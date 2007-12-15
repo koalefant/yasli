@@ -1,8 +1,8 @@
 # makefile
-project("YasliTest")
+project("YasliExample")
 
 # переменная EXE (имя exe-шника)
-set(EXE "yasli-test")
+set(EXE "example")
 
 # ala build-configuration
 set(CMAKE_BUILD_TYPE "Debug") # MinSizeRel
@@ -16,7 +16,7 @@ set(PROJECT_SOURCE_ROOT ${PROJECT_SOURCE_DIR})
 # find_package(wxWidgets)
 
 set(SOURCES
-    Main.h Main.cpp
+    Example.cpp
     )
 
 if(CMAKE_COMPILER_IS_GNUCC)
