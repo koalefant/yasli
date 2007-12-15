@@ -4,16 +4,16 @@ project("YasliTest")
 # переменная EXE (имя exe-шника)
 set(EXE "yasli-test")
 
-# конфигурация
+# ala build-configuration
 set(CMAKE_BUILD_TYPE "Debug") # MinSizeRel
 
-# папка для include-ов CMake-а
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeScripts)
+# we need this to find our Testo.cmake
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/Testo)
+
 set(PROJECT_SOURCE_ROOT ${PROJECT_SOURCE_DIR})
 
-set(wxWidgets_USE_LIBS base core)
-#find_package(PCHSupport REQUIRED)
-find_package(wxWidgets)
+# set(wxWidgets_USE_LIBS base core)
+# find_package(wxWidgets)
 
 set(SOURCES
     Main.h Main.cpp
@@ -28,9 +28,11 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(WARNINGS "-Wall -Wformat -Winit-self -Wimplicit -Wparentheses -Wmissing-braces -Wsequence-point -Wreturn-type -Wswitch -Wunused-function -Wunused-label -Wunknown-pragmas -Wstrict-aliasing -Wundef -Wunsafe-loop-optimizations -Wpointer-arith -Wconversion -Wsign-compare -Wmissing-field-initializers -Wmissing-field-initializers -Winline -Winvalid-pch ")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
+add_executable(${EXE} ${SOURCES})
+
 # place binaries in project root
-install(TARGETS ${EXE}
-        DESTINATION "${PROJECT_SOURCE_ROOT}")
+# install(TARGETS ${EXE}
+#         DESTINATION "${PROJECT_SOURCE_ROOT}")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
@@ -40,7 +42,6 @@ set_target_properties(${EXE} PROPERTIES DEBUG_POSTFIX "-debug")
 
 # includes
 include_directories(.)
-include_directories(libs)
 
 # libraries
 # if(wxWidgets_FOUND)
@@ -55,11 +56,11 @@ include_directories(libs)
 #     target_link_libraries(${EXE} ${wxWidgets_LIBRARIES})
 # endif(wxWidgets_FOUND)
 
-add_subdirectory(libs/testo)
+add_subdirectory(testo)
 target_link_libraries(${EXE} "testo")
 
-add_subdirectory(libs/utils)
+add_subdirectory(utils)
 target_link_libraries(${EXE} "utils")
 
-add_subdirectory(libs/yasli)
+add_subdirectory(yasli)
 target_link_libraries(${EXE} "yasli")

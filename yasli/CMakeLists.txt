@@ -13,7 +13,6 @@ set(SOURCES
 
     TypesFactory.h TypesFactory.cpp
 
-    LibrarySelector.h
     LibraryReference.h
     Library.h Library.cpp
 
@@ -23,8 +22,6 @@ set(SOURCES
     Pointers.h PointersImpl.h
     StringList.h StringList.cpp
 
-    Math.cpp uMath.cpp
-    Colors.cpp Colors.h
     FileSelector.h FileSelector.cpp
 
     StdAfx.h StdAfx.cpp
@@ -33,7 +30,9 @@ set(SOURCES
 
     )
 
-add_definitions(-DSERIALIZATION_EXPORTED)
+# interesting only for SHARED library version
+#add_definitions(-DSERIALIZATION_EXPORTED)
+
 add_library("yasli" ${SOURCES})
 set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 
