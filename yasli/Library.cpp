@@ -115,6 +115,8 @@ void LibraryBase::updateStringList()
 }
 
 // ---------------------------------------------------------------------------
+//
+//
 
 LibraryElementBase::LibraryElementBase(const char* name)
 : name_(name)
@@ -223,7 +225,7 @@ void LibrarySelector::serialize(Archive& ar){
 const char* LibrarySelector::elementName() const
 {
 	LibraryBase* library = LibraryManager::the().libraryByName(libraryName_);
-	if(library && reference_.index_ >= 0 && reference_.index_ < library->size())
+	if(library && reference_.index_ >= 0 && reference_.index_ < int(library->size()))
 		return library->elementByIndex(reference_.index_).name();
 	return "";
 }

@@ -10,6 +10,7 @@
 # include <unistd.h>
 #endif
 
+
 ContentManager* content = 0;
 
 std::string ContentManager::getPath(const char* groupName, const char* folders, const char* elementName) const

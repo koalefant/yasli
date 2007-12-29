@@ -20,6 +20,7 @@
 
 TESTO_BEGIN()
 
+
 /*{{{*/
 enum TestEnum{
     TEST_VALUE_2,

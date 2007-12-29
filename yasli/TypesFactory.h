@@ -1,6 +1,4 @@
-#ifndef __SERIALIZATION_TYPE_INFO_H_INCLUDED__
-#define __SERIALIZATION_TYPE_INFO_H_INCLUDED__
-
+#pragma once
 #include <map>
 
 #include "utils/Errors.h"
@@ -118,5 +116,3 @@ namespace{ \
 #define SERIALIZATION_FORCE_DERIVED_TYPE(BaseType, Type) \
 	extern int dummyForType_##Type; \
 	int* dummyForTypePtr_##Type = &dummyForType_##Type + 1;
-
-#endif

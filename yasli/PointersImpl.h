@@ -30,14 +30,14 @@ public:
             if(!ar(typeID, "")){
                 if(*this){
                     ASSERT((*this)->refCount() == 1);
-                    this->set(0);
+                    this->set((T*)0);
                 }
                 return;
             }
 
             if(oldTypeID && (!typeID || (typeID != oldTypeID))){
                 ASSERT((*this)->refCount() == 1);
-                this->set(0);
+                this->set((T*)0);
             }
 
             if(typeID){

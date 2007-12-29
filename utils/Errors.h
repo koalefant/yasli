@@ -13,6 +13,7 @@ namespace ErrorHelpers {
         exception.line_ = line;
         return exception;
     }
+	//void trace(const char* text);
 }
 
 #ifdef RAISE
@@ -25,10 +26,12 @@ namespace ErrorHelpers {
 
 #ifndef NDEBUG
 # define ASSERT(x) assert((x))
-# define VERIFY(x) { bool result = bool(x); assert(x); }
+# define VERIFY(x) assert(x);
+# define TRACE(x) ErrorHelpers::trace((x))
 #else
 # define ASSERT(x)
 # define VERIFY(x) (x)
+# define TRACE(x)
 #endif
 
 struct ErrorGeneric{

@@ -119,12 +119,13 @@ public:
     T* operator->() const{ return get(); }
     void release(){
         if(ptr_){
-            if(!ptr_->release())
+			if(!ptr_->release())
                 delete ptr_;
             ptr_ = 0;
         }
     }
-    void set(T* const ptr){
+	template<class _T>
+    void set(_T* const ptr){
         if(ptr_ != ptr){
             release();
             ptr_ = ptr;
