@@ -671,7 +671,7 @@ void PropertyItemCheck::redraw(wxDC& dc, const ViewContext& context) const
     dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW)));
 
 	int index = stateIndex();
-	ASSERT(index >= 0 && index < checkStates_.size());
+	ASSERT(index >= 0 && index < int(checkStates_.size()));
     dc.DrawBitmap(checkStates_[index], checkRect.x, checkRect.y, true);
 	//dc.DrawRoundedRectangle(checkRect, 3.0);
 }
