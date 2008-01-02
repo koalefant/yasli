@@ -1,9 +1,14 @@
 #include "StdAfx.h"
 #ifdef WIN32
+# include <sys/stat.h>
 # include <windows.h>
 #else
 # include <sys/stat.h>
 #endif
+
+#include <fcntl.h>
+#include <io.h>
+
 #include "utils/Files.h"
 
 #include <malloc.h>
@@ -11,6 +16,21 @@
 #include <cstdio>
 
 namespace Files{
+
+time_t getModifyTime(const char* path)
+{
+#ifdef WIN32
+	int desc = _open(path, _O_RDONLY, 0);
+	if(!desc)
+		return 0;
+	__stat64 fileStat;
+	_fstat64(desc, &fileStat);
+	_close(desc);
+	return fileStat.st_mtime;
+#else
+
+#endif
+}
 
 bool exists(const char* fileName)
 {

@@ -49,6 +49,22 @@ MemoryWriter& MemoryWriter::operator<<(int value)
     return operator<<((const char*)buffer);
 }
 
+MemoryWriter& MemoryWriter::operator<<(long value)
+{
+    // TODO: optimize
+    char buffer[11];
+    sprintf(buffer, "%i", value);
+    return operator<<((const char*)buffer);
+}
+
+MemoryWriter& MemoryWriter::operator<<(__int64 value)
+{
+    // TODO: optimize
+    char buffer[22];
+    sprintf(buffer, "%I64u", value);
+    return operator<<((const char*)buffer);
+}
+
 MemoryWriter& MemoryWriter::operator<<(unsigned int value)
 {
     // TODO: optimize

@@ -460,6 +460,31 @@ bool TextIArchive::operator()(int& value, const char* name)
     return false;
 }
 
+bool TextIArchive::operator()(long& value, const char* name)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = strtol(token_.begin(), 0, 10);
+        return true;
+    }
+    return false;
+}
+
+bool TextIArchive::operator()(__int64& value, const char* name)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+#ifdef WIN32
+		value = _strtoui64(token_.begin(), 0, 10);
+#else
+#endif
+        return true;
+    }
+    return false;
+}
+
 bool TextIArchive::operator()(float& value, const char* name)
 {
     if(findName(name)){

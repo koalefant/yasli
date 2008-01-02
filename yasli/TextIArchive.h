@@ -19,11 +19,13 @@ public:
     bool operator()(std::string& value, const char* name = "");
     bool operator()(float& value, const char* name = "");
     bool operator()(int& value, const char* name = "");
-    bool operator()(StringListStaticValue& value, const char* name = "");
+    bool operator()(long& value, const char* name = "");
+	bool operator()(__int64& value, const char* name = "");
 
     bool operator()(signed char& value, const char* name = "");
     bool operator()(unsigned char& value, const char* name = "");
     bool operator()(char& value, const char* name = "");
+
 
     template<class T>
     bool operator()(T& value, const char* name = ""){
@@ -32,6 +34,8 @@ public:
 
     bool operator()(const Serializer& ser, const char* name = "");
     bool operator()(const ContainerSerializer& ser, const char* name = "");
+
+    bool operator()(StringListStaticValue& value, const char* name = "");
 private:
     bool findName(const char* name);
     bool openBracket();

@@ -115,3 +115,13 @@ bool PropertyIArchive::operator()(int& value, const char* name)
     }
     return false;
 }
+
+bool PropertyIArchive::operator()(long& value, const char* name)
+{
+    ASSERT(currentChild_);
+    if(const PropertyItem* item = findChild(name)){
+		item->assignTo(reinterpret_cast<void*>(&value), sizeof(value));
+        return true;
+    }
+    return false;
+}

@@ -1,5 +1,6 @@
 #pragma once
 #include "utils/Pointers.h"
+#include <time.h>
 
 namespace Files{
 #ifdef WIN32
@@ -32,6 +33,10 @@ namespace Files{
 
     bool copy(const char* sourceFile, const char* destinationFile);
 
+#ifdef WIN32
+	typedef ::__time64_t time_t;
+#endif
+	time_t getModifyTime(const char* path);
 
 	class iteratorImpl;
 

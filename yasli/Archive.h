@@ -47,6 +47,8 @@ public:
     virtual bool operator()(std::string& value, const char* name = "")   { return false; }
     virtual bool operator()(float& value, const char* name = "")         { return false; }
     virtual bool operator()(int& value, const char* name = "")           { return false; }
+    virtual bool operator()(long& value, const char* name = "")          { return false; }
+    virtual bool operator()(__int64& value, const char* name = "")       { return false; }
 
     virtual bool operator()(unsigned char& value, const char* name = "") { return false; }
     virtual bool operator()(signed char& value, const char* name = "")   { return false; }

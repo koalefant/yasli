@@ -14,6 +14,7 @@ public:
     bool operator()(std::string& value, const char* name);
     bool operator()(float& value, const char* name);
     bool operator()(int& value, const char* name);
+    bool operator()(long& value, const char* name);
 
     bool operator()(const Serializer& ser, const char* name);
     bool operator()(const ContainerSerializer& ser, const char* name);

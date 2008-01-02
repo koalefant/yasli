@@ -131,3 +131,9 @@ bool PropertyOArchive::operator()(int& value, const char* name)
     lastItem_ = add(new PropertyItemInt(name, value), lastItem_);
     return true;
 }
+
+bool PropertyOArchive::operator()(long& value, const char* name)
+{
+    lastItem_ = add(new PropertyItemLong(name, value), lastItem_);
+    return true;
+}

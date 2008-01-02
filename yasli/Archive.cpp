@@ -30,3 +30,18 @@ bool ContainerSerializer::operator()(Archive& ar, std::size_t index) const{
     ASSERT(index < size());
     return serializeFunc_(object_, ar, index);
 }
+
+
+bool bookish()
+{
+	return true;
+}
+
+void bookish2()
+{
+}
+
+void bookish3()
+{
+
+}

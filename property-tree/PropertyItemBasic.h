@@ -91,6 +91,26 @@ protected:
     int value_;
 };
 
+class PropertyItemLong : public PropertyItemField{
+public:
+    PropertyItemLong(const char* name = "", long value = 0)
+    : PropertyItemField(name, TypeID::get<long>())
+    , value_(value)
+    {
+    }
+	std::string toString() const{
+		char buf[60];
+		sprintf(buf, "%i", value_);
+		return buf;
+	}
+    void fromString(const char* str){
+		value_ = atoi(str);
+	}
+	PROPERTY_ITEM_ASSIGN_IMPL(long)
+protected:
+    long value_;
+};
+
 class PropertyItemStringListBase : public PropertyItemField{
 public:
     PropertyItemStringListBase(const char* name);
