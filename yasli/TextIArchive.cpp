@@ -435,6 +435,7 @@ bool TextIArchive::checkStringValueToken()
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
         RAISE(ErrorRuntime(msg.c_str()));
+		return false;
     }
     if(token_.begin()[0] != '"' || token_.end()[-1] != '"'){
         return false;
@@ -443,6 +444,7 @@ bool TextIArchive::checkStringValueToken()
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": Expected string";
         RAISE(ErrorRuntime(msg.c_str()));
+		return false;
     }
     return true;
 }
@@ -477,8 +479,10 @@ bool TextIArchive::operator()(std::string& value, const char* name)
 {
     if(findName(name)){
         readToken();
-        checkStringValueToken();
-        unescapeString(value, token_.begin() + 1, token_.end() - 1);
+        if(checkStringValueToken())
+			unescapeString(value, token_.begin() + 1, token_.end() - 1);
+		else
+			return false;
         return true;
     }
     return false;

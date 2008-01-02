@@ -2,6 +2,7 @@ project("Utilities")
 
 set(SOURCES
 
+    Context.h
     Content.h Content.cpp
     Errors.h
     Factory.h

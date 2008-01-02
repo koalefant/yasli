@@ -1,25 +1,31 @@
 #pragma once
 
+#include <vector>
+
 template<class Type>
 class Context{
 public:
     Context(){
-        ASSERT(current_);
+        ASSERT(!stack_.empty());
     }
     Type& operator()(){
-        return *current_;
+		ASSERT(!stack_.empty());
+        return *stack_.back();
     }
     Type* operator->(){
-        return current_;
+		ASSERT(!stack_.empty());
+        return *stack_.back();
     }
-    static void free(){
-        ASSERT(current_ != 0);
-        current_ = 0;
-    }
-    static void set(Type* newContext){
-        ASSERT(current_ == 0);
-        current_ = newContext;
-    }
+	static void push(Type* context){
+		stack_.push_back(context);
+	}
+	static void pop(){
+		ASSERT(!stack_.empty());
+		stack_.pop_back();
+	}
 protected:
-    static Type* current_;
+	typedef std::vector<Type*> Stack;
+    static Stack stack_;
 };
+
+#define IMPLEMENT_CONTEXT(Type) Context<Type>::Stack Context<Type>::stack_;
