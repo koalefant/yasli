@@ -28,4 +28,4 @@ protected:
     static Stack stack_;
 };
 
-#define IMPLEMENT_CONTEXT(Type) Context<Type>::Stack Context<Type>::stack_;
+#define IMPLEMENT_CONTEXT(Type) template<class Type> typename Context<Type>::Stack Context<Type>::stack_;

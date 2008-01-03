@@ -11,6 +11,10 @@
 #include "yasli/StringList.h"
 #include "yasli/EnumDescription.h"
 
+#ifndef WIN32
+typedef long long __int64;
+#endif
+
 
 template<class T>
 bool serialize(Archive& ar, T& object, const char* name);

@@ -35,7 +35,10 @@ namespace Files{
 
 #ifdef WIN32
 	typedef ::__time64_t time_t;
+#else
+	typedef ::time_t time_t;
 #endif
+
 	time_t getModifyTime(const char* path);
 
 	class iteratorImpl;

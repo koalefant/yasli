@@ -8,6 +8,10 @@
 #undef realloc
 #endif
 
+#ifndef WIN32
+typedef long long __int64;
+#endif
+
 class UTILS_API MemoryWriter : public RefCounter{
 public:
     MemoryWriter(std::size_t size = 128, bool reallocate = true);

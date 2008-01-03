@@ -1,13 +1,15 @@
 #include "StdAfx.h"
 #ifdef WIN32
+# include <fcntl.h>
+# include <io.h>
 # include <sys/stat.h>
 # include <windows.h>
 #else
 # include <sys/stat.h>
+# include <dirent.h>
+# include <unistd.h>
 #endif
 
-#include <fcntl.h>
-#include <io.h>
 
 #include "utils/Files.h"
 
@@ -44,10 +46,18 @@ bool exists(const char* fileName)
 
 bool isDirectory(const char* fileName)
 {
+#ifdef WIN32
 	DWORD attributes = GetFileAttributes(fileName);
 	if(attributes == INVALID_FILE_ATTRIBUTES)
 		return false;
 	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#else
+	if(DIR* dir = opendir(fileName)){
+		closedir(dir);
+		return true;
+	}
+	return false;
+#endif
 }
 
 bool remove(const char* fileName)
@@ -55,7 +65,7 @@ bool remove(const char* fileName)
 #ifdef WIN32
 	return DeleteFile(fileName) != FALSE;
 #else
-	return false;
+	return unlink(fileName) == 0;
 #endif
 }
 
@@ -210,6 +220,74 @@ public:
 	friend class iterator;
 };
 #else
+
+class iteratorImpl : public RefCounter{
+public:
+	iteratorImpl()
+	{
+		dir_ = 0;
+	}
+
+	iteratorImpl(const char* path)
+	{
+		std::string p = extractFilePath(path);
+		path = p.c_str();
+		dir_ = opendir(path);
+		if(!dir_)
+			return;
+		dirent* entry = readdir(dir_);
+		ASSERT(entry);
+		ASSERT(strcmp(entry->d_name, ".") == 0);
+		entry = readdir(dir_);
+		ASSERT(entry);
+		ASSERT(strcmp(entry->d_name, "..") == 0);
+		entry = readdir(dir_);
+		if(entry){
+			entry_.name_ = entry->d_name;
+			entry_.isDirectory_ = isDirectory(entry_.name());
+		}
+		else{
+			closedir(dir_);
+			dir_ = 0;
+		}
+	}
+	~iteratorImpl(){
+		if(dir_)
+			closedir(dir_);
+	}
+
+	bool compare(const iteratorImpl& rhs){
+		if(dir_ == 0 && rhs.dir_ == 0)
+			return true;
+		if(!dir_ || !rhs.dir_)
+			return false;
+		return telldir(dir_) == telldir(rhs.dir_);
+	}
+
+	bool next()
+	{
+		ASSERT(dir_ && "Incrementing bad Files::iterator");
+		dirent* entry = readdir(dir_);
+		if(!entry){
+			closedir(dir_);
+			dir_ = 0;
+			return false;
+		}
+		else{
+			entry_.name_ = entry->d_name;
+			entry_.isDirectory_ = isDirectory(entry_.name());
+			return true;
+		}
+	}
+	bool isValid(){
+		return dir_ != 0;
+	}
+
+	DIR* dir_;
+	DirectoryEntry entry_;
+
+	friend class iterator;
+};
 
 #endif
 

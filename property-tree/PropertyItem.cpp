@@ -9,8 +9,8 @@
 
 #include "yasli/TypesFactory.h"
 #include <wx/font.h>
-#include <wx/dc.h>
 #include <wx/settings.h>
+#include <wx/dc.h>
 #include <wx/textctrl.h>
 
 #include "PropertyItem.h"
