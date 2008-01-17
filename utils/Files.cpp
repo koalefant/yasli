@@ -25,7 +25,7 @@ time_t getModifyTime(const char* path)
 	int desc = _open(path, _O_RDONLY, 0);
 	if(!desc)
 		return 0;
-	__stat64 fileStat;
+	struct _stat64 fileStat;
 	_fstat64(desc, &fileStat);
 	_close(desc);
 	return fileStat.st_mtime;
