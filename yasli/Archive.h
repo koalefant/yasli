@@ -24,6 +24,7 @@ public:
     Archive(bool isInput, bool isEdit = false)
     : isInput_(isInput)
     , isEdit_(isEdit)
+	, filter_(0)
     {
     }
     virtual ~Archive() {}

@@ -23,7 +23,7 @@ time_t getModifyTime(const char* path)
 {
 #ifdef WIN32
 	int desc = _open(path, _O_RDONLY, 0);
-	if(!desc)
+	if(desc <= 0)
 		return 0;
 	struct _stat64 fileStat;
 	_fstat64(desc, &fileStat);
