@@ -76,7 +76,7 @@ BEGIN_EVENT_TABLE(wxListViewComboPopup, wxListView)
     EVT_LIST_ITEM_SELECTED(wxID_ANY, wxListViewComboPopup::onItemSelected)
 END_EVENT_TABLE()
 
-class PropertyControlCombo : public PropertyControl, public wxComboCtrl{
+class PropertyControlCombo : public wxComboCtrl, public PropertyControl{
 public:
     PropertyControlCombo(const PropertyItem::ViewContext& context,
                         PropertyItemStringListBase* item)

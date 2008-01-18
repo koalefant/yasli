@@ -145,6 +145,4 @@ protected:
 };
 
 #define REGISTER_IN_FACTORY(factory, key, product)              \
-    namespace{                                                  \
-    static factory::Creator<product> factory##product##Creator(key);   \
-    }
+    static factory::Creator<product> factory##product##Creator(key); 
