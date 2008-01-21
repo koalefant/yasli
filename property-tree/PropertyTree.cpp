@@ -76,8 +76,13 @@ void PropertyTree::revert()
 {
     focusedItem_ = 0;
 	cancelControl(true, false);
-    PropertyOArchive ar(root_);
-    ar(attached_, "");
+	if(attached_){
+		// FIXME: если делать так всегда, то получается heap corruption!
+		PropertyOArchive ar(root_);
+		ar(attached_, "");
+	}
+	else
+		root_.clear();
     Refresh();
 }
 

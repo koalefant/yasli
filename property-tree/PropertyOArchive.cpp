@@ -99,8 +99,10 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
 		PropertyItem* child = *it;
 		if(child->updated())
 			++it;
-		else
+		else{
+			ASSERT(std::find(currentItem_->begin(), currentItem_->end(), child) == it);
 			it = currentItem_->erase(it);
+		}
 	}
 
 	lastItem_ = currentItem_;
