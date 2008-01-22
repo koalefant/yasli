@@ -1,6 +1,8 @@
-# 
-
 macro(TESTO _library _sources) 
+
+    source_group("testo" FILES "../testo/TestApp.cpp")
+    source_group("" FILES CMakeLists.txt)
+    source_group("" FILES ${_sources})
 
     set(_test_sources
         ${_sources}

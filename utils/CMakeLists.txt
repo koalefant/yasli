@@ -1,24 +1,7 @@
 project("Utilities")
 
-set(SOURCES
-
-    Context.h
-    Content.h Content.cpp
-    Errors.h
-    Factory.h
-    Files.h Files.cpp
-    MemoryReader.h MemoryReader.cpp
-    MemoryWriter.h MemoryWriter.cpp
-    Pointers.h
-    SafeCast.h
-    SharedLibApi.h
-    StdAfx.h StdAfx.cpp
-    StringList.h StringList.cpp
-    StringUtil.h StringUtil.cpp
-    Tokenizer.h Tokenizer.cpp
-    UtilsAPI.h
-
-    )
+file(GLOB SOURCES *.h *.cpp)
+source_group("" FILES ${SOURCES})
 
 add_library("utils" ${SOURCES})
 add_definitions(-DUTILS_EXPORTED)

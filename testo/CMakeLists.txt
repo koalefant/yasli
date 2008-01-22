@@ -1,5 +1,6 @@
 project("Testo")
 
+
 set(SOURCES
 
     Testo.h
@@ -7,6 +8,7 @@ set(SOURCES
     src/StdAfx.h
     src/StdAfx.cpp
     )
+source_group("" FILES ${SOURCES})
 
 add_definitions(-DTESTO_EXPORTED)
 add_library("testo" ${SOURCES})
