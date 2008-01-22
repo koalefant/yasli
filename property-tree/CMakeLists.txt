@@ -1,27 +1,14 @@
 project("YasliPropertyTree")
 set(LIBRARY_NAME "property-tree")
 
-set(SOURCES
+file(GLOB SOURCES *.cpp *.h)
 
-    PropertyItemFactory.h
-    PropertyItem.h PropertyItem.cpp
-    PropertyItemContainer.h
-    PropertyItemBasic.h PropertyItemBasic.cpp
-    PropertyOArchive.h PropertyOArchive.cpp
-    PropertyIArchive.h PropertyIArchive.cpp
-
-    PropertyTree.h PropertyTree.cpp
-    PropertyDialog.h PropertyDialog.cpp
-
-    PropertyItemFileSelector.cpp
-    PropertyItemLibrarySelector.cpp
-
+set(SOURCES	${SOURCES}
     res/property_item_combo_button.xpm
     res/property_item_file_selector_button.xpm
     res/property_item_library_selector_button.xpm
     res/property_tree_minus.xpm
-    res/property_tree_plus.xpm
-    
+    res/property_tree_plus.xpm    
     )
 
 add_library(${LIBRARY_NAME} ${SOURCES})
