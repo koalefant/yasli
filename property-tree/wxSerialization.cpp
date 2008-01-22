@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "property-tree/wxSerialization.h"
 #include "yasli/Archive.h"
 
 #include <wx/window.h>

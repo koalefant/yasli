@@ -30,7 +30,8 @@ time_t getModifyTime(const char* path)
 	_close(desc);
 	return fileStat.st_mtime;
 #else
-
+	// TODO: implement
+	return 0;
 #endif
 }
 

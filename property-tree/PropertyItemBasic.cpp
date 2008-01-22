@@ -80,8 +80,8 @@ class PropertyControlCombo : public wxComboCtrl, public PropertyControl{
 public:
     PropertyControlCombo(const PropertyItem::ViewContext& context,
                         PropertyItemStringListBase* item)
-    : PropertyControl(item, context.tree)
-    , wxComboCtrl()
+    : wxComboCtrl()
+    , PropertyControl(item, context.tree)
     {
 
         wxListViewComboPopup* popupCtrl = new wxListViewComboPopup(this);

@@ -55,8 +55,8 @@ public:
 	const char* libraryName() const{ return libraryName_; }
 	const char* elementName() const;
 protected:
-	LibraryReferenceBase reference_;
 	LibraryReferenceBase* referencePtr_;
+	LibraryReferenceBase reference_;
 	const char* libraryName_;
 };
 
@@ -126,7 +126,6 @@ public:
         const char* libraryName(const LibraryType* dummy);
 		
 		if(ar.isEdit()){
-			ElementType* element = get();
 			const char* name = libraryName((LibraryType*)(0));
 			LibrarySelector selector(this, name);
 			ar(selector, "");

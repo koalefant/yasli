@@ -65,11 +65,10 @@ public:
     // templated switch
     template<class T>
     bool operator()(const T& value, const char* name = "");
-protected:
 private:
-    int filter_;
     bool isInput_;
     bool isEdit_;
+    int filter_;
 };
 
 namespace Helpers{
