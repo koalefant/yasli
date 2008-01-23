@@ -22,42 +22,10 @@ protected:
 
 class LibraryReferenceBase{
 public:
-    operator bool() const{
-        return index_ != -1;
-    }
+    operator bool() const{ return index_ != -1; }
 protected:
     int index_;
 	friend class LibrarySelector;
-};
-
-class LibraryReferenceBase;
-class LibrarySelector{
-public:
-	LibrarySelector()
-	: referencePtr_(0)
-	, libraryName_("")
-	{
-	}
-	LibrarySelector(LibraryReferenceBase* ref, const char* libraryName)
-	: referencePtr_(ref)
-	, reference_(*ref)
-	, libraryName_(libraryName)
-	{
-
-	}
-	~LibrarySelector(){
-        if(referencePtr_)
-			*referencePtr_ = reference_;
-	}
-	int index() const{ return reference_.index_; }
-	void setIndex(int index){ reference_.index_ = index; }
-	void serialize(Archive& ar);
-	const char* libraryName() const{ return libraryName_; }
-	const char* elementName() const;
-protected:
-	LibraryReferenceBase* referencePtr_;
-	LibraryReferenceBase reference_;
-	const char* libraryName_;
 };
 
 template<class ElementType, class LibraryType>
@@ -65,14 +33,10 @@ class LibraryReference : public LibraryReferenceBase{
 public:
     LibraryReference(const char* elementName = "")
     {
-        int libraryFindIndexByName(LibraryType* dummy, const char* elementName);
-
         if(elementName[0] == 0)
             index_ = -1;
-        else{
-            index_ = libraryFindIndexByName((LibraryType*)(0), elementName);
-            //ASSERT(index_ != -1);
-        }
+        else
+            index_ = findIndexByName(elementName);
     }
     bool operator==(const LibraryReference& rhs) const{ return index_ == rhs.index_; }
     bool operator!=(const LibraryReference& rhs) const{ return index_ != rhs.index_; }
@@ -83,71 +47,37 @@ public:
         else
             return "";
     }
-    ElementType* get(){
-        LibraryElementBase* libraryElementByIndex(LibraryType* dummy, int index);
-        if(index_ >= 0)
-            return (ElementType*)(libraryElementByIndex((LibraryType*)0, index_));
-        else
-            return 0;
-    }
     ElementType* get() const{
-        LibraryElementBase* libraryElementByIndex(LibraryType* dummy, int index);
         if(index_ >= 0)
-            return (ElementType*)(libraryElementByIndex((LibraryType*)0, index_));
+            return (ElementType*)elementByIndex(index_);
         else
             return 0;
     }
-    ElementType& operator*(){
-        ElementType* element = get();
-        ASSERT(element);
-        return *element;
-    }
-    ElementType& operator*() const{
-        ElementType* element = get();
-        ASSERT(element);
-        return *element;
-    }
-    ElementType* operator->(){
-        ElementType* element = get();
-        ASSERT(element);
-        return element;
-    }
-    ElementType* operator->() const{
-        ElementType* element = get();
-        ASSERT(element);
-        return element;
-    }
+	ElementType* getNotNull() const{
+		ElementType* element = get();
+		ASSERT(element);
+		return element;
+	}
 
-    // non-template member will fail to compile without class Archive declaration
-    template<class Archive>
-    void serialize(Archive& ar){
-        int libraryFindIndexByName(LibraryType* dummy, const char* elementName);
-        const StringList& libraryStringList(const LibraryType* dummy);
-        const char* libraryName(const LibraryType* dummy);
-		
-		if(ar.isEdit()){
-			const char* name = libraryName((LibraryType*)(0));
-			LibrarySelector selector(this, name);
-			ar(selector, "");
-		}
-		else{
-			ElementType* element = get();
-			std::string value;
-			if(ar.isOutput() && element)
-				value = ((LibraryElementBase*)(element))->name();
+    ElementType& operator*(){ return *getNotNull(); }
+    ElementType& operator*() const{ return *getNotNull(); }
+    ElementType* operator->(){ return getNotNull(); }
+    ElementType* operator->() const{ return getNotNull(); }
 
-			ar(value, "");
-
-			if(ar.isInput())
-				index_ = libraryFindIndexByName((LibraryType*)(0), value.c_str());
-		}
-    }
     bool operator<(const LibraryReference& rhs) const{
         return index_ < rhs.index_;
     }
     bool operator>(const LibraryReference& rhs) const{
         return index_ > rhs.index_;
     }
+
+	// moved into LibraryReferenceImpl.h
+    void serialize(Archive& ar);
+	int findIndexByName(const char* elementName) const;
+	LibraryElementBase* elementByIndex(int index) const;
+	const char* libraryName() const;
+	static bool instantiate();
+	// ^^^
 protected:
     LibraryReference(int index){
         index_ = index;

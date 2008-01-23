@@ -13,6 +13,7 @@
 
 #include "yasli/TextIArchive.h"
 #include "yasli/TextOArchive.h"
+#include "yasli/LibrarySelector.h"
 
 // ---------------------------------------------------------------------------
 
@@ -131,8 +132,6 @@ void LibraryElementBase::serialize(Archive& ar)
 
 // --------------------------------------------------------------------------- 
 
-//LibraryManager::LibraryDescription::LibraryDescription(LibraryInstanceFunc instanceFunc, const char* name, const char* filename, const char* group)
-
 void LibraryManager::registerLibrary(const LibraryDescription* description)
 {
     libraries_[description->name()] = description;
@@ -146,18 +145,6 @@ YASLI_API LibraryManager& LibraryManager::the()
 
 void LibraryManager::serialize(Archive& ar)
 {
-    /*
-    Libraries::iterator it;
-    for(it = libraries_.begin(); it != libraries_.end(); ++it){
-        const char* name = it->first.c_str();
-
-        LibraryInstanceFunc instance = it->second;
-        ASSERT(instance);
-        LibraryBase& library = instance();
-        ASSERT(name && strlen(name));
-        ar(library, name);
-    }
-    */
     ASSERT(0);
 }
 

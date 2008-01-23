@@ -2,6 +2,7 @@
 #include "yasli/Serializer.h"
 #include "yasli/TypesFactory.h"
 #include "yasli/LibraryReference.h"
+#include "yasli/LibrarySelector.h"
 #include "yasli/Library.h"
 #include "PropertyItemFactory.h"
 #include "PropertyItemBasic.h"
