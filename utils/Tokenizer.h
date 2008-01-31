@@ -13,6 +13,11 @@ public:
     , end_(_end)
     {}
 
+	void set(const char* start, const char* end){
+		start_ = start;
+		end_ = end;
+	}
+
     std::size_t length() const{ return end_ - start_; }
 
     bool operator==(const std::string& rhs) const{

@@ -51,7 +51,9 @@ void TextIArchive::open(const char* filename)
         stack_.clear();
 
         stack_.push_back(Level());
-        stack_.back().start = reader_->begin();
+		readToken();
+		putToken();
+        stack_.back().start = token_.end();
     }
     else{
         MemoryWriter msg;
@@ -154,8 +156,12 @@ bool TextIArchive::findName(const char* name)
     const char* blockBegin = stack_.back().start;
 
     readToken();
-    if(!token_)
-        return false; // Reached end of file while searching for name
+    if(!token_){
+	    start = blockBegin;
+        token_.set(blockBegin, blockBegin);
+		readToken();
+	}
+
     if(name[0] == '\0'){
         if(isName(token_)){
 #ifdef DEBUG_TEXTIARCHIVE
@@ -218,8 +224,11 @@ bool TextIArchive::findName(const char* name)
 
     while(true){
         readToken();
-        if(!token_)
-            return false; // Reached end of file while searching for name
+		if(!token_){
+			token_.set(blockBegin, blockBegin);
+			continue;
+		}
+            //return false; // Reached end of file while searching for name
 #ifdef DEBUG_TEXTIARCHIVE
         std::cout << "'" << token_.str() << "'" << std::endl;
         std::cout << "Checking for loop: " << token_.begin() - reader_->begin() << " and " << start - reader_->begin() << std::endl;

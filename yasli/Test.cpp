@@ -579,5 +579,79 @@ struct TextIAddLastElement{
 };
 TESTO_ADD_TEST("Serialization", TextIAddLastElement)
 // ---------------------------------------------------------------------------
+struct TextDataRegressionAtEndOfFile{
+
+    TextDataRegressionAtEndOfFile()
+    : enumValue(TEST_NONE)
+    , scale(0.0f)
+    {
+    }
+
+    void fill(){
+        name = "Unique Name";
+        scale = float(M_PI);
+        strings.clear();
+        strings.push_back("First string");
+        strings.push_back("Another one");
+        strings.push_back("And last");
+        enumValue = TEST_VALUE_2;
+    }
+
+    void serialize(Archive& ar)
+    {
+        if(ar.isOutput()){
+            TESTO_ENSURE(ar(enumValue, "enumValue"));
+            TESTO_ENSURE(ar(name, "name"));
+            TESTO_ENSURE(ar(strings, "strings"));
+            TESTO_ENSURE(ar(scale, "scale"));
+        }
+        else{
+            TESTO_ENSURE(ar(name, "name"));
+            TESTO_ENSURE(ar(scale, "scale"));
+            TESTO_ENSURE(ar(strings, "strings"));
+            TESTO_ENSURE(ar(enumValue, "enumValue"));
+        }
+    }
+
+    void verifyCopy(const TextDataRegressionAtEndOfFile& rhs) const	{
+        TESTO_ENSURE(name == rhs.name);
+        TESTO_ENSURE(enumValue == rhs.enumValue);
+        TESTO_ENSURE(strings == rhs.strings);
+        TESTO_ENSURE(fabs(scale - rhs.scale) < 1e-5f);
+    }
+
+    std::string name;
+    TestEnum enumValue;
+    std::vector<std::string> strings;
+    float scale;
+};
+
+struct TextRegressionAtEndOfFile{
+    typedef TextDataRegressionAtEndOfFile DataType;
+    void invoke(){
+        const char* filename = "!testData.textarchive";
+        {
+            DataType data;
+            data.fill();
+
+            TextOArchive oa;
+            oa.open(filename);
+            data.serialize(oa);
+        }
+
+        DataType reference;
+        reference.fill();
+        {
+            DataType data;
+            TextIArchive ia;
+            ia.open(filename);
+            data.serialize(ia);
+
+            data.verifyCopy(reference);
+        }
+    }
+};
+
+TESTO_ADD_TEST("Serialization", TextRegressionAtEndOfFile)
 
 TESTO_END()
