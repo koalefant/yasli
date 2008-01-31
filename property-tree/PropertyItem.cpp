@@ -457,7 +457,12 @@ public:
         field->calculateRects(context, rects);
         wxRect rect = field->calculateFieldRect(context, rects);
 		rect.SetPosition(context.tree->CalcScrolledPosition(rect.GetPosition()));
-		wxTextCtrl::Create(context.tree, wxID_ANY, wxT(""), rect.GetPosition(), rect.GetSize(), wxTE_PROCESS_ENTER);
+
+		rect.x += 1;
+		rect.width -= 2;
+		rect.y += 3;
+		rect.height -= 5;
+		wxTextCtrl::Create(context.tree, wxID_ANY, wxT(""), rect.GetPosition(), rect.GetSize(), wxTE_PROCESS_ENTER | wxBORDER_NONE);
         SetValue(wxString(field->toString().c_str(), wxConvUTF8));
         SetFocus();
 		SelectAll();
