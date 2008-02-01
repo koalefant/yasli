@@ -42,13 +42,22 @@ const PropertyItem* PropertyIArchive::findChild(const char* name)
 	ASSERT(currentChild_);
     const PropertyItem* start = currentChild_;
     const PropertyItem* last = currentChild_;
-    do{
-        last = currentChild_;
-        currentChild_ = advance(currentChild_);
-        std::cout << "\t got: " << last->name() << std::endl;
-        if(strcmp(last->name(), name) == 0)
+    if(currentItem_->isContainer()){
+        do{
+            last = currentChild_;
+            currentChild_ = advance(currentChild_);
             return last;
-    }while(currentChild_ != start);
+        }while(currentChild_ != start);
+    }
+    else{
+        do{
+            last = currentChild_;
+            currentChild_ = advance(currentChild_);
+            std::cout << "\t got: " << last->name() << std::endl;
+            if(strcmp(last->name(), name) == 0)
+                return last;
+        }while(currentChild_ != start);
+    }
     return 0;
 }
 
@@ -73,6 +82,28 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name)
     ASSERT(currentItem_);
 	currentChild_ = advance(currentItem_);
     currentItem_ = currentItem_->parent();
+    return true;
+}
+
+bool PropertyIArchive::operator()(const ContainerSerializer& ser, const char* name)
+{
+    ASSERT(currentChild_);
+    const PropertyItem* item = findChild(name);
+	if(!item)
+		return false;
+	currentItem_ = item;
+	if(!item->empty())
+		currentChild_ = *item->begin();
+	else
+		currentChild_ = 0;
+
+    ser.resize(item->size());
+    for(int i = 0; i < int(item->size()); ++i)
+        ser(*this, i);
+
+	ASSERT(currentItem_);
+	currentChild_ = advance(currentItem_);
+	currentItem_ = currentItem_->parent();
     return true;
 }
 

@@ -46,23 +46,49 @@ PropertyItem* PropertyOArchive::add(PropertyItem* newItem, PropertyItem* previou
 	return currentItem_->addAfter(newItem, previousItem);
 }
 
+static void eraseNotUpdated(PropertyItem* item)
+{
+	ASSERT(item);
+	PropertyItem::iterator it;
+	for(it = item->begin(); it != item->end(); ){
+		PropertyItem* child = *it;
+		if(child->updated())
+			++it;
+		else{
+			ASSERT(std::find(item->begin(), item->end(), child) == it);
+			it = item->erase(it);
+		}
+	}
+}
+
 bool PropertyOArchive::operator()(const ContainerSerializer& ser, const char* name)
 {
+	ASSERT(!lastItem_ || lastItem_->refCount() >= 1 && lastItem_->refCount() < 10);
+	ASSERT(currentItem_);
     PropertyItemContainer* container = new PropertyItemContainer(name, ser, false);
-    currentItem_->add(container);
+    container = safe_cast<PropertyItemContainer*>(add(container, lastItem_));
 #ifdef DEBUG
     PropertyItem* oldCurrent = currentItem_;
 #endif
+
+	lastItem_ = 0;
     currentItem_ = container;
+    currentItem_->setChildrenUpdated(false);
+
     int count = int(ser.size());
     for(int i = 0; i < count; ++i)
         ser(*this, i);
-    currentItem_ = container->parent();
+
+    eraseNotUpdated(currentItem_);
+
+    lastItem_ = currentItem_;
+    currentItem_ = currentItem_->parent();
 #ifdef DEBUG
     ASSERT(oldCurrent == currentItem_);
 #endif
     return true;
 }
+
 
 
 bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
@@ -71,8 +97,7 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
     if(currentItem_){
         PropertyItem* item;
         typedef PropertyItemFactory::Constructor Args;
-        item = PropertyItemFactory::the()
-		.create(ser.type(), Args(name, ser));
+        item = PropertyItemFactory::the().create(ser.type(), Args(name, ser));
         if(!item){
             std::cout << "Now PropertyItem for type " << ser.type().typeInfo()->name() << std::endl;
             item = new PropertyItemStruct(name, ser);
@@ -94,16 +119,7 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
 
     ser(*this);
 
-	PropertyItem::iterator it;
-	for(it = currentItem_->begin(); it != currentItem_->end(); ){
-		PropertyItem* child = *it;
-		if(child->updated())
-			++it;
-		else{
-			ASSERT(std::find(currentItem_->begin(), currentItem_->end(), child) == it);
-			it = currentItem_->erase(it);
-		}
-	}
+    eraseNotUpdated(currentItem_);
 
 	lastItem_ = currentItem_;
     currentItem_ = currentItem_->parent();

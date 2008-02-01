@@ -100,7 +100,7 @@ MemoryWriter& MemoryWriter::operator<<(float value)
     int sign = 0;
     const char* buf = fcvt(double(value), 5, &point, &sign);
     if(isnan(value)){
-        std::cout << " * WARNING: MemoryWriter, writing NAN float value!" << std::endl;
+        //std::cout << " * WARNING: MemoryWriter, writing NAN float value!" << std::endl;
         write("NAN");
     }
     else{

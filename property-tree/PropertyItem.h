@@ -124,6 +124,7 @@ public:
     iterator begin(){ return children_.begin(); }
     iterator end(){ return children_.end(); }
     bool empty() const{ return children_.empty(); }
+	size_t size() const{ return children_.size(); }
 	iterator erase(iterator it){ return children_.erase(it); }
 
     typedef Children::const_iterator const_iterator;

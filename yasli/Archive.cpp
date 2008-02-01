@@ -5,7 +5,7 @@
 
 void Archive::warning(const char* message)
 {
-    std::cout << "WARNING, Archive: " << message << std::endl;
+    //std::cout << "WARNING, Archive: " << message << std::endl;
 }
 
 bool Archive::operator()(const ContainerSerializer& ser, const char* name)
