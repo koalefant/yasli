@@ -1,8 +1,11 @@
 project("YasliPropertyTree")
-set(LIBRARY_NAME "property-tree")
 
 file(GLOB SOURCES *.cpp *.h)
 source_group("" FILES ${SOURCES})
+
+if(WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif(WIN32)
 
 set(RESOURCES
     res/property_item_combo_button.xpm
@@ -14,10 +17,10 @@ set(RESOURCES
 source_group(res FILES ${RESOURCES})
 set(SOURCES	${SOURCES} ${RESOURCES})
 
-add_library(${LIBRARY_NAME} ${SOURCES})
+add_library("property-tree" ${SOURCES})
 add_definitions(-DGENERIC_EDITOR_EXPORTED)
 
-set_target_properties(${LIBRARY_NAME} PROPERTIES DEBUG_POSTFIX "-debug")
-target_link_libraries(${LIBRARY_NAME} "utils" "yasli")
+set_target_properties("property-tree" PROPERTIES DEBUG_POSTFIX "-debug")
+target_link_libraries("property-tree" "utils" "yasli")
 
-#install(TARGETS ${LIBRARY_NAME} DESTINATION ..)
+#install(TARGETS "property-tree" DESTINATION ..)
