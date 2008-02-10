@@ -176,13 +176,35 @@ protected:
 	std::vector<wxBitmap> checkStates_;
 };
 
-class PropertyItemField : public PropertyItem, public PropertyWithControl{
+class PropertyWithButtons{
 public:
+    typedef PropertyItem::ViewContext ViewContext;
+
+	bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context, const PropertyItemRects& rects);
+	wxRect calculateButtonsRect(const ViewContext& context, const PropertyItemRects& rects) const;
+    void redraw(wxDC& dc, const ViewContext& context, const PropertyItemRects& rects) const;
+
+	void addButton(const wxBitmap* bitmap){
+		Button button;
+		button.bitmap = bitmap;
+		buttons_.push_back(button);
+	}
+	int buttonsCount() const{ return buttons_.size(); }
+protected:
+	virtual bool onButton(int index, const ViewContext& context) = 0;
+private:
+	struct Button{
+		const wxBitmap* bitmap;
+	};
+	std::vector<Button> buttons_;
+};
+
+class PropertyItemField : public PropertyItem, public PropertyWithControl, public PropertyWithButtons{
+public:
+	using PropertyItem::ViewContext;
     PropertyItemField(const char* name = "", TypeID type = TypeID());
     void calculateRects(const PropertyItem::ViewContext& context, PropertyItemRects& rects) const;
     wxRect calculateFieldRect(const ViewContext& context, const PropertyItemRects& rects) const;
-	wxRect calculateButtonsRect(const ViewContext& context, const PropertyItemRects& rects) const;
-	int buttonsCount() const{ return buttons_.size(); }
 	bool activate(const ViewContext& context);
     void redraw(wxDC& dc, const ViewContext& context) const;
     bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context);
@@ -191,19 +213,11 @@ public:
 
     PropertyControl* createControl(const ViewContext& context);
 protected:
-	void addButton(const wxBitmap* bitmap){
-		Button button;
-		button.bitmap = bitmap;
-		buttons_.push_back(button);
-	}
-	virtual bool onButton(int index, const ViewContext& context){
+    // from PropertyWithButtons
+	bool onButton(int index, const ViewContext& context){
 		return activate(context);
 	}
-private:
-	struct Button{
-		const wxBitmap* bitmap;
-	};
-	std::vector<Button> buttons_;
+    // ^^^
 };
 
 

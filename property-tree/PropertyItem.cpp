@@ -254,6 +254,9 @@ bool PropertyItem::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext
         bool inPlusRect = rects.plus.Contains(pos);
         bool inSelectionRect = rects.selection.Contains(pos);
         bool inTextRect = rects.text.Contains(pos);
+        if(children_.empty() && inTextRect && doubleClick)
+        	if(activate(context))
+        		return true;
         if(!doubleClick && inSelectionRect){
             std::cout << "Selecting..." << std::endl;
             context.tree->select(this, true);
@@ -495,6 +498,46 @@ BEGIN_EVENT_TABLE(PropertyControlText, wxTextCtrl)
 END_EVENT_TABLE()
 
 // ---------------------------------------------------------------------------
+static int BUTTON_PADDING = 1;
+static int BUTTON_BORDER = 1;
+static int BUTTON_SIZE = 16;
+static int BUTTON_SPACING = BUTTON_SIZE + BUTTON_BORDER * 2 + BUTTON_PADDING;
+
+wxRect PropertyWithButtons::calculateButtonsRect(const ViewContext& context, const PropertyItemRects& rects) const
+{
+	int left = context.rect.GetRight() - buttons_.size() * BUTTON_SPACING;
+	return wxRect(left, context.rect.y + 1, context.rect.GetRight() - left, DEFAULT_HEIGHT - 2);
+}
+
+bool PropertyWithButtons::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context, const PropertyItemRects& rects)
+{
+    wxRect buttonsRect = calculateButtonsRect(context, rects);
+    if(!buttons_.empty() && buttonsRect.Contains(pos)){
+        int index = (pos.x - buttonsRect.GetLeft()) / int(BUTTON_SPACING);
+        if(onButton(index, context))
+            return true;
+	}
+    return false;
+}
+
+void PropertyWithButtons::redraw(wxDC& dc, const ViewContext& context, const PropertyItemRects& rects) const
+{
+    wxRect buttonsRect = calculateButtonsRect(context, rects);
+	int count = int(buttons_.size());
+	int top = buttonsRect.y + (buttonsRect.GetHeight() - (BUTTON_SIZE + BUTTON_BORDER * 2)) / 2;
+    dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE)));
+    dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW)));
+	for(int i = 0; i < count; ++i){
+		int left = buttonsRect.x + i * BUTTON_SPACING + BUTTON_PADDING;
+
+		wxRect rt(left, top, BUTTON_SIZE + BUTTON_BORDER * 2, buttonsRect.height);
+	    dc.DrawRoundedRectangle(rt, 3.0);
+		if(buttons_[i].bitmap)
+			dc.DrawBitmap(*buttons_[i].bitmap, left + BUTTON_BORDER, top + BUTTON_BORDER, true);
+	}
+}
+
+// ---------------------------------------------------------------------------
 
 
 PropertyItemField::PropertyItemField(const char* name, TypeID type)
@@ -503,7 +546,7 @@ PropertyItemField::PropertyItemField(const char* name, TypeID type)
 
 }
 
-void PropertyItemField::calculateRects(const PropertyItem::ViewContext& context, PropertyItemRects& rects) const
+void PropertyItemField::calculateRects(const ViewContext& context, PropertyItemRects& rects) const
 {
     PropertyItem::calculateRects(context, rects);
     if(label()[0] != '\0'){
@@ -511,30 +554,18 @@ void PropertyItemField::calculateRects(const PropertyItem::ViewContext& context,
     }
 }
 
-static int BUTTON_PADDING = 1;
-static int BUTTON_BORDER = 1;
-static int BUTTON_SIZE = 16;
-static int BUTTON_SPACING = BUTTON_SIZE + BUTTON_BORDER * 2 + BUTTON_PADDING;
 
 wxRect PropertyItemField::calculateFieldRect(const ViewContext& context, const PropertyItemRects& rects) const
 {
-
 	int left;
 	if((label()[0] != '\0'))
 		left = rects.text.GetRight();
 	else
 		left = PLUS_INDENT + context.rect.x + 1;
-    return wxRect(left,
-				  context.rect.y + 1,
-                  context.rect.GetRight() - left - BUTTON_SPACING * buttons_.size(),
-                  DEFAULT_HEIGHT - 2);
+    wxRect buttonsRect = calculateButtonsRect(context, rects);
+    return wxRect(left, context.rect.y + 1,
+                  buttonsRect.x - left, DEFAULT_HEIGHT - 2);
 
-}
-
-wxRect PropertyItemField::calculateButtonsRect(const ViewContext& context, const PropertyItemRects& rects) const
-{
-	int left = context.rect.GetRight() - buttons_.size() * BUTTON_SPACING;
-	return wxRect(left, context.rect.y + 1, context.rect.GetRight() - left, DEFAULT_HEIGHT - 2);
 }
 
 PropertyControl* PropertyItemField::createControl(const ViewContext& context)
@@ -553,25 +584,17 @@ bool PropertyItemField::activate(const ViewContext& context)
 	return false;
 }
 
-bool PropertyItemField::onMouseClick(wxPoint pos, bool doubleClick,
-                                     const ViewContext& context)
+bool PropertyItemField::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context)
 {
     PropertyItemRects rects;
     calculateRects(context, rects);
     wxRect fieldRect = calculateFieldRect(context, rects);
-	wxRect buttonsRect = calculateButtonsRect(context, rects);
 
-    if(rects.text.Contains(pos) && doubleClick)
-		if(activate(context))
-			return true;
     if(fieldRect.Contains(pos))
 		if(activate(context))
 			return true;
-	if(!buttons_.empty() && buttonsRect.Contains(pos)){
-		int index = (pos.x - buttonsRect.GetLeft()) / int(BUTTON_SPACING);
-		if(onButton(index, context))
-			return true;
-	}
+    if(PropertyWithButtons::onMouseClick(pos, doubleClick, context, rects))
+        return true;
     return PropertyItem::onMouseClick(pos, doubleClick, context);
 }
 
@@ -602,20 +625,7 @@ void PropertyItemField::redraw(wxDC& dc, const ViewContext& context) const
                  fieldTextRect, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 	dc.DestroyClippingRegion();
 
-	
-    wxRect buttonsRect = calculateButtonsRect(context, rects);
-	int count = int(buttons_.size());
-	int top = fieldRect.y + (fieldRect.GetHeight() - (BUTTON_SIZE + BUTTON_BORDER * 2)) / 2;
-    dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE)));
-    dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW)));
-	for(int i = 0; i < count; ++i){
-		int left = buttonsRect.x + i * BUTTON_SPACING + BUTTON_PADDING;
-
-		wxRect rt(left, top, BUTTON_SIZE + BUTTON_BORDER * 2, fieldRect.height);
-	    dc.DrawRoundedRectangle(rt, 3.0);
-		if(buttons_[i].bitmap)
-			dc.DrawBitmap(*buttons_[i].bitmap, left + BUTTON_BORDER, top + BUTTON_BORDER, true);
-	}
+    PropertyWithButtons::redraw(dc, context, rects);
 }
 
 // ---------------------------------------------------------------------------
@@ -687,15 +697,10 @@ bool PropertyItemCheck::onMouseClick(wxPoint pos, bool doubleClick, const ViewCo
     calculateRects(context, rects);
     wxRect checkRect = calculateCheckRect(context, rects);
 
-    PropertyItem::onMouseClick(pos, doubleClick, context);
-
     if(checkRect.Contains(pos))
 		if(activate(context))
 			return true;
-    if(rects.text.Contains(pos) && doubleClick)
-		if(activate(context))
-			return true;
-	return false;
+	return PropertyItem::onMouseClick(pos, doubleClick, context);
 }
 // ---------------------------------------------------------------------------
 bool PropertyItemBool::activate(const ViewContext& context)
@@ -715,7 +720,40 @@ PropertyItemContainer::PropertyItemContainer(const char* name, const ContainerSe
                                              bool fixedSize)
 : PropertyItem(name, zer.type())
 {
+    #include "res/property_item_container_add.xpm"
+    static wxBitmap bitmap((const char* const *)property_item_container_add_xpm);
+    addButton(&bitmap);
+}
 
+bool PropertyItemContainer::activate(const ViewContext& context)
+{
+    return PropertyItem::activate(context);
+}
+
+void PropertyItemContainer::redraw(wxDC& dc, const ViewContext& context) const
+{
+    PropertyItemRects rects;
+    calculateRects(context, rects);
+
+    PropertyItem::redraw(dc, context);
+
+    PropertyWithButtons::redraw(dc, context, rects);
+}
+
+bool PropertyItemContainer::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context)
+{
+    PropertyItemRects rects;
+    calculateRects(context, rects);
+
+	if(PropertyWithButtons::onMouseClick(pos, doubleClick, context, rects))
+        return true;
+	return PropertyItem::onMouseClick(pos, doubleClick, context);
+}
+
+bool PropertyItemContainer::onButton(int index, const ViewContext& context)
+{
+	
+	return true;
 }
 
 SERIALIZATION_DERIVED_TYPE(PropertyItem, PropertyItemContainer, "Container")
