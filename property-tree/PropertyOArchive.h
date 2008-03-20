@@ -4,10 +4,11 @@
 
 class PropertyItem;
 class PropertyTreeRoot;
+class PropertyItemElement;
 
 class PropertyOArchive : public Archive{
 public:
-    PropertyOArchive(PropertyTreeRoot& root);
+    PropertyOArchive(PropertyTreeRoot& root, PropertyItemElement* element = 0);
 
     // from Archive
     bool operator()(bool& value, const char* name);
@@ -17,17 +18,16 @@ public:
     bool operator()(long& value, const char* name);
 
     bool operator()(const Serializer& ser, const char* name);
-    bool operator()(const ContainerSerializer& ser, const char* name);
+    bool operator()(const ContainerSerializationInterface& ser, const char* name);
     // ^^^
 
-    template<class T>
-    bool operator()(const T& value, const char* name){
-        return Archive::operator()(value, name);
-	}
+    using Archive::operator();
 protected:
 	PropertyItem* add(PropertyItem* newItem, PropertyItem* previousItem);
+    PropertyItem* rootItem();
 
     PropertyItem* currentItem_;
     PropertyItem* lastItem_;
     PropertyTreeRoot& root_;
+    PropertyItemElement* element_;
 };

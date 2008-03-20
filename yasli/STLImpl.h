@@ -3,5 +3,6 @@
 template<class T, class Alloc>
 bool serialize(Archive& ar, std::vector<T, Alloc>& container, const char* name)
 {
-    return ar(ContainerSerializer(container), name);
+	ContainerSerializationSTLImpl<std::vector<T, Alloc>, T> ser(&container);
+	return ar(static_cast<const ContainerSerializationInterface&>(ser), name);
 }

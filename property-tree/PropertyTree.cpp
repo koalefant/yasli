@@ -6,6 +6,7 @@
 #include "PropertyTree.h"
 #include "PropertyOArchive.h"
 #include "PropertyIArchive.h"
+#include "PopupMenu.h"
 
 // ---------------------------------------------------------------------------
 
@@ -37,14 +38,6 @@ PropertyTree::PropertyTree(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
     wxScrolledWindow::Create(parent, id, pos, size,
                              wxBORDER_NONE | wxTAB_TRAVERSAL, name);
 	SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-
-    PropertyItem* item = root_.add(new PropertyItem("firstItem"));
-    PropertyItem* child = item->add(new PropertyItem("child1"));
-    child->add(new PropertyItemField("subChild1"));
-    child->add(new PropertyItem("subChild2"));
-    item->add(new PropertyItemField("child1"));
-    item->add(new PropertyItemField("child2"));
-    root_.add(new PropertyItem("secondItem"));
 }
 
 PropertyTree::~PropertyTree()
@@ -240,8 +233,18 @@ void PropertyTree::onMouseClick(wxMouseEvent& event)
     root_.onMouseClick(position, event.ButtonDClick(), context);
 }
 
-void PropertyTree::onRightMouseClick(wxMouseEvent& Event)
+void PropertyTree::onRightMouseClick(wxMouseEvent& event)
 {
+	cancelControl();
+	SetFocus();
+
+    PropertyItem::ViewContext context;
+    initViewContext(context, &root_);
+    
+    wxPoint position = event.GetPosition(); 
+	position = CalcUnscrolledPosition(position);
+
+    root_.onRightMouseClick(position, context);
 }
 
 void PropertyTree::onSize(wxSizeEvent& event)
@@ -352,6 +355,20 @@ void PropertyTree::referenceFollowed(LibrarySelector& selector)
 void PropertyTree::onCancelControl(wxCommandEvent& event)
 {
     cancelControl(true);
+}
+
+void PropertyTree::spawnContextMenu(const PropertyItem::ViewContext& context, PropertyItem* item)
+{
+	::PopupMenu menu;
+	PopupMenuItem& root = menu.root();
+	item->onContextMenu(menu, this, PropertyItem::MENU_SECTION_MAIN);
+	if(!root.empty())
+		root.addSeparator();
+	item->onContextMenu(menu, this, PropertyItem::MENU_SECTION_CLIPBOARD);
+	menu.root().add("Copy").setSensitive(false);
+	menu.root().add("Paste").setSensitive(false);
+    item->onContextMenu(menu, this, PropertyItem::MENU_SECTION_DESTRUCTIVE);
+    menu.spawn(this);
 }
 
 void PropertyTree::spawnInPlaceControl(const PropertyItem::ViewContext& context, PropertyWithControl* property)

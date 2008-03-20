@@ -23,6 +23,13 @@ public:
 		addButton(&bitmap);
 		ASSERT(ser.size() == sizeof(value_));
 	}
+
+    PropertyItemFileSelector(const PropertyItemFileSelector& original)
+    : PropertyItemField(original)
+    , value_(original.value_)
+    {
+    }
+
 	std::string toString() const{
 		return value_.c_str();
 	}
@@ -43,6 +50,7 @@ public:
 	void fromString(const char* str){
 		value_ = str;
 	}
+    PROPERTY_ITEM_CLONE_IMPL(PropertyItemFileSelector)
 	PROPERTY_ITEM_ASSIGN_IMPL(FileSelector)
 protected:
 	FileSelector value_;

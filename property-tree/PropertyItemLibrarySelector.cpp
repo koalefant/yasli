@@ -29,6 +29,11 @@ public:
 		static wxBitmap bitmap((const char* const *)property_item_library_selector_button_xpm);
 		addButton(&bitmap);
 	}
+    PropertyItemLibrarySelector(const PropertyItemLibrarySelector& original)
+    : PropertyItemStringList(original)
+    , selector_(original.selector_)
+    {
+    }
 	std::string toString() const{
 		return value_.c_str();
 	}
@@ -51,6 +56,7 @@ public:
 		ASSERT(sizeof(selector_) == size);
 		*reinterpret_cast<LibrarySelector*>(data) = selector_;
 	}
+    PROPERTY_ITEM_CLONE_IMPL(PropertyItemLibrarySelector)
 protected:
 	LibrarySelector selector_;
 };

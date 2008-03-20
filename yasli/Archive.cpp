@@ -8,7 +8,7 @@ void Archive::warning(const char* message)
     //std::cout << "WARNING, Archive: " << message << std::endl;
 }
 
-bool Archive::operator()(const ContainerSerializer& ser, const char* name)
+bool Archive::operator()(const ContainerSerializationInterface& ser, const char* name)
 {
     return false;
 }
@@ -23,25 +23,4 @@ bool Serializer::operator()(Archive& ar) const{
 }
 bool Serializer::operator()(Archive& ar, const char* name) const{
     return ar(*this, name);
-}
-// ---------------------------------------------------------------------------
-bool ContainerSerializer::operator()(Archive& ar, std::size_t index) const{
-    ASSERT(serializeFunc_ && object_);
-    ASSERT(index < size());
-    return serializeFunc_(object_, ar, index);
-}
-
-
-bool bookish()
-{
-	return true;
-}
-
-void bookish2()
-{
-}
-
-void bookish3()
-{
-
 }

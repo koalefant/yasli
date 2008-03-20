@@ -85,7 +85,7 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name)
     return true;
 }
 
-bool PropertyIArchive::operator()(const ContainerSerializer& ser, const char* name)
+bool PropertyIArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
 {
     ASSERT(currentChild_);
     const PropertyItem* item = findChild(name);

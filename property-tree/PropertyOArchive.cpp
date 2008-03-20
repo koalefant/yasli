@@ -5,13 +5,20 @@
 #include "PropertyItemFactory.h"
 #include "PropertyItemBasic.h"
 
-PropertyOArchive::PropertyOArchive(PropertyTreeRoot& root)
+PropertyOArchive::PropertyOArchive(PropertyTreeRoot& root, PropertyItemElement* element)
 : Archive(false, true)
 , currentItem_(0)
 , lastItem_(0)
 , root_(root)
+, element_(element)
 {
+	if(element_)
+		currentItem_ = element_;
+}
 
+PropertyItem* PropertyOArchive::rootItem() 
+{
+    return element_ ? (PropertyItem*)element_ : (PropertyItem*)&root_;
 }
 
 static PropertyItem* advance(PropertyItem* item)
@@ -61,11 +68,21 @@ static void eraseNotUpdated(PropertyItem* item)
 	}
 }
 
-bool PropertyOArchive::operator()(const ContainerSerializer& ser, const char* name)
+bool PropertyOArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
 {
 	ASSERT(!lastItem_ || lastItem_->refCount() >= 1 && lastItem_->refCount() < 10);
 	ASSERT(currentItem_);
-    PropertyItemContainer* container = new PropertyItemContainer(name, ser, false);
+
+    if(!root_.hasElement(ser.type())){
+        root_.addElement(ser.type(), 0);
+        PropertyItemElement element;
+        PropertyOArchive oa(root_, &element);
+        ser.serializeNewElement(oa);
+        if(!element.empty()){
+            root_.addElement(ser.type(), (*element.begin())->clone());
+        }
+    }
+    PropertyItemContainer* container = new PropertyItemContainer(name, ser);
     container = safe_cast<PropertyItemContainer*>(add(container, lastItem_));
 #ifdef DEBUG
     PropertyItem* oldCurrent = currentItem_;
@@ -111,7 +128,7 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
         currentItem_ = item;
     }
     else{
-        currentItem_ = &root_;
+        currentItem_ = rootItem();
     }
 	lastItem_ = 0;
 

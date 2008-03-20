@@ -1,7 +1,10 @@
 #pragma once
+
 #include <wx/gdicmn.h> // wxRect
 #include <wx/bitmap.h>
 #include "yasli/TypeID.h"
+#include "utils/sigslot.h"
+
 class wxDC;
 class wxWindow;
 
@@ -52,6 +55,14 @@ protected:
 		*reinterpret_cast<Type*>(data) = value_; \
 	}
 
+#define PROPERTY_ITEM_CLONE_IMPL(Type) \
+	Type* clone() const{ \
+		ASSERT(sizeof(Type) == sizeof(*this)); \
+        return new Type(*this); \
+	}
+
+class PopupMenu;
+
 class PropertyItem : public RefCounter, public PropertyItemState{
 public:
     enum{
@@ -59,7 +70,14 @@ public:
         SERIALIZE_CONTENT = 2
     };
 
+	enum ContextMenuSection{
+		MENU_SECTION_MAIN,
+		MENU_SECTION_CLIPBOARD,
+		MENU_SECTION_DESTRUCTIVE
+	};
+
     PropertyItem(const char* name = "", TypeID type = TypeID());
+    PropertyItem(const PropertyItem& original);
     virtual ~PropertyItem() {}
 
 	typedef std::vector<SharedPtr<PropertyItem> > Children;
@@ -82,8 +100,10 @@ public:
         wxRect rect;
     };
 
+	virtual PropertyItem* clone() const = 0;
     virtual bool isLeaf() const{ return true; }
     virtual bool isContainer() const{ return false; }
+    virtual bool isElement() const{ return false; }
 
     virtual bool hit(wxCoord coord, const ViewContext& context) const{ return false; }
     virtual bool hitExpandArea(wxCoord coord, const ViewContext& context) const{ return false; }
@@ -92,6 +112,8 @@ public:
     virtual void redraw(wxDC& dc, const ViewContext& context) const;
 	virtual bool activate(const ViewContext& context);
     virtual bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context);
+    virtual bool onRightMouseClick(wxPoint pos, const ViewContext& context);
+    virtual void onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
 
     const char* label() const{ return label_.c_str(); }
     const char* name() const{ return name_.c_str(); }
@@ -161,6 +183,7 @@ public:
 class PropertyItemCheck : public PropertyItem{
 public:
     PropertyItemCheck(const char* name = "", TypeID type = TypeID());
+    PropertyItemCheck(const PropertyItemCheck& original);
 
     void calculateRects(const PropertyItem::ViewContext& context, PropertyItemRects& rects) const;
     wxRect calculateCheckRect(const ViewContext& context, const PropertyItemRects& rects) const;
@@ -179,6 +202,15 @@ protected:
 class PropertyWithButtons{
 public:
     typedef PropertyItem::ViewContext ViewContext;
+
+    PropertyWithButtons()
+    {
+    }
+
+    PropertyWithButtons(const PropertyWithButtons& original)
+    : buttons_(original.buttons_)
+    {
+    }
 
 	bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context, const PropertyItemRects& rects);
 	wxRect calculateButtonsRect(const ViewContext& context, const PropertyItemRects& rects) const;
@@ -203,6 +235,7 @@ class PropertyItemField : public PropertyItem, public PropertyWithControl, publi
 public:
 	using PropertyItem::ViewContext;
     PropertyItemField(const char* name = "", TypeID type = TypeID());
+    PropertyItemField(const PropertyItemField& original);
     void calculateRects(const PropertyItem::ViewContext& context, PropertyItemRects& rects) const;
     wxRect calculateFieldRect(const ViewContext& context, const PropertyItemRects& rects) const;
 	bool activate(const ViewContext& context);
@@ -243,9 +276,59 @@ protected:
     PropertyTree* tree_;
 };
 
+// ---------------------------------------------------------------------------
+class ContainerSerializationInterface;
+class PropertyItemContainer : public PropertyItem, public PropertyWithButtons, public sigslot::has_slots<>{
+public:
+	using PropertyItem::ViewContext;
+    PropertyItemContainer();
+    PropertyItemContainer(const PropertyItemContainer& original);
+    PropertyItemContainer(const char* name, const ContainerSerializationInterface& ser);
+
+    // from PropertyItem:
+    PropertyItemContainer* clone() const{
+        return new PropertyItemContainer(*this);
+    }
+    bool isContainer() const{ return true; }
+	bool activate(const ViewContext& context);
+    void redraw(wxDC& dc, const ViewContext& context) const;
+    bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context);
+    void onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
+    // ^^^
+	void onElementContextMenu(PropertyItem* element, PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
+protected:
+    void onMenuAddElement(PropertyTree* tree);
+    void onMenuRemoveAllElements(PropertyTree* tree);
+    void onMenuRemoveElement(PropertyTree* tree, PropertyItem* element);
+
+    // from PropertyWithButtons:
+	bool onButton(int index, const ViewContext& context);
+    // ^^^
+
+    TypeID childrenType_;
+    bool fixedSize_;
+};
+
+class PropertyItemElement : public PropertyItem{
+public:
+    PropertyItemElement(const char* name = "", TypeID type = TypeID())
+    : PropertyItem(name, type)
+    {
+    }
+	PropertyItemElement(const PropertyItemElement& original)
+	: PropertyItem(original)
+	{
+	}
+
+    bool isElement() const{ return true; }
+	PROPERTY_ITEM_CLONE_IMPL(PropertyItemElement)
+protected:
+};
+
 
 // ---------------------------------------------------------------------------
 
+class PropertyItemElement;
 class PropertyTreeRoot : public PropertyItem{
 public:
     PropertyTreeRoot()
@@ -253,7 +336,16 @@ public:
     }
     bool isRoot() const{ return true; }
     bool isLeaf() const{ return false; }
+
+    bool hasElement(TypeID typeID) const;
+    void addElement(TypeID typeID, PropertyItem* element);
+    const PropertyItem* findElement(TypeID type) const;
+
+    typedef std::map<TypeID, SharedPtr<PropertyItem> > ElementsByType;
+
+	PropertyTreeRoot* clone() const{ return 0; }
 protected:
+    ElementsByType elementsByType_;
 
 };
 

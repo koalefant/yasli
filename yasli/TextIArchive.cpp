@@ -367,7 +367,7 @@ bool TextIArchive::operator()(const Serializer& ser, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(const ContainerSerializer& ser, const char* name)
+bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
 {
     if(findName(name)){
         if(openContainerBracket()){

@@ -1,4 +1,4 @@
-#include "property-tree/PropertyEdit.h"
+#include "PropertyEdit.h"
 #include "TestData.h"
 
 int main(int argc, char** argv)

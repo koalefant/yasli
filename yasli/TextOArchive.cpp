@@ -203,7 +203,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name)
 }
 
 
-bool TextOArchive::operator()(const ContainerSerializer& ser, const char* name)
+bool TextOArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
 {
     placeIndent();
     placeName(name);

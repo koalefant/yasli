@@ -32,7 +32,7 @@ public:
     bool operator()(unsigned char& value, const char* name = "");
 
     bool operator()(const Serializer& ser, const char* name = "");
-    bool operator()(const ContainerSerializer& ser, const char* name = "");
+    bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
     // ^^^
 	
     bool operator()(StringListStaticValue& value, const char* name = "");

@@ -42,9 +42,8 @@ public:
     PropertyItem* focusedItem();
     void setFocusedItem(PropertyItem* focusedItem);
 
-    void spawnInPlaceControl(const PropertyItem::ViewContext& context,
-                             PropertyWithControl* item);
-
+	void spawnContextMenu(const PropertyItem::ViewContext& context, PropertyItem* item);
+    void spawnInPlaceControl(const PropertyItem::ViewContext& context, PropertyWithControl* item);
     void cancelControl(bool now = true, bool commit = true);
 	
 	void commitChange(PropertyItem* changedOne);

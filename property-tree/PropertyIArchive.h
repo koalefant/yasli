@@ -18,7 +18,7 @@ public:
     bool operator()(long& value, const char* name);
 
     bool operator()(const Serializer& value, const char* name);
-	bool operator()(const ContainerSerializer& ser, const char* name);
+	bool operator()(const ContainerSerializationInterface& ser, const char* name);
     // ^^^
 	
     template<class T>

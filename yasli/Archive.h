@@ -59,8 +59,8 @@ public:
     virtual bool operator()(signed char& value, const char* name = "")   { return false; }
     virtual bool operator()(char& value, const char* name = "")          { return false; }
 
-    virtual bool operator()(const Serializer& ser, const char* name = "")       { return false; }
-    virtual bool operator()(const ContainerSerializer& ser, const char* name = "");
+    virtual bool operator()(const Serializer& ser, const char* name = "") { return false; }
+    virtual bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
 
     // templated switch
     template<class T>
@@ -108,13 +108,11 @@ namespace Helpers{
 
     template<class T>
     struct SerializeArray{};
+
     template<class T, int Size>
     struct SerializeArray<T[Size]>{
         static bool invoke(Archive& ar, T value[Size], const char* name){
-            SerializeContainerFunc serialize = &ContainerSerializer::serializeRaw<T[Size]>;
-            ContainerResizeFunc resize = &ContainerSerializer::resizeArray<Size>;
-            ContainerSizeFunc size = &ContainerSerializer::sizeArray<Size>;
-            return ar(ContainerSerializer(TypeID::get<T>(), reinterpret_cast<void*>(value), serialize, resize, size), name);
+            return ar(static_cast<const ContainerSerializationInterface&>(ContainerSerializationArrayImpl<T>(value, Size)), name);
         }
     };
 }
@@ -142,14 +140,11 @@ bool serialize(Archive& ar, T& object, const char* name)
 
     return
         Select< IsClass<T>,
-            //Select< SerializeMethodForm<T>,
-            //    Identity< SerializeStructWithName<T> >,
                 Identity< SerializeStruct<T> >,
-            //>,
-            Select< IsArray<T>,
-                Identity< SerializeArray<T> >,
-                Identity< SerializeEnum<T> >
-            >
+				Select< IsArray<T>,
+					Identity< SerializeArray<T> >,
+					Identity< SerializeEnum<T> >
+				>
         >::type::invoke(ar, object, name);
 }
 

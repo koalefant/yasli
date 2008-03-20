@@ -19,6 +19,8 @@
 
 #include "PropertyTree.h"
 
+#include "PopupMenu.h"
+
 PropertyItemState::PropertyItemState()
 : selected_(false)
 , expanded_(false)
@@ -56,6 +58,22 @@ PropertyItem::PropertyItem(const char* name, TypeID type)
         rowFontBold.SetWeight(wxFONTWEIGHT_BOLD);
         fontsInitialized = true;
     }
+}
+
+PropertyItem::PropertyItem(const PropertyItem& original)
+: PropertyItemState(original)
+, height_(original.height_)
+, parent_(0)
+, layoutChanged_(true)
+, updated_(true)
+, name_(original.name_)
+, label_(original.label_)
+, type_(original.type_)
+{
+	const_iterator it;
+	FOR_EACH(original.children_, it){
+		add( (*it)->clone() );
+	}
 }
 
 void PropertyItem::assignStateFrom(PropertyItem* item)
@@ -282,6 +300,42 @@ bool PropertyItem::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext
 			return true;
     }
 	return false;
+}
+
+bool PropertyItem::onRightMouseClick(wxPoint pos, const ViewContext& context)
+{
+    PropertyItemRects rects;
+    calculateRects(context, rects);
+    
+    if(!isRoot()){
+		if(rects.selection.Contains(pos)){
+			context.tree->select(this, true);
+			context.tree->spawnContextMenu(context, this);
+			return true;
+		}
+    }
+
+    if(!expanded())
+        return false;
+
+    iterator it;
+    FOR_EACH(*this, it){
+        PropertyItem* child = *it;
+
+		ViewContext childContext;
+		child->prepareContext(childContext, this, context);
+        if(child->onRightMouseClick(pos, childContext))
+			return true;
+    }
+	return false;
+}
+
+void PropertyItem::onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section)
+{
+    if(parent()->isContainer()){
+        PropertyItemContainer* container = safe_cast<PropertyItemContainer*>(parent());
+        container->onElementContextMenu(this, menu, tree, section);
+    }
 }
 
 bool PropertyItem::activate(const ViewContext& context)
@@ -546,6 +600,13 @@ PropertyItemField::PropertyItemField(const char* name, TypeID type)
 
 }
 
+PropertyItemField::PropertyItemField(const PropertyItemField& original)
+: PropertyItem(original)
+, PropertyWithControl(original)
+, PropertyWithButtons(original)
+{
+}
+
 void PropertyItemField::calculateRects(const ViewContext& context, PropertyItemRects& rects) const
 {
     PropertyItem::calculateRects(context, rects);
@@ -639,6 +700,12 @@ PropertyItemCheck::PropertyItemCheck(const char* name, TypeID type)
 
 }
 
+PropertyItemCheck::PropertyItemCheck(const PropertyItemCheck& original)
+: PropertyItem(original)
+, checkStates_(original.checkStates_)
+{
+}
+
 int PropertyItemCheck::addCheckState(wxBitmap& bitmap)
 {
 	checkStates_.push_back(bitmap);
@@ -716,9 +783,17 @@ PropertyItemContainer::PropertyItemContainer()
 {
 }
 
-PropertyItemContainer::PropertyItemContainer(const char* name, const ContainerSerializer& zer,
-                                             bool fixedSize)
-: PropertyItem(name, zer.type())
+PropertyItemContainer::PropertyItemContainer(const PropertyItemContainer& original)
+: PropertyItem(original)
+, PropertyWithButtons(original)
+, childrenType_(original.childrenType_)
+, fixedSize_(original.fixedSize_)
+{
+}
+
+PropertyItemContainer::PropertyItemContainer(const char* name, const ContainerSerializationInterface& ser)
+: PropertyItem(name, ser.type())
+, childrenType_(ser.type())
 {
     #include "res/property_item_container_add.xpm"
     static wxBitmap bitmap((const char* const *)property_item_container_add_xpm);
@@ -750,9 +825,77 @@ bool PropertyItemContainer::onMouseClick(wxPoint pos, bool doubleClick, const Vi
 	return PropertyItem::onMouseClick(pos, doubleClick, context);
 }
 
+void PropertyItemContainer::onElementContextMenu(PropertyItem* element, PopupMenu& menu, PropertyTree* tree, ContextMenuSection section)
+{
+    switch(section){
+	case MENU_SECTION_MAIN:
+        //menu.root().add("Insert Element Before", tree)
+        //.connect(this, &PropertyItemContainer::onMenuRemoveAllElements);
+		return;
+    case MENU_SECTION_DESTRUCTIVE:
+		menu.root().addSeparator();
+        menu.root().add("Remove Element", tree, element)
+        .connect(this, &PropertyItemContainer::onMenuRemoveElement);
+        return;
+    default:
+		break;
+    }
+}
+
+void PropertyItemContainer::onMenuRemoveElement(PropertyTree* tree, PropertyItem* element)
+{
+	iterator it = std::find(children_.begin(), children_.end(), element);
+	ASSERT(it != children_.end());
+	++it;
+	if(it == children_.end())
+		tree->select(this);
+	else
+	{
+		tree->select(*it);
+	}	
+	remove(element);
+	tree->commitChange(this);
+}
+
+void PropertyItemContainer::onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section)
+{
+    switch(section){
+    case MENU_SECTION_MAIN:
+        menu.root().add("Add Element", tree)
+        .connect(this, &PropertyItemContainer::onMenuAddElement);
+        return;
+    case MENU_SECTION_DESTRUCTIVE:
+		menu.root().addSeparator();
+        menu.root().add("Remove All Elements", tree)
+        .connect(this, &PropertyItemContainer::onMenuRemoveAllElements);
+        return;
+    default:
+		break;
+    }
+}
+
+void PropertyItemContainer::onMenuRemoveAllElements(PropertyTree* tree)
+{
+    clear();
+    tree->commitChange(this);
+}
+
+
+void PropertyItemContainer::onMenuAddElement(PropertyTree* tree)
+{
+    const PropertyItem* original = tree->root()->findElement(childrenType_);
+    if(!original)
+        return;
+    PropertyItem* element = original->clone();
+	element->setExpanded(true);
+    add(element);	
+	tree->select(element);
+	tree->commitChange(this);
+}
+
 bool PropertyItemContainer::onButton(int index, const ViewContext& context)
 {
-	
+    onMenuAddElement(context.tree);
 	return true;
 }
 
@@ -760,5 +903,27 @@ SERIALIZATION_DERIVED_TYPE(PropertyItem, PropertyItemContainer, "Container")
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemStruct)
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemFileSelector)
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemLibrarySelector)
+
+// ---------------------------------------------------------------------------
+
+bool PropertyTreeRoot::hasElement(TypeID typeID) const
+{
+    return elementsByType_.find(typeID) != elementsByType_.end();
+}
+
+void PropertyTreeRoot::addElement(TypeID typeID, PropertyItem* element)
+{
+    //ASSERT(!hasElement(typeID));
+    elementsByType_[typeID] = element;
+}
+
+const PropertyItem* PropertyTreeRoot::findElement(TypeID type) const
+{
+    ElementsByType::const_iterator it = elementsByType_.find(type);
+    if(it == elementsByType_.end())
+        return 0;
+    return &*it->second;
+}
+
 
 // ---------------------------------------------------------------------------
