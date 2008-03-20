@@ -1,6 +1,6 @@
 #pragma once
 
-#include <assert.h>
+#include "Assert.h"
 #include <string>
 
 namespace ErrorHelpers {
@@ -23,16 +23,6 @@ namespace ErrorHelpers {
 # define RAISE(exception) throw ErrorHelpers::throwExceptionFrom(exception, __FILE__, __FUNCTION__, __LINE__)
 #endif
 
-
-#ifndef NDEBUG
-# define ASSERT(x) assert((x))
-# define VERIFY(x) assert(x);
-# define TRACE(x) ErrorHelpers::trace((x))
-#else
-# define ASSERT(x)
-# define VERIFY(x) (x)
-# define TRACE(x)
-#endif
 
 struct ErrorGeneric{
     ErrorGeneric()
