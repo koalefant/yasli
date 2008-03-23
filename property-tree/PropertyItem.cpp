@@ -496,7 +496,7 @@ PropertyItem* PropertyItem::findByName(const char* name, bool noUpdated)
 PropertyItem* PropertyItem::findByIndex(int index)
 {
 	Children::iterator it = children_.begin();
-	if(index < 0 || index > int(children_.size()))
+	if(index < 0 || index >= int(children_.size()))
 		return 0;
 	return children_[index];
 }
@@ -504,7 +504,7 @@ PropertyItem* PropertyItem::findByIndex(int index)
 const PropertyItem* PropertyItem::findByIndex(int index) const
 {
 	Children::const_iterator it = children_.begin();
-	if(index < 0 || index > int(children_.size()))
+	if(index < 0 || index >= int(children_.size()))
 		return 0;
 	return children_[index];
 }
