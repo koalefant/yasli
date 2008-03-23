@@ -15,6 +15,8 @@ public:
 protected:
 	void Init();
 
+    void onKeyDown(wxKeyEvent& event);
+
 	PropertyTree* tree_;
 
 	DECLARE_EVENT_TABLE()

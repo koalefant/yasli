@@ -25,6 +25,7 @@ public:
 protected:
 	PropertyItem* add(PropertyItem* newItem, PropertyItem* previousItem);
     PropertyItem* rootItem();
+	int containerIndex_;
 
     PropertyItem* currentItem_;
     PropertyItem* lastItem_;

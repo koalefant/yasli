@@ -11,6 +11,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeRoot& root, PropertyItemElement* 
 , lastItem_(0)
 , root_(root)
 , element_(element)
+, containerIndex_(-1)
 {
 	if(element_)
 		currentItem_ = element_;
@@ -38,6 +39,12 @@ static PropertyItem* advance(PropertyItem* item)
 
 PropertyItem* PropertyOArchive::add(PropertyItem* newItem, PropertyItem* previousItem)
 {
+	ASSERT(currentItem_);
+	if(currentItem_->isContainer()){
+		char buffer[10];
+		sprintf_s(buffer, sizeof(buffer), "[%i]", int(containerIndex_));
+		newItem->setLabel(buffer);
+	}
 	if(!currentItem_->empty()){
 		PropertyItem* nextItem = previousItem ? advance(previousItem) : (PropertyItem*)(*currentItem_->begin());
 		if(nextItem->updated() == false && strcmp(nextItem->name(), newItem->name()) == 0){
@@ -94,8 +101,10 @@ bool PropertyOArchive::operator()(const ContainerSerializationInterface& ser, co
 
     int count = int(ser.size());
     for(int i = 0; i < count; ++i)
+	{
+		containerIndex_ = i;
         ser(*this, i);
-
+	}
     eraseNotUpdated(currentItem_);
 
     lastItem_ = currentItem_;

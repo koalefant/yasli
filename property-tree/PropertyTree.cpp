@@ -8,6 +8,52 @@
 #include "PropertyIArchive.h"
 #include "PopupMenu.h"
 
+
+PropertyItem* PropertyItemPath::get(PropertyItem& root) const
+{
+    Indices::const_iterator it = indices_.begin();
+
+    PropertyItem* current = &root;
+    while(it != indices_.end()){
+		current = current->findByIndex(*it);
+		if(!current)
+			return 0;
+		++it;
+    }
+	return current;
+}
+
+void PropertyItemPath::set(PropertyItem& root, PropertyItem* item)
+{
+	indices_.clear();
+	if(item == 0)
+		return;
+
+	typedef std::vector<const PropertyItem*> Items;
+	Items items;
+	
+    const PropertyItem* current = item;
+	while(current != &root){
+		items.push_back(current);
+		current = current->parent();
+		if(current == 0)
+			return;
+	}
+
+	Items::reverse_iterator it = items.rbegin();
+	current = &root;
+	while(it != items.rend()){
+		int index = current->findIndexOf( *it );
+		ASSERT(index >= 0);
+		indices_.push_back(index);
+		current = *it;
+		++it;
+	}
+
+	ASSERT(get(root) == item);
+}
+
+
 // ---------------------------------------------------------------------------
 
 DEFINE_EVENT_TYPE(wxEVT_PROPERTY_TREE_CANCEL_CONTROL)
@@ -28,8 +74,7 @@ END_EVENT_TABLE()
 
 PropertyTree::PropertyTree(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
                            const wxValidator& validator, const wxString& name)
-: focusedItem_(0)
-, redrawing_(false)
+: redrawing_(false)
 {
 
     root_.setExpanded(true);
@@ -67,7 +112,7 @@ void PropertyTree::detach()
 
 void PropertyTree::revert()
 {
-    focusedItem_ = 0;
+    //setFocusedItem(0);
 	cancelControl(true, false);
 	if(attached_){
 		// FIXME: если делать так всегда, то получается heap corruption!
@@ -140,7 +185,7 @@ void PropertyTree::select(PropertyItem* item, bool exclusive)
     signalChanged().freeze(this);
     if(exclusive){
         deselectAll();
-        focusedItem_ = item;
+        setFocusedItem(item);
     }
     item->setSelected(true);
     signalChanged().unfreeze();
@@ -148,12 +193,12 @@ void PropertyTree::select(PropertyItem* item, bool exclusive)
 
 PropertyItem* PropertyTree::focusedItem()
 {
-    return focusedItem_; 
+    return focusedItemPath_.get(root_); 
 }
 
 void PropertyTree::setFocusedItem(PropertyItem* focusedItem)
 {
-    focusedItem_ = focusedItem;
+	focusedItemPath_.set(root_, focusedItem);
 }
 
 PropertyFilter& PropertyTree::currentFilter()
@@ -177,7 +222,7 @@ void PropertyTree::initViewContext(PropertyItem::ViewContext& context, PropertyI
 	
 	wxWindow* focusedWindow = wxWindow::FindFocus();
 	bool controlFocused = (focusedWindow == this) || (spawnedControl_ && spawnedControl_->get() == focusedWindow);
-    context.focusedItem = controlFocused ? focusedItem_ : 0;
+    context.focusedItem = controlFocused ? focusedItem() : 0;
 
 	if(forItem != 0){
 		typedef std::vector<PropertyItem*> Parents;	
@@ -271,7 +316,8 @@ void PropertyTree::onKeyDown(wxKeyEvent& event)
     PropertyItem* focusedItem = this->focusedItem();
 	if(!focusedItem){
 		if(root()->begin() != root()->end()){
-			focusedItem = focusedItem_ = *root()->begin();
+			focusedItem = *root()->begin();
+			setFocusedItem(focusedItem);
 		}
 	}
     if(!focusedItem->parent())
@@ -279,13 +325,13 @@ void PropertyTree::onKeyDown(wxKeyEvent& event)
     switch(event.GetKeyCode())
     {
     case WXK_UP:
-        itemToSelect = focusedItem->parent()->findSibling(focusedItem_, DIR_UP);
+        itemToSelect = focusedItem->parent()->findSibling(focusedItem, DIR_UP);
         break;
     case WXK_DOWN:
-        itemToSelect = focusedItem->parent()->findSibling(focusedItem_, DIR_DOWN);
+        itemToSelect = focusedItem->parent()->findSibling(focusedItem, DIR_DOWN);
         break;
 	case WXK_LEFT:
-        itemToSelect = focusedItem->parent()->findSibling(focusedItem_, DIR_LEFT);
+        itemToSelect = focusedItem->parent()->findSibling(focusedItem, DIR_LEFT);
 		if(!itemToSelect){
 			if(focusedItem->expanded()) // FIXME: can be collapsed
 				focusedItem->setExpanded(false);
@@ -294,7 +340,7 @@ void PropertyTree::onKeyDown(wxKeyEvent& event)
 		}
 		break;
 	case WXK_RIGHT:
-        itemToSelect = focusedItem->parent()->findSibling(focusedItem_, DIR_RIGHT);
+        itemToSelect = focusedItem->parent()->findSibling(focusedItem, DIR_RIGHT);
 		if(!itemToSelect){
 			if(!focusedItem->empty()){
 				if(!focusedItem->expanded()) // FIXME: can be collapsed

@@ -493,6 +493,30 @@ PropertyItem* PropertyItem::findByName(const char* name, bool noUpdated)
 	return 0;
 }
 
+PropertyItem* PropertyItem::findByIndex(int index)
+{
+	Children::iterator it = children_.begin();
+	if(index < 0 || index > int(children_.size()))
+		return 0;
+	return children_[index];
+}
+
+const PropertyItem* PropertyItem::findByIndex(int index) const
+{
+	Children::const_iterator it = children_.begin();
+	if(index < 0 || index > int(children_.size()))
+		return 0;
+	return children_[index];
+}
+
+int PropertyItem::findIndexOf(const PropertyItem* child) const
+{
+	Children::const_iterator it = std::find(children_.begin(), children_.end(), child);
+	if(it == children_.end())
+		return -1;
+	return std::distance(children_.begin(), it);
+}
+
 // ---------------------------------------------------------------------------
 
 wxRect PropertyControl::scrollRect(const wxRect& rect)
@@ -539,6 +563,21 @@ public:
 		tree()->cancelControl();
     }
 
+	void onChar(wxKeyEvent& event)
+	{
+		switch(event.GetKeyCode())
+		{
+		case WXK_RETURN:
+			commit();
+			break;
+		case WXK_ESCAPE:
+			tree()->cancelControl();
+			break;
+		default:
+			event.Skip();
+		}
+	}
+
     wxWindow* get(){ return this; }
 
     DECLARE_CLASS(PropertyControlText)
@@ -549,6 +588,8 @@ protected:
 IMPLEMENT_CLASS(PropertyControlText, wxTextCtrl)
 BEGIN_EVENT_TABLE(PropertyControlText, wxTextCtrl)
     EVT_KILL_FOCUS(PropertyControlText::onKillFocus)
+	EVT_CHAR(PropertyControlText::onChar)
+	EVT_KEY_DOWN(PropertyControlText::onChar)	
 END_EVENT_TABLE()
 
 // ---------------------------------------------------------------------------

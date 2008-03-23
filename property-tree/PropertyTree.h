@@ -10,6 +10,17 @@ class wxDC;
 class PropertyWithControl;
 class LibrarySelector;
 
+class PropertyItemPath
+{
+public:
+	PropertyItem* get(PropertyItem& root) const;
+	void set(PropertyItem& root, PropertyItem* item);
+
+private:
+	typedef std::vector<int> Indices;
+	Indices indices_;
+};
+
 class PropertyTree : public wxScrolledWindow,
       public sigslot::has_slots<>, public Refrigerator{
 public:
@@ -73,7 +84,7 @@ protected:
 
     SharedPtr<PropertyControl> spawnedControl_;
 
-    PropertyItem* focusedItem_; // TODO переделать на путь
+    PropertyItemPath focusedItemPath_;
     PropertyTreeRoot root_;
 	bool redrawing_;
 

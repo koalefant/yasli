@@ -115,6 +115,7 @@ public:
     virtual bool onRightMouseClick(wxPoint pos, const ViewContext& context);
     virtual void onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
 
+	void setLabel(const char* label){ label_ = label; }
     const char* label() const{ return label_.c_str(); }
     const char* name() const{ return name_.c_str(); }
 
@@ -140,6 +141,9 @@ public:
 
     virtual PropertyItem* findSibling(PropertyItem* forItem, SiblingDirection dir, bool enterExpanded = true);
 	PropertyItem* findByName(const char* name, bool noUpdated);
+	PropertyItem* findByIndex(int index);
+	const PropertyItem* findByIndex(int index) const;
+	int findIndexOf(const PropertyItem* child) const;
     virtual bool isChildVisible(PropertyItem* child, PropertyFilter& filter) const;
 
     typedef Children::iterator iterator;

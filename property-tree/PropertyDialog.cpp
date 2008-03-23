@@ -6,6 +6,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxPropertyDialog, wxDialog)
 BEGIN_EVENT_TABLE(wxPropertyDialog, wxDialog)
+	EVT_KEY_DOWN(wxPropertyDialog::onKeyDown)
 END_EVENT_TABLE()
 
 wxPropertyDialog::wxPropertyDialog(wxWindow* parent, const wxString& title)
@@ -25,6 +26,7 @@ wxPropertyDialog::wxPropertyDialog(wxWindow* parent, const wxString& title, Seri
 
 void wxPropertyDialog::Init()
 {
+	SetEscapeId(wxID_CANCEL);
 	wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer(boxSizer);
 	{
@@ -34,6 +36,12 @@ void wxPropertyDialog::Init()
 		wxSizer* sizer = CreateButtonSizer(wxOK | wxCANCEL);
 		boxSizer->Add(sizer, 0, wxEXPAND | wxALL, 6);
 	}
+}
+
+void wxPropertyDialog::onKeyDown(wxKeyEvent& event)
+{
+    if(event.GetKeyCode() != WXK_ESCAPE)
+        event.Skip();
 }
 
 wxPropertyDialog::~wxPropertyDialog()
