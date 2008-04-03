@@ -2,7 +2,7 @@
 
 #include "yasli/TypesFactory.h"
 #include "yasli/Archive.h"
-#include "utils/MemoryWriter.h"
+#include "yasli/MemoryWriter.h"
 
 
 TypeLibrary& TypeLibrary::the()

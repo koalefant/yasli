@@ -1,6 +1,9 @@
 #include "StdAfx.h"
-#include "yasli/Archive.h"
 #include "yasli/StringList.h"
+#include "yasli/Archive.h"
+
+StringList StringList::EMPTY;
+StringListStatic StringListStatic::EMPTY;
 
 bool serialize(Archive& ar, StringListValue& value, const char* name)
 {
@@ -35,3 +38,4 @@ bool serialize(Archive& ar, StringListStaticValue& value, const char* name)
         return true;
     }
 }
+

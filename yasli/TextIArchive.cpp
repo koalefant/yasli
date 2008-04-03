@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <algorithm>
 #include "yasli/TextIArchive.h"
-#include "utils/MemoryReader.h"
-#include "utils/MemoryWriter.h"
-#include "utils/StringUtil.h"
+#include "yasli/MemoryReader.h"
+#include "yasli/MemoryWriter.h"
+#include "yasli/StringUtil.h"
 
 // #define DEBUG_TEXTIARCHIVE
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/sigslot.h"
+#include "yasli/sigslot.h"
 #include <wx/menu.h>
 
 class wxWindow;

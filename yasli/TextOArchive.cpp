@@ -1,9 +1,8 @@
 #include "StdAfx.h"
-#include "utils/Errors.h"
 #include "yasli/TextOArchive.h"
 
-#include "utils/StringUtil.h"
-#include "utils/MemoryWriter.h"
+#include "yasli/StringUtil.h"
+#include "yasli/MemoryWriter.h"
 
 const int TAB_WIDTH = 4;
 

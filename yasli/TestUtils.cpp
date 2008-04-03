@@ -3,10 +3,10 @@
 #include <string>
 #include <iostream>
 #include <math.h>
-#include "utils/Tokenizer.h"
-#include "utils/StringUtil.h"
+#include "yasli/Tokenizer.h"
+#include "yasli/StringUtil.h"
 
-#include "utils/SharedLibApi.h"
+#include "yasli/SharedLibApi.h"
 
 #ifndef M_PI
 # define M_PI 3.1415926
@@ -16,8 +16,6 @@ void EXPORT_SYMBOL dummyExport()
 {
 	return;
 }
-
-
 
 TESTO_BEGIN()
 

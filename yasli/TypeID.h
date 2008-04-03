@@ -1,7 +1,7 @@
 #pragma once
 
 #include <typeinfo>
-#include "utils/Errors.h"
+#include "yasli/Errors.h"
 #include "yasli/API.h"
 
 #ifndef _MSC_VER

@@ -7,8 +7,8 @@
 
 #include "yasli/LibraryBase.h"
 #include "yasli/LibraryReference.h"
-#include "utils/Content.h"
-#include "utils/Errors.h"
+#include "yasli/Content.h"
+#include "yasli/Errors.h"
 
 
 // ---------------------------------------------------------------------------

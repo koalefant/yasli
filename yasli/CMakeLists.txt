@@ -12,5 +12,3 @@ set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 
 include("Testo")
 TESTO("yasli" "Test.cpp")
-
-target_link_libraries("yasli" "utils")

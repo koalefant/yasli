@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utils/StringList.h"
-#include "utils/SafeCast.h"
+#include "yasli/StringList.h"
+#include "yasli/SafeCast.h"
 #include "yasli/API.h"
 
 class Archive;

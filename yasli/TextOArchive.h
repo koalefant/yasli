@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include "yasli/Archive.h"
-#include "utils/Pointers.h"
+#include "yasli/Pointers.h"
 
 class MemoryWriter;
 

@@ -8,13 +8,15 @@
 # pragma warning(disable: 4251 4275)
 #endif
 
-#include "utils/SharedLibApi.h"
+#include "yasli/SharedLibApi.h"
 #ifdef TESTO_EXPORTED
 # define TESTO_API EXPORT_SYMBOL
 #else
 # define TESTO_API IMPORT_SYMBOL
 #endif
 
+#pragma warning(push)
+#pragma warning(disable: 4101)
 namespace Testo{
 
     class TESTO_API Message{
@@ -118,6 +120,8 @@ namespace Testo{
         Testers testers_;
     };
 }
+
+#pragma warning(pop)
 
 using Testo::Tester;
 

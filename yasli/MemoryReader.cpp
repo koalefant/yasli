@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "utils/Errors.h"
-#include "utils/MemoryReader.h"
+#include "yasli/Errors.h"
+#include "yasli/MemoryReader.h"
 #include <cstdlib>
 #include <iostream>
 

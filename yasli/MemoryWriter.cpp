@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "utils/Errors.h"
+#include "yasli/Errors.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -10,7 +10,7 @@
 # define isnan _isnan
 #endif
 
-#include "utils/MemoryWriter.h"
+#include "yasli/MemoryWriter.h"
 
 MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
 : size_(size)

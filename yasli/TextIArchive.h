@@ -1,10 +1,10 @@
 #pragma once
 
 #include "yasli/Archive.h"
-#include "utils/Tokenizer.h"
-#include "utils/Pointers.h"
+#include "yasli/Tokenizer.h"
+#include "yasli/Pointers.h"
 
-#include "utils/MemoryReader.h" //class MemoryReader;
+#include "yasli/MemoryReader.h"
 
 class YASLI_API TextIArchive : public Archive{
 public:

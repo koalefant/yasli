@@ -16,13 +16,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
 
 include_directories(.)
-add_subdirectory(utils)
-add_subdirectory(testo)
 add_subdirectory(yasli)
+add_subdirectory(testo)
 
 add_executable("example" "Example.cpp")
 set_target_properties("example" PROPERTIES DEBUG_POSTFIX "-debug")
-target_link_libraries("example" "utils" "testo" "yasli")
+target_link_libraries("example" "testo" "yasli")
 
 # libraries
 if(wxWidgets_FOUND)

@@ -10,10 +10,10 @@
 # pragma warning(disable: 4250)
 #endif
 
-#include "utils/Pointers.h"
-#include "utils/Errors.h"
-#include "utils/SafeCast.h"
-#include "utils/Macros.h"
+#include "yasli/Pointers.h"
+#include "yasli/Errors.h"
+#include "yasli/SafeCast.h"
+#include "yasli/Macros.h"
 
 #include <vector>
 #include <list>

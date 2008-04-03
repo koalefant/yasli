@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utils/MemoryWriter.h"
-#include "utils/SafeCast.h"
+#include "yasli/MemoryWriter.h"
+#include "yasli/SafeCast.h"
 #include "yasli/TypesFactory.h"
 
 template<class T>

@@ -21,6 +21,4 @@ add_library("property-tree" ${SOURCES})
 add_definitions(-DGENERIC_EDITOR_EXPORTED)
 
 set_target_properties("property-tree" PROPERTIES DEBUG_POSTFIX "-debug")
-target_link_libraries("property-tree" "utils" "yasli")
-
-#install(TARGETS "property-tree" DESTINATION ..)
+target_link_libraries("property-tree" "yasli")

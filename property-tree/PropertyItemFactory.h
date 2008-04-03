@@ -1,6 +1,6 @@
 #pragma once
 #include "PropertyItem.h"
-#include "utils/Factory.h"
+#include "yasli/Factory.h"
 #include "yasli/TypeID.h"
 
 class Serializer;

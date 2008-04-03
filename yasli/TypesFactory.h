@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 
-#include "utils/Errors.h"
+#include "yasli/Assert.h"
 #include "yasli/TypeID.h"
 #include "yasli/API.h"
 

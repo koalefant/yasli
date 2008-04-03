@@ -1,9 +1,8 @@
 #include "StdAfx.h"
 #include <iostream>
 #include <algorithm>
-#include "utils/Files.h"
-#include "utils/Content.h"
-#include "utils/Files.h"
+#include "yasli/Files.h"
+#include "yasli/Content.h"
 #ifdef WIN32
 # include <direct.h>
 #else

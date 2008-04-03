@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/Content.h"
+#include "yasli/Content.h"
 
 class Archive;
 class LibraryElementBase;
@@ -24,10 +24,12 @@ public:
     virtual void serializePreload(Archive& ar) {}
 	virtual void fixNames() { updateStringList(); }
 
+    // from ContentUser:
     void preloadContent();
     void loadContent();
     void saveContent();
     void unloadContent();
+    // ^^^
 
     const char* name() const;
     const char* contentGroup() const;

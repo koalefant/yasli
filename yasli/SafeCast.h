@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/Errors.h"
+#include "yasli/Assert.h"
 
 template<class _Dest, class _Source>
 _Dest safe_cast(_Source source){

@@ -2,7 +2,7 @@
 
 #include "yasli/EnumDescription.h"
 #include "yasli/Archive.h"
-#include "utils/MemoryWriter.h"
+#include "yasli/MemoryWriter.h"
 
 void EnumDescription::add(int value, const char* name)
 {

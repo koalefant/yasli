@@ -3,7 +3,7 @@
 #include <wx/gdicmn.h> // wxRect
 #include <wx/bitmap.h>
 #include "yasli/TypeID.h"
-#include "utils/sigslot.h"
+#include "yasli/sigslot.h"
 
 class wxDC;
 class wxWindow;

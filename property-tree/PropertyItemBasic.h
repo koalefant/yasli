@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include "yasli/Serializer.h"
-#include "utils/StringList.h"
+#include "yasli/StringList.h"
 #include "PropertyItem.h"
 
 class PropertyItemStruct : public PropertyItem{

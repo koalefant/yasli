@@ -16,10 +16,12 @@
 #include "yasli/TextOArchive.h"
 
 #include "yasli/TypesFactory.h"
-#include "utils/MemoryWriter.h"
+#include "yasli/MemoryWriter.h"
 
 TESTO_BEGIN()
 
+
+#pragma warning(disable: 4101)
 
 /*{{{*/
 enum TestEnum{

@@ -1,7 +1,7 @@
 #pragma once
 #include <wx/scrolwin.h>
-#include "utils/sigslot.h"
-#include "utils/FrozenSignal.h"
+#include "yasli/sigslot.h"
+#include "yasli/FrozenSignal.h"
 #include "yasli/Serializer.h"
 #include "PropertyItem.h"
 
