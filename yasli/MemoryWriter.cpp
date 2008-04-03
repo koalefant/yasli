@@ -96,6 +96,11 @@ MemoryWriter& MemoryWriter::operator<<(signed char value)
 
 MemoryWriter& MemoryWriter::operator<<(float value)
 {
+#ifdef WIN32
+	char buf[_CVTBUFSIZE];
+	_gcvt_s(buf, double(value), 8);
+	write(buf);
+#else
     int point = 0;
     int sign = 0;
     const char* buf = fcvt(double(value), 5, &point, &sign);
@@ -104,13 +109,8 @@ MemoryWriter& MemoryWriter::operator<<(float value)
         write("NAN");
     }
     else{
-        if(sign != 0){
+        if(sign != 0)
             write("-");
-            ASSERT(value < 0.00001f);
-        }
-        else{
-            ASSERT(value > -0.00001f);
-        }
         if(point <= 0){
             write("0.");
             while(point < 0){
@@ -126,6 +126,7 @@ MemoryWriter& MemoryWriter::operator<<(float value)
             operator<<(buf + point);
         }
     }
+#endif
     return *this;
 }
 

@@ -61,12 +61,12 @@ const char* TextOArchive::c_str() const
 
 void TextOArchive::openBracket()
 {
-    *buffer_ << "(\n";
+	*buffer_ << "{\n";
 }
 
 void TextOArchive::closeBracket()
 {
-    *buffer_ << ")\n";
+	*buffer_ << "}\n";
 }
 
 void TextOArchive::openContainerBracket()
