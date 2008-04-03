@@ -5,6 +5,38 @@
 #include "yasli/TypesFactory.h"
 
 template<class T>
+class SharedPtrSerializationImpl : public PointerSerializationInterface
+{
+public:
+	SharedPtrSerializationImpl(SharedPtr<T>& ptr)
+	: ptr_(ptr)
+	{}
+
+	TypeID type() const{
+		if(ptr_)
+			return TypeID::get(ptr_.get());
+		else
+			return TypeID();
+	}
+	void create(TypeID type) const{
+		ASSERT(!ptr_ || ptr_->refCount() == 1);
+		ptr_.set(ClassFactory<T>::the().create(type));
+	}
+	TypeID baseType() const{ return TypeID::get<T>(); }
+	virtual Serializer serializer() const{
+		ASSERT(ptr_);
+		return Serializer(*ptr_);
+	}
+	void* get() const{
+		return reinterpret_cast<void*>(ptr_.get());
+	}
+
+protected:
+	mutable SharedPtr<T>& ptr_;
+};
+
+
+template<class T>
 class SerializeableSharedPtr : public SharedPtr<T>{
 public:
     typedef SharedPtr<T> Super;
@@ -57,5 +89,5 @@ public:
 template<class T>
 bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name)
 {
-    return ar(static_cast<SerializeableSharedPtr<T>&>(ptr), name);
+	return ar(SharedPtrSerializationImpl<T>(ptr), name);
 }

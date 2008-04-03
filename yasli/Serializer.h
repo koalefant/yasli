@@ -157,3 +157,15 @@ private:
 	std::size_t size_;
 };/*}}}*/
 
+class PointerSerializationInterface
+{
+public:
+	virtual TypeID type() const = 0;
+	virtual void create(TypeID type) const = 0;
+	virtual TypeID baseType() const = 0;
+	virtual Serializer serializer() const = 0;
+	virtual void* get() const = 0;
+	
+	void serialize(Archive& ar);
+};
+

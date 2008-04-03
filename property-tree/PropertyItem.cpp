@@ -544,7 +544,8 @@ public:
 		rect.y += 3;
 		rect.height -= 5;
 		wxTextCtrl::Create(context.tree, wxID_ANY, wxT(""), rect.GetPosition(), rect.GetSize(), wxTE_PROCESS_ENTER | wxBORDER_NONE);
-        SetValue(wxString(field->toString().c_str(), wxConvUTF8));
+		// XXX: UTF8
+        SetValue(wxStringFromUTF8(field->toString().c_str()));
         SetFocus();
 		SelectAll();
     }
@@ -723,8 +724,8 @@ void PropertyItemField::redraw(wxDC& dc, const ViewContext& context) const
 	*/
 
 	dc.SetClippingRegion(fieldTextRect);
-    dc.DrawLabel(wxString(toString().c_str(), wxConvUTF8), wxBitmap(),
-                 fieldTextRect, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+	wxString label(wxStringFromUTF8(toString().c_str()));
+    dc.DrawLabel(label, wxBitmap(), fieldTextRect, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 	dc.DestroyClippingRegion();
 
     PropertyWithButtons::redraw(dc, context, rects);

@@ -8,6 +8,15 @@
 class wxDC;
 class wxWindow;
 
+inline wxString wxStringFromUTF8(const char* utf8_str)
+{
+#if WX_USE_UNICODE
+	return wxString(utf8_str, wxConvUTF8);
+#else
+	return wxString(wxConvUTF8.cMB2WC(utf8_str), *wxConvCurrent);
+#endif
+}
+
 struct PropertyItemRects;
 class PropertyItem;
 struct PropertyFilter{
@@ -344,6 +353,9 @@ public:
     bool hasElement(TypeID typeID) const;
     void addElement(TypeID typeID, PropertyItem* element);
     const PropertyItem* findElement(TypeID type) const;
+
+	//typedef std::vector<SharedPtr<PropertyItem> > DerivedTypes;
+    //typedef std::map<TypeID, DerivedTypes> DerivedTypesByBase;
 
     typedef std::map<TypeID, SharedPtr<PropertyItem> > ElementsByType;
 

@@ -61,6 +61,7 @@ public:
 
     virtual bool operator()(const Serializer& ser, const char* name = "") { return false; }
     virtual bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
+	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "");
 
     // templated switch
     template<class T>
