@@ -1,4 +1,4 @@
-//#include "StdAfx.h"
+#include "StdAfx.h"
 #include <wx/app.h>
 #include "PropertyEdit.h"
 #include "property-tree/PropertyDialog.h"

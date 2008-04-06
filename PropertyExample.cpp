@@ -1,7 +1,7 @@
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
 #include "yasli/Files.h"
-#include "PropertyEdit.h"
+#include "property-tree/PropertyEdit.h"
 #include "TestData.h"
 
 int main(int argc, char** argv)

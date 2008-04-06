@@ -31,7 +31,7 @@ if(wxWidgets_FOUND)
 
     add_subdirectory(property-tree)
 
-    set(SOURCES "PropertyExample.cpp" "TestData.h" "PropertyEdit.cpp" "PropertyEdit.h")
+    set(SOURCES "PropertyExample.cpp" "TestData.h")
     add_executable("property-example" ${SOURCES})
     set_target_properties("property-example" PROPERTIES DEBUG_POSTFIX "-debug")
     target_link_libraries("property-example" "property-tree" ${wxWidgets_LIBRARIES})

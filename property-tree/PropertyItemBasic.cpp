@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "yasli/Archive.h"
 #include <wx/combobox.h>
 #include <wx/combo.h>
 #include <wx/listctrl.h>
@@ -168,6 +169,40 @@ void wxListViewComboPopup::OnComboDoubleClick()
 {
 }
 
+// ---------------------------------------------------------------------------
+
+void PropertyItemBool::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
+
+// ---------------------------------------------------------------------------
+
+void PropertyItemInt::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
+
+// ---------------------------------------------------------------------------
+
+void PropertyItemLong::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
+
+// ---------------------------------------------------------------------------
+
+void PropertyItemFloat::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
+
+// ---------------------------------------------------------------------------
+
+void PropertyItemString::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
 
 // ---------------------------------------------------------------------------
 
@@ -202,6 +237,11 @@ void PropertyItemStringListStatic::fromString(const char* str)
     value_ = str;
 }
 
+void PropertyItemStringListStatic::serializeValue(Archive& ar)
+{
+    ar(value_, "");
+}
+
 REGISTER_PROPERTY_ITEM(StringListStaticValue, PropertyItemStringListStatic)
 
 // ---------------------------------------------------------------------------
@@ -214,6 +254,11 @@ std::string PropertyItemStringList::toString() const
 void PropertyItemStringList::fromString(const char* str)
 {
     value_ = str;
+}
+
+void PropertyItemStringList::serializeValue(Archive& ar)
+{
+    ar(value_, "");
 }
 
 REGISTER_PROPERTY_ITEM(StringListValue, PropertyItemStringList)

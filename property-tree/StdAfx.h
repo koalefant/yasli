@@ -10,6 +10,8 @@
 # pragma warning(disable: 4250)
 #endif
 
+//#include <wx/wx.h>
+
 #include "yasli/Pointers.h"
 #include "yasli/Errors.h"
 #include "yasli/SafeCast.h"

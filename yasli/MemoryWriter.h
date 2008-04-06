@@ -26,9 +26,11 @@ public:
     // String interface (after this calls '\0' is always written)
     MemoryWriter& operator<<(int value);
     MemoryWriter& operator<<(long value);
+    MemoryWriter& operator<<(unsigned long value);
     MemoryWriter& operator<<(unsigned int value);
     MemoryWriter& operator<<(__int64 value);
     MemoryWriter& operator<<(float value);
+	MemoryWriter& operator<<(double value);
     MemoryWriter& operator<<(signed char value);
     MemoryWriter& operator<<(unsigned char value);
     MemoryWriter& operator<<(char value);

@@ -158,7 +158,7 @@ PropertyItem* PropertyItem::addAfter(PropertyItem* newChild, PropertyItem* after
 	return newChild;
 }
 
-PropertyItem* PropertyItem::replace(PropertyItem* item, PropertyItem* withItem)
+PropertyItem* PropertyItem::replace(PropertyItem* item, PropertyItem* withItem, bool swapChildren)
 {
 	iterator it = std::find(children_.begin(), children_.end(), item);
 	ASSERT(it != children_.end());
@@ -166,7 +166,8 @@ PropertyItem* PropertyItem::replace(PropertyItem* item, PropertyItem* withItem)
 	item->setParent(0);
 	*it = withItem;
 	withItem->setParent(this);
-	withItem->swapChildrenWith(item);
+	if(swapChildren)
+		withItem->swapChildrenWith(item);
 	withItem->assignStateFrom(item);    
     return withItem;
 }
@@ -184,6 +185,12 @@ void PropertyItem::clear()
     children_.clear();
 }
 
+void PropertyItem::serializeValue(Archive& ar)
+{
+	ar(type_, "");
+	ar(children_, "");
+}
+
 void PropertyItem::serialize(Archive& ar)
 {
     if(ar.filter(SERIALIZE_STATE)){
@@ -197,7 +204,18 @@ void PropertyItem::serialize(Archive& ar)
         }
     }
     if(ar.filter(SERIALIZE_CONTENT)){
-        ar(children_, "children");
+		ar(name_, "");
+		//ar(label_, "");
+		//ar(type_, "");
+		serializeValue(ar);
+		if(ar.isInput() && !children_.empty())
+		{
+			Children::iterator it;
+			for(it = children_.begin(); it != children_.end(); ++it){
+				PropertyItem* child = *it;
+				child->setParent(this);
+			}
+		}
     }
 }
 
@@ -939,6 +957,13 @@ bool PropertyItemContainer::onButton(int index, const ViewContext& context)
 {
     onMenuAddElement(context.tree);
 	return true;
+}
+
+void PropertyItemContainer::serializeValue(Archive& ar)
+{
+	ar(type_, "");
+	ar(childrenType_, "");
+	ar(children_, "");
 }
 
 SERIALIZATION_DERIVED_TYPE(PropertyItem, PropertyItemContainer, "Container")

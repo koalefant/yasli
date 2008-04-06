@@ -40,6 +40,7 @@ public:
 	bool activate(const ViewContext& context);
 
 	int stateIndex() const{ return value_ ? 1 : 0; }
+	void serializeValue(Archive& ar);
     PROPERTY_ITEM_CLONE_IMPL(PropertyItemBool)
 	PROPERTY_ITEM_ASSIGN_IMPL(bool)
 protected:
@@ -61,6 +62,7 @@ public:
 	std::string toString() const{ return value_; }
     void fromString(const char* str){ value_ = str; }
 
+	void serializeValue(Archive& ar);
 	PROPERTY_ITEM_CLONE_IMPL(PropertyItemString)
 	PROPERTY_ITEM_ASSIGN_IMPL(std::string)
 protected:
@@ -90,6 +92,7 @@ public:
     void fromString(const char* str){
         value_ = atof(str);
     }
+	void serializeValue(Archive& ar);
 	PROPERTY_ITEM_CLONE_IMPL(PropertyItemFloat)
 	PROPERTY_ITEM_ASSIGN_IMPL(float)
 protected:
@@ -116,6 +119,7 @@ public:
     void fromString(const char* str){
 		value_ = atoi(str);
 	}
+	void serializeValue(Archive& ar);
     PROPERTY_ITEM_CLONE_IMPL(PropertyItemInt)
 	PROPERTY_ITEM_ASSIGN_IMPL(int)
 protected:
@@ -142,6 +146,7 @@ public:
     void fromString(const char* str){
 		value_ = atoi(str);
 	}
+	void serializeValue(Archive& ar);
 	PROPERTY_ITEM_CLONE_IMPL(PropertyItemLong)
 	PROPERTY_ITEM_ASSIGN_IMPL(long)
 protected:
@@ -187,6 +192,7 @@ public:
     const StringListStaticValue& value() const{ return value_; }
     void getStringList(StringList& out) const{ out = value_.stringList(); }
     int index() const{ return value_.index(); }
+	void serializeValue(Archive& ar);
     PROPERTY_ITEM_CLONE_IMPL(PropertyItemStringListStatic)
 	PROPERTY_ITEM_ASSIGN_IMPL(StringListStaticValue)
 protected:
@@ -224,6 +230,7 @@ public:
     const StringListValue& value() const{ return value_; }
     void getStringList(StringList& out) const{ out = value_.stringList(); }
     int index() const{ return value_.index(); }
+	void serializeValue(Archive& ar);
     PROPERTY_ITEM_CLONE_IMPL(PropertyItemStringList)
 	PROPERTY_ITEM_ASSIGN_IMPL(StringListValue)
 protected:

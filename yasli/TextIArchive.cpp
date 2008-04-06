@@ -21,6 +21,20 @@ TextIArchive::~TextIArchive()
     reader_ = 0;
 }
 
+void TextIArchive::openFromMemory(char* buffer, size_t length, bool free)
+{
+	if(buffer)
+		reader_ = new MemoryReader(buffer, length, free);
+
+	token_ = Token(reader_->begin(), reader_->begin());
+	stack_.clear();
+
+	stack_.push_back(Level());
+	readToken();
+	putToken();
+	stack_.back().start = token_.end();
+}
+
 void TextIArchive::open(const char* filename)
 {
     if(std::FILE* file = std::fopen(filename, "rb")){
@@ -43,23 +57,19 @@ void TextIArchive::open(const char* filename)
         }
         std::fclose(file);
 
-        if(buffer)
-            reader_ = new MemoryReader(buffer, fileSize, true);
-
-        token_ = Token(reader_->begin(), reader_->begin());
-        filename_ = filename;
-        stack_.clear();
-
-        stack_.push_back(Level());
-		readToken();
-		putToken();
-        stack_.back().start = token_.end();
+		filename_ = filename;
+		openFromMemory((char*)buffer, fileSize, true);
     }
     else{
         MemoryWriter msg;
         msg << "Unable to open file for reading: " << filename;
         RAISE(ErrorRuntime(msg.c_str()));
     }
+}
+
+bool TextIArchive::isOpen() const
+{
+	return reader_ != 0;
 }
 
 void TextIArchive::close()
@@ -470,12 +480,12 @@ bool TextIArchive::operator()(int& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(long& value, const char* name)
+bool TextIArchive::operator()(unsigned int& value, const char* name)
 {
     if(findName(name)){
         readToken();
         checkValueToken();
-        value = strtol(token_.begin(), 0, 10);
+        value = strtoul(token_.begin(), 0, 10);
         return true;
     }
     return false;
@@ -502,6 +512,21 @@ bool TextIArchive::operator()(float& value, const char* name)
         checkValueToken();
 #ifdef _MSC_VER
         value = float(std::atof(token_.str().c_str()));
+#else
+        value = std::strtof(token_.begin(), 0);
+#endif
+        return true;
+    }
+    return false;
+}
+
+bool TextIArchive::operator()(double& value, const char* name)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+#ifdef _MSC_VER
+        value = std::atof(token_.str().c_str());
 #else
         value = std::strtof(token_.begin(), 0);
 #endif

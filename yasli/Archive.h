@@ -51,9 +51,12 @@ public:
     virtual bool operator()(bool& value, const char* name = "")          { return false; }
     virtual bool operator()(std::string& value, const char* name = "")   { return false; }
     virtual bool operator()(float& value, const char* name = "")         { return false; }
+    virtual bool operator()(double& value, const char* name = "")         { return false; }
     virtual bool operator()(int& value, const char* name = "")           { return false; }
-    virtual bool operator()(long& value, const char* name = "")          { return false; }
     virtual bool operator()(__int64& value, const char* name = "")       { return false; }
+
+	bool operator()(long& value, const char* name = "") { return operator()(*reinterpret_cast<int*>(&value), name); }
+	bool operator()(unsigned long& value, const char* name = "") { return operator()(*reinterpret_cast<unsigned int*>(&value), name); }
 
     virtual bool operator()(unsigned char& value, const char* name = "") { return false; }
     virtual bool operator()(signed char& value, const char* name = "")   { return false; }

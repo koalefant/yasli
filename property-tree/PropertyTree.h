@@ -73,6 +73,10 @@ protected:
     void onKeyDown(wxKeyEvent& event);
     void onCancelControl(wxCommandEvent& event);
 
+	void onMenuCopy(PropertyItem* item);
+	void onMenuPaste(PropertyItem* item);
+	bool canPasteOver(PropertyItem* item);
+
     void initViewContext(PropertyItem::ViewContext& context, PropertyItem* forItem = 0);
 	PropertyFilter& currentFilter();
 

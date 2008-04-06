@@ -1,13 +1,19 @@
 #include "StdAfx.h"
+
 #include <wx/dc.h>
 #include <wx/dcbuffer.h>
 #include <wx/dcclient.h>
 #include <wx/settings.h>
+#include <wx/clipbrd.h>
+
+
 #include "PropertyTree.h"
 #include "PropertyOArchive.h"
 #include "PropertyIArchive.h"
 #include "PopupMenu.h"
 
+#include "yasli/TextOArchive.h"
+#include "yasli/TextIArchive.h"
 
 PropertyItem* PropertyItemPath::get(PropertyItem& root) const
 {
@@ -403,6 +409,112 @@ void PropertyTree::onCancelControl(wxCommandEvent& event)
     cancelControl(true);
 }
 
+static wxDataFormat propertyTreeDataFormat()
+{
+	return wxDataFormat(wxT("YasliPropertyTree"));
+}
+
+class PropertyTreeDataObject : public wxDataObjectSimple
+{
+public:
+	PropertyTreeDataObject(PropertyItem* item = 0)
+	: wxDataObjectSimple(propertyTreeDataFormat())
+	, oa_(100, "")
+	{
+		if(item)
+		{
+			oa_.setFilter(PropertyItem::SERIALIZE_CONTENT);
+			SharedPtr<PropertyItem> ptr(item);
+			oa_(ptr, "single");
+
+			SetData(oa_.size(), oa_.c_str());
+		}
+	}
+	SharedPtr<PropertyItem> createTree()
+	{
+		SharedPtr<PropertyItem> ptr;
+		if(ia_.isOpen()){
+			ia_.setFilter(PropertyItem::SERIALIZE_CONTENT);
+			ia_(ptr, "single");
+		}
+		return ptr;				
+	}
+	const char* asText() const{ return oa_.c_str(); }
+
+	// from wxDataObjectSimple:
+    size_t GetDataSize() const
+    {
+		return oa_.size();
+	}
+    bool GetDataHere(void* buf) const
+	{
+		memcpy(buf, oa_.c_str(), oa_.size());
+		return true;
+	}
+    bool SetData(size_t len, const void* buf)
+    {
+		char* buffer = new char[len];
+		memcpy(buffer, buf, len);
+		ia_.openFromMemory(buffer, len, true);
+		return true;
+	}
+	// ^^^
+protected:
+	TextOArchive oa_;
+	TextIArchive ia_;
+};
+
+void PropertyTree::onMenuCopy(PropertyItem* item)
+{
+	if(wxTheClipboard->Open())
+	{
+		wxDataObjectComposite* composite = new wxDataObjectComposite();
+		PropertyTreeDataObject* propertyTreeData = new PropertyTreeDataObject(item);
+		composite->Add( propertyTreeData, true );
+		composite->Add( new wxTextDataObject( wxString(propertyTreeData->asText(), wxConvUTF8) ) );
+		wxTheClipboard->SetData( composite );
+		wxTheClipboard->Flush();
+		wxTheClipboard->Close();
+	}
+}
+
+bool PropertyTree::canPasteOver(PropertyItem* item)
+{
+	PropertyTreeDataObject dataObject;			
+	SharedPtr<PropertyItem> root;
+	if(wxTheClipboard->Open()) {
+		if(wxTheClipboard->IsSupported(propertyTreeDataFormat())) {
+			if(!wxTheClipboard->GetData(dataObject))
+				return false;				
+		}
+		wxTheClipboard->Close();
+	}
+	root = dataObject.createTree();
+	if(root){
+		return TypeID::get(root.get()) == TypeID::get(item) && root->type() == item->type();
+	}
+	return false;
+}
+
+void PropertyTree::onMenuPaste(PropertyItem* item)
+{
+	SharedPtr<PropertyItem> root;
+	if(wxTheClipboard->Open()) {
+		if(wxTheClipboard->IsSupported(propertyTreeDataFormat())) {
+			PropertyTreeDataObject dataObject;			
+			if(wxTheClipboard->GetData(dataObject))
+				root = dataObject.createTree();
+		}
+		wxTheClipboard->Close();
+	}
+
+	if(root){
+		PropertyItem* parent = item->parent();
+		parent->replace(item, root, false);
+		commitChange(parent);
+	}
+}
+
 void PropertyTree::spawnContextMenu(const PropertyItem::ViewContext& context, PropertyItem* item)
 {
 	::PopupMenu menu;
@@ -411,8 +523,12 @@ void PropertyTree::spawnContextMenu(const PropertyItem::ViewContext& context, Pr
 	if(!root.empty())
 		root.addSeparator();
 	item->onContextMenu(menu, this, PropertyItem::MENU_SECTION_CLIPBOARD);
-	menu.root().add("Copy").setSensitive(false);
-	menu.root().add("Paste").setSensitive(false);
+	menu.root().add("Copy", item)
+		.connect(this, &PropertyTree::onMenuCopy);
+	menu.root().add("Paste", item)
+		.connect(this, &PropertyTree::onMenuPaste)
+		.setSensitive(canPasteOver(item));
+		
     item->onContextMenu(menu, this, PropertyItem::MENU_SECTION_DESTRUCTIVE);
     menu.spawn(this);
 }

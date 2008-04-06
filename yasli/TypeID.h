@@ -23,6 +23,7 @@ public:
 
     TypeID(const TypeID& original)
     : typeInfo_(original.typeInfo_)
+	, name_(original.name_)
     {
     }
 
@@ -51,7 +52,14 @@ public:
     bool registered() const;
 
     bool operator==(const TypeID& rhs) const{
-        return typeInfo_ == rhs.typeInfo_;
+		if(typeInfo_ && rhs.typeInfo_)
+			return typeInfo_ == rhs.typeInfo_;
+		else
+		{
+			const char* name1 = name();
+			const char* name2 = rhs.name();
+			return strcmp(name1, name2) == 0;
+		}
     }
     bool operator!=(const TypeID& rhs) const{
         return typeInfo_ != rhs.typeInfo_;
@@ -70,6 +78,7 @@ public:
     const type_info* typeInfo() const{ return typeInfo_; }
 private:
     const type_info* typeInfo_;
+	std::string name_;
 };
 
 template<class T>

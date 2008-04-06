@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="wxWidgets-mswu"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(WXWIN)\lib\vc_lib-mswu\mswu\;$(WXWIN)\include"
+	/>
+	<Tool
+		Name="VCLibrarianTool"
+		AdditionalDependencies="wxmsw28u_core.lib wxbase28u.lib comctl32.lib rpcrt4.lib"
+		AdditionalLibraryDirectories="&quot;$(WXWIN)\lib\vc_lib-mswu&quot;"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories=""
+	/>
+	<UserMacro
+		Name="WXWIN"
+		Value="$(SolutionDir)wxWidgets"
+	/>
+</VisualStudioPropertySheet>

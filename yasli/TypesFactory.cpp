@@ -18,7 +18,8 @@ TypeLibrary::TypeLibrary()
 
 const TypeDescription* TypeLibrary::find(TypeID typeID) const
 {
-    ASSERT(typeID);
+    if(!typeID)
+		return 0;
     TypeToDescriptionMap::const_iterator it = typeToDescriptionMap_.find(typeID);
     if(it != typeToDescriptionMap_.end())
         return it->second;
@@ -53,6 +54,8 @@ TypeID::TypeID(const char* name)
     const TypeDescription* description = TypeLibrary::the().findByName(name);
     if(description)
         *this = description->typeID();
+	else
+		name_ = name;
 }
 
 bool TypeID::registered() const{
@@ -71,8 +74,10 @@ const char* TypeID::name() const{
     const TypeDescription* description = TypeLibrary::the().find(*this);
     if(description)
         return description->name();
-    else
-        return "";
+    else if(typeInfo_)
+        return typeInfo_->name();
+	else
+		return name_.c_str();
 }
 
 bool serialize(Archive& ar, TypeID& typeID, const char* name)
@@ -80,6 +85,8 @@ bool serialize(Archive& ar, TypeID& typeID, const char* name)
     std::string typeName;
     if(ar.isOutput()){
         typeName = typeID.name();
+        return ar(typeName, name);
+		/*
         if(typeName == ""){
             MemoryWriter msg;
             if(typeID.typeInfo())
@@ -90,7 +97,7 @@ bool serialize(Archive& ar, TypeID& typeID, const char* name)
             return false;
         }
         else
-            return ar(typeName, name);
+		*/
     }
     else{
         if(ar(typeName, name)){

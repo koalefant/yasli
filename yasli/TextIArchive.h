@@ -12,14 +12,17 @@ public:
     ~TextIArchive();
 
     void open(const char* filename);
+	void openFromMemory(char* buffer, size_t length, bool free = false);
+	bool isOpen() const;
     void close();
 
     // virtuals:
     bool operator()(bool& value, const char* name = "");
     bool operator()(std::string& value, const char* name = "");
     bool operator()(float& value, const char* name = "");
+    bool operator()(double& value, const char* name = "");
     bool operator()(int& value, const char* name = "");
-    bool operator()(long& value, const char* name = "");
+    bool operator()(unsigned int& value, const char* name = "");
 	bool operator()(__int64& value, const char* name = "");
 
     bool operator()(signed char& value, const char* name = "");

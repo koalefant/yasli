@@ -93,10 +93,11 @@ public:
 
     PropertyItem* add(PropertyItem* newChild);
     PropertyItem* addAfter(PropertyItem* newChild, PropertyItem* after);
-    PropertyItem* replace(PropertyItem* item, PropertyItem* withItem);
+    PropertyItem* replace(PropertyItem* item, PropertyItem* withItem, bool swapChildren = true);
     void remove(PropertyItem* item);
     void clear();
     void serialize(Archive& ar);
+	virtual void serializeValue(Archive& ar);
 
     struct ViewContext{
         ViewContext()
@@ -127,6 +128,7 @@ public:
 	void setLabel(const char* label){ label_ = label; }
     const char* label() const{ return label_.c_str(); }
     const char* name() const{ return name_.c_str(); }
+	TypeID type() const{ return type_; }
 
 
     virtual bool hasVisibleChildren() const{ return !children_.empty(); }
@@ -309,6 +311,7 @@ public:
     void onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
     // ^^^
 	void onElementContextMenu(PropertyItem* element, PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
+	void serializeValue(Archive& ar);
 protected:
     void onMenuAddElement(PropertyTree* tree);
     void onMenuRemoveAllElements(PropertyTree* tree);

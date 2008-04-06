@@ -48,7 +48,7 @@ bool exists(const char* fileName)
 bool isDirectory(const char* fileName)
 {
 #ifdef WIN32
-	DWORD attributes = GetFileAttributes(fileName);
+	DWORD attributes = GetFileAttributesA( fileName );
 	if(attributes == INVALID_FILE_ATTRIBUTES)
 		return false;
 	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
@@ -64,7 +64,7 @@ bool isDirectory(const char* fileName)
 bool remove(const char* fileName)
 {
 #ifdef WIN32
-	return DeleteFile(fileName) != FALSE;
+	return DeleteFileA( fileName ) != FALSE;
 #else
 	return unlink(fileName) == 0;
 #endif
@@ -86,7 +86,7 @@ bool createDirectory(const char* path)
         if(*p == PATH_SEPARATOR[0]){
             *p = '\0';
 #ifdef WIN32
-			if(!CreateDirectory(path, 0))
+			if(!CreateDirectoryA(path, 0))
 				return false;
 #else
             if(mkdir(path, mask) != 0)
@@ -98,7 +98,7 @@ bool createDirectory(const char* path)
     }
 
 #ifdef WIN32
-	return CreateDirectory(pathCopy, 0) != FALSE;
+	return CreateDirectoryA(pathCopy, 0) != FALSE;
 #else
     return mkdir(pathCopy, mask) == 0;
 #endif
@@ -154,7 +154,7 @@ bool createDirectoryForFile(const char* path)
 bool copy(const char* sourceFile, const char* destinationFile)
 {
 #ifdef WIN32
-	return CopyFile(sourceFile, destinationFile, FALSE) != FALSE;
+	return CopyFileA(sourceFile, destinationFile, FALSE) != FALSE;
 #else
     return system((std::string("cp \"") + sourceFile + "\" \"" + destinationFile + "\"").c_str()) == 0;
 #endif
@@ -171,16 +171,16 @@ public:
 	}
 	iteratorImpl(const char* path)
 	{
-		handle_ = FindFirstFile(path, &findData_);
+		handle_ = FindFirstFileA(path, &findData_);
 		if(handle_ == INVALID_HANDLE_VALUE)
 			return;
 		ASSERT(strcmp(findData_.cFileName, ".") == 0);
-		if(!FindNextFile(handle_, &findData_)){
+		if(!FindNextFileA(handle_, &findData_)){
 			handle_ = INVALID_HANDLE_VALUE;
 			return;
 		}
 		ASSERT(strcmp(findData_.cFileName, "..") == 0);
-		if(!FindNextFile(handle_, &findData_)){
+		if(!FindNextFileA(handle_, &findData_)){
 			handle_ = INVALID_HANDLE_VALUE;
 			return;
 		}
@@ -199,7 +199,7 @@ public:
 	bool next()
 	{
 		ASSERT(handle_ != INVALID_HANDLE_VALUE && "Incrementing bad Files::iterator");
-		if(!FindNextFile(handle_, &findData_)){
+		if(!FindNextFileA(handle_, &findData_)){
 			FindClose(handle_);
 			handle_ = INVALID_HANDLE_VALUE;
 			return false;
@@ -214,7 +214,7 @@ public:
 		return handle_ != INVALID_HANDLE_VALUE;
 	}
 
-	WIN32_FIND_DATA findData_;
+	WIN32_FIND_DATAA findData_;
 	HANDLE handle_;
 	DirectoryEntry entry_;
 

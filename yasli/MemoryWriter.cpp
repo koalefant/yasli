@@ -44,7 +44,7 @@ void MemoryWriter::realloc(std::size_t newSize)
 MemoryWriter& MemoryWriter::operator<<(int value)
 {
     // TODO: optimize
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%i", value);
     return operator<<((const char*)buffer);
 }
@@ -52,15 +52,23 @@ MemoryWriter& MemoryWriter::operator<<(int value)
 MemoryWriter& MemoryWriter::operator<<(long value)
 {
     // TODO: optimize
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%i", value);
+    return operator<<((const char*)buffer);
+}
+
+MemoryWriter& MemoryWriter::operator<<(unsigned long value)
+{
+    // TODO: optimize
+    char buffer[12];
+    sprintf(buffer, "%u", value);
     return operator<<((const char*)buffer);
 }
 
 MemoryWriter& MemoryWriter::operator<<(__int64 value)
 {
     // TODO: optimize
-    char buffer[22];
+    char buffer[24];
     sprintf(buffer, "%I64u", value);
     return operator<<((const char*)buffer);
 }
@@ -68,34 +76,35 @@ MemoryWriter& MemoryWriter::operator<<(__int64 value)
 MemoryWriter& MemoryWriter::operator<<(unsigned int value)
 {
     // TODO: optimize
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%u", value);
     return operator<<((const char*)buffer);
 }
 
 MemoryWriter& MemoryWriter::operator<<(char value)
 {
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%i", int(value));
     return operator<<((const char*)buffer);
 }
 
 MemoryWriter& MemoryWriter::operator<<(unsigned char value)
 {
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%i", int(value));
     return operator<<((const char*)buffer);
 }
 
 MemoryWriter& MemoryWriter::operator<<(signed char value)
 {
-    char buffer[11];
+    char buffer[12];
     sprintf(buffer, "%i", int(value));
     return operator<<((const char*)buffer);
 }
 
 MemoryWriter& MemoryWriter::operator<<(float value)
 {
+	ASSERT(!isnan(value));
 #ifdef WIN32
 	char buf[_CVTBUFSIZE];
 	_gcvt_s(buf, double(value), 8);
@@ -104,27 +113,54 @@ MemoryWriter& MemoryWriter::operator<<(float value)
     int point = 0;
     int sign = 0;
     const char* buf = fcvt(double(value), 5, &point, &sign);
-    if(isnan(value)){
-        //std::cout << " * WARNING: MemoryWriter, writing NAN float value!" << std::endl;
-        write("NAN");
+
+	if(sign != 0)
+        write("-");
+    if(point <= 0){
+        write("0.");
+        while(point < 0){
+            write("0");
+            ++point;
+        }
+        write(buf);
+        *position_ = '\0';
     }
     else{
-        if(sign != 0)
-            write("-");
-        if(point <= 0){
-            write("0.");
-            while(point < 0){
-                write("0");
-                ++point;
-            }
-            write(buf);
-            *position_ = '\0';
+        write(buf, point);
+        write(".");
+        operator<<(buf + point);
+    }
+#endif
+    return *this;
+}
+
+MemoryWriter& MemoryWriter::operator<<(double value)
+{
+	ASSERT(!isnan(value));
+#ifdef WIN32
+	char buf[_CVTBUFSIZE];
+	_gcvt_s(buf, value, 8);
+	write(buf);
+#else
+    int point = 0;
+    int sign = 0;
+    const char* buf = fcvt(value, 5, &point, &sign);
+
+    if(sign != 0)
+        write("-");
+    if(point <= 0){
+        write("0.");
+        while(point < 0){
+            write("0");
+            ++point;
         }
-        else{
-            write(buf, point);
-            write(".");
-            operator<<(buf + point);
-        }
+        write(buf);
+        *position_ = '\0';
+    }
+    else{
+        write(buf, point);
+        write(".");
+        operator<<(buf + point);
     }
 #endif
     return *this;

@@ -59,6 +59,11 @@ const char* TextOArchive::c_str() const
     return buffer_->c_str();
 }
 
+size_t TextOArchive::size() const
+{
+	return buffer_->size();
+}
+
 void TextOArchive::openBracket()
 {
 	*buffer_ << "{\n";
@@ -124,6 +129,14 @@ bool TextOArchive::operator()(float& value, const char* name)
     return true;
 }
 
+bool TextOArchive::operator()(double& value, const char* name)
+{
+    placeIndent();
+    placeName(name);
+    (*buffer_) << value << "\n";
+    return true;
+}
+
 bool TextOArchive::operator()(int& value, const char* name)
 {
     placeIndent();
@@ -132,7 +145,7 @@ bool TextOArchive::operator()(int& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(long& value, const char* name)
+bool TextOArchive::operator()(unsigned int& value, const char* name)
 {
     placeIndent();
     placeName(name);

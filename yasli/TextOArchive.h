@@ -15,16 +15,16 @@ public:
     void open(const char* fileName);
     void close();
 
-    const char* c_str() const;
-
-    
+    const char* c_str() const;    
+    size_t size() const;    
 
     // from Archive:
     bool operator()(bool& value, const char* name = "");
     bool operator()(std::string& value, const char* name = "");
     bool operator()(float& value, const char* name = "");
+    bool operator()(double& value, const char* name = "");
     bool operator()(int& value, const char* name = "");
-    bool operator()(long& value, const char* name = "");
+    bool operator()(unsigned int& value, const char* name = "");
     bool operator()(__int64& value, const char* name = "");
 
     bool operator()(char& value, const char* name = "");
@@ -37,10 +37,7 @@ public:
 	
     bool operator()(StringListStaticValue& value, const char* name = "");
     
-    template<class T>
-    bool operator()(T& value, const char* name = ""){
-        return Archive::operator()(value, name);
-    }
+	using Archive::operator();
 private:
     void openBracket();
     void closeBracket();
