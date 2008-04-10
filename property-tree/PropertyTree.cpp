@@ -87,7 +87,7 @@ PropertyTree::PropertyTree(wxWindow* parent, wxWindowID id, const wxPoint& pos, 
     signalChanged().connect(this, &PropertyTree::onChanged);
     
     wxScrolledWindow::Create(parent, id, pos, size,
-                             wxBORDER_NONE | wxTAB_TRAVERSAL, name);
+		wxBORDER_NONE | wxTAB_TRAVERSAL, name);
 	SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 }
 
@@ -280,7 +280,6 @@ void PropertyTree::onMouseClick(wxMouseEvent& event)
     
     wxPoint position = event.GetPosition(); //ScreenToClient(event.GetPosition());
 	position = CalcUnscrolledPosition(position);
-    std::cout << position.x << ", " << position.y << std::endl;
     root_.onMouseClick(position, event.ButtonDClick(), context);
 }
 
@@ -535,7 +534,6 @@ void PropertyTree::spawnContextMenu(const PropertyItem::ViewContext& context, Pr
 
 void PropertyTree::spawnInPlaceControl(const PropertyItem::ViewContext& context, PropertyWithControl* property)
 {
-    std::cout << "Spawning control..." << std::endl;
     cancelControl();
     spawnedControl_ = property->createControl(context);
 }

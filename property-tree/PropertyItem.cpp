@@ -294,12 +294,10 @@ bool PropertyItem::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext
         	if(activate(context))
         		return true;
         if(!doubleClick && inSelectionRect){
-            std::cout << "Selecting..." << std::endl;
             context.tree->select(this, true);
             return true;
         }
         else if((!doubleClick && inPlusRect) || (doubleClick && inTextRect)){
-            std::cout << "Toggling..." << std::endl;
             context.tree->toggle(this);
             return true;
         }
@@ -965,8 +963,113 @@ void PropertyItemContainer::serializeValue(Archive& ar)
 	ar(childrenType_, "");
 	ar(children_, "");
 }
+// ---------------------------------------------------------------------------
+
+PropertyItemPointer::PropertyItemPointer()
+: PropertyItem("")
+{
+}
+
+PropertyItemPointer::PropertyItemPointer(const PropertyItemPointer& original)
+: PropertyItem(original)
+, PropertyWithButtons(original)
+, derivedType_(original.derivedType_)
+{
+}
+
+PropertyItemPointer::PropertyItemPointer(const char* name, const PointerSerializationInterface& ser)
+: PropertyItem(name, ser.baseType())
+, derivedType_(ser.type())
+, factory_(ser.factory())
+{
+    #include "res/property_item_container_add.xpm"
+    static wxBitmap bitmap((const char* const *)property_item_container_add_xpm);
+    addButton(&bitmap);
+}
+
+void PropertyItemPointer::assignTo(const PointerSerializationInterface& ser) const
+{
+	if(derivedType_ != ser.type())
+	{
+		ser.create(derivedType_);
+	}
+}
+
+
+void PropertyItemPointer::redraw(wxDC& dc, const ViewContext& context) const
+{
+    PropertyItemRects rects;
+    calculateRects(context, rects);
+
+    PropertyItem::redraw(dc, context);
+
+    PropertyWithButtons::redraw(dc, context, rects);
+}
+
+bool PropertyItemPointer::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context)
+{
+    PropertyItemRects rects;
+    calculateRects(context, rects);
+
+	if(PropertyWithButtons::onMouseClick(pos, doubleClick, context, rects))
+        return true;
+	return PropertyItem::onMouseClick(pos, doubleClick, context);
+}
+
+void PropertyItemPointer::onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section)
+{
+    switch(section){
+    case MENU_SECTION_MAIN:
+		{
+        PopupMenuItem& replaceMenu = menu.root().add("Replace", tree);
+		replaceMenu.add("[ NULL ]", tree, -1)
+			.connect(this, &PropertyItemPointer::onMenuReplace);
+
+		int count = factory_->size();
+		for(int i = 0; i < count; ++i)
+		{
+			const TypeDescription* desc = factory_->descriptionByIndex(i);
+			if(desc)
+			{
+				replaceMenu.add(desc->name(), tree, i)
+					.connect(this, &PropertyItemPointer::onMenuReplace);
+			}
+		}
+
+        //.connect(this, &PropertyItemPointer::onMenuCreate);
+        return;
+		}
+    case MENU_SECTION_DESTRUCTIVE:
+        return;
+    default:
+		break;
+    }
+}
+
+void PropertyItemPointer::onMenuReplace(PropertyTree* tree, int derivedIndex)
+{
+	if(derivedIndex == -1)
+		derivedType_ = TypeID();
+	else
+		derivedType_ = factory_->descriptionByIndex(derivedIndex)->typeID();
+	tree->commitChange(this);
+}
+
+bool PropertyItemPointer::onButton(int index, const ViewContext& context)
+{
+	context.tree->spawnContextMenu(context, this);
+	return true;
+}
+
+void PropertyItemPointer::serializeValue(Archive& ar)
+{
+	ar(type_, "");
+	ar(derivedType_, "");
+	ar(children_, "");
+}
 
 SERIALIZATION_DERIVED_TYPE(PropertyItem, PropertyItemContainer, "Container")
+SERIALIZATION_DERIVED_TYPE(PropertyItem, PropertyItemPointer, "Pointer")
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemStruct)
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemFileSelector)
 SERIALIZATION_FORCE_DERIVED_TYPE(PropertyItem, PropertyItemLibrarySelector)

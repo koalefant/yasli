@@ -32,7 +32,7 @@ bool Serializer::operator()(Archive& ar, const char* name) const{
 
 // ---------------------------------------------------------------------------
 
-void PointerSerializationInterface::serialize(Archive& ar)
+void PointerSerializationInterface::serialize(Archive& ar) const
 {
     TypeID baseTypeID = baseType();
     TypeID oldTypeID = type();

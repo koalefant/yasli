@@ -80,14 +80,10 @@ void PopupMenu::generateMenu(wxMenu* menu, wxMenu* subMenu, PopupMenuItem& item)
 
 void PopupMenu::onMenuEvent(wxCommandEvent& event)
 {
-    std::cout << "Handling menu..." << std::endl;
     int id = event.GetId();
     int index = id - ID_FIRST_COMMAND;
     ASSERT(index >= 0 && index < int(handlers_.size()));
     PopupMenuItem* item = handlers_[index];
     if(item)
         item->invoke();
-    else{
-        std::cout << "WARNING: PopupMenu: No handler found..." << std::endl;
-    }
 }

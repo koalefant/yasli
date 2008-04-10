@@ -36,7 +36,6 @@ public:
         type_=  TypeID::get<T>();
         object_ = (void*)(&object);
 		size_ = sizeof(T);
-        ASSERT(object_);
         serializeFunc_ = &Serializer::serializeRaw<T>;
     }
 
@@ -45,7 +44,6 @@ public:
         type_ =  type;
         object_ = (void*)(&object);
 		size_ = sizeof(T);
-        ASSERT(object_);
         serializeFunc_ = &Serializer::serializeRaw<T>;
     }
 
@@ -157,6 +155,7 @@ private:
 	std::size_t size_;
 };/*}}}*/
 
+class ClassFactoryBase;
 class PointerSerializationInterface
 {
 public:
@@ -165,7 +164,8 @@ public:
 	virtual TypeID baseType() const = 0;
 	virtual Serializer serializer() const = 0;
 	virtual void* get() const = 0;
+	virtual ClassFactoryBase* factory() const = 0;
 	
-	void serialize(Archive& ar);
+	void serialize(Archive& ar) const;
 };
 

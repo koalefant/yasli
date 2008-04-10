@@ -169,7 +169,7 @@ public:
 class PropertyItemStringListStatic : public PropertyItemStringListBase{
 public:
     PropertyItemStringListStatic()
-    : PropertyItemStringListBase("") {}
+	: PropertyItemStringListBase("", TypeID::get<StringListStaticValue>()) {}
 
 
     PropertyItemStringListStatic(const char* name, const Serializer& zer)
@@ -203,7 +203,7 @@ protected:
 class PropertyItemStringList : public PropertyItemStringListBase{
 public:
     PropertyItemStringList()
-    : PropertyItemStringListBase("") {}
+	: PropertyItemStringListBase("", TypeID::get<StringListValue>()) {}
 
     PropertyItemStringList(const char* name, TypeID type)
     : PropertyItemStringListBase(name, type)

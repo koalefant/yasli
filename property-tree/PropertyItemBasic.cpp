@@ -2,7 +2,7 @@
 #include "yasli/Archive.h"
 #include <wx/combobox.h>
 #include <wx/combo.h>
-#include <wx/listctrl.h>
+#include <wx/listbox.h>
 #include "yasli/TypesFactory.h"
 #include "PropertyItemFactory.h"
 #include "PropertyItemBasic.h"
@@ -10,11 +10,11 @@
 
 class PropertyControlCombo;
 
-class wxListViewComboPopup : public wxListView,
-                             public wxComboPopup
+class wxListBoxComboPopup : public wxListBox,
+                            public wxComboPopup
 {
 public:
-    wxListViewComboPopup(PropertyControlCombo* control)
+    wxListBoxComboPopup(PropertyControlCombo* control)
     : selfSelecting_(false)
     , control_(control)
     {
@@ -24,26 +24,23 @@ public:
         wxPoint pt = event.GetPosition();
 		selfSelecting_ = true;
 
-        int flags = wxLIST_HITTEST_ONITEMRIGHT;
-        int index = HitTest(pt, flags, 0);
+        int index = HitTest(pt);
         if(index != wxNOT_FOUND){
-            if((flags & (wxLIST_HITTEST_ONITEM | wxLIST_HITTEST_ONITEMRIGHT)) != 0){
-                wxListView::Select(index);
-                index_ = index;
-            }
+            wxListBox::Select(index);
+            index_ = index;
         }
 		selfSelecting_ = false;
     }
     void onMouseClick(wxMouseEvent& event);
-	void onItemSelected(wxListEvent& event);
+	void onItemSelected(wxCommandEvent& event);	
    
     // from wxComboPopup
     void Init(){
         index_ = -1;
     }
     bool Create(wxWindow* parent){
-        return wxListView::Create(parent, 1, wxPoint(0, 0), wxDefaultSize,
-                                  wxLC_LIST | wxLC_SINGLE_SEL | wxSIMPLE_BORDER);
+        return wxListBox::Create(parent, 1, wxPoint(0, 0), wxDefaultSize, 0, 0,
+                                 wxLB_NEEDED_SB | wxLB_SINGLE | wxSIMPLE_BORDER);
     }
     wxWindow *GetControl(){ return this; }
     void OnDismiss();
@@ -51,16 +48,16 @@ public:
 
     void SetStringValue(const wxString& s){
 		selfSelecting_ = true;
-        int n = wxListView::FindItem(-1, s);
-        if(n >= 0 && n < wxListView::GetItemCount())
-            wxListView::Select(n);
+        int n = wxListBox::FindString(s);
+        if(n >= 0 && n < int(wxListBox::GetCount()))
+            wxListBox::Select(n);
 		selfSelecting_ = false;
     }
 
     wxString GetStringValue() const
     {
         if ( index_ >= 0 )
-            return wxListView::GetItemText(index_);
+            return GetString(index_);
         return wxEmptyString;
     }
 protected:
@@ -71,21 +68,19 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(wxListViewComboPopup, wxListView)
-    EVT_MOTION(wxListViewComboPopup::onMouseMove)
-    EVT_LEFT_UP(wxListViewComboPopup::onMouseClick)
-    EVT_LIST_ITEM_SELECTED(wxID_ANY, wxListViewComboPopup::onItemSelected)
+BEGIN_EVENT_TABLE(wxListBoxComboPopup, wxListBox)
+    EVT_MOTION(wxListBoxComboPopup::onMouseMove)
+    EVT_LEFT_UP(wxListBoxComboPopup::onMouseClick)
+    EVT_LISTBOX(wxID_ANY, wxListBoxComboPopup::onItemSelected)
 END_EVENT_TABLE()
 
 class PropertyControlCombo : public wxComboCtrl, public PropertyControl{
 public:
-    PropertyControlCombo(const PropertyItem::ViewContext& context,
-                        PropertyItemStringListBase* item)
+    PropertyControlCombo(const PropertyItem::ViewContext& context, PropertyItemStringListBase* item)
     : wxComboCtrl()
     , PropertyControl(item, context.tree)
     {
-
-        wxListViewComboPopup* popupCtrl = new wxListViewComboPopup(this);
+        wxListBoxComboPopup* popupCtrl = new wxListBoxComboPopup(this);
         SetPopupControl(popupCtrl);
 
         PropertyItemRects rects;
@@ -95,22 +90,20 @@ public:
 		rect.width += item->calculateButtonsRect(context, rects).width / item->buttonsCount();
 		wxComboCtrl::Create(context.tree, wxID_ANY, wxT(""),
 			                rect.GetPosition(), rect.GetSize(), wxCB_DROPDOWN | wxCB_READONLY);
-		//SetSize();
 
         StringList::iterator it;
         StringList values;
         item->getStringList(values);
         FOR_EACH(values, it){
             const char* str = it->c_str();
-            popupCtrl->InsertItem(popupCtrl->GetItemCount(), wxString(str, wxConvUTF8));
+            popupCtrl->Append(wxString(str, wxConvUTF8));
         }
+		SetPopupMaxHeight(popupCtrl->GetCount() * popupCtrl->GetCharHeight() + 2);
 
-        //popupCtrl->SetSelection(item->index());
-		wxString text(item->toString().c_str(), wxConvUTF8);
+		wxString text(wxStringFromUTF8(item->toString().c_str()));
         SetText(text);
 		popupCtrl->SetStringValue(text);
         ShowPopup();
-        //popupCtrl->SetItemState(item->index(), wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
         popupCtrl->SetFocus();
     }
 
@@ -141,31 +134,28 @@ BEGIN_EVENT_TABLE(PropertyControlCombo, wxComboCtrl)
     EVT_KILL_FOCUS(PropertyControlCombo::onKillFocus)
 END_EVENT_TABLE()
 
-void wxListViewComboPopup::onMouseClick(wxMouseEvent& WXUNUSED(event))
+void wxListBoxComboPopup::onMouseClick(wxMouseEvent& WXUNUSED(event))
 {
-    index_ = wxListView::GetFirstSelected();
+    index_ = GetSelection();
 
-    //control_->commit();
     Dismiss();
 }
 
-void wxListViewComboPopup::onItemSelected(wxListEvent& event)
+void wxListBoxComboPopup::onItemSelected(wxCommandEvent& event)
 {
 	if(selfSelecting_)
 		return;
-    index_ = wxListView::GetFirstSelected();
+    index_ = GetSelection();
 
-    //control_->commit();
     Dismiss();
 }
 
-void wxListViewComboPopup::OnDismiss()
+void wxListBoxComboPopup::OnDismiss()
 {
-    std::cout << "Dismissing..." << std::endl;
     control_->tree()->cancelControl(false); // add as pending message
 }
 
-void wxListViewComboPopup::OnComboDoubleClick()
+void wxListBoxComboPopup::OnComboDoubleClick()
 {
 }
 
@@ -239,7 +229,7 @@ void PropertyItemStringListStatic::fromString(const char* str)
 
 void PropertyItemStringListStatic::serializeValue(Archive& ar)
 {
-    ar(value_, "");
+    ar(Serializer(value_), "");
 }
 
 REGISTER_PROPERTY_ITEM(StringListStaticValue, PropertyItemStringListStatic)
@@ -258,7 +248,7 @@ void PropertyItemStringList::fromString(const char* str)
 
 void PropertyItemStringList::serializeValue(Archive& ar)
 {
-    ar(value_, "");
+    ar(Serializer(value_), "");
 }
 
 REGISTER_PROPERTY_ITEM(StringListValue, PropertyItemStringList)

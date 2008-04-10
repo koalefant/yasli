@@ -5,6 +5,7 @@
 StringList StringList::EMPTY;
 StringListStatic StringListStatic::EMPTY;
 
+// ---------------------------------------------------------------------------
 bool serialize(Archive& ar, StringListValue& value, const char* name)
 {
     if(ar.isEdit()){

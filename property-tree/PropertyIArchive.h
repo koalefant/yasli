@@ -19,6 +19,7 @@ public:
 
     bool operator()(const Serializer& value, const char* name);
 	bool operator()(const ContainerSerializationInterface& ser, const char* name);
+	bool operator()(const PointerSerializationInterface& ser, const char* name);
     // ^^^
 	
     template<class T>

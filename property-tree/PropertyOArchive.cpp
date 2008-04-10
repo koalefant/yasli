@@ -115,7 +115,27 @@ bool PropertyOArchive::operator()(const ContainerSerializationInterface& ser, co
     return true;
 }
 
+bool PropertyOArchive::operator()(const PointerSerializationInterface& ser, const char* name)
+{
+	ASSERT(currentItem_);
 
+	PropertyItemPointer* pointer = new PropertyItemPointer(name, ser);
+	pointer = safe_cast<PropertyItemPointer*>(add(pointer, lastItem_));
+	
+	lastItem_ = 0;
+	currentItem_ = pointer;
+	
+	currentItem_->setChildrenUpdated(false);
+	
+	if(ser.get())
+		ser.serializer()(*this);
+
+	eraseNotUpdated(currentItem_);
+
+	lastItem_ = currentItem_;
+	currentItem_ = currentItem_->parent();
+	return true;
+}
 
 bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
 {
@@ -125,7 +145,6 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name)
         typedef PropertyItemFactory::Constructor Args;
         item = PropertyItemFactory::the().create(ser.type(), Args(name, ser));
         if(!item){
-            std::cout << "Now PropertyItem for type " << ser.type().typeInfo()->name() << std::endl;
             item = new PropertyItemStruct(name, ser);
         }
         item = add(item, lastItem_);

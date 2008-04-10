@@ -23,14 +23,53 @@ public:
     const char* name() const{ return name_; }
     std::size_t size() const{ return size_; }
     TypeID typeID() const{ return typeID_; }
+
 protected:
     const char* name_;
     std::size_t size_;
     TypeID typeID_;
 };
 
+
+class ClassFactoryBase{
+public: 
+	ClassFactoryBase(TypeID baseType)
+	: baseType_(baseType)
+	{
+	}
+
+	virtual int size() const = 0;
+	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
+protected:
+	TypeID baseType_;
+
+};
+
+class ClassFactoryManager{
+public:
+	static ClassFactoryManager& the(){
+		static ClassFactoryManager factoryManager;
+		return factoryManager;
+	}
+
+	const ClassFactoryBase* find(TypeID baseType) const{
+		Factories::const_iterator it = factories_.find(baseType);
+		if(it == factories_.end())
+			return 0;
+		else
+			return it->second;
+	}
+
+	void registerFactory(TypeID type, const ClassFactoryBase* factory){
+		factories_[type] = factory;
+	}
+protected:
+	typedef std::map<TypeID, const ClassFactoryBase*> Factories;
+	Factories factories_;
+};
+
 template<class BaseType>
-class ClassFactory{
+class ClassFactory : public ClassFactoryBase{
 public:
     static ClassFactory& the(){
         static ClassFactory factory;
@@ -59,6 +98,12 @@ public:
         }
     };
 
+	ClassFactory()
+	: ClassFactoryBase(TypeID::get<BaseType>())
+	{
+		ClassFactoryManager::the().registerFactory(baseType_, this);
+	}
+
     typedef std::map<TypeID, CreatorBase*> TypeToCreatorMap;
 
     BaseType* create(TypeID derivedType) const
@@ -78,6 +123,18 @@ public:
             ++it;
         return it->second->create();
     }
+	// from ClassFactoryInterface:
+	int size() const{ return typeToCreatorMap_.size(); }
+	const TypeDescription* descriptionByIndex(int index) const{
+		if(index < 0 || index >= int(typeToCreatorMap_.size()))
+			return 0;
+		TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
+		std::advance(it, index);
+		return &it->second->description();
+	}
+
+	// ^^^
+
 protected:
     void registerCreator(CreatorBase* creator){
         typeToCreatorMap_[creator->description().typeID()] = creator;

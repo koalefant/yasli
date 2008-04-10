@@ -113,6 +113,7 @@ public:
 	virtual PropertyItem* clone() const = 0;
     virtual bool isLeaf() const{ return true; }
     virtual bool isContainer() const{ return false; }
+    virtual bool isPointer() const{ return false; }
     virtual bool isElement() const{ return false; }
 
     virtual bool hit(wxCoord coord, const ViewContext& context) const{ return false; }
@@ -341,10 +342,40 @@ public:
 protected:
 };
 
+// ---------------------------------------------------------------------------
+class PointerSerializationInterface;
+class PropertyItemPointer : public PropertyItem, public PropertyWithButtons, public sigslot::has_slots<>{
+public:
+	using PropertyItem::ViewContext;
+    PropertyItemPointer();
+    PropertyItemPointer(const PropertyItemPointer& original);
+    PropertyItemPointer(const char* name, const PointerSerializationInterface& ser);
+
+	void assignTo(const PointerSerializationInterface& ser) const;
+
+    // from PropertyItem:
+    PropertyItemPointer* clone() const{ return new PropertyItemPointer(*this); }
+    bool isPointer() const{ return true; }
+    void redraw(wxDC& dc, const ViewContext& context) const;
+    bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context);
+    void onContextMenu(PopupMenu& menu, PropertyTree* tree, ContextMenuSection section);
+	bool isLeaf() const{ return false; }
+	void serializeValue(Archive& ar);
+    // ^^^
+protected:
+    void onMenuReplace(PropertyTree* tree, int derivedIndex);
+
+    // from PropertyWithButtons:
+	bool onButton(int index, const ViewContext& context);
+    // ^^^
+
+    TypeID derivedType_;
+	const ClassFactoryBase* factory_;
+};
+
 
 // ---------------------------------------------------------------------------
 
-class PropertyItemElement;
 class PropertyTreeRoot : public PropertyItem{
 public:
     PropertyTreeRoot()

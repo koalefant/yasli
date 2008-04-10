@@ -85,6 +85,7 @@ public:
 
 #define CHECK_POLY_PTR ASSERT(reinterpret_cast<PolyRefCounter* const>(this) == dynamic_cast<PolyRefCounter* const>(this));
 
+class Archive;
 template<class T>
 class SharedPtr{
 public:
@@ -133,6 +134,8 @@ public:
                 ptr_->acquire();
         }
     }
+
+    void serialize(Archive& ar);
 protected:
     T* ptr_;
 };

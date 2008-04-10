@@ -19,6 +19,7 @@ public:
 
     bool operator()(const Serializer& ser, const char* name);
     bool operator()(const ContainerSerializationInterface& ser, const char* name);
+	bool operator()(const PointerSerializationInterface& ptr, const char* name);
     // ^^^
 
     using Archive::operator();
