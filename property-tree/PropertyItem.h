@@ -249,24 +249,41 @@ private:
 
 class PropertyItemField : public PropertyItem, public PropertyWithControl, public PropertyWithButtons{
 public:
+
+	enum{
+		STYLE_BOLD   = 1 << 0,
+		STYLE_GRAYED = 1 << 1
+	};
+
 	using PropertyItem::ViewContext;
     PropertyItemField(const char* name = "", TypeID type = TypeID());
     PropertyItemField(const PropertyItemField& original);
+
+	// from PropertyItem:
     void calculateRects(const PropertyItem::ViewContext& context, PropertyItemRects& rects) const;
-    wxRect calculateFieldRect(const ViewContext& context, const PropertyItemRects& rects) const;
 	bool activate(const ViewContext& context);
     void redraw(wxDC& dc, const ViewContext& context) const;
     bool onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context);
+	// ^^^
+
+	// from PropertyWithControl:
+    PropertyControl* createControl(const ViewContext& context);
+	// ^^^
+
+	void setStyle(int style);
+    wxRect calculateFieldRect(const ViewContext& context, const PropertyItemRects& rects) const;
+
 	virtual std::string toString() const;
     virtual void fromString(const char* str) {}
 
-    PropertyControl* createControl(const ViewContext& context);
 protected:
     // from PropertyWithButtons
 	bool onButton(int index, const ViewContext& context){
 		return activate(context);
 	}
     // ^^^
+
+	int style_;
 };
 
 
@@ -344,7 +361,7 @@ protected:
 
 // ---------------------------------------------------------------------------
 class PointerSerializationInterface;
-class PropertyItemPointer : public PropertyItem, public PropertyWithButtons, public sigslot::has_slots<>{
+class PropertyItemPointer : public PropertyItemField, public sigslot::has_slots<>{
 public:
 	using PropertyItem::ViewContext;
     PropertyItemPointer();
@@ -354,6 +371,7 @@ public:
 	void assignTo(const PointerSerializationInterface& ser) const;
 
     // from PropertyItem:
+	bool activate(const ViewContext& context);
     PropertyItemPointer* clone() const{ return new PropertyItemPointer(*this); }
     bool isPointer() const{ return true; }
     void redraw(wxDC& dc, const ViewContext& context) const;
@@ -362,6 +380,10 @@ public:
 	bool isLeaf() const{ return false; }
 	void serializeValue(Archive& ar);
     // ^^^
+
+	// from PropertyItemField:
+	std::string toString() const;
+	// ^^^
 protected:
     void onMenuReplace(PropertyTree* tree, int derivedIndex);
 
@@ -370,6 +392,7 @@ protected:
     // ^^^
 
     TypeID derivedType_;
+	std::string fieldText_;
 	const ClassFactoryBase* factory_;
 };
 

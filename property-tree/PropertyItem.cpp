@@ -290,7 +290,7 @@ bool PropertyItem::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext
         bool inPlusRect = rects.plus.Contains(pos);
         bool inSelectionRect = rects.selection.Contains(pos);
         bool inTextRect = rects.text.Contains(pos);
-        if(children_.empty() && inTextRect && doubleClick)
+        if(/*children_.empty() && */inTextRect && doubleClick)
         	if(activate(context))
         		return true;
         if(!doubleClick && inSelectionRect){
@@ -643,7 +643,7 @@ void PropertyWithButtons::redraw(wxDC& dc, const ViewContext& context, const Pro
 		int left = buttonsRect.x + i * BUTTON_SPACING + BUTTON_PADDING;
 
 		wxRect rt(left, top, BUTTON_SIZE + BUTTON_BORDER * 2, buttonsRect.height);
-	    dc.DrawRoundedRectangle(rt, 3.0);
+		dc.DrawRoundedRectangle(rt, 3.0);
 		if(buttons_[i].bitmap)
 			dc.DrawBitmap(*buttons_[i].bitmap, left + BUTTON_BORDER, top + BUTTON_BORDER, true);
 	}
@@ -654,6 +654,7 @@ void PropertyWithButtons::redraw(wxDC& dc, const ViewContext& context, const Pro
 
 PropertyItemField::PropertyItemField(const char* name, TypeID type)
 : PropertyItem(name, type)
+, style_(0)
 {
 
 }
@@ -662,7 +663,13 @@ PropertyItemField::PropertyItemField(const PropertyItemField& original)
 : PropertyItem(original)
 , PropertyWithControl(original)
 , PropertyWithButtons(original)
+, style_(0)
 {
+}
+
+void PropertyItemField::setStyle(int style)
+{
+	style_ = style;
 }
 
 void PropertyItemField::calculateRects(const ViewContext& context, PropertyItemRects& rects) const
@@ -724,11 +731,12 @@ void PropertyItemField::redraw(wxDC& dc, const ViewContext& context) const
     wxRect fieldRect = calculateFieldRect(context, rects);
 
     PropertyItem::redraw(dc, context);
-    dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_LISTBOX)));
+	wxSystemColour backgroundColor = (style_ & STYLE_GRAYED) ? wxSYS_COLOUR_3DFACE : wxSYS_COLOUR_LISTBOX;
+    dc.SetBrush(wxBrush(wxSystemSettings::GetColour(backgroundColor)));
     dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW)));
-    dc.DrawRoundedRectangle(fieldRect, 3.0);
+    dc.DrawRoundedRectangle(fieldRect, (style_ & STYLE_BOLD) ? 5.0 : 3.0);
 
-    dc.SetFont(rowFontDefault);
+	dc.SetFont((style_ & STYLE_BOLD) ? rowFontBold : rowFontDefault);
     dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT));
     wxRect fieldTextRect = fieldRect;
     fieldTextRect.x += 4;
@@ -966,25 +974,31 @@ void PropertyItemContainer::serializeValue(Archive& ar)
 // ---------------------------------------------------------------------------
 
 PropertyItemPointer::PropertyItemPointer()
-: PropertyItem("")
+: PropertyItemField("")
 {
 }
 
 PropertyItemPointer::PropertyItemPointer(const PropertyItemPointer& original)
-: PropertyItem(original)
-, PropertyWithButtons(original)
+: PropertyItemField(original)
+//, PropertyWithButtons(original)
 , derivedType_(original.derivedType_)
 {
 }
 
 PropertyItemPointer::PropertyItemPointer(const char* name, const PointerSerializationInterface& ser)
-: PropertyItem(name, ser.baseType())
+: PropertyItemField(name, ser.baseType())
 , derivedType_(ser.type())
 , factory_(ser.factory())
 {
-    #include "res/property_item_container_add.xpm"
-    static wxBitmap bitmap((const char* const *)property_item_container_add_xpm);
+	if(derivedType_)
+		fieldText_ = derivedType_.name();
+	else
+		fieldText_ = "[ NULL ]";
+
+    #include "res/property_item_pointer_replace.xpm"
+    static wxBitmap bitmap((const char* const *)property_item_pointer_replace_xpm);
     addButton(&bitmap);
+	setStyle(STYLE_GRAYED | STYLE_BOLD);
 }
 
 void PropertyItemPointer::assignTo(const PointerSerializationInterface& ser) const
@@ -996,15 +1010,26 @@ void PropertyItemPointer::assignTo(const PointerSerializationInterface& ser) con
 }
 
 
+bool PropertyItemPointer::activate(const ViewContext& context)
+{
+	return false;
+}
+
+
 void PropertyItemPointer::redraw(wxDC& dc, const ViewContext& context) const
 {
     PropertyItemRects rects;
     calculateRects(context, rects);
 
-    PropertyItem::redraw(dc, context);
-
-    PropertyWithButtons::redraw(dc, context, rects);
+    PropertyItemField::redraw(dc, context);	
+    //PropertyWithButtons::redraw(dc, context, rects);
 }
+
+std::string PropertyItemPointer::toString() const
+{
+	return fieldText_;
+}
+
 
 bool PropertyItemPointer::onMouseClick(wxPoint pos, bool doubleClick, const ViewContext& context)
 {
