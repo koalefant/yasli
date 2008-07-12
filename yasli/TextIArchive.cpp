@@ -407,22 +407,6 @@ bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const 
                 }
                 ++index;
             }
-            /*
-            while(!closeContainerBracket()){
-                if(!readToken())
-                    RAISE(ErrorRuntime("Reached end of file while reading container!"));
-                else
-                    putToken();
-                if(index >= size)
-                    ser.resize(index + 1);
-                if(index < ser.size())
-                    ser(*this, index);
-                else{
-                    skipBlock();
-                }
-                ++index;
-            }
-            */
             if(size > index)
                 ser.resize(index);
 
@@ -624,30 +608,3 @@ bool TextIArchive::operator()(StringListStaticValue& value, const char* name)
     }
     return false;
 }
-
-/*
-class TextArchiveGrammar : public GrammarBase{
-public:
-    TextArchiveGrammar();
-    Node& entrance() { return sentence_; }
-
-    Node& openStructEntrance(){
-    }
-
-private:
-    Node name_;
-    Node value_;
-    Node sentence_;
-};
-
-
-TextArchiveGrammar::TextArchiveGrammar()
-{
-    name_ = matchString;
-
-    opEqual = "=";
-
-    sentence_ = ((matchString >> "=" ) | Empty) >> value_ >> (sentence_ | Term);
-    value_  = matchString | matchInt | matchFloat | (op("(") >> sentence_ >> ")");
-}
-*/

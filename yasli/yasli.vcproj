@@ -161,6 +161,42 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="pugixml"
+			>
+			<File
+				RelativePath=".\pugiconfig.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\pugixml.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\pugixml.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\pugixpath.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\API.h"
 			>
@@ -399,6 +435,14 @@
 		</File>
 		<File
 			RelativePath=".\UtilsAPI.h"
+			>
+		</File>
+		<File
+			RelativePath=".\XMLIArchive.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\XMLIArchive.h"
 			>
 		</File>
 	</Files>

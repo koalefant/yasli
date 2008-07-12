@@ -29,16 +29,12 @@ public:
     bool operator()(unsigned char& value, const char* name = "");
     bool operator()(char& value, const char* name = "");
 
-
-    template<class T>
-    bool operator()(T& value, const char* name = ""){
-        return Archive::operator()(value, name);
-    }
-
     bool operator()(const Serializer& ser, const char* name = "");
     bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
 
     bool operator()(StringListStaticValue& value, const char* name = "");
+
+	using Archive::operator();
 private:
     bool findName(const char* name);
     bool openBracket();
