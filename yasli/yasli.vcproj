@@ -146,7 +146,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Wrappers"
+			Name="wrappers"
 			>
 			<File
 				RelativePath=".\FileSelector.cpp"
@@ -179,6 +179,14 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\pugixml.hpp"
@@ -195,6 +203,194 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="library"
+			>
+			<File
+				RelativePath=".\Library.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LibraryBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LibraryBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LibraryDirectory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LibraryReference.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LibraryReferenceImpl.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="utils"
+			>
+			<File
+				RelativePath=".\Assert.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Assert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConstString.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Content.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Content.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Context.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Errors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Factory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Files.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Files.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FrozenSignal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Macros.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MemoryReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MemoryReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MemoryWriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MemoryWriter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Pointers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PointersImpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SafeCast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SharedLibApi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sigslot.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StringList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StringList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StringUtil.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StringUtil.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Tokenizer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Tokenizer.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="archives"
+			>
+			<File
+				RelativePath=".\TextIArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextIArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TextOArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextOArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XMLIArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XMLIArchive.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="impl"
+			>
+			<File
+				RelativePath=".\STL.h"
+				>
+			</File>
+			<File
+				RelativePath=".\STLImpl.h"
+				>
 			</File>
 		</Filter>
 		<File
@@ -210,30 +406,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Assert.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Assert.h"
-			>
-		</File>
-		<File
-			RelativePath=".\ConstString.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Content.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Content.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Context.h"
-			>
-		</File>
-		<File
 			RelativePath=".\EnumDescription.cpp"
 			>
 		</File>
@@ -242,99 +414,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Errors.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Factory.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Files.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Files.h"
-			>
-		</File>
-		<File
-			RelativePath=".\FrozenSignal.h"
-			>
-		</File>
-		<File
 			RelativePath=".\Helpers.h"
 			>
 		</File>
 		<File
-			RelativePath=".\Library.h"
-			>
-		</File>
-		<File
-			RelativePath=".\LibraryBase.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\LibraryBase.h"
-			>
-		</File>
-		<File
-			RelativePath=".\LibraryDirectory.h"
-			>
-		</File>
-		<File
-			RelativePath=".\LibraryReference.h"
-			>
-		</File>
-		<File
-			RelativePath=".\LibraryReferenceImpl.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Macros.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Math.h"
-			>
-		</File>
-		<File
-			RelativePath=".\MemoryReader.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\MemoryReader.h"
-			>
-		</File>
-		<File
-			RelativePath=".\MemoryWriter.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\MemoryWriter.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Pointers.h"
-			>
-		</File>
-		<File
-			RelativePath=".\PointersImpl.h"
-			>
-		</File>
-		<File
-			RelativePath=".\SafeCast.h"
-			>
-		</File>
-		<File
 			RelativePath=".\Serializer.h"
-			>
-		</File>
-		<File
-			RelativePath=".\SharedLibApi.h"
-			>
-		</File>
-		<File
-			RelativePath=".\sigslot.h"
 			>
 		</File>
 		<File
@@ -362,66 +446,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\STL.h"
-			>
-		</File>
-		<File
-			RelativePath=".\STLImpl.h"
-			>
-		</File>
-		<File
-			RelativePath=".\StringList.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\StringList.h"
-			>
-		</File>
-		<File
-			RelativePath=".\StringUtil.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\StringUtil.h"
-			>
-		</File>
-		<File
-			RelativePath=".\targetver.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Test.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TestUtils.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TextIArchive.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TextIArchive.h"
-			>
-		</File>
-		<File
-			RelativePath=".\TextOArchive.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TextOArchive.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Tokenizer.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\Tokenizer.h"
-			>
-		</File>
-		<File
 			RelativePath=".\TypeID.h"
 			>
 		</File>
@@ -431,18 +455,6 @@
 		</File>
 		<File
 			RelativePath=".\TypesFactory.h"
-			>
-		</File>
-		<File
-			RelativePath=".\UtilsAPI.h"
-			>
-		</File>
-		<File
-			RelativePath=".\XMLIArchive.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\XMLIArchive.h"
 			>
 		</File>
 	</Files>

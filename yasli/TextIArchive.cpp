@@ -114,9 +114,9 @@ bool TextIArchive::isName(Token token) const
     ASSERT(firstChar != '\n');
     if(firstChar == '"' || firstChar == '\'' || firstChar == '=')
         return false;
-	if(firstChar == '[' || firstChar == '(' || firstChar == '{') // CONVERSION
+	if(firstChar == '[' || firstChar == '{') 
         return false;
-	if(firstChar == ']' || firstChar == ')' || firstChar == '}') // CONVERSION
+	if(firstChar == ']' || firstChar == '}')
         return false;
     if(firstChar >= '0' && firstChar <= '9' || firstChar == '-' || firstChar == '+')
         return false;
@@ -125,8 +125,6 @@ bool TextIArchive::isName(Token token) const
     if(token_ == "false" || token_ == "False" || token_ == "FALSE")
         return false;
     ASSERT(firstChar != '#');
-
-    std::string str = token.str();
     return true;
 }
 
@@ -184,7 +182,7 @@ bool TextIArchive::findName(const char* name)
             skipBlock();
         }
         else{
-			if(token_ == ')' || token_ == ']' || token_ == '}'){ // CONVERSION
+			if(token_ == ']' || token_ == '}'){ // CONVERSION
 #ifdef DEBUG_TEXTIARCHIVE
                 std::cout << "Got close bracket..." << std::endl;
 #endif
@@ -223,7 +221,7 @@ bool TextIArchive::findName(const char* name)
         }
         else{
             start = token_.begin();
-			if(token_ == ')' || token_ == ']' || token_ == '}') // CONVERSION
+			if(token_ == ']' || token_ == '}') // CONVERSION
                 token_ = Token(blockBegin, blockBegin);
             else{
                 putToken();
@@ -252,7 +250,7 @@ bool TextIArchive::findName(const char* name)
             return false; // Reached a full circle: unable to find name
         }
 
-		if(token_ == '}' || token_ == ')' || token_ == ']'){ // CONVERSION
+		if(token_ == '}' || token_ == ']'){ // CONVERSION
 #ifdef DEBUG_TEXTIARCHIVE
             std::cout << "Going to begin of block, from " << token_.begin() - reader_->begin();
 #endif
@@ -300,7 +298,7 @@ bool TextIArchive::findName(const char* name)
 bool TextIArchive::openBracket()
 {
 	Token tok = readToken();
-	if(tok != '{' && tok != '('){ // CONVERSION
+	if(tok != '{'){
         putToken();
         return false;
     }
@@ -321,13 +319,13 @@ bool TextIArchive::closeBracket()
             msg << ": End of file while no matching bracket found";
             RAISE(ErrorRuntime(msg.c_str()));
         }
-		else if(token_ == '}' || token_ == ')' || token_ == ']'){ // CONVERSION
+		else if(token_ == '}' || token_ == ']'){ // CONVERSION
             if(relativeLevel == 0)
-				return token_ == ')' || token_ == '}'; // CONVERSION
+				return token_ == '}';
             else
                 --relativeLevel;
         }
-		else if(token_ == '(' || token_ == '{' || token_ == '['){ // CONVERSION
+		else if(token_ == '{' || token_ == '['){ // CONVERSION
             ++relativeLevel;
         }
     }
@@ -390,7 +388,7 @@ bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const 
 
             while(true){
                 readToken();
-				if(token_ == ')' || token_ == '}') // CONVERSION
+				if(token_ == '}')
 					RAISE(ErrorRuntime("Syntax error: closing container with '}'"));
                 if(token_ == ']')
                     break;

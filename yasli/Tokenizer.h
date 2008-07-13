@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <string>
-#include "UtilsAPI.h"
+#include "API.h"
 
 class Token{
     friend class Tokenizer;
@@ -57,7 +57,7 @@ private:
     const char* end_;
 };
 
-class UTILS_API Tokenizer{
+class YASLI_API Tokenizer{
 public:
     Tokenizer(const char* spaces = " \t\r\n\x0D",
               const char* quotes = "\"\"",

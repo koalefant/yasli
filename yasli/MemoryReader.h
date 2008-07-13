@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstddef>
-#include "UtilsAPI.h"
+#include "API.h"
 
-class UTILS_API MemoryReader{
+class YASLI_API MemoryReader{
 public:
 
     MemoryReader();

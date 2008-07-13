@@ -15,7 +15,7 @@ public:
     ~XMLIArchive();
 
     void open(const char* filename);
-    void openFromMemory(const char* buffer, size_t length, bool free = false);
+    void openFromMemory(const char* buffer, size_t length); // does copy of buffer
     bool isOpen() const;
     void close();
 

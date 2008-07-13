@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include "UtilsAPI.h"
+#include "API.h"
 #include "Pointers.h"
 
 #ifdef realloc
@@ -12,7 +12,7 @@
 typedef long long __int64;
 #endif
 
-class UTILS_API MemoryWriter : public RefCounter{
+class YASLI_API MemoryWriter : public RefCounter{
 public:
     MemoryWriter(std::size_t size = 128, bool reallocate = true);
     ~MemoryWriter();

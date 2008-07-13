@@ -35,9 +35,31 @@ void XMLIArchive::open(const char* filename)
     enterNode();
 }
 
-void XMLIArchive::openFromMemory(const char* buffer, size_t length, bool free)
+
+void XMLIArchive::openFromMemory(const char* buffer, size_t length)
 {
-    ASSERT(0 && "Not implemented");
+  if(isOpen())
+      close();
+  char* buf; 
+  try{
+    buf = new char[length + 1];
+  }
+  catch(...){
+    buf = 0;
+  }
+  if(!buf)
+    return;
+  memcpy(buf, buffer, length);
+  buf[length] = '\0';
+
+  impl_ = new XMLIArchiveImpl();
+  bool result = false;
+  if(impl_->document.parse(pugi::transfer_ownership_tag(), buf)){
+    impl_->childNode = impl_->document.root();
+    enterNode();
+  }
+  else
+    impl_ = 0;  
 }
 
 bool XMLIArchive::isOpen() const
@@ -72,7 +94,7 @@ bool XMLIArchive::findNode(const char* name)
 {
   if(name[0] == '\0')
   {
-    name = "el";
+    name = "element";
     xml_node current = impl_->childNode.next_sibling();
     if(!current){
       if(impl_->previousChildNode)
@@ -121,7 +143,7 @@ bool XMLIArchive::findNode(const char* name)
 bool XMLIArchive::findAttribute(const char* name)
 {
     if(name[0] == '\0')
-        name = "el";
+        name = "element";
     xml_attribute first = impl_->node.first_attribute();
     xml_attribute current = first;
     current = current.next_attribute();
@@ -143,6 +165,26 @@ bool XMLIArchive::findAttribute(const char* name)
 
 bool XMLIArchive::operator()(bool& value, const char* name)
 {
+    if(findNode(name)){
+        const char* str = impl_->childNode.child_value();
+        if(str[0] == 'Y' || str[0] == 'y' ||
+           str[0] == 'T' || str[0] == 't' ||
+           str[0] == '1')
+          value = true;
+        else
+          value = false;
+        return true;
+    }
+    else if(findAttribute(name)){
+        const char* str = impl_->childAttribute.value();
+        if(str[0] == 'Y' || str[0] == 'y' ||
+           str[0] == 'T' || str[0] == 't' ||
+           str[0] == '1')
+          value = true;
+        else
+          value = false;
+        return true;
+    }
     return false;
 }
 
@@ -277,6 +319,8 @@ bool XMLIArchive::operator()(const ContainerSerializationInterface& ser, const c
     if(findNode(name)){
         if(enterNode()){
 
+          if(findAttribute("size"))
+              ser.resize(impl_->childAttribute.as_int());
             std::size_t size = ser.size();
             std::size_t index = 0;
 
