@@ -297,3 +297,19 @@ bool XMLIArchive::operator()(const ContainerSerializationInterface& ser, const c
     return false;
 }
 
+const char* XMLIArchive::pull()
+{
+  xml_node next = impl_->childNode.next_sibling();
+  if(!next){
+    if(impl_->previousChildNode)
+      return 0;
+    else
+      next = impl_->node.first_child();
+    if(!next)
+      return 0;
+  }
+  impl_->previousChildNode = impl_->childNode;
+  impl_->childNode = next;
+  return next.name();
+}
+

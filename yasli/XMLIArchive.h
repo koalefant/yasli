@@ -19,6 +19,7 @@ public:
     bool isOpen() const;
     void close();
 
+    const char* pull();
     bool operator()(bool& value, const char* name = "");
     bool operator()(std::string& value, const char* name = "");
     bool operator()(float& value, const char* name = "");

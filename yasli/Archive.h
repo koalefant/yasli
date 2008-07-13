@@ -47,6 +47,8 @@ public:
         return (filter_ & flags) != 0;
     }
 
+    virtual const char* pull(){ return 0; }
+
     // basic types
     virtual bool operator()(bool& value, const char* name = "")          { return false; }
     virtual bool operator()(std::string& value, const char* name = "")   { return false; }
