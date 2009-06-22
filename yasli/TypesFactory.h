@@ -159,17 +159,18 @@ protected:
 };
 
 
-#define SERIALIZATION_TYPE(Type, name) \
+#define YASLI_TYPE_NAME(Type, name) \
 namespace{ \
     const TypeDescription Type##_Description(TypeID::get<Type>(), name, sizeof(Type)); \
     bool registered_##Type = TypeLibrary::the().registerType(&Type##_Description) != 0; \
 }
 
-#define SERIALIZATION_DERIVED_TYPE(BaseType, Type, name) \
-    const TypeDescription Type##_DerivedDescription(TypeID::get<Type>(), name, sizeof(Type)); \
-    ClassFactory<BaseType>::Creator<Type> Type##_Creator(TypeLibrary::the().registerType(&Type##_DerivedDescription)); \
-	int dummyForType_##Type;
+#define YASLI_CLASS(BaseType, Type, name) \
+	const TypeDescription Type##BaseType##_DerivedDescription(TypeID::get<Type>(), name, sizeof(Type)); \
+	ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	int dummyForType_##Type##BaseType;
 
-#define SERIALIZATION_FORCE_DERIVED_TYPE(BaseType, Type) \
-	extern int dummyForType_##Type; \
-	int* dummyForTypePtr_##Type = &dummyForType_##Type + 1;
+#define YASLI_FORCE_CLASS(BaseType, Type) \
+	extern int dummyForType_##Type##BaseType; \
+	int* dummyForTypePtr_##Type##BaseType = &dummyForType_##Type##BaseType + 1;
+

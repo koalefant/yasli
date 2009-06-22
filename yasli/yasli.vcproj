@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -45,7 +45,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -80,8 +80,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -253,6 +253,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Colors.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ConstString.h"
 				>
 			</File>
@@ -317,6 +321,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Range.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Range.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RangedWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\rangedwrapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Recti.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Recti.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SafeCast.h"
 				>
 			</File>
@@ -350,6 +378,14 @@
 			</File>
 			<File
 				RelativePath=".\Tokenizer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Vect2i.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vect2i.h"
 				>
 			</File>
 		</Filter>

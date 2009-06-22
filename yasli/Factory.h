@@ -106,7 +106,7 @@ public:
     _Product* create(const _Key& key, Arg1 arg1) const{
         typename Creators::const_iterator it = creators_.find(key);
         if(it != creators_.end()){
-            return it->second->create(Construtor(arg1));
+            return it->second->create(Constructor(arg1));
         }
         else
             return 0;

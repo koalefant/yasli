@@ -29,3 +29,4 @@ int assertionDialog(const char* message, const char* function, const char* fileN
 # define VERIFY(x) (x)
 //# define TRACE(x)
 #endif
+#define CHECK(x, action) if(!(x)) { ASSERT(0 && #x); action; };

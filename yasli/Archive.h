@@ -24,6 +24,7 @@ public:
     Archive(bool isInput, bool isEdit = false)
     : isInput_(isInput)
     , isEdit_(isEdit)
+    , inPlace_(false)
 	, filter_(0)
     {
     }
@@ -33,6 +34,7 @@ public:
     bool isInput() const{ return isInput_; }
     bool isOutput() const{ return !isInput_; }
     bool isEdit() const{ return isEdit_; }
+    bool inPlace() const{ return inPlace_; }
 
     virtual void warning(const char* message);
     virtual void close() {}
@@ -71,9 +73,16 @@ public:
     // templated switch
     template<class T>
     bool operator()(const T& value, const char* name = "");
+
+	template<class T>
+	bool serialize(const T& value, const char* name, const char* label)
+	{
+		return operator()(const_cast<T&>(value), name);
+	}
 private:
     bool isInput_;
     bool isEdit_;
+	bool inPlace_;
     int filter_;
 };
 

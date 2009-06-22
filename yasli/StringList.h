@@ -3,7 +3,7 @@
 #include <vector>
 #include "Errors.h"
 
-
+class Archive;
 class StringListStatic : public std::vector<const char*>{
 public:
     enum { npos = -1 };
@@ -84,6 +84,9 @@ public:
     }
     static StringList EMPTY;
 };
+
+void splitStringList(StringList* result, const char *str, char sep);
+bool serialize(Archive& ar, StringList& value, const char* name);
 
 class StringListValue{
 public:

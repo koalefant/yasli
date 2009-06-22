@@ -4,12 +4,15 @@
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
 
-void EnumDescription::add(int value, const char* name)
+void EnumDescription::add(int value, const char* name, const char *label)
 {
     nameToValue_[name] = value;
+    labelToValue_[label] = value;
     valueToName_[value] = name;
+    valueToLabel_[value] = label;
     valueToIndex_[value] = names_.size();
     names_.push_back(name);
+	labels_.push_back(label);
 }
 
 bool EnumDescription::serialize(Archive& ar, int& value, const char* name) const
@@ -38,6 +41,11 @@ const char* EnumDescription::name(int value) const
     ASSERT(it != valueToName_.end());
     return it->second;
 }
+const char* EnumDescription::label(int value) const
+{
+  // TODO
+  return "";
+}
 int EnumDescription::indexByValue(int value) const
 {
     ValueToIndex::const_iterator it = valueToIndex_.find(value);
@@ -49,6 +57,19 @@ int EnumDescription::indexByValue(int value) const
 int EnumDescription::value(const char* name) const
 {
     NameToValue::const_iterator it = nameToValue_.find(name);
-    ASSERT(it != nameToValue_.end());
+    CHECK(it != nameToValue_.end(), return 0);
     return it->second;
 }
+int EnumDescription::valueByLabel(const char* label) const
+{
+    LabelToValue::const_iterator it = labelToValue_.find(label);
+    CHECK(it != labelToValue_.end(), return 0);
+    return it->second;
+}
+
+std::string EnumDescription::labelCombination(int value) const
+{
+	ASSERT(0); // TODO
+	return std::string();
+}
+

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "yasli/Assert.h"
 #include "yasli/API.h"
 #include "yasli/TypeID.h"
@@ -169,3 +170,4 @@ public:
 	void serialize(Archive& ar) const;
 };
 
+typedef std::vector<Serializer> Serializers;
