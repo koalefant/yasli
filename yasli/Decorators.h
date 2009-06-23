@@ -52,7 +52,7 @@ struct NotDecorator{
 	bool* valuePtr_;
 };
 
-inline bool serialize(Archive& ar, NotDecorator& value, const char* name){		
+inline bool serialize(Archive& ar, NotDecorator& value, const char* name, const char* label){		
   /* TODO:
      if(ar.isEdit()){
      if(ar.openStruct(*this, name, nameAlt)){

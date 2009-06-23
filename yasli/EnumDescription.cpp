@@ -15,7 +15,7 @@ void EnumDescription::add(int value, const char* name, const char *label)
 	labels_.push_back(label);
 }
 
-bool EnumDescription::serialize(Archive& ar, int& value, const char* name) const
+bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
 {
     int index = StringListStatic::npos;
     if(ar.isOutput()){
@@ -27,7 +27,7 @@ bool EnumDescription::serialize(Archive& ar, int& value, const char* name) const
     }
 
     StringListStaticValue stringListValue(names(), index);
-    ar(stringListValue, name);
+    ar(stringListValue, name, label);
     if(ar.isInput()){
         if(stringListValue.index() == StringListStatic::npos)
             return false;

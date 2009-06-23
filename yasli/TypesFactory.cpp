@@ -80,7 +80,7 @@ const char* TypeID::name() const{
 		return name_.c_str();
 }
 
-bool serialize(Archive& ar, TypeID& typeID, const char* name)
+bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
 {
     std::string typeName;
     if(ar.isOutput()){

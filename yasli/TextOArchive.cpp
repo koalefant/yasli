@@ -100,7 +100,7 @@ void TextOArchive::placeIndent()
         *buffer_ << "\t";
 }
 
-bool TextOArchive::operator()(bool& value, const char* name)
+bool TextOArchive::operator()(bool& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -110,7 +110,7 @@ bool TextOArchive::operator()(bool& value, const char* name)
 }
 
 
-bool TextOArchive::operator()(std::string& value, const char* name)
+bool TextOArchive::operator()(std::string& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -121,7 +121,7 @@ bool TextOArchive::operator()(std::string& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(float& value, const char* name)
+bool TextOArchive::operator()(float& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -129,7 +129,7 @@ bool TextOArchive::operator()(float& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(double& value, const char* name)
+bool TextOArchive::operator()(double& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -137,7 +137,7 @@ bool TextOArchive::operator()(double& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(int& value, const char* name)
+bool TextOArchive::operator()(int& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -145,7 +145,7 @@ bool TextOArchive::operator()(int& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(unsigned int& value, const char* name)
+bool TextOArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -153,7 +153,7 @@ bool TextOArchive::operator()(unsigned int& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(__int64& value, const char* name)
+bool TextOArchive::operator()(__int64& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -161,7 +161,7 @@ bool TextOArchive::operator()(__int64& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(unsigned char& value, const char* name)
+bool TextOArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -169,7 +169,7 @@ bool TextOArchive::operator()(unsigned char& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(signed char& value, const char* name)
+bool TextOArchive::operator()(signed char& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -177,7 +177,7 @@ bool TextOArchive::operator()(signed char& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(char& value, const char* name)
+bool TextOArchive::operator()(char& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -185,7 +185,7 @@ bool TextOArchive::operator()(char& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(StringListStaticValue& value, const char* name)
+bool TextOArchive::operator()(StringListStaticValue& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -193,7 +193,7 @@ bool TextOArchive::operator()(StringListStaticValue& value, const char* name)
     return true;
 }
 
-bool TextOArchive::operator()(const Serializer& ser, const char* name)
+bool TextOArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -215,7 +215,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name)
 }
 
 
-bool TextOArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
+bool TextOArchive::operator()(const ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);

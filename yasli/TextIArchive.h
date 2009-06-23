@@ -17,22 +17,22 @@ public:
     void close();
 
     // virtuals:
-    bool operator()(bool& value, const char* name = "");
-    bool operator()(std::string& value, const char* name = "");
-    bool operator()(float& value, const char* name = "");
-    bool operator()(double& value, const char* name = "");
-    bool operator()(int& value, const char* name = "");
-    bool operator()(unsigned int& value, const char* name = "");
-	bool operator()(__int64& value, const char* name = "");
+    bool operator()(bool& value, const char* name = "", const char* label = 0);
+    bool operator()(std::string& value, const char* name = "", const char* label = 0);
+    bool operator()(float& value, const char* name = "", const char* label = 0);
+    bool operator()(double& value, const char* name = "", const char* label = 0);
+    bool operator()(int& value, const char* name = "", const char* label = 0);
+    bool operator()(unsigned int& value, const char* name = "", const char* label = 0);
+	bool operator()(__int64& value, const char* name = "", const char* label = 0);
 
-    bool operator()(signed char& value, const char* name = "");
-    bool operator()(unsigned char& value, const char* name = "");
-    bool operator()(char& value, const char* name = "");
+    bool operator()(signed char& value, const char* name = "", const char* label = 0);
+    bool operator()(unsigned char& value, const char* name = "", const char* label = 0);
+    bool operator()(char& value, const char* name = "", const char* label = 0);
 
-    bool operator()(const Serializer& ser, const char* name = "");
-    bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
+    bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
+    bool operator()(const ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 
-    bool operator()(StringListStaticValue& value, const char* name = "");
+    bool operator()(StringListStaticValue& value, const char* name = "", const char* label = 0);
 
 	using Archive::operator();
 private:

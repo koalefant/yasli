@@ -48,7 +48,7 @@ public:
         serializeFunc_ = &Serializer::serializeRaw<T>;
     }
 
-    bool operator()(Archive& ar, const char* name) const;
+    bool operator()(Archive& ar, const char* name, const char* label) const;
     bool operator()(Archive& ar) const;
     operator bool() const{ return object_ && serializeFunc_; }
     void* pointer() const{ return object_; }
@@ -57,9 +57,8 @@ public:
 
     template<class T>
     static bool serializeRaw(void* rawPointer, Archive& ar){
-        ASSERT(rawPointer);
+        CHECK(rawPointer, return false);
         ((T*)(rawPointer))->serialize(ar);
-        //::serialize(ar, *((T*)(rawPointer)), "name");
         return true;
     }
 private:
@@ -80,7 +79,7 @@ public:
 
     virtual bool operator()(Archive& ar, std::size_t index) const = 0;
     virtual operator bool() const = 0;
-    virtual void serializeNewElement(Archive& ar, const char* name = "") const = 0;
+    virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
 };
 
 template<class Container, class Element>
@@ -111,9 +110,9 @@ public:
         return ar((*container_)[index]);
     }
     operator bool() const{ return container_ != 0; }
-    void serializeNewElement(Archive& ar, const char* name = "") const{
+    void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
         Element element;
-        ar(element, name);
+        ar(element, name, label);
     }
     // ^^^
 protected:
@@ -144,10 +143,10 @@ public:
 		return ar(array_[index]);
     }
     operator bool() const{ return array_ != 0; }
-    void serializeNewElement(Archive& ar, const char* name) const{
+    void serializeNewElement(Archive& ar, const char* name, const char* label) const{
         // XXX do we need this?
         T element;
-        ar(element, name);
+        ar(element, name, label);
     }
     // ^^^
     

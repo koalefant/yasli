@@ -181,4 +181,4 @@ private:
 class Archive;
 
 template<class T>
-bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name);
+bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name, const char* label);

@@ -57,7 +57,7 @@ public:
 	float value_;
 };
 
-bool serialize(Archive& ar, RangedWrapperf &wrapper, const char* name);
+bool serialize(Archive& ar, RangedWrapperf &wrapper, const char* name, const char* label);
 
 
 class RangedWrapperi{
@@ -115,4 +115,4 @@ public:
 	int value_;
 };
 
-bool serialize(Archive& ar, RangedWrapperi &wrapper, const char* name);
+bool serialize(Archive& ar, RangedWrapperi &wrapper, const char* name, const char* label);

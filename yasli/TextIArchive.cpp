@@ -359,7 +359,7 @@ bool TextIArchive::closeContainerBracket()
     }
 }
 
-bool TextIArchive::operator()(const Serializer& ser, const char* name)
+bool TextIArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
     if(findName(name)){
         if(openBracket()){
@@ -376,7 +376,7 @@ bool TextIArchive::operator()(const Serializer& ser, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
+bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     if(findName(name)){
         if(openContainerBracket()){
@@ -451,7 +451,7 @@ bool TextIArchive::checkStringValueToken()
     return true;
 }
 
-bool TextIArchive::operator()(int& value, const char* name)
+bool TextIArchive::operator()(int& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -462,7 +462,7 @@ bool TextIArchive::operator()(int& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(unsigned int& value, const char* name)
+bool TextIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -473,7 +473,7 @@ bool TextIArchive::operator()(unsigned int& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(__int64& value, const char* name)
+bool TextIArchive::operator()(__int64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -487,7 +487,7 @@ bool TextIArchive::operator()(__int64& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(float& value, const char* name)
+bool TextIArchive::operator()(float& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -502,7 +502,7 @@ bool TextIArchive::operator()(float& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(double& value, const char* name)
+bool TextIArchive::operator()(double& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -517,7 +517,7 @@ bool TextIArchive::operator()(double& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(std::string& value, const char* name)
+bool TextIArchive::operator()(std::string& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -530,7 +530,7 @@ bool TextIArchive::operator()(std::string& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(bool& value, const char* name)
+bool TextIArchive::operator()(bool& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -544,7 +544,7 @@ bool TextIArchive::operator()(bool& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(signed char& value, const char* name)
+bool TextIArchive::operator()(signed char& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -555,7 +555,7 @@ bool TextIArchive::operator()(signed char& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(unsigned char& value, const char* name)
+bool TextIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -566,7 +566,7 @@ bool TextIArchive::operator()(unsigned char& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(char& value, const char* name)
+bool TextIArchive::operator()(char& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -577,7 +577,7 @@ bool TextIArchive::operator()(char& value, const char* name)
     return false;
 }
 
-bool TextIArchive::operator()(StringListStaticValue& value, const char* name)
+bool TextIArchive::operator()(StringListStaticValue& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();

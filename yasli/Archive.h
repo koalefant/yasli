@@ -17,7 +17,7 @@ typedef long long __int64;
 
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name);
+bool serialize(Archive& ar, T& object, const char* name, const char* label);
 
 class YASLI_API Archive : public RefCounter{
 public:
@@ -52,32 +52,32 @@ public:
     virtual const char* pull(){ return 0; }
 
     // basic types
-    virtual bool operator()(bool& value, const char* name = "")          { return false; }
-    virtual bool operator()(std::string& value, const char* name = "")   { return false; }
-    virtual bool operator()(float& value, const char* name = "")         { return false; }
-    virtual bool operator()(double& value, const char* name = "")         { return false; }
-    virtual bool operator()(int& value, const char* name = "")           { return false; }
-    virtual bool operator()(__int64& value, const char* name = "")       { return false; }
+    virtual bool operator()(bool& value, const char* name = "", const char* label = 0)          { return false; }
+    virtual bool operator()(std::string& value, const char* name = "", const char* label = 0)   { return false; }
+    virtual bool operator()(float& value, const char* name = "", const char* label = 0)         { return false; }
+    virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { return false; }
+    virtual bool operator()(int& value, const char* name = "", const char* label = 0)           { return false; }
+    virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)       { return false; }
 
-	bool operator()(long& value, const char* name = "") { return operator()(*reinterpret_cast<int*>(&value), name); }
-	bool operator()(unsigned long& value, const char* name = "") { return operator()(*reinterpret_cast<unsigned int*>(&value), name); }
+	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name); }
+	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name); }
 
-    virtual bool operator()(unsigned char& value, const char* name = "") { return false; }
-    virtual bool operator()(signed char& value, const char* name = "")   { return false; }
-    virtual bool operator()(char& value, const char* name = "")          { return false; }
+    virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { return false; }
+    virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { return false; }
+    virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { return false; }
 
-    virtual bool operator()(const Serializer& ser, const char* name = "") { return false; }
-    virtual bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
-	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "");
+    virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { return false; }
+    virtual bool operator()(const ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
+	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
 
     // templated switch
     template<class T>
-    bool operator()(const T& value, const char* name = "");
+    bool operator()(const T& value, const char* name = "", const char* label = 0);
 
 	template<class T>
 	bool serialize(const T& value, const char* name, const char* label)
 	{
-		return operator()(const_cast<T&>(value), name);
+		return operator()(const_cast<T&>(value), name, label);
 	}
 private:
     bool isInput_;
@@ -100,24 +100,24 @@ namespace Helpers{
 
     template<class T>
     struct SerializeStruct{
-        static bool invoke(Archive& ar, T& value, const char* name){
-            return ar(Serializer(value), name);
+        static bool invoke(Archive& ar, T& value, const char* name, const char* label){
+            return ar(Serializer(value), name, label);
         };
     };
 
     template<class T>
     struct SerializeStructWithName{
-        static bool invoke(Archive& ar, T& value, const char* name){
-            return value.serialize(ar, name);
+        static bool invoke(Archive& ar, T& value, const char* name, const char* label){
+            return value.serialize(ar, name, label);
         };
     };
 
     template<class Enum>
     struct SerializeEnum{
-        static bool invoke(Archive& ar, Enum& value, const char* name){
+        static bool invoke(Archive& ar, Enum& value, const char* name, const char* label){
             const EnumDescription& enumDescription = getEnumDescription<Enum>();
             ASSERT(enumDescription.registered());
-            return enumDescription.serialize(ar, reinterpret_cast<int&>(value), name);
+            return enumDescription.serialize(ar, reinterpret_cast<int&>(value), name, label);
         };
     };
 
@@ -126,22 +126,22 @@ namespace Helpers{
 
     template<class T, int Size>
     struct SerializeArray<T[Size]>{
-        static bool invoke(Archive& ar, T value[Size], const char* name){
-            return ar(static_cast<const ContainerSerializationInterface&>(ContainerSerializationArrayImpl<T>(value, Size)), name);
+        static bool invoke(Archive& ar, T value[Size], const char* name, const char* label){
+            return ar(static_cast<const ContainerSerializationInterface&>(ContainerSerializationArrayImpl<T>(value, Size)), name, label);
         }
     };
 }
 
 
 template<class T, int Size>
-bool serialize(Archive& ar, T object[Size], const char* name)
+bool serialize(Archive& ar, T object[Size], const char* name, const char* label)
 {
     ASSERT(0);
     return false;
 }
 
 template<class T>
-bool serialize(Archive& ar, const T& object, const char* name)
+bool serialize(Archive& ar, const T& object, const char* name, const char* label)
 {
     T::unable_to_serialize_CONST_object();
     ASSERT(0);
@@ -149,7 +149,7 @@ bool serialize(Archive& ar, const T& object, const char* name)
 }
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name)
+bool serialize(Archive& ar, T& object, const char* name, const char* label)
 {
     using namespace Helpers;
 
@@ -160,10 +160,10 @@ bool serialize(Archive& ar, T& object, const char* name)
 					Identity< SerializeArray<T> >,
 					Identity< SerializeEnum<T> >
 				>
-        >::type::invoke(ar, object, name);
+        >::type::invoke(ar, object, name, label);
 }
 
 template<class T>
-bool Archive::operator()(const T& value, const char* name){
-    return ::serialize(*this, const_cast<T&>(value), name);
+bool Archive::operator()(const T& value, const char* name, const char* label){
+    return ::serialize(*this, const_cast<T&>(value), name, label);
 }

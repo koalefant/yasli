@@ -11,7 +11,7 @@ using std::type_info;
 class Archive;
 class TypeID;
 
-bool YASLI_API serialize(Archive& ar, TypeID& typeID, const char* name);
+bool YASLI_API serialize(Archive& ar, TypeID& typeID, const char* name, const char* label);
 
 class YASLI_API TypeID{
     friend class TypesFactory;

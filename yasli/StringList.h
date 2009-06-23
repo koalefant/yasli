@@ -86,7 +86,7 @@ public:
 };
 
 void splitStringList(StringList* result, const char *str, char sep);
-bool serialize(Archive& ar, StringList& value, const char* name);
+bool serialize(Archive& ar, StringList& value, const char* name, const char* label);
 
 class StringListValue{
 public:
@@ -136,5 +136,5 @@ protected:
 
 class Archive;
 
-bool serialize(Archive& ar, StringListValue& value, const char* name);
-bool serialize(Archive& ar, StringListStaticValue& value, const char* name);
+bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
+bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);

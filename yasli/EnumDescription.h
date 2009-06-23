@@ -19,7 +19,7 @@ public:
     const char* indexByName(const char* name) const;
     int indexByValue(int value) const;
 
-    bool serialize(Archive& ar, int& value, const char* name) const;
+    bool serialize(Archive& ar, int& value, const char* name, const char* label) const;
 
     void add(int value, const char* name, const char* label = ""); // TODO
     const StringListStatic& names() const{ return names_; }
