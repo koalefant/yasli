@@ -4,6 +4,6 @@
 
 void Vect2i::serialize( Archive& ar )
 {
-  ar( x, "" );
-  ar( y, "" );
+  ar( x, "", "x" );
+  ar( y, "", "y" );
 }

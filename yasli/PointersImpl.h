@@ -50,9 +50,9 @@ void SharedPtr<T>::serialize(Archive& ar)
 
     if(ar.isOutput()){
         if(*this){
-            if(ar(oldTypeID, "")){
+            if(ar(oldTypeID, "", "<")){
                 ASSERT(*this);
-                ar(**this, "");
+                ar(**this, "", "<");
             }
             else
                 ar.warning("Unable to write typeID!");
@@ -60,7 +60,7 @@ void SharedPtr<T>::serialize(Archive& ar)
     }
     else{
         TypeID typeID;
-        if(!ar(typeID, "")){
+        if(!ar(typeID, "", "<")){
             if(*this){
                 ASSERT((*this)->refCount() == 1);
                 this->set((T*)0);
@@ -81,7 +81,7 @@ void SharedPtr<T>::serialize(Archive& ar)
                 ASSERT(this->get());
             }
             ASSERT(*this);
-            ar(**this, "");
+            ar(**this, "", "<");
         }
     }
 }

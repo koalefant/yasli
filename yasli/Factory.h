@@ -8,9 +8,9 @@
 template<class _Base>
 struct Constructor0{
     template<class _Derived>
-    void construct(_Derived*& ptr) const
+    void construct(_Derived** ptr) const
     {
-        ptr = new _Derived;
+        *ptr = new _Derived;
     }
 };
 
@@ -21,8 +21,8 @@ struct Constructor1{
     {}
 
     template<class _Derived>
-    void construct(_Derived*& ptr) const{
-        ptr = new _Derived(arg1_);
+    void construct(_Derived** ptr) const{
+        *ptr = new _Derived(arg1_);
     }
 protected:
     _Arg1 arg1_;
@@ -36,8 +36,8 @@ struct Constructor2{
     {}
 
     template<class _Derived>
-    void construct(_Derived*& ptr) const{
-        ptr = new _Derived(arg1_, arg2_);
+    void construct(_Derived** ptr) const{
+        *ptr = new _Derived(arg1_, arg2_);
     }
 protected:
     _Arg1 arg1_;
@@ -53,8 +53,8 @@ struct Constructor3{
     {}
 
     template<class _Derived>
-    void construct(_Derived*& ptr) const{
-        ptr = new _Derived(arg1_, arg2_, arg3_);
+    void construct(_Derived** ptr) const{
+        *ptr = new _Derived(arg1_, arg2_, arg3_);
     }
 protected:
     _Arg1 arg1_;
@@ -80,7 +80,7 @@ public:
         // virtuals:
         _Product* create(_Constructor ctor) const {
             _Derived* result;
-            ctor.construct(result);
+            ctor.construct(&result);
             return result;
         }
         // ^^^
@@ -146,3 +146,9 @@ protected:
 
 #define REGISTER_IN_FACTORY(factory, key, product)              \
     static factory::Creator<product> factory##product##Creator(key); 
+
+#define DECLARE_SEGMENT(fileName) int dataSegment##fileName; 
+
+#define FORCE_SEGMENT(fileName) \
+	extern int dataSegment##fileName; \
+	int* dataSegmentPtr##fileName = &dataSegment##fileName;

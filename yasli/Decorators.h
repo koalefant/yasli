@@ -47,24 +47,20 @@ struct NotDecorator{
 		value_ = value;
 		return *this;
 	}
+    void serialize(Archive& ar)
+    {
+        ar(value_, "value", "Значение");
+    }
 	operator bool() const{ return value_; }
 	bool value_;
 	bool* valuePtr_;
 };
 
 inline bool serialize(Archive& ar, NotDecorator& value, const char* name, const char* label){		
-  /* TODO:
-     if(ar.isEdit()){
-     if(ar.openStruct(*this, name, nameAlt)){
-     ar.serialize(value_, "value", "Значение");
-     ar.closeStruct(name);
-     }
-     return true;
-     }
-     else
-     return ar.serialize(value_, name, nameAlt);
-     */
-  return false;
+    if(ar.isEdit())
+        return ar(Serializer(value), name, label);
+    else
+        return ar(value.value_, name, label);
 }
 
 template<class T, class PointerType = SharedPtr<T> >

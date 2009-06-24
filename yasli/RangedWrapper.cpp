@@ -17,8 +17,6 @@ void RangedWrapperf::serialize(Archive& ar)
 
 bool serialize(Archive& ar, RangedWrapperf& wrapper, const char* name, const char* label)
 {
-	const char* typeName = typeid(RangedWrapperf).name();
-
 	if(ar.inPlace())
 		return ar(*wrapper.valuePointer_, name, label);
 
@@ -48,8 +46,6 @@ void RangedWrapperi::serialize(Archive& ar)
 }
 bool serialize(Archive& ar, RangedWrapperi& wrapper, const char* name, const char* label)
 {
-	const char* typeName = typeid(RangedWrapperf).name();
-
 	if(ar.inPlace())
 		return ar(*wrapper.valuePointer_, name, label);
 
