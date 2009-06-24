@@ -376,7 +376,7 @@ bool TextIArchive::operator()(const Serializer& ser, const char* name, const cha
     return false;
 }
 
-bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const char* name, const char* label)
+bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     if(findName(name)){
         if(openContainerBracket()){
@@ -396,14 +396,14 @@ bool TextIArchive::operator()(const ContainerSerializationInterface& ser, const 
                     RAISE(ErrorRuntime("Reached end of file while reading container!"));
                 putToken();
                 if(index == size)
-                    size = ser.resize(index + 1);
+                    size = index + 1;
                 if(index < size){
-                    ser(*this, index);
+                    ser(*this, "", "");
                 }
                 else{
                     skipBlock();
                 }
-                ++index;
+                ser.next();
             }
             if(size > index)
                 ser.resize(index);

@@ -8,14 +8,14 @@ void Archive::warning(const char* message)
     //std::cout << "WARNING, Archive: " << message << std::endl;
 }
 
-bool Archive::operator()(const ContainerSerializationInterface& ser, const char* name, const char* label)
+bool Archive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     return false;
 }
 
 bool Archive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
 {
-	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name);
+	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name, label);
 }
 // ---------------------------------------------------------------------------
 

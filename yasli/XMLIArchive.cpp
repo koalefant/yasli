@@ -314,7 +314,7 @@ bool XMLIArchive::operator()(const Serializer& ser, const char* name)
     return false;
 }
 
-bool XMLIArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
+bool XMLIArchive::operator()(ContainerSerializationInterface& ser, const char* name)
 {
     if(findNode(name)){
         if(enterNode()){
@@ -327,9 +327,10 @@ bool XMLIArchive::operator()(const ContainerSerializationInterface& ser, const c
             while(true){
                 if(index == size)
                     size = ser.resize(index + 1);
-                if(!ser(*this, index))
+                if(!ser(*this, "", ""))
                     break;
-                ++index;
+                if(!ser.next())
+					break;
             }
             if(size > index)
                 ser.resize(index);

@@ -57,24 +57,24 @@ EnumDescription& getEnumDescription(){
     return EnumDescriptionImpl<Enum>::the();
 }
 
-#define SERIALIZATION_ENUM_BEGIN(Type, name)                                        \
+#define YASLI_ENUM_BEGIN(Type, name)                                                \
     namespace {                                                                     \
         bool registerEnum_##Type();                                                 \
         bool Type##_enum_registered = registerEnum_##Type();                        \
         bool registerEnum_##Type(){                                                 \
             EnumDescription& description = EnumDescriptionImpl<Type>::the();
 
-#define SERIALIZATION_ENUM_BEGIN_NESTED(Class, Enum, name)                          \
+#define YASLI_ENUM_BEGIN_NESTED(Class, Enum, name)                                  \
     namespace {                                                                     \
 	bool registerEnum_##Class##_##Enum();                                           \
 		bool Class##_##Enum##_enum_registered = registerEnum_##Class##_##Enum();    \
 		bool registerEnum_##Class##_##Enum(){                                       \
 			EnumDescription& description = EnumDescriptionImpl<Class::Enum>::the();
                                                                                     
-#define SERIALIZATION_ENUM_VALUE(value, name)                                       \
+#define YASLI_ENUM_VALUE(value, name)                                               \
             description.add(int(value), name);                                      
                                                                                    
-#define SERIALIZATION_ENUM_END()													\
+#define YASLI_ENUM_END()													        \
             return true;                                                            \
         };                                                                          \
     };

@@ -30,7 +30,7 @@ public:
     bool operator()(char& value, const char* name = "", const char* label = 0);
 
     bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
-    bool operator()(const ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
+    bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 
     bool operator()(StringListStaticValue& value, const char* name = "", const char* label = 0);
 

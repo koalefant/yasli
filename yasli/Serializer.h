@@ -72,12 +72,13 @@ private:
 class ContainerSerializationInterface{
 public:
     virtual std::size_t size() const = 0;
-    virtual std::size_t resize(std::size_t size) const = 0;
+    virtual std::size_t resize(std::size_t size) = 0;
 
     virtual void* pointer() const = 0;
     virtual TypeID type() const = 0;
+    virtual bool next() = 0;
 
-    virtual bool operator()(Archive& ar, std::size_t index) const = 0;
+    virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
     virtual operator bool() const = 0;
     virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
 };
@@ -88,27 +89,69 @@ class ContainerSerializationSTLImpl : public ContainerSerializationInterface/*{{
 public:
     explicit ContainerSerializationSTLImpl(Container* container = 0)
     : container_(container)
+    , size_(container->size())
+    , it_(container->begin())
     {
+        ASSERT(container_);
+    }
+
+    template<class T, class A> const
+    void resizeHelper(size_t _size, std::vector<T, A>& _v)
+    {
+        _v.resize( _size );
+    }
+
+    void resizeHelper(size_t _size, ...) const
+    {
+        while(container_->size() > _size)
+        {
+            typename Container::iterator it = container_->end();
+            --it;
+            container_->erase(it);
+        }
+        while(container_->size() < _size)
+            container_->insert(container_->end(), Element());
     }
 
     // from ContainerSerializationInterface
     std::size_t size() const{
-        ASSERT(container_);
+        CHECK(container_ != 0, return 0);
         return container_->size();
     }
-    std::size_t resize(std::size_t size) const{
-        ASSERT(container_);
-        container_->resize(size);
+    std::size_t resize(std::size_t size){
+        CHECK(container_ != 0, return 0);
+        resizeHelper(size, container_);
+        it_ = container_->begin();
+        size_ = size;
         return size;
     }
 
     void* pointer() const{ return reinterpret_cast<void*>(container_); }
     TypeID type() const{ return TypeID::get<Element>(); }
 
+    bool next()
+    {
+        CHECK(container_ && it_ != container_->end(), return false);
+        ++it_;
+        return it_ != container_->end();
+    }
+
+    bool operator()(Archive& ar, const char* name, const char* label){
+        CHECK(container_, return false);
+        if(it_ == container_->end())
+		{
+			it_ = container_->insert(container_->end(), Element());
+			return ar(*it_, name, label);
+		}
+		else
+			return ar(*it_, name, label);
+    }
+    /*
     bool operator()(Archive& ar, std::size_t index) const{
-        ASSERT(container_ && index >= 0 && index < container_->size());
+        CHECK(container_ && size_t(index) < container_->size());
         return ar((*container_)[index]);
     }
+    */
     operator bool() const{ return container_ != 0; }
     void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
         Element element;
@@ -117,6 +160,8 @@ public:
     // ^^^
 protected:
     Container* container_;
+    typename Container::iterator it_;
+    size_t size_;
 };/*}}}*/
 
 template<class T>

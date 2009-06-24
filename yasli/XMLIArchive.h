@@ -33,7 +33,7 @@ public:
     bool operator()(char& value, const char* name = "");
 
     bool operator()(const Serializer& ser, const char* name = "");
-    bool operator()(const ContainerSerializationInterface& ser, const char* name = "");
+    bool operator()(ContainerSerializationInterface& ser, const char* name = "");
 
 	using Archive::operator();
 private:

@@ -17,7 +17,7 @@ bool serialize(Archive& ar, StringListValue& value, const char* name, const char
         std::string str;
         if(ar.isOutput())
             str = value.c_str();
-        if(ar(str, name) && ar.isInput()){
+        if(ar(str, name, label) && ar.isInput()){
             value = str.c_str();
             return true;
         }

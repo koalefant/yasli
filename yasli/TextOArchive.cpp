@@ -215,7 +215,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name, const cha
 }
 
 
-bool TextOArchive::operator()(const ContainerSerializationInterface& ser, const char* name, const char* label)
+bool TextOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
@@ -224,8 +224,11 @@ bool TextOArchive::operator()(const ContainerSerializationInterface& ser, const 
     stack_.push_back(Level(false, position, strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2));
 
     std::size_t size = ser.size();
-    for(std::size_t i = 0; i < size; ++i)
-        ser(*this, i);
+    if(size > 0){
+        do{
+            ser(*this, "", "");
+        }while(ser.next());
+    }
 
     bool joined = joinLinesIfPossible();
     stack_.pop_back();
