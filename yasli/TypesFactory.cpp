@@ -80,6 +80,16 @@ const char* TypeID::name() const{
 		return name_.c_str();
 }
 
+const char* TypeID::label() const{
+    const TypeDescription* description = TypeLibrary::the().find(*this);
+    if(description)
+        return description->label();
+    else if(typeInfo_)
+        return typeInfo_->name();
+	else
+		return name_.c_str();
+}
+
 bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
 {
     std::string typeName;

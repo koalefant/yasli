@@ -49,6 +49,7 @@ public:
     }
     std::size_t sizeOf() const;
     const char* name() const;
+    const char* label() const;
     bool registered() const;
 
     bool operator==(const TypeID& rhs) const{

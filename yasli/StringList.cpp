@@ -42,9 +42,19 @@ bool serialize(Archive& ar, StringListStaticValue& value, const char* name, cons
     }
 }
 // ---------------------------------------------------------------------------
-void splitStringList(StringList* result, const char *str, char sep)
+void splitStringList(StringList* result, const char *str, char delimeter)
 {
-  ASSERT(0);
+    result->clear();
+
+    const char* ptr = str;
+    for(; *ptr; ++ptr)
+	{
+        if(*ptr == delimeter){
+			result->push_back(std::string(str, ptr));
+            str = ptr + 1;
+        }
+	}
+	result->push_back(std::string(str, ptr));
 }
 
 bool serialize(Archive& ar, StringList& value, const char* name, const char* label)

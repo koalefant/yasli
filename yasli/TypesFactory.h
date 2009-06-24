@@ -14,18 +14,21 @@ class Archive;
 
 class YASLI_API TypeDescription{
 public:
-    TypeDescription(TypeID typeID, const char* name, std::size_t size)
+    TypeDescription(TypeID typeID, const char* name, const char *label, std::size_t size)
     : name_(name)
+	, label_(label)
     , size_(size)
     , typeID_(typeID)
     {
     }
     const char* name() const{ return name_; }
+	const char* label() const{ return label_; }
     std::size_t size() const{ return size_; }
     TypeID typeID() const{ return typeID_; }
 
 protected:
     const char* name_;
+	const char* label_;
     std::size_t size_;
     TypeID typeID_;
 };
@@ -40,6 +43,7 @@ public:
 
 	virtual int size() const = 0;
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
+	virtual void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) = 0;
 protected:
 	TypeID baseType_;
 
@@ -123,6 +127,17 @@ public:
             ++it;
         return it->second->create();
     }
+	
+	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label)
+	{
+        CHECK(size_t(index) < typeToCreatorMap_.size(), return);
+        typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
+        while(index--)
+            ++it;
+        BaseType* ptr = it->second->create();
+		ar(*ptr, name, label);
+		delete ptr;
+	}
 	// from ClassFactoryInterface:
 	int size() const{ return typeToCreatorMap_.size(); }
 	const TypeDescription* descriptionByIndex(int index) const{
@@ -161,12 +176,12 @@ protected:
 
 #define YASLI_TYPE_NAME(Type, name) \
 namespace{ \
-    const TypeDescription Type##_Description(TypeID::get<Type>(), name, sizeof(Type)); \
+	const TypeDescription Type##_Description(TypeID::get<Type>(), #Type, name, sizeof(Type)); \
     bool registered_##Type = TypeLibrary::the().registerType(&Type##_Description) != 0; \
 }
 
 #define YASLI_CLASS(BaseType, Type, name) \
-	const TypeDescription Type##BaseType##_DerivedDescription(TypeID::get<Type>(), name, sizeof(Type)); \
+	const TypeDescription Type##BaseType##_DerivedDescription(TypeID::get<Type>(), #Type, name, sizeof(Type)); \
 	ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
 	int dummyForType_##Type##BaseType;
 

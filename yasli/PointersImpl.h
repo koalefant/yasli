@@ -33,7 +33,6 @@ public:
 		return reinterpret_cast<void*>(ptr_.get());
 	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
-
 protected:
 	mutable SharedPtr<T>& ptr_;
 };
