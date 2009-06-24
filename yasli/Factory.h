@@ -145,7 +145,7 @@ protected:
 };
 
 #define REGISTER_IN_FACTORY(factory, key, product)              \
-    static factory::Creator<product> factory##product##Creator(key); 
+	static factory::Creator<product> factory##product##Creator(key); 
 
 #define DECLARE_SEGMENT(fileName) int dataSegment##fileName; 
 

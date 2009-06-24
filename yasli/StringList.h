@@ -90,6 +90,11 @@ bool serialize(Archive& ar, StringList& value, const char* name, const char* lab
 
 class StringListValue{
 public:
+    explicit StringListValue(const StringListStaticValue &value)
+	{
+        stringList_.insert( stringList_.end(), value.stringList().begin(), value.stringList().end() );
+        index_ = value.index();
+	}
     explicit StringListValue(const StringList& stringList = StringList::EMPTY, int value = StringList::npos)
     : stringList_(stringList)
     , index_(value)

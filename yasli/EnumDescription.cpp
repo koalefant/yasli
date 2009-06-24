@@ -6,6 +6,7 @@
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
+	CHECK( name && label, return );
     nameToValue_[name] = value;
     labelToValue_[label] = value;
     valueToName_[value] = name;
