@@ -1,0 +1,5 @@
+glob:*.obj
+glob:*.pch
+glob:*.pdb
+glob:*.idb
+glob:*.vcproj.*.user
