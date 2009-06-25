@@ -8,7 +8,13 @@
 class Token{
     friend class Tokenizer;
 public:
-    Token(const char* _start = 0, const char* _end = 0)
+    Token(const char* _str = 0)
+	: start_(_str)
+	, end_(_str ? _str + strlen(_str) : 0)
+	{
+	}
+
+    Token(const char* _start, const char* _end)
     : start_(_start)
     , end_(_end)
     {}
@@ -20,6 +26,11 @@ public:
 
     std::size_t length() const{ return end_ - start_; }
 
+    bool operator==(const Token& rhs) const{
+		if(length() != rhs.length())
+			return false;
+        return memcmp(start_, rhs.start_, length()) == 0;
+    }
     bool operator==(const std::string& rhs) const{
         return operator==(rhs.c_str());
     }

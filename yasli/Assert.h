@@ -17,15 +17,18 @@ int assertionDialog(const char* message, const char* function, const char* fileN
           case 2: __asm{ int 3 } break;  \
           }  \
       } 
+#  define ASSERT_STR(x, str) ASSERT(x)
 #  define VERIFY(x) ASSERT(x);
 # else
 #  include <assert.h>
 #  define ASSERT(x) assert((x))
+#  define ASSERT_STR(x) assert((x))
 #  define VERIFY(x) assert(x);
 # endif
 //# define TRACE(x) ErrorHelpers::trace((x))
 #else
 # define ASSERT(x)
+# define ASSERT_STR(x)
 # define VERIFY(x) (x)
 //# define TRACE(x)
 #endif

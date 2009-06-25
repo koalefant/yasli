@@ -401,6 +401,22 @@
 			Name="archives"
 			>
 			<File
+				RelativePath=".\BinaryIArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BinaryIArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BinaryOArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BinaryOArchive.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TextIArchive.cpp"
 				>
 			</File>
