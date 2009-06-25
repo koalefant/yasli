@@ -3,6 +3,7 @@
 #include "yasli/EnumDescription.h"
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
+#include "yasli/StringList.h"
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
@@ -27,26 +28,77 @@ bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const
         }
     }
 
-    StringListStaticValue stringListValue(names(), index);
+	StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
     ar(stringListValue, name, label);
     if(ar.isInput()){
         if(stringListValue.index() == StringListStatic::npos)
             return false;
-        value = this->value(stringListValue.c_str());
+		value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
     }
     return true;
 }
+
+bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const
+{
+    if(ar.isOutput())
+    {
+        StringListStatic names = nameCombination(value);
+		std::string str;
+        joinStringList(&str, names, '|');
+        return ar(str, name, label);
+    }
+    else
+    {
+		std::string str;
+        if(!ar(str, name, label))
+            return false;
+        StringList values;
+        splitStringList(&values, str.c_str(), '|');
+        StringList::iterator it;
+        value = 0;
+        for(it = values.begin(); it != values.end(); ++it)
+            value |= this->value(it->c_str());
+		return true;
+    }
+}
+
+
 const char* EnumDescription::name(int value) const
 {
     ValueToName::const_iterator it = valueToName_.find(value);
-    ASSERT(it != valueToName_.end());
+    CHECK(it != valueToName_.end(), return "");
     return it->second;
 }
 const char* EnumDescription::label(int value) const
 {
-  // TODO
-  return "";
+    ValueToLabel::const_iterator it = valueToLabel_.find(value);
+    CHECK(it != valueToLabel_.end(), return "");
+    return it->second;
 }
+
+StringListStatic EnumDescription::nameCombination(int bitVector) const 
+{
+    StringListStatic strings;
+    for(ValueToName::const_iterator i = valueToName_.begin(); i != valueToName_.end(); ++i)
+        if((bitVector & i->first) == i->first){
+            bitVector &= ~i->first;
+            strings.push_back(i->second);
+        }
+    return strings;
+}
+
+StringListStatic EnumDescription::labelCombination(int bitVector) const 
+{
+    StringListStatic strings;
+    for(ValueToLabel::const_iterator i = valueToLabel_.begin(); i != valueToLabel_.end(); ++i)
+        if(i->second && (bitVector & i->first) == i->first){
+            bitVector &= ~i->first;
+            strings.push_back(i->second);
+        }
+    return strings;
+}
+
+
 int EnumDescription::indexByValue(int value) const
 {
     ValueToIndex::const_iterator it = valueToIndex_.find(value);
@@ -67,10 +119,3 @@ int EnumDescription::valueByLabel(const char* label) const
     CHECK(it != labelToValue_.end(), return 0);
     return it->second;
 }
-
-std::string EnumDescription::labelCombination(int value) const
-{
-	ASSERT(0); // TODO
-	return std::string();
-}
-

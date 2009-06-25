@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 
+#include "yasli/ConstString.h"
 #include "yasli/StringList.h"
 #include "yasli/API.h"
 #include "yasli/TypeID.h"
@@ -20,20 +21,22 @@ public:
     int indexByValue(int value) const;
 
     bool serialize(Archive& ar, int& value, const char* name, const char* label) const;
+    bool serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const;
 
     void add(int value, const char* name, const char* label = ""); // TODO
     const StringListStatic& names() const{ return names_; }
     const StringListStatic& labels() const{ return labels_; }
+    StringListStatic nameCombination(int bitVector) const;
+    StringListStatic labelCombination(int bitVector) const;
     bool registered() const { return !names_.empty(); }
 	TypeID type() const{ return type_; }
-	std::string labelCombination(int value) const;
 private:
     StringListStatic names_;
     StringListStatic labels_;
 
-    typedef std::map<const char*, int> NameToValue;
+    typedef std::map<ConstString, int> NameToValue;
     NameToValue nameToValue_;
-    typedef std::map<const char*, int> LabelToValue;
+    typedef std::map<ConstString, int> LabelToValue;
     LabelToValue labelToValue_;
     typedef std::map<int, int> ValueToIndex;
     ValueToIndex valueToIndex_;
@@ -57,22 +60,22 @@ EnumDescription& getEnumDescription(){
     return EnumDescriptionImpl<Enum>::the();
 }
 
-#define YASLI_ENUM_BEGIN(Type, name)                                                \
+#define YASLI_ENUM_BEGIN(Type, label)                                                \
     namespace {                                                                     \
         bool registerEnum_##Type();                                                 \
         bool Type##_enum_registered = registerEnum_##Type();                        \
         bool registerEnum_##Type(){                                                 \
             EnumDescription& description = EnumDescriptionImpl<Type>::the();
 
-#define YASLI_ENUM_BEGIN_NESTED(Class, Enum, name)                                  \
+#define YASLI_ENUM_BEGIN_NESTED(Class, Enum, label)                                  \
     namespace {                                                                     \
 	bool registerEnum_##Class##_##Enum();                                           \
 		bool Class##_##Enum##_enum_registered = registerEnum_##Class##_##Enum();    \
 		bool registerEnum_##Class##_##Enum(){                                       \
 			EnumDescription& description = EnumDescriptionImpl<Class::Enum>::the();
                                                                                     
-#define YASLI_ENUM_VALUE(value, name)                                               \
-            description.add(int(value), name);                                      
+#define YASLI_ENUM_VALUE(value, label)                                              \
+		description.add(int(value), #value, label);                                      
                                                                                    
 #define YASLI_ENUM_END()													        \
             return true;                                                            \

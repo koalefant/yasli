@@ -253,6 +253,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BitVector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BitVectorImpl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Colors.h"
 				>
 			</File>

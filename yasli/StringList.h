@@ -85,7 +85,6 @@ public:
     static StringList EMPTY;
 };
 
-void splitStringList(StringList* result, const char *str, char sep);
 bool serialize(Archive& ar, StringList& value, const char* name, const char* label);
 
 class StringListValue{
@@ -143,3 +142,7 @@ class Archive;
 
 bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
 bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
+
+void splitStringList(StringList* result, const char *str, char sep);
+void joinStringList(std::string* result, const StringList& stringList, char sep);
+void joinStringList(std::string* result, const StringListStatic& stringList, char sep);

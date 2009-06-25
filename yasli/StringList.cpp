@@ -57,6 +57,31 @@ void splitStringList(StringList* result, const char *str, char delimeter)
 	result->push_back(std::string(str, ptr));
 }
 
+void joinStringList(std::string* result, const StringList& stringList, char sep)
+{
+    CHECK(result != 0, return);
+    result->clear();
+    for(StringList::const_iterator it = stringList.begin(); it != stringList.end(); ++it)
+    {
+        if(!result->empty())
+            result += sep;
+        result->append(*it);
+    }
+}
+
+void joinStringList(std::string* result, const StringListStatic& stringList, char sep)
+{
+    CHECK(result != 0, return);
+    result->clear();
+    for(StringListStatic::const_iterator it = stringList.begin(); it != stringList.end(); ++it)
+    {
+        if(!result->empty())
+            (*result) += sep;
+        CHECK(*it != 0, continue);
+        result->append(*it);
+    }
+}
+
 bool serialize(Archive& ar, StringList& value, const char* name, const char* label)
 {
 	return ar(static_cast<std::vector<std::string>&>(value), name, label);

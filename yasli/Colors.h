@@ -5,7 +5,6 @@
 class Archive;
 struct Color3c;
 
-
 struct Color4f
 {
 	float r,g,b,a;
@@ -104,7 +103,7 @@ struct Color3c
 	inline Color3c operator * (int f) const 		{ return Color3c(r*f,g*f,b*f); }
 	inline Color3c operator / (int f) const 		{ if(f!=0) f=(1<<16)/f; else f=1<<16; return Color3c((r*f)>>16,(g*f)>>16,(b*f)>>16); }
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
-	__forceinline void interpolate(const Color3c &u,const Color3c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); }
+	void interpolate(const Color3c &u,const Color3c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); }
 	void serialize(Archive& ar);
 };
 
