@@ -469,6 +469,29 @@ bool TextIArchive::operator()(unsigned int& value, const char* name, const char*
     return false;
 }
 
+
+bool TextIArchive::operator()(short& value, const char* name, const char* label)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (short)strtol(token_.begin(), 0, 10);
+        return true;
+    }
+    return false;
+}
+
+bool TextIArchive::operator()(unsigned short& value, const char* name, const char* label)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (unsigned short)strtoul(token_.begin(), 0, 10);
+        return true;
+    }
+    return false;
+}
+
 bool TextIArchive::operator()(__int64& value, const char* name, const char* label)
 {
     if(findName(name)){

@@ -147,6 +147,22 @@ bool TextOArchive::operator()(unsigned int& value, const char* name, const char*
     return true;
 }
 
+bool TextOArchive::operator()(short& value, const char* name, const char* label)
+{
+    placeIndent();
+    placeName(name);
+    (*buffer_) << value << "\n";
+    return true;
+}
+
+bool TextOArchive::operator()(unsigned short& value, const char* name, const char* label)
+{
+    placeIndent();
+    placeName(name);
+    (*buffer_) << value << "\n";
+    return true;
+}
+
 bool TextOArchive::operator()(__int64& value, const char* name, const char* label)
 {
     placeIndent();

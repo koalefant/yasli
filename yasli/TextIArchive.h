@@ -19,6 +19,8 @@ public:
     bool operator()(std::string& value, const char* name = "", const char* label = 0);
     bool operator()(float& value, const char* name = "", const char* label = 0);
     bool operator()(double& value, const char* name = "", const char* label = 0);
+    bool operator()(short& value, const char* name = "", const char* label = 0);
+    bool operator()(unsigned short& value, const char* name = "", const char* label = 0);
     bool operator()(int& value, const char* name = "", const char* label = 0);
     bool operator()(unsigned int& value, const char* name = "", const char* label = 0);
 	bool operator()(__int64& value, const char* name = "", const char* label = 0);
