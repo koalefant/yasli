@@ -12,11 +12,10 @@ public:
     TextOArchive(int textWidth = 80, const char* header = 0);
     ~TextOArchive();
 
-    void open(const char* fileName);
-    void close();
+    bool save(const char* fileName);
 
     const char* c_str() const;    
-    size_t size() const;    
+    size_t length() const;    
 
     // from Archive:
     bool operator()(bool& value, const char* name = "", const char* label = 0);
@@ -65,5 +64,4 @@ private:
     const char* header_;
     int textWidth_;
 	std::string fileName_;
-	bool open_;
 };

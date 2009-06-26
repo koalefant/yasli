@@ -21,7 +21,7 @@ TextIArchive::~TextIArchive()
     reader_ = 0;
 }
 
-void TextIArchive::openFromMemory(char* buffer, size_t length, bool free)
+bool TextIArchive::open(char* buffer, size_t length, bool free)
 {
 	if(buffer)
 		reader_ = new MemoryReader(buffer, length, free);
@@ -33,9 +33,10 @@ void TextIArchive::openFromMemory(char* buffer, size_t length, bool free)
 	readToken();
 	putToken();
 	stack_.back().start = token_.end();
+	return true;
 }
 
-void TextIArchive::open(const char* filename)
+bool TextIArchive::load(const char* filename)
 {
     if(std::FILE* file = std::fopen(filename, "rb")){
         std::fseek(file, 0, SEEK_END);
@@ -50,33 +51,28 @@ void TextIArchive::open(const char* filename)
             long elementsRead = std::fread(buffer, fileSize, 1, file);
             ASSERT(((char*)(buffer))[fileSize] == '\0');
             if(elementsRead != 1){
+				return false;
+				/*
                 MemoryWriter msg;
                 msg << "Unable to read entire file: " << filename;
                 RAISE(ErrorRuntime(msg.c_str()));
+				*/
             }
         }
         std::fclose(file);
 
 		filename_ = filename;
-		openFromMemory((char*)buffer, fileSize, true);
+		return open((char*)buffer, fileSize, true);
     }
     else{
+		/*
         MemoryWriter msg;
         msg << "Unable to open file for reading: " << filename;
         RAISE(ErrorRuntime(msg.c_str()));
+		*/
+		return false;
     }
 }
-
-bool TextIArchive::isOpen() const
-{
-	return reader_ != 0;
-}
-
-void TextIArchive::close()
-{
-
-}
-
 
 Token TextIArchive::readToken()
 {

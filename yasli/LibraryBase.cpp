@@ -39,7 +39,7 @@ void LibraryBase::preloadContent()
     TextIArchive ia;
 
     try{
-        ia.open(filename.c_str());
+        ia.load(filename.c_str());
         serializePreload(ia);
     }
     catch(ErrorGeneric& error){
@@ -54,7 +54,7 @@ void LibraryBase::loadContent()
     TextIArchive ia;
 
     try{
-        ia.open(filename.c_str());
+        ia.load(filename.c_str());
         serialize(ia);
     }
     catch(ErrorGeneric& error){
@@ -83,8 +83,8 @@ void LibraryBase::saveContent()
     std::cout << "Saving library: " << filename << std::endl;
 
     try{
-        oa.open(filename.c_str());
         serialize(oa);
+		oa.save(filename.c_str());
     }
     catch(ErrorGeneric& error){
         std::cout << "Error saving library " << filename << ":" << error.what() << std::endl;

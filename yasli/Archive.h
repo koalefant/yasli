@@ -73,10 +73,14 @@ public:
     virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
 
+
     // templated switch
     template<class T>
     bool operator()(const T& value, const char* name = "", const char* label = 0);
 
+    // for compatibility
+	virtual bool openBlock(const char* name, const char* label) { return true; }
+	virtual void closeBlock() {}
 	template<class T>
 	bool serialize(const T& value, const char* name, const char* label)
 	{

@@ -11,10 +11,8 @@ public:
     TextIArchive();
     ~TextIArchive();
 
-    void open(const char* filename);
-	void openFromMemory(char* buffer, size_t length, bool free = false);
-	bool isOpen() const;
-    void close();
+    bool load(const char* filename);
+	bool open(char* buffer, size_t length, bool free = false);
 
     // virtuals:
     bool operator()(bool& value, const char* name = "", const char* label = 0);
