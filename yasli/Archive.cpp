@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "yasli/Archive.h"
+#include "yasli/TypesFactory.h"
 
+#include <string>
 #include <iostream>
 
 void Archive::warning(const char* message)
@@ -66,4 +68,8 @@ void PointerSerializationInterface::serialize(Archive& ar) const
             ar(serializer(), "");
         }
     }	
+}
+
+namespace std{
+YASLI_TYPE_NAME(string, "string")
 }

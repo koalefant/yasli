@@ -19,6 +19,11 @@ public:
 
 class StringListStaticValue{
 public:
+	StringListStaticValue(const StringListStaticValue& original)
+	: stringList_(original.stringList_)
+	, index_(original.index_)
+	{
+	}
     explicit StringListStaticValue(const StringListStatic& stringList = StringListStatic::EMPTY, int value = StringListStatic::npos)
     : stringList_(&stringList)
     , index_(value)
@@ -94,6 +99,11 @@ public:
         stringList_.insert( stringList_.end(), value.stringList().begin(), value.stringList().end() );
         index_ = value.index();
 	}
+    StringListValue(const StringListValue &value)
+	{
+		stringList_ = value.stringList_;
+        index_ = value.index_;
+	}
     explicit StringListValue(const StringList& stringList = StringList::EMPTY, int value = StringList::npos)
     : stringList_(stringList)
     , index_(value)
@@ -132,6 +142,7 @@ public:
     template<class Archive>
     void serialize(Archive& ar) {
         ar(index_, "index");
+		ar(stringList_, "stringList");
     }
 protected:
     StringList stringList_;

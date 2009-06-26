@@ -96,22 +96,13 @@ bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
     if(ar.isOutput()){
         typeName = typeID.name();
         return ar(typeName, name);
-		/*
-        if(typeName == ""){
-            MemoryWriter msg;
-            if(typeID.typeInfo())
-                msg << "Unable to write TypeID, unregistered type_info: '" << typeID.typeInfo()->name() << "'";
-            else
-                msg << "Unable to write TypeID, null type_info.";
-            ar.warning(msg.c_str());
-            return false;
-        }
-        else
-		*/
     }
     else{
         if(ar(typeName, name)){
-            typeID = TypeID(typeName.c_str());
+			if(!typeName.empty())
+				typeID = TypeID(typeName.c_str());
+			else
+				typeID = TypeID();
             if(!typeID){
                 MemoryWriter msg;
                 msg << "Unable to read TypeID, unregistered type name: \'" << typeName.c_str() << "'";
