@@ -22,13 +22,13 @@ int assertionDialog(const char* message, const char* function, const char* fileN
 # else
 #  include <assert.h>
 #  define ASSERT(x) assert((x))
-#  define ASSERT_STR(x) assert((x))
+#  define ASSERT_STR(x, str) assert((x))
 #  define VERIFY(x) assert(x);
 # endif
 //# define TRACE(x) ErrorHelpers::trace((x))
 #else
 # define ASSERT(x)
-# define ASSERT_STR(x)
+# define ASSERT_STR(x, str)
 # define VERIFY(x) (x)
 //# define TRACE(x)
 #endif
