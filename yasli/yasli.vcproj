@@ -393,6 +393,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Vect2f.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vect2f.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Vect2i.cpp"
 				>
 			</File>

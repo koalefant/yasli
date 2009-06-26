@@ -1,6 +1,7 @@
 #pragma once
 
 class Archive;
+struct Vect2f;
 struct Vect2i{
 
     enum ID_init{ ID };
@@ -11,6 +12,7 @@ struct Vect2i{
     Vect2i()
     {
     }
+    explicit Vect2i(const Vect2f&);
     Vect2i(int _x, int _y){
         set(_x, _y);
     }
