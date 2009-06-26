@@ -4,8 +4,8 @@
 using std::string;
 const unsigned int BINARY_MAGIC = 0xb1a4c17e;
 
-BinaryIArchive::BinaryIArchive()
-: Archive(true, true)
+BinaryIArchive::BinaryIArchive(bool pretendToBeEdit)
+: Archive(true, pretendToBeEdit)
 , buffer_(0)
 , size_(0)
 , end_(0)

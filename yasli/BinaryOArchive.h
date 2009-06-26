@@ -8,7 +8,7 @@ enum BinaryNode;
 class BinaryOArchive : public Archive{
 public:
 
-  BinaryOArchive(bool writeTypeInfo = false);
+  BinaryOArchive(bool pretendToBeEdit);
   ~BinaryOArchive() {}
 
   void clear();

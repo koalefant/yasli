@@ -7,7 +7,7 @@
 class BinaryIArchive : public Archive{
 public:
 
-  BinaryIArchive();
+  BinaryIArchive(bool pretendToBeEdit);
   ~BinaryIArchive();
 
   bool load(const char* fileName);

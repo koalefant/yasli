@@ -9,24 +9,25 @@ struct Color4f
 {
 	float r,g,b,a;
 	
-	Color4f() 											{ }
-	Color4f(float r_,float g_,float b_,float a_=1.f)		{ r = r_; g = g_; b = b_; a = a_; }
+	Color4f() {}
+	Color4f(float _r, float _g, float _b, float _a = 1.0f)
+    : r(_r), g(_g), b(_b), a(_a) {}
 	explicit Color4f(const struct Color4c& color);
 
-	void set(float r_,float g_,float b_,float a_)	{ r = r_; g = g_; b = b_; a = a_; }
+	void set(float _r, float _g, float _b, float _a) { r = _r; g = _g; b = _b; a = _a; }
 
 	void setHSV(float h,float s,float v, float alpha = 1.f);
 
-	Color4f& operator += (const Color4f &color)	{ r+=color.r; g+=color.g; b+=color.b; a+=color.a; return *this; }
-	Color4f& operator -= (const Color4f &color)	{ r-=color.r; g-=color.g; b-=color.b; a-=color.a; return *this; }
-	Color4f& operator *= (const Color4f &color)	{ r*=color.r; g*=color.g; b*=color.b; a*=color.a; return *this; }
-	Color4f& operator *= (float f)			{ r*=f; g*=f; b*=f; a*=f; return *this; }
-	Color4f& operator /= (float f)			{ if(f!=0) f=1/f; else f=0.001f; r*=f; g*=f; b*=f; a*=f; return *this; }
-	Color4f	operator + (const Color4f &color) const	{ Color4f tmp(r+color.r,g+color.g,b+color.b,a+color.a); return tmp; }
-	Color4f	operator - (const Color4f &color) const	{ Color4f tmp(r-color.r,g-color.g,b-color.b,a-color.a); return tmp; }
-	Color4f	operator * (const Color4f &color) const	{ Color4f tmp(r*color.r,g*color.g,b*color.b,a*color.a); return tmp; }
-	Color4f	operator * (float f) const 		{ Color4f tmp(r*f,g*f,b*f,a*f); return tmp; }
-	Color4f	operator / (float f) const 		{ if(f!=0.f) f=1/f; else f=0.001f; Color4f tmp(r*f,g*f,b*f,a*f); return tmp; }
+	Color4f& operator+= (const Color4f &color)	{ r+=color.r; g+=color.g; b+=color.b; a+=color.a; return *this; }
+	Color4f& operator-= (const Color4f &color)	{ r-=color.r; g-=color.g; b-=color.b; a-=color.a; return *this; }
+	Color4f& operator*= (const Color4f &color)	{ r*=color.r; g*=color.g; b*=color.b; a*=color.a; return *this; }
+	Color4f& operator*= (float f)			{ r*=f; g*=f; b*=f; a*=f; return *this; }
+	Color4f& operator/= (float f)			{ if(f!=0) f=1/f; else f=0.001f; r*=f; g*=f; b*=f; a*=f; return *this; }
+	Color4f	operator+ (const Color4f &color) const	{ Color4f tmp(r+color.r,g+color.g,b+color.b,a+color.a); return tmp; }
+	Color4f	operator- (const Color4f &color) const	{ Color4f tmp(r-color.r,g-color.g,b-color.b,a-color.a); return tmp; }
+	Color4f	operator* (const Color4f &color) const	{ Color4f tmp(r*color.r,g*color.g,b*color.b,a*color.a); return tmp; }
+	Color4f	operator* (float f) const 		{ Color4f tmp(r*f,g*f,b*f,a*f); return tmp; }
+	Color4f	operator/ (float f) const 		{ if(f!=0.f) f=1/f; else f=0.001f; Color4f tmp(r*f,g*f,b*f,a*f); return tmp; }
 	void mul3(const Color4f& x,const Color4f& y){r=x.r*y.r;g=x.g*y.g;b=x.b*y.b;}
 
 	int R() const 						{ return round(255*r); }

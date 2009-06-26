@@ -7,8 +7,8 @@
 
 const unsigned int BINARY_MAGIC = 0xb1a4c17e;
 
-BinaryOArchive::BinaryOArchive(bool writeTypeInfo)
-: Archive(false, true)
+BinaryOArchive::BinaryOArchive(bool pretendToBeEdit)
+: Archive(false, pretendToBeEdit)
 {
     clear();
 }

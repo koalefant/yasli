@@ -261,6 +261,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Colors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Colors.h"
 				>
 			</File>
