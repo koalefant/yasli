@@ -23,7 +23,29 @@ void BinaryOArchive::clear()
 size_t BinaryOArchive::length() const
 { 
     CHECK(stream_, return 0);
-    return stream_->size();
+    return stream_->position();
+}
+
+const char* BinaryOArchive::buffer()
+{
+    CHECK(stream_, return 0);
+    return (const char*)stream_->buffer();
+}
+
+bool BinaryOArchive::save(const char* filename)
+{
+    FILE* f = fopen(filename, "wb");
+    if(!f)
+        return false;
+
+    if(fwrite(buffer(), 1, length(), f) != length())
+    {
+        fclose(f);
+        return false;
+    }
+
+    fclose(f);
+    return true;
 }
 
 void BinaryOArchive::openContainer(const char* name, int size, const char* typeName)
@@ -64,7 +86,7 @@ void BinaryOArchive::write(const char *_string)
 
 void BinaryOArchive::openNode(BinaryNode _type, const char *name)
 {
-    blockSizeOffsets_.push_back(stream_->size());
+    blockSizeOffsets_.push_back(stream_->position());
     unsigned int size = 0;
     stream_->write((const char*)&size, sizeof(size)); // length, shall be overwritten in closeNode
     unsigned char type = (unsigned char)(_type);
@@ -79,10 +101,10 @@ void BinaryOArchive::closeNode()
     blockSizeOffsets_.pop_back();
 
     unsigned int *blockSize = (unsigned int*)((unsigned char*)stream_->buffer() + offset);
-    *blockSize = stream_->size() - offset;
+    *blockSize = stream_->position() - offset;
 }
 
-bool BinaryOArchive::operator()(bool &value, const char *_name)
+bool BinaryOArchive::operator()(bool &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_BOOL, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -90,7 +112,7 @@ bool BinaryOArchive::operator()(bool &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(std::string &value, const char *_name)
+bool BinaryOArchive::operator()(std::string &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_STRING, _name);
     stream_->write(value.c_str(), (int)value.length());
@@ -98,7 +120,7 @@ bool BinaryOArchive::operator()(std::string &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(float &value, const char *_name)
+bool BinaryOArchive::operator()(float &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_FLOAT, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -106,7 +128,7 @@ bool BinaryOArchive::operator()(float &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(double &value, const char *_name)
+bool BinaryOArchive::operator()(double &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_DOUBLE, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -114,7 +136,7 @@ bool BinaryOArchive::operator()(double &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(short &value, const char *_name)
+bool BinaryOArchive::operator()(short &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_INT16, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -122,7 +144,7 @@ bool BinaryOArchive::operator()(short &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(signed char &value, const char *_name)
+bool BinaryOArchive::operator()(signed char &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_SBYTE, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -130,7 +152,7 @@ bool BinaryOArchive::operator()(signed char &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(unsigned char &value, const char *_name)
+bool BinaryOArchive::operator()(unsigned char &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_BYTE, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -138,7 +160,7 @@ bool BinaryOArchive::operator()(unsigned char &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(char &value, const char *_name)
+bool BinaryOArchive::operator()(char &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_BYTE, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -146,7 +168,7 @@ bool BinaryOArchive::operator()(char &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(unsigned short &value, const char *_name)
+bool BinaryOArchive::operator()(unsigned short &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_UINT16, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -156,7 +178,7 @@ bool BinaryOArchive::operator()(unsigned short &value, const char *_name)
 
 
 
-bool BinaryOArchive::operator()(int &value, const char *_name)
+bool BinaryOArchive::operator()(int &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_INT32, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -164,7 +186,7 @@ bool BinaryOArchive::operator()(int &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(unsigned int &value, const char *_name)
+bool BinaryOArchive::operator()(unsigned int &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_UINT32, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -172,7 +194,7 @@ bool BinaryOArchive::operator()(unsigned int &value, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(__int64 &value, const char *_name)
+bool BinaryOArchive::operator()(__int64 &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_INT64, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -181,7 +203,7 @@ bool BinaryOArchive::operator()(__int64 &value, const char *_name)
 }
 
 
-bool BinaryOArchive::operator()(const Serializer &ser, const char *_name)
+bool BinaryOArchive::operator()(const Serializer &ser, const char *_name, const char* label)
 {
     openStruct(_name, ser.type().name());
 
@@ -191,7 +213,7 @@ bool BinaryOArchive::operator()(const Serializer &ser, const char *_name)
     return true;
 }
 
-bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char *_name)
+bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char *_name, const char* label)
 {
     int size = int(ser.size());
     TypeID type = ser.type();
@@ -212,7 +234,7 @@ bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char
 }
 
 
-bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const char *_name)
+bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_POINTER, _name);
     ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());
@@ -224,7 +246,8 @@ bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const
     write(_ptr.type().name());
     //write(_ptr.Type().ShortName(baseType)); TODO
 
-    _ptr.serializer()(*this);
+	if(_ptr.get())
+		_ptr.serializer()(*this);
 
     closeNode();
     return true;

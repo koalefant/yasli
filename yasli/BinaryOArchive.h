@@ -14,24 +14,25 @@ public:
   void clear();
   size_t length() const;
   const char* buffer();
+  bool save(const char* fileName);
 
-  bool operator()(bool &value, const char *name);
-  bool operator()(std::string &value, const char *name);
-  bool operator()(float &value, const char *name);
-  bool operator()(double &value, const char *name);
-  bool operator()(int &value, const char *name);
-  bool operator()(unsigned int &value, const char *name);
-  bool operator()(short &value, const char *name);
-  bool operator()(unsigned short &value, const char *name);
-  bool operator()(__int64 &value, const char *name);
+  bool operator()(bool &value, const char *name, const char* label);
+  bool operator()(std::string &value, const char *name, const char* label);
+  bool operator()(float &value, const char *name, const char* label);
+  bool operator()(double &value, const char *name, const char* label);
+  bool operator()(int &value, const char *name, const char* label);
+  bool operator()(unsigned int &value, const char *name, const char* label);
+  bool operator()(short &value, const char *name, const char* label);
+  bool operator()(unsigned short &value, const char *name, const char* label);
+  bool operator()(__int64 &value, const char *name, const char* label);
 
-  bool operator()(signed char &value, const char *name);
-  bool operator()(unsigned char &value, const char *name);
-  bool operator()(char &value, const char *name);
+  bool operator()(signed char &value, const char *name, const char* label);
+  bool operator()(unsigned char &value, const char *name, const char* label);
+  bool operator()(char &value, const char *name, const char* label);
 
-  bool operator()(const Serializer &ser, const char *name);
-  bool operator()(ContainerSerializationInterface &ser, const char *name);
-  bool operator()(const PointerSerializationInterface &ptr, const char *name);
+  bool operator()(const Serializer &ser, const char *name, const char* label);
+  bool operator()(ContainerSerializationInterface &ser, const char *name, const char* label);
+  bool operator()(const PointerSerializationInterface &ptr, const char *name, const char* label);
 
   using Archive::operator();
 private:

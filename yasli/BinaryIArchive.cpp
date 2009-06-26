@@ -9,12 +9,52 @@ BinaryIArchive::BinaryIArchive()
 , buffer_(0)
 , size_(0)
 , end_(0)
+, loadedData_(0)
 {
 
 }
 
 BinaryIArchive::~BinaryIArchive()
 {
+    if(loadedData_)
+        delete[] loadedData_;
+}
+
+bool BinaryIArchive::load(const char* filename)
+{
+    if(loadedData_)
+    {
+        delete[] loadedData_;
+        loadedData_ = 0;
+    }
+    FILE* f = fopen(filename, "rb");
+    if(!f)
+        return false;
+    fseek(f, 0, SEEK_END);
+    size_t length = ftell(f);
+	fseek(f, 0, SEEK_SET);
+    if(length == 0)
+    {
+        fclose(f);
+        return false;
+    }
+    loadedData_ = new char[length];
+	if(fread((void*)loadedData_, 1, length, f) != length)
+	{
+		delete[] loadedData_;
+		loadedData_ = 0;
+		fclose(f);
+		return false;
+	}
+	if(!open(loadedData_, length))
+	{
+		delete[] loadedData_;
+		loadedData_ = 0;
+		fclose(f);
+		return false;
+	}
+    fclose(f);
+    return true;
 }
 
 bool BinaryIArchive::open(const char* buffer, size_t length)
@@ -51,16 +91,16 @@ bool BinaryIArchive::read(char *_data, int _size)
         return false;
 }
 
-//bool BinaryIArchive::read(Token* str)
-//{
-//  unsigned char len;
-//  if(!read(&len))
-//    return false;
-//  CHECK(pos_ + len <= end_, return false;);
-//  *str = Token(pos_, len);
-//  pos_ += len;
-//  return true;
-//}
+bool BinaryIArchive::read(Token* str)
+{
+  unsigned char len;
+  if(!read(&len))
+    return false;
+  CHECK(pos_ + len <= end_, return false;);
+  *str = Token(pos_, pos_ + len);
+  pos_ += len;
+  return true;
+}
 
 
 bool BinaryIArchive::readUnsafe(char *_data, int _size)
@@ -77,6 +117,7 @@ bool BinaryIArchive::readUnsafe(char *_data, int _size)
 
 bool BinaryIArchive::openStruct(const char *_name, Token* typeName)
 {
+	CHECK(!blocks_.empty(), return false);
     const char *start;
     const char *end;
     if(findNode (BINARY_NODE_STRUCT, Token(_name), &start, &end))
@@ -416,7 +457,8 @@ bool BinaryIArchive::operator()(const PointerSerializationInterface& ptr, const 
         if(type && !ptr.get())
             ptr.create(type);
 
-        ptr.serializer()(*this);
+		if(Serializer ser = ptr.serializer())
+			ser(*this);
 
         closePointer();
         return true;

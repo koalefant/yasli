@@ -52,24 +52,24 @@ public:
     virtual const char* pull(){ return 0; }
 
     // basic types
-    virtual bool operator()(bool& value, const char* name = "", const char* label = 0)          { return false; }
-    virtual bool operator()(std::string& value, const char* name = "", const char* label = 0)   { return false; }
-    virtual bool operator()(float& value, const char* name = "", const char* label = 0)         { return false; }
-    virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { return false; }
-    virtual bool operator()(int& value, const char* name = "", const char* label = 0)           { return false; }
-    virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)       { return false; }
+    virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
+    virtual bool operator()(std::string& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
+    virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
+    virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+    virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
+    virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
 
 	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
 	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
 
-	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { return false; }
-    virtual bool operator()(signed short& value, const char* name = "", const char* label = 0)   { return false; }
+	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+    virtual bool operator()(signed short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
     
-    virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { return false; }
-    virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { return false; }
-    virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { return false; }
+    virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+    virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
+    virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
 
-    virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { return false; }
+    virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
     virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
 
@@ -83,6 +83,8 @@ public:
 		return operator()(const_cast<T&>(value), name, label);
 	}
 private:
+    void notImplemented();
+
     bool isInput_;
     bool isEdit_;
 	bool inPlace_;

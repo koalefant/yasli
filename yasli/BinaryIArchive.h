@@ -10,6 +10,7 @@ public:
   BinaryIArchive();
   ~BinaryIArchive();
 
+  bool load(const char* fileName);
   bool open(const char* buffer, size_t length); // does copy of buffer
   void close();
 
@@ -67,10 +68,12 @@ private:
     return read((char*)value, sizeof(T));
   }
 
+  bool read(Token* str);
   bool read(char* data, int size);
   bool readUnsafe(char* data, int size);
 
   std::string pulledName_;
+  const char* loadedData_;
   const char* pos_;
   const char* buffer_;
   const char* end_;

@@ -17,6 +17,11 @@ bool Archive::operator()(const PointerSerializationInterface& ptr, const char* n
 {
 	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name, label);
 }
+
+void Archive::notImplemented()
+{
+    ASSERT(0 && "Not implemented!");
+}
 // ---------------------------------------------------------------------------
 
 bool Serializer::operator()(Archive& ar) const{
