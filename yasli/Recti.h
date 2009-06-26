@@ -59,7 +59,7 @@ public:
 	int width() const{ return max.x - min.x; }
 	int height() const{ return max.y - min.y; }
 
-    bool pointInside(Vect2i _point)
+    bool pointInside(Vect2i _point) const
     {
       if ( _point.x < min.x || _point.x > max.x )
         return false;
