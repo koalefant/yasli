@@ -400,6 +400,7 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
                     skipBlock();
                 }
                 ser.next();
+				++index;
             }
             if(size > index)
                 ser.resize(index);
