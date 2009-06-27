@@ -4,11 +4,19 @@ class Archive;
 
 class RangedWrapperf{
 public:
+	explicit RangedWrapperf(double value)
+    : value_(float(value))
+	, valuePointer_(0)
+	, range_(0.0f, 1.0f)
+	, step_(1.0f)
+	{
+	}
+
 	RangedWrapperf(float value = 0.0f)
 	: value_(value)
 	, valuePointer_(0)
-	, range_(Rangef(0.f, 1.f))
-	, step_(1.f)
+	, range_(0.0f, 1.0f)
+	, step_(1.0f)
 	{}
 
 	RangedWrapperf(const RangedWrapperf& original)
@@ -64,6 +72,12 @@ class RangedWrapperi{
 public:
 	RangedWrapperi(int value = 0.0f)
 	: value_(value)
+	, valuePointer_(0)
+	, range_(Rangei(0, 3))
+	, step_(1)
+	{}
+	explicit RangedWrapperi(double value)
+	: value_(int(value))
 	, valuePointer_(0)
 	, range_(Rangei(0, 3))
 	, step_(1)
