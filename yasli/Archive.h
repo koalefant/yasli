@@ -139,7 +139,7 @@ namespace Helpers{
     template<class T, int Size>
     struct SerializeArray<T[Size]>{
         static bool invoke(Archive& ar, T value[Size], const char* name, const char* label){
-            return ar(static_cast<const ContainerSerializationInterface&>(ContainerSerializationArrayImpl<T>(value, Size)), name, label);
+            return ar(static_cast<ContainerSerializationInterface&>(ContainerSerializationArrayImpl<T>(value, Size)), name, label);
         }
     };
 }

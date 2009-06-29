@@ -173,25 +173,30 @@ public:
     explicit ContainerSerializationArrayImpl(T* array = 0, int size = 0)
     : array_(array)
     , size_(size)
+    , index_(0)
     {
     }
 
     // from ContainerSerializationInterface:
     std::size_t size() const{ return size_; }
-    std::size_t resize(std::size_t size) const{
+    std::size_t resize(std::size_t size){
+        index_ = 0;
         return size_;
     }
 
     void* pointer() const{ return reinterpret_cast<void*>(array_); }
     TypeID type() const{ return TypeID::get<T>(); }
 
-    bool operator()(Archive& ar, std::size_t index) const{
-        ASSERT(index < size_);
-		return ar(array_[index]);
+    bool operator()(Archive& ar, const char* name, const char* label){
+        CHECK(index_ < size_, return false);
+		return ar(array_[index_], name, label);
     }
     operator bool() const{ return array_ != 0; }
+    bool next(){
+        ++index_;
+        return size_t(index_) < size_;
+    }
     void serializeNewElement(Archive& ar, const char* name, const char* label) const{
-        // XXX do we need this?
         T element;
         ar(element, name, label);
     }
@@ -199,6 +204,7 @@ public:
     
 private:
     T* array_;
+    int index_;
 	std::size_t size_;
 };/*}}}*/
 
