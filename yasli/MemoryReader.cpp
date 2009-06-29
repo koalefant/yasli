@@ -1,8 +1,10 @@
 #include "StdAfx.h"
-#include "yasli/Errors.h"
+#include "yasli/Assert.h"
 #include "yasli/MemoryReader.h"
 #include <cstdlib>
 #include <iostream>
+
+namespace yasli{
 
 MemoryReader::MemoryReader()
 : size_(0)
@@ -81,4 +83,6 @@ bool MemoryReader::checkedSkip(std::size_t size)
 
     position_ += size;
     return true;
+}
+
 }

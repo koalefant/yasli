@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+namespace yasli{
+
 void Archive::warning(const char* message)
 {
     //std::cout << "WARNING, Archive: " << message << std::endl;
@@ -68,6 +70,8 @@ void PointerSerializationInterface::serialize(Archive& ar) const
             ar(serializer(), "");
         }
     }	
+}
+
 }
 
 namespace std{

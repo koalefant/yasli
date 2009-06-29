@@ -3,6 +3,8 @@
 
 #include "yasli/Archive.h"
 
+namespace yasli{
+
 void RangedWrapperf::clip()
 {
 	value_ = range_.clip(value_);
@@ -15,22 +17,6 @@ void RangedWrapperf::serialize(Archive& ar)
   ar.serialize(step_, "step", 0);
 }
 
-bool serialize(Archive& ar, RangedWrapperf& wrapper, const char* name, const char* label)
-{
-	if(ar.inPlace())
-		return ar(*wrapper.valuePointer_, name, label);
-
-	bool result;
-	if(ar.isEdit()){
-      result = ar(Serializer(wrapper), name, label);
-      if(ar.isOutput())
-        wrapper.clip();
-	}
-	else
-		result = ar(wrapper.value_, name, label);
-
-	return result;
-}
 
 void RangedWrapperi::clip()
 {
@@ -44,14 +30,17 @@ void RangedWrapperi::serialize(Archive& ar)
   ar.serialize(range_, "range", 0);
   ar.serialize(step_, "step", 0);
 }
-bool serialize(Archive& ar, RangedWrapperi& wrapper, const char* name, const char* label)
+
+}
+
+bool serialize(yasli::Archive& ar, yasli::RangedWrapperf& wrapper, const char* name, const char* label)
 {
 	if(ar.inPlace())
 		return ar(*wrapper.valuePointer_, name, label);
 
 	bool result;
 	if(ar.isEdit()){
-      result = ar( Serializer(wrapper), name, label);
+		result = ar(yasli::Serializer(wrapper), name, label);
       if(ar.isOutput())
         wrapper.clip();
 	}
@@ -60,3 +49,21 @@ bool serialize(Archive& ar, RangedWrapperi& wrapper, const char* name, const cha
 
 	return result;
 }
+
+bool serialize(yasli::Archive& ar, yasli::RangedWrapperi& wrapper, const char* name, const char* label)
+{
+	if(ar.inPlace())
+		return ar(*wrapper.valuePointer_, name, label);
+
+	bool result;
+	if(ar.isEdit()){
+      result = ar(yasli::Serializer(wrapper), name, label);
+      if(ar.isOutput())
+        wrapper.clip();
+	}
+	else
+		result = ar(wrapper.value_, name, label);
+
+	return result;
+}
+

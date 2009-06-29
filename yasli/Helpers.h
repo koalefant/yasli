@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 class Archive;
 namespace Helpers{
 
@@ -59,3 +61,5 @@ public:
 };
 
 }
+}
+

@@ -12,6 +12,8 @@
 typedef long long __int64;
 #endif
 
+namespace yasli{
+
 class YASLI_API MemoryWriter : public RefCounter{
 public:
     MemoryWriter(std::size_t size = 128, bool reallocate = true);
@@ -57,3 +59,5 @@ private:
     char* memory_;
     bool reallocate_;
 };
+
+}

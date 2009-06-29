@@ -1,6 +1,8 @@
 #pragma once
 #include "LibraryReference.h"
 
+namespace yasli{
+
 class LibrarySelector{
 public:
 	LibrarySelector()
@@ -29,3 +31,5 @@ protected:
 	LibraryReferenceBase reference_;
 	const char* libraryName_;
 };
+
+}

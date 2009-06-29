@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "MemoryWriter.h"
 
+namespace yasli{
+
 #ifdef WIN32
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
@@ -26,3 +28,5 @@ int assertionDialog(const char* message, const char* function, const char* fileN
 
 #endif
 #endif
+
+}

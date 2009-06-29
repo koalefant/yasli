@@ -4,6 +4,8 @@
 #include "BinaryNode.h"
 #include "Tokenizer.h" // for Token
 
+namespace yasli{
+
 class BinaryIArchive : public Archive{
 public:
 
@@ -80,3 +82,6 @@ private:
   const char* pullPosition_;
   size_t size_;
 };
+
+}
+

@@ -1,5 +1,7 @@
 #include "Range.h"
 
+namespace yasli{
+
 class Archive;
 
 class RangedWrapperf{
@@ -129,4 +131,7 @@ public:
 	int value_;
 };
 
-bool serialize(Archive& ar, RangedWrapperi &wrapper, const char* name, const char* label);
+}
+
+bool serialize(yasli::Archive& ar, yasli::RangedWrapperi &wrapper, const char* name, const char* label);
+

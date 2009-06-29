@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 class RefCounter{
 public:
     RefCounter()
@@ -180,5 +182,8 @@ private:
 
 class Archive;
 
+}
+
 template<class T>
-bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label);
+

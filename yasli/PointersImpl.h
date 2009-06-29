@@ -4,6 +4,8 @@
 #include "yasli/SafeCast.h"
 #include "yasli/TypesFactory.h"
 
+namespace yasli{
+
 template<class T>
 class SharedPtrSerializationImpl : public PointerSerializationInterface
 {
@@ -85,8 +87,10 @@ void SharedPtr<T>::serialize(Archive& ar)
     }
 }
 
+}
+
 template<class T>
-bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
-	return ar(static_cast<const PointerSerializationInterface&>(SharedPtrSerializationImpl<T>(ptr)), name, label);
+	return ar(static_cast<const yasli::PointerSerializationInterface&>(yasli::SharedPtrSerializationImpl<T>(ptr)), name, label);
 }

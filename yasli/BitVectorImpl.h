@@ -2,6 +2,8 @@
 #include "yasli/BitVector.h"
 #include "yasli/Archive.h"
 
+namespace yasli{
+
 struct BitVectorWrapper
 {
 	int* valuePointer;
@@ -43,7 +45,7 @@ struct BitVectorWrapper
 template<class Enum>
 void BitVector<Enum>::serialize(Archive& ar)
 {
-    ar(value_, "value", "Value")
+    ar(value_, "value", "Value");
 }
 
 
@@ -57,4 +59,6 @@ bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char
     {
         return desc.serializeBitVector(ar, static_cast<int&>(value), name, label);
     }
+}
+
 }

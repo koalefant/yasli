@@ -3,6 +3,8 @@
 #include <cstddef>
 #include "API.h"
 
+namespace yasli{
+
 class YASLI_API MemoryReader{
 public:
 
@@ -37,3 +39,5 @@ private:
     const char* memory_;
     bool ownedMemory_;
 };
+
+}

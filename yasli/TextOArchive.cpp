@@ -4,7 +4,9 @@
 #include "yasli/StringUtil.h"
 #include "yasli/MemoryWriter.h"
 
-const int TAB_WIDTH = 4;
+namespace yasli{
+
+static const int TAB_WIDTH = 4;
 
 TextOArchive::TextOArchive(int textWidth, const char* header)
 : Archive(false)
@@ -283,4 +285,6 @@ bool TextOArchive::joinLinesIfPossible()
         return true;
     }
     return false;
+}
+
 }

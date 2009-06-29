@@ -1,7 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "Errors.h"
+#include <string>
+#include "yasli/Assert.h"
+
+namespace yasli{
 
 class Archive;
 class StringListStatic : public std::vector<const char*>{
@@ -90,8 +93,6 @@ public:
     static StringList EMPTY;
 };
 
-bool serialize(Archive& ar, StringList& value, const char* name, const char* label);
-
 class StringListValue{
 public:
     explicit StringListValue(const StringListStaticValue &value)
@@ -151,9 +152,12 @@ protected:
 
 class Archive;
 
-bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
-bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
-
 void splitStringList(StringList* result, const char *str, char sep);
 void joinStringList(std::string* result, const StringList& stringList, char sep);
 void joinStringList(std::string* result, const StringListStatic& stringList, char sep);
+
+}
+
+bool serialize(yasli::Archive& ar, yasli::StringList& value, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, yasli::StringListValue& value, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, yasli::StringListStaticValue& value, const char* name, const char* label);

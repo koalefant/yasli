@@ -4,43 +4,11 @@
 #include "yasli/Archive.h"
 #include "yasli/STLImpl.h"
 
+namespace yasli{
+
 StringList StringList::EMPTY;
 StringListStatic StringListStatic::EMPTY;
 
-// ---------------------------------------------------------------------------
-bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label)
-{
-    if(ar.isEdit()){
-        return ar(Serializer(value), name, label);
-    }
-    else{
-        std::string str;
-        if(ar.isOutput())
-            str = value.c_str();
-        if(ar(str, name, label) && ar.isInput()){
-            value = str.c_str();
-            return true;
-        }
-        return false;
-    }
-}
-
-// ---------------------------------------------------------------------------
-bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
-{
-    if(ar.isEdit())
-        return ar(Serializer(value), name, label);
-    else{
-        std::string str;
-        if(ar.isOutput())
-            str = value.c_str();
-        if(ar(str, name, label) && ar.isInput()){
-            value = str.c_str();
-            return true;
-        }
-        return true;
-    }
-}
 // ---------------------------------------------------------------------------
 void splitStringList(StringList* result, const char *str, char delimeter)
 {
@@ -81,8 +49,42 @@ void joinStringList(std::string* result, const StringListStatic& stringList, cha
         result->append(*it);
     }
 }
+}
 
-bool serialize(Archive& ar, StringList& value, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, yasli::StringList& value, const char* name, const char* label)
 {
 	return ar(static_cast<std::vector<std::string>&>(value), name, label);
+}
+
+bool serialize(yasli::Archive& ar, yasli::StringListValue& value, const char* name, const char* label)
+{
+    if(ar.isEdit()){
+        return ar(yasli::Serializer(value), name, label);
+    }
+    else{
+        std::string str;
+        if(ar.isOutput())
+            str = value.c_str();
+        if(ar(str, name, label) && ar.isInput()){
+            value = str.c_str();
+            return true;
+        }
+        return false;
+    }
+}
+
+bool serialize(yasli::Archive& ar, yasli::StringListStaticValue& value, const char* name, const char* label)
+{
+    if(ar.isEdit())
+        return ar(yasli::Serializer(value), name, label);
+    else{
+        std::string str;
+        if(ar.isOutput())
+            str = value.c_str();
+        if(ar(str, name, label) && ar.isInput()){
+            value = str.c_str();
+            return true;
+        }
+        return true;
+    }
 }

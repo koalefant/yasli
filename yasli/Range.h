@@ -1,4 +1,7 @@
 #pragma once
+
+namespace yasli{
+
 class Archive;
 
 class Rangef
@@ -74,3 +77,5 @@ private:
 	int min_;
 	int max_;
 };
+
+}

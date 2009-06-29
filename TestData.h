@@ -9,6 +9,8 @@
 
 #include "yasli/StringList.h"
 
+using namespace yasli;
+
 struct Member{
 	std::string name;
 	float weight;

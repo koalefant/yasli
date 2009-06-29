@@ -4,6 +4,7 @@
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
 
+namespace yasli{
 
 TypeLibrary& TypeLibrary::the()
 {
@@ -90,7 +91,9 @@ const char* TypeID::label() const{
 		return name_.c_str();
 }
 
-bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
+}
+
+bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label)
 {
     std::string typeName;
     if(ar.isOutput()){
@@ -100,11 +103,11 @@ bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
     else{
         if(ar(typeName, name)){
 			if(!typeName.empty())
-				typeID = TypeID(typeName.c_str());
+				typeID = yasli::TypeID(typeName.c_str());
 			else
-				typeID = TypeID();
+				typeID = yasli::TypeID();
             if(!typeID){
-                MemoryWriter msg;
+                yasli::MemoryWriter msg;
                 msg << "Unable to read TypeID, unregistered type name: \'" << typeName.c_str() << "'";
                 ar.warning(msg.c_str());
                 return false;
@@ -116,3 +119,4 @@ bool serialize(Archive& ar, TypeID& typeID, const char* name, const char* label)
             return false;
     }
 }
+

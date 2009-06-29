@@ -1,7 +1,17 @@
 #pragma once
 #include <string>
 
+namespace yasli{
+	class Archive;
+	class FileSelector;
+}
+
+bool serialize(yasli::Archive& ar, yasli::FileSelector& selector, const char* name, const char* label);
+
+namespace yasli{
+
 class Archive;
+
 class FileSelector{
 public:
 	struct Options{
@@ -57,7 +67,8 @@ protected:
 	std::string* fileNamePtr_;
 	std::string fileName_;
 	const Options* options_;
-    friend bool serialize(Archive& ar, FileSelector& selector, const char* name, const char* label);
+	friend bool ::serialize(yasli::Archive& ar, yasli::FileSelector& selector, const char* name, const char* label);
 };
 
-bool serialize(Archive& ar, FileSelector& selector, const char* name, const char* label);
+}
+

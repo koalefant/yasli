@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{ 
+
 class Archive;
 struct ButtonDecorator{
 	ButtonDecorator(const char* _text = 0)
@@ -56,12 +58,6 @@ struct NotDecorator{
 	bool* valuePtr_;
 };
 
-inline bool serialize(Archive& ar, NotDecorator& value, const char* name, const char* label){		
-    if(ar.isEdit())
-        return ar(Serializer(value), name, label);
-    else
-        return ar(value.value_, name, label);
-}
 
 template<class T, class PointerType = SharedPtr<T> >
 struct OptionalPtr : PointerType{
@@ -86,3 +82,12 @@ struct OptionalPtr : PointerType{
 		}
 	}
 };
+
+}
+
+inline bool serialize(yasli::Archive& ar, yasli::NotDecorator& value, const char* name, const char* label){		
+    if(ar.isEdit())
+        return ar(yasli::Serializer(value), name, label);
+    else
+        return ar(value.value_, name, label);
+}

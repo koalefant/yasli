@@ -2,6 +2,8 @@
 #include "yasli/Archive.h"
 #include "LibrarySelector.h"
 
+namespace yasli{
+
 template<class ElementType, class LibraryType>
 int LibraryReference<ElementType, LibraryType>::findIndexByName(const char* elementName) const
 {
@@ -50,4 +52,6 @@ bool LibraryReference<ElementType, LibraryType>::instantiate()
 	ref.findIndexByName("");
 	ref.serialize(*(Archive*)(0));
 	return true;
+}
+
 }

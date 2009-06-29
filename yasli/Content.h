@@ -3,6 +3,8 @@
 #include <vector>
 #include "yasli/ConstString.h"
 
+namespace yasli{
+
 class ContentUser{
 public:
     virtual ~ContentUser() {}
@@ -32,3 +34,5 @@ protected:
 };
 
 extern ContentManager* content;
+
+}

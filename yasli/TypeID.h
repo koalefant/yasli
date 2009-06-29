@@ -1,17 +1,17 @@
 #pragma once
 
 #include <typeinfo>
-#include "yasli/Errors.h"
+#include "yasli/Assert.h"
 #include "yasli/API.h"
 
 #ifndef _MSC_VER
 using std::type_info;
 #endif
 
+namespace yasli{
+
 class Archive;
 class TypeID;
-
-bool YASLI_API serialize(Archive& ar, TypeID& typeID, const char* name, const char* label);
 
 class YASLI_API TypeID{
     friend class TypesFactory;
@@ -84,3 +84,7 @@ private:
 
 template<class T>
 T* createDerivedClass(TypeID typeID);
+
+}
+
+bool YASLI_API serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label);

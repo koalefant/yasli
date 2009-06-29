@@ -8,6 +8,8 @@
 #include "yasli/API.h"
 #include "yasli/TypeID.h"
 
+namespace yasli{
+
 class Archive;
 
 class YASLI_API EnumDescription{
@@ -60,19 +62,21 @@ EnumDescription& getEnumDescription(){
     return EnumDescriptionImpl<Enum>::the();
 }
 
+}
+
 #define YASLI_ENUM_BEGIN(Type, label)                                                \
     namespace {                                                                     \
         bool registerEnum_##Type();                                                 \
         bool Type##_enum_registered = registerEnum_##Type();                        \
         bool registerEnum_##Type(){                                                 \
-            EnumDescription& description = EnumDescriptionImpl<Type>::the();
+		yasli::EnumDescription& description = yasli::EnumDescriptionImpl<Type>::the();
 
 #define YASLI_ENUM_BEGIN_NESTED(Class, Enum, label)                                  \
     namespace {                                                                     \
 	bool registerEnum_##Class##_##Enum();                                           \
 		bool Class##_##Enum##_enum_registered = registerEnum_##Class##_##Enum();    \
 		bool registerEnum_##Class##_##Enum(){                                       \
-			EnumDescription& description = EnumDescriptionImpl<Class::Enum>::the();
+			yasli::EnumDescription& description = yasli::EnumDescriptionImpl<Class::Enum>::the();
                                                                                     
 #define YASLI_ENUM_VALUE(value, label)                                              \
 		description.add(int(value), #value, label);                                      

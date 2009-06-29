@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 class Archive;
 struct Vect2f;
 struct Vect2i{
@@ -56,4 +58,4 @@ struct Vect2i{
     void serialize( Archive& ar );
 };
 
-
+}

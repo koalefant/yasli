@@ -2,6 +2,7 @@
 #include "yasli/Pointers.h"
 #include <time.h>
 
+namespace yasli{
 namespace Files{
 #ifdef WIN32
 	static const char* PATH_SEPARATOR = "\\";
@@ -74,4 +75,5 @@ namespace Files{
 
 		iteratorImpl* impl_;
 	};
+}
 }

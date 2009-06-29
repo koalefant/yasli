@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 enum BinaryNode {
   BINARY_NODE_BOOL,
   BINARY_NODE_STRING,
@@ -17,3 +19,5 @@ enum BinaryNode {
   BINARY_NODE_CONTAINER = 0xfe,
   BINARY_NODE_STRUCT = 0xff
 };
+
+}

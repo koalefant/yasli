@@ -7,6 +7,7 @@ namespace pugi{
     class xml_document;
 }
 
+namespace yasli{
 
 struct XMLIArchiveImpl;
 class YASLI_API XMLIArchive : public Archive{
@@ -45,3 +46,5 @@ private:
 	std::auto_ptr<XMLIArchiveImpl> impl_;
     friend struct XMLIArchiveImpl;
 };
+
+}

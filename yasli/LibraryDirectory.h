@@ -5,6 +5,8 @@
 #include "yasli/TextIArchive.h"
 #include "yasli/TextOArchive.h"
 
+namespace yasli{
+
 template<class T, class ReferenceType>
 class LibraryDirectory : public LibraryBase{
 public:
@@ -180,3 +182,4 @@ protected:
 	Elements elements_;
 };
 
+}

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 class ConstString{
 public:
     ConstString(const char* str = "")
@@ -25,3 +27,5 @@ public:
 protected:
     const char* str_;
 };
+
+}

@@ -5,7 +5,9 @@
 #include "yasli/MemoryWriter.h"
 #include "yasli/TypesFactory.h"
 
-const unsigned int BINARY_MAGIC = 0xb1a4c17e;
+namespace yasli{
+
+static const unsigned int BINARY_MAGIC = 0xb1a4c17e;
 
 BinaryOArchive::BinaryOArchive(bool pretendToBeEdit)
 : Archive(false, pretendToBeEdit)
@@ -251,4 +253,6 @@ bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const
 
     closeNode();
     return true;
+}
+
 }

@@ -274,6 +274,10 @@
 			Name="wrappers"
 			>
 			<File
+				RelativePath=".\Decorators.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileSelector.cpp"
 				>
 			</File>
@@ -442,10 +446,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Errors.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Factory.h"
 				>
 			</File>
@@ -455,10 +455,6 @@
 			</File>
 			<File
 				RelativePath=".\Files.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FrozenSignal.h"
 				>
 			</File>
 			<File
@@ -502,7 +498,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\rangedwrapper.h"
+				RelativePath=".\RangedWrapper.h"
 				>
 			</File>
 			<File

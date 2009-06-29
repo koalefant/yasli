@@ -1,6 +1,7 @@
 #pragma once
 #include "yasli/Content.h"
 
+namespace yasli{
 class Archive;
 class LibraryElementBase;
 
@@ -89,6 +90,8 @@ protected:
     const char* fileName_;
     LibraryInstanceFunc instanceFunc_;
 };
+}
 
 #define REGISTER_LIBRARY(libraryType, libName, filename, group) \
 	LibraryDescription libraryType##_description(&libraryType::the, libName, filename, group); 
+

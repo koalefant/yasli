@@ -3,6 +3,8 @@
 #include "Archive.h"
 #include "Tokenizer.h" // for Token
 
+namespace yasli{
+
 class MemoryWriter;
 enum BinaryNode;
 class BinaryOArchive : public Archive{
@@ -49,3 +51,5 @@ private:
 
   SharedPtr<MemoryWriter> stream_;
 };
+
+}

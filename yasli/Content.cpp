@@ -9,6 +9,7 @@
 # include <unistd.h>
 #endif
 
+namespace yasli{
 
 ContentManager* content = 0;
 
@@ -61,7 +62,10 @@ void ContentManager::initGroup(const char* groupName, const char* directoryPath)
 #else
     getcwd(cwd, 500);
 #endif
-    groupDirectories_[groupName] = std::string(cwd) + Files::pathSeparator() + directoryPath;
+	std::string& str = groupDirectories_[groupName];
+	str = std::string(cwd);
+	str += Files::pathSeparator();
+	str += directoryPath;
 
     ContentGroups::iterator git = contentGroups_.find(groupName);
     if(git == contentGroups_.end()){
@@ -110,4 +114,6 @@ void ContentManager::unloadAll()
             user->unloadContent();
         }
     }
+}
+
 }

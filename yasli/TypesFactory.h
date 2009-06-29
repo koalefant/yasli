@@ -9,6 +9,7 @@
 # pragma warning(disable : 4251)
 #endif
 
+namespace yasli{
 
 class Archive;
 
@@ -173,19 +174,21 @@ protected:
     TypeToDescriptionMap typeToDescriptionMap_;
 };
 
+}
 
 #define YASLI_TYPE_NAME(Type, name) \
 namespace{ \
-	const TypeDescription Type##_Description(TypeID::get<Type>(), #Type, name, sizeof(Type)); \
-    bool registered_##Type = TypeLibrary::the().registerType(&Type##_Description) != 0; \
+	const yasli::TypeDescription Type##_Description(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
+	bool registered_##Type = yasli::TypeLibrary::the().registerType(&Type##_Description) != 0; \
 }
 
 #define YASLI_CLASS(BaseType, Type, name) \
-	const TypeDescription Type##BaseType##_DerivedDescription(TypeID::get<Type>(), #Type, name, sizeof(Type)); \
-	ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	const TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
+	yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
 	int dummyForType_##Type##BaseType;
 
 #define YASLI_FORCE_CLASS(BaseType, Type) \
 	extern int dummyForType_##Type##BaseType; \
 	int* dummyForTypePtr_##Type##BaseType = &dummyForType_##Type##BaseType + 1;
+
 

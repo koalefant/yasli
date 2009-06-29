@@ -4,6 +4,8 @@
 
 #include "yasli/Archive.h"
 
+namespace yasli{
+
 void Rangef::set(float _min, float _max)
 {
 	min_ = _min;
@@ -103,4 +105,6 @@ void Rangei::serialize(Archive& ar)
 Rangei Rangei::merge (const Rangei& _range) const
 {
 	return Rangei(std::min(minimum(), _range.minimum()), std::max(maximum(), _range.maximum()));
+}
+
 }

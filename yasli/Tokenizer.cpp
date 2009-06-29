@@ -4,6 +4,8 @@
 
 // #define DEBUG_TOKENIZER
 
+namespace yasli{
+
 Tokenizer::Tokenizer(const char* spaces, const char* quotes, const char* comments)
 : spaces_(spaces)
 , comments_(comments)
@@ -144,4 +146,6 @@ Token Tokenizer::operator()(const char* ptr) const
     std::cout << "Tokenizer result: " << cur.str() << std::endl;
 #endif
     return cur;
+}
+
 }

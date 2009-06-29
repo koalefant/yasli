@@ -2,6 +2,11 @@
 #include "XMLIArchive.h"
 #include "pugixml.hpp"
 
+using pugi::xml_node;
+using pugi::xml_attribute;
+
+namespace yasli{
+
 struct XMLIArchiveImpl{
     pugi::xml_document document;
     pugi::xml_node node;
@@ -9,9 +14,6 @@ struct XMLIArchiveImpl{
     pugi::xml_node previousChildNode;
     pugi::xml_attribute childAttribute;
 };
-
-using pugi::xml_node;
-using pugi::xml_attribute;
 
 XMLIArchive::XMLIArchive()
 : Archive( true, false )
@@ -358,3 +360,4 @@ const char* XMLIArchive::pull()
   return next.name();
 }
 
+}

@@ -4,6 +4,8 @@
 #include "yasli/SafeCast.h"
 #include "yasli/API.h"
 
+namespace yasli{
+
 class Archive;
 
 class YASLI_API LibraryElementBase{
@@ -85,3 +87,5 @@ protected:
     template<class T, class ReferenceType>
     friend class Library;
 };
+
+}

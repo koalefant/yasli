@@ -8,6 +8,8 @@
 
 // #define DEBUG_TEXTIARCHIVE
 
+namespace yasli{
+
 TextIArchive::TextIArchive()
 : Archive(true)
 , tokenizer_(" \t\n\x0D", "\"\"", "#")
@@ -52,11 +54,6 @@ bool TextIArchive::load(const char* filename)
             ASSERT(((char*)(buffer))[fileSize] == '\0');
             if(elementsRead != 1){
 				return false;
-				/*
-                MemoryWriter msg;
-                msg << "Unable to read entire file: " << filename;
-                RAISE(ErrorRuntime(msg.c_str()));
-				*/
             }
         }
         std::fclose(file);
@@ -65,11 +62,6 @@ bool TextIArchive::load(const char* filename)
 		return open((char*)buffer, fileSize, true);
     }
     else{
-		/*
-        MemoryWriter msg;
-        msg << "Unable to open file for reading: " << filename;
-        RAISE(ErrorRuntime(msg.c_str()));
-		*/
 		return false;
     }
 }
@@ -130,7 +122,7 @@ void TextIArchive::expect(char token)
     if(token_ != token){
         MemoryWriter msg;
         msg << "Error parsing file, expected '=' at line " << line(token_.begin());
-        RAISE(ErrorRuntime(msg.c_str()));
+		ASSERT_STR(0, msg.c_str());
     }
 }
 
@@ -313,7 +305,8 @@ bool TextIArchive::closeBracket()
             const char* start = stack_.back().start;
             msg << filename_.c_str() << ": " << line(start) << " line";
             msg << ": End of file while no matching bracket found";
-            RAISE(ErrorRuntime(msg.c_str()));
+			ASSERT_STR(0, msg.c_str());
+			return false;
         }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
             if(relativeLevel == 0)
@@ -385,11 +378,17 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
             while(true){
                 readToken();
 				if(token_ == '}')
-					RAISE(ErrorRuntime("Syntax error: closing container with '}'"));
+				{
+					ASSERT(0 && "Syntax error: closing container with '}'")
+					return false;
+				}
                 if(token_ == ']')
                     break;
                 else if(!token_)
-                    RAISE(ErrorRuntime("Reached end of file while reading container!"));
+				{
+                    ASSERT(0 && "Reached end of file while reading container!");
+					return false;
+				}
                 putToken();
                 if(index == size)
                     size = index + 1;
@@ -421,7 +420,7 @@ void TextIArchive::checkValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        RAISE(ErrorRuntime(msg.c_str()));
+        ASSERT_STR(0, msg.c_str());
     }
 }
 
@@ -433,7 +432,7 @@ bool TextIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        RAISE(ErrorRuntime(msg.c_str()));
+        ASSERT_STR(0, msg.c_str());
 		return false;
     }
     if(token_.begin()[0] != '"' || token_.end()[-1] != '"'){
@@ -442,7 +441,7 @@ bool TextIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": Expected string";
-        RAISE(ErrorRuntime(msg.c_str()));
+        ASSERT_STR(0, msg.c_str());
 		return false;
     }
     return true;
@@ -625,4 +624,6 @@ bool TextIArchive::operator()(StringListStaticValue& value, const char* name, co
             return false;
     }
     return false;
+}
+
 }

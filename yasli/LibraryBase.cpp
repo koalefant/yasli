@@ -15,6 +15,8 @@
 #include "yasli/TextOArchive.h"
 #include "yasli/LibrarySelector.h"
 
+namespace yasli{
+
 // ---------------------------------------------------------------------------
 
 LibraryBase::LibraryBase()
@@ -38,13 +40,8 @@ void LibraryBase::preloadContent()
     //std::cout << "Loading library: " << filename << std::endl;
     TextIArchive ia;
 
-    try{
-        ia.load(filename.c_str());
-        serializePreload(ia);
-    }
-    catch(ErrorGeneric& error){
-        std::cout << "Error loading library from " << filename << ":" << error.what() << std::endl;
-    }
+    if(ia.load(filename.c_str()))
+		serializePreload(ia);
 }
 
 void LibraryBase::loadContent()
@@ -53,13 +50,8 @@ void LibraryBase::loadContent()
     std::cout << "Loading library: " << filename << std::endl;
     TextIArchive ia;
 
-    try{
-        ia.load(filename.c_str());
+    if(ia.load(filename.c_str()))
         serialize(ia);
-    }
-    catch(ErrorGeneric& error){
-        std::cout << "Error loading library from " << filename << ":" << error.what() << std::endl;
-    }
 }
 
 void LibraryBase::unloadContent()
@@ -82,13 +74,8 @@ void LibraryBase::saveContent()
 
     std::cout << "Saving library: " << filename << std::endl;
 
-    try{
-        serialize(oa);
-		oa.save(filename.c_str());
-    }
-    catch(ErrorGeneric& error){
-        std::cout << "Error saving library " << filename << ":" << error.what() << std::endl;
-    }
+    serialize(oa);
+	oa.save(filename.c_str());
 }
 
 const char* LibraryBase::name() const
@@ -215,4 +202,6 @@ const char* LibrarySelector::elementName() const
 	if(library && reference_.index_ >= 0 && reference_.index_ < int(library->size()))
 		return library->elementByIndex(reference_.index_).name();
 	return "";
+}
+
 }

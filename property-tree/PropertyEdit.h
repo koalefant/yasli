@@ -1,5 +1,7 @@
 #pragma once
 
-class Serializer;
+namespace yasli{
+	class Serializer;
+}
 
-void propertyEdit(Serializer& serializer, int options);
+void propertyEdit(yasli::Serializer& serializer, int options);

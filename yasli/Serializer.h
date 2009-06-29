@@ -5,6 +5,8 @@
 #include "yasli/API.h"
 #include "yasli/TypeID.h"
 
+namespace yasli{
+
 class Archive;
 
 typedef bool(*SerializeStructFunc)(void*, Archive&);
@@ -215,3 +217,5 @@ public:
 };
 
 typedef std::vector<Serializer> Serializers;
+
+}

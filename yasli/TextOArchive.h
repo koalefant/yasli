@@ -4,6 +4,8 @@
 #include "yasli/Archive.h"
 #include "yasli/Pointers.h"
 
+namespace yasli{
+
 class MemoryWriter;
 
 class YASLI_API TextOArchive : public Archive{
@@ -67,3 +69,5 @@ private:
     int textWidth_;
 	std::string fileName_;
 };
+
+}

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace yasli{
+
 class Archive;
 template<class Enum>
 class BitVector
@@ -20,3 +22,5 @@ private:
 
 template<class Enum>
 bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label);
+
+}

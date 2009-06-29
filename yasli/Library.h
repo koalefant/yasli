@@ -8,10 +8,10 @@
 #include "yasli/LibraryBase.h"
 #include "yasli/LibraryReference.h"
 #include "yasli/Content.h"
-#include "yasli/Errors.h"
-
+#include "yasli/Assert.h"
 
 // ---------------------------------------------------------------------------
+namespace yasli{
 
 template<class T, class ReferenceType>
 class Library : public LibraryBase{
@@ -115,3 +115,4 @@ protected:
     bool loaded_;
 };
 
+}

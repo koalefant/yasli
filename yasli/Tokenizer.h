@@ -1,9 +1,10 @@
-#ifndef __TOKENIZER_H_INCLUDED__
-#define __TOKENIZER_H_INCLUDED__
+#pragma once
 
 #include <cstring>
 #include <string>
 #include "API.h"
+
+namespace yasli{
 
 class Token{
     friend class Tokenizer;
@@ -88,4 +89,4 @@ private:
     std::string quotes_;
 };
 
-#endif
+}

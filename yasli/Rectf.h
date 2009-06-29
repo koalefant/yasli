@@ -9,6 +9,8 @@
 #endif
 #include "Vect2f.h"
 
+namespace yasli{
+
 struct Rectf{
 public:
     Rectf()
@@ -70,3 +72,5 @@ public:
 
     void serialize(Archive& ar);
 };
+
+}

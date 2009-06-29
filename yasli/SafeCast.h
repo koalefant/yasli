@@ -2,6 +2,8 @@
 
 #include "yasli/Assert.h"
 
+namespace yasli{
+
 template<class _Dest, class _Source>
 _Dest safe_cast(_Source source){
 #ifdef _DEBUG
@@ -11,4 +13,6 @@ _Dest safe_cast(_Source source){
 #else
     return static_cast<_Dest>(source);
 #endif
+}
+
 }

@@ -9,6 +9,8 @@
 #endif
 #include "Vect2i.h"
 
+namespace yasli{
+
 struct Recti{
 public:
     Recti()
@@ -70,3 +72,5 @@ public:
 
     void serialize(Archive& ar);
 };
+
+}

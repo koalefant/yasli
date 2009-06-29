@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdio>
 
+namespace yasli{
 namespace Files{
 
 time_t getModifyTime(const char* path)
@@ -382,4 +383,5 @@ iterator::operator bool() const
 	return impl_ != 0;
 }
 
+}
 }

@@ -13,7 +13,7 @@
 //#include <wx/wx.h>
 
 #include "yasli/Pointers.h"
-#include "yasli/Errors.h"
+#include "yasli/Assert.h"
 #include "yasli/SafeCast.h"
 #include "yasli/Macros.h"
 

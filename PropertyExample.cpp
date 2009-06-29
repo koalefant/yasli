@@ -7,13 +7,12 @@
 int main(int argc, char** argv)
 {
 	MyDataClass data;
-	if(Files::exists("test.ta")){
-		TextIArchive ia;
-		ia.open("test.ta");
+	TextIArchive ia;
+	if(ia.load("test.ta"))
 		ia(data, "data");
-	}
+
 	propertyEdit(Serializer(data), 0);
 	TextOArchive oa;
-	oa.open("test.ta");
 	oa(data, "data");
+	oa.save("test.ta");
 }

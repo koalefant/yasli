@@ -6,6 +6,8 @@
 
 #include "yasli/MemoryReader.h"
 
+namespace yasli{
+
 class YASLI_API TextIArchive : public Archive{
 public:
     TextIArchive();
@@ -65,3 +67,5 @@ private:
     Token token_;
     std::string filename_;
 };
+
+}

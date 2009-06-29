@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "yasli/StringUtil.h"
 
+namespace yasli{
+
 static char* escapeTable[256] = {
     "\\0" /* 0x00: */,
     "\\x01" /* 0x01: */,
@@ -359,4 +361,6 @@ void unescapeString(std::string& dest, const char* begin, const char* end)
     }
     dest.resize(ptr - &dest[0]);
     //*ptr = '\0';
+}
+
 }

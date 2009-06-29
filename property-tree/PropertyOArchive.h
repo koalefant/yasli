@@ -1,12 +1,13 @@
 #pragma once
 
 #include "yasli/Archive.h"
+using namespace yasli;
 
 class PropertyItem;
 class PropertyTreeRoot;
 class PropertyItemElement;
 
-class PropertyOArchive : public Archive{
+class PropertyOArchive : public yasli::Archive{
 public:
     PropertyOArchive(PropertyTreeRoot& root, PropertyItemElement* element = 0);
 

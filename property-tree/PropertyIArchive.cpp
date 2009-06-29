@@ -61,7 +61,7 @@ const PropertyItem* PropertyIArchive::findChild(const char* name)
     return 0;
 }
 
-bool PropertyIArchive::operator()(const Serializer& ser, const char* name)
+bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
 	const PropertyItem* child = findChild(name);
 	if(!child)
@@ -85,7 +85,7 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name)
     return true;
 }
 
-bool PropertyIArchive::operator()(const ContainerSerializationInterface& ser, const char* name)
+bool PropertyIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
     const PropertyItem* item = findChild(name);
 	if(!item)
@@ -106,7 +106,7 @@ bool PropertyIArchive::operator()(const ContainerSerializationInterface& ser, co
     return true;
 }
 
-bool PropertyIArchive::operator()(const PointerSerializationInterface& ptr, const char* name)
+bool PropertyIArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
 {
     const PropertyItem* item = findChild(name);
 	if(!item)
@@ -135,7 +135,7 @@ bool PropertyIArchive::operator()(const PointerSerializationInterface& ptr, cons
 }
 
 
-bool PropertyIArchive::operator()(bool& value, const char* name)
+bool PropertyIArchive::operator()(bool& value, const char* name, const char* label)
 {
     ASSERT(currentChild_);
     if(const PropertyItem* item = findChild(name)){
@@ -145,7 +145,7 @@ bool PropertyIArchive::operator()(bool& value, const char* name)
     return false;
 }
 
-bool PropertyIArchive::operator()(std::string& value, const char* name)
+bool PropertyIArchive::operator()(std::string& value, const char* name, const char* label)
 {
     if(const PropertyItem* item = findChild(name)){
 		item->assignTo(reinterpret_cast<void*>(&value), sizeof(value));
@@ -154,7 +154,7 @@ bool PropertyIArchive::operator()(std::string& value, const char* name)
     return false;
 }
 
-bool PropertyIArchive::operator()(float& value, const char* name)
+bool PropertyIArchive::operator()(float& value, const char* name, const char* label)
 {
     if(const PropertyItem* item = findChild(name)){
 		item->assignTo(reinterpret_cast<void*>(&value), sizeof(value));
@@ -163,7 +163,7 @@ bool PropertyIArchive::operator()(float& value, const char* name)
     return false;
 }
 
-bool PropertyIArchive::operator()(int& value, const char* name)
+bool PropertyIArchive::operator()(int& value, const char* name, const char* label)
 {
     if(const PropertyItem* item = findChild(name)){
 		item->assignTo(reinterpret_cast<void*>(&value), sizeof(value));
@@ -172,7 +172,7 @@ bool PropertyIArchive::operator()(int& value, const char* name)
     return false;
 }
 
-bool PropertyIArchive::operator()(long& value, const char* name)
+bool PropertyIArchive::operator()(long& value, const char* name, const char* label)
 {
     if(const PropertyItem* item = findChild(name)){
 		item->assignTo(reinterpret_cast<void*>(&value), sizeof(value));

@@ -2,6 +2,8 @@
 
 #include <vector>
 
+namespace yasli{
+
 template<class Type>
 class Context{
 public:
@@ -27,5 +29,7 @@ protected:
 	typedef std::vector<Type*> Stack;
     static Stack stack_;
 };
+
+}
 
 #define IMPLEMENT_CONTEXT(Type) template<class Type> typename Context<Type>::Stack Context<Type>::stack_;

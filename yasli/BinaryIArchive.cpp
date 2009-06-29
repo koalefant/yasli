@@ -2,6 +2,9 @@
 #include "BinaryIArchive.h"
 
 using std::string;
+
+namespace yasli{
+
 const unsigned int BINARY_MAGIC = 0xb1a4c17e;
 
 BinaryIArchive::BinaryIArchive(bool pretendToBeEdit)
@@ -472,3 +475,6 @@ const char* BinaryIArchive::pull()
     pulledName_ = pullNode(&type).str();
 	return pulledName_.c_str();
 }
+
+}
+

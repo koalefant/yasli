@@ -5,6 +5,8 @@
 #include "yasli/Assert.h"
 #include "yasli/ConstString.h"
 
+namespace yasli{
+
 template<class _Base>
 struct Constructor0{
     template<class _Derived>
@@ -144,6 +146,8 @@ protected:
     Creators creators_;
 };
 
+}
+
 #define REGISTER_IN_FACTORY(factory, key, product)              \
 	static factory::Creator<product> factory##product##Creator(key); 
 
@@ -152,3 +156,4 @@ protected:
 #define FORCE_SEGMENT(fileName) \
 	extern int dataSegment##fileName; \
 	int* dataSegmentPtr##fileName = &dataSegment##fileName;
+

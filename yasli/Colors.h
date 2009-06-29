@@ -2,6 +2,7 @@
 
 #include "round.h"
 
+namespace yasli{
 class Archive;
 struct Color3c;
 
@@ -120,4 +121,6 @@ inline Color4f::Color4f(const Color4c& color)
 inline Color4c::Color4c(const Color3c& color)
 {
 	set(color.r,color.g,color.b,255);
+}
+
 }

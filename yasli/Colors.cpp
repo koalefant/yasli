@@ -2,6 +2,8 @@
 #include "Colors.h"
 #include "yasli/Archive.h"
 
+namespace yasli{
+
 void Color4f::serialize(Archive& ar)
 {
     ar(r, "", "R");
@@ -25,3 +27,4 @@ void Color4c::serialize(Archive& ar)
     ar(a, "", "A");
 }
 
+}

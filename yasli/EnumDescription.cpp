@@ -5,6 +5,8 @@
 #include "yasli/MemoryWriter.h"
 #include "yasli/StringList.h"
 
+namespace yasli{
+
 void EnumDescription::add(int value, const char* name, const char *label)
 {
 	CHECK( name && label, return );
@@ -118,4 +120,6 @@ int EnumDescription::valueByLabel(const char* label) const
     LabelToValue::const_iterator it = labelToValue_.find(label);
     CHECK(it != labelToValue_.end(), return 0);
     return it->second;
+}
+
 }

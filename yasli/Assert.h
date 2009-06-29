@@ -5,13 +5,15 @@
 #endif
 
 #ifndef NDEBUG
+namespace yasli{
 int assertionDialog(const char* message, const char* function, const char* fileName, int line);
+}
 # ifdef WIN32
 #  define ASSERT(x) \
       { \
           static bool ignore = false; \
           if(!(x) && !ignore) \
-          switch(assertionDialog((#x), __FUNCTION__, __FILE__, __LINE__)) {  \
+		  switch(yasli::assertionDialog((#x), __FUNCTION__, __FILE__, __LINE__)) {  \
           case 0: break; \
           case 1: ignore = true; break;  \
           case 2: __asm{ int 3 } break;  \

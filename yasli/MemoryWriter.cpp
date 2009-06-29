@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "yasli/Errors.h"
+#include "yasli/Assert.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -11,6 +11,8 @@
 #endif
 
 #include "yasli/MemoryWriter.h"
+
+namespace yasli{
 
 MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
 : size_(size)
@@ -205,12 +207,10 @@ void MemoryWriter::write(const void* data, std::size_t size)
         position_ += size;
     }
     else{
-        if(reallocate_){
-            realloc(size_ * 2);
-            write(data, size);
-        }
-        else
-            RAISE(ErrorRuntime("MemoryWriter overflow!"));
+		CHECK(reallocate_, return);
+
+        realloc(size_ * 2);
+        write(data, size);
     }
     ASSERT(position() < this->size());
 }
@@ -222,12 +222,11 @@ void MemoryWriter::write(char c)
         ++position_;
     }
     else{
-        if(reallocate_){
-            realloc(size_ * 2);
-            write(c);
-        }
-        else
-            RAISE(ErrorRuntime("MemoryWriter overflow!"));
+		CHECK(reallocate_, return);
+        realloc(size_ * 2);
+        write(c);
     }
     ASSERT(position() < this->size());
+}
+
 }

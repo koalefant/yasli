@@ -15,9 +15,12 @@
 typedef long long __int64;
 #endif
 
+namespace yasli{ class Archive; }
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label);
+
+namespace yasli{
 
 class YASLI_API Archive : public RefCounter{
 public:
@@ -141,16 +144,22 @@ namespace Helpers{
     };
 }
 
+template<class T>
+bool Archive::operator()(const T& value, const char* name, const char* label){
+    return ::serialize(*this, const_cast<T&>(value), name, label);
+}
+
+}
 
 template<class T, int Size>
-bool serialize(Archive& ar, T object[Size], const char* name, const char* label)
+bool serialize(yasli::Archive& ar, T object[Size], const char* name, const char* label)
 {
     ASSERT(0);
     return false;
 }
 
 template<class T>
-bool serialize(Archive& ar, const T& object, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, const T& object, const char* name, const char* label)
 {
     T::unable_to_serialize_CONST_object();
     ASSERT(0);
@@ -158,9 +167,9 @@ bool serialize(Archive& ar, const T& object, const char* name, const char* label
 }
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label)
 {
-    using namespace Helpers;
+	using namespace yasli::Helpers;
 
     return
         Select< IsClass<T>,
@@ -170,9 +179,4 @@ bool serialize(Archive& ar, T& object, const char* name, const char* label)
 					Identity< SerializeEnum<T> >
 				>
         >::type::invoke(ar, object, name, label);
-}
-
-template<class T>
-bool Archive::operator()(const T& value, const char* name, const char* label){
-    return ::serialize(*this, const_cast<T&>(value), name, label);
 }
