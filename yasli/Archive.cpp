@@ -1,15 +1,28 @@
 #include "StdAfx.h"
 #include "yasli/Archive.h"
-#include "yasli/TypesFactory.h"
-
 #include <string>
 #include <iostream>
+
+#include "yasli/TypesFactory.h"
+
+#include "pugixml.hpp"
 
 namespace yasli{
 
 void Archive::warning(const char* message)
 {
-    //std::cout << "WARNING, Archive: " << message << std::endl;
+}
+
+bool Archive::operator()(std::wstring& value, const char* name, const char* label)
+{
+	std::string str;
+    if(isOutput())
+        str = pugi::as_utf8(value.c_str());
+    if(!(*this)(str, name, label))
+        return false;
+    if(isInput())
+        value = pugi::as_utf16(str.c_str());
+    return true;
 }
 
 bool Archive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)

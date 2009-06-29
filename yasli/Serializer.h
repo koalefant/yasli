@@ -188,7 +188,7 @@ public:
     TypeID type() const{ return TypeID::get<T>(); }
 
     bool operator()(Archive& ar, const char* name, const char* label){
-        CHECK(index_ < size_, return false);
+        CHECK(size_t(index_) < size_, return false);
 		return ar(array_[index_], name, label);
     }
     operator bool() const{ return array_ != 0; }

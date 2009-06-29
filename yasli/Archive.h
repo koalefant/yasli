@@ -57,6 +57,7 @@ public:
     // basic types
     virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
     virtual bool operator()(std::string& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
+    virtual bool operator()(std::wstring& value, const char* name = "", const char* label = 0);
     virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
     virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
     virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
