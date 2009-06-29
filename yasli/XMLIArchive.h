@@ -42,6 +42,6 @@ private:
     bool enterNode();
     void leaveNode();
 
-    AutoPtr<XMLIArchiveImpl> impl_;
+	std::auto_ptr<XMLIArchiveImpl> impl_;
     friend struct XMLIArchiveImpl;
 };

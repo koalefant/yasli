@@ -121,7 +121,7 @@ void PropertyTree::revert()
     //setFocusedItem(0);
 	cancelControl(true, false);
 	if(attached_){
-		// FIXME: если делать так всегда, то получается heap corruption!
+		// FIXME: РµСЃР»Рё РґРµР»Р°С‚СЊ С‚Р°Рє РІСЃРµРіРґР°, С‚Рѕ РїРѕР»СѓС‡Р°РµС‚СЃСЏ heap corruption!
 		PropertyOArchive ar(root_);
 		ar(attached_, "");
 	}

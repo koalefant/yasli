@@ -29,7 +29,7 @@ void XMLIArchive::open(const char* filename)
 {
     if(isOpen())
         close();
-    impl_ = new XMLIArchiveImpl();
+    impl_.reset(new XMLIArchiveImpl());
     impl_->document.load_file(filename);
     impl_->childNode = impl_->document.root();
     enterNode();
@@ -52,24 +52,24 @@ void XMLIArchive::openFromMemory(const char* buffer, size_t length)
   memcpy(buf, buffer, length);
   buf[length] = '\0';
 
-  impl_ = new XMLIArchiveImpl();
+  impl_.reset(new XMLIArchiveImpl());
   bool result = false;
   if(impl_->document.parse(pugi::transfer_ownership_tag(), buf)){
     impl_->childNode = impl_->document.root();
     enterNode();
   }
   else
-    impl_ = 0;  
+    impl_.reset();
 }
 
 bool XMLIArchive::isOpen() const
 {
-    return impl_ != 0;
+    return impl_.get() != 0;
 }
 
 void XMLIArchive::close()
 {
-    impl_ = 0;
+    impl_.reset();
 }
 
 bool XMLIArchive::enterNode()

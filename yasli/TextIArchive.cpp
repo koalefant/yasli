@@ -18,13 +18,13 @@ TextIArchive::TextIArchive()
 TextIArchive::~TextIArchive()
 {
     stack_.clear();
-    reader_ = 0;
+    reader_.reset();
 }
 
 bool TextIArchive::open(char* buffer, size_t length, bool free)
 {
 	if(buffer)
-		reader_ = new MemoryReader(buffer, length, free);
+		reader_.reset(new MemoryReader(buffer, length, free));
 
 	token_ = Token(reader_->begin(), reader_->begin());
 	stack_.clear();

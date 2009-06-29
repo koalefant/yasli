@@ -61,7 +61,7 @@ private:
     Stack stack_;
 
     Tokenizer tokenizer_;
-    AutoPtr<MemoryReader> reader_;
+	std::auto_ptr<MemoryReader> reader_;
     Token token_;
     std::string filename_;
 };
