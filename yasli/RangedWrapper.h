@@ -67,7 +67,6 @@ public:
 	float value_;
 };
 
-bool serialize(Archive& ar, RangedWrapperf &wrapper, const char* name, const char* label);
 
 
 class RangedWrapperi{
@@ -133,5 +132,6 @@ public:
 
 }
 
+bool serialize(yasli::Archive& ar, yasli::RangedWrapperf &wrapper, const char* name, const char* label);
 bool serialize(yasli::Archive& ar, yasli::RangedWrapperi &wrapper, const char* name, const char* label);
 
