@@ -15,8 +15,8 @@ Vect2i::Vect2i(const Vect2f& vect)
 
 void Vect2i::serialize( Archive& ar )
 {
-  ar( x, "", "x" );
-  ar( y, "", "y" );
+  ar( x, "", "&x" );
+  ar( y, "", "&y" );
 }
 
 }

@@ -4,8 +4,8 @@
 
 void Rectf::serialize(Archive& ar)
 {
-  ar( min.x, "" );
-  ar( min.y, "" );
-  ar( max.x, "" );
-  ar( max.y, "" );
+  ar( min.x, "", "&minX" );
+  ar( min.y, "", "&minY" );
+  ar( max.x, "", "&maxX" );
+  ar( max.y, "", "&maxY" );
 }

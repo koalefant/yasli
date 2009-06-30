@@ -6,25 +6,25 @@ namespace yasli{
 
 void Color4f::serialize(Archive& ar)
 {
-    ar(r, "", "R");
-    ar(g, "", "G");
-    ar(b, "", "B");
-    ar(a, "", "A");
+    ar(r, "", "&R");
+    ar(g, "", "&G");
+    ar(b, "", "&B");
+    ar(a, "", "&A");
 }
 
 void Color3c::serialize(Archive& ar)
 {
-    ar(r, "", "R");
-    ar(g, "", "G");
-    ar(b, "", "B");
+    ar(r, "", "&R");
+    ar(g, "", "&G");
+    ar(b, "", "&B");
 }
 
 void Color4c::serialize(Archive& ar)
 {
-    ar(r, "", "R");
-    ar(g, "", "G");
-    ar(b, "", "B");
-    ar(a, "", "A");
+    ar(r, "", "&R");
+    ar(g, "", "&G");
+    ar(b, "", "&B");
+    ar(a, "", "&A");
 }
 
 }
