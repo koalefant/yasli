@@ -1,7 +1,15 @@
 #pragma once 
 
-#ifdef WIN32
-#else
+#ifdef ASSERT
+# undef ASSERT
+#endif
+
+#ifdef VERIFY
+# undef VERIFY
+#endif
+
+#ifdef CHECK
+# undef CHECK
 #endif
 
 #ifndef NDEBUG
