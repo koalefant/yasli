@@ -1,4 +1,5 @@
 #pragma once
+#include "yasli/round.h"
 
 namespace yasli{
 
@@ -53,9 +54,14 @@ struct Vect2i{
 		y -= rhs.y;
 		return *this;
 	}
-	int norm2() const{ return x * x + y * y; }
+	int length2() const{ return x * x + y * y; }
 
     void serialize( Archive& ar );
 };
+
+inline Vect2i interpolate(Vect2i a, Vect2i b, float phase)
+{
+	return Vect2i(round(a.x + (b.x - a.x) * phase), round(a.y + (b.y - a.y) * phase));
+}
 
 }

@@ -22,7 +22,7 @@ bool serialize(yasli::Archive& ar, T& object, const char* name, const char* labe
 
 namespace yasli{
 
-class YASLI_API Archive : public RefCounter{
+class YASLI_API Archive : public PolyRefCounter{
 public:
     Archive(bool isInput, bool isEdit = false)
     : isInput_(isInput)

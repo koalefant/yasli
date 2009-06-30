@@ -34,6 +34,14 @@ public:
         ASSERT(object);
     }
 
+	Serializer(const Serializer& _original)
+	: type_(_original.type_)
+	, object_(_original.object_)
+	, size_(_original.size_)
+	, serializeFunc_(_original.serializeFunc_)
+	{
+	}
+
     template<class T>
     explicit Serializer(T& object){
         type_=  TypeID::get<T>();

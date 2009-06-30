@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 
 namespace yasli{
 
@@ -53,7 +54,8 @@ struct Vect2f{
 		y -= rhs.y;
 		return *this;
 	}
-	float norm2() const{ return x * x + y * y; }
+	float length2() const{ return x * x + y * y; }
+	float length() const{ return sqrtf(x * x + y * y); }
 
     void serialize( Archive& ar );
 };
