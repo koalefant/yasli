@@ -75,12 +75,11 @@ public:
         set(ptr.ptr_);
         return *this;
     }
-    T* get(){ return reinterpret_cast<T*>(ptr_); }
     T* get() const{ return reinterpret_cast<T*>(ptr_); }
-    T& operator*(){
+    T& operator*() const{
         return *get();
     }
-    T* operator->(){ return get(); }
+    T* operator->() const{ return get(); }
 };
 
 #define CHECK_POLY_PTR ASSERT(reinterpret_cast<PolyRefCounter* const>(this) == dynamic_cast<PolyRefCounter* const>(this));
