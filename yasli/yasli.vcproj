@@ -422,14 +422,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Colors.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Colors.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ConstString.h"
 				>
 			</File>
@@ -486,30 +478,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Range.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Range.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RangedWrapper.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RangedWrapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Recti.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Recti.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SafeCast.h"
 				>
 			</File>
@@ -543,22 +511,6 @@
 			</File>
 			<File
 				RelativePath=".\Tokenizer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Vect2f.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vect2f.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Vect2i.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vect2i.h"
 				>
 			</File>
 		</Filter>
