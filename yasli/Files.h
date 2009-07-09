@@ -2,7 +2,6 @@
 #include "yasli/Pointers.h"
 #include <time.h>
 
-namespace yasli{
 namespace Files{
 #ifdef WIN32
 	static const char* PATH_SEPARATOR = "\\";
@@ -33,6 +32,8 @@ namespace Files{
 	bool remove(const char* path);
 
     bool copy(const char* sourceFile, const char* destinationFile);
+
+	std::string setExtention(const char* file_name, const char* extention);
 
 #ifdef WIN32
 	typedef ::__time64_t time_t;
@@ -75,5 +76,4 @@ namespace Files{
 
 		iteratorImpl* impl_;
 	};
-}
 }

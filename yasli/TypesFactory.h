@@ -131,7 +131,7 @@ public:
 	
 	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label)
 	{
-        CHECK(size_t(index) < typeToCreatorMap_.size(), return);
+        XCHECK(size_t(index) < typeToCreatorMap_.size(), return);
         typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
         while(index--)
             ++it;

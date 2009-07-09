@@ -42,7 +42,7 @@ void Archive::notImplemented()
 // ---------------------------------------------------------------------------
 
 bool Serializer::operator()(Archive& ar) const{
-	CHECK(serializeFunc_ && object_, return false);
+	XCHECK(serializeFunc_ && object_, return false);
     return serializeFunc_(object_, ar);
 }
 bool Serializer::operator()(Archive& ar, const char* name, const char* label) const{

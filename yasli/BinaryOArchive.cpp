@@ -24,13 +24,13 @@ void BinaryOArchive::clear()
 
 size_t BinaryOArchive::length() const
 { 
-    CHECK(stream_, return 0);
+    XCHECK(stream_, return 0);
     return stream_->position();
 }
 
 const char* BinaryOArchive::buffer()
 {
-    CHECK(stream_, return 0);
+    XCHECK(stream_, return 0);
     return (const char*)stream_->buffer();
 }
 

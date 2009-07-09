@@ -32,10 +32,10 @@ TextOArchive::~TextOArchive()
 
 bool TextOArchive::save(const char* fileName)
 {
-    CHECK(fileName && strlen(fileName) > 0, return false);
-    CHECK(stack_.size() == 1, return false);
-    CHECK(buffer_, return false);
-    CHECK(buffer_->position() <= buffer_->size(), return false);
+    XCHECK(fileName && strlen(fileName) > 0, return false);
+    XCHECK(stack_.size() == 1, return false);
+    XCHECK(buffer_, return false);
+    XCHECK(buffer_->position() <= buffer_->size(), return false);
     stack_.pop_back();
     if(FILE* file = fopen(fileName, "wb")){
         if(fwrite(buffer_->c_str(), 1, buffer_->position(), file) != buffer_->position()){

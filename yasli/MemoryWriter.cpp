@@ -110,7 +110,7 @@ MemoryWriter& MemoryWriter::operator<<(float value)
 #ifdef WIN32
 	char buf[_CVTBUFSIZE];
 	_gcvt_s(buf, double(value), 8);
-	write(buf);
+	return (*this) << buf;
 #else
     int point = 0;
     int sign = 0;
@@ -132,8 +132,8 @@ MemoryWriter& MemoryWriter::operator<<(float value)
         write(".");
         operator<<(buf + point);
     }
+	return *this;
 #endif
-    return *this;
 }
 
 MemoryWriter& MemoryWriter::operator<<(double value)
@@ -143,6 +143,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 	char buf[_CVTBUFSIZE];
 	_gcvt_s(buf, value, 8);
 	write(buf);
+	return (*this) << buf;
 #else
     int point = 0;
     int sign = 0;
@@ -164,8 +165,8 @@ MemoryWriter& MemoryWriter::operator<<(double value)
         write(".");
         operator<<(buf + point);
     }
+	return *this;
 #endif
-    return *this;
 }
 
 MemoryWriter& MemoryWriter::operator<<(const char* value)
@@ -207,7 +208,7 @@ void MemoryWriter::write(const void* data, std::size_t size)
         position_ += size;
     }
     else{
-		CHECK(reallocate_, return);
+		XCHECK(reallocate_, return);
 
         realloc(size_ * 2);
         write(data, size);
@@ -222,7 +223,7 @@ void MemoryWriter::write(char c)
         ++position_;
     }
     else{
-		CHECK(reallocate_, return);
+		XCHECK(reallocate_, return);
         realloc(size_ * 2);
         write(c);
     }

@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cstdio>
 
-namespace yasli{
 namespace Files{
 
 time_t getModifyTime(const char* path)
@@ -161,10 +160,23 @@ bool copy(const char* sourceFile, const char* destinationFile)
 #endif
 }
 
+std::string setExtention(const char* file_name, const char* extention)
+{
+	std::string str = file_name;
+	unsigned int pos = str.rfind(".");
+	if(pos != std::string::npos)
+		str.erase(pos, str.size());
+	if(!*extention)
+		return str;
+	str += ".";
+	str += extention;
+	return str;
+}
+
 // ---------------------------------------------------------------------------
 
 #ifdef WIN32
-class iteratorImpl : public RefCounter{
+class iteratorImpl : public yasli::RefCounter{
 public:
 	iteratorImpl()
 	{
@@ -383,5 +395,4 @@ iterator::operator bool() const
 	return impl_ != 0;
 }
 
-}
 }
