@@ -98,3 +98,4 @@ protected:
 	std::vector< SharedPtr<PolyBase> > polyVector_;
 	SharedPtr<PolyBase> polyPtr_;
 };
+
