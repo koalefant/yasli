@@ -99,7 +99,7 @@ bool BinaryIArchive::read(Token* str)
   unsigned char len;
   if(!read(&len))
     return false;
-  XCHECK(pos_ + len <= end_, return false;);
+  ESCAPE(pos_ + len <= end_, return false;);
   *str = Token(pos_, pos_ + len);
   pos_ += len;
   return true;
@@ -120,12 +120,12 @@ bool BinaryIArchive::readUnsafe(char *_data, int _size)
 
 bool BinaryIArchive::openStruct(const char *_name, Token* typeName)
 {
-	XCHECK(!blocks_.empty(), return false);
+	ESCAPE(!blocks_.empty(), return false);
     const char *start;
     const char *end;
     if(findNode (BINARY_NODE_STRUCT, Token(_name), &start, &end))
     {
-        XCHECK(read(typeName), return false;);
+        ESCAPE(read(typeName), return false;);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -138,8 +138,8 @@ bool BinaryIArchive::openContainer(const char *_name, Token *_typeName, size_t *
     const char *start, *end;
     if(findNode(BINARY_NODE_CONTAINER, Token(_name), &start, &end))
     {
-        XCHECK(read(_typeName), return false);
-        XCHECK(read(_size), return false);
+        ESCAPE(read(_typeName), return false);
+        ESCAPE(read(_size), return false);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -152,8 +152,8 @@ bool BinaryIArchive::openPointer(const char *_name, Token *_baseType, Token *_ty
     const char *start, *end;
     if(findNode(BINARY_NODE_POINTER, Token(_name), &start, &end))
     {
-        XCHECK(read(_baseType), return false;);
-        XCHECK(read(_type), return false;;);
+        ESCAPE(read(_baseType), return false;);
+        ESCAPE(read(_type), return false;;);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -191,7 +191,7 @@ size_t BinaryIArchive::readNodeHeader(BinaryNode* _type, Token* name)
     read(&type);
     *_type = BinaryNode(type);
 
-    XCHECK(read(name), return blockSize);
+    ESCAPE(read(name), return blockSize);
     return blockSize;
 }
 

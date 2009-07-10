@@ -208,7 +208,7 @@ void MemoryWriter::write(const void* data, std::size_t size)
         position_ += size;
     }
     else{
-		XCHECK(reallocate_, return);
+		ESCAPE(reallocate_, return);
 
         realloc(size_ * 2);
         write(data, size);
@@ -223,7 +223,7 @@ void MemoryWriter::write(char c)
         ++position_;
     }
     else{
-		XCHECK(reallocate_, return);
+		ESCAPE(reallocate_, return);
         realloc(size_ * 2);
         write(c);
     }

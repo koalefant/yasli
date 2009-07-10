@@ -9,7 +9,7 @@ namespace yasli{
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
-	XCHECK( name && label, return );
+	ESCAPE( name && label, return );
     nameToValue_[name] = value;
     labelToValue_[label] = value;
     valueToName_[value] = name;
@@ -68,13 +68,13 @@ bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* na
 const char* EnumDescription::name(int value) const
 {
     ValueToName::const_iterator it = valueToName_.find(value);
-    XCHECK(it != valueToName_.end(), return "");
+    ESCAPE(it != valueToName_.end(), return "");
     return it->second;
 }
 const char* EnumDescription::label(int value) const
 {
     ValueToLabel::const_iterator it = valueToLabel_.find(value);
-    XCHECK(it != valueToLabel_.end(), return "");
+    ESCAPE(it != valueToLabel_.end(), return "");
     return it->second;
 }
 
@@ -112,13 +112,13 @@ int EnumDescription::indexByValue(int value) const
 int EnumDescription::value(const char* name) const
 {
     NameToValue::const_iterator it = nameToValue_.find(name);
-    XCHECK(it != nameToValue_.end(), return 0);
+    ESCAPE(it != nameToValue_.end(), return 0);
     return it->second;
 }
 int EnumDescription::valueByLabel(const char* label) const
 {
     LabelToValue::const_iterator it = labelToValue_.find(label);
-    XCHECK(it != labelToValue_.end(), return 0);
+    ESCAPE(it != labelToValue_.end(), return 0);
     return it->second;
 }
 

@@ -27,7 +27,7 @@ void splitStringList(StringList* result, const char *str, char delimeter)
 
 void joinStringList(std::string* result, const StringList& stringList, char sep)
 {
-    XCHECK(result != 0, return);
+    ESCAPE(result != 0, return);
     result->clear();
     for(StringList::const_iterator it = stringList.begin(); it != stringList.end(); ++it)
     {
@@ -39,13 +39,13 @@ void joinStringList(std::string* result, const StringList& stringList, char sep)
 
 void joinStringList(std::string* result, const StringListStatic& stringList, char sep)
 {
-    XCHECK(result != 0, return);
+    ESCAPE(result != 0, return);
     result->clear();
     for(StringListStatic::const_iterator it = stringList.begin(); it != stringList.end(); ++it)
     {
         if(!result->empty())
             (*result) += sep;
-        XCHECK(*it != 0, continue);
+        ESCAPE(*it != 0, continue);
         result->append(*it);
     }
 }

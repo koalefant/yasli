@@ -67,7 +67,7 @@ public:
 
     template<class T>
     static bool serializeRaw(void* rawPointer, Archive& ar){
-        XCHECK(rawPointer, return false);
+        ESCAPE(rawPointer, return false);
         ((T*)(rawPointer))->serialize(ar);
         return true;
     }
@@ -125,11 +125,11 @@ public:
 
     // from ContainerSerializationInterface
     std::size_t size() const{
-        XCHECK(container_ != 0, return 0);
+        ESCAPE(container_ != 0, return 0);
         return container_->size();
     }
     std::size_t resize(std::size_t size){
-        XCHECK(container_ != 0, return 0);
+        ESCAPE(container_ != 0, return 0);
         resizeHelper(size, container_);
         it_ = container_->begin();
         size_ = size;
@@ -141,13 +141,13 @@ public:
 
     bool next()
     {
-        XCHECK(container_ && it_ != container_->end(), return false);
+        ESCAPE(container_ && it_ != container_->end(), return false);
         ++it_;
         return it_ != container_->end();
     }
 
     bool operator()(Archive& ar, const char* name, const char* label){
-        XCHECK(container_, return false);
+        ESCAPE(container_, return false);
         if(it_ == container_->end())
 		{
 			it_ = container_->insert(container_->end(), Element());
@@ -196,7 +196,7 @@ public:
     TypeID type() const{ return TypeID::get<T>(); }
 
     bool operator()(Archive& ar, const char* name, const char* label){
-        XCHECK(size_t(index_) < size_, return false);
+        ESCAPE(size_t(index_) < size_, return false);
 		return ar(array_[index_], name, label);
     }
     operator bool() const{ return array_ != 0; }

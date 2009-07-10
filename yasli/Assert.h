@@ -8,8 +8,8 @@
 # undef VERIFY
 #endif
 
-#ifdef XCHECK
-# undef XCHECK
+#ifdef ESCAPE
+# undef ESCAPE
 #endif
 
 #ifndef NDEBUG
@@ -42,4 +42,4 @@ int assertionDialog(const char* message, const char* function, const char* fileN
 # define VERIFY(x) (x)
 //# define TRACE(x)
 #endif
-#define XCHECK(x, action) if(!(x)) { ASSERT(0 && #x); action; };
+#define ESCAPE(x, action) if(!(x)) { ASSERT(0 && #x); action; };
