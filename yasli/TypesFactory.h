@@ -183,8 +183,8 @@ namespace{ \
 }
 
 #define YASLI_CLASS(BaseType, Type, name) \
-	const TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
-	yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
+	yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
 	int dummyForType_##Type##BaseType;
 
 #define YASLI_FORCE_CLASS(BaseType, Type) \
