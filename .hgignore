@@ -3,3 +3,9 @@ glob:*.pch
 glob:*.pdb
 glob:*.idb
 glob:*.vcproj.*.user
+glob:*.ncb
+glob:*.suo
+glob:.*Debug*
+glob:.*Release*
+glob:*.vskdb
+glob:*.vsksln
