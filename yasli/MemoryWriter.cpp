@@ -17,6 +17,7 @@ namespace yasli{
 MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
 : size_(size)
 , reallocate_(reallocate)
+, digits_(8)
 {
     alloc(size);
 }
@@ -109,7 +110,7 @@ MemoryWriter& MemoryWriter::operator<<(float value)
 	ASSERT(!isnan(value));
 #ifdef WIN32
 	char buf[_CVTBUFSIZE];
-	_gcvt_s(buf, double(value), 8);
+	_gcvt_s(buf, double(value), digits_);
 	return (*this) << buf;
 #else
     int point = 0;
@@ -141,8 +142,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 	ASSERT(!isnan(value));
 #ifdef WIN32
 	char buf[_CVTBUFSIZE];
-	_gcvt_s(buf, value, 8);
-	write(buf);
+	_gcvt_s(buf, value, digits_);
 	return (*this) << buf;
 #else
     int point = 0;

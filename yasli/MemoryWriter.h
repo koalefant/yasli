@@ -50,6 +50,9 @@ public:
 
     std::size_t position() const{ return position_ - memory_; }
     void setPosition(std::size_t pos);
+
+	MemoryWriter& setDigits(int digits) { digits_ = digits; return *this; }
+
 private:
     void alloc(std::size_t initialSize);
     void realloc(std::size_t newSize);
@@ -58,6 +61,7 @@ private:
     char* position_;
     char* memory_;
     bool reallocate_;
+	unsigned char digits_;
 };
 
 }
