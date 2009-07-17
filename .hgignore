@@ -1,3 +1,4 @@
+glob:.svn
 glob:*.obj
 glob:*.pch
 glob:*.pdb
