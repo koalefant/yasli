@@ -3,6 +3,7 @@
 #include <time.h>
 
 namespace Files{
+    using std::string;
 #ifdef WIN32
 	static const char* PATH_SEPARATOR = "\\";
 #else
@@ -10,8 +11,8 @@ namespace Files{
 #endif
     inline const char* pathSeparator(){ return PATH_SEPARATOR; }
 
-	std::string extractFileBase(const char* path);
-	std::string extractFilePath(const char* path);
+	string extractFileBase(const char* path);
+	string extractFilePath(const char* path);
 	inline const char* extractFileName(const char* path){
 		size_t len = strlen(path);
 		const char* p = path + len - 1;
@@ -22,6 +23,7 @@ namespace Files{
 		}
 		return path;
 	}
+    string relativePath(const char* path, const char* toDirectory);
 
 
     bool exists(const char* fileName);
@@ -33,7 +35,7 @@ namespace Files{
 
     bool copy(const char* sourceFile, const char* destinationFile);
 
-	std::string setExtention(const char* file_name, const char* extention);
+	string setExtention(const char* file_name, const char* extention);
 
 #ifdef WIN32
 	typedef ::__time64_t time_t;
@@ -51,7 +53,7 @@ namespace Files{
 		bool isFile() const{ return !isDirectory_; }
 		bool isDirectory() const{ return isDirectory_; }
 	protected:
-		std::string name_;
+		string name_;
 		bool isDirectory_;
 		friend class iteratorImpl;
 	};

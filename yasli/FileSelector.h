@@ -10,19 +10,24 @@ bool serialize(yasli::Archive& ar, yasli::FileSelector& selector, const char* na
 
 namespace yasli{
 
+using std::string;
+
 class Archive;
 
 class FileSelector{
 public:
 	struct Options{
-		Options(const char* _filter, bool _save = false, const char* _initialDirectory = ".")
+		Options(const char* _filter, bool _save = false,
+                const char* _initialDirectory = ".", const char* _rootDirectory = "")
 		: filter(_filter)
 		, save(_save)
 		, initialDirectory(_initialDirectory)
+        , rootDirectory(_rootDirectory)
 		{
 		}
-		std::string filter;
-		std::string initialDirectory;
+		string filter;
+		string initialDirectory;
+		string rootDirectory;
 		bool save;
 	};
 

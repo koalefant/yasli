@@ -6,7 +6,7 @@ namespace yasli{
 
 void FileSelector::serialize(Archive& ar)
 {
-	ar(fileName_, "");
+	ar(fileName_, "fileName", "File Name");
 }
 
 }

@@ -104,22 +104,44 @@ bool createDirectory(const char* path)
 #endif
 }
 
-std::string extractFilePath(const char* path)
+string extractFilePath(const char* path)
 {
 	size_t len = strlen(path);
 	if(len == 0)
-		return std::string();
+		return string();
 
 	const char* p = path + len - 1;
 	while(p != path){
 		if(p[0] == PATH_SEPARATOR[0])
-			return std::string(path, p);
+			return string(path, p);
 		--p;
 	}
-	return std::string();
+	return string();
 }
 
-std::string extractFileBase(const char* path)
+string relativePath(const char* path, const char* toDirectory)
+{
+#ifdef WIN32
+	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
+    char fullPath[MAX_PATH + 1];
+	char fullPathLower[MAX_PATH + 1];
+    GetFullPathNameA( path, sizeof(fullPath), fullPath, 0 );
+	strncpy(fullPathLower, fullPath, sizeof(fullPath));
+	CharLowerBuffA( fullPathLower, strlen(fullPathLower) );
+    char fullPathDir[MAX_PATH + 1];
+    GetFullPathNameA( toDirectory, sizeof(fullPathDir), fullPathDir, 0 );
+	CharLowerBuffA( fullPathDir, strlen(fullPathDir) );
+	if ( strstr( fullPathLower, fullPathDir ) == fullPathLower )
+		return string( fullPath + strlen(fullPathDir) + 1, fullPath + strlen(fullPath) );
+	else
+		return string();
+#else
+    ASSERT(0 && "Not implemented");
+    return string();
+#endif
+}
+
+string extractFileBase(const char* path)
 {
     const char* fileNameStart = path;
     const char* end = path + strlen(path);
@@ -134,7 +156,7 @@ std::string extractFileBase(const char* path)
     }
     if(p == fileNameStart)
         p = end;
-	return std::string(fileNameStart, p);
+	return string(fileNameStart, p);
 }
 
 
@@ -144,7 +166,7 @@ bool createDirectoryForFile(const char* path)
     const char* p = path + len;
     while(--p != path){
         if(*p == pathSeparator()[0]){
-            std::string directoryPath(path, p);
+            string directoryPath(path, p);
             return createDirectory(directoryPath.c_str());
         }
     }
@@ -156,15 +178,15 @@ bool copy(const char* sourceFile, const char* destinationFile)
 #ifdef WIN32
 	return CopyFileA(sourceFile, destinationFile, FALSE) != FALSE;
 #else
-    return system((std::string("cp \"") + sourceFile + "\" \"" + destinationFile + "\"").c_str()) == 0;
+    return system((string("cp \"") + sourceFile + "\" \"" + destinationFile + "\"").c_str()) == 0;
 #endif
 }
 
-std::string setExtention(const char* file_name, const char* extention)
+string setExtention(const char* file_name, const char* extention)
 {
-	std::string str = file_name;
+	string str = file_name;
 	unsigned int pos = str.rfind(".");
-	if(pos != std::string::npos)
+	if(pos != string::npos)
 		str.erase(pos, str.size());
 	if(!*extention)
 		return str;
@@ -244,7 +266,7 @@ public:
 
 	iteratorImpl(const char* path)
 	{
-		std::string p = extractFilePath(path);
+		string p = extractFilePath(path);
 		path = p.c_str();
 		dir_ = opendir(path);
 		if(!dir_)
