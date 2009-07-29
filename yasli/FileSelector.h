@@ -17,16 +17,13 @@ class Archive;
 class FileSelector{
 public:
 	struct Options{
-		Options(const char* _filter, bool _save = false,
-                const char* _initialDirectory = ".", const char* _rootDirectory = "")
+		Options(const char* _filter, bool _save = false, const char* _rootDirectory = "")
 		: filter(_filter)
 		, save(_save)
-		, initialDirectory(_initialDirectory)
         , rootDirectory(_rootDirectory)
 		{
 		}
 		string filter;
-		string initialDirectory;
 		string rootDirectory;
 		bool save;
 	};
