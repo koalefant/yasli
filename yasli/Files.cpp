@@ -132,7 +132,7 @@ string relativePath(const char* path, const char* toDirectory)
     GetFullPathNameA( toDirectory, sizeof(fullPathDir), fullPathDir, 0 );
 	CharLowerBuffA( fullPathDir, strlen(fullPathDir) );
 	if ( strstr( fullPathLower, fullPathDir ) == fullPathLower )
-		return string( fullPath + strlen(fullPathDir) + 1, fullPath + strlen(fullPath) );
+		return string( fullPath + strlen(fullPathDir), fullPath + strlen(fullPath) );
 	else
 		return string();
 #else
