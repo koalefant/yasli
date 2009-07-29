@@ -37,6 +37,8 @@ namespace Files{
 
 	string setExtention(const char* file_name, const char* extention);
 
+	string fixSlashes(const char* _path);
+
 #ifdef WIN32
 	typedef ::__time64_t time_t;
 #else

@@ -195,6 +195,15 @@ string setExtention(const char* file_name, const char* extention)
 	return str;
 }
 
+string fixSlashes(const char* _path)
+{
+	string path(_path);
+	for(unsigned int i = 0; i < path.size(); i++)
+		if(path[i] == '/')
+			path[i] = '\\';
+	return path;
+}
+
 // ---------------------------------------------------------------------------
 
 #ifdef WIN32
