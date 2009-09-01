@@ -59,7 +59,8 @@ bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* na
         StringList::iterator it;
         value = 0;
         for(it = values.begin(); it != values.end(); ++it)
-            value |= this->value(it->c_str());
+			if(!it->empty())
+				value |= this->value(it->c_str());
 		return true;
     }
 }
