@@ -39,6 +39,39 @@ protected:
 	mutable SharedPtr<T>& ptr_;
 };
 
+template<class T>
+class PolyPtrSerializationImpl : public PointerSerializationInterface
+{
+public:
+	PolyPtrSerializationImpl(PolyPtr<T>& ptr)
+	: ptr_(ptr)
+	{}
+
+	TypeID type() const{
+		if(ptr_)
+			return TypeID::get(ptr_.get());
+		else
+			return TypeID();
+	}
+	void create(TypeID type) const{
+		ASSERT(!ptr_ || ptr_->refCount() == 1);
+		if(type)
+			ptr_.set(ClassFactory<T>::the().create(type));
+		else
+			ptr_.set((T*)0);
+	}
+	TypeID baseType() const{ return TypeID::get<T>(); }
+	virtual Serializer serializer() const{
+		return Serializer(*ptr_);
+	}
+	void* get() const{
+		return reinterpret_cast<void*>(ptr_.get());
+	}
+	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
+protected:
+	mutable PolyPtr<T>& ptr_;
+};
+
 
 template<class T>
 void SharedPtr<T>::serialize(Archive& ar)
@@ -93,4 +126,10 @@ template<class T>
 bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
 	return ar(static_cast<const yasli::PointerSerializationInterface&>(yasli::SharedPtrSerializationImpl<T>(ptr)), name, label);
+}
+
+template<class T>
+bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label)
+{
+	return ar(static_cast<const yasli::PointerSerializationInterface&>(yasli::PolyPtrSerializationImpl<T>(ptr)), name, label);
 }

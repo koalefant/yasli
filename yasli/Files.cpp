@@ -61,6 +61,18 @@ bool isDirectory(const char* fileName)
 #endif
 }
 
+string currentDirectory() // TODO make unicode!
+{
+#ifdef WIN32
+    char buf[MAX_PATH];
+    GetCurrentDirectoryA(sizeof(buf), buf);
+    return buf;
+#else
+    ASSERT(0 && "Not implemented");
+    return string();
+#endif
+}
+
 bool remove(const char* fileName)
 {
 #ifdef WIN32
@@ -132,7 +144,12 @@ string relativePath(const char* path, const char* toDirectory)
     GetFullPathNameA( toDirectory, sizeof(fullPathDir), fullPathDir, 0 );
 	CharLowerBuffA( fullPathDir, strlen(fullPathDir) );
 	if ( strstr( fullPathLower, fullPathDir ) == fullPathLower )
-		return string( fullPath + strlen(fullPathDir), fullPath + strlen(fullPath) );
+    {
+        char* start = fullPath + strlen(fullPathDir);
+        if(*start == '\\')
+            ++start;
+		return string(start, fullPath + strlen(fullPath));
+    }
 	else
 		return string();
 #else

@@ -24,6 +24,18 @@ namespace yasli{
 
 class YASLI_API Archive : public PolyRefCounter{
 public:
+    template<class T>
+    class Context{
+    public:
+        Context(Archive& ar, T* context) : ar_(ar) { previousContext_ = ar_.setContext(context); }
+        ~Context() { ar_.setContext( previousContext_ ); }
+
+        T* previous() const{ return previousContext_; }
+    private:
+        Archive &ar_;
+        T* previousContext_;
+    };
+
     Archive(bool isInput, bool isEdit = false)
     : isInput_(isInput)
     , isEdit_(isEdit)
@@ -90,6 +102,28 @@ public:
 	{
 		return operator()(const_cast<T&>(value), name, label);
 	}
+    // ^^^
+
+    template<class T>
+    T* context()
+    {
+        ContextMap::iterator it = contextMap_.find(&typeid(T));
+        if(it == contextMap_.end())
+            return 0;
+        return reinterpret_cast<T*>(it->second);
+    }
+    template<class T>
+    T* setContext(T* c)
+    {
+        void*& ptr = contextMap_[&typeid(T)];
+        T* result = reinterpret_cast<T*>(ptr);
+        ptr = reinterpret_cast<void*>(c);
+        return result;
+    }
+    typedef std::map<const type_info*, void*> ContextMap;
+    void setContextMap(const ContextMap& contextMap){ contextMap_ = contextMap; }
+protected:
+    ContextMap contextMap_;
 private:
     void notImplemented();
 

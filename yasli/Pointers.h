@@ -186,3 +186,5 @@ class Archive;
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label);
 
+template<class T>
+bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label);

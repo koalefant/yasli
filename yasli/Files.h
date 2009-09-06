@@ -28,6 +28,7 @@ namespace Files{
 
     bool exists(const char* fileName);
 	bool isDirectory(const char* fileName);
+    string currentDirectory();
 
     bool createDirectory(const char* path);
 	bool createDirectoryForFile(const char* path);
