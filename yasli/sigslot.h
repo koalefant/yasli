@@ -244,11 +244,10 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				(*it)->slot_disconnect(this);
-				++it;
+				_signal_base* p = *it;
+				it = m_senders.erase(it);
+				p->slot_disconnect(this);
 			}
-
-			m_senders.erase(m_senders.begin(), m_senders.end());
 		}
 
 	private:
@@ -327,16 +326,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -449,16 +445,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -557,16 +550,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -664,16 +654,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else 
+					++it;
 			}
 		}
 
@@ -771,16 +758,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -880,16 +864,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -989,16 +970,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -1098,16 +1076,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
@@ -1208,16 +1183,13 @@ namespace sigslot {
 
 			while(it != itEnd)
 			{
-				connections_list::iterator itNext = it;
-				++itNext;
-
 				if((*it)->getdest() == pslot)
 				{
-					m_connected_slots.erase(it);
-					//			delete *it;
+					delete *it; //
+					it = m_connected_slots.erase(it);
 				}
-
-				it = itNext;
+				else
+					++it;
 			}
 		}
 
