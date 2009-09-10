@@ -11,7 +11,7 @@ enum BinaryNode;
 class BinaryOArchive : public Archive{
 public:
 
-  BinaryOArchive(bool pretendToBeEdit);
+  BinaryOArchive(bool pretendToBeEdit = false);
   ~BinaryOArchive() {}
 
   void clear();

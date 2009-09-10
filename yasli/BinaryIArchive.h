@@ -9,7 +9,7 @@ namespace yasli{
 class BinaryIArchive : public Archive{
 public:
 
-  BinaryIArchive(bool pretendToBeEdit);
+  BinaryIArchive(bool pretendToBeEdit = false);
   ~BinaryIArchive();
 
   bool load(const char* fileName);
