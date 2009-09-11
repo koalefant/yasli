@@ -235,13 +235,11 @@ public:
 		handle_ = FindFirstFileA(path, &findData_);
 		if(handle_ == INVALID_HANDLE_VALUE)
 			return;
-		ASSERT(strcmp(findData_.cFileName, ".") == 0);
-		if(!FindNextFileA(handle_, &findData_)){
+		if(!strcmp(findData_.cFileName, ".") && !FindNextFileA(handle_, &findData_)){
 			handle_ = INVALID_HANDLE_VALUE;
 			return;
 		}
-		ASSERT(strcmp(findData_.cFileName, "..") == 0);
-		if(!FindNextFileA(handle_, &findData_)){
+		if(!strcmp(findData_.cFileName, "..") && !FindNextFileA(handle_, &findData_)){
 			handle_ = INVALID_HANDLE_VALUE;
 			return;
 		}
@@ -430,7 +428,7 @@ iterator& iterator::operator++()
 			impl_ = new iteratorImpl(*impl_);
 
 		if(!impl_->next())
-			impl_ = 0;
+			set(0);
 	}
 	else{
 		ASSERT(0 && "Incrementing invalid Files::iterator");
