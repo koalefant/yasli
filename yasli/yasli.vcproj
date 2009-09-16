@@ -375,34 +375,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="library"
-			>
-			<File
-				RelativePath=".\Library.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LibraryBase.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LibraryBase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LibraryDirectory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LibraryReference.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LibraryReferenceImpl.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="utils"
 			>
 			<File
