@@ -21,6 +21,43 @@ struct HLineDecorator{
 	void serialize(Archive& ar) {}
 };
 
+struct RadioDecorator{
+	RadioDecorator()
+	: value_(false)
+	, valuePtr_(0)
+	{
+	}
+	RadioDecorator(const RadioDecorator& original)
+	: value_(original.value_)
+	, valuePtr_(0)
+	{
+	}
+	RadioDecorator(bool& value)
+	: value_(value)
+	, valuePtr_(&value)
+	{}
+	~RadioDecorator() { 
+		if(valuePtr_)
+			*valuePtr_ = value_;
+	}
+
+	RadioDecorator& operator=(const RadioDecorator& rhs){
+		value_ = rhs.value_;
+		return *this;
+	}
+	RadioDecorator& operator=(bool value){
+		value_ = value;
+		return *this;
+	}
+    void serialize(Archive& ar)
+    {
+        ar(value_, "value", "Value");
+    }
+	operator bool() const{ return value_; }
+	bool value_;
+	bool* valuePtr_;
+};
+
 struct NotDecorator{
 	NotDecorator()
 	: value_(false)
@@ -51,7 +88,7 @@ struct NotDecorator{
 	}
     void serialize(Archive& ar)
     {
-        ar(value_, "value", "Значение");
+        ar(value_, "value", "Value");
     }
 	operator bool() const{ return value_; }
 	bool value_;
