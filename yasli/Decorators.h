@@ -123,6 +123,12 @@ struct OptionalPtr : PointerType{
 
 }
 
+inline bool serialize(yasli::Archive& ar, yasli::HLineDecorator& value, const char* name, const char* label){		
+    if(ar.isEdit())
+        return ar(yasli::Serializer(value), name, label);
+    return false;
+}
+
 inline bool serialize(yasli::Archive& ar, yasli::RadioDecorator& value, const char* name, const char* label){		
     if(ar.isEdit())
         return ar(yasli::Serializer(value), name, label);

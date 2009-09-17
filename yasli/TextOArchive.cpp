@@ -6,7 +6,7 @@
 
 namespace yasli{
 
-static const int TAB_WIDTH = 4;
+static const int TAB_WIDTH = 2;
 
 TextOArchive::TextOArchive(int textWidth, const char* header)
 : Archive(false)
