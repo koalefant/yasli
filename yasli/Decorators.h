@@ -58,6 +58,13 @@ struct RadioDecorator{
 	bool* valuePtr_;
 };
 
+inline bool serialize(yasli::Archive& ar, yasli::RadioDecorator& value, const char* name, const char* label){		
+    if(ar.isEdit())
+        return ar(yasli::Serializer(value), name, label);
+    else
+        return ar(value.value_, name, label);
+}
+
 struct NotDecorator{
 	NotDecorator()
 	: value_(false)
