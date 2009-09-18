@@ -105,6 +105,15 @@ MemoryWriter& MemoryWriter::operator<<(signed char value)
     return operator<<((const char*)buffer);
 }
 
+inline void cutRightZeros(const char* str)
+{
+	for(char* p = (char*)str + strlen(str) - 1; p >= str; --p)
+		if(*p == '0')
+			*p = 0;
+		else
+			return;
+}
+
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
 	ASSERT(!isnan(value));
@@ -122,18 +131,24 @@ MemoryWriter& MemoryWriter::operator<<(double value)
     if(sign != 0)
         write("-");
     if(point <= 0){
-        write("0.");
-        while(point < 0){
-            write("0");
-            ++point;
-        }
-        write(buf);
+		cutRightZeros(buf);
+		if(strlen(buf)){
+	        write("0.");
+			while(point < 0){
+				write("0");
+				++point;
+			}
+			write(buf);
+		}
+		else
+			write("0");
         *position_ = '\0';
     }
     else{
         write(buf, point);
         write(".");
-        operator<<(buf + point);
+		cutRightZeros(buf + point);
+		operator<<(buf + point);
     }
 	return *this;
 }
