@@ -31,7 +31,7 @@ public:
     MemoryWriter& operator<<(unsigned long value);
     MemoryWriter& operator<<(unsigned int value);
     MemoryWriter& operator<<(__int64 value);
-    MemoryWriter& operator<<(float value);
+	MemoryWriter& operator<<(float value) { return (*this) << double(value); }
 	MemoryWriter& operator<<(double value);
     MemoryWriter& operator<<(signed char value);
     MemoryWriter& operator<<(unsigned char value);

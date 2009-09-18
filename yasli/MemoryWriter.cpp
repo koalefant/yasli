@@ -17,7 +17,7 @@ namespace yasli{
 MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
 : size_(size)
 , reallocate_(reallocate)
-, digits_(8)
+, digits_(5)
 {
     alloc(size);
 }
@@ -105,49 +105,19 @@ MemoryWriter& MemoryWriter::operator<<(signed char value)
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(float value)
-{
-	ASSERT(!isnan(value));
-#ifdef WIN32
-	char buf[_CVTBUFSIZE];
-	_gcvt_s(buf, double(value), digits_);
-	return (*this) << buf;
-#else
-    int point = 0;
-    int sign = 0;
-    const char* buf = fcvt(double(value), 5, &point, &sign);
-
-	if(sign != 0)
-        write("-");
-    if(point <= 0){
-        write("0.");
-        while(point < 0){
-            write("0");
-            ++point;
-        }
-        write(buf);
-        *position_ = '\0';
-    }
-    else{
-        write(buf, point);
-        write(".");
-        operator<<(buf + point);
-    }
-	return *this;
-#endif
-}
-
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
 	ASSERT(!isnan(value));
+
+	int point = 0;
+	int sign = 0;
+
 #ifdef WIN32
 	char buf[_CVTBUFSIZE];
-	_gcvt_s(buf, value, digits_);
-	return (*this) << buf;
+	_fcvt_s(buf, value, digits_, &point, &sign);
 #else
-    int point = 0;
-    int sign = 0;
-    const char* buf = fcvt(value, 5, &point, &sign);
+    const char* buf = fcvt(value, digits_, &point, &sign);
+#endif
 
     if(sign != 0)
         write("-");
@@ -166,7 +136,6 @@ MemoryWriter& MemoryWriter::operator<<(double value)
         operator<<(buf + point);
     }
 	return *this;
-#endif
 }
 
 MemoryWriter& MemoryWriter::operator<<(const char* value)
