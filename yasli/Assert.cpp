@@ -9,12 +9,15 @@ namespace yasli{
 
 #ifndef NDEBUG
 
-int assertionDialog(const char* message, const char* function, const char* fileName, int line)
+int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line)
 {
     MemoryWriter text;
     //text << "Debug Assertion Triggered:\n\n";
     text << "in " << function << "():\n";
     text << "\n    " << message;
+    if(str){
+        text << "\n    ( " << str << " )";
+    }
     text << "\n\n";
     text << fileName << ": line " << line << "\n";
     int result = MessageBoxA(0, text.c_str(), "Debug Assertion Triggered", MB_ICONERROR | MB_ABORTRETRYIGNORE);
