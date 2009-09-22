@@ -37,6 +37,7 @@ namespace Files{
     bool copy(const char* sourceFile, const char* destinationFile);
 
 	string setExtention(const char* file_name, const char* extention);
+	string extractExtension(const char* file_name);
 
 	string fixSlashes(const char* _path);
 

@@ -212,6 +212,15 @@ string setExtention(const char* file_name, const char* extention)
 	return str;
 }
 
+string extractExtension(const char* fileName)
+{
+	string str = fileName;
+	unsigned int pos = str.rfind(".");
+	if(pos != string::npos)
+        return string(str.begin() + pos + 1, str.end());
+    return string();
+}
+
 string fixSlashes(const char* _path)
 {
 	string path(_path);
