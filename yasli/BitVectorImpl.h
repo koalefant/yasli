@@ -53,6 +53,7 @@ void BitVector<Enum>::serialize(Archive& ar)
 template<class Enum>
 bool serialize(yasli::Archive& ar, yasli::BitVector<Enum>& value, const char* name, const char* label)
 {
+    using namespace yasli;
     EnumDescription &desc = getEnumDescription<Enum>();
     if(ar.isEdit())
         return ar(BitVectorWrapper(&static_cast<int&>(value), &desc), name, label);

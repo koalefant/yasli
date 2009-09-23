@@ -20,7 +20,7 @@ private:
     int value_;
 };
 
-template<class Enum>
-bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label);
-
 }
+
+template<class Enum>
+bool serialize(yasli::Archive& ar, yasli::BitVector<Enum>& value, const char* name, const char* label);
