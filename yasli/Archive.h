@@ -72,11 +72,14 @@ public:
     virtual bool operator()(std::wstring& value, const char* name = "", const char* label = 0);
     virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
     virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+
     virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
-    virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
+    virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
 
 	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
 	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
+    
+    virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
 
 	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
     virtual bool operator()(signed short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
