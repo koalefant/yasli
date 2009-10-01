@@ -4,6 +4,7 @@
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/TypesFactory.h"
+#include "Unicode.h"
 
 namespace yasli{
 
@@ -36,7 +37,7 @@ const char* BinaryOArchive::buffer()
 
 bool BinaryOArchive::save(const char* filename)
 {
-    FILE* f = fopen(filename, "wb");
+    FILE* f = ::yasli::fopen(filename, "wb");
     if(!f)
         return false;
 

@@ -3,6 +3,7 @@
 
 #include "yasli/StringUtil.h"
 #include "yasli/MemoryWriter.h"
+#include "yasli/Unicode.h"
 
 namespace yasli{
 
@@ -37,7 +38,7 @@ bool TextOArchive::save(const char* fileName)
     ESCAPE(buffer_, return false);
     ESCAPE(buffer_->position() <= buffer_->size(), return false);
     stack_.pop_back();
-    if(FILE* file = fopen(fileName, "wb")){
+    if(FILE* file = ::yasli::fopen(fileName, "wb")){
         if(fwrite(buffer_->c_str(), 1, buffer_->position(), file) != buffer_->position()){
             fclose(file);
             return false;

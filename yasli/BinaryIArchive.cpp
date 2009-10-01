@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BinaryIArchive.h"
+#include "Unicode.h"
 
 using std::string;
 
@@ -30,7 +31,7 @@ bool BinaryIArchive::load(const char* filename)
         delete[] loadedData_;
         loadedData_ = 0;
     }
-    FILE* f = fopen(filename, "rb");
+    FILE* f = ::yasli::fopen(filename, "rb");
     if(!f)
         return false;
     fseek(f, 0, SEEK_END);

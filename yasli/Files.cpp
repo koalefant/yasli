@@ -16,6 +16,7 @@
 #include <malloc.h>
 #include <algorithm>
 #include <cstdio>
+#include "Unicode.h"
 
 namespace Files{
 
@@ -37,7 +38,7 @@ time_t getModifyTime(const char* path)
 
 bool exists(const char* fileName)
 {
-    if(std::FILE* file = fopen(fileName, "rb")){
+    if(std::FILE* file = ::yasli::fopen(fileName, "rb")){
         fclose(file);
         return true;
     }
