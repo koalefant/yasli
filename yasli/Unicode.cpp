@@ -50,6 +50,19 @@ std::wstring fromANSIToWide(const char* str)
 	return std::wstring();
 }
 
+std::string toANSIFromWide(const wchar_t* wstr)
+{
+	const unsigned int codepage = CP_ACP;
+	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
+	char* buf = (char*)alloca(len);
+    if(len > 1){ 
+        WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
+		return std::string(buf, len - 1);
+    }
+	return std::string();
+
+}
+
 
 FILE* fopen(const char* utf8filename, const char* mode)
 {

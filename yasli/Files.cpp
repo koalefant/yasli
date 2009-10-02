@@ -49,7 +49,7 @@ bool exists(const char* fileName)
 bool isDirectory(const char* fileName)
 {
 #ifdef WIN32
-	DWORD attributes = GetFileAttributesA( fileName );
+    DWORD attributes = GetFileAttributesW( yasli::toWideChar(fileName).c_str() );
 	if(attributes == INVALID_FILE_ATTRIBUTES)
 		return false;
 	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
@@ -65,9 +65,9 @@ bool isDirectory(const char* fileName)
 string currentDirectory() // TODO make unicode!
 {
 #ifdef WIN32
-    char buf[MAX_PATH];
-    GetCurrentDirectoryA(sizeof(buf), buf);
-    return buf;
+    wchar_t buf[MAX_PATH];
+    GetCurrentDirectoryW(sizeof(buf), buf);
+    return yasli::fromWideChar(buf);
 #else
     ASSERT(0 && "Not implemented");
     return string();
@@ -77,7 +77,7 @@ string currentDirectory() // TODO make unicode!
 bool remove(const char* fileName)
 {
 #ifdef WIN32
-	return DeleteFileA( fileName ) != FALSE;
+    return DeleteFileW( yasli::toWideChar(fileName).c_str() ) != FALSE;
 #else
 	return unlink(fileName) == 0;
 #endif
@@ -99,7 +99,7 @@ bool createDirectory(const char* path)
         if(*p == PATH_SEPARATOR[0]){
             *p = '\0';
 #ifdef WIN32
-			if(!CreateDirectoryA(path, 0))
+            if(!CreateDirectoryW(yasli::toWideChar(path).c_str(), 0))
 				return false;
 #else
             if(mkdir(path, mask) != 0)
@@ -111,7 +111,7 @@ bool createDirectory(const char* path)
     }
 
 #ifdef WIN32
-	return CreateDirectoryA(pathCopy, 0) != FALSE;
+    return CreateDirectoryW(yasli::toWideChar(pathCopy).c_str(), 0) != FALSE;
 #else
     return mkdir(pathCopy, mask) == 0;
 #endif
@@ -136,20 +136,20 @@ string relativePath(const char* path, const char* toDirectory)
 {
 #ifdef WIN32
 	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
-    char fullPath[MAX_PATH + 1];
-	char fullPathLower[MAX_PATH + 1];
-    GetFullPathNameA( path, sizeof(fullPath), fullPath, 0 );
-	strncpy(fullPathLower, fullPath, sizeof(fullPath));
-	CharLowerBuffA( fullPathLower, strlen(fullPathLower) );
-    char fullPathDir[MAX_PATH + 1];
-    GetFullPathNameA( toDirectory, sizeof(fullPathDir), fullPathDir, 0 );
-	CharLowerBuffA( fullPathDir, strlen(fullPathDir) );
-	if ( strstr( fullPathLower, fullPathDir ) == fullPathLower )
+    wchar_t fullPath[MAX_PATH + 1];
+	wchar_t fullPathLower[MAX_PATH + 1];
+    GetFullPathNameW( yasli::toWideChar(path).c_str(), sizeof(fullPath), fullPath, 0 );
+	wcscpy(fullPathLower, fullPath);
+	CharLowerBuffW( fullPathLower, wcslen(fullPathLower) );
+    wchar_t fullPathDir[MAX_PATH + 1];
+    GetFullPathNameW( yasli::toWideChar(toDirectory).c_str(), sizeof(fullPathDir), fullPathDir, 0 );
+	CharLowerBuffW( fullPathDir, wcslen(fullPathDir) );
+	if ( wcsstr( fullPathLower, fullPathDir ) == fullPathLower )
     {
-        char* start = fullPath + strlen(fullPathDir);
-        if(*start == '\\')
+        wchar_t* start = fullPath + wcslen(fullPathDir);
+        if(*start == L'\\')
             ++start;
-		return string(start, fullPath + strlen(fullPath));
+        return yasli::fromWideChar(std::wstring(start, fullPath + wcslen(fullPath)).c_str());
     }
 	else
 		return string();
