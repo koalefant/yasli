@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <stdio.h>
 
 namespace yasli{
 	std::string fromWideChar(const wchar_t* wideCharString);
