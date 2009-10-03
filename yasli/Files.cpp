@@ -139,11 +139,11 @@ string relativePath(const char* path, const char* toDirectory)
 	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
     wchar_t fullPath[MAX_PATH + 1];
 	wchar_t fullPathLower[MAX_PATH + 1];
-    GetFullPathNameW( yasli::toWideChar(path).c_str(), sizeof(fullPath), fullPath, 0 );
+    GetFullPathNameW( yasli::toWideChar(path).c_str(), ARRAYSIZE(fullPath), fullPath, 0 );
 	wcscpy(fullPathLower, fullPath);
 	CharLowerBuffW( fullPathLower, wcslen(fullPathLower) );
     wchar_t fullPathDir[MAX_PATH + 1];
-    GetFullPathNameW( yasli::toWideChar(toDirectory).c_str(), sizeof(fullPathDir), fullPathDir, 0 );
+    GetFullPathNameW( yasli::toWideChar(toDirectory).c_str(), ARRAYSIZE(fullPathDir), fullPathDir, 0 );
 	CharLowerBuffW( fullPathDir, wcslen(fullPathDir) );
 	if ( wcsstr( fullPathLower, fullPathDir ) == fullPathLower )
     {
