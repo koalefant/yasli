@@ -134,6 +134,7 @@ string extractFilePath(const char* path)
 
 string relativePath(const char* path, const char* toDirectory)
 {
+    ESCAPE(path != 0 && toDirectory != 0, return string());
 #ifdef WIN32
 	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
     wchar_t fullPath[MAX_PATH + 1];
@@ -161,6 +162,7 @@ string relativePath(const char* path, const char* toDirectory)
 
 string extractFileBase(const char* path)
 {
+    ESCAPE(path != 0, return string());
     const char* fileNameStart = path;
     const char* end = path + strlen(path);
     const char* p = std::find(path, end, pathSeparator()[0]);
@@ -180,6 +182,7 @@ string extractFileBase(const char* path)
 
 bool createDirectoryForFile(const char* path)
 {
+    ESCAPE(path != 0, return false);
     size_t len = strlen(path);
     const char* p = path + len;
     while(--p != path){
