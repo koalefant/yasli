@@ -25,7 +25,9 @@ bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const
     if(ar.isOutput()){
         index =  indexByValue(value);
         if(index == StringListStatic::npos){
-            ar.warning("Unregistered Enum value!");
+			std::string dummy("");
+			ar(dummy, name, label);
+			ar.warning("Unregistered Enum value!");
             return false;
         }
     }

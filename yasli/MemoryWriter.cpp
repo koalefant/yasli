@@ -169,8 +169,6 @@ MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
     return *this;
 }
 
-
-
 void MemoryWriter::setPosition(std::size_t pos)
 {
     ASSERT(pos < size_);

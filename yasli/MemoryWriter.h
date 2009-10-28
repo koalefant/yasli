@@ -24,6 +24,7 @@ public:
     void* buffer() { return (void*)(memory_); }
     const void* buffer() const { return (const void*)(memory_); }
     std::size_t size() const{ return size_; }
+	void clear() { position_ = memory_; }
 
     // String interface (after this calls '\0' is always written)
     MemoryWriter& operator<<(int value);

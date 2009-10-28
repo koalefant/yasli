@@ -8,6 +8,7 @@ namespace yasli{
 
 class MemoryWriter;
 enum BinaryNode;
+
 class BinaryOArchive : public Archive{
 public:
 
@@ -38,6 +39,7 @@ public:
   bool operator()(const PointerSerializationInterface &ptr, const char *name, const char* label);
 
   using Archive::operator();
+
 private:
   void openContainer(const char* name, int size, const char* typeName);
   void closeContainer();
@@ -47,9 +49,7 @@ private:
   void closeNode();
   void write(const char *str);
 
-  bool writeTypeInfo_;
   std::vector<unsigned int> blockSizeOffsets_;
-
   SharedPtr<MemoryWriter> stream_;
 };
 

@@ -498,6 +498,14 @@
 			Name="archives"
 			>
 			<File
+				RelativePath=".\BinArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BinArchive.h"
+				>
+			</File>
+			<File
 				RelativePath=".\BinaryIArchive.cpp"
 				>
 			</File>

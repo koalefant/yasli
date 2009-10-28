@@ -92,20 +92,19 @@ public:
     virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
 
+	virtual bool openBlock(const char* name, const char* label) { return true; }
+	virtual void closeBlock() {}
 
     // templated switch
     template<class T>
     bool operator()(const T& value, const char* name = "", const char* label = 0);
 
-    // for compatibility
-	virtual bool openBlock(const char* name, const char* label) { return true; }
-	virtual void closeBlock() {}
+	// for compatibility
 	template<class T>
 	bool serialize(const T& value, const char* name, const char* label)
 	{
 		return operator()(const_cast<T&>(value), name, label);
 	}
-    // ^^^
 
     template<class T>
     T* context()
@@ -125,8 +124,10 @@ public:
     }
     typedef std::map<const type_info*, void*> ContextMap;
     void setContextMap(const ContextMap& contextMap){ contextMap_ = contextMap; }
+
 protected:
     ContextMap contextMap_;
+
 private:
     void notImplemented();
 
