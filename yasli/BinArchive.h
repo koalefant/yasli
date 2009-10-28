@@ -118,7 +118,6 @@ private:
 		  }
 		  void read(std::wstring& s)
 		  {
-			  int len = wcslen((wchar_t*)curr_);
 			  ASSERT(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_);
 			  s = (wchar_t*)curr_;
 			  curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
