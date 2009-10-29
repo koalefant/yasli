@@ -1,19 +1,25 @@
 #pragma once
 
+// ƒл€ тегов используетс€ 16-бит xor-hash с проверкой уникальности в debug'e
+// –азмер блока 8, 16, 32 бита автоматически
+
 #include "Archive.h"
 #include "MemoryWriter.h" 
 
 namespace yasli{
 
-inline unsigned calcHash(const void *obj, size_t size)
+inline unsigned short calcHash(const char* str)
 {
-	unsigned hash = 0;
-	for (size_t i = 0, l = size % sizeof(unsigned), e = size - l; i < l; i++)
-		hash |= unsigned(((unsigned char*)obj)[e + i]) << (i*8);
-
-	for (size_t i = 0; i < size/sizeof(unsigned); i++)
-		hash ^= ((unsigned*)obj)[i];
-
+	unsigned short hash = 0;
+	const unsigned short* p = (const unsigned short*)(str);
+	for(;;){
+		unsigned short w = *p++;
+		if(!(w & 0xff))
+			break;
+		hash ^= w;
+		if(!(w & 0xff00))
+			break;
+	}
 	return hash;
 }
 
@@ -122,6 +128,8 @@ private:
 			  s = (wchar_t*)curr_;
 			  curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
 		  }
+
+		  unsigned int readPackedSize();
 
 		  bool validToClose() const { return complex_ || curr_ == end_; } // ѕростые блоки должны быть вычитаны точно
 

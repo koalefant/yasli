@@ -21,8 +21,8 @@ public:
 
     const char* c_str() { return memory_; };
     const wchar_t* w_str() { return (wchar_t*)memory_; };
-    void* buffer() { return (void*)(memory_); }
-    const void* buffer() const { return (const void*)(memory_); }
+    char* buffer() { return memory_; }
+    const char* buffer() const { return memory_; }
     std::size_t size() const{ return size_; }
 	void clear() { position_ = memory_; }
 

@@ -276,7 +276,7 @@ bool TextOArchive::joinLinesIfPossible()
     int indentCount = stack_.back().indentCount;
     //ASSERT(startPosition >= indentCount);
     if(buffer_->position() - startPosition - indentCount < std::size_t(textWidth_)){
-        char* buffer = (char*)buffer_->buffer();
+        char* buffer = buffer_->buffer();
         char* start = buffer + startPosition;
         char* end = buffer + buffer_->position();
         end = joinLines(start, end);

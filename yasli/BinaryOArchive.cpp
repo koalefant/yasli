@@ -32,7 +32,7 @@ size_t BinaryOArchive::length() const
 const char* BinaryOArchive::buffer()
 {
     ESCAPE(stream_, return 0);
-    return (const char*)stream_->buffer();
+    return stream_->buffer();
 }
 
 bool BinaryOArchive::save(const char* filename)
@@ -103,7 +103,7 @@ void BinaryOArchive::closeNode()
     unsigned int offset = blockSizeOffsets_.back();
     blockSizeOffsets_.pop_back();
 
-    unsigned int *blockSize = (unsigned int*)((unsigned char*)stream_->buffer() + offset);
+    unsigned int *blockSize = (unsigned int*)(stream_->buffer() + offset);
     *blockSize = stream_->position() - offset;
 }
 

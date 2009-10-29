@@ -9,10 +9,13 @@ using namespace std;
 
 namespace yasli{
 
+static const unsigned char SIZE16 = 254;
+static const unsigned char SIZE32 = 255;
+
 static const unsigned int BIN_MAGIC = 0xb1a4c17f;
 
 #ifdef _DEBUG
-typedef std::map<unsigned, string> HashMap;
+typedef std::map<unsigned short, string> HashMap;
 static HashMap hashMap;
 #endif
 
@@ -59,11 +62,11 @@ inline void BinOArchive::openNode(const char* name)
 	if(!strlen(name))
 		return;
 
-	unsigned hash = calcHash(name, strlen(name));
+	unsigned short hash = calcHash(name);
 	stream_.write(hash);
 
 	blockSizeOffsets_.push_back(stream_.position());
-	unsigned int size = 0;
+	unsigned char size = 0;
 	stream_.write(size); // length, shall be overwritten in closeNode
 
 #ifdef _DEBUG
@@ -79,11 +82,28 @@ inline void BinOArchive::closeNode(const char* name)
 	if(!strlen(name))
 		return;
 
-    unsigned offset = blockSizeOffsets_.back();
-    blockSizeOffsets_.pop_back();
+    unsigned int offset = blockSizeOffsets_.back();
+	unsigned int size = stream_.position() - offset - sizeof(unsigned char);
+	blockSizeOffsets_.pop_back();
+	unsigned char* sizePtr = (unsigned char*)(stream_.buffer() + offset);
 
-    unsigned int* blockSize = (unsigned int*)((unsigned char*)stream_.buffer() + offset);
-    *blockSize = stream_.position() - offset - sizeof(unsigned);
+	if(size < SIZE16)
+		*sizePtr = size;
+	else{
+		unsigned char* buffer = sizePtr + 1;
+		if(size < 0x10000){
+			stream_.write((unsigned short)0);
+			*sizePtr = SIZE16;
+			memmove(buffer + 2, buffer, size);
+			*((unsigned short*)buffer) = size;
+		}
+		else{
+			stream_.write((unsigned int)0);
+			*sizePtr = SIZE32;
+			memmove(buffer + 4, buffer, size);
+			*((unsigned int*)buffer) = size;
+		}
+	}
 }
 
 bool BinOArchive::operator()(bool& value, const char* name, const char* label)
@@ -203,9 +223,16 @@ bool BinOArchive::operator()(const Serializer& ser, const char* name, const char
 bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
 	openNode(name);
-	stream_.write(ser.size());
 
-    if(ser.size() > 0)
+	unsigned int size = ser.size();
+	if(size < SIZE16)
+		stream_.write((unsigned char)size);
+	else if(size < 0x10000)
+		stream_.write((unsigned short)size);
+	else
+		stream_.write(size);
+
+    if(size > 0)
         do 
         {
             ser(*this, "", "");
@@ -276,8 +303,8 @@ bool BinIArchive::open(const char* buffer, size_t size)
 {
 	if(*(unsigned*)(buffer) != BIN_MAGIC)
 		return false;
-	buffer += sizeof(unsigned);
-	size -= sizeof(unsigned);
+	buffer += sizeof(unsigned int);
+	size -= sizeof(unsigned int);
 
 	blocks_.push_back(Block(buffer, size));
 	return true;
@@ -292,9 +319,6 @@ void BinIArchive::close()
 
 bool BinIArchive::openNode(const char* name)
 {
-	if(!strlen(name))
-		return true;
-
 	Block block(0, 0);
 	if(currentBlock().get(name, block)){
 		blocks_.push_back(block);
@@ -305,15 +329,17 @@ bool BinIArchive::openNode(const char* name)
 
 void BinIArchive::closeNode(const char* name) 
 {
-	if(!strlen(name))
-		return;
-
 	ASSERT(currentBlock().validToClose());
 	blocks_.pop_back();
 }
 
 bool BinIArchive::operator()(bool& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -324,6 +350,11 @@ bool BinIArchive::operator()(bool& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(string& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -334,6 +365,11 @@ bool BinIArchive::operator()(string& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(wstring& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -344,6 +380,11 @@ bool BinIArchive::operator()(wstring& value, const char* name, const char* label
 
 bool BinIArchive::operator()(float& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -354,6 +395,11 @@ bool BinIArchive::operator()(float& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(double& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -364,6 +410,11 @@ bool BinIArchive::operator()(double& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(short& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -374,6 +425,11 @@ bool BinIArchive::operator()(short& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -385,6 +441,11 @@ bool BinIArchive::operator()(unsigned short& value, const char* name, const char
 
 bool BinIArchive::operator()(int& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -395,6 +456,11 @@ bool BinIArchive::operator()(int& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -405,6 +471,11 @@ bool BinIArchive::operator()(unsigned int& value, const char* name, const char* 
 
 bool BinIArchive::operator()(__int64& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -415,6 +486,11 @@ bool BinIArchive::operator()(__int64& value, const char* name, const char* label
 
 bool BinIArchive::operator()(signed char& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -425,6 +501,11 @@ bool BinIArchive::operator()(signed char& value, const char* name, const char* l
 
 bool BinIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -435,6 +516,11 @@ bool BinIArchive::operator()(unsigned char& value, const char* name, const char*
 
 bool BinIArchive::operator()(char& value, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -445,6 +531,11 @@ bool BinIArchive::operator()(char& value, const char* name, const char* label)
 
 bool BinIArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
+	if(!strlen(name)){
+		ser(*this);
+		return true;
+	}
+
 	if(!openNode(name))
 		return false;
 
@@ -455,11 +546,10 @@ bool BinIArchive::operator()(const Serializer& ser, const char* name, const char
 
 bool BinIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-	if(!openNode(name))
+	if(strlen(name) && !openNode(name))
 		return false;
 
-	size_t size;
-	read(size);
+	size_t size = currentBlock().readPackedSize();
 	ser.resize(size);
 
 	if(ser.size() > 0){
@@ -467,13 +557,14 @@ bool BinIArchive::operator()(ContainerSerializationInterface& ser, const char* n
 			ser(*this, "", "");
 		while(ser.next());
 	}
-	closeNode(name);
+	if(strlen(name))
+		closeNode(name);
 	return true;
 }
 
 bool BinIArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
 {
-	if(!openNode(name))
+	if(strlen(name) && !openNode(name))
 		return false;
 
 	string typeName;
@@ -490,19 +581,36 @@ bool BinIArchive::operator()(const PointerSerializationInterface& ptr, const cha
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
 
-	closeNode(name);
+	if(strlen(name))
+		closeNode(name);
 	return true;
+}
+
+unsigned int BinIArchive::Block::readPackedSize()
+{
+	unsigned char size8;
+	read(size8);
+	if(size8 < SIZE16)
+		return size8;
+	if(size8 == SIZE16){
+		unsigned short size16;
+		read(size16);
+		return size16;
+	}
+	unsigned int size32;
+	read(size32);
+	return size32;
 }
 
 bool BinIArchive::Block::get(const char* name, Block& block) 
 {
 	complex_ = true;
-	unsigned hashName = calcHash(name, strlen(name));
+	unsigned short hashName = calcHash(name);
 	const char* currInitial = curr_;
 	for(;;){
-		unsigned size, hash;
+		unsigned short hash;
 		read(hash);
-		read(size);
+		unsigned int size = readPackedSize();
 		
 		const char* currPrev = curr_;
 		if((curr_ += size) == end_)
