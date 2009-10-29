@@ -227,10 +227,13 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
 	unsigned int size = ser.size();
 	if(size < SIZE16)
 		stream_.write((unsigned char)size);
-	else if(size < 0x10000)
+	else if(size < 0x10000){
+		stream_.write(SIZE16)
 		stream_.write((unsigned short)size);
-	else
+	else{
+		stream_.write(SIZE32);
 		stream_.write(size);
+	}
 
     if(size > 0)
         do 
