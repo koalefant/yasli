@@ -57,7 +57,7 @@ bool BinOArchive::save(const char* filename)
     return true;
 }
 
-inline void BinOArchive::openNode(const char* name)
+inline void BinOArchive::openNode(const char* name, bool size8)
 {
 	if(!strlen(name))
 		return;
@@ -66,9 +66,10 @@ inline void BinOArchive::openNode(const char* name)
 	stream_.write(hash);
 
 	blockSizeOffsets_.push_back(stream_.position());
-	unsigned char size = 0;
-	stream_.write(size); // length, shall be overwritten in closeNode
-
+	stream_.write((unsigned char)0); 
+	if(!size8)
+		stream_.write((unsigned short)0); 
+	
 #ifdef _DEBUG
 	HashMap::iterator i = hashMap.find(hash);
 	if(i != hashMap.end() && i->second != name)
@@ -77,31 +78,36 @@ inline void BinOArchive::openNode(const char* name)
 #endif
 }
 
-inline void BinOArchive::closeNode(const char* name)
+inline void BinOArchive::closeNode(const char* name, bool size8)
 {
 	if(!strlen(name))
 		return;
 
     unsigned int offset = blockSizeOffsets_.back();
-	unsigned int size = stream_.position() - offset - sizeof(unsigned char);
+	unsigned int size = stream_.position() - offset - sizeof(unsigned char) - (size8 ? 0 : sizeof(unsigned short));
 	blockSizeOffsets_.pop_back();
 	unsigned char* sizePtr = (unsigned char*)(stream_.buffer() + offset);
 
-	if(size < SIZE16)
+	if(size < SIZE16){
 		*sizePtr = size;
+		if(!size8){
+			unsigned char* buffer = sizePtr + 3;
+			memmove(buffer - 2, buffer, size);
+			stream_.setPosition(stream_.position() - 2);
+		}
+	}
 	else{
-		unsigned char* buffer = sizePtr + 1;
+		ASSERT(!size8);
 		if(size < 0x10000){
-			stream_.write((unsigned short)0);
 			*sizePtr = SIZE16;
-			memmove(buffer + 2, buffer, size);
-			*((unsigned short*)buffer) = size;
+			*((unsigned short*)(sizePtr + 1)) = size;
 		}
 		else{
-			stream_.write((unsigned int)0);
+			unsigned char* buffer = sizePtr + 3;
+			stream_.write((unsigned short)0);
 			*sizePtr = SIZE32;
-			memmove(buffer + 4, buffer, size);
-			*((unsigned int*)buffer) = size;
+			memmove(buffer + 2, buffer, size);
+			*((unsigned int*)(sizePtr + 1)) = size;
 		}
 	}
 }
@@ -214,15 +220,15 @@ bool BinOArchive::operator()(__int64& value, const char* name, const char* label
 
 bool BinOArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
-    openNode(name);
+    openNode(name, false);
     ser(*this);
-    closeNode(name);
+    closeNode(name, false);
     return true;
 }
 
 bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-	openNode(name);
+	openNode(name, false);
 
 	unsigned int size = ser.size();
 	if(size < SIZE16)
@@ -242,7 +248,7 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
             ser(*this, "", "");
         } while (ser.next());
 
-    closeNode(name);
+    closeNode(name, false);
     return true;
 }
 
@@ -251,7 +257,7 @@ bool BinOArchive::operator()(const PointerSerializationInterface& ptr, const cha
     ASSERT_STR(ptr.baseType().registered() && "Writing type with unregistered base", ptr.baseType().name());
     ASSERT_STR(!ptr.get() || ptr.type().registered() && "Writing unregistered type", ptr.type().name());
 
-	openNode(name);
+	openNode(name, false);
 
 	if(ptr.get()){
 		stream_ << ptr.type().name();
@@ -261,7 +267,7 @@ bool BinOArchive::operator()(const PointerSerializationInterface& ptr, const cha
 	else
 		stream_.write(char(0));
 
-    closeNode(name);
+    closeNode(name, false);
     return true;
 }
 

@@ -57,8 +57,8 @@ public:
 
 private:
 	void openContainer(const char* name, int size, const char* typeName);
-	void openNode(const char* name);
-	void closeNode(const char* name);
+	void openNode(const char* name, bool size8 = true);
+	void closeNode(const char* name, bool size8 = true);
 
 	std::vector<unsigned int> blockSizeOffsets_;
 	MemoryWriter stream_;
