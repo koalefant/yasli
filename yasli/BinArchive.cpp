@@ -242,13 +242,25 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
 		stream_.write(size);
 	}
 
-    if(size > 0)
-        do 
-        {
-            ser(*this, "", "");
-        } while (ser.next());
+	if(strlen(name)){
+		if(size > 0){
+			int i = 0;
+			do {
+				MemoryWriter buffer;
+				buffer << i++;
+				ser(*this, buffer.c_str(), "");
+			} while (ser.next());
+		}
 
-    closeNode(name, false);
+		closeNode(name, false);
+	}
+	else{
+		if(size > 0)
+			do 
+				ser(*this, "", "");
+				while (ser.next());
+	}
+
     return true;
 }
 
@@ -556,20 +568,35 @@ bool BinIArchive::operator()(const Serializer& ser, const char* name, const char
 
 bool BinIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-	if(strlen(name) && !openNode(name))
-		return false;
+	if(strlen(name)){
+		if(!openNode(name))
+			return false;
 
-	size_t size = currentBlock().readPackedSize();
-	ser.resize(size);
+		size_t size = currentBlock().readPackedSize();
+		ser.resize(size);
 
-	if(ser.size() > 0){
-		do
-			ser(*this, "", "");
-		while(ser.next());
-	}
-	if(strlen(name))
+		if(size > 0){
+			int i = 0;
+			do{
+				MemoryWriter buffer;
+				buffer << i++;
+				ser(*this, buffer.c_str(), "");
+			}
+			while(ser.next());
+		}
 		closeNode(name);
-	return true;
+		return true;
+	}
+	else{
+		size_t size = currentBlock().readPackedSize();
+		ser.resize(size);
+		if(size > 0){
+			do
+				ser(*this, "", "");
+				while(ser.next());
+		}
+		return true;
+	}
 }
 
 bool BinIArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
@@ -632,7 +659,7 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 			block = Block(currPrev, size);
 			return true;
 		}
-		
+
 		if(curr_ == currInitial)
 			return false;
 	}

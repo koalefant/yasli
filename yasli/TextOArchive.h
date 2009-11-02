@@ -1,6 +1,5 @@
 #pragma once
 
-#include <fstream>
 #include "yasli/Archive.h"
 #include "yasli/Pointers.h"
 

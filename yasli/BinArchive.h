@@ -132,7 +132,7 @@ private:
 		  unsigned int readPackedSize();
 
 		  bool validToClose() const { return complex_ || curr_ == end_; } // ѕростые блоки должны быть вычитаны точно
-
+	
 	private:
 		const char* begin_;
 		const char* end_;
