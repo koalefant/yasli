@@ -31,7 +31,7 @@ public:
 
 	void clear();
 	size_t length() const;
-	const char* buffer();
+	const char* buffer() const { return stream_.buffer(); }
 	bool save(const char* fileName);
 
 	bool operator()(bool& value, const char* name, const char* label);
@@ -74,6 +74,7 @@ public:
 
 	bool load(const char* fileName);
 	bool open(const char* buffer, size_t length); // не копирует буффер!!!
+	bool open(const BinOArchive& ar) { return open(ar.buffer(), ar.length()); }
 	void close();
 
 	bool operator()(bool& value, const char* name, const char* label);

@@ -36,11 +36,6 @@ size_t BinOArchive::length() const
     return stream_.position();
 }
 
-const char* BinOArchive::buffer()
-{
-    return (const char*)stream_.buffer();
-}
-
 bool BinOArchive::save(const char* filename)
 {
     FILE* f = ::yasli::fopen(filename, "wb");
