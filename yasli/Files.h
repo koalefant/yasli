@@ -67,8 +67,6 @@ namespace Files{
 	public:
 		iterator(const char* path = 0);
 		~iterator();
-		iterator(const iterator& original);
-		iterator& operator=(const iterator& rhs);
 		
 		iterator& operator++();
 		bool operator==(const iterator& rhs);
@@ -79,6 +77,8 @@ namespace Files{
 		DirectoryEntry* operator->();
 	protected:
 		void set(iteratorImpl* impl);
+		iterator(const iterator& original);
+		iterator& operator=(const iterator& rhs);
 
 		iteratorImpl* impl_;
 	};

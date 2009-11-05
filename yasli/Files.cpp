@@ -376,12 +376,6 @@ iterator::iterator(const char* path)
 	}
 }
 
-iterator::iterator(const iterator& original)
-: impl_(0)
-{
-	set(original.impl_);
-}
-
 iterator::~iterator()
 {
 	set(0);
@@ -397,12 +391,6 @@ void iterator::set(iteratorImpl* impl)
 		if(impl_)
 			impl_->acquire();
 	}
-}
-
-iterator& iterator::operator=(const iterator& rhs)
-{
-	set(rhs.impl_);
-	return *this;
 }
 
 DirectoryEntry& iterator::operator*()
@@ -437,8 +425,7 @@ bool iterator::operator==(const iterator& rhs)
 iterator& iterator::operator++()
 {
 	if(impl_){
-		if(impl_->refCount() > 1)
-			impl_ = new iteratorImpl(*impl_);
+		ASSERT(impl_->refCount() == 1);
 
 		if(!impl_->next())
 			set(0);
