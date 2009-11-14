@@ -39,15 +39,19 @@ class ClassFactoryBase{
 public: 
 	ClassFactoryBase(TypeID baseType)
 	: baseType_(baseType)
+    , nullLabel_(0)
 	{
 	}
 
 	virtual int size() const = 0;
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
 	virtual void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) = 0;
+
+    bool setNullLabel(const char* label){ nullLabel_ = label; return true; }
+    const char* nullLabel() const{ return nullLabel_; }
 protected:
 	TypeID baseType_;
-
+    const char* nullLabel_;
 };
 
 class ClassFactoryManager{
@@ -80,7 +84,6 @@ public:
         static ClassFactory factory;
         return factory;
     }
-
 
     class CreatorBase{
     public:
@@ -180,6 +183,11 @@ protected:
 namespace{ \
 	const yasli::TypeDescription Type##_Description(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
 	bool registered_##Type = yasli::TypeLibrary::the().registerType(&Type##_Description) != 0; \
+}
+
+#define YASLI_CLASS_NULL(BaseType, name) \
+namespace { \
+    bool BaseType##_NullRegistered = yasli::ClassFactory<BaseType>::the().setNullLabel(name); \
 }
 
 #define YASLI_CLASS(BaseType, Type, name) \
