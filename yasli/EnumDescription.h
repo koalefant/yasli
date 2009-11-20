@@ -77,13 +77,25 @@ EnumDescription& getEnumDescription(){
 		bool Class##_##Enum##_enum_registered = registerEnum_##Class##_##Enum();    \
 		bool registerEnum_##Class##_##Enum(){                                       \
 			yasli::EnumDescription& description = yasli::EnumDescriptionImpl<Class::Enum>::the();
+
+#define YASLI_ENUM_BEGIN_NESTED2(Class, Class1, Enum, label)                                  \
+	namespace {                                                                     \
+	bool registerEnum_##Class##Class1##_##Enum();                                           \
+	bool Class##Class1##_##Enum##_enum_registered = registerEnum_##Class##Class1##_##Enum();    \
+	bool registerEnum_##Class##Class1##_##Enum(){                                       \
+	yasli::EnumDescription& description = yasli::EnumDescriptionImpl<Class::Class1::Enum>::the();
+
                                                                                     
 #define YASLI_ENUM_VALUE(value, label)                                              \
 		description.add(int(value), #value, label);                                      
 
 #define YASLI_ENUM_VALUE_NESTED(Class, value, label)                                       \
 	description.add(int(Class::value), #value, label);                                      
-                                                                                   
+
+#define YASLI_ENUM_VALUE_NESTED2(Class, Class1, value, label)                                       \
+	description.add(int(Class::Class1::value), #value, label);                                      
+
+
 #define YASLI_ENUM_END()													        \
             return true;                                                            \
         };                                                                          \
