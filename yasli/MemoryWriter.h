@@ -52,7 +52,7 @@ public:
     std::size_t position() const{ return position_ - memory_; }
     void setPosition(std::size_t pos);
 
-	MemoryWriter& setDigits(int digits) { digits_ = digits; return *this; }
+	MemoryWriter& setDigits(int digits) { digits_ = (unsigned char)digits; return *this; }
 
 private:
     void alloc(std::size_t initialSize);
