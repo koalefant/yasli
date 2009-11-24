@@ -89,6 +89,7 @@ StringListStatic EnumDescription::nameCombination(int bitVector) const
             bitVector &= ~i->first;
             strings.push_back(i->second);
         }
+	ASSERT(!bitVector && "Unregistered enum value");
     return strings;
 }
 
@@ -100,7 +101,8 @@ StringListStatic EnumDescription::labelCombination(int bitVector) const
             bitVector &= ~i->first;
             strings.push_back(i->second);
         }
-    return strings;
+	ASSERT(!bitVector && "Unregistered enum value");
+	return strings;
 }
 
 
