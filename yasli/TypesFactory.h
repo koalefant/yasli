@@ -47,7 +47,7 @@ public:
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
 	virtual void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) = 0;
 
-    bool setNullLabel(const char* label){ nullLabel_ = label; return true; }
+    bool setNullLabel(const char* label){ nullLabel_ = label ? label : ""; return true; }
     const char* nullLabel() const{ return nullLabel_; }
 protected:
 	TypeID baseType_;
