@@ -67,8 +67,8 @@ inline void BinOArchive::openNode(const char* name, bool size8)
 	
 #ifdef _DEBUG
 	HashMap::iterator i = hashMap.find(hash);
-	if(i != hashMap.end() && i->second != name)
-		ASSERT_STR(0, name);
+//	if(i != hashMap.end() && i->second != name)
+//		ASSERT_STR(0, name);
 	hashMap[hash] = name;
 #endif
 }
