@@ -14,7 +14,7 @@ public:
     ~TextIArchive();
 
     bool load(const char* filename);
-	bool open(char* buffer, size_t length, bool free = false);
+	bool open(const char* buffer, size_t length, bool free = false);
 
     // virtuals:
     bool operator()(bool& value, const char* name = "", const char* label = 0);

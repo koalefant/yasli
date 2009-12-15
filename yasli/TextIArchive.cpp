@@ -24,7 +24,7 @@ TextIArchive::~TextIArchive()
     reader_.reset();
 }
 
-bool TextIArchive::open(char* buffer, size_t length, bool free)
+bool TextIArchive::open(const char* buffer, size_t length, bool free)
 {
 	if(buffer)
 		reader_.reset(new MemoryReader(buffer, length, free));
