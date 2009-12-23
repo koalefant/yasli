@@ -15,6 +15,8 @@
 typedef long long __int64;
 #endif
 
+#pragma warning (disable: 4100)
+
 namespace yasli{ class Archive; }
 
 template<class T>
