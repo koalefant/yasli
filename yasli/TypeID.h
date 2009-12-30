@@ -3,6 +3,7 @@
 #include <typeinfo>
 #include "yasli/Assert.h"
 #include "yasli/API.h"
+#include <string>
 
 #ifndef _MSC_VER
 using std::type_info;

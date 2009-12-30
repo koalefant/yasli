@@ -5,6 +5,7 @@
 #include "yasli/Pointers.h"
 
 #include "yasli/MemoryReader.h"
+#include <memory>
 
 namespace yasli{
 

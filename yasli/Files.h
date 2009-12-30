@@ -1,6 +1,7 @@
 #pragma once
 #include "yasli/Pointers.h"
 #include <time.h>
+#include <string>
 
 namespace Files{
     using std::string;

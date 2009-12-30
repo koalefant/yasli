@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BinaryOArchive.h"
-#include <xutility>
+//#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/TypesFactory.h"

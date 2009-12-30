@@ -242,10 +242,10 @@ namespace sigslot {
 			const_iterator it = m_senders.begin();
 			const_iterator itEnd = m_senders.end();
 
-			while(it != itEnd)
+			while(m_senders.begin() != m_senders.end())
 			{
-				_signal_base* p = *it;
-				it = m_senders.erase(it);
+				_signal_base* p = *m_senders.begin();
+				m_senders.erase(m_senders.begin());
 				p->slot_disconnect(this);
 			}
 		}

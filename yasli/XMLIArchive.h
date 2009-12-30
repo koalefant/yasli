@@ -2,6 +2,7 @@
 
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
+#include <memory>
 
 namespace pugi{
     class xml_document;
