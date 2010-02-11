@@ -1,4 +1,7 @@
 #include "StdAfx.h"
+
+#include "Files.h"
+
 #ifdef WIN32
 # include <fcntl.h>
 # include <io.h>
@@ -11,12 +14,13 @@
 #endif
 
 
-#include "yasli/Files.h"
-
 #include <malloc.h>
 #include <algorithm>
 #include <cstdio>
+#include <string>
 #include "Unicode.h"
+
+using std::string;
 
 namespace Files{
 
