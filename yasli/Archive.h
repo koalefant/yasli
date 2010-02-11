@@ -126,7 +126,7 @@ public:
     }
     typedef std::map<const type_info*, void*> ContextMap;
     void setContextMap(const ContextMap& contextMap){ contextMap_ = contextMap; }
-
+    const ContextMap& contextMap() const{ return contextMap_; }
 protected:
     ContextMap contextMap_;
 
