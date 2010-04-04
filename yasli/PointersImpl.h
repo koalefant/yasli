@@ -54,7 +54,7 @@ public:
 			return TypeID();
 	}
 	void create(TypeID type) const{
-		ASSERT(!ptr_ || ptr_->refCount() == 1);
+		// ASSERT(!ptr_ || ptr_->refCount() == 1); not necessary to be true
 		if(type)
 			ptr_.set(ClassFactory<T>::the().create(type));
 		else
