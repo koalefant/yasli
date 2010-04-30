@@ -47,7 +47,7 @@ public:
     }
     void write(char c);
     void write(const char* str);
-    void write(const void* data, std::size_t size);
+    bool write(const void* data, std::size_t size);
 
     std::size_t position() const{ return position_ - memory_; }
     void setPosition(std::size_t pos);

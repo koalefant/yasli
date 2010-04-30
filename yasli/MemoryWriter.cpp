@@ -181,7 +181,7 @@ void MemoryWriter::write(const char* value)
     write((void*)value, strlen(value));
 }
 
-void MemoryWriter::write(const void* data, std::size_t size)
+bool MemoryWriter::write(const void* data, std::size_t size)
 {
     ASSERT(memory_ <= position_);
     ASSERT(position() < this->size());
@@ -190,12 +190,14 @@ void MemoryWriter::write(const void* data, std::size_t size)
         position_ += size;
     }
     else{
-		ESCAPE(reallocate_, return);
+        if(!reallocate_)
+            return false;
 
         realloc(size_ * 2);
         write(data, size);
     }
     ASSERT(position() < this->size());
+    return true;
 }
 
 void MemoryWriter::write(char c)

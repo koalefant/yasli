@@ -165,12 +165,28 @@ namespace Helpers{
         };
     };
 
+    template<class T>
+    struct SerializeStructFast{
+        template<class TArchive>
+        static bool invoke(TArchive& ar, T& value, const char* name, const char* label){
+            return ar.serializeStruct(value, name, label);
+        };
+    };
+
     template<class Enum>
     struct SerializeEnum{
         static bool invoke(Archive& ar, Enum& value, const char* name, const char* label){
             const EnumDescription& enumDescription = getEnumDescription<Enum>();
             ASSERT(enumDescription.registered());
             return enumDescription.serialize(ar, reinterpret_cast<int&>(value), name, label);
+        };
+    };
+
+    template<class Enum>
+    struct SerializeEnumFast{
+        template<class TArchive>
+        static bool invoke(TArchive& ar, Enum& value, const char* name, const char* label){
+            return ar((int&)value, name, label); 
         };
     };
 
