@@ -160,6 +160,8 @@ bool TextIArchive::findName(const char* name)
     ASSERT(!stack_.empty());
     const char* start = 0;
     const char* blockBegin = stack_.back().start;
+	if(*blockBegin == '\0')
+		return false;
 
     readToken();
     if(!token_){
