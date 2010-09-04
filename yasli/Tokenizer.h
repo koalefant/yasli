@@ -6,87 +6,78 @@
 
 namespace yasli{
 
-class Token{
-    friend class Tokenizer;
-public:
+struct Token{
     Token(const char* _str = 0)
-	: start_(_str)
-	, end_(_str ? _str + strlen(_str) : 0)
+	: start(_str)
+	, end(_str ? _str + strlen(_str) : 0)
+	{
+	}
+
+    Token(const char* _str, size_t _len)
+	: start(_str)
+	, end(_str + _len)
 	{
 	}
 
     Token(const char* _start, const char* _end)
-    : start_(_start)
-    , end_(_end)
+    : start(_start)
+    , end(_end)
     {}
 
-	void set(const char* start, const char* end){
-		start_ = start;
-		end_ = end;
+	void set(const char* _start, const char* _end){
+		start = _start;
+		end = _end;
 	}
 
-    std::size_t length() const{ return end_ - start_; }
+    std::size_t length() const{ return end - start; }
 
     bool operator==(const Token& rhs) const{
 		if(length() != rhs.length())
 			return false;
-        return memcmp(start_, rhs.start_, length()) == 0;
+        return memcmp(start, rhs.start, length()) == 0;
     }
     bool operator==(const std::string& rhs) const{
-        return operator==(rhs.c_str());
+        if(length() != rhs.size())
+            return false;
+        return std::memcmp(start, rhs.c_str(), length()) == 0;
     }
 
 
     bool operator==(const char* text) const{
-        if(std::strlen(text) == length())
-            return std::strncmp(text, start_, length()) == 0;
-        else
-            return false;
+        return std::memcmp(text, start, length()) == 0;
     }
     bool operator!=(const char* text) const{
-        if(std::strlen(text) == length())
-            return std::strncmp(text, start_, length()) != 0;
-        else
-            return true;
+        return std::memcmp(text, start, length()) != 0;
     }
     bool operator==(char c) const{
-        return length() == 1 && *start_ == c;
+        return length() == 1 && *start == c;
     }
     bool operator!=(char c) const{
-        return length() != 1 || *start_ != c;
+        return length() != 1 || *start != c;
     }
 
     operator bool() const{
-        return start_ != end_;
+        return start != end;
     }
 
-    std::string str() const{ return std::string(start_, end_);  }
+    std::string str() const{ return std::string(start, end);  }
 
-    const char* begin() const{ return start_; }
-    const char* end() const{ return end_; }
-private:
-    const char* start_;
-    const char* end_;
+    const char* start;
+    const char* end;
 };
 
 class YASLI_API Tokenizer{
 public:
-    Tokenizer(const char* spaces = " \t\r\n\x0D",
-              const char* quotes = "\"\"",
-              const char* comments = "#");
+    Tokenizer();
 
     Token operator()(const char* text) const;
 private:
     inline bool isSpace(char c) const;
-    inline bool isWordPart(char c) const;
+    inline bool isWordPart(unsigned char c) const;
     inline bool isComment(char c) const;
     inline bool isQuoteOpen(int& quoteIndex, char c) const;
     inline bool isQuoteClose(int quoteIndex, char c) const;
     inline bool isQuote(char c) const;
-
-    std::string spaces_;
-    std::string comments_;
-    std::string quotes_;
 };
 
 }
