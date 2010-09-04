@@ -1,0 +1,24 @@
+#include "StdAfx.h"
+#include "ww/PropertyEditor.h"
+#include "ww/PropertyTree.h"
+#include "ww/Win32/Window.h"
+#include "EditorDialog.h"
+
+namespace ww{
+
+bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, Widget* parent, const char* title)
+{
+	return edit(ser, stateFileName, flags, parent ? *_findWindow(parent) : HWND(0), title);
+}
+
+bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, HWND parent, const char* title)
+{
+	bool result = false;
+	const char* typeName = ser.type().name();
+	EditorDialog dialog(ser, stateFileName, flags, parent);
+	if(title)
+		dialog.setTitle(title);
+	result = dialog.showModal() == ww::RESPONSE_OK;
+	return result;
+}
+}

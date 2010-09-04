@@ -1,0 +1,388 @@
+#pragma once
+
+#include <typeinfo>
+#include <algorithm>
+#include "ww/Widget.h"
+#include "yasli/Serializer.h"
+#include "yasli/StringList.h"
+#include "yasli/Factory.h"
+#include "ww/ConstStringList.h"
+#include "ww/Win32/Types.h"
+
+namespace Gdiplus{
+	class Graphics;
+	class Rect;
+	class Font;
+}
+
+namespace ww{
+class PropertyTree;
+class PropertyRow;
+class PropertyTreeModel;
+class PopupMenuItem;
+struct KeyPress;
+
+enum ScanResult {
+	SCAN_FINISHED, 
+	SCAN_CHILDREN, 
+	SCAN_SIBLINGS, 
+	SCAN_CHILDREN_SIBLINGS
+};
+
+class PropertyRowWidget : public PolyRefCounter{
+public:
+	PropertyRowWidget(PropertyRow* row, PropertyTreeModel* model)
+	: row_(row)
+	, model_(model)
+	{
+	}
+	virtual ~PropertyRowWidget();
+	virtual Widget* actualWidget() { return 0; }
+	virtual void commit() = 0;
+	PropertyRow* row() { return row_; }
+	PropertyTreeModel* model() { return model_; }
+protected:
+	PropertyRow* row_;
+	PropertyTreeModel* model_;
+};
+
+class PropertyTreeTransaction;
+
+class WW_API PropertyRow : public RefCounter
+{
+public:
+	static const int ROW_DEFAULT_HEIGHT = 21; 
+	static const int ICON_SIZE = 21; 
+	static const int TEXT_SIZE_MIN = 30; 
+	static const int WIDGET_SIZE_MIN = 30; 
+	static const bool Custom = true;
+
+	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
+	typedef Rows::iterator iterator;
+	typedef Rows::const_iterator const_iterator;
+
+
+	PropertyRow();
+	PropertyRow(const char* name, const char* nameAlt, const char* typeName);
+	PropertyRow(const char* name, const char* nameAlt, const Serializer& ser);
+	virtual ~PropertyRow() {}
+
+	bool selected() const{ return selected_; }
+	void setSelected(bool selected) { selected_ = selected; }
+	bool expanded() const{ return expanded_; }
+	void _setExpanded(bool expanded); // используйте PropertyTree::expandRow
+	void setExpandedRecursive(PropertyTree* tree, bool expanded);
+
+	bool visible(const PropertyTree* tree) const;
+	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
+
+	const PropertyRow* hit(const PropertyTree* tree, Vect2i point) const;
+	PropertyRow* hit(const PropertyTree* tree, Vect2i point);
+	PropertyRow* parent() { return parent_; }
+	const PropertyRow* parent() const{ return parent_; }
+	void setParent(PropertyRow* row) { parent_ = row; }
+	bool isRoot() const { return !parent_; }
+	int level() const;
+
+	PropertyRow* add(PropertyRow* row, PropertyRow* after = 0);
+	PropertyRow* addBefore(PropertyRow* row, PropertyRow* before);
+
+	template<class Op> bool scanChildren(Op& op);
+	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
+
+	PropertyRow* childByIndex(int index);
+	const PropertyRow* childByIndex(int index) const;
+	int childIndex(PropertyRow* row);
+	bool isChildOf(const PropertyRow* row) const;
+	
+	bool empty() const{ return children_.empty(); }
+	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
+    PropertyRow* findByAddress(void* addr);
+	iterator begin() { return children_.begin(); }
+	iterator end() { return children_.end(); }
+	const_iterator begin() const{ return children_.begin(); }
+	const_iterator end() const{ return children_.end(); }
+	std::size_t count() const{ return children_.size(); }
+	PropertyRow* front() { return children_.front(); }
+	PropertyRow* back() { return children_.back(); }
+	iterator erase(iterator it){ return children_.erase(it); }
+	void clear(){ children_.clear(); }
+	void erase(PropertyRow* row);
+	void swapChildren(PropertyRow* row);
+	
+    void assignRowState(const PropertyRow& row, bool recurse);
+	void assignRowProperties(PropertyRow* row);
+	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, bool preserveChildren = true);
+
+	const char* name() const{ return name_; }
+	void setName(const char* name) { name_ = name; }
+	const char* label() const { return label_; }
+	const char* labelUndecorated() const { return labelUndecorated_; }
+	void setLabel(const char* label) { label_ = label ? label : ""; setLabelChanged(); }
+	void setLabelChanged();
+	void updateLabel();
+	const char* parseControlCodes(const char* ptr);
+	const char* typeName() const{ return typeName_; }
+	void setTypeName(const char* typeName) { typeName_ = typeName; }
+	std::string rowText() const;
+
+	PropertyRow* findSelected();
+	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false);
+	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false) const;
+	void intersect(const PropertyRow* row);
+
+	int verticalIndex(PropertyTree* tree, PropertyRow* row);
+	PropertyRow* rowByVerticalIndex(PropertyTree* tree, int index);
+	int horizontalIndex(PropertyTree* tree, PropertyRow* row);
+	PropertyRow* rowByHorizontalIndex(PropertyTree* tree, int index);
+
+	template<class T>
+	bool assignTo(T& object){
+		return assignTo(reinterpret_cast<void*>(&object), sizeof(T));
+	}
+	virtual bool assignTo(void* object, int size) { return false; }
+	virtual std::string valueAsString() const;
+	virtual std::wstring valueAsWString() const;
+
+	int height() const{ return size_.y; }
+
+	virtual int widgetSizeMin() const { return widgetSizeMin_; } 
+	virtual int floorHeight() const{ return 0; }
+
+    void updateSize(const PropertyTree* tree);
+    void adjustRect(const PropertyTree* tree, const Recti& rect, Vect2i pos, int& totalHeight, int& extraSize);
+	void scaleSize(float t, bool scaleWidget);
+	void cutSize(int& extraSize, bool cutWidget);
+
+	virtual bool hasIcon() const{ return false; }
+
+	const Recti rect() const{ return Recti(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
+	const Recti textRect() const{ return Recti(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+    const Recti widgetRect() const{ return Recti(widgetPos_, pos_.y, widgetPos_ + widgetSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+    const Recti plusRect() const{ return Recti(pos_.x, pos_.y, pos_.x + plusSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+	const Recti floorRect() const { return Recti(textPos_, pos_.y + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, pos_.y + size_.y); }
+	void adjustHoveredRect(Recti& hoveredRect);
+	Gdiplus::Font* rowFont(const PropertyTree* tree) const;
+	
+	void drawRow(HDC dc, const PropertyTree* tree);
+    void drawPlus(Gdiplus::Graphics* gr, const Recti& rect, bool expanded, bool selected, bool grayed) const;
+	void drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect);
+	virtual void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect) {}
+	virtual PropertyRowWidget* createWidget(PropertyTree* tree) { return 0; }
+	
+	virtual bool isContainer() const{ return false; }
+	virtual bool isPointer() const{ return false; }
+
+	virtual bool isLeaf() const{ return false; }
+	virtual bool isStatic() const{ return pulledContainer_ == 0; }
+	virtual bool activateOnAdd() const{ return false; }
+	
+	bool canBeToggled(const PropertyTree* tree) const;
+	bool canBeDragged() const;
+	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const;
+	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
+
+	virtual bool onActivate(PropertyTree* tree, bool force); // возвращает изменилось ли значение строчки
+	virtual bool onKeyDown(PropertyTree* tree, KeyPress key);
+	virtual bool onMouseDown(PropertyTree* tree, Vect2i point, bool& changed) { return false; } // возваращает, нужно ли capture-ить мышь
+	virtual void onMouseMove(PropertyTree* tree, Vect2i point) {}
+	virtual void onMouseUp(PropertyTree* tree, Vect2i point) {}
+	virtual bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
+
+	void setUpdated(bool updated) { updated_ = updated; }
+	bool updated() const { return updated_; }
+	bool readOnly() const { return readOnly_; }
+	bool readOnlyOver() const { return readOnlyOver_; }
+	bool fixedWidget() const{ return fixedWidget_ || hasIcon(); }
+	bool multiValue() const { return multiValue_; }
+	void setMultiValue(bool multiValue) { multiValue_ = multiValue; }
+	bool fullRow(const PropertyTree* tree) const;
+	void setFullRow(bool fullRow) { fullRow_ = fullRow; }
+
+	// pulledRow - это та, что "вытягивается" на уровень вверх
+	// (по символу '^' в начале nameAlt)
+	bool pulledUp() const { return pulledUp_; }
+   	bool pulledBefore() const { return pulledBefore_; } // добавление перед по символу '`', дополнительный к pulledUp
+	bool hasPulled() const { return hasPulled_; }
+	bool pulledSelected() const;
+	PropertyRow* nonPulledParent();
+	void setPulledContainer(PropertyRow* container){ pulledContainer_ = container; }
+	PropertyRow* pulledContainer() { return pulledContainer_; }
+	const PropertyRow* pulledContainer() const{ return pulledContainer_; }
+
+	PropertyRow* cloneChildren(PropertyRow* result, const PropertyRow* source) const;
+	virtual PropertyRow* clone() const {
+		return cloneChildren(serializer_ ? new PropertyRow(name_, label_, serializer_) : new PropertyRow(name_, label_, typeName_), this);
+	}
+
+	const wchar_t* digest() const{ return digest_.c_str(); }
+	virtual void digestReset();
+	void digestAppend(const wchar_t* text);
+
+	Serializer serializer() const{ return serializer_; }
+	virtual void serializeValue(Archive& ar) {}
+	void serialize(Archive& ar);
+
+	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
+
+protected:
+	void init(const char* name, const char* nameAlt, const char* typeName);
+
+	const char* name_;
+	const char* label_;
+	const char* labelUndecorated_;
+	const char* typeName_;
+    Serializer serializer_;
+	std::wstring digest_;
+	PropertyRow* parent_;
+	Rows children_;
+
+	bool visible_;
+	bool expanded_;
+	bool selected_;
+	bool updated_;
+	bool labelChanged_;
+	bool readOnly_;
+	bool readOnlyOver_;
+	bool fixedWidget_;
+	bool fullRow_;
+	bool pulledUp_;
+	bool pulledBefore_;
+	bool hasPulled_;
+	bool multiValue_;
+	char freePulledChildren_;
+
+	Vect2s pos_;
+	Vect2s size_;
+    short int plusSize_;
+	short int textPos_;
+	short int textSizeInitial_;
+	short int textSize_;
+	short int widgetPos_; // widget == icon!
+	short int widgetSize_;
+	short int widgetSizeMin_;
+	short int textSizeDelta_;
+	short int widgetSizeDelta_;
+	unsigned textHash_;
+
+	yasli::SharedPtr<PropertyRow> pulledContainer_;
+
+	static ConstStringList* constStrings_;
+};
+
+
+template<bool value>
+struct StaticBool{
+	enum { Value = value };
+};
+
+class WW_API PropertyRowArg{
+public:
+	PropertyRowArg(void* object, int size, const char* name, const char* nameAlt, const char* typeName){
+		object_ = object;
+		size_ = size;
+		name_ = name;
+		nameAlt_ = nameAlt;
+		typeName_ = typeName;
+	}
+
+	template<class T>
+	void construct(T** row)
+	{
+		*row = (T*)createRow<T>(StaticBool<true>());
+	}
+
+	template<class Derived>
+	static ww::PropertyRow* createRow(StaticBool<true> custom)
+	{
+		PropertyRow* result;
+		if(object_)
+			result = new Derived(object_, size_, name_, nameAlt_, typeName_);
+		else
+			result = new Derived();
+		return result;
+	}
+
+	template<class Derived>
+	static PropertyRow* createRow(StaticBool<false> custom)
+	{
+		PropertyRow* result = new Derived();
+		return result;
+	}
+
+	template<class Derived>
+	static PropertyRow* createArg(){ 
+		return createRow<Derived>(StaticBool<Derived::Custom>());
+	}
+
+protected:
+	static void* object_;
+	static int size_;
+	static const char* name_;
+	static const char* nameAlt_;
+	static const char* typeName_;
+};
+
+typedef Factory<std::string, PropertyRow, PropertyRowArg> PropertyRowFactory;
+
+template<class Op>
+bool PropertyRow::scanChildren(Op& op)
+{
+	Rows::iterator it;
+	FOR_EACH(children_, it){
+		ScanResult result = op(*it);
+		if(result == SCAN_FINISHED)
+			return false;
+		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
+			if(!(*it)->scanChildren(op))
+				return false;
+			if(result == SCAN_CHILDREN)
+				return false;
+		}
+	}
+	return true;
+}
+
+template<class Op>
+bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
+{
+	Rows::iterator it;
+	FOR_EACH(children_, it){
+		ScanResult result = op(*it, tree);
+		if(result == SCAN_FINISHED)
+			return false;
+		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
+			if(!(*it)->scanChildren(op, tree))
+				return false;
+			if(result == SCAN_CHILDREN)
+				return false;
+		}
+	}
+	return true;
+}
+
+template<class Op>
+bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
+{
+	for(Rows::reverse_iterator it = children_.rbegin(); it != children_.rend(); ++it){
+		ScanResult result = op(*it, tree);
+		if(result == SCAN_FINISHED)
+			return false;
+		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
+			if(!(*it)->scanChildrenReverse(op, tree))
+				return false;
+			if(result == SCAN_CHILDREN)
+				return false;
+		}
+	}
+	return true;
+}
+
+}
+
+#define REGISTER_PROPERTY_ROW(DataType, RowType) \
+	REGISTER_IN_FACTORY(PropertyRowFactory, typeid(DataType).name(), RowType); \
+	YASLI_CLASS(PropertyRow, RowType, #DataType);
+
+
