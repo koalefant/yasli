@@ -15,24 +15,25 @@ typedef bool(*SerializeContainerFunc)(void*, Archive&, std::size_t index);
 typedef std::size_t(*ContainerResizeFunc)(void*, std::size_t size);
 typedef std::size_t(*ContainerSizeFunc)(void*);
 
+// Struct serializer. 
 class YASLI_API Serializer{/*{{{*/
-    friend class Archive;
+	friend class Archive;
 public:
-    Serializer()
-    : object_(0)
+	Serializer()
+	: object_(0)
 	, size_(0)
-    , serializeFunc_(0)
-    {
-    }
+	, serializeFunc_(0)
+	{
+	}
 
 	Serializer(TypeID type, void* object, std::size_t size, SerializeStructFunc serialize)
-    : type_(type)
-    , object_(object)
+	: type_(type)
+	, object_(object)
 	, size_(size)
-    , serializeFunc_(serialize)
-    {
-        ASSERT(object);
-    }
+	, serializeFunc_(serialize)
+	{
+		ASSERT(object);
+	}
 
 	Serializer(const Serializer& _original)
 	: type_(_original.type_)
@@ -42,177 +43,213 @@ public:
 	{
 	}
 
-    template<class T>
-    explicit Serializer(T& object){
-        type_=  TypeID::get<T>();
-        object_ = (void*)(&object);
+	template<class T>
+	explicit Serializer(T& object){
+		type_=  TypeID::get<T>();
+		object_ = (void*)(&object);
 		size_ = sizeof(T);
-        serializeFunc_ = &Serializer::serializeRaw<T>;
-    }
+		serializeFunc_ = &Serializer::serializeRaw<T>;
+	}
 
-    template<class T>
-    explicit Serializer(T& object, TypeID type){
-        type_ =  type;
-        object_ = (void*)(&object);
+	template<class T>
+	explicit Serializer(T& object, TypeID type){
+		type_ =  type;
+		object_ = (void*)(&object);
 		size_ = sizeof(T);
-        serializeFunc_ = &Serializer::serializeRaw<T>;
-    }
+		serializeFunc_ = &Serializer::serializeRaw<T>;
+	}
 
-    bool operator()(Archive& ar, const char* name, const char* label) const;
-    bool operator()(Archive& ar) const;
-    operator bool() const{ return object_ && serializeFunc_; }
-    void* pointer() const{ return object_; }
-    TypeID type() const{ return type_; }
+	bool operator()(Archive& ar, const char* name, const char* label) const;
+	bool operator()(Archive& ar) const;
+	operator bool() const{ return object_ && serializeFunc_; }
+	void* pointer() const{ return object_; }
+	TypeID type() const{ return type_; }
 	std::size_t size() const{ return size_; }
 
-    template<class T>
-    static bool serializeRaw(void* rawPointer, Archive& ar){
-        ESCAPE(rawPointer, return false);
-        ((T*)(rawPointer))->serialize(ar);
-        return true;
-    }
+	template<class T>
+	static bool serializeRaw(void* rawPointer, Archive& ar){
+		ESCAPE(rawPointer, return false);
+		((T*)(rawPointer))->serialize(ar);
+		return true;
+	}
 private:
 
-    TypeID type_;
-    void* object_;
+	TypeID type_;
+	void* object_;
 	std::size_t size_;
-    SerializeStructFunc serializeFunc_;
+	SerializeStructFunc serializeFunc_;
 };/*}}}*/
 
 class ContainerSerializationInterface{
 public:
-    virtual std::size_t size() const = 0;
-    virtual std::size_t resize(std::size_t size) = 0;
+  virtual std::size_t size() const = 0;
+  virtual std::size_t resize(std::size_t size) = 0;
 
-    virtual void* pointer() const = 0;
-    virtual TypeID type() const = 0;
-    virtual bool next() = 0;
+  virtual void* pointer() const = 0;
+  virtual TypeID type() const = 0;
+  virtual bool next() = 0;
+  virtual void extractInPlacePointers(Archive& ar) const { ASSERT(0 && "Not implemented"); }
 
-    virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
-    virtual operator bool() const = 0;
-    virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
+	virtual void* elementPointer() const = 0;
+	virtual size_t elementSize() const = 0;
+
+  virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
+  virtual operator bool() const = 0;
+  virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
 };
 
 template<class Container, class Element>
 class ContainerSerializationSTLImpl : public ContainerSerializationInterface/*{{{*/
 {
 public:
-    explicit ContainerSerializationSTLImpl(Container* container = 0)
-    : container_(container)
-    , size_(container->size())
-    , it_(container->begin())
-    {
-        ASSERT(container_);
-    }
+	explicit ContainerSerializationSTLImpl(Container* container = 0)
+	: container_(container)
+	, size_(container->size())
+	, it_(container->begin())
+	{
+		ASSERT(container_);
+	}
 
-    template<class T, class A> const
-    void resizeHelper(size_t _size, std::vector<T, A>& _v)
-    {
-        _v.resize( _size );
-    }
+	template<class T, class A>
+	void resizeHelper(size_t _size, std::vector<T, A>& _v) const
+	{
+		_v.resize( _size );
+	}
 
-    void resizeHelper(size_t _size, ...) const
-    {
-        while(container_->size() > _size)
-        {
-            typename Container::iterator it = container_->end();
-            --it;
-            container_->erase(it);
-        }
-        while(container_->size() < _size)
-            container_->insert(container_->end(), Element());
-    }
+	void resizeHelper(size_t _size, ...) const
+	{
+		while(container_->size() > _size)
+		{
+			typename Container::iterator it = container_->end();
+			--it;
+			container_->erase(it);
+		}
+		while(container_->size() < _size)
+			container_->insert(container_->end(), Element());
+	}
 
-    // from ContainerSerializationInterface
-    std::size_t size() const{
-        ESCAPE(container_ != 0, return 0);
-        return container_->size();
-    }
-    std::size_t resize(std::size_t size){
-        ESCAPE(container_ != 0, return 0);
-        resizeHelper(size, container_);
-        it_ = container_->begin();
-        size_ = size;
-        return size;
-    }
+	template<class T, class A> 
+	void extractInPlacePointersHelper(Archive& ar, ...) const
+	{
+		ASSERT(0 && "Container is not supported");
+	}
 
-    void* pointer() const{ return reinterpret_cast<void*>(container_); }
-    TypeID type() const{ return TypeID::get<Element>(); }
 
-    bool next()
-    {
-        ESCAPE(container_ && it_ != container_->end(), return false);
-        ++it_;
-        return it_ != container_->end();
-    }
+	template<class T, class A> 
+	void extractInPlacePointersHelper(Archive& ar, std::vector<T, A>* _v) const
+	{
+#ifdef _MSC_VER
+#pragma pack(push,_CRT_PACKING)
+		struct MSVector {
+			char padding[8];
+			T* ptr1;
+			T* ptr2;
+			T* ptr3;
+		};
+#pragma pack(pop)
+		MSVector* vector = (MSVector*)_v;
+		void** ptr = reinterpret_cast<void**>(_v);
+		ar.inPlacePointer((void**)&vector->ptr1);
+		ar.inPlacePointer((void**)&vector->ptr2);
+		ar.inPlacePointer((void**)&vector->ptr3);
+#else
+# error Unsupported platform
+#endif
+	}
 
-    bool operator()(Archive& ar, const char* name, const char* label){
-        ESCAPE(container_, return false);
-        if(it_ == container_->end())
+	// from ContainerSerializationInterface
+	std::size_t size() const{
+		ESCAPE(container_ != 0, return 0);
+		return container_->size();
+	}
+	std::size_t resize(std::size_t size){
+		ESCAPE(container_ != 0, return 0);
+		resizeHelper(size, container_);
+		it_ = container_->begin();
+		size_ = size;
+		return size;
+	}
+
+	void* pointer() const{ return reinterpret_cast<void*>(container_); }
+	TypeID type() const{ return TypeID::get<Element>(); }
+
+	bool next()
+	{
+		ESCAPE(container_ && it_ != container_->end(), return false);
+		++it_;
+		return it_ != container_->end();
+	}
+
+	void* elementPointer() const { return &*it_; }
+	size_t elementSize() const { return sizeof(Container::value_type); }
+
+	bool operator()(Archive& ar, const char* name, const char* label){
+		ESCAPE(container_, return false);
+		if(it_ == container_->end())
 		{
 			it_ = container_->insert(container_->end(), Element());
 			return ar(*it_, name, label);
 		}
 		else
 			return ar(*it_, name, label);
-    }
-    /*
-    bool operator()(Archive& ar, std::size_t index) const{
-        CHECK(container_ && size_t(index) < container_->size());
-        return ar((*container_)[index]);
-    }
-    */
-    operator bool() const{ return container_ != 0; }
-    void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
-        Element element;
-        ar(element, name, label);
-    }
-    // ^^^
+	}
+	void extractInPlacePointers(Archive& ar) const
+	{
+		extractInPlacePointersHelper(ar, container_);
+	}
+	operator bool() const{ return container_ != 0; }
+	void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
+		Element element;
+		ar(element, name, label);
+	}
+	// ^^^
 protected:
-    Container* container_;
-    typename Container::iterator it_;
-    size_t size_;
+	Container* container_;
+	typename Container::iterator it_;
+	size_t size_;
 };/*}}}*/
 
 template<class T>
 class ContainerSerializationArrayImpl : public ContainerSerializationInterface{/*{{{*/
-    friend class Archive;
+	friend class Archive;
 public:
-    explicit ContainerSerializationArrayImpl(T* array = 0, int size = 0)
-    : array_(array)
-    , size_(size)
-    , index_(0)
-    {
-    }
+	explicit ContainerSerializationArrayImpl(T* array = 0, int size = 0)
+	: array_(array)
+	, size_(size)
+	, index_(0)
+	{
+	}
 
-    // from ContainerSerializationInterface:
-    std::size_t size() const{ return size_; }
-    std::size_t resize(std::size_t size){
-        index_ = 0;
-        return size_;
-    }
+	// from ContainerSerializationInterface:
+	std::size_t size() const{ return size_; }
+	std::size_t resize(std::size_t size){
+		index_ = 0;
+		return size_;
+	}
 
-    void* pointer() const{ return reinterpret_cast<void*>(array_); }
-    TypeID type() const{ return TypeID::get<T>(); }
+	void* pointer() const{ return reinterpret_cast<void*>(array_); }
+	TypeID type() const{ return TypeID::get<T>(); }
+	void* elementPointer() const { return &array_[index_]; }
+	size_t elementSize() const { return sizeof(T); }
 
-    bool operator()(Archive& ar, const char* name, const char* label){
-        ESCAPE(size_t(index_) < size_, return false);
+	bool operator()(Archive& ar, const char* name, const char* label){
+		ESCAPE(size_t(index_) < size_, return false);
 		return ar(array_[index_], name, label);
-    }
-    operator bool() const{ return array_ != 0; }
-    bool next(){
-        ++index_;
-        return size_t(index_) < size_;
-    }
-    void serializeNewElement(Archive& ar, const char* name, const char* label) const{
-        T element;
-        ar(element, name, label);
-    }
-    // ^^^
-    
+	}
+	operator bool() const{ return array_ != 0; }
+	bool next(){
+		++index_;
+		return size_t(index_) < size_;
+	}
+	void serializeNewElement(Archive& ar, const char* name, const char* label) const{
+		T element;
+		ar(element, name, label);
+	}
+	// ^^^
+
 private:
-    T* array_;
-    int index_;
+	T* array_;
+	int index_;
 	std::size_t size_;
 };/*}}}*/
 
@@ -226,6 +263,7 @@ public:
 	virtual Serializer serializer() const = 0;
 	virtual void* get() const = 0;
 	virtual ClassFactoryBase* factory() const = 0;
+	virtual void extractInPlacePointers(Archive& ar) const{ ASSERT(0 && "Not implemented"); }
 	
 	void serialize(Archive& ar) const;
 };

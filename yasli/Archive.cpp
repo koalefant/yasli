@@ -11,23 +11,24 @@ namespace yasli{
 
 void Archive::warning(const char* message)
 {
+	// TODO: provide messaging-interface
 }
 
 bool Archive::operator()(std::wstring& value, const char* name, const char* label)
 {
 	std::string str;
-    if(isOutput())
-        str = pugi::as_utf8(value.c_str());
-    if(!(*this)(str, name, label))
-        return false;
-    if(isInput())
-        value = pugi::as_utf16(str.c_str());
-    return true;
+	if(isOutput())
+		str = pugi::as_utf8(value.c_str());
+	if(!(*this)(str, name, label))
+		return false;
+	if(isInput())
+		value = pugi::as_utf16(str.c_str());
+	return true;
 }
 
 bool Archive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-    return false;
+	return false;
 }
 
 bool Archive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="yasli"
 	ProjectGUID="{894FD61A-7469-4C2D-A9F7-C026F3E458B5}"
 	RootNamespace="yasli"
@@ -519,6 +519,22 @@
 			</File>
 			<File
 				RelativePath=".\BinaryOArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InPlaceIArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InPlaceIArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InPlaceOArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InPlaceOArchive.h"
 				>
 			</File>
 			<File

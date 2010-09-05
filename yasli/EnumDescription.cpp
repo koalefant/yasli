@@ -21,25 +21,32 @@ void EnumDescription::add(int value, const char* name, const char *label)
 
 bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
 {
-    int index = StringListStatic::npos;
-    if(ar.isOutput()){
-        index =  indexByValue(value);
-        if(index == StringListStatic::npos){
-			std::string dummy("");
-			ar(dummy, name, label);
-			ar.warning("Unregistered Enum value!");
-            return false;
-        }
-    }
+	if (!ar.isInPlace())
+	{
+		int index = StringListStatic::npos;
+		if(ar.isOutput()){
+			index =  indexByValue(value);
+			if(index == StringListStatic::npos){
+				std::string dummy("");
+				ar(dummy, name, label);
+				ar.warning("Unregistered Enum value!");
+				return false;
+			}
+		}
 
-	StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
-    ar(stringListValue, name, label);
-    if(ar.isInput()){
-        if(stringListValue.index() == StringListStatic::npos)
-            return false;
-		value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
-    }
-    return true;
+		StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
+		ar(stringListValue, name, label);
+		if(ar.isInput()){
+			if(stringListValue.index() == StringListStatic::npos)
+				return false;
+			value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
+		}
+	}
+	else
+	{
+		return ar(value, name, label);
+	}
+	return true;
 }
 
 bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const

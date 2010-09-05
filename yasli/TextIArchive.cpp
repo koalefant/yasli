@@ -14,13 +14,12 @@ namespace yasli{
 TextIArchive::TextIArchive()
 : Archive(true)
 {
-
 }
 
 TextIArchive::~TextIArchive()
 {
-    stack_.clear();
-    reader_.reset();
+	stack_.clear();
+	reader_.reset();
 }
 
 bool TextIArchive::open(const char* buffer, size_t length, bool free)

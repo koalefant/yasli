@@ -38,20 +38,37 @@ public:
 		T* previousContext_;
 	};
 
+	enum ArchiveCaps{
+		INPUT = 1 << 0,
+		EDIT = 1 << 1,
+		INPLACE = 1 << 2,
+	};
+
 	Archive(bool isInput, bool isEdit = false)
 	: isInput_(isInput)
 	, isEdit_(isEdit)
-	, inPlace_(false)
+	, isInPlace_(false)
 	, filter_(0)
 	{
 	}
+
+	Archive(int caps)
+	: isInput_((caps & INPUT) != 0)
+	, isEdit_((caps & EDIT) != 0)
+	, isInPlace_((caps & INPLACE) != 0)
+	, filter_(0)
+	{
+
+	}
+
 	virtual ~Archive() {}
 
 	bool isPermanent() const{ return true; }
 	bool isInput() const{ return isInput_; }
 	bool isOutput() const{ return !isInput_; }
 	bool isEdit() const{ return isEdit_; }
-	bool inPlace() const{ return inPlace_; }
+	bool isInPlace() const{ return isInPlace_; }
+	virtual void inPlacePointer(void** pointer) { ASSERT(0 && "Not implemented"); }
 
 	virtual void warning(const char* message);
 	virtual void close() {}
@@ -135,7 +152,7 @@ private:
 
 	bool isInput_;
 	bool isEdit_;
-	bool inPlace_;
+	bool isInPlace_;
 	int filter_;
 };
 
