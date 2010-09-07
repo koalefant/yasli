@@ -52,9 +52,9 @@ TypeID TypeID::ZERO;
 TypeID::TypeID(const char* name)
 : typeInfo_(0)
 {
-    const TypeDescription* description = TypeLibrary::the().findByName(name);
-    if(description)
-        *this = description->typeID();
+	const TypeDescription* description = TypeLibrary::the().findByName(name);
+	if(description)
+		*this = description->typeID();
 	else
 		name_ = name;
 }
@@ -82,11 +82,11 @@ const char* TypeID::name() const{
 }
 
 const char* TypeID::label() const{
-    const TypeDescription* description = TypeLibrary::the().find(*this);
-    if(description)
-        return description->label();
-    else if(typeInfo_)
-        return typeInfo_->name();
+	const TypeDescription* description = TypeLibrary::the().find(*this);
+	if(description)
+		return description->label();
+	else if(typeInfo_)
+		return typeInfo_->name();
 	else
 		return name_.c_str();
 }
@@ -95,28 +95,28 @@ const char* TypeID::label() const{
 
 bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label)
 {
-    std::string typeName;
-    if(ar.isOutput()){
-        typeName = typeID.name();
-        return ar(typeName, name);
-    }
-    else{
-        if(ar(typeName, name)){
+	std::string typeName;
+	if(ar.isOutput()){
+		typeName = typeID.name();
+		return ar(typeName, name);
+	}
+	else{
+		if(ar(typeName, name)){
 			if(!typeName.empty())
 				typeID = yasli::TypeID(typeName.c_str());
 			else
 				typeID = yasli::TypeID();
-            if(!typeID){
-                yasli::MemoryWriter msg;
-                msg << "Unable to read TypeID, unregistered type name: \'" << typeName.c_str() << "'";
-                ar.warning(msg.c_str());
-                return false;
-            }
-            else
-                return true;
-        }
-        else
-            return false;
-    }
+			if(!typeID){
+				yasli::MemoryWriter msg;
+				msg << "Unable to read TypeID, unregistered type name: \'" << typeName.c_str() << "'";
+				ar.warning(msg.c_str());
+				return false;
+			}
+			else
+				return true;
+		}
+		else
+			return false;
+	}
 }
 

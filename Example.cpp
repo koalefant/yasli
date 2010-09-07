@@ -37,7 +37,7 @@ struct Member{
 	char memberWord[8];
 
 	Member()
-	: weight(0.0f)
+    : weight(rand() * 100.0f / RAND_MAX)
 	, mode(MEMBER_MODE_A) 
 	{
 		strcpy(memberWord, "memberW");
@@ -65,7 +65,7 @@ class PolyBase : public RefCounter
 public:
 	PolyBase()
 	{
-
+        baseMember_= "Very nice\nand long\nMember";
 	}
 
 	virtual void serialize(Archive& ar)
@@ -120,8 +120,8 @@ public:
 	void serialize(Archive& ar){
 		ar(name_, "name");
 		ar(polyPtr_, "polyPtr");
-		ar(polyVector_, "polyVector");
-		ar(members_, "members");
+		//ar(polyVector_, "polyVector");
+		//ar(members_, "members");
 
 		if(!ar.isInPlace())
 		{
@@ -139,7 +139,7 @@ public:
 		}
 		else
 		{
-			ar(floatValues_, "floatValues");
+			//ar(floatValues_, "floatValues");
 			ar(index_, "stringList");
 		}
 	}
@@ -159,7 +159,7 @@ struct MyDataContainer
 {
 	MyDataContainer()
 	{
-		objects.resize(10000);
+		objects.resize(10);
 	}
 
 	void serialize(Archive& ar)
@@ -210,17 +210,15 @@ void benchmark()
 	// and write back
 	if(true)
 	{
-		/*
 		InPlaceOArchive oa;
 		MyDataContainer container;
 		AutoTimer t("write time");
 		oa(container);
 		oa.save(filename);
-		*/
 	}
 
 	size_t fileSize = getFileSize(filename);
-	const int iterations = 50;
+	const int iterations = 1;
 	{
 		AutoTimer t("read time");
 		for(int i = 0; i < iterations; ++i)

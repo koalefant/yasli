@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "InPlaceOArchive.h"
+#include "TypesFactory.h"
 #include "Files.h" // for yasli::fopen
 
 namespace yasli {
@@ -11,10 +12,10 @@ InPlaceOArchive::InPlaceOArchive()
 
 bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, const char* name)
 {
-  ESCAPE(!stack_.empty(), return false);
+	ESCAPE(!stack_.empty(), return false);
 
-  if (!stack_.empty())
-  {
+	if (!stack_.empty())
+	{
 		Chunk& chunk = *stack_.back();
 		if (addr >= chunk.address &&
 			((const char*)addr + size) <= (const char*)chunk.address + chunk.size * chunk.count)
@@ -31,7 +32,7 @@ bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, 
 			ASSERT_STR(0, msg.c_str());
 			return false;
 		}
-  }
+	}
 	return false;
 }
 
@@ -196,14 +197,46 @@ void InPlaceOArchive::inPlacePointer(void** pointer)
 
 bool InPlaceOArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
 {
+	if(!ptr.get())
+		return false;
+
+	TypeID derivedType = ptr.type();
+	
+	const ClassFactoryBase *factory = ClassFactoryManager::the().find(ptr.baseType());
+	if (!factory)
+	{
+		ASSERT_STR(0 && "Base type is not registered", ptr.baseType().name());;
+		return false;
+	}
+
+	size_t size = factory->sizeOf(derivedType);
+	if (size == 0)
+	{
+		ASSERT_STR(0 && "No type description for type", ptr.type().name());;
+		return false;
+	}
+
 	ptr.extractInPlacePointers(*this);
 
 	Stack stack;
 	stack.swap(stack_);
 
-	if(ptr.get())
-		operator()(ptr.serializer());
-	
+	Chunk chunk;
+	chunk.typeID = derivedType;
+	chunk.position = buffer_.position();
+	chunk.size = size;
+	chunk.count = 1;
+	chunk.address = ptr.get();
+
+	std::pair<AddressToChunkMap::iterator, bool> it = chunks_.insert(AddressToChunkMap::value_type(chunk.address, chunk));
+
+	stack_.push_back(&it.first->second);
+
+	buffer_.write(chunk.address, chunk.size);
+
+	ptr.serializer()(*this);
+
+
 	stack.swap(stack_);
 	return true;
 }

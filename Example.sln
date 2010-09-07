@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example", "Example.vcproj", "{DF6EF913-80EC-43C0-B22A-4FB9A924B4C7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5} = {894FD61A-7469-4C2D-A9F7-C026F3E458B5}
@@ -23,8 +23,8 @@ Global
 		{DF6EF913-80EC-43C0-B22A-4FB9A924B4C7}.ReleaseStatic|Win32.Build.0 = ReleaseStatic|Win32
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Debug|Win32.ActiveCfg = Debug|Win32
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Debug|Win32.Build.0 = Debug|Win32
-		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.ActiveCfg = Release|Win32
-		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.Build.0 = Release|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.ActiveCfg = ReleaseStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.Build.0 = ReleaseStatic|Win32
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.ReleaseStatic|Win32.ActiveCfg = ReleaseStatic|Win32
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.ReleaseStatic|Win32.Build.0 = ReleaseStatic|Win32
 	EndGlobalSection

@@ -73,7 +73,7 @@ public:
 	}
 	void extractInPlacePointers(Archive& ar) const
 	{
-		ar.inPlacePointer(reinterpret_cast<void*&>(ptr_));
+		ar.inPlacePointer(reinterpret_cast<void**>(&ptr_));
 	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
 protected:
