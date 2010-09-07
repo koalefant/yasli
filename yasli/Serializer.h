@@ -128,12 +128,10 @@ public:
 			container_->insert(container_->end(), Element());
 	}
 
-	template<class T, class A> 
 	void extractInPlacePointersHelper(Archive& ar, ...) const
 	{
 		ASSERT(0 && "Container is not supported");
 	}
-
 
 	template<class T, class A> 
 	void extractInPlacePointersHelper(Archive& ar, std::vector<T, A>* _v) const
