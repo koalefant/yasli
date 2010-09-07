@@ -32,7 +32,7 @@ void RangedWrapperi::serialize(Archive& ar)
 
 bool serialize(Archive& ar, RangedWrapperf& wrapper, const char* name, const char* label)
 {
-	if(ar.inPlace())
+	if(ar.isInPlace())
 		return ar(*wrapper.valuePointer_, name, label);
 
 	bool result;
@@ -49,7 +49,7 @@ bool serialize(Archive& ar, RangedWrapperf& wrapper, const char* name, const cha
 
 bool serialize(Archive& ar, RangedWrapperi& wrapper, const char* name, const char* label)
 {
-	if(ar.inPlace())
+	if(ar.isInPlace())
 		return ar(*wrapper.valuePointer_, name, label);
 
 	bool result;
