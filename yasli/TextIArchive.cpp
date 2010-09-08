@@ -118,7 +118,6 @@ bool TextIArchive::isName(Token token) const
 			   (token_ == "False") ||
 			   (token_ == "FALSE"))
 				return false;
-			return false;
 		}
 		return true;
 	}
