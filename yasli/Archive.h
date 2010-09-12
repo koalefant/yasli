@@ -68,7 +68,7 @@ public:
 	bool isOutput() const{ return !isInput_; }
 	bool isEdit() const{ return isEdit_; }
 	bool isInPlace() const{ return isInPlace_; }
-	virtual void inPlacePointer(void** pointer) { ASSERT(0 && "Not implemented"); }
+	virtual void inPlacePointer(void** pointer, size_t offset) { ASSERT(0 && "Not implemented"); }
 
 	virtual void warning(const char* message);
 	virtual void close() {}

@@ -5,8 +5,9 @@
 
 namespace yasli {
 
-InPlaceOArchive::InPlaceOArchive()
+InPlaceOArchive::InPlaceOArchive(bool resolveGraphs)
 : Archive(INPUT | INPLACE)
+, resolveGraphs_(resolveGraphs)
 {
 }
 
@@ -16,7 +17,7 @@ bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, 
 
 	if (!stack_.empty())
 	{
-		Chunk& chunk = *stack_.back();
+		Chunk& chunk = stack_.back();
 		if (addr >= chunk.address &&
 			((const char*)addr + size) <= (const char*)chunk.address + chunk.size * chunk.count)
 		{
@@ -58,99 +59,129 @@ bool InPlaceOArchive::save(const char* filename)
 	return true;
 }
 
+void InPlaceOArchive::pushPointer(size_t offset, size_t pointToOffset)
+{
+	pointerOffsets_.push_back(offset);
+	if (!resolveGraphs_)
+	{
+		ASSERT(offset + sizeof(void*) <= buffer_.position());
+		size_t* ptr = (size_t*)&buffer_.buffer()[offset];
+		*ptr = pointToOffset;
+	}
+}
+
+void InPlaceOArchive::appendChunk(void* address, TypeID type, size_t sizeOf, size_t count)
+{
+	if (resolveGraphs_)
+	{
+		pointerToOffset_.insert(PointerToOffset::value_type(address, buffer_.position()));
+		pointerToOffset_.insert(PointerToOffset::value_type((char*)address + sizeOf * count, buffer_.position() + sizeOf * count));
+	}
+
+	buffer_.write((char*)address, sizeOf * count);
+}
+
+void InPlaceOArchive::pushChunk(size_t position, void* address, TypeID type, size_t sizeOf, size_t count)
+{
+	if (resolveGraphs_)
+	{
+		pointerToOffset_.insert(PointerToOffset::value_type(address, position));
+		pointerToOffset_.insert(PointerToOffset::value_type((char*)address + sizeOf * count, position + sizeOf * count));
+	}
+
+	Chunk chunk;
+	chunk.typeID = type;
+	chunk.count = count;
+	chunk.position = position;
+	chunk.address = address;
+	chunk.size = sizeOf;
+
+	stack_.push_back(chunk);
+}
+
+void InPlaceOArchive::popChunk()
+{
+	stack_.pop_back();
+}
+
+
 bool InPlaceOArchive::operator()(std::string& value, const char* name, const char* label)
 {
 	size_t offset;
-	if (!findOffset(&offset, value, name))
+	if (!findOffset(&offset, &value, name))
 		return false;
 #ifdef _MSC_VER
-	bool usesInternalBuffer = value.c_str() >= (char*)&value && value.c_str() < (char*)&value + sizeof(value);
+	bool usesInternalBuffer = value.c_str() >= (const char*)&value && value.c_str() < (const char*)&value + sizeof(value);
 	if (!usesInternalBuffer)
-			pointerOffsets_.push_back(offset + 8);
+		pushPointer(offset + 8, buffer_.position());
 #else
 # error Unsupported platform
 #endif
 
-	Chunk chunk;
-	chunk.address = (void*)value.c_str();
-	chunk.position = buffer_.position();
-	chunk.size = sizeof(char);
-	chunk.typeID = TypeID::get<char>();
-	chunk.count = value.size() + 1;
-
-	chunks_.insert(AddressToChunkMap::value_type(chunk.address, chunk));
-	buffer_.write(value.c_str(), value.size() + 1);
+	appendChunk((void*)value.c_str(), TypeID::get<char>(), sizeof(char), value.size() + 1);
 	return true;
 }
 
 bool InPlaceOArchive::operator()(std::wstring& value, const char* name, const char* label)
 {
-	 return findOffset(0, &value, name);
+	size_t offset;
+	if (!findOffset(&offset, &value, name))
+		return false;
+#ifdef _MSC_VER
+	bool usesInternalBuffer = value.c_str() >= (const wchar_t*)&value && value.c_str() < (wchar_t*)&value + sizeof(value) / sizeof(wchar_t);
+	if (!usesInternalBuffer)
+		pushPointer(offset + 8, buffer_.position());
+#else
+# error Unsupported platform
+#endif
+
+	appendChunk((void*)value.c_str(), TypeID::get<wchar_t>(), sizeof(wchar_t), value.size() + 1);
+	return true;
+}
+
+void InPlaceOArchive::rewritePointers()
+{
+	for (size_t i = 0; i < pointerOffsets_.size(); ++i)
+	{
+		size_t offset = pointerOffsets_[i];
+		void* address = (void*&)(buffer_.buffer()[offset]);
+		if (address == 0)
+		{
+			pointerOffsets_.erase(pointerOffsets_.begin() + i);
+			--i;
+			continue; // skip NULL-pointers
+		}
+
+		PointerToOffset::iterator it = pointerToOffset_.find(address);
+		ESCAPE(it != pointerToOffset_.end(), continue);
+		size_t dehydratedOffset = it->second;
+
+		(size_t&)(buffer_.buffer()[offset]) = dehydratedOffset;
+	}
 }
 
 bool InPlaceOArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
 	Chunk* parent = 0;
 	bool isRoot = buffer_.position() == 0;
-	if (!stack_.empty())
-	{
-		parent = stack_.back();
-	}
+	bool hasParent = !stack_.empty();
 
-	Chunk chunk;
-	chunk.typeID = ser.type();
-	if (parent)
-	{
-		if(!findOffset(&chunk.position, ser.pointer(), ser.size(), name))
-			return false;
-	}
-	else
-	{
-		// root chunk
-		chunk.position = buffer_.position();
-	}
+	void* address = ser.pointer();
+	size_t size = ser.size();
+	size_t position = buffer_.position();
+	if (hasParent && !findOffset(&position, address, size, name))
+		return false;
 
-	chunk.count = 1;
-	chunk.address = ser.pointer();
-	chunk.size = ser.size();
-
-	std::pair<AddressToChunkMap::iterator, bool> it = chunks_.insert(AddressToChunkMap::value_type(chunk.address, chunk));
-
-	chunkEnds_[(char*)chunk.address + chunk.size * chunk.count] = &it.first->second;
-	stack_.push_back(&it.first->second);
-	if (!parent)
+	pushChunk(position, address, ser.type(), size, 1);
+	if (!hasParent)
 		buffer_.write(ser.pointer(), ser.size());
+
 	ser(*this);
-	stack_.pop_back();
 
-	if (isRoot)
-	{
-		// dehydrate pointers
-		for (size_t i = 0; i < pointerOffsets_.size(); ++i)
-		{
-			size_t offset = pointerOffsets_[i];
-			void* address = (void*&)(buffer_.buffer()[offset]);
-			if (address == 0)
-			{
-				pointerOffsets_.erase(pointerOffsets_.begin() + i);
-				--i;
-				continue; // skip NULL-pointers
-			}
-			
-			AddressToChunkMap::iterator it = chunks_.find(address);
-			size_t dehydratedOffset;
-			if(it == chunks_.end())
-			{
-				EndAddressToChunkMap::iterator eit = chunkEnds_.find(address);
-				ESCAPE(eit != chunkEnds_.end(), continue);
-				dehydratedOffset = eit->second->position + eit->second->size * eit->second->count;
-			}
-			else
-				dehydratedOffset = it->second.position;
+	popChunk();
 
-			(size_t&)(buffer_.buffer()[offset]) = dehydratedOffset;
-		}
-	}
+	if (isRoot && resolveGraphs_)
+		rewritePointers();
 
 	return true;
 }
@@ -162,37 +193,28 @@ bool InPlaceOArchive::operator()(ContainerSerializationInterface &container, con
 	Stack stack;
 	stack.swap(stack_);
 
-	Chunk chunk;
-	chunk.typeID = container.type();
-	chunk.position = buffer_.position();
-	chunk.size = container.elementSize();
-	chunk.count = container.size();
-	chunk.address = container.elementPointer();
+	pushChunk(buffer_.position(), container.elementPointer(), container.type(), 
+						container.elementSize(), container.size());
 
-	std::pair<AddressToChunkMap::iterator, bool> it = chunks_.insert(AddressToChunkMap::value_type(chunk.address, chunk));
-
-	chunkEnds_[(char*)chunk.address + chunk.size * chunk.count] = &it.first->second;
-	stack_.push_back(&it.first->second);
-
-	if(container.size() > 0){
-		buffer_.write(container.elementPointer(), chunk.size * chunk.count);
-		do{
+	buffer_.write(container.elementPointer(), container.elementSize() * container.size());
+	if (container.size() > 0){
+		do {
 			container(*this, "", "");
-		}while(container.next());
+		} while (container.next());
 	}
 
-	stack_.pop_back();
+	// popChunk();
 
 	stack.swap(stack_);
 	return true;
 }
 
-void InPlaceOArchive::inPlacePointer(void** pointer)
+void InPlaceOArchive::inPlacePointer(void** pointer, size_t offset)
 {
-	size_t offset;
-	ESCAPE(findOffset(&offset, (void*)pointer, sizeof(pointer), "pointer"), return);
+	size_t memberOffset;
+	ESCAPE(findOffset(&memberOffset, (void*)pointer, sizeof(pointer), "pointer"), return);
 
-	pointerOffsets_.push_back(offset);
+	pushPointer(memberOffset, buffer_.position() + offset);
 }
 
 bool InPlaceOArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
@@ -220,22 +242,14 @@ bool InPlaceOArchive::operator()(const PointerSerializationInterface& ptr, const
 
 	Stack stack;
 	stack.swap(stack_);
+	
+	pushChunk(buffer_.position(), ptr.get(), derivedType, size, 1);
 
-	Chunk chunk;
-	chunk.typeID = derivedType;
-	chunk.position = buffer_.position();
-	chunk.size = size;
-	chunk.count = 1;
-	chunk.address = ptr.get();
-
-	std::pair<AddressToChunkMap::iterator, bool> it = chunks_.insert(AddressToChunkMap::value_type(chunk.address, chunk));
-
-	stack_.push_back(&it.first->second);
-
-	buffer_.write(chunk.address, chunk.size);
+	buffer_.write(ptr.get(), size);
 
 	ptr.serializer()(*this);
 
+	// popChunk();
 
 	stack.swap(stack_);
 	return true;

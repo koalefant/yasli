@@ -145,11 +145,11 @@ public:
 			T* ptr3;
 		};
 #pragma pack(pop)
-		MSVector* vector = (MSVector*)_v;
+		MSVector* v = (MSVector*)_v;
 		void** ptr = reinterpret_cast<void**>(_v);
-		ar.inPlacePointer((void**)&vector->ptr1);
-		ar.inPlacePointer((void**)&vector->ptr2);
-		ar.inPlacePointer((void**)&vector->ptr3);
+		ar.inPlacePointer((void**)&v->ptr1, 0);
+		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
+		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
 #else
 # error Unsupported platform
 #endif

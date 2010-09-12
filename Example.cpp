@@ -95,7 +95,7 @@ public:
 	: index_(0)
 	{
 		// we are going to fill in default values
-		name_ = "Foo, that is a name long enough to be allocated on heap";
+		name_ = L"Foo, that is a name long enough to be allocated on heap";
 		stringList_.push_back("Choice 1");
 		stringList_.push_back("Choice 2");
 		stringList_.push_back("Choice 3");
@@ -118,10 +118,10 @@ public:
 		strcpy_s(endBuf_, "END");
 	}
 	void serialize(Archive& ar){
-		ar(name_, "name");
+		ar(name_);
 		ar(polyPtr_, "polyPtr");
-		//ar(polyVector_, "polyVector");
-		//ar(members_, "members");
+		ar(polyVector_, "polyVector");
+		ar(members_, "members");
 
 		if(!ar.isInPlace())
 		{
@@ -139,12 +139,12 @@ public:
 		}
 		else
 		{
-			//ar(floatValues_, "floatValues");
+			ar(floatValues_, "floatValues");
 			ar(index_, "stringList");
 		}
 	}
 protected:
-	std::string name_;
+	std::wstring name_;
 	typedef std::vector<Member> Members;
 	Members members_;
 	int index_;
@@ -159,7 +159,7 @@ struct MyDataContainer
 {
 	MyDataContainer()
 	{
-		objects.resize(10);
+		objects.resize(10000);
 	}
 
 	void serialize(Archive& ar)
@@ -210,7 +210,7 @@ void benchmark()
 	// and write back
 	if(true)
 	{
-		InPlaceOArchive oa;
+		InPlaceOArchive oa(false);
 		MyDataContainer container;
 		AutoTimer t("write time");
 		oa(container);
@@ -246,7 +246,7 @@ void testInplace()
 	const char* inplaceFilename = "test.inp";
 	{
 		std::auto_ptr<MyDataClass> test(new MyDataClass());
-		InPlaceOArchive oa;
+		InPlaceOArchive oa(false);
 		ESCAPE(oa(*test, "test"), return);
 		oa.save(inplaceFilename);
 	}
@@ -259,10 +259,23 @@ void testInplace()
 	}
 }
 
+void testText()
+{
+		MyDataClass obj;
+		TextIArchive ia;
+		if(ia.load("test.ta"))
+			ia(obj, "obj");
+
+		TextOArchive oa;
+		oa(obj, "obj");
+		oa.save("test.ta");
+}
+
 int main(int argc, char** argv)
 {
-	benchmark();
-	//testInplace();
+	//benchmark();
+	testInplace();
+	// testText();
 	
 	return 0;
 }
