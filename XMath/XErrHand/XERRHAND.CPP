@@ -176,7 +176,8 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 
 XErrorHandler::XErrorHandler()
 {
-	SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)&exHandler);
+	if(!IsDebuggerPresent())
+		SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)&exHandler);
 }
 
 void XErrorHandler::Abort(const char* message, const char* subj)
