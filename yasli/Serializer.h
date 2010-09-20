@@ -146,7 +146,6 @@ public:
 		};
 #pragma pack(pop)
 		MSVector* v = (MSVector*)_v;
-		void** ptr = reinterpret_cast<void**>(_v);
 		ar.inPlacePointer((void**)&v->ptr1, 0);
 		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
 		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
