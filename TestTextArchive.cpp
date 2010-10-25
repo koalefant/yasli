@@ -28,7 +28,6 @@ SUITE(TextArchive)
 
 			TextIArchive ia;
 			CHECK(ia.open(bufChanged.c_str(), bufChanged.size()));
-
 			CHECK(ia(obj, "obj"));
 
 			TextOArchive oa;
@@ -39,7 +38,7 @@ SUITE(TextArchive)
 			bufResaved = oa.c_str();
 			CHECK(!bufChanged.empty());
 		}
-		CHECK(bufChanged == bufResaved);
+		CHECK_EQUAL(bufChanged, bufResaved);
 	}
 
 	TEST(RegressionEmptyFileFreeze)
@@ -58,22 +57,21 @@ SUITE(TextArchive)
 
 	TEST(Regression4Or5LengthNames)
 	{
-		string value1 = "Value1";
-		string value2 = "Value2";
-
-		TextOArchive oa;
-		oa(value1, "valu");
-		oa(value2, "value");
+		const char* input = 
+		"valu = \"Val1\"\n"
+		"value = \"Val2\"\n";
 
 		TextIArchive ia;
-		CHECK(ia.open(oa.c_str(), oa.length()));
-		string value1New;
-		CHECK(ia(value1New, "valu"));
-		string value2New;
-		CHECK(ia(value2New, "value"));
+		CHECK(ia.open(input, strlen(input)));
 
-		CHECK(value1 == value1New);
-		CHECK(value2 == value2New);
+		string value1;
+		string value2;
+
+		CHECK(ia(value1, "valu"));
+		CHECK(ia(value2, "value"));
+
+		CHECK_EQUAL("Val1", value1);
+		CHECK_EQUAL("Val2", value2);
 	}
 
 	TEST(RegressionSubstringName)
@@ -85,6 +83,19 @@ SUITE(TextArchive)
 		CHECK(ia.open(input, strlen(input)));
 		string value;
 		CHECK(ia(value, "known_value2") == false);
+	}
+
+	TEST(RegressionNegativeFloat)
+	{
+		const char* input = 
+		"value = -123.23\n";
+
+		TextIArchive ia;
+		CHECK(ia.open(input, strlen(input)));
+
+		float value;
+		CHECK(ia(value, "value"));
+		CHECK_CLOSE(-123.23f, value, 0.001f);
 	}
 
 	TEST(RegressionTwoUnkownNameFreeze)
