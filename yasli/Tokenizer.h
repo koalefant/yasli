@@ -39,16 +39,20 @@ struct Token{
     bool operator==(const std::string& rhs) const{
         if(length() != rhs.size())
             return false;
-        return std::memcmp(start, rhs.c_str(), length()) == 0;
+        return memcmp(start, rhs.c_str(), length()) == 0;
     }
 
 
     bool operator==(const char* text) const{
-        return std::memcmp(text, start, length()) == 0;
+		if(std::strncmp(text, start, length()) == 0)
+			return text[length()] == '\0';
+		return false;
     }
     bool operator!=(const char* text) const{
-        return std::memcmp(text, start, length()) != 0;
-    }
+		if(std::strncmp(text, start, length()) == 0)
+			return text[length()] != '\0';
+		return true;
+	}
     bool operator==(char c) const{
         return length() == 1 && *start == c;
     }
