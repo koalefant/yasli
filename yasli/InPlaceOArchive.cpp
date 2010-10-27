@@ -193,11 +193,14 @@ bool InPlaceOArchive::operator()(ContainerSerializationInterface &container, con
 	Stack stack;
 	stack.swap(stack_);
 
-	pushChunk(buffer_.position(), container.elementPointer(), container.type(), 
-						container.elementSize(), container.size());
+	size_t containerSize = container.size();
+	pushChunk(buffer_.position(), containerSize ? container.elementPointer() : 0, container.type(), 
+						container.elementSize(), containerSize);
 
-	buffer_.write(container.elementPointer(), container.elementSize() * container.size());
-	if (container.size() > 0){
+	if (containerSize > 0)
+	{
+		buffer_.write(container.elementPointer(), container.elementSize() * containerSize);
+
 		do {
 			container(*this, "", "");
 		} while (container.next());

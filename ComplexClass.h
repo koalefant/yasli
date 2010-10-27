@@ -19,7 +19,7 @@ struct Member
 	Member()
 	: weight(0.0f) {}
 
-	void checkEquality(const Member& copy)
+	void checkEquality(const Member& copy) const
 	{
 		CHECK(name == copy.name);
 		CHECK(weight == copy.weight);
@@ -57,7 +57,7 @@ public:
 		ar(baseMember_, "baseMember");
 	}
 
-	virtual void checkEquality(PolyBase* copy)
+	virtual void checkEquality(const PolyBase* copy) const
 	{
 		CHECK(baseMember_ == copy->baseMember_);
 	}
@@ -74,9 +74,9 @@ public:
 		ar(derivedMember_, "derivedMember");
 	}
 
-	void checkEquality(PolyBase* copyBase)
+	void checkEquality(const PolyBase* copyBase) const
 	{
-		PolyDerivedA* copy = dynamic_cast<PolyDerivedA*>(copyBase);
+		const PolyDerivedA* copy = dynamic_cast<const PolyDerivedA*>(copyBase);
 		CHECK(copy != 0);
 		CHECK(derivedMember_ == copy->derivedMember_);
 
@@ -100,9 +100,9 @@ public:
 		ar(derivedMember_, "derivedMember");
 	}
 
-	void checkEquality(PolyBase* copyBase)
+	void checkEquality(const PolyBase* copyBase) const
 	{
-		PolyDerivedB* copy = dynamic_cast<PolyDerivedB*>(copyBase);
+		const PolyDerivedB* copy = dynamic_cast<const PolyDerivedB*>(copyBase);
 		CHECK(copy != 0);
 		CHECK(derivedMember_ == copy->derivedMember_);
 
@@ -132,6 +132,8 @@ public:
 
 		polyVector_.push_back(new PolyDerivedB);
 		polyVector_.push_back(new PolyBase);
+
+		members_.resize(13);
 	}
 
 	void change()
@@ -161,15 +163,22 @@ public:
 		ar(polyPtr_, "polyPtr");
 		ar(polyVector_, "polyVector");
 		ar(members_, "members");
-		StringListValue value(stringList_, stringList_[index_]);
-		ar(value, "stringList");
-		index_ = value.index();
-		if(index_ == -1)
-			index_ = 0;
+		if(ar.isInPlace())
+		{
+			ar(index_, "index");
+		}
+		else
+		{
+			StringListValue value(stringList_, stringList_[index_]);
+			ar(value, "stringList");
+			index_ = value.index();
+			if(index_ == -1)
+				index_ = 0;
+		}
 		ar(array_, "array");
 	}
 
-	void checkEquality(const ComplexClass& copy)
+	void checkEquality(const ComplexClass& copy) const
 	{
 		CHECK(name_ == copy.name_);
 		CHECK(index_ == copy.index_);
@@ -213,6 +222,3 @@ protected:
 	Member array_[5];
 };
 
-YASLI_CLASS(PolyBase, PolyBase, "Base")
-YASLI_CLASS(PolyBase, PolyDerivedA, "Derived A")
-YASLI_CLASS(PolyBase, PolyDerivedB, "Derived B")

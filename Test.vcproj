@@ -27,7 +27,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="$(TargetPath)"
+				CommandLine="$(TargetPath)&#x0D;&#x0A;"
 				Outputs="pass.txt"
 			/>
 			<Tool
@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="$(TargetPath)"
+				CommandLine="$(TargetPath)&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -158,7 +158,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description=""
 				CommandLine="$(TargetPath)"
 			/>
 		</Configuration>
@@ -167,7 +166,15 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\ComplexClass.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Main.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\TestInPlaceArchive.cpp"
 			>
 		</File>
 		<File

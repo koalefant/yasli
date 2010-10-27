@@ -101,9 +101,9 @@ SUITE(TextArchive)
 	TEST(RegressionTwoUnkownNameFreeze)
 	{
 		const char* input = 
+		"known_value = \"Val\"\n"
 		"unknown_name1 = 10\n"
 		"unknown_name2 = 20\n"
-		"known_value = \"Val\"\n"
 		;
 
 		TextIArchive ia;

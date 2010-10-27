@@ -82,20 +82,20 @@ private:
 
 class ContainerSerializationInterface{
 public:
-  virtual std::size_t size() const = 0;
-  virtual std::size_t resize(std::size_t size) = 0;
+	virtual std::size_t size() const = 0;
+	virtual std::size_t resize(std::size_t size) = 0;
 
-  virtual void* pointer() const = 0;
-  virtual TypeID type() const = 0;
-  virtual bool next() = 0;
-  virtual void extractInPlacePointers(Archive& ar) const { ASSERT(0 && "Not implemented"); }
+	virtual void* pointer() const = 0;
+	virtual TypeID type() const = 0;
+	virtual bool next() = 0;
+	virtual void extractInPlacePointers(Archive& ar) const { ASSERT(0 && "Not implemented"); }
 
 	virtual void* elementPointer() const = 0;
 	virtual size_t elementSize() const = 0;
 
-  virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
-  virtual operator bool() const = 0;
-  virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
+	virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
+	virtual operator bool() const = 0;
+	virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
 };
 
 template<class Container, class Element>
@@ -214,6 +214,10 @@ public:
 	: array_(array)
 	, size_(size)
 	, index_(0)
+	{
+	}
+
+	virtual void extractInPlacePointers(Archive& ar) const
 	{
 	}
 
