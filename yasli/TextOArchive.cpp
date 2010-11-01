@@ -59,22 +59,22 @@ size_t TextOArchive::length() const
 
 void TextOArchive::openBracket()
 {
-	*buffer_ << "{\n";
+	*buffer_ << "{\r\n";
 }
 
 void TextOArchive::closeBracket()
 {
-	*buffer_ << "}\n";
+	*buffer_ << "}\r\n";
 }
 
 void TextOArchive::openContainerBracket()
 {
-    *buffer_ << "[\n";
+    *buffer_ << "[\r\n";
 }
 
 void TextOArchive::closeContainerBracket()
 {
-    *buffer_ << "]\n";
+    *buffer_ << "]\r\n";
 }
 
 void TextOArchive::placeName(const char* name)
@@ -98,7 +98,7 @@ bool TextOArchive::operator()(bool& value, const char* name, const char* label)
     placeIndent();
     placeName(name);
     *buffer_ << (value ? "true" : "false");
-    *buffer_ << "\n";
+    *buffer_ << "\r\n";
     return true;
 }
 
@@ -110,7 +110,7 @@ bool TextOArchive::operator()(std::string& value, const char* name, const char* 
     (*buffer_) << "\""; 
     const char* str = value.c_str();
     escapeString(*buffer_, str, str + value.size());
-    (*buffer_) << "\"\n";
+    (*buffer_) << "\"\r\n";
     return true;
 }
 
@@ -118,7 +118,7 @@ bool TextOArchive::operator()(float& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -126,7 +126,7 @@ bool TextOArchive::operator()(double& value, const char* name, const char* label
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -134,7 +134,7 @@ bool TextOArchive::operator()(int& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -142,7 +142,7 @@ bool TextOArchive::operator()(unsigned int& value, const char* name, const char*
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -150,7 +150,7 @@ bool TextOArchive::operator()(short& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -158,7 +158,7 @@ bool TextOArchive::operator()(unsigned short& value, const char* name, const cha
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -166,7 +166,7 @@ bool TextOArchive::operator()(__int64& value, const char* name, const char* labe
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -174,7 +174,7 @@ bool TextOArchive::operator()(unsigned char& value, const char* name, const char
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -182,7 +182,7 @@ bool TextOArchive::operator()(signed char& value, const char* name, const char* 
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -190,7 +190,7 @@ bool TextOArchive::operator()(char& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << value << "\n";
+    (*buffer_) << value << "\r\n";
     return true;
 }
 
@@ -198,7 +198,7 @@ bool TextOArchive::operator()(StringListStaticValue& value, const char* name, co
 {
     placeIndent();
     placeName(name);
-    (*buffer_) << "\"" << value.c_str() << "\"\n";
+    (*buffer_) << "\"" << value.c_str() << "\"\r\n";
     return true;
 }
 
@@ -252,7 +252,7 @@ static char* joinLines(char* start, char* end)
     ASSERT(start <= end);
     char* next = start;
     while(next != end){
-        if(*next != '\t'){
+        if(*next != '\t' && *next != '\r'){
             if(*next != '\n')
                 *start = *next;
             else
