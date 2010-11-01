@@ -26,7 +26,7 @@ int assertionDialog(const char* message, const char* str, const char* function, 
         }
         text << "\n\n";
         text << fileName << ": line " << line << "\n";
-        int result = MessageBoxA(0, text.c_str(), "Debug Assertion Triggered", MB_ICONERROR | MB_ABORTRETRYIGNORE);
+        int result = MessageBoxA(0, text.c_str(), "Debug Assertion Triggered", MB_ICONERROR | MB_ABORTRETRYIGNORE | MB_TASKMODAL);
         switch(result){
         case IDRETRY: return 0;
         case IDIGNORE: return 1;
