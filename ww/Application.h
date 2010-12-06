@@ -23,6 +23,7 @@ public:
     sigslot::signal0& signalIdle() { return signalIdle_; }
     sigslot::signal0& signalQuit() { return signalQuit_; }
 
+	void processPendingMessages();
     Win32::MessageLoop* _messageLoop(){ return messageLoop_.get(); }
 private:
     void onLoopIdle();

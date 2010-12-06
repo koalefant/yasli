@@ -48,6 +48,19 @@ void MessageLoop::quit(int code)
     ::PostQuitMessage(code);
 }
 
+void MessageLoop::processPendingMessages()
+{
+	MSG msg;
+	while (PeekMessage(&msg, 0, 0, 0, TRUE))
+	{
+		if (msg.message == WM_QUIT)
+			return;
+
+		TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
+		DispatchMessage(&msg);
+	}
+}
+
 void MessageLoop::installFilter(MessageFilter* filter)
 {
     filters_.push_back(filter);

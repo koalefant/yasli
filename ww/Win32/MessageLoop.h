@@ -17,6 +17,7 @@ class WW_API MessageLoop : public sigslot::has_slots
 {
 public:
     int run();
+	static void processPendingMessages();
 
     sigslot::signal0& signalIdle() { return signalIdle_; }
     sigslot::signal0& signalQuit() { return signalQuit_; }

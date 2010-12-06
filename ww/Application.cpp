@@ -49,6 +49,11 @@ void Application::onLoopQuit()
     signalQuit_.emit();
 }
 
+void Application::processPendingMessages()
+{
+	Win32::MessageLoop::processPendingMessages();
+}
+
 }
 
 
