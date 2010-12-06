@@ -229,7 +229,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="gdiplus.lib"
+				AdditionalDependencies="gdiplus.lib comctl32.lib"
 				OutputFile="$(OutDir)/wWidgets.lib"
 				AdditionalLibraryDirectories=""
 			/>
