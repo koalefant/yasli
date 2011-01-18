@@ -2,8 +2,11 @@
 #include "ww/ColorChooserDialog.h"
 #include "ww/ColorChooser.h"
 #include "yasli/Assert.h"
+#include "yasli/BinArchive.h"
 
 namespace ww{
+
+static std::string stateFileName = std::string(getenv("TEMP")) + "\\colorChooserDialog.tmp";
 
 ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color4f& color, bool showColor, bool showAlpha, int border)
 : Dialog(parent, border)
@@ -20,7 +23,7 @@ ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color4f& color,
 	else
 		setDefaultSize(Vect2i(400, 0));
 	setResizeable(true);
-	
+
 	chooser_ = new ColorChooser();
 	chooser_->signalChanged().connect(this, &ColorChooserDialog::onChooserChanged);
 	chooser_->setShowColor(showColor);
@@ -31,6 +34,20 @@ ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color4f& color,
 	addButton("Cancel", RESPONSE_CANCEL);
 
 	set(color);
+
+	BinIArchive ia;
+	if(ia.load(stateFileName.c_str())){
+		ia.setFilter(SERIALIZE_STATE);
+		ia.serialize(*this, "window", 0);
+	}
+}
+
+ColorChooserDialog::~ColorChooserDialog()
+{
+	BinOArchive oa;
+	oa.setFilter(SERIALIZE_STATE);
+	oa.serialize(*this, "window", 0);
+	oa.save(stateFileName.c_str());
 }
 
 void ColorChooserDialog::set(const Color4f& color)
