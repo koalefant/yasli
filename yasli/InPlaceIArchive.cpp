@@ -14,9 +14,9 @@ const void* InPlaceIArchive::load(size_t rootSize, const char* filename)
 	FILE* file = fopen(filename, "rb");
 	if(!file)
 		return 0;
-	std::fseek(file, 0, SEEK_END);
-	size_t fileSize = std::ftell(file);
-	std::fseek(file, 0, SEEK_SET);
+  fseek(file, 0, SEEK_END);
+  size_t fileSize = ftell(file);
+  fseek(file, 0, SEEK_SET);
 
 	ESCAPE(fileSize >= rootSize, return 0);
 

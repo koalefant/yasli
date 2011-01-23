@@ -2,6 +2,7 @@
 #include "yasli/Pointers.h"
 #include <time.h>
 #include <string>
+#include <string.h>
 
 namespace Files{
     using std::string;

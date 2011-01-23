@@ -157,7 +157,7 @@ public:
 	const TypeDescription* descriptionByIndex(int index) const{
 		if(index < 0 || index >= int(typeToCreatorMap_.size()))
 			return 0;
-		TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
+    typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
 		std::advance(it, index);
 		return &it->second->description();
 	}

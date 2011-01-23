@@ -3,7 +3,7 @@
 
 namespace yasli{
 
-static char* escapeTable[256] = {
+static const char* escapeTable[256] = {
     "\\0" /* 0x00: */,
     "\\x01" /* 0x01: */,
     "\\x02" /* 0x02: */,

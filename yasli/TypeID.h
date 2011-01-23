@@ -4,6 +4,7 @@
 #include "yasli/Assert.h"
 #include "yasli/API.h"
 #include <string>
+#include <string.h>
 
 #ifndef _MSC_VER
 using std::type_info;

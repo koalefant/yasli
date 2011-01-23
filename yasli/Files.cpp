@@ -140,7 +140,7 @@ string relativePath(const char* path, const char* toDirectory)
 {
     ESCAPE(path != 0 && toDirectory != 0, return string());
 #ifdef WIN32
-	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
+	// TODO: unicode should be used here
     wchar_t fullPath[MAX_PATH + 1];
 	wchar_t fullPathLower[MAX_PATH + 1];
     GetFullPathNameW( yasli::toWideChar(path).c_str(), ARRAYSIZE(fullPath), fullPath, 0 );
@@ -298,7 +298,7 @@ public:
 };
 #else
 
-class iteratorImpl : public RefCounter{
+class iteratorImpl : public yasli::RefCounter{
 public:
 	iteratorImpl()
 	{

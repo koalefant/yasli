@@ -150,7 +150,7 @@ public:
 		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
 		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
 #else
-# error Unsupported platform
+# warning Unsupported platform
 #endif
 	}
 
@@ -178,7 +178,7 @@ public:
 	}
 
 	void* elementPointer() const { return &*it_; }
-	size_t elementSize() const { return sizeof(Container::value_type); }
+  size_t elementSize() const { return sizeof(typename Container::value_type); }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
 		ESCAPE(container_, return false);

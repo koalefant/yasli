@@ -3,11 +3,11 @@
 #include "Archive.h"
 #include "Tokenizer.h" // for Token
 #include "MemoryWriter.h" 
+#include "BinaryNode.h"
 
 namespace yasli{
 
 class MemoryWriter;
-enum BinaryNode;
 
 class BinaryOArchive : public Archive{
 public:
