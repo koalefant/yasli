@@ -135,7 +135,7 @@ public:
 
 	BaseType* createByIndex(int index) const
 	{
-		ASSERT(index >= 0 && index < typeToCreatorMap_.size());
+		ASSERT(index >= 0 && index < int(typeToCreatorMap_.size()));
 		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
 		while(index--)
 			++it;
