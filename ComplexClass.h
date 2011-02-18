@@ -6,7 +6,6 @@
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/Macros.h"
 
 #include "yasli/StringList.h" 
 using namespace yasli;
@@ -153,8 +152,9 @@ public:
 		polyVector_.push_back(new PolyBase());
 		polyVector_[4]->change();
 
-		for (size_t i = 0; i < ARRAY_LEN(array_); ++i)
-			array_[i].change(ARRAY_LEN(array_) - i);
+		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
+		for (size_t i = 0; i < arrayLen; ++i)
+			array_[i].change(arrayLen - i);
 	}
 
 	void serialize(Archive& ar)
@@ -205,7 +205,8 @@ public:
 			polyVector_[i]->checkEquality(copy.polyVector_[i]);
 		}
 
-		for (size_t i = 0; i < ARRAY_LEN(array_); ++i)
+		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
+		for (size_t i = 0; i < arrayLen; ++i)
 		{
 			array_[i].checkEquality(copy.array_[i]);
 		}

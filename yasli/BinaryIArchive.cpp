@@ -242,43 +242,6 @@ void BinaryIArchive::closeNode()
 
 }
 
-Token BinaryIArchive::pullNode(BinaryNode* type)
-{
-    Token name;
-
-    const char* oldPosition = pos_;
-    if(pullPosition_ == 0)
-        pullPosition_ = blocks_.back().innerStart;
-    else
-    {
-        pos_ = pullPosition_;
-        size_t blockSize;
-        read(&blockSize);
-        pullPosition_ += blockSize;
-        ASSERT( pullPosition_ >= blocks_.back().innerStart && 
-                pullPosition_ <= blocks_.back().end );
-        if(pullPosition_ == blocks_.back().end)
-        {
-            pos_ = oldPosition;
-            return Token(0);
-        }
-    }
-
-    pos_ = pullPosition_;
-    if(pos_ == blocks_.back().end && oldPosition == pos_)
-        return Token(0);
-
-    size_t blockSize = readNodeHeader(type, &name);
-    if(blockSize > 0)
-    {
-        pos_ = oldPosition;
-        return name;
-    }
-    else
-        return Token(0);
-
-}
-
 bool BinaryIArchive::operator()(bool& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_BOOL, name))

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Archive.h"
-#include "Tokenizer.h" // for Token
 #include "MemoryWriter.h" 
 
 namespace yasli{

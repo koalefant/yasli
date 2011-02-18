@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "InPlaceOArchive.h"
 #include "TypesFactory.h"
-#include "Files.h" // for yasli::fopen
 
 namespace yasli {
 

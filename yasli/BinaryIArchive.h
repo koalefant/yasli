@@ -1,8 +1,7 @@
 #pragma once
 #include "Archive.h"
-
 #include "BinaryNode.h"
-#include "Tokenizer.h" // for Token
+#include "ConstString.h"
 
 namespace yasli{
 

@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "InPlaceIArchive.h"
-#include "Files.h"
 
 namespace yasli {
 

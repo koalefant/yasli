@@ -1,13 +1,13 @@
 #pragma once
 
 #include "yasli/Archive.h"
-#include "yasli/Tokenizer.h"
 #include "yasli/Pointers.h"
-
-#include "yasli/MemoryReader.h"
+#include "yasli/ConstString.h"
 #include <memory>
 
 namespace yasli{
+
+class MemoryReader;
 
 class YASLI_API TextIArchive : public Archive{
 public:
@@ -48,7 +48,7 @@ private:
 
 	void checkValueToken();
 	bool checkStringValueToken();
-	Token readToken();
+	void readToken();
 	void putToken();
 	int line(const char* position) const; 
 	bool isName(Token token) const;
@@ -63,7 +63,6 @@ private:
 	typedef std::vector<Level> Stack;
 	Stack stack_;
 
-	Tokenizer tokenizer_;
 	std::auto_ptr<MemoryReader> reader_;
 	Token token_;
 	std::string filename_;

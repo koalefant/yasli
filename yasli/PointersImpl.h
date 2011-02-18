@@ -1,7 +1,6 @@
 #pragma once
 
 #include "yasli/MemoryWriter.h"
-#include "yasli/SafeCast.h"
 #include "yasli/TypesFactory.h"
 
 namespace yasli{

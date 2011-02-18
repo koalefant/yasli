@@ -271,110 +271,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="wrappers"
-			>
-			<File
-				RelativePath=".\Decorators.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileSelector.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileSelector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LibrarySelector.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="pugixml"
-			>
-			<File
-				RelativePath=".\pugiconfig.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\pugixml.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugStatic|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseStatic|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\pugixml.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\pugixpath.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugStatic|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseStatic|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
 			Name="utils"
 			>
 			<File
@@ -398,31 +294,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Content.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Content.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Context.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Factory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Files.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Files.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Macros.h"
 				>
 			</File>
 			<File
@@ -450,39 +326,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SafeCast.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SharedLibApi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\sigslot.h"
-				>
-			</File>
-			<File
 				RelativePath=".\StringList.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\StringList.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StringUtil.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\StringUtil.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Tokenizer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Tokenizer.h"
 				>
 			</File>
 			<File
@@ -497,70 +345,170 @@
 		<Filter
 			Name="archives"
 			>
-			<File
-				RelativePath=".\BinArchive.cpp"
+			<Filter
+				Name="InPlace"
 				>
-			</File>
-			<File
-				RelativePath=".\BinArchive.h"
+				<File
+					RelativePath=".\InPlaceIArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InPlaceIArchive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InPlaceOArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InPlaceOArchive.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Binary"
 				>
-			</File>
-			<File
-				RelativePath=".\BinaryIArchive.cpp"
+				<File
+					RelativePath=".\BinArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BinArchive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BinaryIArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BinaryIArchive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BinaryOArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BinaryOArchive.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Text"
 				>
-			</File>
-			<File
-				RelativePath=".\BinaryIArchive.h"
+				<File
+					RelativePath=".\TextIArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextIArchive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextOArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextOArchive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Token.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="XML"
 				>
-			</File>
-			<File
-				RelativePath=".\BinaryOArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BinaryOArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InPlaceIArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InPlaceIArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InPlaceOArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InPlaceOArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TextIArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextIArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TextOArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextOArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\XMLIArchive.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XMLIArchive.h"
-				>
-			</File>
+				<File
+					RelativePath=".\pugiconfig.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\pugixml.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\pugixml.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\pugixpath.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\XMLIArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\XMLIArchive.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="impl"
