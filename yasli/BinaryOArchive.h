@@ -2,11 +2,11 @@
 
 #include "Archive.h"
 #include "MemoryWriter.h" 
+#include "BinaryNode.h"
 
 namespace yasli{
 
 class MemoryWriter;
-enum BinaryNode;
 
 class BinaryOArchive : public Archive{
 public:

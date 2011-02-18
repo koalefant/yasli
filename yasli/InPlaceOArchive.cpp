@@ -114,7 +114,7 @@ bool InPlaceOArchive::operator()(std::string& value, const char* name, const cha
 	if (!usesInternalBuffer)
 		pushPointer(offset + 8, buffer_.position());
 #else
-# error Unsupported platform
+# warning Unsupported platform
 #endif
 
 	appendChunk((void*)value.c_str(), TypeID::get<char>(), sizeof(char), value.size() + 1);
@@ -131,7 +131,7 @@ bool InPlaceOArchive::operator()(std::wstring& value, const char* name, const ch
 	if (!usesInternalBuffer)
 		pushPointer(offset + 8, buffer_.position());
 #else
-# error Unsupported platform
+# warning Unsupported platform
 #endif
 
 	appendChunk((void*)value.c_str(), TypeID::get<wchar_t>(), sizeof(wchar_t), value.size() + 1);

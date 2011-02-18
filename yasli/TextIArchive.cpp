@@ -861,7 +861,7 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
                 readToken();
 				if(token_ == '}')
 				{
-					ASSERT(0 && "Syntax error: closing container with '}'")
+          ASSERT(0 && "Syntax error: closing container with '}'");
 					return false;
 				}
                 if(token_ == ']')

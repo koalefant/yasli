@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "BinaryOArchive.h"
 //#include <xutility>
 #include "BinaryNode.h"

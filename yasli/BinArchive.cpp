@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "BinArchive.h"
 #include <map>
 #include "yasli/MemoryWriter.h"

@@ -11,7 +11,12 @@
 #include <vector>
 #include <list>
 #include <map>
-#include "stdio.h"
+#include <string.h>
+
+#ifndef WIN32
+# include <stdio.h>
+# include <stdlib.h>
+#endif
 
 #include "Assert.h"
 
