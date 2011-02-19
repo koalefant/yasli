@@ -1,20 +1,20 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
-#include <windows.h>
-
-#include "TestData.h"
-#include "yasli/TextOArchive.h"
-#include "yasli/TextIArchive.h"
-#include "yasli/InPlaceOArchive.h"
-#include "yasli/InPlaceIArchive.h"
-using namespace yasli;
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
 #include "yasli/TypesFactory.h"
+
+#include "yasli/TextOArchive.h"
+#include "yasli/TextIArchive.h"
+#include "yasli/InPlaceOArchive.h"
+#include "yasli/InPlaceIArchive.h"
 
 using namespace yasli;
 
@@ -115,7 +115,7 @@ public:
 			floatValues_[i] = rand() * 1000.0f / RAND_MAX;
 		polyVector_.push_back( new PolyBase() );
 
-		strcpy_s(endBuf_, "END");
+		strcpy(endBuf_, "END");
 	}
 	void serialize(Archive& ar){
 		ar(name_);
@@ -180,12 +180,12 @@ struct AutoTimer
 	AutoTimer(const char* name)
 	: name_(name)
 	{
-		startTime_ = GetTickCount();
+		startTime_ = clock() * 1000 / CLOCKS_PER_SEC;
 	}
 
 	int result() const
 	{
-		return GetTickCount() - startTime_;
+		return clock() * 1000 / CLOCKS_PER_SEC - startTime_;
 	}
 
 	~AutoTimer()
@@ -196,12 +196,17 @@ struct AutoTimer
 
 int getFileSize(const char* filename)
 {
+#ifdef WIN32
 	struct _stat64 desc;
-	if (_stat64(filename, &desc) == 0)
-	{
-		return (int)desc.st_size;
-	}
-	return -1;
+	if (_stat64(filename, &desc) != 0)
+    return -1;
+#else
+  struct stat desc;
+  if (stat(filename, &desc) != 0)
+    return -1;
+#endif
+
+  return (int)desc.st_size;
 }
 
 void benchmark()
@@ -274,8 +279,8 @@ void testText()
 int main(int argc, char** argv)
 {
 	//benchmark();
-	testInplace();
-	// testText();
+//  testInplace();
+   testText();
 	
 	return 0;
 }

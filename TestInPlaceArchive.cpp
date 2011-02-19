@@ -1,3 +1,5 @@
+#include <memory>
+#include <stdlib.h>
 #include "UnitTest++.h"
 
 #include "ComplexClass.h"
@@ -11,6 +13,7 @@ SUITE(InPlaceArchive)
 {
 	TEST(ComplexSaveAndLoad)
 	{
+#ifdef WIN32
 		const char* inplaceFilename = "test.inp";
 		{
 			std::auto_ptr<ComplexClass> obj(new ComplexClass);
@@ -35,6 +38,7 @@ SUITE(InPlaceArchive)
 				free((void*)(result));
 			}
 		}
+#endif
 	}
 }
 

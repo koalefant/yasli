@@ -1,4 +1,6 @@
 #pragma once
+
+#include <string>
 #include <string.h>
 
 namespace yasli{
@@ -54,12 +56,12 @@ struct Token{
 	}
 
 	bool operator==(const char* text) const{
-		if(std::strncmp(text, start, length()) == 0)
+		if(strncmp(text, start, length()) == 0)
 			return text[length()] == '\0';
 		return false;
 	}
 	bool operator!=(const char* text) const{
-		if(std::strncmp(text, start, length()) == 0)
+		if(strncmp(text, start, length()) == 0)
 			return text[length()] != '\0';
 		return true;
 	}

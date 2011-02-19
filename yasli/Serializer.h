@@ -150,7 +150,8 @@ public:
 		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
 		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
 #else
-# warning Unsupported platform
+    ASSERT(0 && "Unsupported platform");
+// # warning Unsupported platform
 #endif
 	}
 
