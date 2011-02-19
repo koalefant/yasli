@@ -333,14 +333,6 @@
 				RelativePath=".\StringList.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Unicode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Unicode.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="archives"

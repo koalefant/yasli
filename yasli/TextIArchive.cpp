@@ -4,7 +4,6 @@
 #include "yasli/TextIArchive.h"
 #include "yasli/MemoryReader.h"
 #include "yasli/MemoryWriter.h"
-#include "yasli/Unicode.h"
 
 // #define DEBUG_TEXTIARCHIVE
 
@@ -511,7 +510,7 @@ bool TextIArchive::open(const char* buffer, size_t length, bool free)
 
 bool TextIArchive::load(const char* filename)
 {
-	if(std::FILE* file = ::yasli::fopen(filename, "rb"))
+	if(std::FILE* file = fopen(filename, "rb"))
 	{
 		std::fseek(file, 0, SEEK_END);
 		long fileSize = std::ftell(file);

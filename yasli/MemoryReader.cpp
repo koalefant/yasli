@@ -3,7 +3,6 @@
 #include "yasli/MemoryReader.h"
 #include <cstdlib>
 #include <iostream>
-#include "Unicode.h"
 
 namespace yasli{
 
@@ -17,7 +16,7 @@ MemoryReader::MemoryReader()
 
 MemoryReader::MemoryReader(const char* fileName)
 {
-    FILE* file = ::yasli::fopen(fileName, "rb");
+    FILE* file = fopen(fileName, "rb");
     ASSERT(file);
     if(file){
         fseek(file, 0, SEEK_END);
