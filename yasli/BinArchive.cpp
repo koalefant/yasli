@@ -212,6 +212,14 @@ bool BinOArchive::operator()(long long& value, const char* name, const char* lab
     return true;
 }
 
+bool BinOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+    openNode(name);
+    stream_.write(value);
+    closeNode(name);
+    return true;
+}
+
 bool BinOArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
     openNode(name, false);
@@ -486,6 +494,21 @@ bool BinIArchive::operator()(unsigned int& value, const char* name, const char* 
 }
 
 bool BinIArchive::operator()(long long& value, const char* name, const char* label)
+{
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
+	if(!openNode(name))
+		return false;
+
+	read(value);
+	closeNode(name);
+	return true;
+}
+
+bool BinIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);

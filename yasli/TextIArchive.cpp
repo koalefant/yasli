@@ -978,9 +978,25 @@ bool TextIArchive::operator()(long long& value, const char* name, const char* la
     if(findName(name)){
         readToken();
         checkValueToken();
-#ifdef WIN32
+#ifdef _MSC_VER
+		value = _strtoi64(token_.start, 0, 10);
+#else
+		value = strtoll(token_.start, 0, 10);
+#endif
+        return true;
+    }
+    return false;
+}
+
+bool TextIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+#ifdef _MSC_VER
 		value = _strtoui64(token_.start, 0, 10);
 #else
+		value = strtoull(token_.start, 0, 10);
 #endif
         return true;
     }
@@ -1010,7 +1026,7 @@ bool TextIArchive::operator()(double& value, const char* name, const char* label
 #ifdef _MSC_VER
         value = std::atof(token_.str().c_str());
 #else
-        value = std::strtof(token_.start, 0);
+        value = std::strtod(token_.start, 0);
 #endif
         return true;
     }

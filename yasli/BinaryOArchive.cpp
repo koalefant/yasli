@@ -204,6 +204,13 @@ bool BinaryOArchive::operator()(long long &value, const char *_name, const char*
     return true;
 }
 
+bool BinaryOArchive::operator()(unsigned long long &value, const char *_name, const char* label)
+{
+    openNode(BINARY_NODE_UINT64, _name);
+    stream_->write((const char*)&value, sizeof(value));
+    closeNode();
+    return true;
+}
 
 bool BinaryOArchive::operator()(const Serializer &ser, const char *_name, const char* label)
 {

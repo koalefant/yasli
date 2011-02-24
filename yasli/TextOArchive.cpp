@@ -468,6 +468,14 @@ bool TextOArchive::operator()(long long& value, const char* name, const char* la
     return true;
 }
 
+bool TextOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+    placeIndent();
+    placeName(name);
+    (*buffer_) << value << "\r\n";
+    return true;
+}
+
 bool TextOArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
     placeIndent();

@@ -25,6 +25,7 @@ public:
   bool operator()(int& value, const char* name = "", const char* label = 0);
   bool operator()(unsigned int& value, const char* name = "", const char* label = 0);
   bool operator()(long long& value, const char* name = "", const char* label = 0);
+  bool operator()(unsigned long long& value, const char* name = "", const char* label = 0);
 
   bool operator()(signed char& value, const char* name = "", const char* label = 0);
   bool operator()(unsigned char& value, const char* name = "", const char* label = 0);

@@ -335,6 +335,15 @@ bool BinaryIArchive::operator()(long long& value, const char* name, const char* 
     return false;
 }
 
+bool BinaryIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+    if(findNode(BINARY_NODE_UINT64, name))
+    {
+        read(&value);
+        return true;
+    }
+    return false;
+}
 
 bool BinaryIArchive::operator()(signed char& value, const char* name, const char* label)
 {
