@@ -460,7 +460,7 @@ bool TextOArchive::operator()(unsigned short& value, const char* name, const cha
     return true;
 }
 
-bool TextOArchive::operator()(__int64& value, const char* name, const char* label)
+bool TextOArchive::operator()(long long& value, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);

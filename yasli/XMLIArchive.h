@@ -28,7 +28,7 @@ public:
     bool operator()(double& value, const char* name = "");
     bool operator()(int& value, const char* name = "");
     bool operator()(unsigned int& value, const char* name = "");
-	bool operator()(__int64& value, const char* name = "");
+	bool operator()(long long& value, const char* name = "");
 
     bool operator()(signed char& value, const char* name = "");
     bool operator()(unsigned char& value, const char* name = "");

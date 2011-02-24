@@ -255,7 +255,7 @@ bool XMLIArchive::operator()(unsigned int& value, const char* name)
     return false;
 }
 
-bool XMLIArchive::operator()(__int64& value, const char* name)
+bool XMLIArchive::operator()(long long& value, const char* name)
 {
     ASSERT(0 && "Not implemented");
     return false;

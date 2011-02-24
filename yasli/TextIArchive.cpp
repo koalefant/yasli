@@ -973,7 +973,7 @@ bool TextIArchive::operator()(unsigned short& value, const char* name, const cha
     return false;
 }
 
-bool TextIArchive::operator()(__int64& value, const char* name, const char* label)
+bool TextIArchive::operator()(long long& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();

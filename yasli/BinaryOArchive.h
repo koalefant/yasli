@@ -27,7 +27,7 @@ public:
   bool operator()(unsigned int &value, const char *name, const char* label);
   bool operator()(short &value, const char *name, const char* label);
   bool operator()(unsigned short &value, const char *name, const char* label);
-  bool operator()(__int64 &value, const char *name, const char* label);
+  bool operator()(long long &value, const char *name, const char* label);
 
   bool operator()(signed char &value, const char *name, const char* label);
   bool operator()(unsigned char &value, const char *name, const char* label);

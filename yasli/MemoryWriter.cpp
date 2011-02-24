@@ -68,7 +68,7 @@ MemoryWriter& MemoryWriter::operator<<(unsigned long value)
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(__int64 value)
+MemoryWriter& MemoryWriter::operator<<(long long value)
 {
     // TODO: optimize
     char buffer[24];

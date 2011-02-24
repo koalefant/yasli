@@ -204,7 +204,7 @@ bool BinOArchive::operator()(unsigned int& value, const char* name, const char* 
     return true;
 }
 
-bool BinOArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinOArchive::operator()(long long& value, const char* name, const char* label)
 {
     openNode(name);
     stream_.write(value);
@@ -485,7 +485,7 @@ bool BinIArchive::operator()(unsigned int& value, const char* name, const char* 
 	return true;
 }
 
-bool BinIArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinIArchive::operator()(long long& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);

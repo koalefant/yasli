@@ -196,7 +196,7 @@ bool BinaryOArchive::operator()(unsigned int &value, const char *_name, const ch
     return true;
 }
 
-bool BinaryOArchive::operator()(__int64 &value, const char *_name, const char* label)
+bool BinaryOArchive::operator()(long long &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_INT64, _name);
     stream_->write((const char*)&value, sizeof(value));

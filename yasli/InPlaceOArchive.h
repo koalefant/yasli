@@ -20,7 +20,7 @@ public:
 	bool operator()(unsigned int& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 	bool operator()(short& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 	bool operator()(unsigned short& value, const char* name, const char* label) { return findOffset(0, &value, name); }
-	bool operator()(__int64& value, const char* name, const char* label) { return findOffset(0, &value, name); }
+	bool operator()(long long& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 
 	bool operator()(signed char& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 	bool operator()(unsigned char& value, const char* name, const char* label) { return findOffset(0, &value, name); }

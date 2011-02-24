@@ -325,7 +325,7 @@ bool BinaryIArchive::operator()(unsigned int& value, const char* name, const cha
     return false;
 }
 
-bool BinaryIArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinaryIArchive::operator()(long long& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_INT64, name))
     {
