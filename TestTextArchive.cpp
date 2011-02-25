@@ -4,6 +4,10 @@
 #include "yasli/TextIArchive.h"
 #include "yasli/TextOArchive.h"
 
+#ifndef _MSC_VER
+# include <wchar.h>
+#endif
+
 using std::string;
 using namespace yasli;
 
@@ -112,5 +116,35 @@ SUITE(TextArchive)
 		CHECK(ia(value, "known_value") == true);
 		CHECK(ia(value, "known_value2") == false);
 	}
+
+	TEST(CheckUtfConversion)
+  {
+    {
+      const char* input = "value = \"Кириллица\"\n";
+
+      std::wstring value;
+
+      TextIArchive ia;
+      CHECK(ia.open(input, strlen(input)));
+      CHECK(ia(value, "value") == true);
+      CHECK(value == L"Кириллица");
+    }
+
+    {
+      std::wstring value = L"\x041a\x0438";
+      //wprintf(L"%ls\n", value.c_str());
+      TextOArchive oa;
+      CHECK(oa(value, "value"));
+      //printf("hey: %s\n", oa.c_str());
+
+      TextIArchive ia;
+      CHECK(ia.open(oa.c_str(), oa.length()));
+
+      std::wstring value2;
+      CHECK(ia(value2, "value"));
+      CHECK(value == value2);
+    }
+
+  }
 }
 
