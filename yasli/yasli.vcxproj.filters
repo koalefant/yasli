@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="wrappers">
+      <UniqueIdentifier>{860382b8-a9d3-478b-aaf7-2993e80e4f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pugixml">
+      <UniqueIdentifier>{758e6397-5a82-461f-b3cf-e4933f436f0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{f2843d5e-44d3-4818-94dd-f2a5e7975202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="archives">
+      <UniqueIdentifier>{b309dae3-a999-4dad-b998-60c9a2147d4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="impl">
+      <UniqueIdentifier>{360eace1-fa30-4d1e-819e-812a4fa91534}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Decorators.h">
+      <Filter>wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSelector.h">
+      <Filter>wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="LibrarySelector.h">
+      <Filter>wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="pugiconfig.hpp">
+      <Filter>pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="pugixml.hpp">
+      <Filter>pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="Assert.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BitVector.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BitVectorImpl.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstString.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Content.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Context.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Factory.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Files.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Macros.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryReader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryWriter.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Pointers.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PointersImpl.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SafeCast.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedLibApi.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="sigslot.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="StringList.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtil.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Tokenizer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Unicode.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BinArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryIArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryOArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="InPlaceIArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="InPlaceOArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="TextIArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="TextOArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="XMLIArchive.h">
+      <Filter>archives</Filter>
+    </ClInclude>
+    <ClInclude Include="STL.h">
+      <Filter>impl</Filter>
+    </ClInclude>
+    <ClInclude Include="STLImpl.h">
+      <Filter>impl</Filter>
+    </ClInclude>
+    <ClInclude Include="API.h" />
+    <ClInclude Include="Archive.h" />
+    <ClInclude Include="EnumDescription.h" />
+    <ClInclude Include="Helpers.h" />
+    <ClInclude Include="Serializer.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="TypeID.h" />
+    <ClInclude Include="TypesFactory.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="FileSelector.cpp">
+      <Filter>wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="pugixml.cpp">
+      <Filter>pugixml</Filter>
+    </ClCompile>
+    <ClCompile Include="pugixpath.cpp">
+      <Filter>pugixml</Filter>
+    </ClCompile>
+    <ClCompile Include="Assert.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Content.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Files.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryReader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryWriter.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="StringList.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtil.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Tokenizer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Unicode.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="BinArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryIArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryOArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="InPlaceIArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="InPlaceOArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="TextIArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="TextOArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="XMLIArchive.cpp">
+      <Filter>archives</Filter>
+    </ClCompile>
+    <ClCompile Include="Archive.cpp" />
+    <ClCompile Include="EnumDescription.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="TypesFactory.cpp" />
+  </ItemGroup>
+</Project>

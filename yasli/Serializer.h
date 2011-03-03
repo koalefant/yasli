@@ -72,6 +72,8 @@ public:
 		((T*)(rawPointer))->serialize(ar);
 		return true;
 	}
+
+	void serialize(Archive& ar) { ASSERT(0); }
 private:
 
 	TypeID type_;

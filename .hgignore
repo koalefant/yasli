@@ -10,3 +10,4 @@ glob:.*Debug*
 glob:.*Release*
 glob:*.vskdb
 glob:*.vsksln
+glob:*.user
