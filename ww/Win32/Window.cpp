@@ -15,6 +15,7 @@ namespace Win32{
 EXTERN_C IMAGE_DOS_HEADER __ImageBase; // mega-hint!
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
+#if _MSC_VER <= 1500
 // При использовании typeid().name() выделяется память для кеширования андекорированных имен. 
 // VC ее не освобождает, видимо, не знает, в какой момент.
 struct TypeInfoNamesCleaner { 
@@ -28,6 +29,7 @@ struct TypeInfoNamesCleaner {
 	}
 };
 TypeInfoNamesCleaner typeInfoNamesCleaner;
+#endif
 
 #else
 # error Something broken horribly...
@@ -143,7 +145,9 @@ int WW_API basicMessageLoop(HACCEL acceleratorTable)
 			TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
 			DispatchMessage(&msg);
 		}
+#if _MSC_VER <= 1500
 		__type_info_root_node.next = 0;
+#endif
 	}
 	return int(msg.wParam);
 }

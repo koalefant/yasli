@@ -119,7 +119,6 @@ private:
     struct BaseClass{
         std::string name;
         StringList strings;
-        StringList stringsAlt;
         DerivedTypes types;
     };
 

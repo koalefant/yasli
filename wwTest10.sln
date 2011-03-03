@@ -1,0 +1,46 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wwTest", "wwTest.vcxproj", "{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wWidgets", "ww\wWidgets.vcxproj", "{18632F7A-290E-B902-7C03-72FB0C12DE45}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yasli", "..\yasli\yasli\yasli.vcxproj", "{894FD61A-7469-4C2D-A9F7-C026F3E458B5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XMath", "XMath\XMath.vcxproj", "{2A528448-DC07-42A7-BF07-E12CB130145C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Final|Win32 = Final|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Debug|Win32.ActiveCfg = DebugStatic|Win32
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Debug|Win32.Build.0 = DebugStatic|Win32
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Final|Win32.ActiveCfg = ReleaseStatic|Win32
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Final|Win32.Build.0 = ReleaseStatic|Win32
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Release|Win32.ActiveCfg = ReleaseStatic|Win32
+		{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}.Release|Win32.Build.0 = ReleaseStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Debug|Win32.ActiveCfg = DebugStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Debug|Win32.Build.0 = DebugStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Final|Win32.ActiveCfg = ReleaseStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Final|Win32.Build.0 = ReleaseStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Release|Win32.ActiveCfg = ReleaseStatic|Win32
+		{18632F7A-290E-B902-7C03-72FB0C12DE45}.Release|Win32.Build.0 = ReleaseStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Debug|Win32.ActiveCfg = DebugStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Debug|Win32.Build.0 = DebugStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Final|Win32.ActiveCfg = ReleaseStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Final|Win32.Build.0 = ReleaseStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.ActiveCfg = ReleaseStatic|Win32
+		{894FD61A-7469-4C2D-A9F7-C026F3E458B5}.Release|Win32.Build.0 = ReleaseStatic|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Debug|Win32.Build.0 = Debug|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Final|Win32.ActiveCfg = Release|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Final|Win32.Build.0 = Release|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Release|Win32.ActiveCfg = Release|Win32
+		{2A528448-DC07-42A7-BF07-E12CB130145C}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

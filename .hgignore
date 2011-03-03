@@ -11,3 +11,5 @@ glob:.*Debug*
 glob:.*Release*
 glob:tags
 glob:states
+glob:*.user
+glob:*.sdf

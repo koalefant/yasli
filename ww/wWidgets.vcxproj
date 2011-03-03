@@ -1,0 +1,351 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugStatic|Win32">
+      <Configuration>DebugStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLLDebug|Win32">
+      <Configuration>DLLDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLLRelease|Win32">
+      <Configuration>DLLRelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|Win32">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{18632F7A-290E-B902-7C03-72FB0C12DE45}</ProjectGuid>
+    <RootNamespace>wWidgets</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">$(SolutionDir)\.$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">$(SolutionDir)\.$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">$(SolutionDir)\.$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(SolutionDir)\.$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)..\..\yasli;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WW_DLL;WW_EXPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerOutput>
+      </AssemblerOutput>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)wWidgetsDbg.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)wWidgetsDbg.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(OutDir)wWidgetsDllDbg.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)..\..\yasli;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WW_DLL;WW_EXPORTED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)wWidgets.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)wWidgets.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)..\..\yasli;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <Lib>
+      <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)wWidgets.lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..;$(ProjectDir)..\..\yasli;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)wWidgets.lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="_Enums.h" />
+    <ClInclude Include="_WidgetWindow.h" />
+    <ClInclude Include="_WidgetWithWindow.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="Canvas.h" />
+    <ClInclude Include="CheckBox.h" />
+    <ClInclude Include="CheckComboBox.h" />
+    <ClInclude Include="ClassMenu.h" />
+    <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="ColorComboBox.h" />
+    <ClInclude Include="ColorRect.h" />
+    <ClInclude Include="ComboBox.h" />
+    <ClInclude Include="ConstStringList.h" />
+    <ClInclude Include="Container.h" />
+    <ClInclude Include="Dialog.h" />
+    <ClInclude Include="Entry.h" />
+    <ClInclude Include="ExcludeClipRectVisitor.h" />
+    <ClInclude Include="FileDialog.h" />
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="HBox.h" />
+    <ClInclude Include="HLine.h" />
+    <ClInclude Include="HotkeyContext.h" />
+    <ClInclude Include="HSplitter.h" />
+    <ClInclude Include="ImageStore.h" />
+    <ClInclude Include="Label.h" />
+    <ClInclude Include="MenuBar.h" />
+    <ClInclude Include="PopupMenu.h" />
+    <ClInclude Include="ProgressBar.h" />
+    <ClInclude Include="RadioButton.h" />
+    <ClInclude Include="RadioButtonBox.h" />
+    <ClInclude Include="ScrolledWindow.h" />
+    <ClInclude Include="Serialization.h" />
+    <ClInclude Include="Slider.h" />
+    <ClInclude Include="Space.h" />
+    <ClInclude Include="SpaceHeader.h" />
+    <ClInclude Include="Splitter.h" />
+    <ClInclude Include="SplitterImpl.h" />
+    <ClInclude Include="Tabs.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Tooltip.h" />
+    <ClInclude Include="VBox.h" />
+    <ClInclude Include="Viewport2D.h" />
+    <ClInclude Include="VSplitter.h" />
+    <ClInclude Include="Widget.h" />
+    <ClInclude Include="Win32Proxy.h" />
+    <ClInclude Include="Window.h" />
+    <ClInclude Include="Workspace.h" />
+    <ClInclude Include="EditorDialog.h" />
+    <ClInclude Include="PropertyEditor.h" />
+    <ClInclude Include="PropertyIArchive.h" />
+    <ClInclude Include="PropertyOArchive.h" />
+    <ClInclude Include="ColorChooser.h" />
+    <ClInclude Include="ColorChooserDialog.h" />
+    <ClInclude Include="ColorRamp.h" />
+    <ClInclude Include="HotkeyButton.h" />
+    <ClInclude Include="HotkeyDialog.h" />
+    <ClInclude Include="Win32\Drawing.h" />
+    <ClInclude Include="Win32\Handle.h" />
+    <ClInclude Include="Win32\MemoryDC.h" />
+    <ClInclude Include="Win32\MessageLoop.h" />
+    <ClInclude Include="Win32\Rectangle.h" />
+    <ClInclude Include="Win32\Types.h" />
+    <ClInclude Include="Win32\Window.h" />
+    <ClInclude Include="API.h" />
+    <ClInclude Include="gdiplus.h" />
+    <ClInclude Include="KeyPress.h" />
+    <ClInclude Include="_PropertyRowBuiltin.h" />
+    <ClInclude Include="PropertyRow.h" />
+    <ClInclude Include="PropertyRowField.h" />
+    <ClInclude Include="PropertyTree.h" />
+    <ClInclude Include="PropertyTreeDrawing.h" />
+    <ClInclude Include="PropertyTreeModel.h" />
+    <ClInclude Include="PropertyTreeOperator.h" />
+    <ClInclude Include="TreeImpl.h" />
+    <ClInclude Include="PropertyRowBitVector.h" />
+    <ClInclude Include="StdAfx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="_WidgetWindow.cpp" />
+    <ClCompile Include="_WidgetWithWindow.cpp" />
+    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Canvas.cpp" />
+    <ClCompile Include="CheckBox.cpp" />
+    <ClCompile Include="CheckComboBox.cpp" />
+    <ClCompile Include="Clipboard.cpp" />
+    <ClCompile Include="ColorRect.cpp" />
+    <ClCompile Include="ComboBox.cpp" />
+    <ClCompile Include="ConstStringList.cpp" />
+    <ClCompile Include="Dialog.cpp" />
+    <ClCompile Include="Entry.cpp" />
+    <ClCompile Include="FileDialog.cpp" />
+    <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="HLine.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="HotkeyContext.cpp" />
+    <ClCompile Include="ImageStore.cpp" />
+    <ClCompile Include="Label.cpp" />
+    <ClCompile Include="MenuBar.cpp" />
+    <ClCompile Include="PopupMenu.cpp" />
+    <ClCompile Include="ProgressBar.cpp" />
+    <ClCompile Include="RadioButton.cpp" />
+    <ClCompile Include="RadioButtonBox.cpp" />
+    <ClCompile Include="ScrolledWindow.cpp" />
+    <ClCompile Include="Slider.cpp" />
+    <ClCompile Include="Splitter.cpp" />
+    <ClCompile Include="Tabs.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Tooltip.cpp" />
+    <ClCompile Include="Viewport2D.cpp" />
+    <ClCompile Include="Widget.cpp" />
+    <ClCompile Include="Win32Proxy.cpp" />
+    <ClCompile Include="Window.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="Workspace.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="EditorDialog.cpp" />
+    <ClCompile Include="PropertyEditor.cpp" />
+    <ClCompile Include="PropertyIArchive.cpp" />
+    <ClCompile Include="PropertyOArchive.cpp" />
+    <ClCompile Include="ColorChooser.cpp" />
+    <ClCompile Include="ColorChooserDialog.cpp" />
+    <ClCompile Include="ColorRamp.cpp" />
+    <ClCompile Include="HotkeyButton.cpp" />
+    <ClCompile Include="HotkeyDialog.cpp" />
+    <ClCompile Include="Win32\Drawing.cpp" />
+    <ClCompile Include="Win32\MemoryDC.cpp" />
+    <ClCompile Include="Win32\MessageLoop.cpp" />
+    <ClCompile Include="Win32\Window.cpp" />
+    <ClCompile Include="KeyPress.cpp" />
+    <ClCompile Include="_PropertyRowBuiltin.cpp" />
+    <ClCompile Include="PropertyRowField.cpp" />
+    <ClCompile Include="PropertyTree.cpp" />
+    <ClCompile Include="PropertyTreeDrawing.cpp" />
+    <ClCompile Include="PropertyTreeModel.cpp" />
+    <ClCompile Include="PropertyTreeOperator.cpp" />
+    <ClCompile Include="TreeImpl.cpp" />
+    <ClCompile Include="PropertyRow.cpp" />
+    <ClCompile Include="PropertyRowBitVector.cpp" />
+    <ClCompile Include="PropertyRowColor.cpp" />
+    <ClCompile Include="PropertyRowDecorators.cpp" />
+    <ClCompile Include="PropertyRowFileSelector.cpp" />
+    <ClCompile Include="PropertyRowHotkey.cpp" />
+    <ClCompile Include="PropertyRowRanged.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="labels.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\yasli\yasli\yasli.vcxproj">
+      <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\XMath\XMath.vcxproj">
+      <Project>{2a528448-dc07-42a7-bf07-e12cb130145c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -381,11 +381,6 @@ void PropertyRowPointer::updateTitle()
 {
 }
 
-int PropertyRowPointer::factoryIndex()
-{
-	return -1;	
-}
-
 void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, PropertyTree* tree)
 {
     tree->model()->push(this);

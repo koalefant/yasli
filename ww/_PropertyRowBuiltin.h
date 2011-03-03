@@ -79,7 +79,6 @@ public:
 
 	bool assignTo(const PointerSerializationInterface &ptr);
 
-	int factoryIndex();
 	TypeID baseType() const{ return baseType_; }
 	TypeID derivedType() const{ return derivedType_; }
 	ClassFactoryBase* factory() const{ return factory_; }
