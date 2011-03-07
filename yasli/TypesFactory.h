@@ -135,31 +135,23 @@ public:
 
 	BaseType* createByIndex(int index) const
 	{
-		ASSERT(index >= 0 && index < typeToCreatorMap_.size());
-		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
-		while(index--)
-			++it;
-		return it->second->create();
+		ASSERT(index >= 0 && index < creators_.size());
+		return creators_[index]->create();
 	}
 
 	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label)
 	{
-		ESCAPE(size_t(index) < typeToCreatorMap_.size(), return);
-		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
-		while(index--)
-			++it;
-		BaseType* ptr = it->second->create();
+		ESCAPE(size_t(index) < creators_.size(), return);
+		BaseType* ptr = creators_[index]->create();
 		ar(*ptr, name, label);
 		delete ptr;
 	}
 	// from ClassFactoryInterface:
-	int size() const{ return typeToCreatorMap_.size(); }
+	int size() const{ return creators_.size(); }
 	const TypeDescription* descriptionByIndex(int index) const{
-		if(index < 0 || index >= int(typeToCreatorMap_.size()))
+		if(index < 0 || index >= int(creators_.size()))
 			return 0;
-		TypeToCreatorMap::const_iterator it = typeToCreatorMap_.begin();
-		std::advance(it, index);
-		return &it->second->description();
+		return &creators_[index]->description();
 	}
 
 	// ^^^
@@ -167,9 +159,11 @@ public:
 protected:
 	void registerCreator(CreatorBase* creator){
 		typeToCreatorMap_[creator->description().typeID()] = creator;
+		creators_.push_back(creator);
 	}
 
 	TypeToCreatorMap typeToCreatorMap_;
+	std::vector<CreatorBase*> creators_;
 };
 
 
