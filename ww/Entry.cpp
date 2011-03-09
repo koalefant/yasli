@@ -145,6 +145,8 @@ int EntryImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 {
 	if((keyCode == VK_RETURN && owner_->swallowReturn_) || keyCode == VK_ESCAPE/* || VK_TAB*/)
 		return 0;
+	if(keyCode == VK_LEFT || keyCode == VK_RIGHT)
+		return Win32::Window32::onMessageKeyDown(keyCode, count, flags);
 	return __super::onMessageKeyDown(keyCode, count, flags);
 }
 
