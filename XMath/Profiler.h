@@ -174,7 +174,7 @@ inline void profiler_quant(int curLogicQuant = 0) { Profiler::instance().quant(c
 #define start_timer_auto1(title) 
 #define statistics_add(title, x) 
 
-inline void profiler_start_stop(ProfilerMode mode = PROFILER_REBUILD) {}
+inline void profiler_start_stop(enum ProfilerMode mode = PROFILER_REBUILD) {}
 inline void profiler_quant(unsigned long curLogicQuant = 0){}
 
 #endif //_FINAL_VERSION_

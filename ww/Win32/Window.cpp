@@ -9,6 +9,8 @@
 #include "ww/Application.h"
 #include <typeinfo>
 
+#pragma comment (lib, "comctl32.lib")
+
 namespace Win32{
 
 #ifdef _MSC_VER

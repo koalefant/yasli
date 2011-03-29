@@ -4,6 +4,7 @@
 #include "ww/_PropertyRowBuiltin.h"
 
 #include "ww/PropertyTree.h"
+#include "ww/TreeImpl.h"
 #include "ww/PropertyRow.h"
 
 #include "ww/Win32/Drawing.h"
@@ -72,6 +73,7 @@ bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree,
         tree->model()->push(this);
 		handleMouse(point);
 		tree->redraw();
+		::SetCapture(tree->impl()->get());
 		return true;
 	}
 	return false;
@@ -88,6 +90,8 @@ template<class WrapperType, class ScalarType>
 void PropertyRowRanged<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2i point)
 {
 	tree->model()->rowChanged(this);
+	if(::GetCapture() == tree->impl()->get())
+		::ReleaseCapture();
 }
 
 template<class WrapperType, class ScalarType>

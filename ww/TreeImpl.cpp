@@ -645,7 +645,6 @@ LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	ASSERT(::IsWindow(handle_));
     
 	switch(message){
-		break;
 	case WM_HSCROLL:
 	case WM_VSCROLL:
 		onMessageScroll(message, LOWORD(wparam));
