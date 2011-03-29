@@ -19,6 +19,7 @@ using std::string;
 namespace ww{
 
 class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public sigslot::has_slots{
+	bool locked_;
 public:
 	PropertyRowFileSelector(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowFileSelector() {}
@@ -39,12 +40,16 @@ public:
 
 
 PropertyRowFileSelector::PropertyRowFileSelector(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<FileSelector, PropertyRowFileSelector>(object, size, name, nameAlt, typeName)
+: PropertyRowImpl<FileSelector, PropertyRowFileSelector>(object, size, name, nameAlt, typeName), locked_(false)
 {
 }
 
 bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 {
+	if(locked_)
+		return false;
+	locked_ = true;
+
 	FileSelector& selector = value();
 	const FileSelector::Options* options = selector.options();
 	string title = std::string("(") + options->filter + ")";
@@ -73,10 +78,13 @@ bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 		else
 			selector = fileDialog.fileName();
 		tree->model()->rowChanged(this);
+		locked_ = false;
 		return true;
 	}
-	else
+	else{
+		locked_ = false;
 		return false;
+	}
 }
 
 bool PropertyRowFileSelector::onContextMenu(PopupMenuItem& root, PropertyTree* tree)

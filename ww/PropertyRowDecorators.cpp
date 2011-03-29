@@ -27,16 +27,17 @@ public:
 	std::string valueAsString() const { return value_ ? value_.text : ""; }
 protected:
 	bool underMouse_;
+	bool locked_;
 };
 
 PropertyRowButton::PropertyRowButton(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<ButtonDecorator, PropertyRowButton>(object, size, name, nameAlt, typeName)
-, underMouse_(false)
+, underMouse_(false), locked_(false)
 {
 }
 
 PropertyRowButton::PropertyRowButton()
-: underMouse_(false)
+: underMouse_(false), locked_(false)
 {
 	widgetSizeMin_ = 100;
 }
@@ -104,8 +105,9 @@ void PropertyRowButton::onMouseMove(PropertyTree* tree, Vect2i point)
 
 void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2i point)
 {
-	if(widgetRect().pointInside(point)){
-		tree->model()->rowChanged(this);
+	if(!locked_ && widgetRect().pointInside(point)){
+		locked_ = true;
+		tree->model()->rowChanged(this); // Row is recreated here, so don't unlock
     }
 	else{
         tree->model()->push(this);

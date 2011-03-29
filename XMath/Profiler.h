@@ -1,5 +1,12 @@
 #pragma once
 
+enum ProfilerMode
+{
+	PROFILER_ACCURATE,
+	PROFILER_REBUILD,
+	PROFILER_MEMORY
+};
+
 #if !defined(_FINAL_VERSION_) && !defined(_FINAL)
 
 #include <vector>
@@ -11,13 +18,6 @@
 
 namespace yasli { class Archive; }
 class Profiler;
-
-enum ProfilerMode
-{
-	PROFILER_ACCURATE,
-	PROFILER_REBUILD,
-	PROFILER_MEMORY
-};
 
 struct AllocationData
 {
@@ -174,8 +174,11 @@ inline void profiler_quant(int curLogicQuant = 0) { Profiler::instance().quant(c
 #define start_timer_auto1(title) 
 #define statistics_add(title, x) 
 
-inline void profiler_start_stop(enum ProfilerMode mode = PROFILER_REBUILD) {}
+#pragma warning (push)
+#pragma warning(disable: 4100)
+inline void profiler_start_stop(ProfilerMode mode = PROFILER_REBUILD) {}
 inline void profiler_quant(unsigned long curLogicQuant = 0){}
+#pragma warning (pop)
 
 #endif //_FINAL_VERSION_
 
