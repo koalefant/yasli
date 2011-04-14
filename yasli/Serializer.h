@@ -5,6 +5,8 @@
 #include "yasli/API.h"
 #include "yasli/TypeID.h"
 
+#pragma warning (disable: 4100)
+
 namespace yasli{
 
 class Archive;
