@@ -1,7 +1,7 @@
 #pragma once
 #include <math.h>
-#include "XMath/fastMath.h"
-#include "XMath/round.h"
+#include "fastMath.h"
+#include "round.h"
 
 #pragma warning (disable : 4244)
 #pragma warning (disable : 4201)
@@ -320,7 +320,11 @@ public:
 	static const Mat2f ID;
 };
 // forward transform
-inline const Vect2f operator*(const Mat2f& m, const Vect2f& v) { return Vect2f(v) *= m; }
+inline const Vect2f operator*(const Mat2f& m, const Vect2f& v) {
+  Vect2f result(v);
+  result *= m;
+  return result;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -353,7 +357,11 @@ public:
 	static const MatX2f ID;
 };
 // forward transform
-inline const Vect2f operator*(const MatX2f& m, const Vect2f& v) { return Vect2f(v) *= m; }
+inline const Vect2f operator*(const MatX2f& m, const Vect2f& v) {
+  Vect2f result(v);
+  result *= m;
+  return result;
+}
 
 
 

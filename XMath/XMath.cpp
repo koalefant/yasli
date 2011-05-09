@@ -11,10 +11,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "XMath/xmath.h"
-#include "XMath/random.h"
-#include "Yasli/Archive.h"
+#include "xmath.h"
+#include "Random.h"
+#include "yasli/Archive.h"
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4073 ) // initializers put in library initialization area
 #pragma init_seg(lib)
 

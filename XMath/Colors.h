@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XMath/xmath.h"
+#include "xmath.h"
 struct Color3c;
 
 struct Color4f

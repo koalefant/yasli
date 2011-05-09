@@ -13,6 +13,7 @@ inline T clamp(const T& x, const T1& xmin, const T2& xmax)
   return x;
 }
 
+#ifdef WIN32
 inline int round(double x)
 {
 #ifdef _M_AMD64
@@ -31,4 +32,16 @@ inline int round(float x)
 {
 	return _mm_cvtt_ss2si(_mm_load_ss(&x));
 }
+#else
+inline int round(float x)
+{
+  return lroundf(x);
+}
 
+/*
+inline int round(double x)
+{
+  return lround(x);
+}
+*/
+#endif

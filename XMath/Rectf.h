@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XMath\XMath.h"
+#include "xmath.h"
 #include <functional>
 #include <memory>
 

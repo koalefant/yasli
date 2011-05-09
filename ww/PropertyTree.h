@@ -236,3 +236,4 @@ std::wstring generateDigest(Serializer& ser);
 
 }
 
+// vim:ts=4

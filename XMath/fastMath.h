@@ -1,9 +1,9 @@
 #pragma once
 
+#ifdef _MSC_VER
 #include <xmmintrin.h>
 
 #pragma warning(disable: 4725)
-
 inline const float sqrtFast(const float x)
 {
 	float r;
@@ -41,6 +41,25 @@ cycle_fast_fmod:
 	return result;
 #endif
 }
+#else
+#include <math.h>
+inline const float sqrtFast(const float x)
+{
+  return sqrtf(x);
+}
+
+inline float invSqrtFast(float x)
+{
+  return 1.0f / sqrtf(x);
+}
+
+inline float fmodFast(float a, float b)
+{
+  return fmodf(a, b);
+}
+
+#endif
+
 
 inline unsigned int F2DW( float f ) 
 { 

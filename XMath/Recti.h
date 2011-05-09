@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XMath/xmath.h"
+#include "xmath.h"
 
 class Recti{
 public:
