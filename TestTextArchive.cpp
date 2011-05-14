@@ -1,5 +1,5 @@
-// Please keep this source file in UTF-8 encoding
-// in order for CheckUtf8Conversion test to work
+// This files contains strings both in utf-8 and windows-1251 encoding.
+// We need this for CheckUtf8Conversion test.
 #include "UnitTest++.h"
 
 #include "ComplexClass.h"
@@ -122,14 +122,24 @@ SUITE(TextArchive)
 	TEST(CheckUtf8Conversion)
   {
     {
-      const char* input = "value = \"Кириллица: абвгджзеёклмнопрстуфхцчшщъыьэюяАБВГДЖЗЕЁКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №\"\n";
+		// this literal is stored in "utf-8"
+      const char* input = "value = \"Кириллица: абвгдеёжзклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №\"\n";
 
       std::wstring value;
 
       TextIArchive ia;
       CHECK(ia.open(input, strlen(input)));
       CHECK(ia(value, "value") == true);
-      CHECK(value == L"Кириллица: абвгджзеёклмнопрстуфхцчшщъыьэюяАБВГДЖЗЕЁКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №");
+#ifdef _MSC_VER
+	  #pragma setlocale("russian")
+	  // literal in "windows-1251"
+	  const wchar_t* unicodeString = L"���������: �����������������������������������Ũ������������������������ �";
+#else
+	  // literal in "utf-8"
+	  const wchar_t* unicodeString = L"Кириллица: абвгдеёжзклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №";
+#endif
+	
+      CHECK(value == unicodeString);
     }
 
     {
