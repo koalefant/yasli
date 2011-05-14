@@ -4,7 +4,7 @@
 # define TRANSLATE(x) x
 #endif
 
-#include "yasli/SafeCast.h"
+#include "ww/SafeCast.h"
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"

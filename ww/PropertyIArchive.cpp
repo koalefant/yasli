@@ -107,6 +107,17 @@ bool PropertyIArchive::operator()(signed long& value, const char* name, const ch
 		return false;
 }
 
+bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
+{
+	if(openRow(name, label, typeid(long long).name())){
+		currentNode_->assignTo(value);
+		closeRow(name);
+		return true;
+	}
+	else
+		return false;
+}
+
 // Unsigned types
 bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
@@ -144,6 +155,17 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
 	if(openRow(name, label, typeid(unsigned long).name())){
+		currentNode_->assignTo(value);
+		closeRow(name);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+	if(openRow(name, label, typeid(unsigned long long).name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;

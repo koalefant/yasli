@@ -2,8 +2,7 @@
 
 #include "yasli/TypesFactory.h"
 #include <string>
-#include "yasli/sigslot.h"
-
+#include "ww/sigslot.h
 #include "ww/MenuBar.h"
 #include "ww/VBox.h"
 #include "ww/SpaceHeader.h"

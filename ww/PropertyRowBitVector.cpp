@@ -4,7 +4,7 @@
 #include "PropertyTree.h"
 #include "ww/CheckComboBox.h"
 #include "ww/PropertyTreeModel.h"
-#include "yasli/SafeCast.h"
+#include "ww/SafeCast.h"
 #include "yasli/PointersImpl.h"
 
 namespace ww{

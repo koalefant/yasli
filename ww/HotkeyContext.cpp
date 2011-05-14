@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "HotkeyContext.h"
 #include "Serialization.h"
-#include "yasli/sigslot.h"
+#include "sigslot.h"
 #include "Win32/MessageLoop.h"
 #include "KeyPress.h"
 #include "Application.h"

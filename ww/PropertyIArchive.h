@@ -26,11 +26,13 @@ protected:
     bool operator()(signed short& value, const char* name, const char* label);
     bool operator()(signed int& value, const char* name, const char* label);
     bool operator()(signed long& value, const char* name, const char* label);
+    bool operator()(long long& value, const char* name, const char* label);
     // Unsigned types
     bool operator()(unsigned char& value, const char* name, const char* label);
     bool operator()(unsigned short& value, const char* name, const char* label);
     bool operator()(unsigned int& value, const char* name, const char* label);
     bool operator()(unsigned long& value, const char* name, const char* label);
+    bool operator()(unsigned long long& value, const char* name, const char* label);
 
     bool operator()(float& value, const char* name, const char* label);
     bool operator()(double& value, const char* name, const char* label);

@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Canvas.h"
-#include "yasli/Unicode.h"
+#include "ww/Unicode.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Window.h" // for defaultFont
 
 using Win32::AutoSelector;
 using Win32::StockSelector;
-using yasli::toWideChar;
+using ww::toWideChar;
 
 namespace ww{
 

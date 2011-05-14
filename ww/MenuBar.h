@@ -1,7 +1,7 @@
 #pragma once
 #include "ww/_WidgetWithWindow.h"
 #include "ww/KeyPress.h"
-#include "yasli/sigslot.h"
+#include "ww/sigslot.h"
 
 namespace ww{
 

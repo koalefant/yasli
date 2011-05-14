@@ -2,7 +2,7 @@
 
 #include <map>
 #include "ww/API.h"
-#include "yasli/sigslot.h"
+#include "ww/sigslot.h"
 #include "KeyPress.h"
 #include "yasli/Pointers.h"
 

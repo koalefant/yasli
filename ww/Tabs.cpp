@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "Tabs.h"
-#include "yasli/SafeCast.h"
+#include "ww/SafeCast.h"
 #include "ww/Unicode.h"
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/Window.h"

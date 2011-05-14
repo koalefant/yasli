@@ -33,9 +33,12 @@
 #include "yasli/BinaryOArchive.h"
 #include "yasli/BinaryIArchive.h"
 #include "yasli/BinArchive.h"
-#include <windows.h>
 
 #include "TestData.h"
+
+#include <string>
+#include <windows.h>
+using std::string;
 
 class IntButton : public ww::Button{
 public:

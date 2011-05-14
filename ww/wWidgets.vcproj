@@ -51,6 +51,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				AssemblerOutput="0"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
@@ -130,6 +131,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
@@ -213,6 +215,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
@@ -280,6 +283,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
@@ -895,6 +899,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Files.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Files.h"
+				>
+			</File>
+			<File
 				RelativePath=".\gdiplus.h"
 				>
 			</File>
@@ -904,6 +916,18 @@
 			</File>
 			<File
 				RelativePath=".\KeyPress.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SafeCast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Unicode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Unicode.h"
 				>
 			</File>
 		</Filter>
@@ -1006,6 +1030,22 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Decorators"
+			>
+			<File
+				RelativePath=".\Decorators.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FileSelector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileSelector.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\labels.txt"

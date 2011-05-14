@@ -19,9 +19,7 @@
 #include "yasli/BitVectorImpl.h"
 #include "yasli/TypesFactory.h"
 #include "yasli/EnumDescription.h"
-#include "yasli/SafeCast.h"
-//#include "UnicodeConverter.h"
-
+#include "ww/SafeCast.h"
 #include "ww/PopupMenu.h"
 #include "ww/Win32/Window.h"
 #include "ww/Win32/Drawing.h"
@@ -543,9 +541,11 @@ REGISTER_NUMERIC(unsigned char, UnsignedChar)
 REGISTER_NUMERIC(short, Short)
 REGISTER_NUMERIC(int, Int)
 REGISTER_NUMERIC(long, Long)
+REGISTER_NUMERIC(long long, LongLong)
 REGISTER_NUMERIC(unsigned short, UnsignedShort)
 REGISTER_NUMERIC(unsigned int, UnsignedInt)
 REGISTER_NUMERIC(unsigned long, UnsignedLong)
+REGISTER_NUMERIC(unsigned long long, UnsignedLongLong)
 
 #undef REGISTER_NUMERIC
 
@@ -995,6 +995,12 @@ bool PropertyOArchive::operator()(signed long& value, const char* name, const ch
 	return true;
 }
 
+bool PropertyOArchive::operator()(long long& value, const char* name, const char* label)
+{
+	lastNode_ = addRow(new PropertyRowNumeric<long long>(name, label, value));
+	return true;
+}
+
 // ---
 
 bool PropertyOArchive::operator()(unsigned char& value, const char* name, const char* label)
@@ -1018,6 +1024,12 @@ bool PropertyOArchive::operator()(unsigned int& value, const char* name, const c
 bool PropertyOArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
 	lastNode_ = addRow(new PropertyRowNumeric<unsigned long>(name, label, value));
+	return true;
+}
+
+bool PropertyOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+	lastNode_ = addRow(new PropertyRowNumeric<unsigned long long>(name, label, value));
 	return true;
 }
 

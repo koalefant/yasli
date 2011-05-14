@@ -1,4 +1,5 @@
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #include <assert.h>
 
 #define _WIN32_WINNT 0x0501
@@ -17,4 +18,8 @@
 #include "XMath/Profiler.h"
 
 #define FOR_EACH(container, it) for( it = (container).begin(); it != (container).end(); ++it )
+
+template<class T, size_t Len>
+char (&globalArrayLenHelper(const T(&)[Len]))[Len];
+#define ARRAY_LEN(arr) sizeof(globalArrayLenHelper(arr)) 
 

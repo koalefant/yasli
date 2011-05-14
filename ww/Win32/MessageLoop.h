@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ww/API.h"
-#include "yasli/sigslot.h"
-#include "yasli/Pointers.h"
+#include "ww/sigslot.h"
 #include "ww/Win32/Types.h"
+#include "yasli/Pointers.h"
 
 namespace Win32{
 

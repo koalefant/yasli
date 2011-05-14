@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ww/API.h"
 #include <string>
 #include <vector>
+#include "ww/API.h"
+#include "ww/sigslot.h"
 #include "yasli/Pointers.h"
-#include "yasli/sigslot.h"
 #include "yasli/Assert.h"
 #include "XMath/XMath.h"
 #include "KeyPress.h"

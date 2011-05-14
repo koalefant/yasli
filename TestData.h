@@ -16,12 +16,17 @@
 #include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
 #include "yasli/TypesFactory.h"
-#include "yasli/Decorators.h"
+#include "ww/Decorators.h"
 #include "XMath/Colors.h"
-#include "yasli/FileSelector.h"
+#include "ww/FileSelector.h"
 #include "ww/KeyPress.h"
 
 using namespace yasli;
+using ww::NotDecorator;
+using ww::HLineDecorator;
+using ww::RadioDecorator;
+using ww::FileSelector;
+using ww::ButtonDecorator;
 
 enum USELESS_ENUM {
     FIRST_VALUE,

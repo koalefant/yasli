@@ -3,8 +3,7 @@
 #include "ww/Widget.h"
 #include "ww/Win32/Window.h"
 #include "ww/Unicode.h"
-#include "yasli/Macros.h"
-#include "yasli/Files.h"
+#include "ww/Files.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <commdlg.h>

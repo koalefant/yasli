@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ww/API.h"
-#include "yasli/sigslot.h"
+#include "ww/sigslot.h"
 #include "yasli/Pointers.h"
 
 namespace Win32{

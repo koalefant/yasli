@@ -8,13 +8,14 @@
 #include "Profiler.h"
 #include "MTSection.h"
 #include "ww/PropertyEditor.h"
-#include "yasli/Macros.h"
+#include "Macros.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/Decorators.h"
+#include "ww/Decorators.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
 
+using namespace ww;
 using namespace yasli;
 using namespace std;
 

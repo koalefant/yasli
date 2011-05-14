@@ -3,7 +3,7 @@
 //#include <xutility>
 #include "ww/API.h"
 #include "ww/MouseButton.h"
-#include "yasli/sigslot.h"
+#include "ww/sigslot.h"
 #include "yasli/Pointers.h"
 #include "XMath/XMath.h"
 #include "XMath/Recti.h"

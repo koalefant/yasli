@@ -10,12 +10,12 @@
 #include "ww/PropertyEditor.h"
 #include "_PropertyRowBuiltin.h"
 #include "ww/Win32/Window.h"
+#include "ww/SafeCast.h"
 
 #include "yasli/TypesFactory.h"
 #include "yasli/Serializer.h"
 #include "yasli/BinaryIArchive.h"
 #include "yasli/BinaryOArchive.h"
-#include "yasli/SafeCast.h"
 
 #include <windows.h>
 
