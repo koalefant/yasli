@@ -404,10 +404,6 @@
 					RelativePath=".\TextOArchive.h"
 					>
 				</File>
-				<File
-					RelativePath=".\Token.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter

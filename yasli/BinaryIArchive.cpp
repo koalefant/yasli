@@ -441,12 +441,5 @@ bool BinaryIArchive::operator()(const PointerSerializationInterface& ptr, const 
     return false;
 }
 
-const char* BinaryIArchive::pull()
-{
-    BinaryNode type;
-    pulledName_ = pullNode(&type).str();
-	return pulledName_.c_str();
-}
-
 }
 

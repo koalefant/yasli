@@ -15,7 +15,6 @@ public:
   bool open(const char* buffer, size_t length); // does copy of buffer
   void close();
 
-  const char* pull();
   bool operator()(bool& value, const char* name = "", const char* label = 0);
   bool operator()(std::string& value, const char* name = "", const char* label = 0);
   bool operator()(float& value, const char* name = "", const char* label = 0);
@@ -39,7 +38,6 @@ public:
   using Archive::operator();
 
 private:
-  Token pullNode(BinaryNode* type);
   void closeNode();
   bool findNode(BinaryNode _type, const Token &_name, const char** start, const char** end);
   bool findNode(BinaryNode _type, const char *_name);
