@@ -78,10 +78,8 @@ const Vect4f Vect4f::ID(1, 1, 1, 1);
 RandomGenerator xm_random_generator;
 int RandomGenerator::operator()(){ return ((value = value*214013L + 2531011L) >> 16) & 0x7fff; }
 
-#ifdef _MSC_VER
 extern char exceptMSG[];
 char* exceptMSGDummy = exceptMSG;
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
