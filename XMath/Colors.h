@@ -73,10 +73,10 @@ struct Color4c
 	void setHSV(float h,float s,float v, unsigned char alpha = 255);
 
 	Color4c& operator *= (float f)			{ r=round(r*f); g=round(g*f); b=round(b*f); a=round(a*f); return *this; }
-	Color4c& operator += (Color4c &p)		{ r+=p.r; g+=p.g; b+=p.b; a+=p.a; return *this; }
-	Color4c& operator -= (Color4c &p)		{ r-=p.r; g-=p.g; b-=p.b; a-=p.a; return *this; }
-	Color4c operator + (Color4c &p)		{ return Color4c(r+p.r,g+p.g,b+p.b,a+p.a); }
-	Color4c operator - (Color4c &p)		{ return Color4c(r-p.r,g-p.g,b-p.b,a-p.a); }
+  Color4c& operator += (const Color4c &p)		{ r+=p.r; g+=p.g; b+=p.b; a+=p.a; return *this; }
+  Color4c& operator -= (const Color4c &p)		{ r-=p.r; g-=p.g; b-=p.b; a-=p.a; return *this; }
+  Color4c operator + (const Color4c &p)		{ return Color4c(r+p.r,g+p.g,b+p.b,a+p.a); }
+  Color4c operator - (const Color4c &p)		{ return Color4c(r-p.r,g-p.g,b-p.b,a-p.a); }
 	Color4c operator * (float f) const 		{ return Color4c(round(r*f), round(g*f), round(b*f), round(a*f)); }
 	Color4c operator * (int f) const 		{ return Color4c(r*f,g*f,b*f,a*f); }
 	Color4c operator / (int f) const 		{ if(f!=0) f=(1<<16)/f; else f=1<<16; return Color4c((r*f)>>16,(g*f)>>16,(b*f)>>16,(a*f)>>16); }
