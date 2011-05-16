@@ -1,11 +1,18 @@
 #include "stdafx.h"
-#include "Colors.h"
-#include "Windows.h"
-#include "Yasli/Archive.h"
-using namespace yasli;
 
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
 #pragma warning(disable : 4073 ) // initializers put in library initialization area
 #pragma init_seg(lib)
+#endif
+
+#include <algorithm>
+using std::min;
+using std::max;
+#include "Colors.h"
+#include "yasli/Archive.h"
+using namespace yasli;
+
 
 const Color4f Color4f::WHITE(1, 1, 1, 1);
 const Color4f Color4f::BLACK(0, 0, 0, 1);
@@ -29,9 +36,9 @@ const Color4c Color4c::ZERO(0, 0, 0, 0);
 
 Color4c& Color4c::setGDI(unsigned long color)
 {
-	r = GetRValue(color);
-	g = GetGValue(color);
-	b = GetBValue(color);
+	r = color & 0xff;
+	g = (color >> 8) & 0xff;
+	b = (color >> 16) & 0xff;
 	a = 255;
 	return *this;
 }
