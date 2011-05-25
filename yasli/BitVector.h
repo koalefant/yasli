@@ -9,7 +9,8 @@ class BitVector
 public:
     BitVector(int value = 0) : value_(value) {}
 
-    operator int&() { return value_; }
+	operator int&() { return value_; }
+    operator int() const { return value_; }
 
     BitVector& operator|= (Enum value) { value_ |= value; return *this; }
     BitVector& operator|= (int value) { value_ |= value; return *this; }
