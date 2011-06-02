@@ -1,3 +1,5 @@
+// Please keep this source file in UTF-8 encoding
+// in order for CheckUtf8Conversion test to work
 #include "UnitTest++.h"
 
 #include "ComplexClass.h"
@@ -117,25 +119,23 @@ SUITE(TextArchive)
 		CHECK(ia(value, "known_value2") == false);
 	}
 
-	TEST(CheckUtfConversion)
+	TEST(CheckUtf8Conversion)
   {
     {
-      const char* input = "value = \"Кириллица\"\n";
+      const char* input = "value = \"Кириллица: абвгджзеёклмнопрстуфхцчшщъыьэюяАБВГДЖЗЕЁКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №\"\n";
 
       std::wstring value;
 
       TextIArchive ia;
       CHECK(ia.open(input, strlen(input)));
       CHECK(ia(value, "value") == true);
-      CHECK(value == L"Кириллица");
+      CHECK(value == L"Кириллица: абвгджзеёклмнопрстуфхцчшщъыьэюяАБВГДЖЗЕЁКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ №");
     }
 
     {
       std::wstring value = L"\x041a\x0438";
-      //wprintf(L"%ls\n", value.c_str());
       TextOArchive oa;
       CHECK(oa(value, "value"));
-      //printf("hey: %s\n", oa.c_str());
 
       TextIArchive ia;
       CHECK(ia.open(oa.c_str(), oa.length()));

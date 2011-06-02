@@ -598,8 +598,13 @@ bool TextIArchive::isName(Token token) const
 void TextIArchive::expect(char token)
 {
     if(token_ != token){
+      const char* lineEnd = token_.start;
+      while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
+        ++lineEnd;
+
         MemoryWriter msg;
-        msg << "Error parsing file, expected '=' at line " << line(token_.start);
+        msg << "Error parsing file, expected '=' at line " << line(token_.start) << ":\n"
+         << std::string(token_.start, lineEnd).c_str();
 		ASSERT_STR(0, msg.c_str());
     }
 }

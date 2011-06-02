@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "yasli/TypesFactory.h"
-#include "pugixml.hpp"
 
 namespace yasli{
 
@@ -173,13 +172,11 @@ bool Archive::operator()(std::wstring& value, const char* name, const char* labe
 {
   std::string str;
   if(isOutput())
-    str = pugi::as_utf8(value.c_str());
-    //utf16ToUtf8(&str, value.c_str());
+    utf16ToUtf8(&str, value.c_str());
   if (!(*this)(str, name, label))
     return false;
   if(isInput())
-    value = pugi::as_utf16(str.c_str());
-    //utf8ToUtf16(&value, str.c_str());
+    utf8ToUtf16(&value, str.c_str());
 	return true;
 }
 
