@@ -7,8 +7,10 @@ namespace Files{
     using std::string;
 #ifdef WIN32
 	static const char* PATH_SEPARATOR = "\\";
+	static const char* PATH_SEPARATOR2 = "/";
 #else
 	static const char* PATH_SEPARATOR = "/";
+	static const char* PATH_SEPARATOR2 = "\\";
 #endif
     inline const char* pathSeparator(){ return PATH_SEPARATOR; }
 
@@ -19,7 +21,7 @@ namespace Files{
 		const char* p = path + len - 1;
 		while(p != path){
 			--p;
-			if(*p == PATH_SEPARATOR[0])
+			if(*p == PATH_SEPARATOR[0] || *p == PATH_SEPARATOR2[0])
 				return p + 1;
 		}
 		return path;

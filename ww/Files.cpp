@@ -101,7 +101,7 @@ bool createDirectory(const char* path)
 
     char* p = pathCopy;
     while(*p != '\0'){
-        if(*p == PATH_SEPARATOR[0]){
+        if(*p == PATH_SEPARATOR[0] || *p == PATH_SEPARATOR2[0]){
             *p = '\0';
 #ifdef WIN32
 			if(!CreateDirectoryW(ww::toWideChar(path).c_str(), 0))
@@ -130,7 +130,7 @@ string extractFilePath(const char* path)
 
 	const char* p = path + len - 1;
 	while(p != path){
-		if(p[0] == PATH_SEPARATOR[0])
+		if(p[0] == PATH_SEPARATOR[0] || p[0] == PATH_SEPARATOR2[0])
 			return string(path, p);
 		--p;
 	}
