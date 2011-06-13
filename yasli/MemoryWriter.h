@@ -8,10 +8,6 @@
 #undef realloc
 #endif
 
-#ifndef WIN32
-typedef long long __int64;
-#endif
-
 namespace yasli{
 
 class YASLI_API MemoryWriter : public RefCounter{
@@ -31,7 +27,8 @@ public:
 	MemoryWriter& operator<<(long value);
 	MemoryWriter& operator<<(unsigned long value);
 	MemoryWriter& operator<<(unsigned int value);
-	MemoryWriter& operator<<(__int64 value);
+	MemoryWriter& operator<<(long long value);
+	MemoryWriter& operator<<(unsigned long long value);
 	MemoryWriter& operator<<(float value) { return (*this) << double(value); }
 	MemoryWriter& operator<<(double value);
 	MemoryWriter& operator<<(signed char value);

@@ -6,10 +6,11 @@
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/Macros.h"
 
 #include "yasli/StringList.h" 
 using namespace yasli;
+
+#define YCHECK(x) ASSERT(x); CHECK(x)
 
 struct Member
 {
@@ -21,8 +22,8 @@ struct Member
 
 	void checkEquality(const Member& copy) const
 	{
-		CHECK(name == copy.name);
-		CHECK(weight == copy.weight);
+		YCHECK(name == copy.name);
+		YCHECK(weight == copy.weight);
 	}
 
 	void change(int index)
@@ -59,7 +60,7 @@ public:
 
 	virtual void checkEquality(const PolyBase* copy) const
 	{
-		CHECK(baseMember_ == copy->baseMember_);
+		YCHECK(baseMember_ == copy->baseMember_);
 	}
 protected:
 	std::string baseMember_;
@@ -77,8 +78,8 @@ public:
 	void checkEquality(const PolyBase* copyBase) const
 	{
 		const PolyDerivedA* copy = dynamic_cast<const PolyDerivedA*>(copyBase);
-		CHECK(copy != 0);
-		CHECK(derivedMember_ == copy->derivedMember_);
+		YCHECK(copy != 0);
+		YCHECK(derivedMember_ == copy->derivedMember_);
 
 		PolyBase::checkEquality(copyBase);
 	}
@@ -103,8 +104,8 @@ public:
 	void checkEquality(const PolyBase* copyBase) const
 	{
 		const PolyDerivedB* copy = dynamic_cast<const PolyDerivedB*>(copyBase);
-		CHECK(copy != 0);
-		CHECK(derivedMember_ == copy->derivedMember_);
+		YCHECK(copy != 0);
+		YCHECK(derivedMember_ == copy->derivedMember_);
 
 		PolyBase::checkEquality(copyBase);
 	}
@@ -112,6 +113,90 @@ protected:
 	std::string derivedMember_;
 };
 
+struct NumericTypes
+{
+  NumericTypes()
+  : bool_(false)
+  , char_(0)
+  , sChar_(0)
+  , uChar_(0)
+  , int_(0)
+  , uInt_(0)
+  , long_(0)
+  , uLong_(0)
+  , longLong_(0)
+  , uLongLong_(0)
+  , float_(0.0f)
+  , double_(0.0)
+  {
+  }
+
+  void change()
+  {
+    bool_ = true;
+    char_ = -1;
+    sChar_ = -2;
+    uChar_ = 0xff - 3;
+    int_ = -4;
+    uInt_ = -5;
+    long_ = -6l;
+    uLong_ = -7ul;
+    longLong_ = -8ll;
+    uLongLong_ = -9ull;
+    float_ = -10.0f;
+    double_ = -11.0;
+  }
+
+  void serialize(Archive& ar)
+  {
+    ar(bool_, "bool");
+    ar(char_, "char");
+    ar(sChar_, "signed_char");
+    ar(uChar_, "unsigned_char");
+    ar(int_, "int");
+    ar(uInt_, "unsigned_int");
+    ar(long_, "long");
+    ar(uLong_, "unsigned_long");
+    ar(longLong_, "long_long");
+    ar(uLongLong_, "unsigned_long_long");
+    ar(float_, "float");
+    ar(double_, "double");
+  }
+
+  void checkEquality(const NumericTypes& rhs) const
+  {
+    YCHECK(bool_ == rhs.bool_);
+    YCHECK(char_ == rhs.char_);
+    YCHECK(sChar_ == rhs.sChar_);
+    YCHECK(uChar_ == rhs.uChar_);
+    YCHECK(int_ == rhs.int_);
+    YCHECK(uInt_ == rhs.uInt_);
+    YCHECK(long_ == rhs.long_);
+    YCHECK(uLong_ == rhs.uLong_);
+    YCHECK(longLong_ == rhs.longLong_);
+    YCHECK(uLongLong_ == rhs.uLongLong_);
+    YCHECK(float_ == rhs.float_);
+    YCHECK(double_ == rhs.double_);
+  }
+
+  bool bool_;
+
+  char char_;
+  signed char sChar_;
+  unsigned char uChar_;
+
+	int int_;
+	unsigned int uInt_;
+
+  long long_;
+  unsigned long uLong_;
+
+  long long longLong_;
+  unsigned long long uLongLong_;
+
+  float float_;
+  double double_;
+};
 
 class ComplexClass{
 public:
@@ -153,8 +238,11 @@ public:
 		polyVector_.push_back(new PolyBase());
 		polyVector_[4]->change();
 
-		for (size_t i = 0; i < ARRAY_LEN(array_); ++i)
-			array_[i].change(ARRAY_LEN(array_) - i);
+		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
+		for (size_t i = 0; i < arrayLen; ++i)
+			array_[i].change(arrayLen - i);
+
+    numericTypes_.change();
 	}
 
 	void serialize(Archive& ar)
@@ -176,45 +264,51 @@ public:
 				index_ = 0;
 		}
 		ar(array_, "array");
+		ar(numericTypes_, "numericTypes");
 	}
 
 	void checkEquality(const ComplexClass& copy) const
 	{
-		CHECK(name_ == copy.name_);
-		CHECK(index_ == copy.index_);
+		YCHECK(name_ == copy.name_);
+		YCHECK(index_ == copy.index_);
 
-		CHECK(polyPtr_ != 0);
-		CHECK(copy.polyPtr_ != 0);
+		YCHECK(polyPtr_ != 0);
+		YCHECK(copy.polyPtr_ != 0);
 		polyPtr_->checkEquality(copy.polyPtr_);
 
-		CHECK(members_.size() == copy.members_.size());
+		YCHECK(members_.size() == copy.members_.size());
 		for (size_t i = 0; i < members_.size(); ++i)
 		{
 			members_[i].checkEquality(copy.members_[i]);
 		}
 
-		CHECK(polyVector_.size() == copy.polyVector_.size());
+		YCHECK(polyVector_.size() == copy.polyVector_.size());
 		for (size_t i = 0; i < polyVector_.size(); ++i)
 		{
 			if(polyVector_[i] == 0)
 			{
-				CHECK(copy.polyVector_[i] == 0);
+				YCHECK(copy.polyVector_[i] == 0);
 				continue;
 			}
-			CHECK(copy.polyVector_[i] != 0);
+			YCHECK(copy.polyVector_[i] != 0);
 			polyVector_[i]->checkEquality(copy.polyVector_[i]);
 		}
 
-		for (size_t i = 0; i < ARRAY_LEN(array_); ++i)
+		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
+		for (size_t i = 0; i < arrayLen; ++i)
 		{
 			array_[i].checkEquality(copy.array_[i]);
 		}
+
+    numericTypes_.checkEquality(copy.numericTypes_);
 	}
 protected:
 	std::string name_;
 	typedef std::vector<Member> Members;
 	Members members_;
 	int index_;
+  NumericTypes numericTypes_;
+
 	StringListStatic stringList_;
 	std::vector< SharedPtr<PolyBase> > polyVector_;
 	SharedPtr<PolyBase> polyPtr_;

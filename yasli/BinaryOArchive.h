@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Archive.h"
-#include "Tokenizer.h" // for Token
 #include "MemoryWriter.h" 
+#include "BinaryNode.h"
 
 namespace yasli{
 
 class MemoryWriter;
-enum BinaryNode;
 
 class BinaryOArchive : public Archive{
 public:
@@ -28,7 +27,8 @@ public:
   bool operator()(unsigned int &value, const char *name, const char* label);
   bool operator()(short &value, const char *name, const char* label);
   bool operator()(unsigned short &value, const char *name, const char* label);
-  bool operator()(__int64 &value, const char *name, const char* label);
+  bool operator()(long long &value, const char *name, const char* label);
+  bool operator()(unsigned long long &value, const char *name, const char* label);
 
   bool operator()(signed char &value, const char *name, const char* label);
   bool operator()(unsigned char &value, const char *name, const char* label);

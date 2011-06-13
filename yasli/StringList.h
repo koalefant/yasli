@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <string.h>
 #include "yasli/Assert.h"
 
 namespace yasli{
@@ -12,7 +13,7 @@ public:
     enum { npos = -1 };
     int find(const char* value) const{
 		for(std::size_t i = 0; i < size(); ++i){
-            if(std::strcmp((*this)[i], value) == 0)
+            if(strcmp((*this)[i], value) == 0)
                 return i;
         }
         return npos;

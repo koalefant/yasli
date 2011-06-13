@@ -1,10 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "BinaryOArchive.h"
 //#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/TypesFactory.h"
-#include "Unicode.h"
 
 namespace yasli{
 
@@ -37,7 +36,7 @@ const char* BinaryOArchive::buffer()
 
 bool BinaryOArchive::save(const char* filename)
 {
-    FILE* f = ::yasli::fopen(filename, "wb");
+    FILE* f = fopen(filename, "wb");
     if(!f)
         return false;
 
@@ -197,7 +196,7 @@ bool BinaryOArchive::operator()(unsigned int &value, const char *_name, const ch
     return true;
 }
 
-bool BinaryOArchive::operator()(__int64 &value, const char *_name, const char* label)
+bool BinaryOArchive::operator()(long long &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_INT64, _name);
     stream_->write((const char*)&value, sizeof(value));
@@ -205,6 +204,13 @@ bool BinaryOArchive::operator()(__int64 &value, const char *_name, const char* l
     return true;
 }
 
+bool BinaryOArchive::operator()(unsigned long long &value, const char *_name, const char* label)
+{
+    openNode(BINARY_NODE_UINT64, _name);
+    stream_->write((const char*)&value, sizeof(value));
+    closeNode();
+    return true;
+}
 
 bool BinaryOArchive::operator()(const Serializer &ser, const char *_name, const char* label)
 {

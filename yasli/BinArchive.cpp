@@ -1,9 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "BinArchive.h"
 #include <map>
 #include "yasli/MemoryWriter.h"
 #include "yasli/TypesFactory.h"
-#include "Unicode.h"
 
 using namespace std;
 
@@ -38,7 +37,7 @@ size_t BinOArchive::length() const
 
 bool BinOArchive::save(const char* filename)
 {
-    FILE* f = ::yasli::fopen(filename, "wb");
+    FILE* f = fopen(filename, "wb");
     if(!f)
         return false;
 
@@ -205,7 +204,15 @@ bool BinOArchive::operator()(unsigned int& value, const char* name, const char* 
     return true;
 }
 
-bool BinOArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinOArchive::operator()(long long& value, const char* name, const char* label)
+{
+    openNode(name);
+    stream_.write(value);
+    closeNode(name);
+    return true;
+}
+
+bool BinOArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
     openNode(name);
     stream_.write(value);
@@ -296,7 +303,7 @@ bool BinIArchive::load(const char* filename)
 {
 	close();
 
-	FILE* f = ::yasli::fopen(filename, "rb");
+	FILE* f = fopen(filename, "rb");
 	if(!f)
 		return false;
 	fseek(f, 0, SEEK_END);
@@ -486,7 +493,22 @@ bool BinIArchive::operator()(unsigned int& value, const char* name, const char* 
 	return true;
 }
 
-bool BinIArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinIArchive::operator()(long long& value, const char* name, const char* label)
+{
+	if(!strlen(name)){
+		read(value);
+		return true;
+	}
+
+	if(!openNode(name))
+		return false;
+
+	read(value);
+	closeNode(name);
+	return true;
+}
+
+bool BinIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);

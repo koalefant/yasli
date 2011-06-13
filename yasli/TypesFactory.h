@@ -135,7 +135,7 @@ public:
 
 	BaseType* createByIndex(int index) const
 	{
-		ASSERT(index >= 0 && index < creators_.size());
+		ASSERT(size_t(index) < creators_.size());
 		return creators_[index]->create();
 	}
 
@@ -149,7 +149,7 @@ public:
 	// from ClassFactoryInterface:
 	int size() const{ return creators_.size(); }
 	const TypeDescription* descriptionByIndex(int index) const{
-		if(index < 0 || index >= int(creators_.size()))
+		if(size_t(index) >= int(creators_.size()))
 			return 0;
 		return &creators_[index]->description();
 	}

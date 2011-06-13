@@ -11,10 +11,6 @@
 #include "yasli/StringList.h"
 #include "yasli/EnumDescription.h"
 
-#ifndef WIN32
-typedef long long __int64;
-#endif
-
 #pragma warning (disable: 4100)
 
 namespace yasli{ class Archive; }
@@ -91,6 +87,8 @@ public:
 	virtual bool operator()(std::wstring& value, const char* name = "", const char* label = 0);
 	virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
 	virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+  // there is no point to support long double since it is represented as double on MSVC
+	virtual bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
 
 	virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
 	virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
@@ -98,7 +96,8 @@ public:
 	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
 	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
 
-	virtual bool operator()(__int64& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
+	virtual bool operator()(long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
+	virtual bool operator()(unsigned long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
 
 	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(signed short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
@@ -110,6 +109,7 @@ public:
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
+
 
 	virtual bool openBlock(const char* name, const char* label) { return true; }
 	virtual void closeBlock() {}

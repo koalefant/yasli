@@ -1,4 +1,5 @@
 #pragma once 
+#include <stdio.h>
 
 #ifdef ASSERT
 # undef ASSERT
@@ -40,16 +41,11 @@ int assertionDialog(const char* message, const char* str, const char* function, 
       } 
 #  define VERIFY(x) ASSERT(x);
 # else
-#  include <assert.h>
-#  define ASSERT(x) assert((x))
-#  define ASSERT_STR(x, str) assert((x))
-#  define VERIFY(x) assert(x);
+#  define ASSERT(x) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x "\n\tin %s()\n", __LINE__, __FUNCTION__); }  }
+#  define ASSERT_STR(x, str) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x " (%s)\n\tin %s()\n", __LINE__, str, __FUNCTION__); }  }
 # endif
-//# define TRACE(x) ErrorHelpers::trace((x))
 #else
 # define ASSERT(x)
 # define ASSERT_STR(x, str)
-# define VERIFY(x) (x)
-//# define TRACE(x)
 #endif
 #define ESCAPE(x, action) if(!(x)) { ASSERT(0 && #x); action; };

@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <math.h>
-#ifdef WIN32
+#ifdef _MSC_VER
 # include <float.h>
 # define isnan _isnan
 #endif
@@ -56,7 +56,11 @@ MemoryWriter& MemoryWriter::operator<<(long value)
 {
     // TODO: optimize
     char buffer[12];
+#ifdef _MSC_VER
     sprintf(buffer, "%i", value);
+#else
+    sprintf(buffer, "%li", value);
+#endif
     return operator<<((const char*)buffer);
 }
 
@@ -64,15 +68,35 @@ MemoryWriter& MemoryWriter::operator<<(unsigned long value)
 {
     // TODO: optimize
     char buffer[12];
+#ifdef _MSC_VER
     sprintf(buffer, "%u", value);
+#else
+    sprintf(buffer, "%lu", value);
+#endif
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(__int64 value)
+MemoryWriter& MemoryWriter::operator<<(long long value)
 {
     // TODO: optimize
     char buffer[24];
+#ifdef _MSC_VER
+    sprintf(buffer, "%I64i", value);
+#else
+    sprintf(buffer, "%lli", value);
+#endif
+    return operator<<((const char*)buffer);
+}
+
+MemoryWriter& MemoryWriter::operator<<(unsigned long long value)
+{
+    // TODO: optimize
+    char buffer[24];
+#ifdef _MSC_VER
     sprintf(buffer, "%I64u", value);
+#else
+    sprintf(buffer, "%llu", value);
+#endif
     return operator<<((const char*)buffer);
 }
 
@@ -121,7 +145,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 	int point = 0;
 	int sign = 0;
 
-#ifdef WIN32
+#ifdef _MSC_VER
 	char buf[_CVTBUFSIZE];
 	_fcvt_s(buf, value, digits_, &point, &sign);
 #else

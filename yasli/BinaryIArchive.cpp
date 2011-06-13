@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "BinaryIArchive.h"
-#include "Unicode.h"
 
 using std::string;
 
@@ -31,7 +30,7 @@ bool BinaryIArchive::load(const char* filename)
         delete[] loadedData_;
         loadedData_ = 0;
     }
-    FILE* f = ::yasli::fopen(filename, "rb");
+    FILE* f = fopen(filename, "rb");
     if(!f)
         return false;
     fseek(f, 0, SEEK_END);
@@ -242,43 +241,6 @@ void BinaryIArchive::closeNode()
 
 }
 
-Token BinaryIArchive::pullNode(BinaryNode* type)
-{
-    Token name;
-
-    const char* oldPosition = pos_;
-    if(pullPosition_ == 0)
-        pullPosition_ = blocks_.back().innerStart;
-    else
-    {
-        pos_ = pullPosition_;
-        size_t blockSize;
-        read(&blockSize);
-        pullPosition_ += blockSize;
-        ASSERT( pullPosition_ >= blocks_.back().innerStart && 
-                pullPosition_ <= blocks_.back().end );
-        if(pullPosition_ == blocks_.back().end)
-        {
-            pos_ = oldPosition;
-            return Token(0);
-        }
-    }
-
-    pos_ = pullPosition_;
-    if(pos_ == blocks_.back().end && oldPosition == pos_)
-        return Token(0);
-
-    size_t blockSize = readNodeHeader(type, &name);
-    if(blockSize > 0)
-    {
-        pos_ = oldPosition;
-        return name;
-    }
-    else
-        return Token(0);
-
-}
-
 bool BinaryIArchive::operator()(bool& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_BOOL, name))
@@ -363,7 +325,7 @@ bool BinaryIArchive::operator()(unsigned int& value, const char* name, const cha
     return false;
 }
 
-bool BinaryIArchive::operator()(__int64& value, const char* name, const char* label)
+bool BinaryIArchive::operator()(long long& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_INT64, name))
     {
@@ -373,6 +335,15 @@ bool BinaryIArchive::operator()(__int64& value, const char* name, const char* la
     return false;
 }
 
+bool BinaryIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+{
+    if(findNode(BINARY_NODE_UINT64, name))
+    {
+        read(&value);
+        return true;
+    }
+    return false;
+}
 
 bool BinaryIArchive::operator()(signed char& value, const char* name, const char* label)
 {
@@ -468,13 +439,6 @@ bool BinaryIArchive::operator()(const PointerSerializationInterface& ptr, const 
         return true;
     }
     return false;
-}
-
-const char* BinaryIArchive::pull()
-{
-    BinaryNode type;
-    pulledName_ = pullNode(&type).str();
-	return pulledName_.c_str();
 }
 
 }

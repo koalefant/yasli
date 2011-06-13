@@ -10,5 +10,5 @@ endif(WIN32)
 add_library("yasli" ${SOURCES})
 set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 
-include("Testo")
-TESTO("yasli" "Test.cpp")
+#include("Testo")
+#TESTO("yasli" "Test.cpp")
