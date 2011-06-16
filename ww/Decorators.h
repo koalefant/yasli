@@ -14,14 +14,14 @@ struct ButtonDecorator{
 	operator bool() const{
 		return pressed;
 	}
-	void serialize(Archive& ar) {}
+	void serialize(yasli::Archive& ar) {}
 
 	bool pressed;
 	const char* text;
 };
 
 struct HLineDecorator{
-	void serialize(Archive& ar) {}
+	void serialize(yasli::Archive& ar) {}
 };
 
 struct RadioDecorator{
@@ -52,7 +52,7 @@ struct RadioDecorator{
 		value_ = value;
 		return *this;
 	}
-    void serialize(Archive& ar)
+    void serialize(yasli::Archive& ar)
     {
         ar(value_, "value", "Value");
     }
@@ -90,7 +90,7 @@ struct NotDecorator{
 		value_ = value;
 		return *this;
 	}
-    void serialize(Archive& ar)
+    void serialize(yasli::Archive& ar)
     {
         ar(value_, "value", "Value");
     }
@@ -102,7 +102,7 @@ struct NotDecorator{
 
 template<class T, class PointerType = SharedPtr<T> >
 struct OptionalPtr : PointerType{
-	void serialize(Archive& ar){
+	void serialize(yasli::Archive& ar){
 		xassert(ar.isEdit());
 		bool optionallyEnabled = false;
 		if(ar.isInput()){
