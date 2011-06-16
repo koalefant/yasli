@@ -2,7 +2,7 @@
 
 #include "XMath/Colors.h"
 #include "XMath/Rectf.h"
-#include "XMath/Recti.h"
+#include "ww/Rect.h"
 
 struct HDC__;
 typedef HDC__* HDC;
@@ -41,7 +41,7 @@ public:
     Vect2f fromView(const Vect2i& p) const;
 private:
     HDC dc_;
-    Recti visibleRect_;
+    Rect visibleRect_;
 };
 
 }

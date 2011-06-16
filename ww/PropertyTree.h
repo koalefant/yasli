@@ -109,10 +109,10 @@ protected:
 
     bool onContextMenu(PropertyRow* row, PopupMenuItem& menu);
     bool onRowKeyDown(PropertyRow* row, KeyPress key);
-    bool onRowLMBDown(PropertyRow* row, const Recti& rowRect, Vect2i point);
-    void onRowLMBUp(PropertyRow* row, const Recti& rowRect, Vect2i point);
-    void onRowRMBDown(PropertyRow* row, const Recti& rowRect, Vect2i point);
-    void onRowMouseMove(PropertyRow* row, const Recti& rowRect, Vect2i point);
+    bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point);
+    void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2i point);
+    void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point);
+    void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2i point);
 
     void onRowMenuUndo();
     void onRowMenuCopy(PropertyRow* row);

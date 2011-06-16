@@ -129,7 +129,7 @@ ColorRampImpl::ColorRampImpl(ColorRamp* owner)
 , mouseArea_(0)
 , owner_(owner)
 {
-	create(L"", WS_CHILD, Recti(0, 0, 40, 40), *Win32::_globalDummyWindow, WS_EX_CLIENTEDGE);
+	create(L"", WS_CHILD, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow, WS_EX_CLIENTEDGE);
 	createRampBitmap();
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ww/Win32/Types.h"
+#include "ww/Rect.h"
 #include "XMath/Colors.h"
-#include "XMath/Recti.h"
 
 class KeysColor;
 
@@ -31,7 +31,7 @@ namespace Win32{
 		return c.rgb();
 	}
 	// void drawGradient(HDC dc, const RECT& rect, KeysColor& gradient, bool alphaOnly = false);
-	void drawColorBlend(HDC dc, const Recti& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly = false);
+	void drawColorBlend(HDC dc, const ww::Rect& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly = false);
 
 	void drawVerticalBlend(HDC dc, const RECT& rect, COLORREF color1, COLORREF color2);
 

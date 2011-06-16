@@ -56,7 +56,7 @@ Viewport2DImpl::Viewport2DImpl(Viewport2D* owner)
 , owner_(owner)
 , initialized_(false)
 {
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Recti(0, 0, 0, 0), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 0, 0), *Win32::_globalDummyWindow));
 	initialized_ = true;
 }
 

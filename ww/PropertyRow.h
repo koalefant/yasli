@@ -151,22 +151,22 @@ public:
 	virtual int floorHeight() const{ return 0; }
 
     void updateSize(const PropertyTree* tree);
-    void adjustRect(const PropertyTree* tree, const Recti& rect, Vect2i pos, int& totalHeight, int& extraSize);
+    void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2i pos, int& totalHeight, int& extraSize);
 	void scaleSize(float t, bool scaleWidget);
 	void cutSize(int& extraSize, bool cutWidget);
 
 	virtual bool hasIcon() const{ return false; }
 
-	const Recti rect() const{ return Recti(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
-	const Recti textRect() const{ return Recti(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-    const Recti widgetRect() const{ return Recti(widgetPos_, pos_.y, widgetPos_ + widgetSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-    const Recti plusRect() const{ return Recti(pos_.x, pos_.y, pos_.x + plusSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-	const Recti floorRect() const { return Recti(textPos_, pos_.y + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, pos_.y + size_.y); }
-	void adjustHoveredRect(Recti& hoveredRect);
+	const Rect rect() const{ return Rect(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
+	const Rect textRect() const{ return Rect(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+    const Rect widgetRect() const{ return Rect(widgetPos_, pos_.y, widgetPos_ + widgetSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+    const Rect plusRect() const{ return Rect(pos_.x, pos_.y, pos_.x + plusSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
+	const Rect floorRect() const { return Rect(textPos_, pos_.y + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, pos_.y + size_.y); }
+	void adjustHoveredRect(Rect& hoveredRect);
 	Gdiplus::Font* rowFont(const PropertyTree* tree) const;
 	
 	void drawRow(HDC dc, const PropertyTree* tree);
-    void drawPlus(Gdiplus::Graphics* gr, const Recti& rect, bool expanded, bool selected, bool grayed) const;
+    void drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expanded, bool selected, bool grayed) const;
 	void drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect);
 	virtual void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect) {}
 	virtual PropertyRowWidget* createWidget(PropertyTree* tree) { return 0; }

@@ -175,10 +175,10 @@ CheckComboBoxImpl::CheckComboBoxImpl(ww::CheckComboBox* owner)
 , itemHeightSet_(false)
 {
 	
-	//VERIFY(create(L"", WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST, Recti(0, 0, 24, 24), Win32::_globalDummyWindow));
+	//VERIFY(create(L"", WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST, Rect(0, 0, 24, 24), Win32::_globalDummyWindow));
 
 	bool created = false;
-	VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Recti(0, 0, 30, 30), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Rect(0, 0, 30, 30), *Win32::_globalDummyWindow));
 
 	if(!created){
 		DWORD error = GetLastError();
@@ -447,14 +447,14 @@ void CheckComboBox::updateMinimalSize()
 }
 
 
-void CheckComboBox::_setPosition(const Recti& position)
+void CheckComboBox::_setPosition(const Rect& position)
 {
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
 	ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
-	Recti pos(position.left() + border_, position.top() + border_,
+	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_ * 2, position.bottom() - border_ * 2 + _minimalSize().y * dropDownHeight_);
 	deferer->defer(_window(), pos);
 }

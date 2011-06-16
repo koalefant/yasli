@@ -38,16 +38,16 @@ DragWindow::DragWindow(TreeImpl* treeImpl)
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 	if(useLayeredWindows_){
 		exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-		VERIFY(create(L"", WS_POPUP | WS_DISABLED, Recti(0, 0, 320, 320), 0, exStyle));
+		VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 	}
 	else{
-		Recti treeRect(0, 0, 100, 100);
+		Rect treeRect(0, 0, 100, 100);
 		VERIFY(create(L"", WS_POPUP | WS_DISABLED, treeRect, 0, exStyle));
 	}
 }
 #pragma warning(pop)
 
-void DragWindow::set(TreeImpl* treeImpl, PropertyRow* row, const Recti& rowRect)
+void DragWindow::set(TreeImpl* treeImpl, PropertyRow* row, const Rect& rowRect)
 {
 	RECT rect;
 	GetClientRect(*treeImpl_, &rect);
@@ -109,7 +109,7 @@ protected:
 
 void DragWindow::drawRow(HDC dc)
 {
-	Recti entireRowRect(0, 0, rect_.width(), rect_.height());
+	Rect entireRowRect(0, 0, rect_.width(), rect_.height());
 
 	HGDIOBJ oldBrush = ::SelectObject(dc, GetSysColorBrush(COLOR_BTNFACE));
 	HGDIOBJ oldPen = ::SelectObject(dc, GetStockObject(BLACK_PEN));
@@ -198,8 +198,8 @@ bool DragController::dragOn(POINT screenPoint)
 	if(!dragging_ && (Vect2i(startPoint_.x, startPoint_.y) - Vect2i(screenPoint.x, screenPoint.y)).norm2() >= 25)
 		if(row_->canBeDragged()){
 			needCapture = true;
-			Recti rect = row_->rect();
-            rect = Recti(rect.leftTop() - treeImpl_->offset_ + Vect2i(treeImpl_->tree()->tabSize(), 0), 
+			Rect rect = row_->rect();
+            rect = Rect(rect.leftTop() - treeImpl_->offset_ + Vect2i(treeImpl_->tree()->tabSize(), 0), 
                          rect.rightBottom() - treeImpl_->offset_);
             
 			window_.set(treeImpl_, row_, rect);
@@ -261,7 +261,7 @@ void DragController::trackRow(POINT pt)
 void DragController::drawUnder(HDC dc)
 {
 	if(dragging_ && destinationRow_ == hoveredRow_ && hoveredRow_){
-		Recti rowRect = hoveredRow_->rect();
+		Rect rowRect = hoveredRow_->rect();
 		rowRect.setLeft(rowRect.left() + treeImpl_->tree()->tabSize());
 		FillRect(dc, &Win32::Rect(rowRect), GetSysColorBrush(COLOR_HIGHLIGHT));
 	}
@@ -272,7 +272,7 @@ void DragController::drawOver(HDC dc)
 	if(!dragging_)
 		return;
 	
-	Recti rowRect = row_->rect();
+	Rect rowRect = row_->rect();
 	{
 		Win32::StockSelector brush(dc, GetSysColorBrush(COLOR_BTNFACE));
 		Win32::StockSelector pen(dc, GetStockObject(NULL_PEN));
@@ -281,7 +281,7 @@ void DragController::drawOver(HDC dc)
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
 		const int tickSize = 4;
-		Recti hoveredRect = hoveredRow_->rect();
+		Rect hoveredRect = hoveredRow_->rect();
 		hoveredRect.setLeft(hoveredRect.left() + treeImpl_->tree()->tabSize());
 
 		if(!before_){ // previous
@@ -337,7 +337,7 @@ TreeImpl::TreeImpl(PropertyTree* tree)
 , redrawLock_(false)
 , redrawRequest_(false)
 {
-	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Recti(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
 }
 #pragma warning(pop)
 
@@ -421,7 +421,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 		}			
 	}
 	if(capturedRow_){
-		Recti rowRecti = capturedRow_->rect();
+		Rect rowRecti = capturedRow_->rect();
 		tree_->onRowLMBUp(capturedRow_, rowRecti, Vect2i(x + offset_.x, y + offset_.y));
 		capturedRow_ = 0;
 	}
@@ -528,7 +528,7 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
 			}
 		}
 		if(capturedRow_){
-			Recti rect;
+			Rect rect;
 			getRowRect(capturedRow_, rect);
 			tree_->onRowMouseMove(capturedRow_, rect, point);
 		}
@@ -664,7 +664,7 @@ LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 
 struct DrawVisitor
 {
-	DrawVisitor(HDC dc, const Recti& area, int scrollOffset)
+	DrawVisitor(HDC dc, const Rect& area, int scrollOffset)
 		: area_(area)
 		, dc_(dc)
 		, offset_(0)
@@ -686,7 +686,7 @@ struct DrawVisitor
 
 protected:
 	HDC dc_;
-	Recti area_;
+	Rect area_;
 	int offset_;
 	int scrollOffset_;
 };
@@ -719,6 +719,7 @@ void TreeImpl::redraw(HDC dc)
 	if(size_.y > clientHeight)
 	{
 		using namespace Gdiplus;
+		using Gdiplus::Rect;
 		Graphics gr(dc);
 		const int shadowHeight = 10;
 		//Color color1(gdiplusSysColor(COLOR_BTNFACE));
@@ -759,7 +760,7 @@ void TreeImpl::redraw(HDC dc)
 	}
 }
 
-TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2i point, const Recti& rowRect)
+TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2i point, const Rect& rowRect)
 {
 	if(!row->hasVisibleChildren(tree()) && row->plusRect().pointInside(point))
 		return TREE_HIT_PLUS;
@@ -808,7 +809,7 @@ struct RowRectObtainer
 	PropertyRow* row_;
 };
 
-bool TreeImpl::getRowRect(PropertyRow* row, Recti& outRect, bool onlyVisible)
+bool TreeImpl::getRowRect(PropertyRow* row, Rect& outRect, bool onlyVisible)
 {
     if(!model()->root())
         return false;
@@ -834,7 +835,7 @@ void TreeImpl::ensureVisible(PropertyRow* row, bool update)
 
 	tree_->expandParents(row);
 
-	Recti rect = row->rect();
+	Rect rect = row->rect();
 	if(rect.top() < area_.top() + offset_.y){
 		offset_.y =  rect.top() - area_.top();
 	}

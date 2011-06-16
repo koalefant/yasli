@@ -66,7 +66,7 @@ void Win32Proxy::_arrangeChildren()
 	VERIFY(::GetClientRect(parentHwnd_, &rect));
 	VERIFY(::InflateRect(&rect, -border_, -border_));
 
-	Recti recti(rect.left, rect.top, rect.right, rect.bottom);
+	Rect recti(rect.left, rect.top, rect.right, rect.bottom);
 	Container::_setPosition(recti);
 	_window()->move(recti);
 

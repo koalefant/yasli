@@ -26,14 +26,14 @@ void _WidgetWithWindow::setWindow(Win32::Window32* window)
 	window_ = window;
 }
 
-void _WidgetWithWindow::_setPosition(const Recti& position)
+void _WidgetWithWindow::_setPosition(const ww::Rect& position)
 {
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
 	ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
-	Recti pos(position.left() + border_, position.top() + border_,
+	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_, position.bottom() - border_);
 	deferer->defer(window_, pos);
 }
@@ -92,10 +92,10 @@ _ContainerWithWindow::~_ContainerWithWindow()
 	delete window;
 }
 
-void _ContainerWithWindow::_setPosition(const Recti& position)
+void _ContainerWithWindow::_setPosition(const Rect& position)
 {
 	Container::_setPosition(position);
-	window_->move(Recti(position.left() + border(), position.top() + border(), position.right() - border(), position.bottom() - border()));
+	window_->move(Rect(position.left() + border(), position.top() + border(), position.right() - border(), position.bottom() - border()));
 	_arrangeChildren();
 }
 

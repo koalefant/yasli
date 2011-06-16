@@ -451,9 +451,9 @@ void PropertyRowPointer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widg
 {
 	using namespace Gdiplus;
 
-	Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
+	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
-	LinearGradientBrush brush(Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
+	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
 
 	Color colors[3] = { brushColor, brushColor, gdiplusSysColor(COLOR_3DSHADOW) };
 	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };

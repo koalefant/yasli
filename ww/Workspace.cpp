@@ -32,7 +32,7 @@ public:
 	const wchar_t* className() const{ return L"ww.FloatingSplitter"; }
 	FloatingSplitter();
 
-	void set(const Recti& rect);
+	void set(const Rect& rect);
 
 	void redraw(HDC dc);
 	void onMessagePaint();
@@ -42,7 +42,7 @@ protected:
 	void drawRow(HDC dc);
 	void updateLayeredWindow();
 
-	Recti rect_;
+	Rect rect_;
 	HBITMAP bitmap_;
 	COLORREF* bitmapBits_;
 };
@@ -54,7 +54,7 @@ FloatingSplitter::FloatingSplitter()
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
 	exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Recti(0, 0, 320, 320), 0, exStyle));
+	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 }
 #pragma warning(pop)
 
@@ -65,7 +65,7 @@ void FloatingSplitter::redraw(HDC dc)
 	DrawEdge(dc, &rt, BDR_RAISEDINNER, BF_RECT);
 }
 
-void FloatingSplitter::set(const Recti& rect)
+void FloatingSplitter::set(const Rect& rect)
 {
 	rect_ = rect;
 	if(::IsWindow(*this)){
@@ -117,7 +117,7 @@ void FloatingSplitter::onMessagePaint()
 
 // ---------------------------------------------------------------------------
 
-static bool isVerticalSplit(Recti rect, Vect2i point)
+static bool isVerticalSplit(Rect rect, Vect2i point)
 {
 	if(rect.left() != 0){
 		point.x -= rect.left();
@@ -170,7 +170,7 @@ WorkspaceImpl::WorkspaceImpl(Workspace* owner)
 , splitting_(false)
 {
 	floatingSplitter_ = new FloatingSplitter();
-	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Recti(0,0, 20, 20), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0,0, 20, 20), *Win32::_globalDummyWindow));
 }
 
 WorkspaceImpl::~WorkspaceImpl()
@@ -295,16 +295,16 @@ void WorkspaceImpl::onMessageLButtonDown(UINT button, int x, int y)
 	return Win32::Window32::onMessageLButtonDown(button, x, y);
 }
 
-static Recti calculateSplitterRect(const Recti& spaceRect, Vect2i point)
+static Rect calculateSplitterRect(const Rect& spaceRect, Vect2i point)
 {
 	int splitterWidth = Splitter::SPLITTER_WIDTH;
 	int halfWidth = Splitter::SPLITTER_WIDTH / 2;
 
 	if(isVerticalSplit(spaceRect, point))
-		return Recti(spaceRect.left(), point.y - halfWidth,
+		return Rect(spaceRect.left(), point.y - halfWidth,
 		             spaceRect.right(), point.y - halfWidth + splitterWidth);
 	else
-		return Recti(point.x - halfWidth, spaceRect.top(),
+		return Rect(point.x - halfWidth, spaceRect.top(),
 		             splitterWidth, spaceRect.height());
 }
 
@@ -327,7 +327,7 @@ void WorkspaceImpl::onMessageMouseMove(UINT button, int x, int y)
 				
 				//if(isVerticalSplit(rect.recti(), point) == vertical()){
 
-				Recti splitterRect = calculateSplitterRect(rect.recti(), Vect2i(pt.x, pt.y));
+				Rect splitterRect = calculateSplitterRect(rect.recti(), Vect2i(pt.x, pt.y));
 				floatingSplitter_->set(splitterRect);
 				/*
 				Win32::Rect rt;
@@ -455,7 +455,7 @@ void Workspace::_arrangeChildren()
 		RECT rect;
 		VERIFY(::GetClientRect(*impl(), &rect));
 		VERIFY(::InflateRect(&rect, -border_, -border_));
-		rootWidget_->_setPosition(Recti(rect.left , rect.top, rect.right + rect.left, rect.bottom));
+		rootWidget_->_setPosition(Rect(rect.left , rect.top, rect.right + rect.left, rect.bottom));
 	}
 }
 
@@ -845,7 +845,7 @@ public:
 	const wchar_t* className() const{ return L"ww.DarkOverlay"; }
 	DarkOverlay();
 
-	void set(const Recti& rect);
+	void set(const Rect& rect);
 
 	void redraw(HDC dc);
 	void onMessagePaint();
@@ -855,7 +855,7 @@ protected:
 	void drawRow(HDC dc);
 	void updateLayeredWindow();
 
-	Recti rect_;
+	Rect rect_;
 	HBITMAP bitmap_;
 	COLORREF* bitmapBits_;
 };
@@ -867,7 +867,7 @@ DarkOverlay::DarkOverlay()
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
 	exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Recti(0, 0, 320, 320), 0, exStyle));
+	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 }
 #pragma warning(pop)
 
@@ -877,7 +877,7 @@ void DarkOverlay::redraw(HDC dc)
 	FillRect(dc, &rt, (HBRUSH)GetStockObject(BLACK_BRUSH));
 }
 
-void DarkOverlay::set(const Recti& rect)
+void DarkOverlay::set(const Rect& rect)
 {
 	rect_ = rect;
 	if(::IsWindow(*this)){
@@ -1006,7 +1006,7 @@ void SpaceSplitterImpl::onMenuJoin(int splitterIndex)
 int SpaceSplitterImpl::hoveredHalf(int x, int y)
 {
 	ASSERT(splitterIndex_ >= 0);
-	Recti rect = getSplitterRect(splitterIndex_);
+	Rect rect = getSplitterRect(splitterIndex_);
 	if(owner_->vertical()){
 		int center = rect.top() + rect.height() / 2;
 		return y > center ? 1 : 0;
@@ -1166,7 +1166,7 @@ SpaceHeaderImpl::SpaceHeaderImpl(SpaceHeader* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	create(L"", WS_CHILD, Recti(0, 0, 20, 20), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
 }
 
 

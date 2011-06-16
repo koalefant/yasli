@@ -13,7 +13,7 @@
 #include "yasli/TypesFactory.h"
 
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <windows.h>
 
 namespace ww{
 YASLI_CLASS(Container, Window, "Application Window")
@@ -120,7 +120,6 @@ int WindowImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 	return __super::onMessageKeyDown(keyCode, count, flags);
 }
 
-
 // -------------------------------------------------------------------------------------
 Window::Window(Application* app, int border)
 {
@@ -139,7 +138,6 @@ Window::Window(HWND parent, int border)
 	style_ = 0;
 	init(parent, border, 0);
 }
-
 
 Window::~Window()
 {
@@ -169,7 +167,7 @@ void Window::init(HWND owner, int border, Application* app)
         hotkeyContext_->installFilter(app_);
 
 	window_ = new WindowImpl(this);
-	VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Recti(0, 0, 400, 400), owner));
+	VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Rect(0, 0, 400, 400), owner));
 	setBorder(border);
 	
 	hotkeyContext_->signalPressed(KeyPress(KEY_TAB)).connect(this, &Window::onHotkeyFocusNext);
@@ -207,7 +205,7 @@ void Window::setResizeable(bool allowResize)
 	window_->setStyle(calculateStyle()); 
 }
 
-void Window::setRestoredPosition(const Recti& position)
+void Window::setRestoredPosition(const Rect& position)
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
@@ -216,7 +214,7 @@ void Window::setRestoredPosition(const Recti& position)
 	VERIFY(SetWindowPlacement(*_window(), &placement));
 }
 
-Recti Window::restoredPosition() const
+Rect Window::restoredPosition() const
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
@@ -394,7 +392,7 @@ void Window::reposition()
         break;
     } 
     }
-    Recti rect(left, top, left + width, top + height);
+    Rect rect(left, top, left + width, top + height);
 
 	::SetWindowPos(*window_, 0, rect.left(), rect.top(), rect.width(), rect.height(), SWP_NOZORDER | SWP_NOACTIVATE | (visible_ ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
 	positioned_ = true;
@@ -426,7 +424,7 @@ void Window::_arrangeChildren()
 		RECT rect;
 		VERIFY(::GetClientRect(*window_, &rect));
 		VERIFY(::InflateRect(&rect, -border_, -border_));
-		child_->_setPosition(Recti(rect.left, rect.top, rect.right, rect.bottom));
+		child_->_setPosition(Rect(rect.left, rect.top, rect.right, rect.bottom));
 	}
 }
 
@@ -454,7 +452,7 @@ void Window::_relayoutParents()
         move = true;
 	}
 	if(move){
-		window_->move(Recti(windowRect.left, windowRect.top, windowRect.right, windowRect.bottom));
+		window_->move(Rect(windowRect.left, windowRect.top, windowRect.right, windowRect.bottom));
 		window_->update();
 	}
 	else
@@ -488,7 +486,7 @@ void Window::serialize(Archive& ar)
 		ar(child_, "widget", "Widget");
 	}
     else if(ar.filter(SERIALIZE_STATE)){
-		Recti position = restoredPosition();
+		Rect position = restoredPosition();
 		bool maximized = this->maximized();
 
 		ar.serialize(position, "restoredPosition", "Restored Position");

@@ -30,7 +30,7 @@ SplitterImpl::SplitterImpl(ww::Splitter* owner)
 , grabbedSplitter_(-1)
 , lastCursorPosition_(0, 0)
 {
-	create(L"", WS_CHILD | WS_CLIPCHILDREN, Recti(0, 0, 100, 100), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0, 0, 100, 100), *Win32::_globalDummyWindow);
 }
 
 void SplitterImpl::onMessagePaint()
@@ -47,7 +47,7 @@ void SplitterImpl::onMessagePaint()
         if(owner_ && !owner_->flat_){
             int count = owner_->splittersCount();
             for(int i = 0; i < count; ++i){
-                Recti rect = owner_->getSplitterRect(i);
+                Rect rect = owner_->getSplitterRect(i);
                 int spacing = owner_->splitterSpacing();
 
                 int hspacing = owner_->positionFromPoint(Vect2i(spacing, 0));
@@ -73,7 +73,7 @@ BOOL SplitterImpl::onMessageSetCursor(HWND window, USHORT hitTest, USHORT messag
 	VERIFY(::ScreenToClient(handle_, &cursorPosition));
 
 	for(int i = 0; i < count; ++i){
-		Recti rect = owner_->getSplitterRect(i);
+		Rect rect = owner_->getSplitterRect(i);
 
 		if(rect.pointInside(Vect2i(cursorPosition.x, cursorPosition.y))){
 			if(owner_->positionFromPoint(Vect2i(0xffff,  0)))
@@ -110,7 +110,7 @@ int SplitterImpl::splitterByPoint(Vect2i point)
 {
 	int count = owner_->splittersCount();
 	for(int i = 0; i < count; ++i){
-		Recti rect = owner_->getSplitterRect(i);
+		Rect rect = owner_->getSplitterRect(i);
 		if(rect.pointInside(point)){
 			return i;
 		}
@@ -118,7 +118,7 @@ int SplitterImpl::splitterByPoint(Vect2i point)
 	return -1;
 }
 
-Recti SplitterImpl::getSplitterRect(int splitterIndex)
+Rect SplitterImpl::getSplitterRect(int splitterIndex)
 {
 	return owner_->getSplitterRect(splitterIndex);
 }
@@ -207,7 +207,7 @@ void Splitter::add(Widget* widget, float position, bool fold, int beforeIndex)
 	_queueRelayout();
 }
 
-void Splitter::_setPosition(const Recti& position)
+void Splitter::_setPosition(const Rect& position)
 {
 	Container::_setPosition(position);
 	window_->move(position);
@@ -294,7 +294,7 @@ void Splitter::_arrangeChildren()
 						snapOffset = size - len;
 				}
 
-				Recti rect = rectByPosition(start, start + len + snapOffset);
+				Rect rect = rectByPosition(start, start + len + snapOffset);
 				widget->_setVisibleInLayout(visibleInLayout);
 				widget->_setPosition(rect);
 
@@ -408,7 +408,7 @@ int Splitter::splittersCount()
 	return std::max(0, int(elements_.size()) - 1);
 }
 
-Recti Splitter::getSplitterRect(int splitterIndex)
+Rect Splitter::getSplitterRect(int splitterIndex)
 {
 	ASSERT(splitterIndex < int(elements_.size()) - 1);
 	Elements::iterator it = elements_.begin();
@@ -551,9 +551,9 @@ void HSplitter::setSplitterMinimalSize(const Vect2i& size)
 	minimalSize_ = size;
 }
 
-Recti HSplitter::rectByPosition(int start, int end) 
+Rect HSplitter::rectByPosition(int start, int end) 
 {
-	Recti rect(border_ + start, border_, border_ + end, border_ + _position().height() - 2 * border_);
+	Rect rect(border_ + start, border_, border_ + end, border_ + _position().height() - 2 * border_);
 	return rect;
 }
 
@@ -611,9 +611,9 @@ void VSplitter::setSplitterMinimalSize(const Vect2i& size)
 	minimalSize_.y = size.x;
 }
 
-Recti VSplitter::rectByPosition(int start, int end) 
+Rect VSplitter::rectByPosition(int start, int end) 
 {
-	Recti rect(border_, border_ + start, _position().width() - border_, border_ + end);
+	Rect rect(border_, border_ + start, _position().width() - border_, border_ + end);
 	return rect;
 }
 

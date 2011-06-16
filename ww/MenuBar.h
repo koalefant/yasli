@@ -64,7 +64,7 @@ public:
 
     void registerHotkeys(Window* mainWindow);
 
-    void _setPosition(const Recti& position);
+    void _setPosition(const Rect& position);
     void _setParent(Container* container);
     void _updateVisibility();
 protected:

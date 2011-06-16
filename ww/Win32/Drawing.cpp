@@ -187,7 +187,7 @@ void drawComboBox(HDC dc, const RECT& rect, const wchar_t* text, HFONT font)
 }
 
 
-void drawColorBlend(HDC dc, const Recti& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly)
+void drawColorBlend(HDC dc, const ww::Rect& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly)
 {
 	Win32::StockSelector pen(dc, GetStockObject(DC_PEN));
 	for(int i = rect.left(); i <= rect.right (); ++i){

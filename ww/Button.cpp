@@ -55,7 +55,7 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 , owner_(owner)
 , button_(0)
 {
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Recti(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 	button_ = ::CreateWindow( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, *this, 0, (HINSTANCE)GetWindowLong(*this, GWLP_HINSTANCE), 0);
 	ASSERT(button_);
 	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(button_, GWLP_WNDPROC));

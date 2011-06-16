@@ -19,7 +19,7 @@ public:
 
 	void setWindow(Win32::Window32* window);
 
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 	void _setParent(Container* container);
 	void _setFocus();
 	void _updateVisibility();
@@ -38,7 +38,7 @@ public:
 	_ContainerWithWindow(_ContainerWindow* window, int border);
 	~_ContainerWithWindow();
 
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 	void _setParent(Container* container);
 	void _setFocus();
 	void _updateVisibility();

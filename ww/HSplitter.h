@@ -15,7 +15,7 @@ protected:
 	bool vertical() { return false; }
 	int boxLength() const;
 	Vect2i elementSize(Widget* widget) const;
-	Recti rectByPosition(int start, int end);
+	Rect rectByPosition(int start, int end);
 	void setSplitterMinimalSize(const Vect2i& size);
 	int positionFromPoint(const Vect2i point) const;
 };

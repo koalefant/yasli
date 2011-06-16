@@ -31,24 +31,24 @@ enum WindowPosition{
 
 class WW_API Window : public Container{
 public:
-    Window(Application* app, int border = 4);
-    //Window(Widget* owner, int border = 4);
-    Window(int border = 4, int style = 0);
+	Window(Application* app, int border = 4);
+	//Window(Widget* owner, int border = 4);
+	Window(int border = 4, int style = 0);
 
-    // virtuals:
-    ~Window();
+	// virtuals:
+	~Window();
 
 	bool isVisible() const;
 	void showAll();
 
-    void visitChildren(WidgetVisitor& visitor) const;
-    // ^^^
+	void visitChildren(WidgetVisitor& visitor) const;
+	// ^^^
 
 
 	/// добавить контрол в окно
 	void add(Widget* widget);
-    /// убирает единственный дочерний виджет
-    void remove();
+	/// убирает единственный дочерний виджет
+	void remove();
 
 	/// устанавливает заголок окна (тот, что в TitleBar-е)
 	void setTitle(std::string str);
@@ -60,22 +60,22 @@ public:
 	void setDefaultPosition(WindowPosition position);
 	void setDefaultSize(Vect2i size);
 
-    /// разрешает/запрещает изменение размеров окна
+	/// разрешает/запрещает изменение размеров окна
 	void setResizeable(bool allowResize);
 	bool resizeable() const{ return resizeable_; }
-    /// разрешает/запрещает сворачивание окна
+	/// разрешает/запрещает сворачивание окна
 	void setMinimizeable(bool allowMinimize);
 	bool minimizeable() const{ return minimizeable_; }
 
-	Recti restoredPosition() const;
-	void setRestoredPosition(const Recti& position);
+	Rect restoredPosition() const;
+	void setRestoredPosition(const Rect& position);
 
 	void setMaximized(bool maximized);
 	bool maximized() const;
 
 	// signals
 	sigslot::signal0& signalClose(){ return signalClose_; }
-    sigslot::signal0& signalActivate(){ return signalActivate_; }
+	sigslot::signal0& signalActivate(){ return signalActivate_; }
 
 	// virtual events:
 	virtual void onClose();
@@ -95,11 +95,11 @@ public:
 	void onHotkeyFocusPrev();
 
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
-    void _setFocusedWidget(Widget* widget);
-    Widget* _focusedWidget(){ return focusedWidget_; }
+	void _setFocusedWidget(Widget* widget);
+	Widget* _focusedWidget(){ return focusedWidget_; }
 
 protected:
-    Window(HWND parent, int border);
+	Window(HWND parent, int border);
 	void init(HWND parent, int border, Application* app);
 
 	void _updateVisibility();
@@ -109,7 +109,6 @@ protected:
 	void _setFocus();
 	unsigned int calculateStyle();
 	void reposition();
-
 
 	sigslot::signal0 signalClose_;
 	sigslot::signal0 signalActivate_;
@@ -127,12 +126,12 @@ protected:
 	Widget* focusedWidget_;
 	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
 
-    Win32::Window32* window_;
+	Win32::Window32* window_;
 
 	Widget* defWidget_;
-    Application* app_;
+	Application* app_;
 
-    friend class WindowImpl;
+	friend class WindowImpl;
 };
 
 };

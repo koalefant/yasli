@@ -44,12 +44,12 @@ public:
 
 	void _updateVisibility();
 	void _setParent(Container* container);
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 	void _arrangeChildren();
 	void _relayoutParents();
 
 	int splittersCount();
-	Recti getSplitterRect(int splitterIndex);
+	Rect getSplitterRect(int splitterIndex);
 protected:
 	friend SplitterImpl;
 
@@ -59,7 +59,7 @@ protected:
 	virtual int boxLength() const = 0;
 	virtual Vect2i elementSize(Widget* widget) const = 0;
 	virtual void setSplitterMinimalSize(const Vect2i& size) = 0;
-	virtual Recti rectByPosition(int start, int end) = 0;
+	virtual Rect rectByPosition(int start, int end) = 0;
 	virtual int positionFromPoint(const Vect2i point) const = 0;
 
 	int splitterWidth() const;
@@ -74,7 +74,7 @@ protected:
 		}
 		void serialize(Archive& ar);
 		SharedPtr<ww::Widget> widget;
-		Recti splitterRect;
+		Rect splitterRect;
 		float position;
 		float snappedPosition;
 		bool fold;

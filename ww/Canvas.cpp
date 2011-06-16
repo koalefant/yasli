@@ -52,8 +52,8 @@ void Canvas::fillCircle(const Vect2f& pos, float radius, const Color4c& color)
     ESCAPE(dc_, return);
     Vect2i p(toView(pos));
     Vect2f center = toView(pos);
-    Recti r(toView(pos - Vect2f(radius, radius)),
-            toView(pos + Vect2f(radius, radius)));
+	Rect r(toView(pos - Vect2f(radius, radius)),
+		   toView(pos + Vect2f(radius, radius)));
     AutoSelector oldPen(dc_, CreateSolidBrush(RGB(color.r, color.g, color.b)));
     AutoSelector oldBrush(dc_, GetStockObject(NULL_PEN));
     Ellipse(dc_, r.left(), r.top(), r.right(), r.bottom());

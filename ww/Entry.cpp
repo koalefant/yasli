@@ -52,7 +52,7 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 , owner_(owner)
 , setting_(false)
 {
-	VERIFY(create(L"", generateStyle(), Recti(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
+	VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));

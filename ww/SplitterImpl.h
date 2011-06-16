@@ -19,7 +19,7 @@ protected:
 	void	onMessagePaint();
 
 	int splitterByPoint(Vect2i point);
-	Recti getSplitterRect(int splitterIndex);
+	Rect getSplitterRect(int splitterIndex);
 
 	ww::Splitter* owner_;
 	Vect2i lastCursorPosition_;

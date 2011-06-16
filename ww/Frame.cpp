@@ -38,7 +38,7 @@ FrameImpl::FrameImpl(Frame* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Recti(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 #pragma warning(pop)
@@ -91,7 +91,7 @@ LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				::GetClientRect(*this, &clientRect);
 				::FillRect(dc, &clientRect, ::GetSysColorBrush(COLOR_BTNFACE));
 
-				Recti rect(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+				Rect rect(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
 				rect.setTop(clientRect.top);
 				rect.setLeft(clientRect.left);
 				rect.setBottom(clientRect.bottom);
@@ -188,7 +188,7 @@ void Frame::_arrangeChildren()
 		RECT rect;
 		VERIFY(::GetClientRect(*_window(), &rect));
 		VERIFY(::InflateRect(&rect, -border_, -border_));
-		child_->_setPosition(Recti(rect.left + space_, rect.top + 2 * space_, 
+		child_->_setPosition(Rect(rect.left + space_, rect.top + 2 * space_, 
 			                       rect.right - space_, rect.bottom - 2 * space_));
 	}
 }
@@ -217,7 +217,7 @@ void Frame::_relayoutParents()
 		move = true;
 	}
 	if(move){
-		_window()->move(Recti(windowRect.left, windowRect.top, windowRect.right, windowRect.bottom));
+		_window()->move(Rect(windowRect.left, windowRect.top, windowRect.right, windowRect.bottom));
 		_window()->update();
 	}
 	else

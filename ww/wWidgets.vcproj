@@ -919,6 +919,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Rect.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Rect.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SafeCast.h"
 				>
 			</File>

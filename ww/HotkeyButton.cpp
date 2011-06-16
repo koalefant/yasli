@@ -43,7 +43,7 @@ HotkeyButtonImpl::HotkeyButtonImpl(HotkeyButton* owner)
 , pressed_(false)
 , ticksLeft_(-1)
 {
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Recti(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 	::SetTimer(*this, TIMER_ID, 100, 0);
 }
 

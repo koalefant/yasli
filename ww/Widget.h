@@ -6,7 +6,7 @@
 #include "ww/sigslot.h"
 #include "yasli/Pointers.h"
 #include "XMath/XMath.h"
-#include "XMath/Recti.h"
+#include "ww/Rect.h"
 
 namespace Win32{
 	class Window32;
@@ -85,8 +85,8 @@ public:
 	/// пересчитать размеры родительских контролов
     virtual void _setParent(Container* container);
 
-	const Recti& _position() const{ return position_; }
-	virtual void _setPosition(const Recti& position);
+	const Rect& _position() const{ return position_; }
+	virtual void _setPosition(const Rect& position);
 	void _relayoutParents(bool propagate);
 	virtual void _relayoutParents();
 	virtual void _queueRelayout();
@@ -122,7 +122,7 @@ protected:
 	sigslot::signal0 signalDelete_;
 
 	/// положение контрола в родительском контейнере, в пикселях (не путать с координатами в окне)
-	Recti position_;
+	Rect position_;
 	/// родительский контейнер, владеющий контролом
     Container* parent_;
 	/// минимально-возможный размер

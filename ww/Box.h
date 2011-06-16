@@ -35,7 +35,7 @@ public:
 	// ^^
 
 	void _setParent(Container* container);
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 	void _relayoutParents();
 	void _arrangeChildren();
 	void _updateVisibility();

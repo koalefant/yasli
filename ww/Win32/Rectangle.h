@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include "XMath/Recti.h"
+#include "ww/Rect.h"
 #include "XMath/Colors.h"
 
 namespace Win32{
@@ -30,7 +30,7 @@ struct Rect : ::RECT{
 		this->right = right;
 		this->bottom = bottom;
 	}
-	explicit Rect(const Recti& rect)
+	explicit Rect(const ww::Rect& rect)
 	{
 		left = rect.left();
 		top = rect.top();
@@ -52,8 +52,8 @@ struct Rect : ::RECT{
 		return point.x >= left && point.x < right &&
 			   point.y >= top && point.y < bottom;
 	}
-	Recti recti(){
-		return Recti(left, top, right, bottom);
+	ww::Rect recti(){
+		return ww::Rect(left, top, right, bottom);
 	}
 };
 

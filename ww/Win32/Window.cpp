@@ -1,13 +1,16 @@
 #include "StdAfx.h"
+
+#include "ww/Win32/Window.h"
+
+#include "ww/Unicode.h"
+#include "ww/Application.h"
+#include "ww/Rect.h"
+
+#include <typeinfo>
 #include <algorithm>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <commctrl.h>
-
-#include "ww/Unicode.h"
-#include "ww/Win32/Window.h"
-#include "ww/Application.h"
-#include <typeinfo>
 
 #pragma comment (lib, "comctl32.lib")
 
@@ -49,7 +52,7 @@ static HFONT initializeDefaultFont()
 static Win32::Window32* initializeGlobalDummyWindow()
 {
 	static Win32::Window32 window;
-	VERIFY(window.create(L"dummy", 0, Recti(0, 0, 100, 100), 0));
+	VERIFY(window.create(L"dummy", 0, ww::Rect(0, 0, 100, 100), 0));
 	return &window; 
 }
 
@@ -228,7 +231,7 @@ HWND Window32::detach()
 
 
 
-bool Window32::create(const wchar_t* windowName, UINT style, const Recti& position, HWND parentWnd, UINT exStyle)
+bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& position, HWND parentWnd, UINT exStyle)
 {
 	if(!Win32::_globalInstance())
 		_setGlobalInstance(HINST_THISCOMPONENT);
@@ -606,14 +609,14 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	return defaultWindowProcedure(message, wparam, lparam);
 }
 
-Recti Window32::getRect() const
+ww::Rect Window32::getRect() const
 {
 	RECT rect;
 	VERIFY(GetWindowRect(handle_, &rect));
-	return Recti(rect.left, rect.top, rect.right, rect.bottom);
+	return ww::Rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
-void Window32::move(const Recti& rect, bool redraw)
+void Window32::move(const ww::Rect& rect, bool redraw)
 {
 	ASSERT(::IsWindow(handle_));
 	if(::IsWindow(handle_))
@@ -770,7 +773,7 @@ WindowPositionDeferer::~WindowPositionDeferer()
 	parent_->positionDeferer_ = 0;
 }
 
-void WindowPositionDeferer::defer(Window32* window, Recti position)
+void WindowPositionDeferer::defer(Window32* window, const ww::Rect& position)
 {
 	ASSERT(handle_);
 	ASSERT(::IsWindow(*window));

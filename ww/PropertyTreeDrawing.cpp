@@ -64,8 +64,9 @@ void drawingFinish()
 	}
 }
 
-void createRoundRectanglePath(GraphicsPath* path, const Rect &_rect, int dia)
+void createRoundRectanglePath(GraphicsPath* path, const Gdiplus::Rect &_rect, int dia)
 {
+	using Gdiplus::Rect;
     Rect r = _rect;
     if(dia > r.Width)
         dia = r.Width;
@@ -150,7 +151,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 	
 	Color lightColor = gdiplusSysColor(grayBackground ? COLOR_BTNFACE : COLOR_WINDOW);
 	Color darkColor = gdiplusSysColor(grayBackground ? COLOR_3DSHADOW : COLOR_BTNFACE);
-	LinearGradientBrush brush(Rect(rt.X, rt.Y, rt.Width, rt.Height), Color(), Color(), LinearGradientModeVertical);
+	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height), Color(), Color(), LinearGradientModeVertical);
 
 	Color colors[3] = { darkColor, lightColor, lightColor };
 	Gdiplus::REAL positions[3] = { 0.0f, 0.4f, 1.0f };
@@ -162,7 +163,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 
 	rt.Inflate(-3, -1);
 	rt.Height -= 1;
-	Recti textRect( rt.GetLeft(), rt.GetTop(), rt.GetRight(), rt.GetBottom() );
+	Rect textRect( rt.GetLeft(), rt.GetTop(), rt.GetRight(), rt.GetBottom() );
 	StringFormat format;
 	format.SetAlignment(StringAlignmentNear);
 	format.SetLineAlignment(StringAlignmentCenter);
@@ -185,7 +186,7 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 	SolidBrush brush(brushColor);
 	Color penColor;
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-    fillRoundRectangle(gr, &brush, Rect(rect.X + offsetX, rect.Y + offsetY, size, size), penColor, 4);
+	fillRoundRectangle(gr, &brush, Gdiplus::Rect(rect.X + offsetX, rect.Y + offsetY, size, size), penColor, 4);
 
 	if(checked){
 		ASSERT(checkBitmap);

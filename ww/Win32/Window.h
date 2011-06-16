@@ -2,11 +2,11 @@
 
 #include "ww/API.h"
 #include "ww/Win32/Types.h"
+#include "ww/Rect.h"
 
 #include "yasli/Pointers.h"
 #include "yasli/Assert.h"
 #include "XMath/XMath.h"
-#include "XMath/Recti.h"
 
 
 struct tagDRAWITEMSTRUCT;
@@ -63,7 +63,7 @@ public:
 	WindowPositionDeferer(Window32* parent, int numWindows = 1);
 	~WindowPositionDeferer();
 
-    void defer(Window32* window, Recti position);
+	void defer(Window32* window, const ww::Rect& position);
 protected:
 	HDWP handle_;
 	Window32* parent_;
@@ -126,15 +126,15 @@ public:
 	Window32* parent() const;
 
 	// api functions
-    bool create(const wchar_t* windowName, UINT style, const Recti& position, HWND parentWnd, UINT exStyle = 0);
+	bool create(const wchar_t* windowName, UINT style, const ww::Rect& position, HWND parentWnd, UINT exStyle = 0);
 	bool creating() const{ return creating_; }
 	void destroy();
 
 	void setWindowText(const wchar_t* windowText);
 	void enable(bool enabled);
 	void show(int showCommand);
-	Recti getRect() const;
-	void move(const Recti& position, bool redraw = false);
+	ww::Rect getRect() const;
+	void move(const ww::Rect& position, bool redraw = false);
 	void update();
 	bool isVisible() const;
 

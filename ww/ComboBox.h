@@ -56,7 +56,7 @@ protected:
 
 	ComboBoxImpl* impl() const{ return reinterpret_cast<ComboBoxImpl*>(_window()); }
 	friend class ComboBoxImpl;
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 
 	void updateMinimalSize();
 

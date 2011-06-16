@@ -46,6 +46,7 @@ PropertyRowButton::PropertyRowButton()
 void PropertyRowButton::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect)
 {
 	using namespace Gdiplus;
+	using Gdiplus::Rect;
 	bool pressed = underMouse_ && value();
 	Rect buttonRect = widgetRect;
 	buttonRect.X -= 1;

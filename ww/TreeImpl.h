@@ -16,7 +16,7 @@ public:
 	const wchar_t* className() const{ return L"ww.DragWindow"; }
 	DragWindow(TreeImpl* treeImpl);
 
-	void set(TreeImpl* treeImpl, PropertyRow* row, const Recti& rowRect);
+	void set(TreeImpl* treeImpl, PropertyRow* row, const Rect& rowRect);
 	void show();
 	void hide();
 	void move(int deltaX, int deltaY);
@@ -30,7 +30,7 @@ protected:
 
 	bool useLayeredWindows_;
 	PropertyRow* row_;
-	Recti rect_;
+	Rect rect_;
 	TreeImpl* treeImpl_;
 	Vect2i offset_;
 	HBITMAP bitmap_;
@@ -86,8 +86,8 @@ public:
 	void redraw(HDC dc);
 
 	PropertyRow* rowByPoint(Vect2i point);
-	TreeHitTest hitTest(PropertyRow* row, Vect2i pt, const Recti& rowRect);
-	bool getRowRect(PropertyRow* row, Recti& rect, bool onlyVisible = true);
+	TreeHitTest hitTest(PropertyRow* row, Vect2i pt, const Rect& rowRect);
+	bool getRowRect(PropertyRow* row, Rect& rect, bool onlyVisible = true);
 	bool toggleRow(PropertyRow* node);
 	void ensureVisible(PropertyRow* row, bool update = true);
 
@@ -117,7 +117,7 @@ public:
 protected:
 	Vect2i size_;
 	Vect2i offset_;
-	Recti area_;
+	Rect area_;
 	PropertyTree* tree_;
 	PropertyRow* hoveredRow_;
 	PropertyRow* capturedRow_;

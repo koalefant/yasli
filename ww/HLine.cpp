@@ -30,7 +30,7 @@ HLineImpl::HLineImpl(HLine* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD, Recti(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 #pragma warning(pop)
@@ -42,7 +42,7 @@ void HLineImpl::onMessagePaint()
 	{
 		HDC dc = paintDC;
 		RECT clientRect;
-		Recti rect;
+		Rect rect;
 		::GetClientRect(*this, &clientRect);
 		::FillRect(dc, &clientRect, ::GetSysColorBrush(COLOR_BTNFACE));
 		::DrawEdge(dc, &clientRect, EDGE_ETCHED, BF_TOP);

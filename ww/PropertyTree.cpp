@@ -179,7 +179,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 	return false;
 }
 
-bool PropertyTree::onRowLMBDown(PropertyRow* row, const Recti& rowRect, Vect2i point)
+bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point)
 {
 	row = impl()->rowByPoint(point);
 	if(row){
@@ -207,14 +207,14 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Recti& rowRect, Vect2i p
 	return false;
 }
 
-void PropertyTree::onRowLMBUp(PropertyRow* row, const Recti& rowRect, Vect2i point)
+void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2i point)
 {
 	row->onMouseUp(this, point);
 	if(GetCapture() == *_window())
 		ReleaseCapture();
 }
 
-void PropertyTree::onRowRMBDown(PropertyRow* row, const Recti& rowRect, Vect2i point)
+void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point)
 {
     SharedPtr<PropertyRow> handle = row;
 	onRowSelected(row, false, true);	
@@ -482,7 +482,7 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	return true;
 }
 
-void PropertyTree::onRowMouseMove(PropertyRow* row, const Recti& rowRect, Vect2i point)
+void PropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2i point)
 {
 	row->onMouseMove(this, point);
 }
@@ -589,8 +589,8 @@ void PropertyTree::_arrangeChildren()
 			Widget* w = widget_->actualWidget();
 			ASSERT(w);
 			if(w){
-                Recti rect = row->widgetRect();
-				rect = Recti(rect.leftTop() - impl()->offset_, 
+                Rect rect = row->widgetRect();
+				rect = Rect(rect.leftTop() - impl()->offset_, 
 					rect.rightBottom() - impl()->offset_);
 				w->_setPosition(rect);
 				if(!w->isVisible()){

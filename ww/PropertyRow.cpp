@@ -525,7 +525,7 @@ void PropertyRow::updateSize(const PropertyTree* tree)
     }
 }
 
-void PropertyRow::adjustRect(const PropertyTree* tree, const Recti& rect, Vect2i pos, int& totalHeight, int& _extraSize)
+void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2i pos, int& totalHeight, int& _extraSize)
 {
 	pos_ = pos;
 	pos.x += plusSize_;
@@ -801,6 +801,8 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
         return;
 
     using namespace Gdiplus;
+	using Gdiplus::Rect;
+
     Graphics gr(dc);
     gr.SetSmoothingMode(SmoothingModeAntiAlias);
     gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
@@ -808,7 +810,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     Color textColor;
     textColor.SetFromCOLORREF(GetSysColor(COLOR_BTNTEXT));
 
-	Recti rowRect = rect();
+	ww::Rect rowRect = rect();
 
     // рисуем горизонтальную линию
     std::wstring text = toWideChar(rowText().c_str());
@@ -900,12 +902,12 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     }
 }
 
-void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Recti& rect, bool expanded, bool selected, bool grayed) const
+void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expanded, bool selected, bool grayed) const
 {	
 	using namespace Gdiplus;
 	Vect2i size(9, 9);
 	Vect2i center(rect.center());
-	Win32::Rect r(Recti(center - Vect2i(4, 4), center - Vect2i(4, 4) + size));
+	Win32::Rect r(Rect(center - Vect2i(4, 4), center - Vect2i(4, 4) + size));
 
 	fillRoundRectangle(gr, &SolidBrush(gdiplusSysColor(/*grayed ? COLOR_BTNFACE : */COLOR_WINDOW)), gdiplusRect(r), gdiplusSysColor(COLOR_3DDKSHADOW), 3);
 
@@ -1062,7 +1064,7 @@ PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2i point)
             if(PropertyRow* result = child->hit(tree, point))
                 return result;
     }
-	if(Recti(pulledUp() ? pos_.x : 0, pos_.y, pos_.x + size_.x, pos_.y + size_.y).pointInside(point))
+	if(Rect(pulledUp() ? pos_.x : 0, pos_.y, pos_.x + size_.x, pos_.y + size_.y).pointInside(point))
         return this;
     return 0;
 }

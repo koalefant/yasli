@@ -52,7 +52,7 @@ TabsImpl::TabsImpl(Tabs* tabs)
 , focusedTab_(-1)
 , owner_(0)
 {
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Recti(0, 0, 20, 20), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow));
 	owner_ = tabs;
 }
 
@@ -175,8 +175,8 @@ void TabsImpl::redraw(HDC dc)
 
 		const int roundness = 8;
 		if(selected){
-            Rect rect(gdiplusRect(item.rect));
-            LinearGradientBrush brush(Rect(rect.X, rect.Y, rect.Width, rect.Height), Color(), Color(), LinearGradientModeVertical);
+			Gdiplus::Rect rect(gdiplusRect(item.rect));
+			LinearGradientBrush brush(Gdiplus::Rect(rect.X, rect.Y, rect.Width, rect.Height), Color(), Color(), LinearGradientModeVertical);
 
             Color colors[3] = {
                 gdiplusSysColor(COLOR_WINDOW),
@@ -189,13 +189,13 @@ void TabsImpl::redraw(HDC dc)
 			Gdiplus::SolidBrush shadowBrush(gdiplusSysColor(COLOR_3DSHADOW));
             rect.Height += roundness;
             fillRoundRectangle(&gr, &brush, 
-                               Rect(rect.X, rect.Y, rect.Width - 1, rect.Height),
+							   Gdiplus::Rect(rect.X, rect.Y, rect.Width - 1, rect.Height),
                                gdiplusSysColor(COLOR_3DSHADOW), roundness);
 
 			lineStart = Point(item.rect.right - 1, item.rect.bottom - 1);
 		}
 		else{
-            Rect rect(gdiplusRect(item.rect));
+			Gdiplus::Rect rect(gdiplusRect(item.rect));
 			rect.Width -= 1;
             rect.Height += roundness;
             fillRoundRectangle(&gr, &SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), rect, gdiplusSysColor(COLOR_3DSHADOW), roundness);

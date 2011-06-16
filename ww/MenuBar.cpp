@@ -64,21 +64,21 @@ public:
     {
     }
 
-    MenuBarItem(MenuItem* item, const Recti& rect)
+    MenuBarItem(MenuItem* item, const Rect& rect)
     : item_(item)	
     , rect_(rect)
     {	
 
     }
 
-    void setRect(Recti& rect){
+    void setRect(Rect& rect){
         rect_ = rect;
     }
-    const Recti& rect() const{ return rect_; }
+    const Rect& rect() const{ return rect_; }
     MenuItem* item(){ return item_; }
 protected:
     SharedPtr<MenuItem> item_;
-    Recti rect_;
+    Rect rect_;
 };
 
 class MenuBarImpl : public _WidgetWindow, public sigslot::has_slots
@@ -120,7 +120,7 @@ MenuBarImpl::MenuBarImpl(ww::MenuBar* owner)
 , activeItem_(-1)
 , root_("")
 {
-    create(L"", WS_CHILD, Recti(0, 0, 24, 24), *Win32::_globalDummyWindow);
+    create(L"", WS_CHILD, Rect(0, 0, 24, 24), *Win32::_globalDummyWindow);
 }
 
 MenuBarImpl::~MenuBarImpl()
@@ -272,7 +272,7 @@ void MenuBarImpl::onItemActivate(MenuItem* item)
 
 void MenuBarImpl::updateRootItems()
 {
-    Recti pos(owner_->_position());
+    Rect pos(owner_->_position());
     Vect2i size = calculateTextSize(*this, Win32::defaultFont(), L" ");
     size.y +=  + GetSystemMetrics(SM_CYEDGE) * 4;
     int height = std::max(size.y, owner_->_position().height());
@@ -284,7 +284,7 @@ void MenuBarImpl::updateRootItems()
         const std::wstring text = toWideChar(item.text_.c_str());
         Vect2i textSize = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), text.c_str());
         textSize.x += 10;
-        Recti rect(offset, (pos.height() - height) / 2, offset + textSize.x, (pos.height() - height) / 2 + height);
+        Rect rect(offset, (pos.height() - height) / 2, offset + textSize.x, (pos.height() - height) / 2 + height);
         rootItems_.push_back(MenuBarItem(&item, rect));
 
         offset += textSize.x;
@@ -346,7 +346,7 @@ void MenuBar::registerHotkeys(Window* mainWindow)
     impl()->root_.registerHotkeys(mainWindow->_hotkeyContext());
 }
 
-void MenuBar::_setPosition(const Recti& position)
+void MenuBar::_setPosition(const Rect& position)
 {
     __super::_setPosition(position);
     impl()->updateRootItems();

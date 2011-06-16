@@ -55,6 +55,7 @@ template<class ColorType>
 void PropertyRowColor<ColorType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
 {
 	using namespace Gdiplus;
+	using Gdiplus::Rect;
 
 	if(multiValue()){
 		__super::redraw(gr, widgetRect, floorRect);

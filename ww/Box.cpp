@@ -169,7 +169,7 @@ void Box::_setParent(Container* container)
 	_setPosition(position_);
 }
 
-void Box::_setPosition(const Recti& position)
+void Box::_setPosition(const Rect& position)
 {
 	Container::_setPosition(position);
 	_arrangeChildren();
@@ -284,7 +284,7 @@ float VBox::boxLength() const
 void VBox::setElementPosition(Element& element, float offset, float length)
 {
 	int border = this->border();
-	Recti rect(border, border + round(offset), _position().width() - border, border + round(offset) + round(length));
+	Rect rect(border, border + round(offset), _position().width() - border, border + round(offset) + round(length));
 	if(element.fill()){
 		element.widget->_setPosition(rect + position_.leftTop());
 	}
@@ -346,7 +346,7 @@ float HBox::boxLength() const
 void HBox::setElementPosition(Element& element, float offset, float length)
 {
 	int border = this->border();
-	Recti rect(border + round(offset), border, border + round(offset) + round(length), _position().height() - border);
+	Rect rect(border + round(offset), border, border + round(offset) + round(length), _position().height() - border);
 	if(element.fill()){
 		element.widget->_setPosition(rect + position_.leftTop());
 	}

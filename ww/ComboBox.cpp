@@ -50,7 +50,7 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 , owner_(owner)
 , comboBoxHandle_(0)
 {
-	VERIFY(create(L"", WS_CHILD, Recti(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
 	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
 							 0, 0, 42, 42, *this, 0, (HINSTANCE)(GetWindowLong(*this, GWLP_HINSTANCE)), 0);
@@ -191,14 +191,14 @@ void ComboBox::updateMinimalSize()
 }
 
 
-void ComboBox::_setPosition(const Recti& position)
+void ComboBox::_setPosition(const Rect& position)
 {
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
 	ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
-	Recti pos(position.left() + border_, position.top() + border_,
+	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_ * 2, position.bottom() - border_ * 2);
 	deferer->defer(_window(), pos);
 }
@@ -357,7 +357,7 @@ public:
 ColorComboBoxImpl::ColorComboBoxImpl(ColorComboBox* owner)
 : ComboBoxImpl(owner)
 {
-	VERIFY(create(L"", WS_CHILD, Recti(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
 	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "",
 							   WS_CHILD | WS_TABSTOP  | WS_VISIBLE | WS_VSCROLL
 							   | CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS,

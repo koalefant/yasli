@@ -26,7 +26,7 @@ ScrolledWindowImpl::ScrolledWindowImpl(ScrolledWindow* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Recti(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
 }
 
 
@@ -201,7 +201,7 @@ void ScrolledWindow::_arrangeChildren()
         if(size.y <= clientSize.y)
             pos.y = (clientSize.y - size.y) / 2;
 
-        Recti rect(pos, pos + size);
+        Rect rect(pos, pos + size);
         child_->_setPosition(rect);
     }
 }

@@ -62,7 +62,7 @@ void Widget::_setVisibleInLayout(bool visibleInLayout)
 		_updateVisibility();
 }
 
-void Widget::_setPosition(const Recti& position)
+void Widget::_setPosition(const ww::Rect& position)
 {
 	position_ = position;
 }

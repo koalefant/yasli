@@ -31,7 +31,7 @@ SliderImpl::SliderImpl(Slider* owner)
 , owner_(owner)
 , dragging_(false)
 {
-	create(L"", WS_CHILD, Recti(0, 0, 20, 20), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
 }
 
 void SliderImpl::redraw(HDC dc)

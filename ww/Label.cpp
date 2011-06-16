@@ -32,7 +32,7 @@ LabelImpl::LabelImpl(Label* owner, bool emphasis)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD , Recti(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	VERIFY(create(L"", WS_CHILD , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 LabelImpl::~LabelImpl()

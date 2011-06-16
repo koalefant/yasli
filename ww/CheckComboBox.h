@@ -50,7 +50,7 @@ protected:
 	CheckComboBoxImpl* window() const{ return reinterpret_cast<CheckComboBoxImpl*>(_window()); }
 	friend class CheckComboBoxImpl;
 	friend class CheckComboListBoxImpl;
-	void _setPosition(const Recti& position);
+	void _setPosition(const Rect& position);
 
 	void updateMinimalSize();
 
