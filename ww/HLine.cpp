@@ -61,7 +61,7 @@ BOOL HLineImpl::onMessageEraseBkgnd(HDC dc)
 HLine::HLine(int border)
 : _WidgetWithWindow(new HLineImpl(this), border)
 {
-	_setMinimalSize(Vect2i(GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE)));
+	_setMinimalSize(GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
 }
 
 };

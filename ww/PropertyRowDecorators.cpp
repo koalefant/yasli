@@ -19,9 +19,9 @@ public:
 	PropertyRowButton();
 	PropertyRowButton(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
-	bool onMouseDown(PropertyTree* tree, Vect2i point, bool& changed);
-	void onMouseMove(PropertyTree* tree, Vect2i point);
-	void onMouseUp(PropertyTree* tree, Vect2i point);
+	bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
+	void onMouseMove(PropertyTree* tree, Vect2 point);
+	void onMouseUp(PropertyTree* tree, Vect2 point);
 	bool onActivate(PropertyTree* tree, bool force);
 	int floorHeight() const{ return 3; }
 	std::string valueAsString() const { return value_ ? value_.text : ""; }
@@ -84,7 +84,7 @@ void PropertyRowButton::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widge
 	gr->DrawString( text.c_str(), wcslen(text.c_str()), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
 
-bool PropertyRowButton::onMouseDown(PropertyTree* tree, Vect2i point, bool& changed)
+bool PropertyRowButton::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
 {
 	if(widgetRect().pointInside(point)){
 		value().pressed = !value().pressed;
@@ -95,7 +95,7 @@ bool PropertyRowButton::onMouseDown(PropertyTree* tree, Vect2i point, bool& chan
 	return false;
 }
 
-void PropertyRowButton::onMouseMove(PropertyTree* tree, Vect2i point)
+void PropertyRowButton::onMouseMove(PropertyTree* tree, Vect2 point)
 {
 	bool underMouse = widgetRect().pointInside(point);
 	if(underMouse != underMouse_){
@@ -104,7 +104,7 @@ void PropertyRowButton::onMouseMove(PropertyTree* tree, Vect2i point)
 	}
 }
 
-void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2i point)
+void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2 point)
 {
 	if(!locked_ && widgetRect().pointInside(point)){
 		locked_ = true;

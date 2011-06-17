@@ -69,14 +69,14 @@ void CheckBoxImpl::setCheckBoxStatus(bool status)
 void CheckBoxImpl::updateMinimalSize()
 {
 	HFONT font = GetWindowFont(handle_);
-	Vect2i textSize = Win32::calculateTextSize(handle_, font, toWideChar(owner_->text_.c_str()).c_str());
+	Vect2 textSize = Win32::calculateTextSize(handle_, font, toWideChar(owner_->text_.c_str()).c_str());
 
 	if(owner_->buttonLike()){
-		owner_->_setMinimalSize(textSize + Vect2i(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 2,
-												  GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 2) + Vect2i(owner_->border(), owner_->border()));
+		owner_->_setMinimalSize(textSize + Vect2(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 2,
+												  GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 2) + Vect2(owner_->border(), owner_->border()));
 	}
 	else{
-		owner_->_setMinimalSize(textSize + Vect2i(24, 0) + Vect2i(owner_->border(), owner_->border()));
+		owner_->_setMinimalSize(textSize + Vect2(24, 0) + Vect2(owner_->border(), owner_->border()));
 	}
 }
 
@@ -160,7 +160,7 @@ CheckBox::CheckBox(const char* text, int border)
 : _WidgetWithWindow(new CheckBoxImpl(this), border), status_(false)
 , buttonLike_(false)
 {
-	_setMinimalSize(Vect2i(24, 24));
+	_setMinimalSize(24, 24);
 	setText(text);
 }
 

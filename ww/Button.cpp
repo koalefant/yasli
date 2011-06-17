@@ -80,10 +80,10 @@ void ButtonImpl::setButtonText(const wchar_t* text)
 	VERIFY(::SetWindowText(button_, text));
 
 	HFONT font = GetWindowFont(button_);
-	Vect2i textSize = Win32::calculateTextSize(button_, font, text);
+	Vect2 textSize = Win32::calculateTextSize(button_, font, text);
 
-	Vect2i extraSize(8, 8);
-	Vect2i minimalSize = textSize + Vect2i(owner_->border(), owner_->border()) * 2 + Vect2i(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)) * 2 + extraSize;
+	Vect2 extraSize(8, 8);
+	Vect2 minimalSize = textSize + Vect2(owner_->border(), owner_->border()) * 2 + Vect2(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)) * 2 + extraSize;
 	owner_->_setMinimalSize(minimalSize);
 	owner_->_queueRelayout();
 }
@@ -154,7 +154,7 @@ LRESULT ButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 Button::Button(const char* text, int border)
 : _WidgetWithWindow(new ButtonImpl(this), border)
 {
-	_setMinimalSize(Vect2i(24, 24));
+	_setMinimalSize(24, 24);
 	setText(text);
 	defaultBtn_ = false;
 }

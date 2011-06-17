@@ -34,7 +34,7 @@ public:
 protected:
 	ScrolledWindowImpl* impl();	
 
-	Vect2i clientAreaSize() const;
+	Vect2 clientAreaSize() const;
 	bool verticalScrollVisible() const;
 	bool horizontalScrollVisible() const;
 
@@ -44,7 +44,7 @@ protected:
 	ScrollPolicy policyHorizontal_;
 	ScrollPolicy policyVertical_;
 
-	Vect2i offset_;
+	Vect2 offset_;
 
 	friend class ScrolledWindowImpl;
 };

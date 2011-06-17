@@ -27,15 +27,15 @@ public:
 	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 
 	bool onKeyDown(PropertyTree* tree, KeyPress key);
-	bool onMouseDown(PropertyTree* tree, Vect2i point, bool& changed);
-	void onMouseMove(PropertyTree* tree, Vect2i point);
-	void onMouseUp(PropertyTree* tree, Vect2i point);
+	bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
+	void onMouseMove(PropertyTree* tree, Vect2 point);
+	void onMouseUp(PropertyTree* tree, Vect2 point);
 
-	void handleMouse(Vect2i point);
+	void handleMouse(Vect2 point);
 };
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::handleMouse(Vect2i point)
+void PropertyRowRanged<WrapperType, ScalarType>::handleMouse(Vect2 point)
 {
 	float val = float(point.x - (floorRect().left() + 1)) / (floorRect().width() - 2);
 	value().value() = ScalarType(val * value().range().length() + value().range().minimum());
@@ -67,7 +67,7 @@ bool PropertyRowRanged<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, K
 }
 
 template<class WrapperType, class ScalarType>
-bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree, Vect2i point, bool& changed)
+bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
 {
 	if(floorRect().pointInside(point)){
         tree->model()->push(this);
@@ -80,14 +80,14 @@ bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree,
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::onMouseMove(PropertyTree* tree, Vect2i point)
+void PropertyRowRanged<WrapperType, ScalarType>::onMouseMove(PropertyTree* tree, Vect2 point)
 {
 	handleMouse(point);
 	tree->redraw();
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2i point)
+void PropertyRowRanged<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2 point)
 {
 	tree->model()->rowChanged(this);
 	if(::GetCapture() == tree->impl()->get())

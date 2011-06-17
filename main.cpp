@@ -102,7 +102,7 @@ MainWindow::MainWindow(ww::Application& app)
 	setMinimizeable(true);
 	setResizeable(true);
 
-	setDefaultSize(Vect2i(800, 600));
+	setDefaultSize(800, 600);
 	setDefaultPosition(ww::POSITION_CENTER);
 
 	signalClose().connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);

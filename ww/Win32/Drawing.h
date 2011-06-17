@@ -2,9 +2,10 @@
 
 #include "ww/Win32/Types.h"
 #include "ww/Rect.h"
-#include "XMath/Colors.h"
 
 class KeysColor;
+struct Color4f;
+struct Color4c;
 
 namespace Gdiplus{
 	class Graphics;
@@ -14,22 +15,9 @@ namespace Gdiplus{
 namespace Win32{
 	using namespace yasli;
 
-	inline COLORREF toColorRef(const Color4f& color){
-		return COLORREF(((unsigned char)(round(color.r * 255.0f))|
-			     ((unsigned short)((unsigned char)(round(color.g * 255.0f)))<<8))|
-				(((unsigned int)(unsigned char)(round(color.b * 255.0f)))<<16));
-	}
-	inline Color4c toColor4c(COLORREF c){
-		return Color4c((unsigned char)(c & 0x000000FF),
-                       (unsigned char)((c & 0x0000FF00) >> 8),
-                       (unsigned char)((c & 0x00FF0000) >> 16));
-	}
-	inline COLORREF blendColor(COLORREF from, COLORREF to, float factor)
-	{
-		Color4c c;
-		c.interpolate(toColor4c(from), toColor4c(to), factor);
-		return c.rgb();
-	}
+	COLORREF toColorRef(const Color4f& color);
+	Color4c toColor4c(COLORREF c);
+	COLORREF blendColor(COLORREF from, COLORREF to, float factor);
 	// void drawGradient(HDC dc, const RECT& rect, KeysColor& gradient, bool alphaOnly = false);
 	void drawColorBlend(HDC dc, const ww::Rect& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly = false);
 

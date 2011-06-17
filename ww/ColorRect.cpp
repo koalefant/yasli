@@ -96,7 +96,7 @@ BOOL ColorRectImpl::onMessageEraseBkgnd(HDC)
 ColorRect::ColorRect(Color4f color, int border)
 : _WidgetWithWindow(new ColorRectImpl(this), border)
 {
-	_setMinimalSize(Vect2i(40, 40));
+	_setMinimalSize(40, 40);
 }
 #pragma warning(pop)
 

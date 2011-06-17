@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include "ww/ComboBox.h"
-#include "ww/ColorComboBox.h"
 #include "ww/Container.h"
 
 #include "ww/_WidgetWindow.h"
@@ -17,7 +16,6 @@
 namespace ww{
 
 #pragma warning(push)
-#pragma warning(disable: 4355) //  'this' : used in base member initializer list
 
 YASLI_CLASS(Widget, ComboBox, "ComboBox")
 
@@ -177,17 +175,17 @@ ComboBox::ComboBox(ComboBoxImpl* impl, bool expandByContent, int border)
 
 void ComboBox::updateMinimalSize()
 {
-	Vect2i size = Win32::calculateTextSize(impl()->comboBox(), GetWindowFont(*impl()), L" ");
+	Vect2 size = Win32::calculateTextSize(impl()->comboBox(), GetWindowFont(*impl()), L" ");
 	if(expandByContent_){
 		Items::iterator it;
 		FOR_EACH(items_, it){
-			Vect2i anotherSize = Win32::calculateTextSize(*impl(), GetWindowFont(*impl()), toWideChar(it->c_str()).c_str());
+			Vect2 anotherSize = Win32::calculateTextSize(*impl(), GetWindowFont(*impl()), toWideChar(it->c_str()).c_str());
 			size.x = std::max(anotherSize.x, size.x);
 			size.y = std::max(anotherSize.y, size.y);
 		}
 	}
-	_setMinimalSize(size + Vect2i(4, 2) + Vect2i(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
-		            + Vect2i(border_, border_) * 2 + Vect2i(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)));
+	_setMinimalSize(size + Vect2(4, 2) + Vect2(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
+		            + Vect2(border_, border_) * 2 + Vect2(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)));
 }
 
 
@@ -345,120 +343,6 @@ void ComboBox::serialize(Archive& ar)
 	ar.serialize(expandByContent_, "expandByContent", "Расширять по содержимому");
 	Widget::serialize(ar);
 }
-
-// ---------------------------------------------------------------------------
-/* TODO
-class ColorComboBoxImpl : public ComboBoxImpl{
-public:
-	ColorComboBoxImpl(ColorComboBox* owner);
-	BOOL onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruct);
-};
-
-ColorComboBoxImpl::ColorComboBoxImpl(ColorComboBox* owner)
-: ComboBoxImpl(owner)
-{
-	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
-	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, "COMBOBOX", "",
-							   WS_CHILD | WS_TABSTOP  | WS_VISIBLE | WS_VSCROLL
-							   | CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS,
-							   0, 0, 42, 42, *this, 0, (HINSTANCE)(GetWindowLong(*this, GWLP_HINSTANCE)), 0);
-	
-	ASSERT(comboBoxHandle_);
-	SetWindowFont(comboBoxHandle_, Win32::defaultFont(), FALSE);
-}
-
-BOOL ColorComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruct)
-{
-	HDC dcContext = drawItemStruct->hDC;
-	if(!dcContext)
-		return FALSE;
-
-	Win32::Rect itemRect = drawItemStruct->rcItem;
-	Win32::Rect blockRect = itemRect;
-	Win32::Rect textRect = blockRect;
-	int item = drawItemStruct->itemID;
-	int action = drawItemStruct->itemAction;
-	int state = drawItemStruct->itemState;
-	COLORREF color = 0;
-	COLORREF normalColor = GetSysColor(COLOR_WINDOW);
-	COLORREF selectedColor = GetSysColor(COLOR_HIGHLIGHT);
-	COLORREF textColor = GetSysColor(COLOR_WINDOWTEXT);
-	int fourthWidth = blockRect.width();
-	HBRUSH frameBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
-
-	if(state & ODS_SELECTED){
-		SetTextColor(dcContext, (0x00FFFFFF & ~textColor));
-		SetBkColor(dcContext, selectedColor);
-		HBRUSH solidBrush = CreateSolidBrush(selectedColor);
-		FillRect(dcContext, &blockRect, solidBrush);
-		DeleteObject((HGDIOBJ)solidBrush);
-	}
-	else{
-		SetTextColor(dcContext, textColor);
-		SetBkColor(dcContext, normalColor);
-		HBRUSH solidBrush = CreateSolidBrush(normalColor);
-		FillRect(dcContext, &blockRect, solidBrush);
-		DeleteObject((HGDIOBJ)solidBrush);
-	}
-
-	if(state & ODS_FOCUS){
-		DrawFocusRect(dcContext, &itemRect);
-	}
-
-	InflateRect(&blockRect, -2, -2);
-
-	if(item != -1){
-		if(state & ODS_DISABLED){
-			color = GetSysColor(COLOR_INACTIVECAPTIONTEXT);
-			SetTextColor(dcContext, color);
-		}
-		else{
-			color = (COLORREF)::SendMessage(comboBox(), CB_GETITEMDATA, item, 0);
-			//color = GetItemData(item);
-		}
-
-		std::string strColor;
-		SetBkMode(dcContext, TRANSPARENT);
-
-		HBRUSH solidBrush = CreateSolidBrush(color);
-		FillRect(dcContext, &blockRect, solidBrush);
-		DeleteObject((HGDIOBJ)solidBrush);
-		FrameRect(dcContext, &blockRect, frameBrush);
-	}
-	return TRUE;
-}
-
-// ---------------------------------------------------------------------------
-
-ColorComboBox::ColorComboBox(int border)
-: ComboBox(new ColorComboBoxImpl(this), false, border)
-{
-}
-
-void ColorComboBox::add(Color4c color, const char* text)
-{
-	int index = ::SendMessage(impl()->comboBox(), CB_INSERTSTRING, -1, (LPARAM)text);
-	if(index >= 0)
-		::SendMessage(impl()->comboBox(), CB_SETITEMDATA, index, (LPARAM)color.RGBGDI());
-}
-
-void ColorComboBox::set(const ComboListColor& value)
-{
-	clear();
-	const ColorContainer& colors = value.comboList();
-	ColorContainer::const_iterator it;
-	int index = 0;
-	int selectedIndex = -1;
-	FOR_EACH(colors, it){
-		add(Color4c(*it));
-		if(Color4c(*it) == Color4c(value.value()))
-			selectedIndex = index;
-		++index;
-	}
-	if(selectedIndex >= 0)
-        setSelectedIndex(selectedIndex);
-}
-*/
 
 }
 #pragma warning(pop)

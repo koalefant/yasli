@@ -405,11 +405,16 @@ void Window::setDefaultPosition(WindowPosition position)
 	reposition();
 }
 
-void Window::setDefaultSize(Vect2i size)
+void Window::setDefaultSize(Vect2 size)
 {
 	defaultSize_ = size;
 	positioned_ = false;
 	reposition();
+}
+
+void Window::setDefaultSize(int w, int h)
+{
+	setDefaultSize(Vect2(w, h));
 }
 
 void Window::visitChildren(WidgetVisitor& visitor) const
@@ -431,9 +436,9 @@ void Window::_arrangeChildren()
 void Window::_relayoutParents()
 {
 	if(child_)
-		_setMinimalSize(child_->_minimalSize() + Vect2i(border_ * 2, border_ * 2));
+		_setMinimalSize(child_->_minimalSize() + Vect2(border_ * 2, border_ * 2));
 	else
-		_setMinimalSize(Vect2i(border_ * 2, border_ * 2));
+		_setMinimalSize(border_ * 2, border_ * 2);
 
 	RECT clientRect;
 	::GetClientRect(*window_, &clientRect);

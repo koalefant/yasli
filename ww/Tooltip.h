@@ -15,14 +15,14 @@ public:
 	void hide();
 
 	void setBaloon(bool baloon);
-	void setOffset(const Vect2i& offset) { offset_ = offset; }
+	void setOffset(const Vect2& offset) { offset_ = offset; }
 
 protected:
 	std::string text_;
 	bool baloon_;
 	Widget* widget_;
 	HWND toolTipWindow_;
-	Vect2i offset_;
+	Vect2 offset_;
 };
 
 }

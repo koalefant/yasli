@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XMath/xmath.h"
+#include "ww/Vect2.h"
 
 namespace ww {
 
@@ -9,12 +9,12 @@ class Rect
 public:
     Rect()
     {}
-    Rect(Vect2i _min, Vect2i _max)
+    Rect(Vect2 _min, Vect2 _max)
     : min_(_min), max_(_max) {}
     Rect(int left, int top, int right, int bottom){
         set(left, top, right, bottom);
     }
-    void set(Vect2i _min, Vect2i _max){
+    void set(Vect2 _min, Vect2 _max){
         min_ = _min;
         max_ = _max;
     }
@@ -24,19 +24,19 @@ public:
         max_.x = maxX;
         max_.y = maxY;
     }
-	const Vect2i& leftTop() const { return min_; }
-	const Vect2i& rightBottom() const { return max_; }
-	Vect2i center() const{ 
+	const Vect2& leftTop() const { return min_; }
+	const Vect2& rightBottom() const { return max_; }
+	Vect2 center() const{ 
 		return (min_ + max_) / 2; 
 	}
-    Vect2i size() const{ 
+    Vect2 size() const{ 
 		return max_ - min_; 
 	}
     bool isValid() const{
         return min_.x <= max_.x && min_.y <= max_.y;
     }
 
-	Rect operator+(Vect2i offset){
+	Rect operator+(Vect2 offset){
 		return Rect( min_ + offset, max_ + offset );
 	}
 
@@ -53,7 +53,7 @@ public:
 	int width() const{ return max_.x - min_.x; }
 	int height() const{ return max_.y - min_.y; }
 
-    bool pointInside(Vect2i _point) const // -> inside
+    bool pointInside(Vect2 _point) const // -> inside
     {
       if ( _point.x < min_.x || _point.x > max_.x )
         return false;
@@ -62,7 +62,7 @@ public:
       return true;
     }
 
-	void addBound(const Vect2i& point)
+	void addBound(const Vect2& point)
 	{
 		if(min_.x > point.x)
 			min_.x = point.x;
@@ -80,7 +80,7 @@ public:
 	void serialize(yasli::Archive& ar);
 
 private:
-	Vect2i min_, max_; 
+	Vect2 min_, max_; 
 };
 
 }

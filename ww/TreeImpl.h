@@ -32,7 +32,7 @@ protected:
 	PropertyRow* row_;
 	Rect rect_;
 	TreeImpl* treeImpl_;
-	Vect2i offset_;
+	Vect2 offset_;
 	HBITMAP bitmap_;
 	COLORREF* bitmapBits_;
 };
@@ -85,8 +85,8 @@ public:
 
 	void redraw(HDC dc);
 
-	PropertyRow* rowByPoint(Vect2i point);
-	TreeHitTest hitTest(PropertyRow* row, Vect2i pt, const Rect& rowRect);
+	PropertyRow* rowByPoint(Vect2 point);
+	TreeHitTest hitTest(PropertyRow* row, Vect2 pt, const Rect& rowRect);
 	bool getRowRect(PropertyRow* row, Rect& rect, bool onlyVisible = true);
 	bool toggleRow(PropertyRow* node);
 	void ensureVisible(PropertyRow* row, bool update = true);
@@ -115,8 +115,8 @@ public:
 	void onMessagePaint();
 
 protected:
-	Vect2i size_;
-	Vect2i offset_;
+	Vect2 size_;
+	Vect2 offset_;
 	Rect area_;
 	PropertyTree* tree_;
 	PropertyRow* hoveredRow_;

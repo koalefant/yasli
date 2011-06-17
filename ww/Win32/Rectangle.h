@@ -2,9 +2,11 @@
 
 #include <windows.h>
 #include "ww/Rect.h"
-#include "XMath/Colors.h"
+#include "ww/Vect2.h"
 
 namespace Win32{
+
+using ww::Vect2;
 
 struct Rect : ::RECT{
 	Rect()
@@ -16,7 +18,7 @@ struct Rect : ::RECT{
 		right = rightBottom.x;
 		bottom = rightBottom.y;
 	}
-	Rect(Vect2i leftTop, Vect2i rightBottom)
+	Rect(Vect2 leftTop, Vect2 rightBottom)
 	{
 		left = leftTop.x;
 		top = leftTop.y;
@@ -48,7 +50,7 @@ struct Rect : ::RECT{
 	int width() const{ return right - left; }
 	int height() const{ return bottom - top; }
 
-	bool pointIn(Vect2i point) const{
+	bool pointIn(Vect2 point) const{
 		return point.x >= left && point.x < right &&
 			   point.y >= top && point.y < bottom;
 	}

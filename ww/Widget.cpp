@@ -67,9 +67,14 @@ void Widget::_setPosition(const ww::Rect& position)
 	position_ = position;
 }
 
-void Widget::setRequestSize(const Vect2i size)
+void Widget::setRequestSize(const Vect2 size)
 {
 	requestSize_ = size;
+}
+
+void Widget::setRequestSize(int w, int h)
+{
+	requestSize_.set(w, h);
 }
 
 void Widget::setBorder(int border)
@@ -77,12 +82,17 @@ void Widget::setBorder(int border)
 	border_ = border;
 }
 
-const Vect2i Widget::_minimalSize() const
+const Vect2 Widget::_minimalSize() const
 { 
-	return Vect2i(max(minimalSize_.x, requestSize_.x), max(minimalSize_.y, requestSize_.y)); 
+	return Vect2(max(minimalSize_.x, requestSize_.x), max(minimalSize_.y, requestSize_.y)); 
 }
 
-void Widget::_setMinimalSize(const Vect2i& size)
+void Widget::_setMinimalSize(int w, int h)
+{
+	_setMinimalSize(Vect2(w, h));
+}
+
+void Widget::_setMinimalSize(const Vect2& size)
 {
 	minimalSize_ = size;
 }

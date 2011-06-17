@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XMath/xmath.h"
+namespace yasli{ class Archive; }
 
 class Rangef
 {

@@ -1,12 +1,12 @@
 #pragma once
 
-//#include <xutility>
 #include "ww/API.h"
 #include "ww/MouseButton.h"
 #include "ww/sigslot.h"
-#include "yasli/Pointers.h"
-#include "XMath/XMath.h"
+#include "ww/Vect2.h"
 #include "ww/Rect.h"
+
+#include "yasli/Pointers.h"
 
 namespace Win32{
 	class Window32;
@@ -65,8 +65,9 @@ public:
 	virtual void setBorder(int border);
 	int border() const{ return border_; }
 	/// пользовательский минимальный размер в пикселях
-	virtual void setRequestSize(const Vect2i size);
-	Vect2i requestSize() const{ return requestSize_; }
+	Vect2 requestSize() const{ return requestSize_; }
+	void setRequestSize(int w, int h);
+	virtual void setRequestSize(const Vect2 size);
 
 	virtual void passFocus(FocusDirection direction);
 	void setFocus();
@@ -91,8 +92,9 @@ public:
 	virtual void _relayoutParents();
 	virtual void _queueRelayout();
 
-	const Vect2i _minimalSize() const;
-	virtual void _setMinimalSize(const Vect2i& size);
+	const Vect2 _minimalSize() const;
+	void _setMinimalSize(int x, int y);
+	virtual void _setMinimalSize(const Vect2& size);
 
 	virtual Win32::Window32* _window() const{ return 0; }
     
@@ -126,9 +128,9 @@ protected:
 	/// родительский контейнер, владеющий контролом
     Container* parent_;
 	/// минимально-возможный размер
-	Vect2i minimalSize_;
+	Vect2 minimalSize_;
 	/// минимальный размер запрашиваемый пользователем
-	Vect2i requestSize_;
+	Vect2 requestSize_;
 	/// рамка вокруг контрола, в пикселях
 	int border_;
 

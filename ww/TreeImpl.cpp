@@ -82,7 +82,7 @@ void DragWindow::show()
 
 void DragWindow::move(int deltaX, int deltaY)
 {
-	offset_ += Vect2i(deltaX, deltaY);
+	offset_ += Vect2(deltaX, deltaY);
 	setWindowPos(::IsWindowVisible(*this) ? true : false);
 }
 
@@ -117,7 +117,7 @@ void DragWindow::drawRow(HDC dc)
 	::SelectObject(dc, oldBrush);
 	::SelectObject(dc, oldPen);
 
-	Vect2i leftTop = row_->rect().leftTop();
+	Vect2 leftTop = row_->rect().leftTop();
 	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
 	row_->drawRow(dc, treeImpl_->tree());
 	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
@@ -195,11 +195,11 @@ bool DragController::dragOn(POINT screenPoint)
 	window_.move(screenPoint.x - lastPoint_.x, screenPoint.y - lastPoint_.y);
 
 	bool needCapture = false;
-	if(!dragging_ && (Vect2i(startPoint_.x, startPoint_.y) - Vect2i(screenPoint.x, screenPoint.y)).norm2() >= 25)
+	if(!dragging_ && (Vect2(startPoint_.x, startPoint_.y) - Vect2(screenPoint.x, screenPoint.y)).length2() >= 25)
 		if(row_->canBeDragged()){
 			needCapture = true;
 			Rect rect = row_->rect();
-            rect = Rect(rect.leftTop() - treeImpl_->offset_ + Vect2i(treeImpl_->tree()->tabSize(), 0), 
+            rect = Rect(rect.leftTop() - treeImpl_->offset_ + Vect2(treeImpl_->tree()->tabSize(), 0), 
                          rect.rightBottom() - treeImpl_->offset_);
             
 			window_.set(treeImpl_, row_, rect);
@@ -229,7 +229,7 @@ void DragController::trackRow(POINT pt)
 	hoveredRow_ = 0;
 	destinationRow_ = 0;
 
-    Vect2i point(pt.x + treeImpl_->offset_.x, pt.y + treeImpl_->offset_.y);
+    Vect2 point(pt.x + treeImpl_->offset_.x, pt.y + treeImpl_->offset_.y);
 	PropertyRow* row = treeImpl_->rowByPoint(point);
 	if(!row || !row_)
 		return;
@@ -328,8 +328,8 @@ void DragController::drop(POINT screenPoint)
 TreeImpl::TreeImpl(PropertyTree* tree)
 : _ContainerWindow(tree)
 , tree_(tree)
-, size_(Vect2i::ZERO)
-, offset_(Vect2i::ZERO)
+, size_(Vect2::ZERO)
+, offset_(Vect2::ZERO)
 , hoveredRow_(0)
 , capturedRow_(0)
 , drag_(this)
@@ -376,7 +376,7 @@ void TreeImpl::onMessageLButtonDblClk(int x, int y)
 {
 	::SetFocus(handle_);
 
-	Vect2i point(x + offset_.x, y + offset_.y);
+	Vect2 point(x + offset_.x, y + offset_.y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		ASSERT(row->refCount() > 0);
@@ -411,7 +411,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 		drag_.drop(pos);
 		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE);
 	}
-	Vect2i point(x, y);
+	Vect2 point(x, y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		switch(hitTest(row, point, row->rect())){
@@ -422,7 +422,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 	}
 	if(capturedRow_){
 		Rect rowRecti = capturedRow_->rect();
-		tree_->onRowLMBUp(capturedRow_, rowRecti, Vect2i(x + offset_.x, y + offset_.y));
+		tree_->onRowLMBUp(capturedRow_, rowRecti, Vect2(x + offset_.x, y + offset_.y));
 		capturedRow_ = 0;
 	}
 	
@@ -433,7 +433,7 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
-	Vect2i point(x + offset_.x, y + offset_.y);
+	Vect2 point(x + offset_.x, y + offset_.y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		if(tree_->onRowLMBDown(row, row->rect(), point))
@@ -457,7 +457,7 @@ void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 	ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
 
-	Vect2i point(x + offset_.x, y + offset_.y);
+	Vect2 point(x + offset_.x, y + offset_.y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		model()->setFocusedRow(row);
@@ -477,7 +477,7 @@ void TreeImpl::onMessageMButtonDown(UINT button, int x, int y)
 {
 	::SetFocus(handle_);
 
-	Vect2i point(x + offset_.x, y + offset_.y);
+	Vect2 point(x + offset_.x, y + offset_.y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		switch(hitTest(row, point, row->rect())){
@@ -505,7 +505,7 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
         RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 	else{
-		Vect2i point(x + offset_.x, y + offset_.y);
+		Vect2 point(x + offset_.x, y + offset_.y);
 		PropertyRow* row = rowByPoint(point);
 		if(row){
 			switch(hitTest(row, point, row->rect())){
@@ -760,7 +760,7 @@ void TreeImpl::redraw(HDC dc)
 	}
 }
 
-TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2i point, const Rect& rowRect)
+TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 point, const Rect& rowRect)
 {
 	if(!row->hasVisibleChildren(tree()) && row->plusRect().pointInside(point))
 		return TREE_HIT_PLUS;
@@ -774,7 +774,7 @@ TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2i point, const Re
 	return TREE_HIT_NONE;
 }
 
-PropertyRow* TreeImpl::rowByPoint(Vect2i point)
+PropertyRow* TreeImpl::rowByPoint(Vect2 point)
 {
     return model()->root()->hit(tree_, point);
 }

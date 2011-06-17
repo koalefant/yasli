@@ -110,7 +110,7 @@ void Viewport2DImpl::onMessageMouseMove(UINT button, int x, int y)
 {
 	ASSERT(x > -0xFFFF && x < 0xFFFF);
 	ASSERT(y > -0xFFFF && y < 0xFFFF);
-	Vect2i delta = Vect2i(x, y) - owner_->mousePosition_;
+	Vect2 delta = Vect2(x, y) - owner_->mousePosition_;
 	owner_->mousePosition_.x = x;
 	owner_->mousePosition_.y = y;
 	owner_->onMouseMove(delta);
@@ -184,7 +184,7 @@ BOOL Viewport2DImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 Viewport2D::Viewport2D(int border, int fontHeight)
 : _WidgetWithWindow(new Viewport2DImpl(this), border)
 , viewOffset_(Vect2f::ZERO)
-, viewSize_(Vect2i::ZERO)
+, viewSize_(Vect2::ZERO)
 , zoomIndex_(4)
 , scrolling_(false)
 , lmbPressed_(false)
@@ -252,17 +252,17 @@ void Viewport2D::setViewCenter(const Vect2f& center)
     
 Vect2f Viewport2D::coordsToScreen(const Vect2f& pos) const
 {
-	return (pos + viewOffset_)*viewScale() + Vect2f(viewSize_) * viewCenter_;
+	return (pos + viewOffset_)*viewScale() + Vect2f(viewSize_.x, viewSize_.y) * viewCenter_;
 }
 
 Vect2f Viewport2D::coordsFromScreen(const Vect2f& pos) const
 {
-	return (pos - Vect2f(viewSize_) * viewCenter_)/viewScale() - viewOffset_;
+	return (pos - Vect2f(viewSize_.x, viewSize_.y) * viewCenter_)/viewScale() - viewOffset_;
 }
 
 Rectf Viewport2D::visibleArea() const
 {
-	return Rectf(coordsFromScreen(Vect2f::ZERO), coordsFromScreen(viewSize_));
+	return Rectf(coordsFromScreen(Vect2f::ZERO), coordsFromScreen(Vect2f(viewSize_.x, viewSize_.y)));
 }
 
 void Viewport2D::onMouseButtonDown(MouseButton button)
@@ -303,7 +303,7 @@ void Viewport2D::onMouseButtonUp(MouseButton button)
 	}
 }
 
-void Viewport2D::onMouseMove(const Vect2i& delta)
+void Viewport2D::onMouseMove(const Vect2& delta)
 {
     if(rmbPressed_){
         if(enableBasicNavigation_){

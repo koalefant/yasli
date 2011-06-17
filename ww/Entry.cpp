@@ -62,8 +62,8 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 	HFONT font = Win32::defaultFont();
 	SetWindowFont(*this, font, FALSE);
 
-	Vect2i textSize = Win32::calculateTextSize(*this, font, L" ");
-	owner_->_setMinimalSize(textSize + Vect2i(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1, GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1));
+	Vect2 textSize = Win32::calculateTextSize(*this, font, L" ");
+	owner_->_setMinimalSize(textSize + Vect2(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1, GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1));
 }
 
 EntryImpl::~EntryImpl()

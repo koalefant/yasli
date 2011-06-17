@@ -100,7 +100,7 @@ HFONT defaultBoldFont()
 	return globalDefaultBoldFont.font_;
 }
 
-Vect2i calculateTextSize(HWND window, HFONT font, const wchar_t* text)
+ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 {
 	HDC dc = ::GetDC(window);
 	ASSERT(dc);
@@ -109,7 +109,7 @@ Vect2i calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 	VERIFY(::GetTextExtentPoint32(dc, text, wcslen(text), &size));
 	VERIFY(::SelectObject(dc, oldFont) == font);
 	VERIFY(ReleaseDC(window, dc));
-	return Vect2i(size.cx, size.cy);
+	return ww::Vect2(size.cx, size.cy);
 }
 
 LRESULT CALLBACK universalWindowProcedure(HWND handle, UINT message, WPARAM wparam, LPARAM lparam)

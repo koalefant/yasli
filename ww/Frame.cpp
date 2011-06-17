@@ -49,10 +49,10 @@ void FrameImpl::setFrameText(const wchar_t* text)
 	VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
-	Vect2i textSize = Win32::calculateTextSize(handle_, font, text);
+	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);
 
-	owner_->_setMinimalSize(textSize + Vect2i(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1,
-		GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1) + Vect2i(owner_->border(), owner_->border()));
+	owner_->_setMinimalSize(textSize + Vect2(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1,
+		GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1) + Vect2(owner_->border(), owner_->border()));
 	owner_->_queueRelayout();
 
 }
@@ -110,7 +110,7 @@ LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				COLORREF oldBkColor = ::SetBkColor(dc, ::GetSysColor(COLOR_BTNFACE));
                 std::wstring text = toWideChar(owner_->text());
 				HFONT fontInt = font();
-				Vect2i textSize = Win32::calculateTextSize(handle_, fontInt, text.c_str());
+				Vect2 textSize = Win32::calculateTextSize(handle_, fontInt, text.c_str());
 				RECT fillRect = { rect.left() + hspacing*2 - 1,
 					rect.top(),
 					rect.left() + hspacing*2 + textSize.x + 2,
@@ -146,7 +146,7 @@ Frame::Frame(const char* text, bool emphasis, int border)
 , space_(7)
 , emphasis_(emphasis)
 {
-	_setMinimalSize(Vect2i(24, 24));
+	_setMinimalSize(24, 24);
 	setText(text);
 }
 
@@ -196,9 +196,9 @@ void Frame::_arrangeChildren()
 void Frame::_relayoutParents()
 {
 	if(child_)
-		_setMinimalSize(child_->_minimalSize() + Vect2i(border_ * 2 + space_ * 2, border_ * 2 + space_ * 3));
+		_setMinimalSize(child_->_minimalSize() + Vect2(border_ * 2 + space_ * 2, border_ * 2 + space_ * 3));
 	else
-		_setMinimalSize(Vect2i(border_ * 2, border_ * 2));
+		_setMinimalSize(border_ * 2, border_ * 2);
 	
 	RECT clientRect;
 	::GetClientRect(*_window(), &clientRect);

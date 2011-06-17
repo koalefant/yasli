@@ -4,9 +4,9 @@
 #include <vector>
 #include "ww/API.h"
 #include "ww/sigslot.h"
+#include "ww/Vect2.h"
 #include "yasli/Pointers.h"
 #include "yasli/Assert.h"
-#include "XMath/XMath.h"
 #include "KeyPress.h"
 
 struct HMENU__;
@@ -237,7 +237,7 @@ public:
     PopupMenuItem0& root() { return root_; };
     const PopupMenuItem0& root() const { return root_; };
     void spawn(Widget* widget);
-    void spawn(Vect2i screenPoint, Widget* widget);
+    void spawn(Vect2 screenPoint, Widget* widget);
 	void clear();
 
 	//BOOL onCommand(WPARAM wParam, LPARAM lParam);

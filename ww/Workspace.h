@@ -27,7 +27,7 @@ public:
 	void setSpace(Space* space);
 	Widget* widget();
 
-	Space* spaceByPoint(Vect2i screenPoint);
+	Space* spaceByPoint(Vect2 screenPoint);
 	Workspace* workspace() { return workspace_; }
 protected:
 	SharedPtr<Space> child_;
@@ -39,11 +39,11 @@ public:
 	bool isLeaf() const{ return false; }
 	void serialize(Archive& ar);
 
-	Space* spaceByPoint(Vect2i screenPoint);
+	Space* spaceByPoint(Vect2 screenPoint);
 	void replaceSpace(Space* oldSpace, Space* newSpace);
 	void removeSpace(int index);
 	ww::Widget* widget() { return splitter_; }
-	bool selfSplit(Vect2i point);
+	bool selfSplit(Vect2 point);
 	virtual bool vertical() const = 0;
 	void setParent(Space* parent);
 protected:
@@ -55,7 +55,7 @@ protected:
 class SpaceHBox : public SpaceBox{
 public:
 	SpaceHBox();
-	SpaceHBox(Space* oldSpace, Vect2i screenSplitPoint);
+	SpaceHBox(Space* oldSpace, Vect2 screenSplitPoint);
 	bool vertical() const { return false; }
 };
 
@@ -63,7 +63,7 @@ public:
 class SpaceVBox : public SpaceBox{
 public:
 	SpaceVBox();
-	SpaceVBox(Space* oldSpace, Vect2i screenSplitPoint);
+	SpaceVBox(Space* oldSpace, Vect2 screenSplitPoint);
 	bool vertical() const { return true; }
 };
 

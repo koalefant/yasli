@@ -33,7 +33,7 @@ void EditorDialog::init(const Serializer& serializer, const char* stateFileName,
 		title += stateFileName_;
 	}
 	setTitle(title.c_str());
-	setDefaultSize(Vect2i(450, 500));
+	setDefaultSize(450, 500);
 	setDefaultPosition(ww::POSITION_CENTER);
 	
 	setResizeable(true);

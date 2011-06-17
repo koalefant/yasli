@@ -33,7 +33,7 @@ public:
 	int splitterSpacing() const{ return splitterSpacing_; }
 	float widgetPosition(Widget* widget) const;
 	Widget* widgetByPosition(float position);
-	Widget* widgetByScreenPoint(Vect2i point);
+	Widget* widgetByScreenPoint(Vect2 point);
 	Widget* widgetByIndex(int index);
 	virtual bool vertical() = 0;
 
@@ -57,10 +57,10 @@ protected:
 
 	void setPanePosition(int index, int poisitionInPixels);
 	virtual int boxLength() const = 0;
-	virtual Vect2i elementSize(Widget* widget) const = 0;
-	virtual void setSplitterMinimalSize(const Vect2i& size) = 0;
+	virtual Vect2 elementSize(Widget* widget) const = 0;
+	virtual void setSplitterMinimalSize(const Vect2& size) = 0;
 	virtual Rect rectByPosition(int start, int end) = 0;
-	virtual int positionFromPoint(const Vect2i point) const = 0;
+	virtual int positionFromPoint(const Vect2 point) const = 0;
 
 	int splitterWidth() const;
 

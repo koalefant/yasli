@@ -42,11 +42,12 @@ LabelImpl::~LabelImpl()
 
 void LabelImpl::setText(const wchar_t* text)
 {
-	Vect2i textSize = Win32::calculateTextSize(*this, font(), text);
+	Vect2 textSize = Win32::calculateTextSize(*this, font(), text);
 	if(owner_->expandByContent_)
-		owner_->_setMinimalSize(textSize + Vect2i(2 + owner_->border() * 2, 2 + owner_->border() * 2));
+		owner_->_setMinimalSize(textSize + Vect2(2 + owner_->border() * 2, 2 + owner_->border() * 2));
 	else
-		owner_->_setMinimalSize(Vect2i(0, textSize.y) + Vect2i(2 + owner_->border() * 2, 2 + owner_->border() * 2));
+		owner_->_setMinimalSize(2 + owner_->border() * 2, 
+								textSize.y + 2 + owner_->border() * 2);
 	owner_->_queueRelayout();
 }
 
@@ -130,7 +131,7 @@ Label::Label(const char* text, bool emphasis, int border)
 , emphasis_(emphasis)
 , expandByContent_(true)
 {
-    _setMinimalSize(Vect2i(42, 42));
+    _setMinimalSize(42, 42);
 	setText(text);
 }
 #pragma warning(pop)

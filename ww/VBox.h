@@ -13,7 +13,7 @@ protected:
 	float elementLength(const Element& element) const;
 	float elementWidth(const Element& element) const;
 	float boxLength() const;
-	void setBoxSize(const Vect2i& size);
+	void setBoxSize(const Vect2& size);
 };
 
 }

@@ -240,7 +240,7 @@ void Box::setClipChildren(bool clipChildren)
 
 bool Box::updateMinimalSize()
 {
-    Vect2i oldMinimalSize = _minimalSize();
+    Vect2 oldMinimalSize = _minimalSize();
 
     float length = 0;
     float width = 0;
@@ -253,9 +253,9 @@ bool Box::updateMinimalSize()
     length += float(spacing_)*float(std::max(0, int(elements_.size()) + 1)) + border_ * 2.0f;
     width += border_ * 2.0f;
     if(clipChildren_)
-        setBoxSize(Vect2i(0, round(width)));
+        setBoxSize(Vect2(0, round(width)));
     else
-        setBoxSize(Vect2i(round(length), round(width)));
+        setBoxSize(Vect2(round(length), round(width)));
     ::RedrawWindow(*_findWindow(this), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
     return oldMinimalSize != _minimalSize();
 
@@ -299,7 +299,7 @@ void VBox::setElementPosition(Element& element, float offset, float length)
 	}
 }
 
-void VBox::setBoxSize(const Vect2i& size)
+void VBox::setBoxSize(const Vect2& size)
 {
 	minimalSize_.x = size.y;
 	minimalSize_.y = size.x;
@@ -361,7 +361,7 @@ void HBox::setElementPosition(Element& element, float offset, float length)
 	}
 }
 
-void HBox::setBoxSize(const Vect2i& size)
+void HBox::setBoxSize(const Vect2& size)
 {
 	minimalSize_.x = size.x;
 	minimalSize_.y = size.y;

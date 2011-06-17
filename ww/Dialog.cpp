@@ -127,7 +127,7 @@ void Dialog::add(Widget* widget, PackMode packMode)
 void Dialog::addButton(const char* label, int response, bool atRight)
 {
 	ButtonResponse* button = new ButtonResponse(label, response, 0);
-	button->setRequestSize(Vect2i(68, 24));
+	button->setRequestSize(68, 24);
 	button->signalPressed().connect(this, &Dialog::onResponse);
 	hboxButtons_->add(button, atRight ? PACK_END : PACK_BEGIN);
 	if(response == RESPONSE_OK || response == RESPONSE_YES){

@@ -142,7 +142,7 @@ ScrolledWindow::ScrolledWindow(int border)
 , policyVertical_(SCROLL_AUTOMATIC)
 {
 	setBorder(border);
-	_setMinimalSize(Vect2i(0, 0));
+	_setMinimalSize(0, 0);
 }
 #pragma warning(pop)
 
@@ -183,10 +183,9 @@ void ScrolledWindow::_arrangeChildren()
     using std::min;
     using std::max;
     if(child_){
-        Vect2i clientSize = clientAreaSize();
-        Vect2i minSize = child_->_minimalSize();
-        Vect2i offset;
-        Vect2i size;
+        Vect2 clientSize = clientAreaSize();
+        Vect2 minSize = child_->_minimalSize();
+        Vect2 size;
         if(fill_)
             size.set(max(minSize.x, clientSize.x), max(minSize.y, clientSize.y));
         else
@@ -195,7 +194,7 @@ void ScrolledWindow::_arrangeChildren()
         offset_.x = clamp(offset_.x, 0, minSize.x - clientSize.x);
         offset_.y = clamp(offset_.y, 0, minSize.y - clientSize.y);
 
-        Vect2i pos = -offset_;
+        Vect2 pos = -offset_;
         if(size.x <= clientSize.x)
             pos.x = (clientSize.x - size.x) / 2;
         if(size.y <= clientSize.y)
@@ -208,14 +207,14 @@ void ScrolledWindow::_arrangeChildren()
 
 void ScrolledWindow::_relayoutParents()
 {
-	Vect2i oldMinimalSize = _minimalSize();
+	Vect2 oldMinimalSize = _minimalSize();
 	int h = (policyHorizontal_ == SCROLL_NEVER && child_)
 		? child_->_minimalSize().x + GetSystemMetrics(SM_CXVSCROLL)
 		: GetSystemMetrics(SM_CXVSCROLL) + GetSystemMetrics(SM_CXHSCROLL) * 2;
 	int v = (policyVertical_ == SCROLL_NEVER && child_)
 		? child_->_minimalSize().x + GetSystemMetrics(SM_CYHSCROLL)
 		: GetSystemMetrics(SM_CYHSCROLL) + GetSystemMetrics(SM_CYVSCROLL) * 2;
-	_setMinimalSize(Vect2i(h + border_ * 2, v + border_ * 2));
+	_setMinimalSize(h + border_ * 2, v + border_ * 2);
 	impl()->updateScrollBars();
 	_arrangeChildren();
 	Container::_relayoutParents(oldMinimalSize != _minimalSize());
@@ -226,9 +225,9 @@ ScrolledWindowImpl* ScrolledWindow::impl()
 	return static_cast<ScrolledWindowImpl*>(_window());
 }
 
-Vect2i ScrolledWindow::clientAreaSize() const
+Vect2 ScrolledWindow::clientAreaSize() const
 {
-	Vect2i result(_position().width() - border() * 2, _position().height() - border() * 2);
+	Vect2 result(_position().width() - border() * 2, _position().height() - border() * 2);
 	if(policyHorizontal_ == SCROLL_ALWAYS){
 		result.y -= GetSystemMetrics(SM_CYHSCROLL);
 	}

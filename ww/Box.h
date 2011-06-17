@@ -60,7 +60,7 @@ protected:
 
 	virtual float boxLength() const = 0;
 	virtual void setElementPosition(Element& element, float offset, float length) = 0;
-	virtual void setBoxSize(const Vect2i& size) = 0;
+	virtual void setBoxSize(const Vect2& size) = 0;
 	bool updateMinimalSize();
 
 	typedef std::vector<Element> Elements;

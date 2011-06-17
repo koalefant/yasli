@@ -250,7 +250,7 @@ void MenuBarImpl::onMessageLButtonDown(UINT button, int x, int y)
             POINT pt = { item.rect().left(), item.rect().bottom() };
             ClientToScreen(*this, &pt);
             RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
-            menu.spawn(Vect2i(pt.x, pt.y), owner_);
+            menu.spawn(Vect2(pt.x, pt.y), owner_);
             activeItem_ = -1;
             updateActiveItem();
             RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
@@ -273,7 +273,7 @@ void MenuBarImpl::onItemActivate(MenuItem* item)
 void MenuBarImpl::updateRootItems()
 {
     Rect pos(owner_->_position());
-    Vect2i size = calculateTextSize(*this, Win32::defaultFont(), L" ");
+    Vect2 size = calculateTextSize(*this, Win32::defaultFont(), L" ");
     size.y +=  + GetSystemMetrics(SM_CYEDGE) * 4;
     int height = std::max(size.y, owner_->_position().height());
     rootItems_.clear();
@@ -282,7 +282,7 @@ void MenuBarImpl::updateRootItems()
     for(it = root_.subItems_.begin(); it != root_.subItems_.end(); ++it){
         MenuItem& item = *it->get();
         const std::wstring text = toWideChar(item.text_.c_str());
-        Vect2i textSize = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), text.c_str());
+        Vect2 textSize = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), text.c_str());
         textSize.x += 10;
         Rect rect(offset, (pos.height() - height) / 2, offset + textSize.x, (pos.height() - height) / 2 + height);
         rootItems_.push_back(MenuBarItem(&item, rect));

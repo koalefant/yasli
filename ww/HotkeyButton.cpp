@@ -205,7 +205,7 @@ void HotkeyButtonImpl::onMessageRButtonUp(UINT button, int x, int y)
 HotkeyButton::HotkeyButton(int border)
 : _WidgetWithWindow(new HotkeyButtonImpl(this), border)
 {
-    _setMinimalSize(Vect2i(220, 24));
+    _setMinimalSize(220, 24);
 }
 
 #pragma warning(pop)

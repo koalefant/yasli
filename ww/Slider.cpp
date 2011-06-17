@@ -125,7 +125,7 @@ Slider::Slider(int border)
 : _WidgetWithWindow(new SliderImpl(this), border)
 , stepsCount_(0)
 {
-    _setMinimalSize(Vect2i(20, 20));
+    _setMinimalSize(20, 20);
 }
 #pragma warning(pop)
 

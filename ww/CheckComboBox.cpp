@@ -433,17 +433,17 @@ CheckComboBox::CheckComboBox(bool expandByContent, int border)
 
 void CheckComboBox::updateMinimalSize()
 {
-	Vect2i size = Win32::calculateTextSize(window()->comboBox(), GetWindowFont(*window()), L" ");
+	Vect2 size = Win32::calculateTextSize(window()->comboBox(), GetWindowFont(*window()), L" ");
 	if(expandByContent_){
 		Items::iterator it;
 		FOR_EACH(items_, it){
-			Vect2i anotherSize = Win32::calculateTextSize(*window(), GetWindowFont(*window()), toWideChar(it->c_str()).c_str());
+			Vect2 anotherSize = Win32::calculateTextSize(*window(), GetWindowFont(*window()), toWideChar(it->c_str()).c_str());
 			size.x = std::max(anotherSize.x, size.x);
 			size.y = std::max(anotherSize.y, size.y);
 		}
 	}
-	_setMinimalSize(size + Vect2i(4, 4) + Vect2i(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
-		            + Vect2i(border_, border_) * 2 + Vect2i(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)));
+	_setMinimalSize(size + Vect2(4, 4) + Vect2(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
+		            + Vect2(border_, border_) * 2 + Vect2(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)));
 }
 
 

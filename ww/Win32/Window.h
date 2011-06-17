@@ -3,10 +3,10 @@
 #include "ww/API.h"
 #include "ww/Win32/Types.h"
 #include "ww/Rect.h"
+#include "ww/Vect2.h"
 
 #include "yasli/Pointers.h"
 #include "yasli/Assert.h"
-#include "XMath/XMath.h"
 
 
 struct tagDRAWITEMSTRUCT;
@@ -32,8 +32,7 @@ LRESULT CALLBACK universalWindowProcedure(HWND handle, UINT message, WPARAM wpar
 /// приступить к обработки сообщений вплоть до получения WM_QUIT 
 int WW_API basicMessageLoop(HACCEL acceleratorTable = 0);
 
-//Vect2i calculateTextSize(HWND window, HFONT font, const char* text);
-Vect2i calculateTextSize(HWND window, HFONT font, const wchar_t* text);
+ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text);
 HFONT defaultFont();
 HFONT defaultBoldFont();
 void initializeCommonControls();

@@ -70,7 +70,7 @@ public:
     void setUndoEnabled(bool enabled, bool full = false);
     void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
 	
-	Vect2i treeSize() const;
+	Vect2 treeSize() const;
 	bool multiSelectable() const { return propertyTree_ != 0; }
 
     sigslot::signal0& signalChanged(){ return signalChanged_; }
@@ -97,7 +97,7 @@ public:
     TreeImpl* impl() const;
 
     bool isFocused() const;
-    Vect2i _toScreen(Vect2i point) const;
+    Vect2 _toScreen(Vect2 point) const;
     void _setFocus();
     void _cancelWidget(){ widget_ = 0; }
 
@@ -109,10 +109,10 @@ protected:
 
     bool onContextMenu(PropertyRow* row, PopupMenuItem& menu);
     bool onRowKeyDown(PropertyRow* row, KeyPress key);
-    bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point);
-    void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2i point);
-    void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point);
-    void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2i point);
+    bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point);
+    void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point);
+    void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point);
+    void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2 point);
 
     void onRowMenuUndo();
     void onRowMenuCopy(PropertyRow* row);

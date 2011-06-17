@@ -83,7 +83,7 @@ public:
 	TypeID derivedType() const{ return derivedType_; }
 	ClassFactoryBase* factory() const{ return factory_; }
     bool onActivate( PropertyTree* tree, bool force);
-    bool onMouseDown(PropertyTree* tree, Vect2i point, bool& changed);
+    bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
 	bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
 	void onMenuCreateByIndex(int index, bool useDefaultValue, PropertyTree* tree);
 	bool isStatic() const{ return false; }

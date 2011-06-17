@@ -135,10 +135,10 @@ void RadioButtonImpl::setRadioButtonText(const wchar_t* text)
 	VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
-	Vect2i textSize = Win32::calculateTextSize(handle_, font, text);
+	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);
 
-	owner_->_setMinimalSize(textSize + Vect2i(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1,
-		GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1) + Vect2i(owner_->border(), owner_->border()));
+	owner_->_setMinimalSize(textSize + Vect2(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1,
+		GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1) + Vect2(owner_->border(), owner_->border()));
 	owner_->_queueRelayout();
 }
 
@@ -187,7 +187,7 @@ BOOL RadioButtonImpl::onMessageEraseBkgnd(HDC dc)
 RadioButton::RadioButton(RadioButton* groupWith, const char* text, int border)
 : _WidgetWithWindow(new RadioButtonImpl(this, groupWith), border), status_(groupWith == 0)
 {
-	_setMinimalSize(Vect2i(24, 24));
+	_setMinimalSize(24, 24);
 	setText(text);
 	window()->setRadioButtonStatus(status_);
 }

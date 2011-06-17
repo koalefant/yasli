@@ -117,7 +117,7 @@ void FloatingSplitter::onMessagePaint()
 
 // ---------------------------------------------------------------------------
 
-static bool isVerticalSplit(Rect rect, Vect2i point)
+static bool isVerticalSplit(Rect rect, Vect2 point)
 {
 	if(rect.left() != 0){
 		point.x -= rect.left();
@@ -236,7 +236,7 @@ Space* WorkspaceImpl::canBeSplitted(int x, int y, bool& outVertical)
 {
 	POINT pt = { x, y };
 	::ClientToScreen(*this, &pt);
-	Vect2i point(pt.x, pt.y);
+	Vect2 point(pt.x, pt.y);
 
 	if(Space* space = owner_->rootSpace_.spaceByPoint(point)){
 		HWND wnd = *_findWindow(space->widget());
@@ -265,7 +265,7 @@ void WorkspaceImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	POINT pt = { x, y };
 	::ClientToScreen(*this, &pt);
-	Vect2i point(pt.x, pt.y);
+	Vect2 point(pt.x, pt.y);
 
 	if(splitting_){
 		if(GetCapture() == *this){
@@ -295,7 +295,7 @@ void WorkspaceImpl::onMessageLButtonDown(UINT button, int x, int y)
 	return Win32::Window32::onMessageLButtonDown(button, x, y);
 }
 
-static Rect calculateSplitterRect(const Rect& spaceRect, Vect2i point)
+static Rect calculateSplitterRect(const Rect& spaceRect, Vect2 point)
 {
 	int splitterWidth = Splitter::SPLITTER_WIDTH;
 	int halfWidth = Splitter::SPLITTER_WIDTH / 2;
@@ -316,7 +316,7 @@ void WorkspaceImpl::onMessageMouseMove(UINT button, int x, int y)
 
 		setCursor();
 
-		Space* space = owner_->rootSpace_.spaceByPoint(Vect2i(pt.x, pt.y));
+		Space* space = owner_->rootSpace_.spaceByPoint(Vect2(pt.x, pt.y));
 		if(space){
 			Widget* widget = space->widget();
 			if(widget){
@@ -327,7 +327,7 @@ void WorkspaceImpl::onMessageMouseMove(UINT button, int x, int y)
 				
 				//if(isVerticalSplit(rect.recti(), point) == vertical()){
 
-				Rect splitterRect = calculateSplitterRect(rect.recti(), Vect2i(pt.x, pt.y));
+				Rect splitterRect = calculateSplitterRect(rect.recti(), Vect2(pt.x, pt.y));
 				floatingSplitter_->set(splitterRect);
 				/*
 				Win32::Rect rt;
@@ -600,7 +600,7 @@ Space* Space::clone()
 	result->decrRef();
 	return result;
 }
-Space* Space::spaceByPoint(Vect2i screenPoint)
+Space* Space::spaceByPoint(Vect2 screenPoint)
 {
 	if(Widget* widget = this->widget())
 	{
@@ -703,7 +703,7 @@ void RootSpace::replaceSpace(Space* oldSpace, Space* newSpace)
 	setSpace(newSpace);
 }
 
-Space* RootSpace::spaceByPoint(Vect2i screenPoint)
+Space* RootSpace::spaceByPoint(Vect2 screenPoint)
 {
 	if(child_)
 		return child_->spaceByPoint(screenPoint);
@@ -762,7 +762,7 @@ void SpaceBox::setParent(Space* parent)
 	}
 }
 
-bool SpaceBox::selfSplit(Vect2i point)
+bool SpaceBox::selfSplit(Vect2 point)
 {
 	if(Widget* widget = splitter_->widgetByScreenPoint(point)){
 		Win32::Window32* window = _findWindow(widget);
@@ -825,7 +825,7 @@ void SpaceBox::replaceSpace(Space* oldSpace, Space* newSpace)
     ASSERT(0 && "Unable to find oldSpace");
 }
 
-Space* SpaceBox::spaceByPoint(Vect2i screenPoint)
+Space* SpaceBox::spaceByPoint(Vect2 screenPoint)
 {
 	Spaces::iterator it;
 	for(it = spaces_.begin(); it != spaces_.end(); ++it){
@@ -1050,7 +1050,7 @@ void SpaceSplitterImpl::onMessageRButtonDown(UINT button, int x, int y)
 		darkOverlay_->show(false);
 	}
 	else{
-		int splitterIndex = splitterByPoint(Vect2i(x, y));
+		int splitterIndex = splitterByPoint(Vect2(x, y));
 		if(splitterIndex >= 0){
 			PopupMenu menu(100);
 
@@ -1082,7 +1082,7 @@ SpaceHBox::SpaceHBox()
 	splitter_ = new SpaceHSplitter(this);
 }
 
-SpaceHBox::SpaceHBox(Space* oldSpace, Vect2i screenSplitPoint)
+SpaceHBox::SpaceHBox(Space* oldSpace, Vect2 screenSplitPoint)
 {
 	Widget* widget = oldSpace->findWidget();
 	ASSERT(widget);
@@ -1119,7 +1119,7 @@ SpaceVBox::SpaceVBox()
 	splitter_ = new SpaceVSplitter(this);
 }
 
-SpaceVBox::SpaceVBox(Space* oldSpace, Vect2i screenSplitPoint)
+SpaceVBox::SpaceVBox(Space* oldSpace, Vect2 screenSplitPoint)
 {
 	Widget* widget = oldSpace->findWidget();
 	ASSERT(widget);
@@ -1204,7 +1204,7 @@ void SpaceHeaderImpl::onMessageLButtonDown(UINT button, int x, int y)
 
 	ClassMenuItemAdderSpace(owner_, index).generateMenu(menu.root(), SerializationFactory<Space, FactoryArg0<Space> >::instance().comboStringsAlt());
 	
-	menu.spawn(Vect2i(rect.left, rect.bottom), owner_);
+	menu.spawn(Vect2(rect.left, rect.bottom), owner_);
 	
 	Win32::Window32::onMessageLButtonDown(button, x, y);
 }
@@ -1311,8 +1311,8 @@ void SpaceHeader::serialize(Archive& ar)
 
 void SpaceHeader::updateMinimalSize()
 {
-	Vect2i size = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), label_.c_str());
-	size += Vect2i(GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE)) * 2;
+	Vect2 size = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), label_.c_str());
+	size += Vect2(GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE)) * 2;
 	size.x += GetSystemMetrics(SM_CXVSCROLL) + 4;
 	_setMinimalSize(size);
 }

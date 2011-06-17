@@ -58,7 +58,8 @@ public:
 	void setIconFromFile(const char* resourceName);
 
 	void setDefaultPosition(WindowPosition position);
-	void setDefaultSize(Vect2i size);
+	void setDefaultSize(int w, int h);
+	void setDefaultSize(Vect2 size);
 
 	/// разрешает/запрещает изменение размеров окна
 	void setResizeable(bool allowResize);
@@ -118,7 +119,7 @@ protected:
 	bool showTitleBar_;
 	bool positioned_;
 	WindowPosition windowPosition_;
-	Vect2i defaultSize_;
+	Vect2 defaultSize_;
 	std::string title_;
 	int style_;
 

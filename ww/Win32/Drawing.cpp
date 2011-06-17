@@ -5,6 +5,7 @@
 #include "ww/Win32/Handle.h"
 #include "ww/gdiplus.h"
 #include "ww/PropertyTreeDrawing.h" // FIXME привести в порядок
+#include "XMath/Colors.h"
 
 enum{
 	OBM_CHECK = 32760
@@ -13,6 +14,27 @@ enum{
 static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
 
 namespace Win32{
+
+COLORREF toColorRef(const Color4f& color)
+{
+	return COLORREF(((unsigned char)(round(color.r * 255.0f))|
+					 ((unsigned short)((unsigned char)(round(color.g * 255.0f)))<<8))|
+					(((unsigned int)(unsigned char)(round(color.b * 255.0f)))<<16));
+}
+
+Color4c toColor4c(COLORREF c)
+{
+	return Color4c((unsigned char)(c & 0x000000FF),
+				   (unsigned char)((c & 0x0000FF00) >> 8),
+				   (unsigned char)((c & 0x00FF0000) >> 16));
+}
+
+COLORREF blendColor(COLORREF from, COLORREF to, float factor)
+{
+	Color4c c;
+	c.interpolate(toColor4c(from), toColor4c(to), factor);
+	return c.rgb();
+}
 
 void drawEdit3D(HDC dc, const RECT& rect, const wchar_t* text, HFONT font)
 {

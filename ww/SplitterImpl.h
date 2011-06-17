@@ -18,11 +18,11 @@ protected:
 
 	void	onMessagePaint();
 
-	int splitterByPoint(Vect2i point);
+	int splitterByPoint(Vect2 point);
 	Rect getSplitterRect(int splitterIndex);
 
 	ww::Splitter* owner_;
-	Vect2i lastCursorPosition_;
+	Vect2 lastCursorPosition_;
 	int grabbedSplitter_;
 };
 };

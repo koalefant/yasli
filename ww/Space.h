@@ -29,8 +29,8 @@ public:
 	void addToHeader(Widget* widget);
 
 	void setMenu(const char* menuPath);
-	virtual Space* spaceByPoint(Vect2i point);
-	virtual bool selfSplit(Vect2i screenPoint) { return false; }
+	virtual Space* spaceByPoint(Vect2 point);
+	virtual bool selfSplit(Vect2 screenPoint) { return false; }
 	Space* clone();
 	virtual void replaceSpace(Space* oldSpace, Space* newSpace);
 	virtual bool isLeaf() const{ return true; }

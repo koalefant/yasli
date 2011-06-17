@@ -37,8 +37,8 @@ public:
 
     Rectf visibleArea() const;
 
-    Vect2i toView(const Vect2f& p) const;
-    Vect2f fromView(const Vect2i& p) const;
+    Vect2 toView(const Vect2f& p) const;
+    Vect2f fromView(const Vect2& p) const;
 private:
     HDC dc_;
     Rect visibleRect_;

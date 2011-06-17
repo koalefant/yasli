@@ -2,7 +2,7 @@
 
 #include "ww/API.h"
 #include "ww/Win32/Types.h"
-#include "XMath/XMath.h"
+#include "ww/Vect2.h"
 
 namespace ww{
 
@@ -12,7 +12,7 @@ public:
 	~ImageStore();
 	void addFromResource(const char* bitmapID, unsigned int color);
 	void addFromFile(const char* fileName, unsigned int color);
-	Vect2i slideSize() const { return size_; }
+	Vect2 slideSize() const { return size_; }
 
 	void _draw(int index, HDC destDC, int x, int y, bool disabled = false);
 protected:
@@ -22,7 +22,7 @@ protected:
 	HBITMAP bitmapGray_;
 	HIMAGELIST imageList_;
 	HIMAGELIST imageListGray_;
-	Vect2i size_;
+	Vect2 size_;
 };
 
 }

@@ -3,6 +3,7 @@
 #include "ww/Win32/Types.h"
 #include "ww/_WidgetWithWindow.h"
 #include "ww/Win32/Handle.h"
+
 #include "XMath/XMath.h"
 #include "XMath/Colors.h"
 #include "XMath/Rectf.h"
@@ -31,7 +32,7 @@ public:
 	void redraw(bool updateNow = false);
 
 	// для получения координат используется mousePosition()
-	virtual void onMouseMove(const Vect2i& delta);
+	virtual void onMouseMove(const Vect2& delta);
 	virtual void onMouseButtonDown(MouseButton button);
 	virtual void onMouseButtonUp(MouseButton button);
 
@@ -44,8 +45,8 @@ public:
 	void captureMouse();
 	void releaseMouse();
 
-	Vect2i size() const{ return size_; }
-	Vect2i mousePosition() const{ return mousePosition_; }
+	Vect2 size() const{ return size_; }
+	Vect2 mousePosition() const{ return mousePosition_; }
 	
 	void setBackgroundColor(Color3c backgroundColor){
 		backgroundColor_ = backgroundColor;
@@ -76,7 +77,10 @@ public:
 	bool rmbPressed() const { return rmbPressed_; }
 	bool scrolling() const { return scrolling_; }
 
-	Vect2f clickPoint() const { return coordsFromScreen(mousePosition()); }
+	Vect2f clickPoint() const {
+		Vect2 mousePos = mousePosition();
+		return coordsFromScreen(Vect2f(mousePos.x, mousePos.y));
+	}
 
 protected:
 	int fontHeight_;
@@ -85,7 +89,7 @@ protected:
     bool enableBasicNavigation_;
     Vect2f viewCenter_;
 
-	Vect2i viewSize_;
+	Vect2 viewSize_;
 	Vect2f viewOffset_;
 	Vect2f viewScale_;
 	int zoomIndex_;
@@ -96,8 +100,8 @@ protected:
 	bool rmbPressed_;
 	bool scrolling_;
 
-	Vect2i mousePosition_;
-	Vect2i size_;
+	Vect2 mousePosition_;
+	Vect2 size_;
 
 	void createFont();
 

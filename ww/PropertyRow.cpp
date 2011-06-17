@@ -72,7 +72,7 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	visible_ = true;
 	labelChanged_ = true;
 	
-	pos_ = size_ = Vect2i::ZERO;
+	pos_ = size_ = Vect2::ZERO;
 	plusSize_ = 0;
 	textPos_ = 0;
 	textSizeInitial_ = 0;
@@ -525,7 +525,7 @@ void PropertyRow::updateSize(const PropertyTree* tree)
     }
 }
 
-void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2i pos, int& totalHeight, int& _extraSize)
+void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 pos, int& totalHeight, int& _extraSize)
 {
 	pos_ = pos;
 	pos.x += plusSize_;
@@ -617,7 +617,7 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2i 
 			}
         }
 		else if(row->visible(tree) && nonPulled->expanded()){
-			Vect2i rowPos(nonPulled->plusRect().right(), totalHeight);
+			Vect2 rowPos(nonPulled->plusRect().right(), totalHeight);
 			totalHeight += row->size_.y;
 			row->adjustRect(tree, rect, rowPos, totalHeight, extraSize);
         }
@@ -905,9 +905,9 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expanded, bool selected, bool grayed) const
 {	
 	using namespace Gdiplus;
-	Vect2i size(9, 9);
-	Vect2i center(rect.center());
-	Win32::Rect r(Rect(center - Vect2i(4, 4), center - Vect2i(4, 4) + size));
+	Vect2 size(9, 9);
+	Vect2 center(rect.center());
+	Win32::Rect r(Rect(center - Vect2(4, 4), center - Vect2(4, 4) + size));
 
 	fillRoundRectangle(gr, &SolidBrush(gdiplusSysColor(/*grayed ? COLOR_BTNFACE : */COLOR_WINDOW)), gdiplusRect(r), gdiplusSysColor(COLOR_3DDKSHADOW), 3);
 
@@ -1046,12 +1046,12 @@ bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall
 	return false;
 }
 
-const PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2i point) const
+const PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2 point) const
 {
   return const_cast<PropertyRow*>(this)->hit(tree, point);
 }
 
-PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2i point)
+PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2 point)
 {
     bool expanded = this->expanded();
     if(isContainer() && pulledUp())

@@ -492,11 +492,11 @@ bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
         return false;
     PopupMenu menu(512);
     ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu.root(), tree->model()->typeStringList(typeName()));
-    menu.spawn(tree->_toScreen(Vect2i(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
+    menu.spawn(tree->_toScreen(Vect2(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
     return true;
 }
 
-bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Vect2i point, bool& changed) 
+bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed) 
 {
     if(widgetRect().pointInside(point)){
         if(onActivate(tree, false))

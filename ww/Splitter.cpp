@@ -50,8 +50,8 @@ void SplitterImpl::onMessagePaint()
                 Rect rect = owner_->getSplitterRect(i);
                 int spacing = owner_->splitterSpacing();
 
-                int hspacing = owner_->positionFromPoint(Vect2i(spacing, 0));
-                int vspacing = owner_->positionFromPoint(Vect2i(0, spacing));
+                int hspacing = owner_->positionFromPoint(Vect2(spacing, 0));
+                int vspacing = owner_->positionFromPoint(Vect2(0, spacing));
                 RECT windowRect = { rect.left() + hspacing,
                     rect.top() + vspacing,
                     rect.right() - hspacing,
@@ -75,8 +75,8 @@ BOOL SplitterImpl::onMessageSetCursor(HWND window, USHORT hitTest, USHORT messag
 	for(int i = 0; i < count; ++i){
 		Rect rect = owner_->getSplitterRect(i);
 
-		if(rect.pointInside(Vect2i(cursorPosition.x, cursorPosition.y))){
-			if(owner_->positionFromPoint(Vect2i(0xffff,  0)))
+		if(rect.pointInside(Vect2(cursorPosition.x, cursorPosition.y))){
+			if(owner_->positionFromPoint(Vect2(0xffff,  0)))
 				SetCursor(LoadCursor(0, MAKEINTRESOURCE(IDC_SIZEWE)));
 			else
 				SetCursor(LoadCursor(0, MAKEINTRESOURCE(IDC_SIZENS)));
@@ -88,10 +88,10 @@ BOOL SplitterImpl::onMessageSetCursor(HWND window, USHORT hitTest, USHORT messag
 
 void SplitterImpl::onMessageMouseMove(UINT button, int x, int y)
 {
-	Vect2i cursorPosition;
+	Vect2 cursorPosition;
 	::GetCursorPos((POINT*)(&cursorPosition));
 	::ScreenToClient(handle_, (POINT*)&cursorPosition);
-	cursorPosition -= Vect2i(owner_->border(), owner_->border());
+	cursorPosition -= Vect2(owner_->border(), owner_->border());
 	if(cursorPosition != lastCursorPosition_){
 		bool buttonPressed = button & MK_LBUTTON;
 		if(grabbedSplitter_ >= 0 && buttonPressed && ::GetCapture() == *this){
@@ -106,7 +106,7 @@ void SplitterImpl::onMessageMouseMove(UINT button, int x, int y)
 }
 
 
-int SplitterImpl::splitterByPoint(Vect2i point)
+int SplitterImpl::splitterByPoint(Vect2 point)
 {
 	int count = owner_->splittersCount();
 	for(int i = 0; i < count; ++i){
@@ -125,9 +125,9 @@ Rect SplitterImpl::getSplitterRect(int splitterIndex)
 
 void SplitterImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
-	Vect2i cursorPosition(x, y);
+	Vect2 cursorPosition(x, y);
 
-	grabbedSplitter_ = splitterByPoint(Vect2i(x, y));
+	grabbedSplitter_ = splitterByPoint(Vect2(x, y));
 	if(grabbedSplitter_ >= 0){
 		::SetCapture(*this);
 		return;
@@ -315,22 +315,22 @@ int Splitter::splitterWidth() const
 
 void Splitter::_relayoutParents()
 {
-	Vect2i oldMinimalSize = _minimalSize();
+	Vect2 oldMinimalSize = _minimalSize();
 	if(elements_.empty()){
-		setSplitterMinimalSize(Vect2i(border_ * 2, border_ * 2));
+		setSplitterMinimalSize(Vect2(border_ * 2, border_ * 2));
 	}
 	else{
 		Elements::iterator it;
 		int width = 0;
 		int minimalLength = (int(elements_.size()) - 1) * splitterWidth();
 		FOR_EACH(elements_, it){
-			Vect2i size = elementSize(it->widget);
+			Vect2 size = elementSize(it->widget);
 			if(!it->fold)
 				minimalLength += size.x;
 			width = std::max(width, size.y);
 		}
 		_arrangeChildren();
-		setSplitterMinimalSize(Vect2i(minimalLength + border_ * 2, width + border_ * 2));
+		setSplitterMinimalSize(Vect2(minimalLength + border_ * 2, width + border_ * 2));
 	}
 	Widget::_relayoutParents(oldMinimalSize != _minimalSize() ? true : false);
 }
@@ -386,7 +386,7 @@ Widget* Splitter::widgetByIndex(int index)
 	return it->widget;
 }
 
-Widget* Splitter::widgetByScreenPoint(Vect2i point)
+Widget* Splitter::widgetByScreenPoint(Vect2 point)
 {
 	Elements::iterator it;
 	FOR_EACH(elements_, it){
@@ -536,7 +536,7 @@ HSplitter::~HSplitter()
 {
 }
 
-int HSplitter::positionFromPoint(const Vect2i point) const
+int HSplitter::positionFromPoint(const Vect2 point) const
 {
 	return point.x;
 }
@@ -546,7 +546,7 @@ int HSplitter::boxLength() const
 	return position_.width() - border_ * 2;
 }
 
-void HSplitter::setSplitterMinimalSize(const Vect2i& size)
+void HSplitter::setSplitterMinimalSize(const Vect2& size)
 {
 	minimalSize_ = size;
 }
@@ -573,7 +573,7 @@ Widget* HSplitter::_nextWidget(Widget* last, FocusDirection focusDirection) cons
 	}
 }
 
-Vect2i HSplitter::elementSize(Widget* widget) const
+Vect2 HSplitter::elementSize(Widget* widget) const
 {
 	return widget->_minimalSize();
 }
@@ -595,7 +595,7 @@ VSplitter::~VSplitter()
 {
 }
 
-int VSplitter::positionFromPoint(const Vect2i point) const
+int VSplitter::positionFromPoint(const Vect2 point) const
 {
 	return point.y;
 }
@@ -605,7 +605,7 @@ int VSplitter::boxLength() const
 	return position_.height() - border_ * 2;
 }
 
-void VSplitter::setSplitterMinimalSize(const Vect2i& size)
+void VSplitter::setSplitterMinimalSize(const Vect2& size)
 {
 	minimalSize_.x = size.y;
 	minimalSize_.y = size.x;
@@ -617,10 +617,10 @@ Rect VSplitter::rectByPosition(int start, int end)
 	return rect;
 }
 
-Vect2i VSplitter::elementSize(Widget* widget) const
+Vect2 VSplitter::elementSize(Widget* widget) const
 {
-	Vect2i size = widget->_minimalSize();
-	return Vect2i(size.y, size.x);
+	Vect2 size = widget->_minimalSize();
+	return Vect2(size.y, size.x);
 }
 
 

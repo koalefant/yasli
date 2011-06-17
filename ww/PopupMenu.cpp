@@ -62,10 +62,10 @@ void PopupMenu::spawn(Widget* widget)
 {
     POINT pt;
 	GetCursorPos(&pt);
-	spawn(Vect2i(pt.x, pt.y), widget);
+	spawn(Vect2(pt.x, pt.y), widget);
 }
 
-void PopupMenu::spawn(Vect2i point, Widget* widget)
+void PopupMenu::spawn(Vect2 point, Widget* widget)
 {
 	if(root_.children().empty())
 		return;

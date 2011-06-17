@@ -53,7 +53,7 @@ PropertyTree::PropertyTree(int border)
 {
 	(TreeConfig&)*this = defaultConfig;
 
-	_setMinimalSize(Vect2i(0, 0));
+	_setMinimalSize(0, 0);
 
 	model_ = new PropertyTreeModel();
 	model_->setExpandLevels(expandLevels_);
@@ -113,7 +113,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		if(onContextMenu(row, menu.root())){
             Win32::Rect rect(row->rect());
 			_window()->clientToScreen(rect);
-			Vect2i pt(rect.left + (rect.bottom - rect.top), rect.bottom);
+			Vect2 pt(rect.left + (rect.bottom - rect.top), rect.bottom);
 			menu.spawn(pt, this);
 		}
 		return true; }
@@ -156,14 +156,14 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	case KEY_END | KEY_MOD_CONTROL:
-		selectedRow = model()->root()->rowByVerticalIndex(this, INT_INF);
+		selectedRow = model()->root()->rowByVerticalIndex(this, INT_MAX);
 		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	case KEY_HOME:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = -INT_INF);
+		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
 		break;
 	case KEY_END:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_INF);
+		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		break;
 	case KEY_SPACE:
 		if(focusedRow->canBeToggled(this))
@@ -179,7 +179,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 	return false;
 }
 
-bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point)
+bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
 	row = impl()->rowByPoint(point);
 	if(row){
@@ -207,14 +207,14 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2i po
 	return false;
 }
 
-void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2i point)
+void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
 	row->onMouseUp(this, point);
 	if(GetCapture() == *_window())
 		ReleaseCapture();
 }
 
-void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2i point)
+void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
     SharedPtr<PropertyRow> handle = row;
 	onRowSelected(row, false, true);	
@@ -310,9 +310,9 @@ void PropertyTree::updateHeights()
 	impl()->updateScrollBar();
 }
 
-Vect2i PropertyTree::treeSize() const
+Vect2 PropertyTree::treeSize() const
 {
-	return impl()->size_ + (compact() ? Vect2i::ZERO : Vect2i(8, 8));
+	return impl()->size_ + (compact() ? Vect2::ZERO : Vect2(8, 8));
 }
 
 void PropertyTree::serialize(Archive& ar)
@@ -482,7 +482,7 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	return true;
 }
 
-void PropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2i point)
+void PropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
 	row->onMouseMove(this, point);
 }
@@ -631,11 +631,11 @@ PropertyRow* PropertyTree::selectedRow()
     return model()->rowFromPath(sel.front());
 }
 
-Vect2i PropertyTree::_toScreen(Vect2i point) const
+Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
     POINT pt = { point.x - impl()->offset_.x, point.y - impl()->offset_.y };
     ClientToScreen(*impl(), &pt);
-    return Vect2i(pt.x, pt.y);
+    return Vect2(pt.x, pt.y);
 }
 
 void PropertyTree::selectByAddress(void* addr)

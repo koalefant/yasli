@@ -20,7 +20,7 @@ ImageStore::ImageStore(int cx, int cy, const char* resourceName, unsigned int ma
 	imageListGray_ = ImageList_Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 16);
 	ASSERT(imageListGray_ != NULL);
 
-	size_ = Vect2i(cx, cy);
+	size_ = Vect2(cx, cy);
 	if(resourceName)
 		addFromResource(resourceName, maskColor);
 }

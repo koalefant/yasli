@@ -17,6 +17,8 @@
 #include "XMath/MinMax.h"
 #include "XMath/Profiler.h"
 
+#pragma warning(disable: 4355) //  'this' : used in base member initializer list
+
 #define FOR_EACH(container, it) for( it = (container).begin(); it != (container).end(); ++it )
 
 template<class T, size_t Len>

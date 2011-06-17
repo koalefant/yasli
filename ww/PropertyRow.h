@@ -76,8 +76,8 @@ public:
 	bool visible(const PropertyTree* tree) const;
 	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
-	const PropertyRow* hit(const PropertyTree* tree, Vect2i point) const;
-	PropertyRow* hit(const PropertyTree* tree, Vect2i point);
+	const PropertyRow* hit(const PropertyTree* tree, Vect2 point) const;
+	PropertyRow* hit(const PropertyTree* tree, Vect2 point);
 	PropertyRow* parent() { return parent_; }
 	const PropertyRow* parent() const{ return parent_; }
 	void setParent(PropertyRow* row) { parent_ = row; }
@@ -151,7 +151,7 @@ public:
 	virtual int floorHeight() const{ return 0; }
 
     void updateSize(const PropertyTree* tree);
-    void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2i pos, int& totalHeight, int& extraSize);
+    void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 pos, int& totalHeight, int& extraSize);
 	void scaleSize(float t, bool scaleWidget);
 	void cutSize(int& extraSize, bool cutWidget);
 
@@ -185,9 +185,9 @@ public:
 
 	virtual bool onActivate(PropertyTree* tree, bool force); // возвращает изменилось ли значение строчки
 	virtual bool onKeyDown(PropertyTree* tree, KeyPress key);
-	virtual bool onMouseDown(PropertyTree* tree, Vect2i point, bool& changed) { return false; } // возваращает, нужно ли capture-ить мышь
-	virtual void onMouseMove(PropertyTree* tree, Vect2i point) {}
-	virtual void onMouseUp(PropertyTree* tree, Vect2i point) {}
+	virtual bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed) { return false; } // возваращает, нужно ли capture-ить мышь
+	virtual void onMouseMove(PropertyTree* tree, Vect2 point) {}
+	virtual void onMouseUp(PropertyTree* tree, Vect2 point) {}
 	virtual bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
 
 	void setUpdated(bool updated) { updated_ = updated; }
@@ -253,8 +253,9 @@ protected:
 	bool multiValue_;
 	char freePulledChildren_;
 
-	Vect2s pos_;
-	Vect2s size_;
+	// do we really need Vect2s here? 
+	Vect2 pos_;
+	Vect2 size_;
     short int plusSize_;
 	short int textPos_;
 	short int textSizeInitial_;

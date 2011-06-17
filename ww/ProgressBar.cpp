@@ -66,8 +66,8 @@ LRESULT ProgressBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 ProgressBar::ProgressBar(int border)
 : _WidgetWithWindow(new ProgressBarImpl(this), border)
 {
-    _setMinimalSize(Vect2i(4, 4));
-    setRequestSize(Vect2i(24, 24));
+    _setMinimalSize(4, 4);
+    setRequestSize(24, 24);
     pos_ = 0.f;
     setPosition(pos_);
 }

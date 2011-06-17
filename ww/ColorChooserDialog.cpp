@@ -19,9 +19,9 @@ ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color4f& color,
 		setTitle("Choose Alpha");
 
 	if(showColor)
-		setDefaultSize(Vect2i(350, 400));
+		setDefaultSize(350, 400);
 	else
-		setDefaultSize(Vect2i(400, 0));
+		setDefaultSize(400, 0);
 	setResizeable(true);
 
 	chooser_ = new ColorChooser();

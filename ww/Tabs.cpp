@@ -8,7 +8,6 @@
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
-#include "XMath/Colors.h"
 #include "gdiplus.h"
 #include "PropertyTreeDrawing.h" // rename
 #include "yasli/Archive.h"
@@ -129,7 +128,7 @@ void TabsImpl::recalculateRects()
 		TabsItem& item = *it;
 
 		HFONT font = selectedTab_ == index ? Win32::defaultBoldFont() : Win32::defaultFont();
-		Vect2i size = Win32::calculateTextSize(*this, font, toWideChar(item.text.c_str()).c_str());
+		Vect2 size = Win32::calculateTextSize(*this, font, toWideChar(item.text.c_str()).c_str());
 
 		size.x += PADDING_X * 2;
 		size.y += PADDING_Y * 2;
@@ -148,7 +147,7 @@ void TabsImpl::recalculateRects()
 			item.rect.right = round(item.rect.right * scale);
 		}
 	}
-	owner_->_setMinimalSize(Vect2i(20, height));
+	owner_->_setMinimalSize(20, height);
 	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
 }
 
@@ -243,7 +242,7 @@ void TabsImpl::onMessageMButtonDown(UINT button, int x, int y)
 	Items::iterator it;
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
-		if(item.rect.pointIn(Vect2i(x, y))){
+		if(item.rect.pointIn(Vect2(x, y))){
 			owner_->signalMouseButtonDown().emit(MOUSE_BUTTON_MIDDLE, index);
 			break;
 		}
@@ -258,7 +257,7 @@ void TabsImpl::onMessageRButtonDown(UINT button, int x, int y)
 	Items::iterator it;
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
-		if(item.rect.pointIn(Vect2i(x, y))){
+		if(item.rect.pointIn(Vect2(x, y))){
 			owner_->signalMouseButtonDown().emit(MOUSE_BUTTON_RIGHT, index);
 			break;
 		}
@@ -275,15 +274,12 @@ void TabsImpl::onMessageLButtonDown(UINT button, int x, int y)
 	Items::iterator it;
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
-		if(item.rect.pointIn(Vect2i(x, y))){
+		if(item.rect.pointIn(Vect2(x, y))){
 			focusedTab_ = index;
 			if(index != selectedTab_){
 				owner_->setSelectedTab(index);
 			}
 		}
-
-		HFONT font = selectedTab_ == index ? Win32::defaultBoldFont() : Win32::defaultFont();
-		Vect2i size = Win32::calculateTextSize(*this, font, toWideChar(item.text.c_str()).c_str());
 		++index;
 	}
 	RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
@@ -298,7 +294,7 @@ void TabsImpl::onMessageLButtonDown(UINT button, int x, int y)
 Tabs::Tabs(int border)
 : _WidgetWithWindow(new TabsImpl(this), border)
 {
-	_setMinimalSize(Vect2i(20, 20));
+	_setMinimalSize(20, 20);
 	impl().recalculateRects();
 }
 #pragma warning(pop)

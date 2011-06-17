@@ -938,6 +938,14 @@
 				RelativePath=".\Unicode.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Vect2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vect2.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="PropertyTree"

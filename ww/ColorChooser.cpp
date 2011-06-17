@@ -44,7 +44,7 @@ void ColorChooser::relayout()
 	add(hbox, PACK_COMPACT);
 	{
         colorRect_ = new ColorRect();
-		colorRect_->setRequestSize(Vect2i(64, 64));
+		colorRect_->setRequestSize(64, 64);
 		colorRect_->set(color_);
 		hbox->add(colorRect_);
 
@@ -86,7 +86,7 @@ void ColorChooser::relayout()
 		}
 		vbox = new VBox();
 		hbox->add(vbox, PACK_COMPACT);
-		vbox->setRequestSize(Vect2i(50, 10));
+		vbox->setRequestSize(50, 10);
 		{
 			if(showColor_){
 				entryRed_ = new Entry();
