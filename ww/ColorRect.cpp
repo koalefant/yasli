@@ -41,20 +41,18 @@ void ColorRectImpl::redraw(HDC dc)
 	HRGN region = CreateRoundRectRgn(rect.left + 1, rect.top + 1, rect.right - 1, rect.bottom - 1, roundness, roundness - 2);
 	::SelectClipRgn(dc, region);
 
-	Color4c c(owner_->color_);
+	Color c(owner_->color_);
 	HBRUSH brush = CreateSolidBrush(RGB(c.r, c.g, c.b));
 
 	RECT filledRect = { rect.left + 1, rect.top + 1, rect.right - 1, rect.bottom - 1};
 	
-	Color4f black;
-	black.interpolate3(Color4f(0.0f, 0.0f, 0.0f, 1.0f), owner_->get(), owner_->get().a);
-	Color4f white;
-	white.interpolate3(Color4f(1.0f, 1.0f, 1.0f, 1.0f), owner_->get(), owner_->get().a);
+	Color black = Color(0, 0, 0).interpolate(owner_->get(), owner_->get().a / 255.0f);
+	Color white = Color(255, 255, 255).interpolate(owner_->get(), owner_->get().a / 255.0f);
 	float w = (filledRect.right - filledRect.left) * 0.25f;
 	float h = (filledRect.bottom - filledRect.top) * 0.25f;
 
-	HBRUSH blackBrush = CreateSolidBrush(black.RGBGDI());
-	HBRUSH whiteBrush = CreateSolidBrush(white.RGBGDI());
+	HBRUSH blackBrush = CreateSolidBrush(black.rgb());
+	HBRUSH whiteBrush = CreateSolidBrush(white.rgb());
 
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 2; ++j) {
@@ -93,14 +91,14 @@ BOOL ColorRectImpl::onMessageEraseBkgnd(HDC)
 
 #pragma warning(push)
 #pragma warning(disable: 4355) // 'this' : used in base member initializer list
-ColorRect::ColorRect(Color4f color, int border)
+ColorRect::ColorRect(Color color, int border)
 : _WidgetWithWindow(new ColorRectImpl(this), border)
 {
 	_setMinimalSize(40, 40);
 }
 #pragma warning(pop)
 
-void ColorRect::set(const Color4f& color)
+void ColorRect::set(const Color& color)
 {
 	color_ = color;
 	if(::IsWindowVisible(impl()))

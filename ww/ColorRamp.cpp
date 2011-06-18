@@ -1,12 +1,14 @@
 #include "StdAfx.h"
 #include "ww/ColorRamp.h"
+#include "ww/Color.h"
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/MemoryDC.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Rectangle.h"
 #include <float.h>
 #include <math.h>
-#include "XMath/Colors.h"
+
+namespace ww{
 
 struct HBSColor{
 	HBSColor(float _hue = 0.0f, float _brightness = 1.0f, float _saturation = 0.0f)
@@ -15,11 +17,11 @@ struct HBSColor{
 	, saturation(_saturation)
 	{}
 
-	HBSColor(const Color4f& color);
+	HBSColor(const Color& color);
 
-	void set(const Color4f& color);
+	void set(const Color& color);
 
-	void toRGB(Color4f& result) const;
+	Color toRGB() const;
 
 	float hue;
 	float brightness;
@@ -27,10 +29,14 @@ struct HBSColor{
 };
 
 
-void HBSColor::set(const Color4f& color)
+void HBSColor::set(const Color& color)
 {
-	float minval = std::min(color.r, std::min(color.g, color.b));
-    float maxval = std::max(color.r, std::max(color.g, color.b));
+	float r = color.r / 255.0f;
+	float g = color.g / 255.0f;
+	float b = color.b / 255.0f;
+
+	float minval = std::min(r, std::min(g, b));
+    float maxval = std::max(r, std::max(g, b));
     float mdiff = float(maxval) - float(minval);
     float msum = float(maxval) + float(minval);
 
@@ -40,15 +46,15 @@ void HBSColor::set(const Color4f& color)
         hue = 0.0f;
     }
     else{
-        float rnorm = (maxval - color.r) / mdiff;      
-        float gnorm = (maxval - color.g) / mdiff;
-        float bnorm = (maxval - color.b) / mdiff;   
+        float rnorm = (maxval - r) / mdiff;      
+        float gnorm = (maxval - g) / mdiff;
+        float bnorm = (maxval - b) / mdiff;   
 
-        if(color.r == maxval)
+        if(r == maxval)
             hue = 60.0f * (6.0f + bnorm - gnorm);
-        if(color.g  == maxval)
+        if(g  == maxval)
             hue = 60.0f * (2.0f + rnorm - bnorm);
-        if(color.b  == maxval)
+        if(b  == maxval)
             hue = 60.0f * (4.0f + gnorm - rnorm);
         if(hue > 360.0f)
             hue = hue - 360.0f;
@@ -75,25 +81,25 @@ static float toRGBAux(float rm1, float rm2, float rh)
     return rm1;
 }
 
-void HBSColor::toRGB(Color4f& result) const
+Color HBSColor::toRGB() const
 {
+	Color brithnessColor(int(brightness * 255.0f),
+						 int(brightness * 255.0f),
+						 int(brightness * 255.0f));
     if(saturation == 0){
-		result.set(brightness, brightness, brightness, 1.0f);
+		return brithnessColor;
     }
     else{
-      result.r = toRGBAux(0.0f, 1.0f, hue + 120.0f);   
-      result.g = toRGBAux(0.0f, 1.0f, hue);
-      result.b = toRGBAux(0.0f, 1.0f, hue - 120.0f);
-	  result.a = 1.0f;
+	  Color result;
+	  result.r = int(toRGBAux(0.0f, 1.0f, hue + 120.0f) * brightness* 255.0f);
+      result.g = int(toRGBAux(0.0f, 1.0f, hue) * brightness * 255.0f);
+      result.b = int(toRGBAux(0.0f, 1.0f, hue - 120.0f) * brightness* 255.0f);
+	  result.a = 255;
       
-	  result.r *= brightness;
-	  result.g *= brightness;
-	  result.b *= brightness;
-	  result.interpolate(result, Color4f(brightness, brightness, brightness, 1.0f), 1.0f - saturation);
+	  return result.interpolate(brithnessColor, 1.0f - saturation);
     }
 }
 
-namespace ww{
 
 class ColorRampImpl : public _WidgetWindow{
 public:
@@ -115,7 +121,7 @@ public:
 	BOOL onMessageEraseBkgnd(HDC dc);
 	BOOL onMessageSetCursor(HWND window, USHORT hitTest, USHORT message);
 
-	void setColor(const Color4f& color);
+	void setColor(const Color& color);
 protected:
 	Win32::Handle<HBITMAP> rampBitmap_;
 	int mouseArea_;
@@ -133,7 +139,7 @@ ColorRampImpl::ColorRampImpl(ColorRamp* owner)
 	createRampBitmap();
 }
 
-void ColorRampImpl::setColor(const Color4f& color)
+void ColorRampImpl::setColor(const Color& color)
 {
 	hlsColor_.set(color);
 	if(::IsWindow(*this)){
@@ -203,9 +209,7 @@ void ColorRampImpl::createRampBitmap()
     HBSColor hlsColor = hlsColor_;
     hlsColor.saturation = 1.0f;
     hlsColor.brightness = 1.0f;
-	Color4f colorf(1.0f, 1.0f, 1.0f, 1.0f);
-	hlsColor.toRGB(colorf);
-    Color4c color(colorf);
+    Color color = hlsColor.toRGB();
 
 	BITMAPINFO bi;
 	ZeroMemory(&bi, sizeof(bi));
@@ -263,9 +267,7 @@ void ColorRampImpl::redraw(HDC dc)
     // Курсор в Saturation/Brightness области
     int posY = round((1.0f - hlsColor_.brightness) * float(ramp_height));
     int posX = round((hlsColor_.saturation) * float(ramp_width));
-	Color4f colorf(1.0f, 1.0f, 1.0f, 1.0f);
-	hlsColor_.toRGB(colorf);
-    Color4c color(colorf);
+    Color color = hlsColor_.toRGB();
 
     FillRect(dc, &Win32::Rect(posX - 4, posY - 4, posX + 5, posY + 5), HBRUSH(GetStockObject(BLACK_BRUSH)));
 	HBRUSH brush = CreateSolidBrush(RGB(color.r, color.g, color.b));
@@ -277,9 +279,7 @@ void ColorRampImpl::redraw(HDC dc)
 	HGDIOBJ oldPen = SelectObject(dc, GetStockObject(DC_PEN));
 	for(int i = 0; i < rect.height(); ++i){
 		float hue = 360.0f * float(i) / float(rect.height());
-		Color4f colorf;
-		HBSColor(hue, 1.0f, 1.0f).toRGB(colorf);
-        Color4c color(colorf);
+        Color color = HBSColor(hue, 1.0f, 1.0f).toRGB();
 		SetDCPenColor(dc, RGB(color.r, color.g, color.b));
 		MoveToEx(dc, width - HUE_WIDTH, i, 0);
 		LineTo(dc, width + width - HUE_WIDTH, i);
@@ -290,8 +290,7 @@ void ColorRampImpl::redraw(HDC dc)
     // Курсор на Hue полоске
 	int pos = round(hlsColor_.hue / 360.0f * rect.height());
 		
-	HBSColor(hlsColor_.hue, 1.0f, 1.0f).toRGB(colorf);
-    color = Color4c(colorf);
+	color = HBSColor(hlsColor_.hue, 1.0f, 1.0f).toRGB();
 	FillRect(dc, &Win32::Rect(width - HUE_WIDTH - 2, pos - 2, width + 2, pos + 3), HBRUSH(GetStockObject(BLACK_BRUSH)));
 	brush = CreateSolidBrush(RGB(color.r, color.g, color.b));
 	FillRect(dc, &Win32::Rect(width - HUE_WIDTH - 1, pos - 1, width + 1, pos + 2), brush);
@@ -311,7 +310,7 @@ void ColorRampImpl::handleMouse(POINT point)
     float saturation = clamp(float(point.x) / cx, 0.0f, 1.0f);
 	hlsColor_.brightness = brightness;
 	hlsColor_.saturation = saturation;
-	hlsColor_.toRGB(owner_->color_);
+	owner_->color_ = hlsColor_.toRGB();
 	owner_->signalChanged_.emit();
 	mouseArea_ = 1;
 	SetCapture(*this);
@@ -330,7 +329,7 @@ void ColorRampImpl::handleMouseHue(POINT point)
 	if(fabs(hlsColor_.hue - hue) > FLT_EPSILON){
 		hlsColor_.hue = hue;
 		createRampBitmap();
-		hlsColor_.toRGB(owner_->color_);
+		owner_->color_ = hlsColor_.toRGB();
 		owner_->signalChanged_.emit();
 		RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
@@ -402,7 +401,7 @@ ColorRamp::ColorRamp(int border)
 }
 #pragma warning(pop)
 
-void ColorRamp::set(const Color4f& color)
+void ColorRamp::set(const Color& color)
 {
 	color_ = color;
 	impl().setColor(color);

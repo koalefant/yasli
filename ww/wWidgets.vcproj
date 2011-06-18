@@ -899,6 +899,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Color.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Color.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Files.cpp"
 				>
 			</File>

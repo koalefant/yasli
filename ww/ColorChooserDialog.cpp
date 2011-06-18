@@ -7,9 +7,10 @@
 namespace ww{
 
 static std::string stateFileName = std::string(getenv("TEMP")) + "\\colorChooserDialog.tmp";
+static const int DIALOG_BORDER = 12;
 
-ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color4f& color, bool showColor, bool showAlpha, int border)
-: Dialog(parent, border)
+ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color& color, bool showColor, bool showAlpha)
+: Dialog(parent, DIALOG_BORDER )
 {
 	ASSERT(showColor || showAlpha);
 
@@ -50,7 +51,7 @@ ColorChooserDialog::~ColorChooserDialog()
 	oa.save(stateFileName.c_str());
 }
 
-void ColorChooserDialog::set(const Color4f& color)
+void ColorChooserDialog::set(const Color& color)
 {
 	color_ = color;
 	chooser_->set(color);

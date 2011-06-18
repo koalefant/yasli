@@ -2,7 +2,7 @@
 #include "ww/ImageStore.h"
 #include "ww/Unicode.h"
 
-#include "XMath/Colors.h"
+#include "ww/Color.h"
 #include "ww/Win32/Window.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -33,17 +33,16 @@ void ImageStore::_createFromBitmap(HBITMAP bitmap, unsigned int color)
 	VERIFY(GetObject(bitmap, sizeof(bitmapStruct), &bitmapStruct));
 	ASSERT(bitmapStruct.bmBitsPixel == 32);
 
-	typedef Color4c ColorType;
 	int count = bitmapStruct.bmWidth * bitmapStruct.bmHeight;
-	ColorType* source = new ColorType[count];
-	ColorType* dest = new ColorType[count];
-	GetBitmapBits(bitmap, sizeof(ColorType) * count, source);
+	Color* source = new Color[count];
+	Color* dest = new Color[count];
+	GetBitmapBits(bitmap, sizeof(Color) * count, source);
 
 	int width = bitmapStruct.bmWidth;
 	int height = bitmapStruct.bmHeight;
 	for(int y = 0; y < height; ++y)
 		for(int x = 0; x < width; ++x){
-			ColorType c = source[y * width + x];
+			Color c = source[y * width + x];
 			if(color != RGB(c.r, c.g, c.b)){
 				unsigned char lum = round((c.r * 0.30f + c.g * 0.59f + c.b * 0.11f) * 0.5f + 96);
 				dest[y * width + x].set(lum, lum, lum);

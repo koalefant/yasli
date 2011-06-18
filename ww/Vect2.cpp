@@ -8,8 +8,8 @@ const Vect2 Vect2::ZERO;
 
 void Vect2::serialize(yasli::Archive& ar)
 {
-	ar(x, "");
-	ar(y, "");
+	ar(x, "", "^x");
+	ar(y, "", "^y");
 }
 
 }

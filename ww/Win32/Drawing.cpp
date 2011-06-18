@@ -5,7 +5,12 @@
 #include "ww/Win32/Handle.h"
 #include "ww/gdiplus.h"
 #include "ww/PropertyTreeDrawing.h" // FIXME привести в порядок
-#include "XMath/Colors.h"
+#include "ww/Color.h"
+
+#ifdef _MSC_VER
+# define _USE_MATH_DEFINES
+#endif
+#include <math.h>
 
 enum{
 	OBM_CHECK = 32760
@@ -15,24 +20,21 @@ static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
 
 namespace Win32{
 
-COLORREF toColorRef(const Color4f& color)
+int round(float v)
 {
-	return COLORREF(((unsigned char)(round(color.r * 255.0f))|
-					 ((unsigned short)((unsigned char)(round(color.g * 255.0f)))<<8))|
-					(((unsigned int)(unsigned char)(round(color.b * 255.0f)))<<16));
+	return int(v);
 }
 
-Color4c toColor4c(COLORREF c)
+ww::Color toColor(COLORREF c)
 {
-	return Color4c((unsigned char)(c & 0x000000FF),
+	return ww::Color((unsigned char)(c & 0x000000FF),
 				   (unsigned char)((c & 0x0000FF00) >> 8),
 				   (unsigned char)((c & 0x00FF0000) >> 16));
 }
 
 COLORREF blendColor(COLORREF from, COLORREF to, float factor)
 {
-	Color4c c;
-	c.interpolate(toColor4c(from), toColor4c(to), factor);
+	ww::Color c = toColor(from).interpolate(toColor(to), factor);
 	return c.rgb();
 }
 
@@ -209,25 +211,29 @@ void drawComboBox(HDC dc, const RECT& rect, const wchar_t* text, HFONT font)
 }
 
 
-void drawColorBlend(HDC dc, const ww::Rect& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly)
+void drawColorBlend(HDC dc, const ww::Rect& rect, const ww::Color& color1, const ww::Color& color2, bool alphaOnly)
 {
 	Win32::StockSelector pen(dc, GetStockObject(DC_PEN));
 	for(int i = rect.left(); i <= rect.right (); ++i){
 		float pos = float(i - rect.left()) / float(rect.width());
 
-        Color4f solidColor, result;
-		solidColor.interpolate(color1, color2, pos);
+		ww::Color result;
+		ww::Color solidColor = color1.interpolate(color2, pos);
 
 		for(int j = 0; j < 2; ++j){
-			Color4f backColor = ((i / rect.height () + j) % 2) ? Color4f (1.0f, 1.0f, 1.0f) : Color4f (0.0f, 0.0f, 0.0f);
-			result.interpolate3 (backColor, solidColor, solidColor.a);
+			ww::Color backColor = ((i / rect.height () + j) % 2) ?
+				ww::Color(255, 255, 255) : ww::Color(0, 0, 0);
+
+			result = backColor.interpolate(solidColor, solidColor.a);
 			
 			RECT r    = { i,      rect.top() + j * rect.height() / 2, 
 						  i + 1, (rect.top() + j * rect.height() / 2) + (j ? 0 : (rect.height () / 2))
 						};
 			int y = rect.top() + j * rect.height() / 2;
 			::MoveToEx(dc, i, y, 0);
-			COLORREF color = toColorRef(alphaOnly ? Color4f(solidColor.a, solidColor.a, solidColor.a, 1.0f) : result);
+			COLORREF color = (alphaOnly ? ww::Color(int(solidColor.a * 255),
+											   int(solidColor.a * 255),
+											   int(solidColor.a * 255), 255) : result).rgb();
 			::SetDCPenColor(dc, color);
 			::LineTo(dc, i, y + rect.height() / 2);
 		}

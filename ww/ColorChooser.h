@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ww/VBox.h"
-#include "XMath/Colors.h"
+#include "ww/Color.h"
 
 namespace ww{
 
@@ -14,8 +14,8 @@ class ColorChooser : public VBox{
 public:
 	ColorChooser(int border = 0);
 
-	void set(const Color4f& color);
-	const Color4f& get() const{ return color_; }
+	void set(const Color& color);
+	const Color& get() const{ return color_; }
 
 	void setShowColor(bool showColor);
 	bool showColor()const{ return showColor_; }
@@ -30,9 +30,9 @@ protected:
 	void onSliderChanged();
 	void onEntryChanged();
 	void onHexChanged();
-	void updateEntries(const Color4f& color);
-	void updateSliders(const Color4f& color);
-	void updateHex(const Color4f& color);
+	void updateEntries(const Color& color);
+	void updateSliders(const Color& color);
+	void updateHex(const Color& color);
 	
 	bool showColor_;
 	bool showAlpha_;
@@ -50,7 +50,7 @@ protected:
 
 	ColorRamp* ramp_;
 	ColorRect* colorRect_;
-	Color4f color_;
+	Color color_;
 };
 
 }

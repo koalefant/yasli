@@ -132,7 +132,7 @@ void ColorChooser::setShowAlpha(bool showAlpha)
 	relayout();
 }
 
-void ColorChooser::set(const Color4f& color)
+void ColorChooser::set(const Color& color)
 {
 	color_ = color;
 	if(ramp_)
@@ -143,14 +143,14 @@ void ColorChooser::set(const Color4f& color)
 	updateHex(color);
 }
 
-static void setEntryValue(Entry* entry, float value)
+static void setEntryValue(Entry* entry, unsigned char value)
 {
 	char buf[16];
-	sprintf_s(buf, sizeof(buf), "%i", round(value * 255)) ;
+	sprintf_s(buf, sizeof(buf), "%i", value) ;
 	entry->setText(buf);
 }
 
-void ColorChooser::updateEntries(const Color4f& color)
+void ColorChooser::updateEntries(const Color& color)
 {
 	if(showColor_){
 		setEntryValue(entryRed_, color.r);
@@ -162,17 +162,16 @@ void ColorChooser::updateEntries(const Color4f& color)
 	}
 }
 
-void ColorChooser::updateHex(const Color4f& color)
+void ColorChooser::updateHex(const Color& color)
 {
 	if(showColor_ || showAlpha_){
 		char buf[16];
-		Color4c c = color;
-		sprintf_s(buf, sizeof(buf), "%02X%02X%02X%02X", c.r, c.g, c.b, c.a);
+		sprintf_s(buf, sizeof(buf), "%02X%02X%02X%02X", color.r, color.g, color.b, color.a);
 		entryHex_->setText(buf);
 	}
 }
 
-void ColorChooser::updateSliders(const Color4f& color)
+void ColorChooser::updateSliders(const Color& color)
 {
 	if(showColor_){
 		sliderRed_->setValue(color.r);
@@ -187,7 +186,7 @@ void ColorChooser::updateSliders(const Color4f& color)
 void ColorChooser::onRampChanged()
 {
 	ASSERT(ramp_);
-	color_ = Color4f(ramp_->get().r, ramp_->get().g, ramp_->get().b, color_.a);
+	color_.set(ramp_->get().r, ramp_->get().g, ramp_->get().b, color_.a);
 	updateSliders(color_);
 	updateEntries(color_);
 	updateHex(color_);
@@ -198,12 +197,12 @@ void ColorChooser::onRampChanged()
 void ColorChooser::onSliderChanged()
 {
 	if(showColor_){
-		color_.r = sliderRed_->value();
-		color_.g = sliderGreen_->value();
-		color_.b = sliderBlue_->value();
+		color_.r = int(sliderRed_->value() * 255);
+		color_.g = int(sliderGreen_->value() * 255);
+		color_.b = int(sliderBlue_->value() * 255);
 	}
 	if(showAlpha_){
-		color_.a = sliderAlpha_->value();
+		color_.a = int(sliderAlpha_->value() * 255);
 	}
 	if(ramp_)
 		ramp_->set(color_);
@@ -216,12 +215,12 @@ void ColorChooser::onSliderChanged()
 void ColorChooser::onEntryChanged()
 {
 	if(showColor_){
-		color_.r = clamp((float)atof(entryRed_->text()) / 255.0f, 0.0f, 1.0f);
-		color_.g = clamp((float)atof(entryGreen_->text()) / 255.0f, 0.0f, 1.0f);
-		color_.b = clamp((float)atof(entryBlue_->text()) / 255.0f, 0.0f, 1.0f);
+		color_.r = clamp(atoi(entryRed_->text()), 0, 255);
+		color_.g = clamp(atoi(entryGreen_->text()), 0, 255);
+		color_.b = clamp(atoi(entryBlue_->text()), 0, 255);
 	}
 	if(showAlpha_){
-		color_.a = clamp((float)atof(entryAlpha_->text()) / 255.0f, 0.0f, 1.0f);
+		color_.a = clamp(atoi(entryAlpha_->text()), 0, 255);
 	}
 	if(ramp_)
 		ramp_->set(color_);
@@ -235,7 +234,7 @@ void ColorChooser::onHexChanged()
 {
 	int r = 255, g  = 255, b = 255, a = 255;
 	sscanf_s(entryHex_->text(), "%2X%2X%2X%2X", &r, &g, &b, &a);
-	color_ = Color4f(Color4c(r, g, b, a));
+	color_.set(r, g, b, a);
 	colorRect_->set(color_);
 	updateEntries(color_);
 	updateSliders(color_);
