@@ -39,7 +39,6 @@ int assertionDialog(const char* message, const char* str, const char* function, 
           case 2: __asm{ int 3 } break;  \
           }  \
       } 
-#  define VERIFY(x) ASSERT(x);
 # else
 #  define ASSERT(x) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x "\n\tin %s()\n", __LINE__, __FUNCTION__); }  }
 #  define ASSERT_STR(x, str) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x " (%s)\n\tin %s()\n", __LINE__, str, __FUNCTION__); }  }
@@ -47,7 +46,6 @@ int assertionDialog(const char* message, const char* str, const char* function, 
 #else
 # define ASSERT(x)
 # define ASSERT_STR(x, str)
-# define VERIFY(x) x
 #endif
 
 #define ESCAPE(x, action) if(!(x)) { ASSERT(0 && #x); action; };
