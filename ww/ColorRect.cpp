@@ -23,7 +23,7 @@ ColorRectImpl::ColorRectImpl(ColorRect* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
 }
 
 

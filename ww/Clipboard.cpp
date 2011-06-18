@@ -241,7 +241,7 @@ bool Clipboard::copy(PropertyRow* row)
 		CopyMemory(mem, oa.buffer(), oa.length());
 		GlobalUnlock(memoryHandle);
 
-		VERIFY(::SetClipboardData(clipboardFormat_, memoryHandle));
+		WW_VERIFY(::SetClipboardData(clipboardFormat_, memoryHandle));
 		::CloseClipboard();
 		PropertyRow::setConstStrings(0);
 		return true;

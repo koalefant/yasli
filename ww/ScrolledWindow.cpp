@@ -26,7 +26,7 @@ ScrolledWindowImpl::ScrolledWindowImpl(ScrolledWindow* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
 }
 
 

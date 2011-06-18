@@ -177,22 +177,22 @@ bool convertToDFB(HBITMAP& hBitmap)
                               if(BitBlt(hMemDst, 0, 0, stBitmap.bmWidth, stBitmap.bmHeight, hMemSrc, 0, 0, SRCCOPY))
                                   converted = true; // success
 
-                              VERIFY(SelectObject(hMemDst, hOldDst));
+                              WW_VERIFY(SelectObject(hMemDst, hOldDst));
                           }
-                          VERIFY(DeleteDC(hMemDst));
+                          WW_VERIFY(DeleteDC(hMemDst));
                       }
-                      VERIFY(SelectObject(hMemSrc, hOldSrc));
+                      WW_VERIFY(SelectObject(hMemSrc, hOldSrc));
                   }
-                  VERIFY(DeleteDC(hMemSrc));
+                  WW_VERIFY(DeleteDC(hMemSrc));
               }
           }
 
           if (converted){
-              VERIFY(DeleteObject(hBitmap)); // it's no longer needed
+              WW_VERIFY(DeleteObject(hBitmap)); // it's no longer needed
               hBitmap = hDfb;
           }
           else
-              VERIFY(DeleteObject(hDfb));
+              WW_VERIFY(DeleteObject(hDfb));
       }
       ReleaseDC(0, hScreen);
   }
@@ -231,7 +231,7 @@ void ColorRampImpl::createRampBitmap()
 	if(!bitmap)
 		delete[] pixels;
 
-    VERIFY(convertToDFB(bitmap));
+    WW_VERIFY(convertToDFB(bitmap));
 	rampBitmap_ = bitmap;
 }
 

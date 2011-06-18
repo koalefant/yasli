@@ -204,7 +204,7 @@ void MenuBarImpl::onMessageMouseMove(UINT button, int x, int y)
         event.cbSize = sizeof(event);
         event.dwFlags = TME_LEAVE;
         event.hwndTrack = *this;
-        VERIFY(TrackMouseEvent(&event));
+        WW_VERIFY(TrackMouseEvent(&event));
     }
 
     __super::onMessageMouseMove(button, x, y);

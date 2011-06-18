@@ -28,7 +28,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="$(TargetPath)"
+				CommandLine="$(TargetPath)&#x0D;&#x0A;"
 				Outputs="testResult.txt"
 			/>
 			<Tool
@@ -104,7 +104,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="$(TargetPath)"
+				CommandLine="$(TargetPath)&#x0D;&#x0A;"
+				Outputs="testResult.txt"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

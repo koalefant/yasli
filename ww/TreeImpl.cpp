@@ -38,11 +38,11 @@ DragWindow::DragWindow(TreeImpl* treeImpl)
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 	if(useLayeredWindows_){
 		exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-		VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
+		WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 	}
 	else{
 		Rect treeRect(0, 0, 100, 100);
-		VERIFY(create(L"", WS_POPUP | WS_DISABLED, treeRect, 0, exStyle));
+		WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, treeRect, 0, exStyle));
 	}
 }
 #pragma warning(pop)
@@ -337,7 +337,7 @@ TreeImpl::TreeImpl(PropertyTree* tree)
 , redrawLock_(false)
 , redrawRequest_(false)
 {
-	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
 }
 #pragma warning(pop)
 
@@ -552,7 +552,7 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 	ASSERT(dc);
 	HGDIOBJ oldFont = ::SelectObject(dc, Win32::defaultFont());
 	TEXTMETRIC textMetric;
-	VERIFY(GetTextMetrics(dc, &textMetric));
+	WW_VERIFY(GetTextMetrics(dc, &textMetric));
 	::SelectObject(dc, oldFont);
 	int lineScrollHeight = textMetric.tmHeight + 2;
 	ReleaseDC(*this, dc);

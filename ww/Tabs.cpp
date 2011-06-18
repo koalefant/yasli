@@ -51,7 +51,7 @@ TabsImpl::TabsImpl(Tabs* tabs)
 , focusedTab_(-1)
 , owner_(0)
 {
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow));
 	owner_ = tabs;
 }
 

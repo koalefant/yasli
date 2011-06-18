@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include "Macros.h"
 #include "yasli/Pointers.h"
 
 #ifndef WW_DISABLE_XMATH
@@ -24,16 +25,3 @@
 
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 
-#define FOR_EACH(container, it) for( it = (container).begin(); it != (container).end(); ++it )
-
-template<class T, size_t Len>
-char (&globalArrayLenHelper(const T(&)[Len]))[Len];
-#define ARRAY_LEN(arr) sizeof(globalArrayLenHelper(arr)) 
-
-inline int min(int x,int y){ return x < y ? x : y; }
-inline float min(float x,float y){ return x < y ? x : y; }
-inline double min(double x,double y){ return x < y ? x : y; }
-
-inline int max(int x,int y){ return x > y ? x : y; }
-inline float max(float x,float y){ return x > y ? x : y; }
-inline double max(double x,double y){ return x > y ? x : y; }

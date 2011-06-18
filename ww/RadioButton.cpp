@@ -74,7 +74,7 @@ RadioButtonImpl::RadioButtonImpl(RadioButton* owner, RadioButton* groupWith)
 	else
 		group_ = groupWith->group();
 	group_->add(owner);
-	VERIFY(create(L"", WS_CHILD | WS_VISIBLE | BS_RADIOBUTTON | BS_NOTIFY, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | BS_RADIOBUTTON | BS_NOTIFY, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
@@ -132,7 +132,7 @@ void RadioButtonImpl::setRadioButtonStatus(bool status)
 void RadioButtonImpl::setRadioButtonText(const wchar_t* text)
 {
 	ASSERT(::IsWindow(handle_));
-	VERIFY(::SetWindowText(handle_, text));
+	WW_VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
 	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);

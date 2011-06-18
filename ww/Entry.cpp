@@ -52,7 +52,7 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 , owner_(owner)
 , setting_(false)
 {
-	VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
+	WW_VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
@@ -121,7 +121,7 @@ void EntryImpl::commit()
 void EntryImpl::setText(const wchar_t* text)
 {
 	setting_ = true;
-	VERIFY(::SetWindowText(*this, text));
+	WW_VERIFY(::SetWindowText(*this, text));
 	setting_ = false;
 }
 
@@ -236,7 +236,7 @@ EntrySelection Entry::selection() const
 void Entry::replace(EntrySelection selection, const char* text)
 {
 	setSelection(selection);
-	VERIFY(SendMessage(*impl(), EM_REPLACESEL, 0, (LPARAM)text));
+	WW_VERIFY(SendMessage(*impl(), EM_REPLACESEL, 0, (LPARAM)text));
 }
 
 void Entry::setText(const char* text)

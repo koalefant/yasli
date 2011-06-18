@@ -167,7 +167,7 @@ void Window::init(HWND owner, int border, Application* app)
         hotkeyContext_->installFilter(app_);
 
 	window_ = new WindowImpl(this);
-	VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Rect(0, 0, 400, 400), owner));
+	WW_VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Rect(0, 0, 400, 400), owner));
 	setBorder(border);
 	
 	hotkeyContext_->signalPressed(KeyPress(KEY_TAB)).connect(this, &Window::onHotkeyFocusNext);
@@ -209,16 +209,16 @@ void Window::setRestoredPosition(const Rect& position)
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
-	VERIFY(GetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(GetWindowPlacement(*_window(), &placement));
 	placement.rcNormalPosition = Win32::Rect(position);
-	VERIFY(SetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(SetWindowPlacement(*_window(), &placement));
 }
 
 Rect Window::restoredPosition() const
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
-	VERIFY(GetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(GetWindowPlacement(*_window(), &placement));
 	return Win32::Rect(placement.rcNormalPosition).recti();
 }
 
@@ -427,8 +427,8 @@ void Window::_arrangeChildren()
 {
 	if(child_){
 		RECT rect;
-		VERIFY(::GetClientRect(*window_, &rect));
-		VERIFY(::InflateRect(&rect, -border_, -border_));
+		WW_VERIFY(::GetClientRect(*window_, &rect));
+		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		child_->_setPosition(Rect(rect.left, rect.top, rect.right, rect.bottom));
 	}
 }

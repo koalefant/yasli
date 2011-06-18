@@ -174,12 +174,12 @@ void ColorChooser::updateHex(const Color& color)
 void ColorChooser::updateSliders(const Color& color)
 {
 	if(showColor_){
-		sliderRed_->setValue(color.r);
-		sliderGreen_->setValue(color.g);
-		sliderBlue_->setValue(color.b);
+		sliderRed_->setValue(color.r / 255.0f);
+		sliderGreen_->setValue(color.g / 255.0f);
+		sliderBlue_->setValue(color.b / 255.0f);
 	}
 	if(showAlpha_){
-		sliderAlpha_->setValue(color.a);
+		sliderAlpha_->setValue(color.a / 255.0f);
 	}
 }
 

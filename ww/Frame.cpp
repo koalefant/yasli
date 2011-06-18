@@ -38,7 +38,7 @@ FrameImpl::FrameImpl(Frame* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 #pragma warning(pop)
@@ -46,7 +46,7 @@ FrameImpl::FrameImpl(Frame* owner)
 void FrameImpl::setFrameText(const wchar_t* text)
 {
 	ASSERT(::IsWindow(handle_));
-	VERIFY(::SetWindowText(handle_, text));
+	WW_VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
 	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);
@@ -186,8 +186,8 @@ void Frame::_arrangeChildren()
 {
 	if(child_){
 		RECT rect;
-		VERIFY(::GetClientRect(*_window(), &rect));
-		VERIFY(::InflateRect(&rect, -border_, -border_));
+		WW_VERIFY(::GetClientRect(*_window(), &rect));
+		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		child_->_setPosition(Rect(rect.left + space_, rect.top + 2 * space_, 
 			                       rect.right - space_, rect.bottom - 2 * space_));
 	}

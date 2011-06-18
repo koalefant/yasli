@@ -48,7 +48,7 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 , owner_(owner)
 , comboBoxHandle_(0)
 {
-	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
 	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
 							 0, 0, 42, 42, *this, 0, (HINSTANCE)(GetWindowLong(*this, GWLP_HINSTANCE)), 0);

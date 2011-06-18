@@ -54,7 +54,7 @@ FloatingSplitter::FloatingSplitter()
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
 	exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
+	WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 }
 #pragma warning(pop)
 
@@ -170,7 +170,7 @@ WorkspaceImpl::WorkspaceImpl(Workspace* owner)
 , splitting_(false)
 {
 	floatingSplitter_ = new FloatingSplitter();
-	VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0,0, 20, 20), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0,0, 20, 20), *Win32::_globalDummyWindow));
 }
 
 WorkspaceImpl::~WorkspaceImpl()
@@ -453,8 +453,8 @@ void Workspace::_arrangeChildren()
 {
 	if(rootWidget_){
 		RECT rect;
-		VERIFY(::GetClientRect(*impl(), &rect));
-		VERIFY(::InflateRect(&rect, -border_, -border_));
+		WW_VERIFY(::GetClientRect(*impl(), &rect));
+		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		rootWidget_->_setPosition(Rect(rect.left , rect.top, rect.right + rect.left, rect.bottom));
 	}
 }
@@ -867,7 +867,7 @@ DarkOverlay::DarkOverlay()
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
 	exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-	VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
+	WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 }
 #pragma warning(pop)
 

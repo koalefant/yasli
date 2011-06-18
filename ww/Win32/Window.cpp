@@ -52,7 +52,7 @@ static HFONT initializeDefaultFont()
 static Win32::Window32* initializeGlobalDummyWindow()
 {
 	static Win32::Window32 window;
-	VERIFY(window.create(L"dummy", 0, ww::Rect(0, 0, 100, 100), 0));
+	WW_VERIFY(window.create(L"dummy", 0, ww::Rect(0, 0, 100, 100), 0));
 	return &window; 
 }
 
@@ -106,9 +106,9 @@ ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 	ASSERT(dc);
 	SIZE size = { 0, 0 };
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
-	VERIFY(::GetTextExtentPoint32(dc, text, wcslen(text), &size));
-	VERIFY(::SelectObject(dc, oldFont) == font);
-	VERIFY(ReleaseDC(window, dc));
+	WW_VERIFY(::GetTextExtentPoint32(dc, text, wcslen(text), &size));
+	WW_VERIFY(::SelectObject(dc, oldFont) == font);
+	WW_VERIFY(ReleaseDC(window, dc));
 	return ww::Vect2(size.cx, size.cy);
 }
 
@@ -196,7 +196,7 @@ Window32::~Window32()
 	if(::IsWindow(handle_)){
 		if(handleOwner_){
 			ShowWindow(handle_, SW_HIDE);
-			VERIFY(DestroyWindow(handle_) != 0); 
+			WW_VERIFY(DestroyWindow(handle_) != 0); 
 
 			MSG msg;
 			while(PeekMessage(&msg, handle_, 0, 0, PM_REMOVE)){
@@ -238,7 +238,7 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 	//ASSERT(Win32::_globalInstance() && " is not set!");
 	creating_ = true;
 	if(!isClassRegistered(className()))
-		VERIFY(registerClass(className()));
+		WW_VERIFY(registerClass(className()));
 
 	ASSERT(isClassRegistered(className()));
 	ASSERT(!parentWnd || ::IsWindow(parentWnd));
@@ -612,7 +612,7 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 ww::Rect Window32::getRect() const
 {
 	RECT rect;
-	VERIFY(GetWindowRect(handle_, &rect));
+	WW_VERIFY(GetWindowRect(handle_, &rect));
 	return ww::Rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
@@ -620,7 +620,7 @@ void Window32::move(const ww::Rect& rect, bool redraw)
 {
 	ASSERT(::IsWindow(handle_));
 	if(::IsWindow(handle_))
-	VERIFY(::MoveWindow(handle_, rect.left(), rect.top(), rect.width(), rect.height(), redraw ? TRUE : FALSE));
+	WW_VERIFY(::MoveWindow(handle_, rect.left(), rect.top(), rect.width(), rect.height(), redraw ? TRUE : FALSE));
 }
 
 Window32* Window32::parent() const
@@ -655,14 +655,14 @@ LONG_PTR Window32::getUserDataLongPtr()
 
 void Window32::setWindowText(const wchar_t* windowText)
 {
-	VERIFY(::SetWindowText(handle_, windowText));
+	WW_VERIFY(::SetWindowText(handle_, windowText));
 }
 
 
 void Window32::setStyle(UINT style)
 {
-	VERIFY(::SetWindowLong(handle_, GWL_STYLE, style));
-	VERIFY(::SetWindowPos(handle_, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED));
+	WW_VERIFY(::SetWindowLong(handle_, GWL_STYLE, style));
+	WW_VERIFY(::SetWindowPos(handle_, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED));
 	if(::IsWindowVisible(handle_))
 		::RedrawWindow(handle_, 0, 0, RDW_ALLCHILDREN | RDW_FRAME | RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW);
 }
@@ -694,7 +694,7 @@ void Window32::show(int showCommand)
 
 void Window32::update()
 {
-	VERIFY(::UpdateWindow(handle_));
+	WW_VERIFY(::UpdateWindow(handle_));
 }
 
 bool Window32::isVisible() const
@@ -769,7 +769,7 @@ WindowPositionDeferer::WindowPositionDeferer(Window32* parent, int numWindows)
 WindowPositionDeferer::~WindowPositionDeferer()
 {
 	ASSERT(handle_);
-	VERIFY(::EndDeferWindowPos(handle_));
+	WW_VERIFY(::EndDeferWindowPos(handle_));
 	parent_->positionDeferer_ = 0;
 }
 
@@ -777,7 +777,7 @@ void WindowPositionDeferer::defer(Window32* window, const ww::Rect& position)
 {
 	ASSERT(handle_);
 	ASSERT(::IsWindow(*window));
-	VERIFY(::DeferWindowPos(handle_, *window, 0, position.left(), position.top(), position.width(), position.height(), SWP_NOZORDER));
+	WW_VERIFY(::DeferWindowPos(handle_, *window, 0, position.left(), position.top(), position.width(), position.height(), SWP_NOZORDER));
 }
 
 void initializeCommonControls()
@@ -785,7 +785,7 @@ void initializeCommonControls()
 	INITCOMMONCONTROLSEX iccex;
 	iccex.dwICC = ICC_WIN95_CLASSES;
 	iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-	VERIFY(InitCommonControlsEx(&iccex));
+	WW_VERIFY(InitCommonControlsEx(&iccex));
 }
 
 }

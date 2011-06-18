@@ -30,7 +30,7 @@ void ImageStore::_createFromBitmap(HBITMAP bitmap, unsigned int color)
 	BITMAP bitmapStruct;
 	ZeroMemory(&bitmapStruct, sizeof(bitmapStruct));
 
-	VERIFY(GetObject(bitmap, sizeof(bitmapStruct), &bitmapStruct));
+	WW_VERIFY(GetObject(bitmap, sizeof(bitmapStruct), &bitmapStruct));
 	ASSERT(bitmapStruct.bmBitsPixel == 32);
 
 	int count = bitmapStruct.bmWidth * bitmapStruct.bmHeight;
@@ -55,8 +55,8 @@ void ImageStore::_createFromBitmap(HBITMAP bitmap, unsigned int color)
 
 	bitmapGray_ = CreateBitmapIndirect(&bitmapStruct);
 	ASSERT(bitmapGray_);
-	VERIFY(ImageList_AddMasked(imageList_, bitmap, color) != -1);
-	VERIFY(ImageList_AddMasked(imageListGray_, bitmapGray_, color) != -1);
+	WW_VERIFY(ImageList_AddMasked(imageList_, bitmap, color) != -1);
+	WW_VERIFY(ImageList_AddMasked(imageListGray_, bitmapGray_, color) != -1);
 	delete[] dest;
 	delete[] source;
 }
@@ -82,7 +82,7 @@ ImageStore::~ImageStore()
 
 void ImageStore::_draw(int i, HDC destDC, int x, int y, bool disabled)
 {
-	VERIFY(ImageList_Draw(disabled ? imageListGray_ : imageList_, i, destDC, x, y, ILD_NORMAL));
+	WW_VERIFY(ImageList_Draw(disabled ? imageListGray_ : imageList_, i, destDC, x, y, ILD_NORMAL));
 }
 
 }

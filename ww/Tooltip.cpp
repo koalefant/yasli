@@ -57,8 +57,8 @@ void Tooltip::attach(Widget* widget)
 	ti.rect.left = ti.rect.top = ti.rect.bottom = ti.rect.right = 0; 
 
 	ASSERT(::IsWindow(toolTipWindow_));
-	VERIFY(SendMessage(toolTipWindow_, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti));
-	VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)TRUE, (LPARAM)&ti));
+	WW_VERIFY(SendMessage(toolTipWindow_, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti));
+	WW_VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)TRUE, (LPARAM)&ti));
 }
 
 void Tooltip::setText(const char* text)
@@ -76,7 +76,7 @@ void Tooltip::setText(const char* text)
 		event.cbSize = sizeof(event);
 		event.dwFlags = TME_LEAVE;
 		event.hwndTrack = *_findWindow(widget_);
-		VERIFY(TrackMouseEvent(&event));
+		WW_VERIFY(TrackMouseEvent(&event));
 	}
 }
 
@@ -101,7 +101,7 @@ void Tooltip::hide()
 	ti.lpszText  = LPSTR_TEXTCALLBACK;
 	ti.rect.left = ti.rect.top = ti.rect.bottom = ti.rect.right = 0; 
 
-	VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)FALSE, (LPARAM)&ti));
+	WW_VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)FALSE, (LPARAM)&ti));
 }
 
 

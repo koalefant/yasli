@@ -24,7 +24,7 @@ Win32ProxyImpl::Win32ProxyImpl(Win32Proxy* owner, HWND _parent)
 	Win32::Window32 parent(_parent);
 	Win32::Rect rect;
 	GetClientRect(_parent, &rect);
-	VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPCHILDREN, rect.recti(), parent));
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPCHILDREN, rect.recti(), parent));
 	
 
 	ASSERT(::IsWindow(handle_));
@@ -63,8 +63,8 @@ Win32ProxyImpl& Win32Proxy::impl()
 void Win32Proxy::_arrangeChildren()
 {
 	RECT rect;
-	VERIFY(::GetClientRect(parentHwnd_, &rect));
-	VERIFY(::InflateRect(&rect, -border_, -border_));
+	WW_VERIFY(::GetClientRect(parentHwnd_, &rect));
+	WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 
 	Rect recti(rect.left, rect.top, rect.right, rect.bottom);
 	Container::_setPosition(recti);

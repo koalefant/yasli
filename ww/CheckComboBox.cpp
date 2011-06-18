@@ -175,10 +175,10 @@ CheckComboBoxImpl::CheckComboBoxImpl(ww::CheckComboBox* owner)
 , itemHeightSet_(false)
 {
 	
-	//VERIFY(create(L"", WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST, Rect(0, 0, 24, 24), Win32::_globalDummyWindow));
+	//WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST, Rect(0, 0, 24, 24), Win32::_globalDummyWindow));
 
 	bool created = false;
-	VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Rect(0, 0, 30, 30), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Rect(0, 0, 30, 30), *Win32::_globalDummyWindow));
 
 	if(!created){
 		DWORD error = GetLastError();
@@ -205,7 +205,7 @@ LRESULT CheckComboBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, L
 
 void CheckComboBoxImpl::setCheck(int index, bool flag)
 {
-	VERIFY(::SendMessage(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
+	WW_VERIFY(::SendMessage(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
 	ASSERT(::SendMessage(handle_, CB_GETITEMDATA, index, 0) != -1);
 	ASSERT((flag ? TRUE : FALSE) == ::SendMessage(handle_, CB_GETITEMDATA, index, 0));
 
@@ -347,7 +347,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 			wchar_t* buffer = new wchar_t[len + 1];
 			memset((void*)buffer, 0, sizeof(wchar_t) * len + 1);
 			ASSERT(buffer);
-			VERIFY(CallWindowProc(controlWindowProc_, handle_, CB_GETLBTEXT, (WPARAM)drawItemStruct->itemID, (LPARAM)buffer) != CB_ERR);
+			WW_VERIFY(CallWindowProc(controlWindowProc_, handle_, CB_GETLBTEXT, (WPARAM)drawItemStruct->itemID, (LPARAM)buffer) != CB_ERR);
 			str = buffer;
 			delete[] buffer;
 		}

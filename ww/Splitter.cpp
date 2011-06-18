@@ -69,8 +69,8 @@ BOOL SplitterImpl::onMessageSetCursor(HWND window, USHORT hitTest, USHORT messag
 	int count = owner_->splittersCount();
 
 	POINT cursorPosition;
-	VERIFY(::GetCursorPos(&cursorPosition));
-	VERIFY(::ScreenToClient(handle_, &cursorPosition));
+	WW_VERIFY(::GetCursorPos(&cursorPosition));
+	WW_VERIFY(::ScreenToClient(handle_, &cursorPosition));
 
 	for(int i = 0; i < count; ++i){
 		Rect rect = owner_->getSplitterRect(i);

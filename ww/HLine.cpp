@@ -30,7 +30,7 @@ HLineImpl::HLineImpl(HLine* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 #pragma warning(pop)

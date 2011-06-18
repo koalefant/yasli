@@ -32,7 +32,7 @@ LabelImpl::LabelImpl(Label* owner, bool emphasis)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	VERIFY(create(L"", WS_CHILD , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 }
 
 LabelImpl::~LabelImpl()
@@ -100,7 +100,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			};
 
 			RECT rect;
-			VERIFY(GetClientRect(*this, &rect));
+			WW_VERIFY(GetClientRect(*this, &rect));
 			HFONT oldFont = HFONT(::SelectObject(dc, (HGDIOBJ)font()));
 			HBRUSH oldBrush = HBRUSH(::SelectObject(dc, (HGDIOBJ)(::GetStockObject(GRAY_BRUSH))));
 			int oldBackMode = ::SetBkMode(dc, OPAQUE);
