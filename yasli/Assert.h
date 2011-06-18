@@ -47,7 +47,7 @@ int assertionDialog(const char* message, const char* str, const char* function, 
 #else
 # define ASSERT(x)
 # define ASSERT_STR(x, str)
-# define VERIFY(x) 
+# define VERIFY(x) x
 #endif
 
 #define ESCAPE(x, action) if(!(x)) { ASSERT(0 && #x); action; };
