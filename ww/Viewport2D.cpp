@@ -5,10 +5,6 @@
 #include "ww/Win32/Handle.h"
 #include "ww/Unicode.h"
 #include "ww/KeyPress.h"
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <algorithm>
-#include "XMath/MinMax.h"
 #include "Serialization.h"
 
 using Win32::AutoSelector;
@@ -284,7 +280,7 @@ void Viewport2D::onMouseButtonDown(MouseButton button)
 	}
 	else if(button == ww::MOUSE_BUTTON_WHEEL_UP){
         if(enableBasicNavigation_){
-            zoomIndex_ = std::min(MaxZoom - 1, zoomIndex_ + 1);
+            zoomIndex_ = min(MaxZoom - 1, zoomIndex_ + 1);
             viewScale_ = Vect2f::ID*ZoomTable[zoomIndex_];
             createFont();
             redraw();

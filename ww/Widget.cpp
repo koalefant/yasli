@@ -7,7 +7,6 @@
 #include "ww/Win32/Window.h"
 
 #include "ww/Serialization.h"
-#include "XMath/MinMax.h"
 
 namespace ww{
 

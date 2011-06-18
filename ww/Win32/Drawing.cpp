@@ -113,8 +113,8 @@ void drawNotCheck(Gdiplus::Graphics *gr, const Gdiplus::Rect& checkRect, bool ch
 		rect.Inflate(-3, -3);
 		gr->FillEllipse(&SolidBrush(gdiplusSysColor(COLOR_WINDOW)), gdiplusRectF(rect));
 		gr->DrawEllipse(&Pen(gdiplusSysColor(COLOR_3DSHADOW)), gdiplusRectF(rect));
-		int dx = round(cosf(M_PI * 0.25f) * size / 2) - 1;
-		int dy = round(sinf(M_PI * 0.25f) * size / 2) - 1;
+		int dx = round(cosf(float(M_PI) * 0.25f) * size / 2) - 1;
+		int dy = round(sinf(float(M_PI) * 0.25f) * size / 2) - 1;
 		gr->DrawLine(&Pen(color, 3), center.X - dx, center.Y + dy, center.X + dx, center.Y - dy);
 	}
 	else{

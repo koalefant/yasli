@@ -474,7 +474,7 @@ void Splitter::setSplitterPosition(float position, int splitterIndex)
 			--it;
 		}
 
-		it->position = std::max(limitMin, std::min(position, limitMax));
+		it->position = max(limitMin, std::min(position, limitMax));
 		_arrangeChildren();
 		::RedrawWindow(*window_, 0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 	}
@@ -486,7 +486,7 @@ void Splitter::setPanePosition(int index, int positionInPixels)
 		int length = boxLength() - (int(elements_.size()) - 1) * splitterWidth();
 		int offset = index * splitterWidth();
 		positionInPixels -= offset;
-		positionInPixels = std::max(0, std::min(positionInPixels, length));
+		positionInPixels = max(0, std::min(positionInPixels, length));
 		float position = length > FLT_EPSILON ? float(positionInPixels) / length : 0.0f;
 		setSplitterPosition(position, index);
 	}

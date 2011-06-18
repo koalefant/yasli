@@ -6,7 +6,6 @@
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Rectangle.h"
 #include <float.h>
-#include <math.h>
 
 namespace ww{
 

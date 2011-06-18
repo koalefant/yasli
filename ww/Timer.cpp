@@ -2,7 +2,6 @@
 #include "Timer.h"
 #include "ww/Win32/Window.h"
 #include "ww/Widget.h"
-#include "XMath/round.h"
 
 namespace ww{
 
@@ -18,11 +17,11 @@ protected:
 	Timer* owner_;
 };
 
-Timer::Timer(Widget* owner, float interval)
+Timer::Timer(Widget* owner, int intervalMS)
 {
 	owner_ = owner;
 	impl_ = new TimerImpl(this);
-	owner->_window()->attachTimer(impl_, round(interval * 1000.0f));
+	owner->_window()->attachTimer(impl_, intervalMS);
 }
 
 Timer::~Timer()

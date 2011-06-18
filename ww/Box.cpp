@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include <float.h>
+#include <algorithm>
 #include "ww/Box.h"
 #include "ww/HBox.h"
 #include "ww/VBox.h"
@@ -133,7 +134,7 @@ void Box::_arrangeChildren()
 			++sizeable_elements;
 	}
 
-	fixed_length += float(std::max(0, int(elements_.size()) - 1)) * spacing_;
+	fixed_length += (float)max(0, int(elements_.size()) - 1) * spacing_;
 	float sizeable_length = length - fixed_length;
 
 	float element_length = sizeable_elements > 0 && sizeable_length > FLT_EPSILON ? sizeable_length/float(sizeable_elements) : 0;
@@ -152,7 +153,7 @@ void Box::_arrangeChildren()
 
 				offset += it->padding + len;
 				offset += float(spacing_);
-				offset = std::min(offset, length);
+				offset = min(offset, length);
 			}
 		}
 	}

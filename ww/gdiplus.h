@@ -1,8 +1,5 @@
 #pragma once
 
-#include <algorithm>
-using std::min;
-using std::max;
 #include <rpc.h>
 #include <unknwn.h>
 #include <gdiplus.h>
