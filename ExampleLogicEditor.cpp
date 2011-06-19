@@ -12,6 +12,7 @@
 #include "yasli/PointersImpl.h"
 
 #include "ww/Decorators.h"
+#include "ww/SliderDecorator.h"
 #include "ww/FileSelector.h"
 #include "ww/Color.h"
 #include "ww/Unicode.h"
@@ -57,8 +58,9 @@ public:
 		ar(mode_, "mode", "Mode");
 		ar(children_, "children", "^Subconditions");
 	}
-private:
+
 	std::vector<SharedPtr<ConditionBase> > children_;
+private:
 	Mode mode_;
 };
 
@@ -96,12 +98,10 @@ YASLI_CLASS(ConditionBase, ConditionCheckFileAttributes, "Check File Attributes"
 class ActionBase : public yasli::RefCounter
 {
 public:
-
 	virtual void act() = 0;
 	virtual void serialize(Archive &ar) {}
-private:
-
 };
+YASLI_CLASS_NULL(ActionBase, "Do Nothing")
 
 class ActionMessageBox : public ActionBase
 {
@@ -168,7 +168,7 @@ public:
 			if (actions_[i])
 				actions_[i]->act();
 	}
-private:
+
 	std::vector<SharedPtr<ActionBase> > actions_;
 };
 YASLI_CLASS(ActionBase, ActionSequence, "Sequence");
@@ -205,6 +205,30 @@ private:
 YASLI_CLASS(ActionBase, ActionPaintSky, "Paint Sky");
 
 
+class ActionSmile : public ActionBase
+{
+public:
+	ActionSmile()
+	: howWide_(0.5f)
+	, withTeeth_(false)
+	{}
+
+	void serialize(Archive &ar)
+	{
+		ar(ww::SliderDecoratorf(howWide_, 0.0f, 1.0f), "howWide", "How Wide?");
+		ar(withTeeth_, "withTeeth", "With Teeth");
+	}
+
+	void act()
+	{
+		// look outside!
+	}
+private:
+	float howWide_;
+	bool withTeeth_;
+};
+YASLI_CLASS(ActionBase, ActionSmile, "Smile");
+
 struct LogicEditorData
 {
 	void serialize(Archive& ar)
@@ -215,20 +239,30 @@ struct LogicEditorData
 	}
 
 	LogicEditorData()
-	: condition_(new ConditionSwitch())
-	, action_(new ActionSequence())
 	{
+		ConditionSwitch* cond = new ConditionSwitch();
+		cond->children_.push_back(new ConditionCheckFileAttributes());
+		cond->children_.push_back(new ConditionBase());
+		condition_ = cond;
+
+		ActionSequence* seq = new ActionSequence();
+		seq->actions_.push_back(new ActionMessageBox());
+		seq->actions_.push_back(new ActionPaintSky());
+		seq->actions_.push_back(new ActionSmile());
+		action_ = seq;
 	}
 
 	SharedPtr<ConditionBase> condition_;
 	SharedPtr<ActionBase> action_;
-} conditionEditorData;
+	} conditionEditorData;
 
 ww::Widget* createLogicEditor()
 {
 	ww::PropertyTree* propertyTree = new ww::PropertyTree();
 
 	propertyTree->attach(yasli::Serializer(conditionEditorData));
+	propertyTree->expandAll();
+
 	return propertyTree;
 }
 
