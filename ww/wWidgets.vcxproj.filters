@@ -19,11 +19,11 @@
     <Filter Include="PropertyTree">
       <UniqueIdentifier>{edc5b014-ac72-44b9-a8ad-05ba8b89ec0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PropertyTree\PropertyRows">
-      <UniqueIdentifier>{6cf1c69a-b116-41f5-be64-6da5f8aba8f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Decorators">
       <UniqueIdentifier>{ba430748-e351-4567-a770-a00e24f9d19e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PropertyTree\Rows">
+      <UniqueIdentifier>{6cf1c69a-b116-41f5-be64-6da5f8aba8f3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -256,7 +256,7 @@
       <Filter>PropertyTree</Filter>
     </ClInclude>
     <ClInclude Include="PropertyRowBitVector.h">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Color.h">
@@ -279,6 +279,9 @@
     </ClInclude>
     <ClInclude Include="Files.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SliderDecorator.h">
+      <Filter>Decorators</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -454,25 +457,22 @@
       <Filter>PropertyTree</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRow.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowBitVector.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowColor.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowDecorators.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowFileSelector.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowHotkey.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyRowRanged.cpp">
-      <Filter>PropertyTree\PropertyRows</Filter>
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="Color.cpp">
@@ -492,6 +492,12 @@
     </ClCompile>
     <ClCompile Include="Files.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SliderDecorator.cpp">
+      <Filter>Decorators</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowSlider.cpp">
+      <Filter>PropertyTree\Rows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

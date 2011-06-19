@@ -72,6 +72,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(SolutionDir)\.$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">$(SolutionDir)\.$(Configuration)\$(ProjectName)\</IntDir>
+    <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">
     <ClCompile>
@@ -158,6 +159,7 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)/$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -171,6 +173,7 @@
     <ClInclude Include="Files.h" />
     <ClInclude Include="FileSelector.h" />
     <ClInclude Include="Rect.h" />
+    <ClInclude Include="SliderDecorator.h" />
     <ClInclude Include="Unicode.h" />
     <ClInclude Include="Vect2.h" />
     <ClInclude Include="_Enums.h" />
@@ -257,6 +260,7 @@
     <ClCompile Include="Files.cpp" />
     <ClCompile Include="FileSelector.cpp" />
     <ClCompile Include="Rect.cpp" />
+    <ClCompile Include="SliderDecorator.cpp" />
     <ClCompile Include="Unicode.cpp" />
     <ClCompile Include="Vect2.cpp" />
     <ClCompile Include="_WidgetWindow.cpp" />
@@ -337,7 +341,7 @@
     <ClCompile Include="PropertyRowDecorators.cpp" />
     <ClCompile Include="PropertyRowFileSelector.cpp" />
     <ClCompile Include="PropertyRowHotkey.cpp" />
-    <ClCompile Include="PropertyRowRanged.cpp" />
+    <ClCompile Include="PropertyRowSlider.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">Create</PrecompiledHeader>

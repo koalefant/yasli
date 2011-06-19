@@ -7,7 +7,6 @@
 //#include "xMath\xMath.h"
 
 #include "ww/PropertyEditor.h"
-#include "XMath/RangedWrapper.h"
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/BitVector.h"
@@ -17,6 +16,7 @@
 #include "yasli/PointersImpl.h"
 #include "yasli/TypesFactory.h"
 #include "ww/Decorators.h"
+#include "ww/SliderDecorator.h"
 #include "XMath/Colors.h"
 #include "ww/FileSelector.h"
 #include "ww/KeyPress.h"
@@ -261,7 +261,7 @@ struct TestData
 
 			ar(poly_vector, "poly_vector", "Vector with Polymorphic Items");
 			ar(childsBase, "childsBase", "Simple Vector");
-			ar(RangedWrapperf (fvalue, -15.0f, 15.0f, 0.5f), "fvalue", "Float Value");
+			ar(ww::SliderDecoratorf(fvalue, -15.0f, 15.0f, 0.5f), "fvalue", "Float Value");
 			ar(mega_boolean, "mega_boolean", 0);
 			ar(position, "position", "Position");
 			ar(size, "size", "Size");

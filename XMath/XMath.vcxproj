@@ -81,7 +81,6 @@
     <ClCompile Include="ComboListColor.cpp" />
     <ClCompile Include="Profiler.cpp" />
     <ClCompile Include="Range.cpp" />
-    <ClCompile Include="RangedWrapper.cpp" />
     <ClCompile Include="Rectf.cpp" />
     <ClCompile Include="Recti.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -113,7 +112,6 @@
     <ClInclude Include="Profiler.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Range.h" />
-    <ClInclude Include="RangedWrapper.h" />
     <ClInclude Include="Rectf.h" />
     <ClInclude Include="Recti.h" />
     <ClInclude Include="round.h" />

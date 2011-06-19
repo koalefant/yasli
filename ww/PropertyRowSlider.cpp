@@ -11,18 +11,18 @@
 #include "ww/Win32/Window.h"
 #include "ww/Serialization.h"
 #include "ww/KeyPress.h"
-#include "XMath/RangedWrapper.h"
+#include "ww/SliderDecorator.h"
 #include "gdiplus.h"
 #include <math.h>
 
 namespace ww{
 
 template<class WrapperType, class ScalarType>
-class PropertyRowRanged : public PropertyRowNumeric<WrapperType, PropertyRowRanged<WrapperType, ScalarType> >{
+class PropertyRowSlider : public PropertyRowNumeric<WrapperType, PropertyRowSlider<WrapperType, ScalarType> >{
 public:
 	static const bool Custom = true;
-	PropertyRowRanged(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
-	PropertyRowRanged();
+	PropertyRowSlider(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowSlider();
 	int floorHeight() const{ return 12; }
 	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 
@@ -35,31 +35,31 @@ public:
 };
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::handleMouse(Vect2 point)
+void PropertyRowSlider<WrapperType, ScalarType>::handleMouse(Vect2 point)
 {
 	float val = float(point.x - (floorRect().left() + 1)) / (floorRect().width() - 2);
-	value().value() = ScalarType(val * value().range().length() + value().range().minimum());
+	value().value() = ScalarType(val * (value().maxValue() - value().minValue()) + value().minValue());
 	if(value().step() != 0)
 		value().value() = ScalarType(value().value() - fmodf(float(value().value()), float(value().step())));
 	value().clip();
 }
 
 template<class WrapperType, class ScalarType>
-bool PropertyRowRanged<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, KeyPress key)
+bool PropertyRowSlider<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, KeyPress key)
 {
 	if(key == KEY_LEFT){
         tree->model()->push(this);
 		value().value() = clamp(value().value() - value().step(),
-			                    value().range().minimum(),
-								value().range().maximum());
+			                    value().minValue(),
+								value().maxValue());
 		tree->model()->rowChanged(this);
 		return true;
 	}
 	if(key == KEY_RIGHT){
         tree->model()->push(this);
 		value().value() = clamp(value().value() + value().step(),
-			                    value().range().minimum(),
-								value().range().maximum());
+			                    value().minValue(),
+								value().maxValue());
 		tree->model()->rowChanged(this);
 		return true;
 	}
@@ -67,7 +67,7 @@ bool PropertyRowRanged<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, K
 }
 
 template<class WrapperType, class ScalarType>
-bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
+bool PropertyRowSlider<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
 {
 	if(floorRect().pointInside(point)){
         tree->model()->push(this);
@@ -80,14 +80,14 @@ bool PropertyRowRanged<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree,
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::onMouseMove(PropertyTree* tree, Vect2 point)
+void PropertyRowSlider<WrapperType, ScalarType>::onMouseMove(PropertyTree* tree, Vect2 point)
 {
 	handleMouse(point);
 	tree->redraw();
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2 point)
+void PropertyRowSlider<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2 point)
 {
 	tree->model()->rowChanged(this);
 	if(::GetCapture() == tree->impl()->get())
@@ -95,14 +95,14 @@ void PropertyRowRanged<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, V
 }
 
 template<class WrapperType, class ScalarType>
-PropertyRowRanged<WrapperType, ScalarType>::PropertyRowRanged(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowNumeric<WrapperType, PropertyRowRanged>(object, size, name, nameAlt, typeName)
+PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+: PropertyRowNumeric<WrapperType, PropertyRowSlider>(object, size, name, nameAlt, typeName)
 {
 	widgetSizeMin_ = 40;
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowRanged<WrapperType, ScalarType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowSlider<WrapperType, ScalarType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
 {
 	__super::redraw(gr, widgetRect, floorRect);
 	ScalarType val = value();
@@ -110,21 +110,21 @@ void PropertyRowRanged<WrapperType, ScalarType>::redraw(Gdiplus::Graphics* gr, c
 	rt.top += 1;
 	rt.bottom -= 1;
     HDC dc = gr->GetHDC();
-	Win32::drawSlider(dc, rt, float(val - value().range().minimum()) / value().range().length(), false/*state == FOCUSED*/);
+	Win32::drawSlider(dc, rt, float(val - value().minValue()) / (value().maxValue() - value().minValue()), false/*state == FOCUSED*/);
     gr->ReleaseHDC(dc);
 }
 
 template<class WrapperType, class ScalarType>
-PropertyRowRanged<WrapperType, ScalarType>::PropertyRowRanged()
+PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider()
 {
 	widgetSizeMin_ = 40;
 }
 
-typedef PropertyRowRanged<RangedWrapperf, float> PropertyRowRangedf;
-typedef PropertyRowRanged<RangedWrapperi, int> PropertyRowRangedi;
+typedef PropertyRowSlider<SliderDecoratorf, float> PropertyRowSliderf;
+typedef PropertyRowSlider<SliderDecoratori, int> PropertyRowSlideri;
 
-DECLARE_SEGMENT(PropertyRowRanged)
-REGISTER_PROPERTY_ROW(RangedWrapperf, PropertyRowRangedf);
-REGISTER_PROPERTY_ROW(RangedWrapperi, PropertyRowRangedi);
+DECLARE_SEGMENT(PropertyRowSlider)
+REGISTER_PROPERTY_ROW(SliderDecoratorf, PropertyRowSliderf);
+REGISTER_PROPERTY_ROW(SliderDecoratori, PropertyRowSlideri);
 
 }

@@ -1211,7 +1211,7 @@ FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowFileSelector)
 FORCE_SEGMENT(PropertyRowColor)
 FORCE_SEGMENT(PropertyRowHotkey)
-FORCE_SEGMENT(PropertyRowRanged)
+FORCE_SEGMENT(PropertyRowSlider)
 
 }
 
