@@ -122,31 +122,17 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Decorators.h" />
-    <ClInclude Include="FileSelector.h" />
-    <ClInclude Include="LibrarySelector.h" />
-    <ClInclude Include="pugiconfig.hpp" />
-    <ClInclude Include="pugixml.hpp" />
     <ClInclude Include="Assert.h" />
     <ClInclude Include="BitVector.h" />
     <ClInclude Include="BitVectorImpl.h" />
     <ClInclude Include="ConstString.h" />
-    <ClInclude Include="Content.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="Factory.h" />
-    <ClInclude Include="Files.h" />
-    <ClInclude Include="Macros.h" />
     <ClInclude Include="MemoryReader.h" />
     <ClInclude Include="MemoryWriter.h" />
     <ClInclude Include="Pointers.h" />
     <ClInclude Include="PointersImpl.h" />
-    <ClInclude Include="SafeCast.h" />
-    <ClInclude Include="SharedLibApi.h" />
-    <ClInclude Include="sigslot.h" />
     <ClInclude Include="StringList.h" />
-    <ClInclude Include="StringUtil.h" />
-    <ClInclude Include="Tokenizer.h" />
-    <ClInclude Include="Unicode.h" />
     <ClInclude Include="BinArchive.h" />
     <ClInclude Include="BinaryIArchive.h" />
     <ClInclude Include="BinaryOArchive.h" />
@@ -154,7 +140,6 @@
     <ClInclude Include="InPlaceOArchive.h" />
     <ClInclude Include="TextIArchive.h" />
     <ClInclude Include="TextOArchive.h" />
-    <ClInclude Include="XMLIArchive.h" />
     <ClInclude Include="STL.h" />
     <ClInclude Include="STLImpl.h" />
     <ClInclude Include="API.h" />
@@ -167,36 +152,10 @@
     <ClInclude Include="TypesFactory.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileSelector.cpp" />
-    <ClCompile Include="pugixml.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="pugixpath.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Assert.cpp" />
-    <ClCompile Include="Content.cpp" />
-    <ClCompile Include="Files.cpp" />
     <ClCompile Include="MemoryReader.cpp" />
     <ClCompile Include="MemoryWriter.cpp" />
     <ClCompile Include="StringList.cpp" />
-    <ClCompile Include="StringUtil.cpp" />
-    <ClCompile Include="Tokenizer.cpp" />
-    <ClCompile Include="Unicode.cpp" />
     <ClCompile Include="BinArchive.cpp" />
     <ClCompile Include="BinaryIArchive.cpp" />
     <ClCompile Include="BinaryOArchive.cpp" />
@@ -204,7 +163,6 @@
     <ClCompile Include="InPlaceOArchive.cpp" />
     <ClCompile Include="TextIArchive.cpp" />
     <ClCompile Include="TextOArchive.cpp" />
-    <ClCompile Include="XMLIArchive.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="EnumDescription.cpp" />
     <ClCompile Include="StdAfx.cpp">

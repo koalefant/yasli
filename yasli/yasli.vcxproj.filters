@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="wrappers">
-      <UniqueIdentifier>{860382b8-a9d3-478b-aaf7-2993e80e4f4c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="pugixml">
-      <UniqueIdentifier>{758e6397-5a82-461f-b3cf-e4933f436f0f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{f2843d5e-44d3-4818-94dd-f2a5e7975202}</UniqueIdentifier>
     </Filter>
@@ -18,21 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Decorators.h">
-      <Filter>wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="FileSelector.h">
-      <Filter>wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="LibrarySelector.h">
-      <Filter>wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="pugiconfig.hpp">
-      <Filter>pugixml</Filter>
-    </ClInclude>
-    <ClInclude Include="pugixml.hpp">
-      <Filter>pugixml</Filter>
-    </ClInclude>
     <ClInclude Include="Assert.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -45,19 +24,10 @@
     <ClInclude Include="ConstString.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="Content.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="Context.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="Factory.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Files.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Macros.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="MemoryReader.h">
@@ -69,28 +39,7 @@
     <ClInclude Include="Pointers.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="PointersImpl.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="SafeCast.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedLibApi.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="sigslot.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="StringList.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="StringUtil.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Tokenizer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Unicode.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="BinArchive.h">
@@ -114,9 +63,6 @@
     <ClInclude Include="TextOArchive.h">
       <Filter>archives</Filter>
     </ClInclude>
-    <ClInclude Include="XMLIArchive.h">
-      <Filter>archives</Filter>
-    </ClInclude>
     <ClInclude Include="STL.h">
       <Filter>impl</Filter>
     </ClInclude>
@@ -131,24 +77,12 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TypeID.h" />
     <ClInclude Include="TypesFactory.h" />
+    <ClInclude Include="PointersImpl.h">
+      <Filter>impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileSelector.cpp">
-      <Filter>wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="pugixml.cpp">
-      <Filter>pugixml</Filter>
-    </ClCompile>
-    <ClCompile Include="pugixpath.cpp">
-      <Filter>pugixml</Filter>
-    </ClCompile>
     <ClCompile Include="Assert.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Content.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Files.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="MemoryReader.cpp">
@@ -158,15 +92,6 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="StringList.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="StringUtil.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Tokenizer.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Unicode.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="BinArchive.cpp">
@@ -188,9 +113,6 @@
       <Filter>archives</Filter>
     </ClCompile>
     <ClCompile Include="TextOArchive.cpp">
-      <Filter>archives</Filter>
-    </ClCompile>
-    <ClCompile Include="XMLIArchive.cpp">
       <Filter>archives</Filter>
     </ClCompile>
     <ClCompile Include="Archive.cpp" />
