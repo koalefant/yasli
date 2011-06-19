@@ -166,6 +166,13 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="Decorators.h" />
+    <ClInclude Include="Files.h" />
+    <ClInclude Include="FileSelector.h" />
+    <ClInclude Include="Rect.h" />
+    <ClInclude Include="Unicode.h" />
+    <ClInclude Include="Vect2.h" />
     <ClInclude Include="_Enums.h" />
     <ClInclude Include="_WidgetWindow.h" />
     <ClInclude Include="_WidgetWithWindow.h" />
@@ -246,6 +253,12 @@
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Files.cpp" />
+    <ClCompile Include="FileSelector.cpp" />
+    <ClCompile Include="Rect.cpp" />
+    <ClCompile Include="Unicode.cpp" />
+    <ClCompile Include="Vect2.cpp" />
     <ClCompile Include="_WidgetWindow.cpp" />
     <ClCompile Include="_WidgetWithWindow.cpp" />
     <ClCompile Include="Application.cpp" />

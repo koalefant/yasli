@@ -22,6 +22,9 @@
     <Filter Include="PropertyTree\PropertyRows">
       <UniqueIdentifier>{6cf1c69a-b116-41f5-be64-6da5f8aba8f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Decorators">
+      <UniqueIdentifier>{ba430748-e351-4567-a770-a00e24f9d19e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_Enums.h">
@@ -256,6 +259,27 @@
       <Filter>PropertyTree\PropertyRows</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Color.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Vect2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Decorators.h">
+      <Filter>Decorators</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSelector.h">
+      <Filter>Decorators</Filter>
+    </ClInclude>
+    <ClInclude Include="Unicode.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Files.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_WidgetWindow.cpp">
@@ -451,6 +475,24 @@
       <Filter>PropertyTree\PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="Color.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Rect.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Vect2.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSelector.cpp">
+      <Filter>Decorators</Filter>
+    </ClCompile>
+    <ClCompile Include="Unicode.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Files.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="labels.txt" />
