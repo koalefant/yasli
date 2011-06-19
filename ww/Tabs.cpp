@@ -352,7 +352,8 @@ void Tabs::serialize(Archive& ar)
 	if(ar.filter(SERIALIZE_STATE)){
 		int index = selectedTab();
 		ar(index, "selectedTab", "selectedTab");
-		setSelectedTab(index);
+		if (size_t(index) < impl().items_.size())
+			setSelectedTab(index);
 	}
 }
 
@@ -414,6 +415,7 @@ void TabPages::setSelectedTab(int index)
 {
 	if(VBox::size() > 1)
 		VBox::remove(1);
+	ESCAPE(size_t(index) < widgets_.size(), return);
 	Widget* widget = widgets_.at(index);
 	VBox::add(widget, PACK_FILL);
 	widget->showAll();
