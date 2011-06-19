@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+namespace yasli { class Archive; }
+
 namespace ww {
 
 struct Vect2

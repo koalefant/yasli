@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="wwTest"
-	ProjectGUID="{10639A91-28AE-4DEA-B2BA-7A6BC537F4CC}"
+	Name="wwExample"
+	ProjectGUID="{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -63,10 +63,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/wwExample.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/wwExample.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -222,11 +222,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/wwExample.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="stlport_vc71_static.lib;kdWidgetsDbg.lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -259,23 +259,19 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\main.cpp"
+			RelativePath=".\Example.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ExampleLogicEditor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ExampleLogicEditor.h"
 			>
 		</File>
 		<File
 			RelativePath=".\Resource.h"
-			>
-		</File>
-		<File
-			RelativePath=".\resource1.h"
-			>
-		</File>
-		<File
-			RelativePath=".\TestData.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TestData.h"
 			>
 		</File>
 		<File

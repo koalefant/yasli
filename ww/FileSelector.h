@@ -13,8 +13,6 @@ bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name,
 
 namespace ww{
 
-using std::string;
-
 class FileSelector{
 public:
 	struct Options{
@@ -24,8 +22,8 @@ public:
         , rootDirectory(_rootDirectory)
 		{
 		}
-		string filter;
-		string rootDirectory;
+		std::string filter;
+		std::string rootDirectory;
 		bool save;
 	};
 
