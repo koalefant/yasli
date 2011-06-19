@@ -71,7 +71,7 @@ string currentDirectory() // TODO make unicode!
 {
 #ifdef WIN32
     wchar_t buf[MAX_PATH];
-    GetCurrentDirectoryW(sizeof(buf), buf);
+    GetCurrentDirectoryW(ARRAY_LEN(buf), buf);
     return ww::fromWideChar(buf);
 #else
     ASSERT(0 && "Not implemented");
