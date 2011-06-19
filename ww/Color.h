@@ -6,7 +6,7 @@ struct Color
 {
     unsigned char b, g, r, a;
 	
-	Color() { }
+	Color() : r(255), g(255), b(255), a(255) { }
 	Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a = 255) { r=_r; g=_g; b=_b; a=_a; }
 	explicit Color(unsigned long _argb) { argb() = _argb; }
 	void set(int rc,int gc,int bc,int ac = 255) { r=rc; g=gc; b=bc; a=ac; }
