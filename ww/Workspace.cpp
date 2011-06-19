@@ -605,7 +605,8 @@ Space* Space::spaceByPoint(Vect2 screenPoint)
 	if(Widget* widget = this->widget())
 	{
 		Win32::Rect rect(widget->_position());
-		HWND wnd = *_findWindow(widget);
+		Win32::Window* window = _findWindow(widget);
+		HWND wnd = window ? window->get() : 0;
 		::ClientToScreen(wnd, (POINT*)(&rect));
 		::ClientToScreen(wnd, (POINT*)(&rect) + 1);
 		POINT pt = { screenPoint.x, screenPoint.y };
