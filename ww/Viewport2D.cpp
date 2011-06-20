@@ -246,19 +246,20 @@ void Viewport2D::setViewCenter(const Vect2f& center)
     viewCenter_ = center;
 }
     
-Vect2f Viewport2D::coordsToScreen(const Vect2f& pos) const
+Vect2 Viewport2D::coordsToScreen(const Vect2f& pos) const
 {
-	return (pos + viewOffset_)*viewScale() + Vect2f(viewSize_.x, viewSize_.y) * viewCenter_;
+	Vect2f v = (pos + viewOffset_)*viewScale() + Vect2f(viewSize_.x, viewSize_.y) * viewCenter_;
+	return Vect2(v.xi(), v.yi());
 }
 
-Vect2f Viewport2D::coordsFromScreen(const Vect2f& pos) const
+Vect2f Viewport2D::coordsFromScreen(const Vect2& pos) const
 {
-	return (pos - Vect2f(viewSize_.x, viewSize_.y) * viewCenter_)/viewScale() - viewOffset_;
+	return (Vect2f(pos.x, pos.y) - Vect2f(viewSize_.x, viewSize_.y) * viewCenter_)/viewScale() - viewOffset_;
 }
 
 Rectf Viewport2D::visibleArea() const
 {
-	return Rectf(coordsFromScreen(Vect2f::ZERO), coordsFromScreen(Vect2f(viewSize_.x, viewSize_.y)));
+	return Rectf(coordsFromScreen(Vect2::ZERO), coordsFromScreen(viewSize_));
 }
 
 void Viewport2D::onMouseButtonDown(MouseButton button)
@@ -343,13 +344,13 @@ Viewport2DImpl* Viewport2D::impl()
 
 void Viewport2D::drawPixel(HDC dc, const Vect2f& pos, const Color4c& color)
 {
-	Vect2i posScr(coordsToScreen(pos));
+	Vect2 posScr(coordsToScreen(pos));
 	SetPixel(dc, posScr.x, posScr.y, color.rgb());
 }
 
 void Viewport2D::drawCircle(HDC dc, const Vect2f& pos, float radius, const Color4c& color, int outline_width)
 {
-	Vect2f center = coordsToScreen(pos);
+	Vect2 center = coordsToScreen(pos);
 	AutoSelector oldPen(dc, CreateSolidBrush(RGB(color.r, color.g, color.b)));
 	AutoSelector oldBrush(dc, CreatePen(PS_SOLID, outline_width, RGB(0, 0, 0)));
 	Ellipse(dc,
@@ -361,8 +362,8 @@ void Viewport2D::drawCircle(HDC dc, const Vect2f& pos, float radius, const Color
 
 void Viewport2D::drawLine(HDC dc, const Vect2f& _start, const Vect2f& _end, const Color4c& color, int style, int width)
 {
-	Vect2i start(coordsToScreen(_start));
-	Vect2i end(coordsToScreen(_end));
+	Vect2 start(coordsToScreen(_start));
+	Vect2 end(coordsToScreen(_end));
 
 	AutoSelector pen(dc, CreatePen(style, width, color.rgb()));
 	MoveToEx(dc, start.x, start.y, 0);
@@ -372,8 +373,8 @@ void Viewport2D::drawLine(HDC dc, const Vect2f& _start, const Vect2f& _end, cons
 
 void Viewport2D::fillRectangle(HDC dc, const Rectf& rect, const Color4c& color)
 {
-	Vect2i leftTop (coordsToScreen(rect.leftTop()));
-	Vect2i rightBottom (coordsToScreen(rect.rightBottom()));
+	Vect2 leftTop (coordsToScreen(rect.leftTop()));
+	Vect2 rightBottom (coordsToScreen(rect.rightBottom()));
 	if(leftTop.y > rightBottom.y)
 		std::swap(leftTop.y, rightBottom.y);
 	RECT rt = { leftTop.x, leftTop.y, rightBottom.x, rightBottom.y };
@@ -383,8 +384,8 @@ void Viewport2D::fillRectangle(HDC dc, const Rectf& rect, const Color4c& color)
 
 void Viewport2D::drawRectangle(HDC dc, const Rectf& rect, const Color4c& color)
 {
-	Vect2i leftTop (coordsToScreen(rect.leftTop()));
-	Vect2i rightBottom (coordsToScreen(rect.rightBottom()));
+	Vect2 leftTop (coordsToScreen(rect.leftTop()));
+	Vect2 rightBottom (coordsToScreen(rect.rightBottom()));
 	if(leftTop.y > rightBottom.y)
 		std::swap(leftTop.y, rightBottom.y);
 	RECT rt = { leftTop.x, leftTop.y, rightBottom.x, rightBottom.y };
@@ -395,8 +396,8 @@ void Viewport2D::drawRectangle(HDC dc, const Rectf& rect, const Color4c& color)
 void Viewport2D::drawText(HDC dc, const Rectf& rect, const char* _text, TextAlign text_align, bool endEllipsis)
 {
 	std::wstring text(toWideChar(_text));
-	Vect2i p1(coordsToScreen(Vect2f(rect.left(), rect.top())));
-	Vect2i p2(coordsToScreen(Vect2f(rect.right(), rect.bottom())));
+	Vect2 p1(coordsToScreen(Vect2f(rect.left(), rect.top())));
+	Vect2 p2(coordsToScreen(Vect2f(rect.right(), rect.bottom())));
 	RECT rt = { p1.x, p1.y, p2.x, p2.y };
 	int flags = DT_VCENTER | DT_SINGLELINE;
 	if (text_align == ALIGN_LEFT) {
@@ -437,8 +438,10 @@ void Viewport2D::drawText(HDC dc, const Vect2f& pos, const char* _text, const Co
 	SetBkMode(dc, TRANSPARENT);
 	SetTextColor(dc, textColor.rgb());
 
-	Vect2f posScr = coordsToScreen(pos) + size*sign;
-	TextOut(dc, posScr.xi(), posScr.yi(), text.c_str(), wcslen(text.c_str()));
+	Vect2 posScr = coordsToScreen(pos);
+	posScr.x += round(size.x*sign.x);
+	posScr.y += round(size.y*sign.y);
+	TextOut(dc, posScr.x, posScr.y, text.c_str(), wcslen(text.c_str()));
 }
 
 }

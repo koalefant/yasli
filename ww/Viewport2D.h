@@ -66,8 +66,8 @@ public:
 	const Vect2f& viewScale() const { return viewScale_; }
 	float pixelWidth() const { return 1.f/fabsf(viewScale_.x); }
 	float pixelHeight() const { return 1.f/fabsf(viewScale_.y); }
-	Vect2f coordsToScreen(const Vect2f& pos) const;
-	Vect2f coordsFromScreen(const Vect2f& pos) const;
+	Vect2 coordsToScreen(const Vect2f& pos) const;
+	Vect2f coordsFromScreen(const Vect2& pos) const;
 	void centerOn(const Vect2f& point) { viewOffset_ = -point; }
 	Rectf visibleArea() const;
 	void setVisibleArea(const Rectf& rect, bool preserveAspect = true);
@@ -77,10 +77,7 @@ public:
 	bool rmbPressed() const { return rmbPressed_; }
 	bool scrolling() const { return scrolling_; }
 
-	Vect2f clickPoint() const {
-		Vect2 mousePos = mousePosition();
-		return coordsFromScreen(Vect2f(mousePos.x, mousePos.y));
-	}
+	Vect2f clickPoint() const { return coordsFromScreen(mousePosition()); }
 
 protected:
 	int fontHeight_;
