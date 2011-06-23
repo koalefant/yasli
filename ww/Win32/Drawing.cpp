@@ -273,17 +273,22 @@ void drawSlider(HDC dc, const RECT& rect, float value, bool focused)
 			Color::Transparent, roundness);
 
 		//ww::fillRoundRectangle(&gr, &SolidBrusH(COLOR_BTNFACE
+
+        const int handleWidth = 4;
 		
-		Rect filledRect( rect.left, rect.top,  round((rect.right - rect.left - 2) * clamp(value, 0.0f, 1.0f)) + 2, rect.bottom - rect.top );
+		Rect filledRect( rect.left, rect.top, 
+                         round((rect.right - rect.left - handleWidth - 1) * clamp(value, 0.0f, 1.0f)) + handleWidth,
+                         rect.bottom - rect.top );
 
 		Color colors2[3] = { gdiplusSysColor(COLOR_BTNFACE), gdiplusSysColor(COLOR_BTNFACE), gdiplusSysColor(COLOR_3DSHADOW) };
 		brush.SetInterpolationColors(colors2, positions, 3);
 
 		ww::fillRoundRectangle(&gr, focused ? (Brush*)&SolidBrush(gdiplusSysColor(COLOR_HIGHLIGHT)) : &brush, filledRect, Color::Transparent, roundness);
 	
-		Rect handleRect( filledRect.GetRight() - 3,  filledRect.Y - 1, 4, filledRect.Height + 1);
+		Rect handleRect( filledRect.GetRight() - handleWidth,  filledRect.Y - 1, handleWidth, filledRect.Height + 1);
 
-		ww::fillRoundRectangle(&gr, &SolidBrush(Color::Transparent), Rect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top),
+		ww::fillRoundRectangle(&gr, &SolidBrush(Color::Transparent),
+                               Rect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top),
                                gdiplusSysColor(COLOR_3DSHADOW), roundness);
 
 		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), handleRect);

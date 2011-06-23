@@ -57,9 +57,6 @@
     <ClInclude Include="ClassMenu.h">
       <Filter>Widgets</Filter>
     </ClInclude>
-    <ClInclude Include="Clipboard.h">
-      <Filter>Widgets</Filter>
-    </ClInclude>
     <ClInclude Include="ColorComboBox.h">
       <Filter>Widgets</Filter>
     </ClInclude>
@@ -124,9 +121,6 @@
       <Filter>Widgets</Filter>
     </ClInclude>
     <ClInclude Include="ScrolledWindow.h">
-      <Filter>Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="Serialization.h">
       <Filter>Widgets</Filter>
     </ClInclude>
     <ClInclude Include="Slider.h">
@@ -283,6 +277,12 @@
     <ClInclude Include="SliderDecorator.h">
       <Filter>Decorators</Filter>
     </ClInclude>
+    <ClInclude Include="Clipboard.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="_WidgetWindow.cpp">
@@ -307,9 +307,6 @@
       <Filter>Widgets</Filter>
     </ClCompile>
     <ClCompile Include="CheckComboBox.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="Clipboard.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
     <ClCompile Include="ColorRect.cpp">
@@ -498,6 +495,9 @@
     </ClCompile>
     <ClCompile Include="PropertyRowSlider.cpp">
       <Filter>PropertyTree\Rows</Filter>
+    </ClCompile>
+    <ClCompile Include="Clipboard.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

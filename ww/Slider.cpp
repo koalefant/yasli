@@ -22,6 +22,8 @@ public:
 	void onMessagePaint();
 	BOOL onMessageEraseBkgnd(HDC dc);
 protected:
+    float mousePositionToValue(int x, int y) const;
+
 	Slider* owner_;
 	bool dragging_;
 };
@@ -40,8 +42,8 @@ void SliderImpl::redraw(HDC dc)
 	GetClientRect(*this, &rect);
 
 	FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
-	bool focused = GetFocus() == *this;
-	if(focused)
+	bool focused = GetFocus() == get();
+	if (focused)
 		DrawFocusRect(dc, &rect);
 	rect.left += 1;	rect.top += 1;
 	rect.right -= 1; rect.bottom -= 1;
@@ -77,14 +79,19 @@ int SliderImpl::onMessageKillFocus(HWND focusedWindow)
 	return __super::onMessageKillFocus(focusedWindow);
 }
 
+float SliderImpl::mousePositionToValue(int x, int y) const
+{
+    Win32::Rect rect;
+    GetClientRect(get(), &rect);
+    const int handleWidth = 4;
+    return clamp(float(x - handleWidth / 2) / float(rect.width() - handleWidth - 2), 0.0f, 1.0f);
+}
 
 
 void SliderImpl::onMessageMouseMove(UINT button, int x, int y)
 {
 	if((button & MK_LBUTTON) && dragging_){
-		Win32::Rect rect;
-		GetClientRect(*this, &rect);
-		float value = clamp(float(x - 1) / float(rect.width() - 2), 0.0f, 1.0f);
+		float value = mousePositionToValue(x, y);
 		owner_->value_ = value;
 		owner_->signalChanged_.emit();
 		::RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_NOERASE);
@@ -98,13 +105,13 @@ void SliderImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	Win32::Rect rect;
 	GetClientRect(*this, &rect);
-	float value = clamp(float(x - 1) / float(rect.width() - 2), 0.0f, 1.0f);
+	float value = mousePositionToValue(x, y);
 	owner_->value_ = value;
 	owner_->signalChanged_.emit();
 	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	dragging_ = true;
-	//SetFocus(*this);
+	SetFocus(*this);
 	owner_->_setFocus();
 	SetCapture(*this);
 	__super::onMessageLButtonDown(button, x ,y);
