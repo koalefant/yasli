@@ -121,7 +121,7 @@ void Dialog::init(int border)
 
 void Dialog::add(Widget* widget, PackMode packMode)
 {
-	vbox_->insert(widget, vbox_->size() - 2, packMode, 0);
+	vbox_->insert(widget, int(vbox_->size() - 2), packMode, 0);
 }
 
 void Dialog::addButton(const char* label, int response, bool atRight)

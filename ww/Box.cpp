@@ -121,7 +121,7 @@ void Box::_arrangeChildren()
 		for(int i = 0; i < (int)elements_.size() - 1; i++)
 			elements_[i].packModeReal = elements_[i].packMode == PACK_BEGIN && elements_[i].packMode == PACK_BEGIN ? PACK_COMPACT : elements_[i].packMode;
 		elements_.back().packModeReal = elements_.back().packMode;
-		for(int i = elements_.size() - 1; i > 0; i--)
+		for(int i = int(elements_.size()) - 1; i > 0; i--)
 			if(elements_[i].packMode == PACK_END && elements_[i - 1].packMode == PACK_END)
 				elements_[i].packModeReal = PACK_COMPACT;
 	}
@@ -143,7 +143,7 @@ void Box::_arrangeChildren()
 	if(!elements_.empty()){
 		Win32::Window32* window = _findWindow(this);
 		ASSERT(window);
-		Win32::Window32::PositionDeferer deferer = window->positionDeferer(elements_.size());
+		Win32::Window32::PositionDeferer deferer = window->positionDeferer((int)elements_.size());
 		FOR_EACH(elements_, it){
 			if(it->widget){
 				float len = it->expand() ? element_length + elementLength(*it) : elementLength(*it);

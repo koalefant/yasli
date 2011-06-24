@@ -33,8 +33,8 @@ public:
 	void selectAll() {}
 	void showDropDown();
 	HWND comboBox(){ return handle_; }
-	bool getCheck(int index) const;
-	void setCheck(int index, bool checked);
+	bool getCheck(size_t index) const;
+	void setCheck(size_t index, bool checked);
 	void updateValue();
 protected:
 	friend class CheckComboListBoxImpl;
@@ -73,9 +73,9 @@ CheckComboListBoxImpl::CheckComboListBoxImpl(HWND handle, CheckComboBoxImpl* own
 , owner_(owner)
 {
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle, GWLP_WNDPROC));
-	::SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
-	LONG userData = ::GetWindowLong(handle, GWL_USERDATA);
-	::SetWindowLong(handle, GWL_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
+	LONG_PTR userData = ::GetWindowLongPtr(handle, GWLP_USERDATA);
+	::SetWindowLong(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 }
 
@@ -96,7 +96,7 @@ void CheckComboListBoxImpl::onMessageLButtonUp(UINT button, int x, int y)
 
 CheckComboListBoxImpl::~CheckComboListBoxImpl()
 {
-	::SetWindowLong(handle_, GWL_USERDATA, 0);
+	::SetWindowLongPtr(handle_, GWLP_USERDATA, 0);
 }
 
 int CheckComboListBoxImpl::onMessageDestroy()
@@ -113,10 +113,10 @@ LRESULT CheckComboListBoxImpl::defaultWindowProcedure(UINT message, WPARAM wpara
 
 void CheckComboListBoxImpl::onMessageRButtonDown(UINT button, int x, int y)
 {
-	int count = owner_->owner_->items_.size();
+	size_t count = owner_->owner_->items_.size();
 	int selectedCount = 0;
 
-	for(int i = 0; i < count; ++i) {
+	for(size_t i = 0; i < count; ++i) {
 		if(owner_->getCheck(i))
 			selectedCount++;
 	}
@@ -186,8 +186,8 @@ CheckComboBoxImpl::CheckComboBoxImpl(ww::CheckComboBox* owner)
 	}
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
-	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
-	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
+	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 	SetWindowFont(handle_, Win32::defaultFont(), FALSE);
 	//ComboBox_SetText(handle_, toWideChar(owner->value()).c_str());
 }
@@ -203,7 +203,7 @@ LRESULT CheckComboBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, L
 	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
-void CheckComboBoxImpl::setCheck(int index, bool flag)
+void CheckComboBoxImpl::setCheck(size_t index, bool flag)
 {
 	WW_VERIFY(::SendMessage(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
 	ASSERT(::SendMessage(handle_, CB_GETITEMDATA, index, 0) != -1);
@@ -232,7 +232,7 @@ void CheckComboBoxImpl::updateValue()
 	ComboBox_SetText(handle_, toWideChar(value.c_str()).c_str());
 }
 
-bool CheckComboBoxImpl::getCheck(int index) const
+bool CheckComboBoxImpl::getCheck(size_t index) const
 {
 	return bool(::SendMessage(handle_, CB_GETITEMDATA, index, 0) == FALSE ? false : true);
 }
@@ -389,7 +389,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 
 	// Erase and draw
 	ExtTextOut(dc, 0, 0, ETO_OPAQUE, &text, 0, 0, 0);
-	DrawText(dc, str.c_str(), str.length(), &text, DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
+	DrawText(dc, str.c_str(), int(str.length()), &text, DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
 
 	if((drawItemStruct->itemState & (ODS_FOCUS|ODS_SELECTED)) == (ODS_FOCUS|ODS_SELECTED))
 		DrawFocusRect(dc, &text);

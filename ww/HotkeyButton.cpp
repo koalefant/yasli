@@ -55,7 +55,7 @@ void HotkeyButtonImpl::redraw(HDC dc)
 	RECT rt;
 	GetClientRect(*this, &rt);
 	const wchar_t* str = L"Press a Key, Please...";
-	::DrawText(dc, str, wcslen(str), &rt, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	::DrawText(dc, str, (int)wcslen(str), &rt, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 
 	::SelectObject(dc, oldFont);
 }

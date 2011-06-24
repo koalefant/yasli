@@ -12,14 +12,17 @@
 		<Platform
 			Name="Win32"
 		/>
+		<Platform
+			Name="x64"
+		/>
 	</Platforms>
 	<ToolFiles>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="DLLDebug|Win32"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
@@ -101,9 +104,94 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="DLLDebug|x64"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				AssemblerOutput="0"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="gdiplus.lib"
+				OutputFile="$(OutDir)/wWidgetsDbg.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/wWidgetsDbg.pdb"
+				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				ImportLibrary="$(OutDir)/wWidgetsDllDbg.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="DLLRelease|Win32"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
@@ -182,9 +270,91 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="DLLRelease|x64"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="gdiplus.lib"
+				OutputFile="$(OutDir)/wWidgets.dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/wWidgets.pdb"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="DebugStatic|Win32"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
@@ -253,9 +423,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseStatic|Win32"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(ProjectName)"
+			Name="DebugStatic|x64"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
@@ -274,6 +444,146 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				ShowIncludes="false"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="gdiplus.lib comctl32.lib"
+				OutputFile="$(OutDir)/wWidgets.lib"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseStatic|Win32"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="0"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="gdiplus.lib"
+				OutputFile="$(OutDir)/wWidgets.lib"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseStatic|x64"
+			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
+			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -490,7 +800,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DLLDebug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="DLLRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLRelease|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -506,7 +832,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DebugStatic|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="ReleaseStatic|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -694,7 +1036,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DLLDebug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="DLLRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLRelease|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -710,7 +1068,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DebugStatic|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="ReleaseStatic|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -734,7 +1108,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DLLDebug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="DLLRelease|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLRelease|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -750,7 +1140,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="DebugStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="ReleaseStatic|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1095,7 +1501,23 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
+				Name="DLLDebug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
 				Name="DLLRelease|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLRelease|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -1111,7 +1533,23 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
+				Name="DebugStatic|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
 				Name="ReleaseStatic|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleaseStatic|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

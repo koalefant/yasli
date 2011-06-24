@@ -18,6 +18,10 @@
 #pragma warning(disable : 4073 ) // initializers put in library initialization area
 #pragma init_seg(lib)
 
+#ifdef _WIN64
+char exceptMSG[512] 	= "EXCEPTION OCCURED";
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	Constants

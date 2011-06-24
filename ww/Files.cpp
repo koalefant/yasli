@@ -95,7 +95,7 @@ bool createDirectory(const char* path)
     umask(mask);
 #endif
 
-    int len = strlen(path);
+    int len = (int)strlen(path);
     char* pathCopy = (char*)alloca(len + 1);
     memcpy(pathCopy, path, len + 1);
 
@@ -146,10 +146,10 @@ string relativePath(const char* path, const char* toDirectory)
 	wchar_t fullPathLower[MAX_PATH + 1];
     GetFullPathNameW( ww::toWideChar(path).c_str(), ARRAYSIZE(fullPath), fullPath, 0 );
 	wcscpy(fullPathLower, fullPath);
-	CharLowerBuffW( fullPathLower, wcslen(fullPathLower) );
+	CharLowerBuffW( fullPathLower, (int)wcslen(fullPathLower) );
     wchar_t fullPathDir[MAX_PATH + 1];
     GetFullPathNameW( ww::toWideChar(toDirectory).c_str(), ARRAYSIZE(fullPathDir), fullPathDir, 0 );
-	CharLowerBuffW( fullPathDir, wcslen(fullPathDir) );
+	CharLowerBuffW( fullPathDir, (int)wcslen(fullPathDir) );
 	if ( wcsstr( fullPathLower, fullPathDir ) == fullPathLower )
     {
         wchar_t* start = fullPath + wcslen(fullPathDir);
@@ -211,7 +211,7 @@ bool copy(const char* sourceFile, const char* destinationFile)
 string setExtention(const char* file_name, const char* extention)
 {
 	string str = file_name;
-	unsigned int pos = str.rfind(".");
+	size_t pos = str.rfind(".");
 	if(pos != string::npos)
 		str.erase(pos, str.size());
 	if(!*extention)
@@ -224,7 +224,7 @@ string setExtention(const char* file_name, const char* extention)
 string extractExtension(const char* fileName)
 {
 	string str = fileName;
-	unsigned int pos = str.rfind(".");
+	size_t pos = str.rfind(".");
 	if(pos != string::npos)
         return string(str.begin() + pos + 1, str.end());
     return string();

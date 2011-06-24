@@ -23,7 +23,7 @@ public:
 	void insert(Widget* widget, int beforeIndex, PackMode packMode = PACK_COMPACT, int padding = 0);
 	void remove(Widget* widget);
 	void remove(int index);
-	int size() const { return elements_.size(); }
+	size_t size() const { return elements_.size(); }
 
 	void setSpacing(int spacing);
 	int spacing() const{ return spacing_; }

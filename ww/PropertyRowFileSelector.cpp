@@ -21,7 +21,7 @@ namespace ww{
 class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public sigslot::has_slots{
 	bool locked_;
 public:
-	PropertyRowFileSelector(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowFileSelector(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowFileSelector() {}
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
@@ -39,7 +39,7 @@ public:
 };
 
 
-PropertyRowFileSelector::PropertyRowFileSelector(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowFileSelector::PropertyRowFileSelector(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<FileSelector, PropertyRowFileSelector>(object, size, name, nameAlt, typeName), locked_(false)
 {
 }

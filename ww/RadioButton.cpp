@@ -77,8 +77,8 @@ RadioButtonImpl::RadioButtonImpl(RadioButton* owner, RadioButton* groupWith)
 	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | BS_RADIOBUTTON | BS_NOTIFY, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
-	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
-	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
+	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	SetWindowFont(handle_, Win32::defaultFont(), FALSE);
 }

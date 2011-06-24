@@ -141,7 +141,7 @@ public:
 	bool assignTo(T& object){
 		return assignTo(reinterpret_cast<void*>(&object), sizeof(T));
 	}
-	virtual bool assignTo(void* object, int size) { return false; }
+	virtual bool assignTo(void* object, size_t size) { return false; }
 	virtual std::string valueAsString() const;
 	virtual std::wstring valueAsWString() const;
 
@@ -280,7 +280,7 @@ struct StaticBool{
 
 class WW_API PropertyRowArg{
 public:
-	PropertyRowArg(void* object, int size, const char* name, const char* nameAlt, const char* typeName){
+	PropertyRowArg(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName){
 		object_ = object;
 		size_ = size;
 		name_ = name;
@@ -319,7 +319,7 @@ public:
 
 protected:
 	static void* object_;
-	static int size_;
+	static size_t size_;
 	static const char* name_;
 	static const char* nameAlt_;
 	static const char* typeName_;

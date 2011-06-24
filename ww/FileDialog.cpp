@@ -66,7 +66,7 @@ bool FileDialog::showModal()
 	std::vector<std::string>::iterator it;
 	for(it = masks_.begin(); it != masks_.end(); ++it){
 		std::wstring mask(toWideChar(it->c_str()));
-		int len = wcslen(mask.c_str());
+		int len = int(wcslen(mask.c_str()));
 		ASSERT(p + len + 1< filterEnd);
 		wcscpy_s(p, filterEnd - p - 1, mask.c_str());
 		p += len;

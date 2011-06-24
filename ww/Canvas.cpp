@@ -34,7 +34,7 @@ void Canvas::drawText(const Vect2f& pos, const char* _text, const Color4c& textC
 
 	Vect2 viewPos = toView(pos);
     Vect2f posScr = Vect2f(viewPos.x, viewPos.y) + size * sign;
-    TextOut(dc_, posScr.xi(), posScr.yi(), text.c_str(), wcslen(text.c_str()));
+    TextOut(dc_, posScr.xi(), posScr.yi(), text.c_str(), (int)wcslen(text.c_str()));
 }
 
 void Canvas::drawLine(const Vect2f& _start, const Vect2f& _end, const Color4c& color, int width)

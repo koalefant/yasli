@@ -39,7 +39,7 @@ struct SerializeAll{
 
 __int64 getRDTSC();
 int totalMemoryUsed(); 
-int __cdecl allocationTrackingHook(  int  nAllocType,  void   * pvData,  unsigned int   nSize,  int      nBlockUse,  long     lRequest,  const unsigned char * szFileName,  int      nLine  );
+int __cdecl allocationTrackingHook( int  nAllocType, void * pvData, size_t nSize, int nBlockUse, long lRequest, const unsigned char * szFileName, int nLine  );
 
 static bool isPressed(int vkKey) 
 {
@@ -567,8 +567,7 @@ typedef struct _CrtMemBlockHeader
 } _CrtMemBlockHeader;
 
 #define pHdr(pbData) (((_CrtMemBlockHeader *)pbData)-1)
-
-int __cdecl allocationTrackingHook(  int  nAllocType,  void   * pvData,  unsigned int   nSize,  int      nBlockUse,  long     lRequest,  const unsigned char * szFileName,  int      nLine  )
+int __cdecl allocationTrackingHook(  int  nAllocType,  void   * pvData,  size_t nSize,  int      nBlockUse,  long     lRequest,  const unsigned char * szFileName,  int      nLine  )
 {
 	AllocationData::dbgHookData_.operations++;
 	switch(nAllocType){
@@ -581,7 +580,7 @@ int __cdecl allocationTrackingHook(  int  nAllocType,  void   * pvData,  unsigne
 			}
 		case _HOOK_ALLOC:   
 			{
-				AllocationData::dbgHookData_.size += nSize;
+				AllocationData::dbgHookData_.size += int(nSize);
 				AllocationData::dbgHookData_.blocks++;
 				break;
 			}
@@ -589,7 +588,7 @@ int __cdecl allocationTrackingHook(  int  nAllocType,  void   * pvData,  unsigne
 			{
 				_CrtMemBlockHeader *pHead = pHdr(pvData);
 				nSize = (unsigned int)pHead->nDataSize;
-				AllocationData::dbgHookData_.size -= nSize;
+				AllocationData::dbgHookData_.size -= int(nSize);
 				AllocationData::dbgHookData_.blocks--;
 				break;
 			}

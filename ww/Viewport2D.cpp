@@ -441,7 +441,7 @@ void Viewport2D::drawText(HDC dc, const Vect2f& pos, const char* _text, const Co
 	Vect2 posScr = coordsToScreen(pos);
 	posScr.x += round(size.x*sign.x);
 	posScr.y += round(size.y*sign.y);
-	TextOut(dc, posScr.x, posScr.y, text.c_str(), wcslen(text.c_str()));
+	TextOut(dc, posScr.x, posScr.y, text.c_str(), (int)wcslen(text.c_str()));
 }
 
 }

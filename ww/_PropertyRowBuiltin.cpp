@@ -19,7 +19,7 @@ PropertyRowBool::PropertyRowBool(const char* name, const char* label, bool value
 {
 }
 
-bool PropertyRowBool::assignTo(void* object, int size)
+bool PropertyRowBool::assignTo(void* object, size_t size)
 {
 	ASSERT(size == sizeof(bool));
 	*reinterpret_cast<bool*>(object) = value_;
@@ -62,7 +62,7 @@ int PropertyRowPointer::widgetSizeMin() const
     std::wstring wstr(generateLabel());
     Gdiplus::StringFormat format;
     Gdiplus::RectF bound;
-    gr.MeasureString(wstr.c_str(), wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
+    gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
     ReleaseDC(*Win32::_globalDummyWindow, dc);
     return bound.Width + 10;
 }

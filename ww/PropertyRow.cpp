@@ -18,7 +18,7 @@
 namespace ww{
 
 WW_API void* PropertyRowArg::object_(0);
-WW_API int PropertyRowArg::size_(0);
+WW_API size_t PropertyRowArg::size_(0);
 WW_API const char* PropertyRowArg::name_(0);
 WW_API const char* PropertyRowArg::nameAlt_(0);
 WW_API const char* PropertyRowArg::typeName_(0);
@@ -331,7 +331,7 @@ void PropertyRow::drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& wid
 	Color textColor;
 	textColor.SetFromCOLORREF(GetSysColor(pulledSelected() ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT));
 	SolidBrush brush(textColor);
-	gr->DrawString(text.c_str(), text.size(), propertyTreeDefaultFont(), rt, &format, &brush);
+	gr->DrawString(text.c_str(), (int)text.size(), propertyTreeDefaultFont(), rt, &format, &brush);
 }
 
 void PropertyRow::serialize(Archive& ar)
@@ -494,7 +494,7 @@ void PropertyRow::updateSize(const PropertyTree* tree)
 			std::wstring wstr(toWideChar(text.c_str()));
 			Gdiplus::StringFormat format;
 			Gdiplus::RectF bound;
-			gr.MeasureString(wstr.c_str(), wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
+			gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
 			ReleaseDC(*Win32::_globalDummyWindow, dc);
 			textSizeInitial_ = bound.Width + 3;
 		}
@@ -883,7 +883,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     if(textSize_ > 0){
 		SolidBrush brush(textColor);
         Font* font = rowFont(tree);
-        gr.DrawString(text.c_str(), text.size(), font, gdiplusRectF(textRect()), &format, &brush);
+        gr.DrawString(text.c_str(), (int)text.size(), font, gdiplusRectF(textRect()), &format, &brush);
     }
 
     // краткое содержание
@@ -897,7 +897,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 
         if(width > 0){
             RectF digestRect(textRight, pos_.y, width, ROW_DEFAULT_HEIGHT);
-            gr.DrawString(digest_.c_str(), digest_.size(), propertyTreeDefaultFont(), digestRect, &format, &SolidBrush(gdiplusSysColor(COLOR_3DSHADOW)));
+            gr.DrawString(digest_.c_str(), (int)digest_.size(), propertyTreeDefaultFont(), digestRect, &format, &SolidBrush(gdiplusSysColor(COLOR_3DSHADOW)));
         }
     }
 }

@@ -146,12 +146,12 @@ void MenuBarImpl::redraw(HDC dc)
         if(activeItem_ == index){
             ::FillRect(dc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT));
             COLORREF oldTextColor = ::SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-            ::DrawText(dc, text.c_str(), wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
+            ::DrawText(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
             ::SetTextColor(dc, oldTextColor);
         }
         else{
             COLORREF oldTextColor = ::SetTextColor(dc, GetSysColor(COLOR_MENUTEXT));
-            ::DrawText(dc, text.c_str(), wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
+            ::DrawText(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
             ::SetTextColor(dc, oldTextColor);
         }
         ::SetBkMode(dc, oldBkMode);

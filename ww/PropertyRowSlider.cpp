@@ -21,7 +21,7 @@ template<class WrapperType, class ScalarType>
 class PropertyRowSlider : public PropertyRowNumeric<WrapperType, PropertyRowSlider<WrapperType, ScalarType> >{
 public:
 	static const bool Custom = true;
-	PropertyRowSlider(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowSlider();
 	int floorHeight() const{ return 12; }
 	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
@@ -95,7 +95,7 @@ void PropertyRowSlider<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, V
 }
 
 template<class WrapperType, class ScalarType>
-PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowNumeric<WrapperType, PropertyRowSlider>(object, size, name, nameAlt, typeName)
 {
 	widgetSizeMin_ = 40;

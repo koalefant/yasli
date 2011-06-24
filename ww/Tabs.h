@@ -14,7 +14,7 @@ class Tabs : public _WidgetWithWindow, public TabChanger{
 public:
 	Tabs(int border = 0);
 
-	int add(const char* tabTitle, int before = -1);
+	size_t add(const char* tabTitle, int before = -1);
 	void remove(int index);
 	void clear();
 
@@ -44,7 +44,7 @@ public:
 	int add(const char* title, Widget* widget, int before = -1);
 	void remove(int index);
 	Widget* widgetByIndex(int index);
-	int size() const;
+	size_t size() const;
 
 	int selectedTab() { return tabs_->selectedTab(); }
 	void setSelectedTab(int index);

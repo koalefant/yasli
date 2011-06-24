@@ -55,9 +55,9 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 	WW_VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
-	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
-	LONG userData = ::GetWindowLong(handle_, GWL_USERDATA);
-	::SetWindowLong(handle_, GWL_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
+	LONG_PTR userData = ::GetWindowLongPtr(handle_, GWLP_USERDATA);
+	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	HFONT font = Win32::defaultFont();
 	SetWindowFont(*this, font, FALSE);

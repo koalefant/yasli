@@ -46,12 +46,12 @@ YASLI_CLASS(Widget, RadioButtonBox, "Radio Group");
 
 	void RadioButtonBox::addRadioButton(const char * name)
 	{
-		if(!radioButtons_.size())
+		if(radioButtons_.empty())
 			radioButtons_.push_back(new ww::RadioButton(0, name, 0));
 		else
 			radioButtons_.push_back(new ww::RadioButton(radioButtons_[0], name, 0));
 	
-		int last = radioButtons_.size() - 1;
+		size_t last = radioButtons_.size() - 1;
 		box_->add(radioButtons_[last]);
 		radioButtons_[last]->signalChanged().connect(this, &RadioButtonBox::onChangedSelection);
 	}

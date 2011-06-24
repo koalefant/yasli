@@ -17,13 +17,13 @@ public:
 	, value_(value)
 	{
 	}
-	PropertyRowImpl(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+	PropertyRowImpl(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRowField(name, nameAlt, typeName)
 	, value_(*reinterpret_cast<Type*>(object))
 	{
 		ASSERT(sizeof(Type) == size);
 	}
-	bool assignTo(void* object, int size){
+	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<Type*>(object) = value();
 		return true;
 	}

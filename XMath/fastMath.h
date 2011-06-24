@@ -22,6 +22,9 @@ inline float invSqrtFast(float x)
 // ¬ 3 раза быстрее за счет проверки аргументов, точна€.
 inline float fmodFast(float a, float b)
 {
+#ifdef _WIN64
+	return fmodf(a, b);
+#else
 	float result;
 	_asm
 	{
@@ -36,6 +39,7 @@ cycle_fast_fmod:
 			fstp result
 	}
 	return result;
+#endif
 }
 
 inline unsigned int F2DW( float f ) 

@@ -202,7 +202,7 @@ bool PropertyIArchive::operator()(ContainerSerializationInterface& ser, const ch
 	if(!openRow(name, label, typeName))
         return false;
 
-    int size = 0;
+    size_t size = 0;
 	if(currentNode_->multiValue())
 		size = ser.size();
 	else{
@@ -210,7 +210,7 @@ bool PropertyIArchive::operator()(ContainerSerializationInterface& ser, const ch
 		size = ser.resize(size);
 	}
 
-	int index = 0;
+	size_t index = 0;
     if(ser.size() > 0)
         while(index < size)
         {

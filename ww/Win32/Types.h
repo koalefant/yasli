@@ -13,8 +13,13 @@ typedef unsigned int        UINT;
 typedef short               SHORT;
 typedef unsigned short      USHORT;
 
+#ifdef _WIN64
+typedef unsigned __int64 UINT_PTR;
+typedef __int64 LONG_PTR;
+#else
 typedef __w64 unsigned int       UINT_PTR;
 typedef __w64 long				LONG_PTR;
+#endif
 
 typedef UINT_PTR            WPARAM;
 typedef LONG_PTR            LPARAM;

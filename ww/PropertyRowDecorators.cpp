@@ -17,7 +17,7 @@ namespace ww{
 class PropertyRowButton : public PropertyRowImpl<ButtonDecorator, PropertyRowButton>{
 public:
 	PropertyRowButton();
-	PropertyRowButton(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowButton(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 	bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
 	void onMouseMove(PropertyTree* tree, Vect2 point);
@@ -30,7 +30,7 @@ protected:
 	bool locked_;
 };
 
-PropertyRowButton::PropertyRowButton(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowButton::PropertyRowButton(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<ButtonDecorator, PropertyRowButton>(object, size, name, nameAlt, typeName)
 , underMouse_(false), locked_(false)
 {
@@ -81,7 +81,7 @@ void PropertyRowButton::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widge
 	Color textColor;
 	textColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOWTEXT));
 	SolidBrush textBrush(textColor);
-	gr->DrawString( text.c_str(), wcslen(text.c_str()), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
+	gr->DrawString( text.c_str(), (int)wcslen(text.c_str()), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
 
 bool PropertyRowButton::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
@@ -131,11 +131,11 @@ REGISTER_PROPERTY_ROW(ButtonDecorator, PropertyRowButton);
 class PropertyRowHLine : public PropertyRowImpl<HLineDecorator, PropertyRowHLine>{
 public:
 	PropertyRowHLine();
-	PropertyRowHLine(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 };
 
-PropertyRowHLine::PropertyRowHLine(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowHLine::PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<HLineDecorator, PropertyRowHLine>(object, size, name, nameAlt, typeName)
 {
 }
@@ -161,14 +161,14 @@ REGISTER_PROPERTY_ROW(HLineDecorator, PropertyRowHLine);
 class PropertyRowNot : public PropertyRowImpl<NotDecorator, PropertyRowNot>{
 public:
 	PropertyRowNot();
-	PropertyRowNot(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 	bool hasIcon() const{ return true; }
 	std::string valueAsString() const { return value_ ? label() : ""; }
 };
 
-PropertyRowNot::PropertyRowNot(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowNot::PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<NotDecorator, PropertyRowNot>(object, size, name, nameAlt, typeName)
 {
 }
@@ -197,14 +197,14 @@ REGISTER_PROPERTY_ROW(NotDecorator, PropertyRowNot);
 class PropertyRowRadio : public PropertyRowImpl<RadioDecorator, PropertyRowRadio>{
 public:
 	PropertyRowRadio();
-	PropertyRowRadio(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 	bool hasIcon() const{ return true; }
 	std::string valueAsString() const { return value() ? label() : ""; }
 };
 
-PropertyRowRadio::PropertyRowRadio(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowRadio::PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<RadioDecorator, PropertyRowRadio>(object, size, name, nameAlt, typeName)
 {
 }

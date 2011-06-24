@@ -130,7 +130,7 @@ protected:
 
 	void updatePropertyTree();
 
-	yasli::SharedPtr<PropertyTreeModel> model_;
+	PolyPtr<PropertyTreeModel> model_;
 	int cursorX_;
 
     sigslot::signal0 signalChanged_;

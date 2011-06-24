@@ -106,7 +106,7 @@ ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 	ASSERT(dc);
 	SIZE size = { 0, 0 };
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
-	WW_VERIFY(::GetTextExtentPoint32(dc, text, wcslen(text), &size));
+	WW_VERIFY(::GetTextExtentPoint32(dc, text, (int)wcslen(text), &size));
 	WW_VERIFY(::SelectObject(dc, oldFont) == font);
 	WW_VERIFY(ReleaseDC(window, dc));
 	return ww::Vect2(size.cx, size.cy);
@@ -645,12 +645,12 @@ LONG_PTR Window32::setLongPtr(int index, LONG_PTR newLongPtr)
 
 LONG_PTR Window32::setUserDataLongPtr(LONG_PTR newLongPtr)
 {
-	return ::SetWindowLongPtr(handle_, GWL_USERDATA, LONG(newLongPtr));
+	return ::SetWindowLongPtr(handle_, GWLP_USERDATA, LONG_PTR(newLongPtr));
 }
 
 LONG_PTR Window32::getUserDataLongPtr()
 {
-	return ::GetWindowLongPtr(handle_, GWL_USERDATA);
+	return ::GetWindowLongPtr(handle_, GWLP_USERDATA);
 }
 
 void Window32::setWindowText(const wchar_t* windowText)
@@ -731,7 +731,7 @@ void Window32::attachTimer(TimerInterface* timer, int interval)
 	}
 	else{
 		timers_.push_back(timer);
-		index = timers_.size() - 1;
+		index = int(timers_.size() - 1);
 	}
 	timer->setWindow(this);
 	SetTimer(*this, 100 + index, interval, 0);

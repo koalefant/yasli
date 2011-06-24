@@ -43,8 +43,8 @@ ProgressBarImpl::ProgressBarImpl(ProgressBar* owner)
 	InitCommonControls();
 	WW_VERIFY(create(L"", WS_CHILD | PBS_SMOOTH | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
-	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG>(&Win32::universalWindowProcedure));
-	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
+	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 	SendMessage(handle_, PBM_SETRANGE, 0, MAKELPARAM(0, MAX_RANGE)); 
 	SetWindowFont(handle_, Win32::defaultFont(), FALSE);
 }

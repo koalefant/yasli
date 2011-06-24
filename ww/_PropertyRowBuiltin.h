@@ -55,7 +55,7 @@ public:
 	int value() const;
 	void setValue(int index);
 	void setVisibleIndex(int index);
-	bool assignTo(void* object, int size);
+	bool assignTo(void* object, size_t size);
 	bool isStatic() const{ return false; }
 	const EnumDescription* descriptor() { return descriptor_; }
 	PropertyRowWidget* createWidget(PropertyTree* tree);
@@ -111,7 +111,7 @@ class PropertyRowBool : public PropertyRow{
 public:
 	enum { Custom = false };
 	PropertyRowBool(const char* name = "", const char* nameAlt = "", bool value = false);
-	bool assignTo(void* val, int size);
+	bool assignTo(void* val, size_t size);
 
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
     bool isLeaf() const{ return true; }
@@ -133,7 +133,7 @@ public:
 	enum { Custom = false };
 	PropertyRowString(const char* name = "", const char* nameAlt = "", const std::wstring& value = std::wstring());
 	PropertyRowString(const char* name, const char* nameAlt, const std::string& value);
-	PropertyRowString(void* object, int size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowString(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 	bool assignTo(std::string& str);
 	bool assignTo(std::wstring& str);
 	PropertyRowWidget* createWidget(PropertyTree* tree);
@@ -145,12 +145,12 @@ class PropertyRowStringListValue : public PropertyRowImpl<StringListValue, Prope
 public:
 	enum { Custom = true };
 	PropertyRowStringListValue(const char* name = "", const char* nameAlt = "", const StringListValue& value = StringListValue());
-	PropertyRowStringListValue(void* object, int size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowStringListValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);
 	std::string valueAsString() const { return value_.c_str(); }
-	bool assignTo(void* object, int size){
+	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<StringListValue*>(object) = value().c_str();
 		return true;
 	}
@@ -160,12 +160,12 @@ class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStatic
 public:
 	enum { Custom = false };
 	PropertyRowStringListStaticValue(const char* name = "", const char* nameAlt = "", const StringListStaticValue& value = StringListStaticValue());
-	PropertyRowStringListStaticValue(void* object, int size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);
 	std::string valueAsString() const { return value_.c_str(); }
-	bool assignTo(void* object, int size){
+	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<StringListStaticValue*>(object) = value().index();
 		return true;
 	}
@@ -225,7 +225,7 @@ public:
 	{
 		widgetSizeMin_ = 60;
 	}
-	PropertyRowNumeric(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+	PropertyRowNumeric(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRowImpl<Type, Derived>(object, size, name, nameAlt, typeName)
 	{
 		widgetSizeMin_ = 60;

@@ -18,7 +18,7 @@ namespace ww{
 
 class PropertyRowHotkey : public PropertyRowImpl<KeyPress, PropertyRowHotkey>, public sigslot::has_slots{
 public:
-	PropertyRowHotkey(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowHotkey(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowHotkey() {}
 	bool onActivate(PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);
@@ -27,7 +27,7 @@ public:
 protected:
 };
 
-PropertyRowHotkey::PropertyRowHotkey(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowHotkey::PropertyRowHotkey(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<KeyPress, PropertyRowHotkey>(object, size, name, nameAlt, typeName)
 {
 

@@ -63,7 +63,7 @@ PropertyRowBitVector::PropertyRowBitVector(const char* name, const char* label, 
 	}
 }
 
-PropertyRowBitVector::PropertyRowBitVector(void* object, int _size, const char* name, const char* label, const char* typeName)
+PropertyRowBitVector::PropertyRowBitVector(void* object, size_t _size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<BitVectorWrapper, PropertyRowBitVector>(object, _size, name, label, typeName)
 , description_(0)
 , flags_(0)
@@ -87,7 +87,7 @@ PropertyRowBitVector::PropertyRowBitVector(void* object, int _size, const char* 
 	}
 }
 
-bool PropertyRowBitVector::assignTo(void* object, int size)
+bool PropertyRowBitVector::assignTo(void* object, size_t size)
 {
 	ASSERT(size == sizeof(BitVectorWrapper));
 	reinterpret_cast<BitVectorWrapper*>(object)->value = flags();

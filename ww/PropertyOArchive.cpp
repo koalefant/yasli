@@ -306,7 +306,7 @@ void PropertyRowEnum::setVisibleIndex(int visibleIndex)
 	ASSERT(0);
 }
 
-bool PropertyRowEnum::assignTo(void* object, int size)
+bool PropertyRowEnum::assignTo(void* object, size_t size)
 {
 	ESCAPE(size == sizeof(int), return false);
 	*reinterpret_cast<int*>(object) = value();
@@ -472,7 +472,7 @@ void PropertyRowPointer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widg
 	format.SetTrimming(StringTrimmingNone);
 	std::wstring str = generateLabel();
 	const wchar_t* text = str.c_str();;
-	gr->DrawString(text, wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
+	gr->DrawString(text, (int)wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
@@ -633,7 +633,7 @@ PropertyRowString::PropertyRowString(const char* name, const char* label, const 
 {
 }
 
-PropertyRowString::PropertyRowString(void* object, int size, const char* name, const char* label, const char* typeName)
+PropertyRowString::PropertyRowString(void* object, size_t size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<std::wstring, PropertyRowString>(object, size, name, label, typeName)
 {
 
@@ -716,7 +716,7 @@ PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const c
 	widgetSizeMin_ = 80;
 }
 
-PropertyRowStringListValue::PropertyRowStringListValue(void* object, int size, const char* name, const char* label, const char* typeName)
+PropertyRowStringListValue::PropertyRowStringListValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<StringListValue, PropertyRowStringListValue>(object, size, name, label, typeName)
 {
 	widgetSizeMin_ = 80;
@@ -736,7 +736,7 @@ PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* n
 	widgetSizeMin_ = 100;
 }
 
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(void* object, int size, const char* name, const char* label, const char* typeName)
+PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(object, size, name, label, typeName)
 {
 	widgetSizeMin_ = 100;
@@ -1087,7 +1087,7 @@ bool PropertyOArchive::operator()(const PointerSerializationInterface& ptr, cons
 	{
         const char* baseTypeName = ptr.baseType().name();
 		ClassFactoryBase* factory = ptr.factory();
-		int count = factory->size();		
+		size_t count = factory->size();		
         if(factory->nullLabel() != 0){
             if(factory->nullLabel()[0] != '\0')
                 model_->addDefaultType(0, baseTypeName, "", factory->nullLabel());
@@ -1095,8 +1095,8 @@ bool PropertyOArchive::operator()(const PointerSerializationInterface& ptr, cons
         else
             model_->addDefaultType(0, baseTypeName, "", "[ null ]");
 
-        for(int i = 0; i < count; ++i) {
-			const TypeDescription *desc = factory->descriptionByIndex(i);
+        for(size_t i = 0; i < count; ++i) {
+			const TypeDescription *desc = factory->descriptionByIndex((int)i);
 
 			const char* name = desc->name();
 			const char* label = desc->label();
@@ -1104,7 +1104,7 @@ bool PropertyOArchive::operator()(const PointerSerializationInterface& ptr, cons
 			if(SharedPtr<Archive> archive = openDefaultArchive(baseTypeName, name, label)){
                 archive->setContextMap(contextMap_);
                 archive->setFilter(getFilter());
-				factory->serializeNewByIndex( *archive, i, "name", "nameAlt" );
+				factory->serializeNewByIndex( *archive, (int)i, "name", "nameAlt" );
       			closeDefaultArchive(archive, baseTypeName, name, label);
 			}
         }

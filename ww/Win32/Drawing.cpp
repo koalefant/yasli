@@ -45,7 +45,7 @@ void drawEdit3D(HDC dc, const RECT& rect, const wchar_t* text, HFONT font)
 	::DrawEdge(dc, &rt, EDGE_SUNKEN, BF_RECT);
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
 	::InflateRect(&rt, -3, -2);
-	::DrawText(dc, text, wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+	::DrawText(dc, text, (int)wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 	::SelectObject(dc, oldFont);
 }
 
@@ -58,7 +58,7 @@ void drawEditWhiteRect(HDC dc, const RECT& rect, const wchar_t* text, HFONT font
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
 	::InflateRect(&rt, -5, -2);
 	rt.bottom -= 1;
-	::DrawText(dc, text, wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+	::DrawText(dc, text, (int)wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 	::SelectObject(dc, oldFont);
 }
 
@@ -161,7 +161,7 @@ void drawButton(HDC dc, const RECT& rect, const wchar_t* text, HFONT font)
 	::InflateRect(&rt, -5, -2);
 	rt.bottom -= 1;
 	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
-	::DrawText(dc, text, wcslen(text), &rt, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+	::DrawText(dc, text, (int)wcslen(text), &rt, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 	::SetBkMode(dc, oldBkMode);
 	::SelectObject(dc, oldFont);
 }
@@ -184,7 +184,7 @@ void drawEdit(HDC dc, const RECT& rect, const wchar_t* text, HFONT font, bool pa
 	::InflateRect(&rt, -5, -1);
 	rt.bottom -= 1;
 	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
-	::DrawText(dc, text, wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER | (pathEllipsis ? DT_PATH_ELLIPSIS : DT_END_ELLIPSIS));
+	::DrawText(dc, text, (int)wcslen(text), &rt, DT_LEFT | DT_SINGLELINE | DT_VCENTER | (pathEllipsis ? DT_PATH_ELLIPSIS : DT_END_ELLIPSIS));
 	::SetBkMode(dc, oldBkMode);
 	::SelectObject(dc, oldFont);
 }

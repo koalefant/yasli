@@ -65,7 +65,7 @@ template<class ColorType>
 class PropertyRowColor : public PropertyRowImpl<ColorType, PropertyRowColor<ColorType> >{
 public:
 	static const bool Custom = true;
-	PropertyRowColor(void* object, int size, const char* name, const char* nameAlt, const char* typeName);
+	PropertyRowColor(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowColor();
 	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
 
@@ -89,7 +89,7 @@ bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
 
 
 template<class ColorType>
-PropertyRowColor<ColorType>::PropertyRowColor(void* object, int size, const char* name, const char* nameAlt, const char* typeName)
+PropertyRowColor<ColorType>::PropertyRowColor(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<ColorType, PropertyRowColor>(object, size, name, nameAlt, typeName)
 {
 	widgetSizeMin_ = 26;

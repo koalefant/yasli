@@ -11,6 +11,7 @@ static const int FIXED_POINT = 12;
 static const int ADJUST_PERIOD = 1000;
 static const int PROCESSORS_MAX = 8;
 
+#ifndef _WIN64
 __declspec (noinline)
 __int64 getRDTSC()
 {
@@ -47,6 +48,20 @@ int getCPUID()
 	}
 	return id;
 }
+#else
+
+__int64 getRDTSC()
+{
+	__int64 counter;
+	QueryPerformanceCounter((LARGE_INTEGER*)&counter);
+	return counter;
+}
+
+int getCPUID()
+{
+	return 0;
+}
+#endif
 
 class XClock
 {

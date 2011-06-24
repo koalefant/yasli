@@ -171,7 +171,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 	format.SetTrimming(pathEllipsis ? StringTrimmingEllipsisPath : StringTrimmingEllipsisCharacter);
 	
 	SolidBrush textBrush(gdiplusSysColor(COLOR_WINDOWTEXT));
-    gr->DrawString(text, wcslen(text), font, gdiplusRectF(textRect), &format, &textBrush );
+    gr->DrawString(text, (int)wcslen(text), font, gdiplusRectF(textRect), &format, &textBrush );
 }
 
 void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)

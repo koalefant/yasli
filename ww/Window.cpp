@@ -300,7 +300,7 @@ void Window::setIconFromResource(const char* resourceName)
 	HICON icon = LoadIcon(Win32::_globalInstance(), toWideChar(resourceName).c_str());
 	ASSERT(icon);
  
-	SetClassLong(*window_, GCL_HICON, (LONG)icon);
+	SetClassLongPtr(*window_, GCLP_HICON, (LONG_PTR)icon);
 }
 
 void Window::setIconFromFile(const char* resourceName)
@@ -308,7 +308,7 @@ void Window::setIconFromFile(const char* resourceName)
 	HANDLE icon = LoadImage(0, toWideChar(resourceName).c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 	ASSERT(icon);
 
-	SetClassLong(*window_, GCL_HICON, (LONG)icon);
+	SetClassLongPtr(*window_, GCLP_HICON, (LONG_PTR)icon);
 }
 
 void Window::add(Widget* widget)

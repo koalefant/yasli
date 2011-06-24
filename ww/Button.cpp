@@ -59,8 +59,8 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 	button_ = ::CreateWindow( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, *this, 0, (HINSTANCE)GetWindowLong(*this, GWLP_HINSTANCE), 0);
 	ASSERT(button_);
 	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(button_, GWLP_WNDPROC));
-	::SetWindowLongPtr(button_, GWLP_WNDPROC, reinterpret_cast<LONG>(&buttonWindowProcedure));
-	::SetWindowLongPtr(button_, GWLP_USERDATA, reinterpret_cast<LONG>(this));
+	::SetWindowLongPtr(button_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&buttonWindowProcedure));
+	::SetWindowLongPtr(button_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 	SetWindowFont(button_, Win32::defaultFont(), FALSE);
 }
 

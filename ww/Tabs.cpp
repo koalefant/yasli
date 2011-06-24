@@ -320,7 +320,7 @@ void Tabs::setSelectedTab(int index, const TabChanger* changer)
 	RedrawWindow(impl(), 0, 0, RDW_INVALIDATE);
 }
 
-int Tabs::add(const char* tabTitle, int before)
+size_t Tabs::add(const char* tabTitle, int before)
 {
 	TabsItem item;
 	item.text = tabTitle;
@@ -381,7 +381,7 @@ int TabPages::add(const char* title, Widget* widget, int before)
 	if(widgets_.size() == 1){
 		VBox::add(widget, PACK_FILL);
 	}
-	return widgets_.size() - 1;
+	return int(widgets_.size() - 1);
 }
 
 void TabPages::onTabChange(const TabChanger* changer)
@@ -406,9 +406,9 @@ Widget* TabPages::widgetByIndex(int index)
 	return widgets_.at(index);
 }
 
-int TabPages::size() const
+size_t TabPages::size() const
 {
-	return int(widgets_.size());
+	return widgets_.size();
 }
 
 void TabPages::setSelectedTab(int index)
