@@ -14,7 +14,7 @@ void EnumDescription::add(int value, const char* name, const char *label)
     labelToValue_[label] = value;
     valueToName_[value] = name;
     valueToLabel_[value] = label;
-    valueToIndex_[value] = names_.size();
+    valueToIndex_[value] = int(names_.size());
     names_.push_back(name);
 	labels_.push_back(label);
 }

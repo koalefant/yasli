@@ -41,10 +41,11 @@ bool InPlaceOArchive::save(const char* filename)
 	MemoryWriter buf;
 	buf.write("YINPA32", 8);
 
-	int headerSize = pointerOffsets_.size() * sizeof(size_t);
-	buf.write(headerSize);
+	size_t headerSize = int(pointerOffsets_.size() * sizeof(size_t));
+    ESCAPE(headerSize <= UINT_MAX, return false);
+	buf.write(int(headerSize));
 	if (!pointerOffsets_.empty())
-		buf.write((const char*)&pointerOffsets_[0], headerSize);
+		buf.write((const char*)&pointerOffsets_[0], int(headerSize));
 
 	buf.write(buffer_.position());
 	buf.write(buffer_.buffer(), buffer_.position());

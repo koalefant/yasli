@@ -59,7 +59,7 @@ inline void BinOArchive::openNode(const char* name, bool size8)
 	unsigned short hash = calcHash(name);
 	stream_.write(hash);
 
-	blockSizeOffsets_.push_back(stream_.position());
+	blockSizeOffsets_.push_back(int(stream_.position()));
 	stream_.write((unsigned char)0); 
 	if(!size8)
 		stream_.write((unsigned short)0); 
@@ -78,7 +78,7 @@ inline void BinOArchive::closeNode(const char* name, bool size8)
 		return;
 
     unsigned int offset = blockSizeOffsets_.back();
-	unsigned int size = stream_.position() - offset - sizeof(unsigned char) - (size8 ? 0 : sizeof(unsigned short));
+	unsigned int size = (unsigned int)(stream_.position() - offset - sizeof(unsigned char) - (size8 ? 0 : sizeof(unsigned short)));
 	blockSizeOffsets_.pop_back();
 	unsigned char* sizePtr = (unsigned char*)(stream_.buffer() + offset);
 
@@ -232,7 +232,7 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
 {
 	openNode(name, false);
 
-	unsigned int size = ser.size();
+	unsigned int size = (unsigned int)ser.size();
 	if(size < SIZE16)
 		stream_.write((unsigned char)size);
 	else if(size < 0x10000){
@@ -330,7 +330,7 @@ bool BinIArchive::open(const char* buffer, size_t size)
 	buffer += sizeof(unsigned int);
 	size -= sizeof(unsigned int);
 
-	blocks_.push_back(Block(buffer, size));
+	blocks_.push_back(Block(buffer, (unsigned int)size));
 	return true;
 }
 

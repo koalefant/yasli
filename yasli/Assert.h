@@ -26,7 +26,7 @@ int assertionDialog(const char* message, const char* str, const char* function, 
 		  switch(yasli::assertionDialog((#x), 0, __FUNCTION__, __FILE__, __LINE__)) {  \
           case 0: break; \
           case 1: ignore = true; break;  \
-          case 2: __asm{ int 3 } break;  \
+          case 2: __debugbreak(); break;  \
           }  \
       } 
 #  define ASSERT_STR(x, str) \
@@ -36,7 +36,7 @@ int assertionDialog(const char* message, const char* str, const char* function, 
 		  switch(yasli::assertionDialog((#x), (str), __FUNCTION__, __FILE__, __LINE__)) {  \
           case 0: break; \
           case 1: ignore = true; break;  \
-          case 2: __asm{ int 3 } break;  \
+          case 2: __debugbreak(); break;  \
           }  \
       } 
 # else

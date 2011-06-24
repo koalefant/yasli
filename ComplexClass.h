@@ -233,7 +233,7 @@ public:
 		polyPtr_->change();
 
 		for (size_t i = 0; i < members_.size(); ++i)
-			members_[i].change(i);
+			members_[i].change(int(i));
 
 		for (size_t i = 0; i < polyVector_.size(); ++i)
 			polyVector_[i]->change();
@@ -244,7 +244,7 @@ public:
 
 		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
 		for (size_t i = 0; i < arrayLen; ++i)
-			array_[i].change(arrayLen - i);
+			array_[i].change(int(arrayLen - i));
 
     numericTypes_.change();
 	}

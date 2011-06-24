@@ -88,7 +88,7 @@ void BinaryOArchive::write(const char *_string)
 
 void BinaryOArchive::openNode(BinaryNode _type, const char *name)
 {
-    blockSizeOffsets_.push_back(stream_->position());
+    blockSizeOffsets_.push_back((unsigned int)stream_->position());
     unsigned int size = 0;
     stream_->write((const char*)&size, sizeof(size)); // length, shall be overwritten in closeNode
     unsigned char type = (unsigned char)(_type);
@@ -103,7 +103,7 @@ void BinaryOArchive::closeNode()
     blockSizeOffsets_.pop_back();
 
     unsigned int *blockSize = (unsigned int*)(stream_->buffer() + offset);
-    *blockSize = stream_->position() - offset;
+    *blockSize = (unsigned int)(stream_->position() - offset);
 }
 
 bool BinaryOArchive::operator()(bool &value, const char *_name, const char* label)

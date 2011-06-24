@@ -12,7 +12,8 @@ class StringListStatic : public std::vector<const char*>{
 public:
     enum { npos = -1 };
     int find(const char* value) const{
-		for(std::size_t i = 0; i < size(); ++i){
+		int numItems = int(size());
+		for(int i = 0; i < numItems; ++i){
             if(strcmp((*this)[i], value) == 0)
                 return i;
         }
@@ -78,14 +79,15 @@ public:
         *this  = rhs;
     }
     StringList(const StringListStatic& rhs){
-        int size = int(rhs.size());
+        const int size = int(rhs.size());
         resize(size);
         for(int i = 0; i < int(size); ++i)
             (*this)[i] = rhs[i];
     }
     enum { npos = -1 };
     int find(const char* value) const{
-		for(std::size_t i = 0; i < size(); ++i){
+		const int numItems = int(size());
+		for(int i = 0; i < numItems; ++i){
             if((*this)[i] == value)
                 return i;
         }

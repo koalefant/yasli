@@ -521,7 +521,7 @@ bool TextIArchive::load(const char* filename)
 			buffer = std::malloc(fileSize + 1);
 			ASSERT(buffer);
 			memset(buffer, 0, fileSize + 1);
-			long elementsRead = std::fread(buffer, fileSize, 1, file);
+			size_t elementsRead = std::fread(buffer, fileSize, 1, file);
 			ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
 				return false;
@@ -560,7 +560,7 @@ void TextIArchive::putToken()
 
 int TextIArchive::line(const char* position) const
 {
-	return std::count(reader_->begin(), position, '\n') + 1;
+	return int(std::count(reader_->begin(), position, '\n') + 1);
 }
 
 bool TextIArchive::isName(Token token) const

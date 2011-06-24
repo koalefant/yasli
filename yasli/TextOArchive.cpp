@@ -387,7 +387,7 @@ void TextOArchive::placeName(const char* name)
 
 void TextOArchive::placeIndent()
 {
-    int count = stack_.size() - 1;
+    int count = int(stack_.size() - 1);
     stack_.back().indentCount += count/* * TAB_WIDTH*/;
     for(int i = 0; i < count; ++i)
         *buffer_ << "\t";
@@ -516,7 +516,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name, const cha
     placeName(name);
     std::size_t position = buffer_->position();
     openBracket();
-    stack_.push_back(Level(false, position, strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2));
+    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2)));
 
     ASSERT(ser);
     ser(*this);
@@ -538,7 +538,7 @@ bool TextOArchive::operator()(ContainerSerializationInterface& ser, const char* 
     placeName(name);
     std::size_t position = buffer_->position();
     openContainerBracket();
-    stack_.push_back(Level(false, position, strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2));
+    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
 
     std::size_t size = ser.size();
     if(size > 0){

@@ -43,7 +43,7 @@ public:
 	{
 	}
 
-	virtual int size() const = 0;
+	virtual size_t size() const = 0;
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
 	virtual size_t sizeOf(TypeID typeID) const = 0;
 	virtual void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) = 0;
@@ -147,7 +147,7 @@ public:
 		delete ptr;
 	}
 	// from ClassFactoryInterface:
-	int size() const{ return creators_.size(); }
+	size_t size() const{ return creators_.size(); }
 	const TypeDescription* descriptionByIndex(int index) const{
 		if(size_t(index) >= int(creators_.size()))
 			return 0;
