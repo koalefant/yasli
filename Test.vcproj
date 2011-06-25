@@ -20,7 +20,7 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
+			Name="DebugStatic|Win32"
 			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
@@ -95,7 +95,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
+			Name="DebugStatic|x64"
 			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
@@ -171,7 +171,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
+			Name="ReleaseStatic|Win32"
 			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
@@ -250,7 +250,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
+			Name="ReleaseStatic|x64"
 			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
