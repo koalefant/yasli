@@ -74,7 +74,7 @@ PropertyTree::~PropertyTree()
 void PropertyTree::update()
 {
 	needUpdate_ = true;
-    ::RedrawWindow(*impl(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+    ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 TreeImpl* PropertyTree::impl() const
@@ -406,6 +406,7 @@ void PropertyTree::revert()
 		while(++it != attached_.end()){
 			PropertyTreeModel model2;
 			PropertyOArchive oa2(&model2);
+			Archive::Context<ww::PropertyTree> treeContext(oa2, this);
 			oa2.setFilter(filter_);
 			(*it)(oa2, "", "");
 			model_->root()->intersect(model2.root());
@@ -422,6 +423,7 @@ void PropertyTree::apply()
 		Serializers::iterator it;
 		FOR_EACH(attached_, it){
 			PropertyIArchive ia(model_);
+			Archive::Context<ww::PropertyTree> treeContext(ia, this);
 			ia.setFilter(filter_);
 			(*it)(ia, "", "");
 		}

@@ -20,6 +20,7 @@
 #include "XMath/Colors.h"
 #include "ww/FileSelector.h"
 #include "ww/KeyPress.h"
+#include "ww/PropertyTree.h"
 
 using namespace yasli;
 using ww::NotDecorator;
@@ -239,7 +240,10 @@ struct TestData
 		ButtonDecorator button("Open in PropertyEditor");
 		ar(button, "button", "<");
 		if(button)
-			ww::edit(Serializer(*this), "testStateNested");
+		{
+			ww::PropertyTree* tree = ar.context<ww::PropertyTree>();
+			ww::edit(Serializer(*this), "testStateNested", ww::IMMEDIATE_UPDATE | ww::ONLY_TRANSLATED, tree);
+		}
 
 		ar(hotkey, "hotkey", "Hotkey");
 		ar(base, "base", "Base");
