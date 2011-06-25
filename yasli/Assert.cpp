@@ -9,15 +9,22 @@ namespace yasli{
 
 #ifndef NDEBUG
 static bool interactiveAssertion = true;
+static bool testMode = true;
 
 void setInteractiveAssertion(bool interactive)
 {
     interactiveAssertion = interactive;
 }
 
+void setTestMode(bool testMode)
+{
+	interactiveAssertion = false;
+    testMode = testMode;
+}
+
 int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line)
 {
-    if(interactiveAssertion){
+    if(interactiveAssertion || IsDebuggerPresent()){
         MemoryWriter text;
         text << "in " << function << "():\n";
         text << "\n    " << message;
@@ -36,10 +43,17 @@ int assertionDialog(const char* message, const char* str, const char* function, 
     }
     else{
         MemoryWriter text;
-        text << "Assertion: " << fileName << ": line " << line << ", " << function << "(): " << message;
+		// output in msvc error format
+		text << fileName << "(" << line << "): error: " << "Assertion in " << function << "(): " << message;
         if(str)
             text << " ( " << str << " )";
+		text << "\n";
         fwrite(text.c_str(), text.size(), 1, stderr);
+		fflush(stderr);
+		if (testMode)
+		{
+			exit(-1);
+		}
         return 0; // Retry
     }
 }

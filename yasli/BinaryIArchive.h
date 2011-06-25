@@ -42,7 +42,7 @@ private:
   bool findNode(BinaryNode _type, const Token &_name, const char** start, const char** end);
   bool findNode(BinaryNode _type, const char *_name);
   size_t readNodeHeader(BinaryNode* _type, Token* name);
-  bool openContainer(const char *_name, Token *_typeName, size_t *_size);
+  bool openContainer(const char *_name, Token *_typeName, int *_size);
   void closeContainer();
   bool openStruct(const char *_name, Token* typeName);
   void closeStruct();

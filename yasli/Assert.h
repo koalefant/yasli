@@ -16,6 +16,7 @@
 #ifndef NDEBUG
 namespace yasli{
 void setInteractiveAssertion(bool interactive);
+void setTestMode(bool interactive);
 int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line);
 }
 # ifdef WIN32

@@ -133,7 +133,7 @@ bool BinaryIArchive::openStruct(const char *_name, Token* typeName)
     return false;
 }
 
-bool BinaryIArchive::openContainer(const char *_name, Token *_typeName, size_t *_size)
+bool BinaryIArchive::openContainer(const char *_name, Token *_typeName, int *_size)
 {
     const char *start, *end;
     if(findNode(BINARY_NODE_CONTAINER, Token(_name), &start, &end))
@@ -185,10 +185,11 @@ void BinaryIArchive::closePointer()
 size_t BinaryIArchive::readNodeHeader(BinaryNode* _type, Token* name)
 {
     unsigned int blockSize;
-    read(&blockSize);
-    ASSERT(blockSize >= 4 && blockSize <= (unsigned int)(blocks_.back().end - blocks_.back().start ));
+    ESCAPE(read(&blockSize), return 0);
+	size_t lastBlockSize = blocks_.back().end - blocks_.back().start;
+    ASSERT(blockSize >= 4 && blockSize <= (unsigned int)(lastBlockSize));
     unsigned char type;
-    read(&type);
+    ESCAPE(read(&type), return 0);
     *_type = BinaryNode(type);
 
     ESCAPE(read(name), return blockSize);
@@ -245,7 +246,9 @@ bool BinaryIArchive::operator()(bool& value, const char* name, const char* label
 {
     if(findNode(BINARY_NODE_BOOL, name))
     {
-        read(&value);
+		unsigned char byteValue;
+        ESCAPE(read(&byteValue), return false);
+		value = byteValue ? true : false;
         return true;
     }
     return false;
@@ -268,7 +271,7 @@ bool BinaryIArchive::operator()(float& value, const char* name, const char* labe
 {
     if(findNode(BINARY_NODE_FLOAT, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -278,7 +281,7 @@ bool BinaryIArchive::operator()(double& value, const char* name, const char* lab
 {
     if(findNode(BINARY_NODE_DOUBLE, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -288,7 +291,7 @@ bool BinaryIArchive::operator()(short& value, const char* name, const char* labe
 {
     if(findNode(BINARY_NODE_INT16, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -298,7 +301,7 @@ bool BinaryIArchive::operator()(unsigned short& value, const char* name, const c
 {
     if(findNode(BINARY_NODE_UINT16, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -309,7 +312,7 @@ bool BinaryIArchive::operator()(int& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_INT32, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -319,7 +322,7 @@ bool BinaryIArchive::operator()(unsigned int& value, const char* name, const cha
 {
     if(findNode(BINARY_NODE_UINT32, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -329,7 +332,7 @@ bool BinaryIArchive::operator()(long long& value, const char* name, const char* 
 {
     if(findNode(BINARY_NODE_INT64, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -339,7 +342,7 @@ bool BinaryIArchive::operator()(unsigned long long& value, const char* name, con
 {
     if(findNode(BINARY_NODE_UINT64, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -349,7 +352,7 @@ bool BinaryIArchive::operator()(signed char& value, const char* name, const char
 {
     if(findNode(BINARY_NODE_SBYTE, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -359,7 +362,7 @@ bool BinaryIArchive::operator()(unsigned char& value, const char* name, const ch
 {
     if(findNode(BINARY_NODE_BYTE, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -369,7 +372,7 @@ bool BinaryIArchive::operator()(char& value, const char* name, const char* label
 {
     if(findNode(BINARY_NODE_SBYTE, name))
     {
-        read(&value);
+        ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -391,11 +394,12 @@ bool BinaryIArchive::operator()(const Serializer& ser, const char* _name, const 
 
 bool BinaryIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-    size_t size;
+    int size;
     Token typeName;
     if(openContainer( name, &typeName, &size))
     {
-        ser.resize(size);
+		ESCAPE(size < 1024 * 1024, return false);
+        ser.resize(size_t(size));
 
         if(ser.size() > 0)
         {
