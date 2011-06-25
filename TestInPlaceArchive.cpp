@@ -9,12 +9,17 @@
 using std::string;
 using namespace yasli;
 
+#ifndef _WIN64 // InPlaceArchive is not ported yet to 64-bit
 SUITE(InPlaceArchive)
 {
 	TEST(ComplexSaveAndLoad)
 	{
 #ifdef WIN32
+#ifdef _WIN64
+		const char* inplaceFilename = "test.inp64";
+#else
 		const char* inplaceFilename = "test.inp";
+#endif
 		{
 			std::auto_ptr<ComplexClass> obj(new ComplexClass);
 			obj->change();
@@ -41,4 +46,4 @@ SUITE(InPlaceArchive)
 #endif
 	}
 }
-
+#endif

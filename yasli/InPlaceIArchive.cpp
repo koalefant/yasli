@@ -30,6 +30,7 @@ const void* InPlaceIArchive::load(size_t rootSize, const char* filename)
 	if (fread(&offsetsSize, sizeof(offsetsSize), 1, file) != 1)
 		return 0;
 
+	ESCAPE(offsetsSize < 1024 * 1024 * 1024, return 0);
 	std::vector<size_t> pointerOffsets;
 	pointerOffsets.resize(offsetsSize / sizeof(size_t));
 	if (!pointerOffsets.empty())

@@ -43,7 +43,7 @@ bool InPlaceOArchive::save(const char* filename)
 
 	size_t headerSize = int(pointerOffsets_.size() * sizeof(size_t));
     ESCAPE(headerSize <= UINT_MAX, return false);
-	buf.write(int(headerSize));
+	buf.write(size_t(headerSize));
 	if (!pointerOffsets_.empty())
 		buf.write((const char*)&pointerOffsets_[0], int(headerSize));
 
