@@ -137,7 +137,6 @@ void Widget::_updateVisibility()
 
 void Widget::setFocus()
 {
-    //ESCAPE(_focusable(), return);
     if(_focusable() && _window())
         ::SetFocus(*_window());
 }

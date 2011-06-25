@@ -19,7 +19,9 @@ public:
 	enum { Custom = false };
 	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool readOnly);
 	bool isContainer() const{ return true; }
+	bool onActivate( PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& item, PropertyTree* tree);
+	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect);
 	bool onKeyDown(PropertyTree* tree, KeyPress key);
 
 	void onMenuAppendElement(PropertyTree* tree);
@@ -44,8 +46,11 @@ public:
 	bool hasFixedSize() const{ return fixedSize_; }
 
 protected:
+	void generateMenu(PopupMenuItem& root, PropertyTree* tree);
+
 	bool fixedSize_;
 	const char* elementTypeName_;
+	wchar_t buttonLabel_[8];
 };
 
 class PropertyRowEnum : public PropertyRow{

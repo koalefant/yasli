@@ -66,6 +66,9 @@ PropertyRowContainer::PropertyRowContainer(const char* name = "", const char* la
 , fixedSize_(readOnly)
 , elementTypeName_(elementTypeName)
 {
+	buttonLabel_[0] = 0;
+	widgetSizeMin_ = 32;
+
 	if(pulledUp())
 		_setExpanded(true);		
 }
@@ -86,6 +89,33 @@ protected:
 	bool insert_;
 };
 
+void PropertyRowContainer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+{
+	using namespace Gdiplus;
+
+	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
+	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
+	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
+
+	Color colors[3] = { brushColor, brushColor, gdiplusSysColor(COLOR_3DSHADOW) };
+	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };
+	brush.SetInterpolationColors(colors, positions, 3);
+
+	fillRoundRectangle(gr, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
+
+	Color textColor;
+    textColor.SetFromCOLORREF(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+	Gdiplus::SolidBrush textBrush(textColor);
+	RectF textRect( float(widgetRect.X), float(widgetRect.Y), float(widgetRect.Width), float(widgetRect.Height) );
+	StringFormat format;
+	format.SetAlignment(StringAlignmentCenter);
+	format.SetLineAlignment(StringAlignmentCenter);
+	format.SetFormatFlags(StringFormatFlagsNoWrap);
+	format.SetTrimming(StringTrimmingNone);
+	wchar_t* text = multiValue() ? L"..." : buttonLabel_; 
+	gr->DrawString(text, (int)wcslen(text), propertyTreeDefaultFont(), textRect, &format, &textBrush);
+}
+
 bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
 {
 	if(key == KeyPress(KEY_DELETE, KEY_MOD_SHIFT)){
@@ -99,16 +129,25 @@ bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
 	return __super::onKeyDown(tree, key);
 }
 
-bool PropertyRowContainer::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
+bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
-	if(!root.empty())
-		root.addSeparator();
+    if(readOnly())
+        return false;
+    PopupMenu menu(512);
+    generateMenu(menu.root(), tree);
+    menu.spawn(tree->_toScreen(Vect2(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
+    return true;
+}
 
+void PropertyRowContainer::generateMenu(PopupMenuItem& root, PropertyTree* tree)
+{
     if(!readOnly())
     {
 	    PopupMenuItem& createItem = root.add(TRANSLATE("Add"), tree)
 		    .connect(this, &PropertyRowContainer::onMenuAppendElement)
 		    .setHotkey(KeyPress(VK_INSERT));
+
+		root.addSeparator();
 
 		PropertyRow* row = defaultRow(tree->model());
 		if(row && row->isPointer()){
@@ -122,6 +161,14 @@ bool PropertyRowContainer::onContextMenu(PopupMenuItem& root, PropertyTree* tree
 	    root.add(TRANSLATE("Remove All"), tree->model()).connect(this, &PropertyRowContainer::onMenuClear)
 		    .setHotkey(KeyPress(KEY_DELETE, KEY_MOD_SHIFT))
 		    .enable(!readOnly());
+}
+
+bool PropertyRowContainer::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
+{
+	if(!root.empty())
+		root.addSeparator();
+
+    generateMenu(root, tree);
 
 	if(pulledUp())
 		return !root.empty();
@@ -224,6 +271,8 @@ void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeMod
 
 void PropertyRowContainer::digestReset()
 {
+	swprintf_s(buttonLabel_, ARRAY_LEN(buttonLabel_), L"%i", count());
+
 	wchar_t buffer[14];
 	if(multiValue())
 		swprintf_s(buffer, L"[...]");
@@ -250,6 +299,7 @@ class AutoDropComboBox : public ComboBox{
 public:
 	void show(){
 		ComboBox::show();
+		ComboBox::setFocus();
 		showDropDown();
 	}
 };

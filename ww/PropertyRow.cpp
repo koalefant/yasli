@@ -397,7 +397,7 @@ const char* PropertyRow::parseControlCodes(const char* ptr)
 	pulledUp_ = pulledBefore_ = false;
 	hasPulled_ = false;
 	readOnly_ = readOnlyOver_ = false;
-	fixedWidget_ = false;
+	fixedWidget_ = isContainer();
 	while(true){
 		if(*ptr == '^'){
 			if(parent() && !parent()->isRoot()){
@@ -503,7 +503,11 @@ void PropertyRow::updateSize(const PropertyTree* tree)
 	textSize_ = textSizeInitial_;
 	widgetSize_ = hasIcon() ? ICON_SIZE : widgetSizeMin();
 	if(pulledUp() && isContainer())
-		textSize_ = widgetSize_ = plusSize_ = 0;
+	{
+		//textSize_ = widgetSize_ = plusSize_ = 0;
+		textSize_ = plusSize_ = 0;
+		widgetSize_ = widgetSizeMin_;
+	}
 
 	size_.set(plusSize_ + textSize_ + widgetSize_, ROW_DEFAULT_HEIGHT + floorHeight());
 	textSizeDelta_ = textSize_ > TEXT_SIZE_MIN ? textSize_ - TEXT_SIZE_MIN : 0;
@@ -515,7 +519,7 @@ void PropertyRow::updateSize(const PropertyTree* tree)
 		if(!row->visible(tree))
 			continue;
         row->updateSize(tree);
-		if(row->pulledUp() && !row->isContainer()){
+		if(row->pulledUp()){
 			size_.x += row->size_.x;
 			size_.y = max(size_.y, row->size_.y);
 			textSizeDelta_ += row->textSizeDelta_;
@@ -605,16 +609,18 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 	size_.x = textSize_ + widgetSize_;
 
 	PropertyRow* nonPulled = nonPulledParent();
+	bool hasChildrenPulledAfter = false;
 	FOR_EACH(children_, it){
         PropertyRow* row = *it;
         if(row->pulledUp()){
 			if(row->pulledBefore())
 				continue;
 			row->adjustRect(tree, rect, pos, totalHeight, extraSize);
-			if(!row->isContainer()){
+			//if(!row->isContainer()){
 				pos.x += row->size_.x;
 				size_.x += row->size_.x;
-			}
+			//}
+			hasChildrenPulledAfter = true;
         }
 		else if(row->visible(tree) && nonPulled->expanded()){
 			Vect2 rowPos(nonPulled->plusRect().right(), totalHeight);
@@ -623,8 +629,13 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
         }
     }
 
+
 	if(!pulledUp())
+	{
+		if (!hasChildrenPulledAfter && !hasIcon())
+			widgetPos_ = rect.right() - widgetSize_;
 		size_.x = rect.right() - pos_.x;
+	}
 }
 
 void PropertyRow::scaleSize(float t, bool scaleWidget)
@@ -797,7 +808,7 @@ Gdiplus::Font* PropertyRow::rowFont(const PropertyTree* tree) const
 
 void PropertyRow::drawRow(HDC dc, const PropertyTree* tree) 
 {
-    if(isContainer() && pulledUp() || !visible(tree))
+    if(!visible(tree))
         return;
 
     using namespace Gdiplus;
