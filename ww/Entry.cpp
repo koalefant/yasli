@@ -5,6 +5,7 @@
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
 #include "yasli/TypesFactory.h"
+#include "ww/KeyPress.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -143,9 +144,10 @@ int EntryImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 
 int EntryImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 {
-	if((keyCode == VK_RETURN && owner_->swallowReturn_) || keyCode == VK_ESCAPE/* || VK_TAB*/)
-		return 0;
-	if(keyCode == VK_LEFT || keyCode == VK_RIGHT)
+	ww::KeyPress key = ww::KeyPress::addModifiers(ww::Key(keyCode));
+    if (owner_->onKeyPress(key))
+        return 0;
+	if(keyCode == KEY_LEFT || keyCode == KEY_RIGHT)
 		return Win32::Window32::onMessageKeyDown(keyCode, count, flags);
 	return __super::onMessageKeyDown(keyCode, count, flags);
 }
@@ -185,6 +187,8 @@ BOOL EntryImpl::onMessageEraseBkgnd(HDC dc)
 	return __super::onMessageEraseBkgnd(dc);
 	//return FALSE;
 }
+
+// ---------------------------------------------------------------------------
 
 
 Entry::Entry(const char* text, bool multiline, int border)
@@ -279,6 +283,13 @@ void Entry::serialize(Archive& ar)
 void Entry::commit()
 {
 	impl()->commit();
+}
+
+bool Entry::onKeyPress(const KeyPress& key)
+{
+	if((key.key == KEY_RETURN && swallowReturn_) || key.key == KEY_ESCAPE/* || KEY_TAB*/)
+		return true;
+    return false;
 }
 
 };

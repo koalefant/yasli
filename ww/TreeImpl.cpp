@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "ww/TreeImpl.h"
 #include "ww/Window.h"
+#include "ww/Entry.h"
 
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/Handle.h"
@@ -33,7 +34,6 @@ DragWindow::DragWindow(TreeImpl* treeImpl)
 : useLayeredWindows_(true)
 , treeImpl_(treeImpl)
 , offset_(0, 0)
-
 {
 	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 	if(useLayeredWindows_){
@@ -44,6 +44,7 @@ DragWindow::DragWindow(TreeImpl* treeImpl)
 		Rect treeRect(0, 0, 100, 100);
 		WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, treeRect, 0, exStyle));
 	}
+
 }
 #pragma warning(pop)
 
@@ -229,7 +230,7 @@ void DragController::trackRow(POINT pt)
 	hoveredRow_ = 0;
 	destinationRow_ = 0;
 
-    Vect2 point(pt.x + treeImpl_->offset_.x, pt.y + treeImpl_->offset_.y);
+    Vect2 point(pt.x, pt.y);
 	PropertyRow* row = treeImpl_->rowByPoint(point);
 	if(!row || !row_)
 		return;
@@ -353,6 +354,7 @@ int TreeImpl::onMessageKillFocus(HWND newFocusedWindow)
 }
 
 int TreeImpl::onMessageSetFocus(HWND lastFocusedWindow)
+
 {
     int result = 0;
 	if(!creating() && owner_->_focusable()){
@@ -376,11 +378,11 @@ void TreeImpl::onMessageLButtonDblClk(int x, int y)
 {
 	::SetFocus(handle_);
 
-	Vect2 point(x + offset_.x, y + offset_.y);
+	Vect2 point(x, y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		ASSERT(row->refCount() > 0);
-		if(row->widgetRect().pointInside(point)){
+		if(row->widgetRect().pointInside(pointToRootSpace(point))){
 			if(!row->onActivate(tree_, true))
 				toggleRow(row);	
 		}
@@ -422,7 +424,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 	}
 	if(capturedRow_){
 		Rect rowRecti = capturedRow_->rect();
-		tree_->onRowLMBUp(capturedRow_, rowRecti, Vect2(x + offset_.x, y + offset_.y));
+		tree_->onRowLMBUp(capturedRow_, rowRecti, pointToRootSpace(Vect2(x, y)));
 		capturedRow_ = 0;
 	}
 	
@@ -433,14 +435,13 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
-	Vect2 point(x + offset_.x, y + offset_.y);
-	PropertyRow* row = rowByPoint(point);
+	PropertyRow* row = rowByPoint(Vect2(x, y));
 	if(row){
-		if(tree_->onRowLMBDown(row, row->rect(), point))
+		if(tree_->onRowLMBDown(row, row->rect(), pointToRootSpace(Vect2(x, y))))
 			capturedRow_ = row;
 		else{
 			// row могла уже быть пересоздана	
-			row = rowByPoint(point);
+			row = rowByPoint(Vect2(x, y));
             if(row && !row->readOnly()){
 				POINT cursorPos;
 				GetCursorPos(&cursorPos);
@@ -457,18 +458,18 @@ void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 	ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
 
-	Vect2 point(x + offset_.x, y + offset_.y);
+	Vect2 point(x, y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		model()->setFocusedRow(row);
 		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		tree_->onRowRMBDown(row, row->rect(), point);
+		tree_->onRowRMBDown(row, row->rect(), pointToRootSpace(point));
 	}
 	else{
 		Win32::Rect rect;
 		GetClientRect(*this, &rect);
-		tree_->onRowRMBDown(model()->root(), rect.recti(), point);
+		tree_->onRowRMBDown(model()->root(), rect.recti(), pointToRootSpace(point));
 	}
 	__super::onMessageRButtonDown(button, x, y);
 }
@@ -477,7 +478,7 @@ void TreeImpl::onMessageMButtonDown(UINT button, int x, int y)
 {
 	::SetFocus(handle_);
 
-	Vect2 point(x + offset_.x, y + offset_.y);
+	Vect2 point(x, y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		switch(hitTest(row, point, row->rect())){
@@ -505,8 +506,8 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
         RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 	else{
-		Vect2 point(x + offset_.x, y + offset_.y);
-		PropertyRow* row = rowByPoint(point);
+		Vect2 point(x, y);
+		PropertyRow* row = rowByPoint(pointToRootSpace(point));
 		if(row){
 			switch(hitTest(row, point, row->rect())){
 			case TREE_HIT_ROW:
@@ -590,22 +591,31 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 	}
 }
 
+void TreeImpl::updateArea()
+{
+    Win32::Rect clientRect;
+    ::GetClientRect(handle_, &clientRect);
+
+    area_ = clientRect.recti();
+    area_.setLeft(area_.left() + 1);
+    area_.setRight(area_.right() - 1);
+    area_.setTop(area_.top() + 1);
+    area_.setBottom(area_.bottom() - 1);
+
+    if (tree_->filterMode_)
+        area_.setTop(area_.top() + tree_->filterEntry_->_minimalSize().y + 2 + 2);
+
+    tree_->_arrangeChildren();
+    updateScrollBar();
+
+    if(area_.width() > 0)
+        tree_->needUpdate_ = true;
+}
+
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 {
 	if(!creating()){
-        Win32::Rect clientRect;
-		::GetClientRect(handle_, &clientRect);
-        area_ = clientRect.recti();
-		if(!tree_->compact_){
-			area_.setLeft(area_.left() + 4);
-			area_.setRight(area_.right() - 4);
-			area_.setTop(area_.top() + 4);
-			area_.setBottom(area_.bottom() - 4);
-		}
-		tree_->_arrangeChildren();
-		updateScrollBar();
-		if(area_.width() > 0)
-			tree_->needUpdate_ = true;
+        updateArea();
 	}
 	return TRUE;
 }
@@ -630,13 +640,36 @@ void TreeImpl::onMessagePaint()
 
 int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 {
+    KeyPress keyPress = KeyPress::addModifiers(Key(keyCode));
+
+	if (keyPress == KeyPress(KEY_F, KEY_MOD_CONTROL)) {
+        tree_->setFilterMode(true);
+    }
+
+    if (tree_->filterMode_) {
+        if (keyPress == KeyPress(KEY_ESCAPE)) {
+            tree_->setFilterMode(false);
+        }
+    }
+
 	PropertyRow* row = model()->focusedRow();
-	bool result = tree_->onRowKeyDown(row, KeyPress::addModifiers(Key(keyCode)));
+	bool result = tree_->onRowKeyDown(row, keyPress);
 	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
 	if(!result)
 		return __super::onMessageKeyDown(keyCode, count, flags);
 	else
 		return 0;
+}
+
+int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
+{
+	if (code != ' ' && code != VK_ESCAPE)
+	{
+        if (!(code == VK_BACK && !tree_->filterMode_))
+            tree_->setFilterMode(true);
+	   PostMessage(tree_->filterEntry_->_window()->get(), WM_CHAR, code, MAKELPARAM(count, flags));
+	}
+	return __super::onMessageChar(code, count, flags);
 }
 
 LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
@@ -696,25 +729,30 @@ void TreeImpl::redraw(HDC dc)
 	if(tree_->needUpdate_)
 		tree_->updateHeights();
 
-	RECT clientRect;
-	::GetClientRect(handle_, &clientRect);
-	int clientWidth = clientRect.right - clientRect.left;
-	int clientHeight = clientRect.bottom - clientRect.top;
+	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
+    ::GetClientRect(handle_, &clientRect);
+    int clientWidth = clientRect.right - clientRect.left;
+    int clientHeight = clientRect.bottom - clientRect.top;
 
 	{
 		Graphics gr(dc);
-		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left, clientRect.top, clientWidth, clientHeight);
+		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left, 
+			clientRect.top, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
 	}
-	::IntersectClipRect(dc, area_.left() - 4, area_.top() - 3, area_.right() + 4, area_.bottom() + 3);
+
+	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
+
 	OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
 
 	if(drag_.captured())
 		drag_.drawUnder(dc);
 
+	OffsetViewportOrgEx(dc, area_.left(), area_.top(), 0);
 	model()->root()->scanChildren(DrawVisitor(dc, area_, offset_.y), tree_);
+	OffsetViewportOrgEx(dc, -area_.left(), -area_.top(), 0);
 	OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
-	::IntersectClipRect(dc, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
 
 	if(size_.y > clientHeight)
 	{
@@ -727,23 +765,23 @@ void TreeImpl::redraw(HDC dc)
 		Color color1(0, 0, 0, 0);
 		Color color2(96, 0, 0, 0);
 
-		Rect upperRect(clientRect.left, clientRect.top - 1, clientWidth, shadowHeight + 1);
+		Rect upperRect(area_.left() - 1, area_.top() - 1, area_.width() + 2, shadowHeight + 1);
 		LinearGradientBrush upperBrush(upperRect, color2, color1, LinearGradientModeVertical);
 		upperRect.Y += 1;
 		upperRect.Height -= 2;
 		gr.FillRectangle(&upperBrush, upperRect);
 
-		Rect lowerRect(clientRect.left, clientRect.bottom - shadowHeight / 2 - 1, clientWidth, shadowHeight / 2 + 2);
+		Rect lowerRect(area_.left(), area_.bottom() - shadowHeight / 2 - 1, area_.width(), shadowHeight / 2 + 2);
 		LinearGradientBrush lowerBrush(lowerRect, color1, color2, LinearGradientModeVertical);
 		lowerRect.Y += 1;
 		lowerRect.Height -= 2;
 		gr.FillRectangle(&lowerBrush, lowerRect);
 
 		SolidBrush brush(gdiplusSysColor(COLOR_BTNSHADOW));
-		gr.FillRectangle(&brush, Rect(clientRect.left, clientRect.top, 1, clientHeight));
-		gr.FillRectangle(&brush, Rect(clientRect.left, clientRect.top, clientWidth, 2));
-		gr.FillRectangle(&brush, Rect(clientRect.right - 1, clientRect.top, 1, clientHeight));
-		gr.FillRectangle(&brush, Rect(clientRect.left, clientRect.bottom - 2, clientWidth, 2));
+		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), 1, area_.height()));
+		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), area_.width(), 2));
+		gr.FillRectangle(&brush, Rect(clientRect.right - 1, area_.top(), 1, area_.height()));
+		gr.FillRectangle(&brush, Rect(clientRect.left, area_.bottom() - 2, area_.width(), 2));
 	}
 
 	if(drag_.captured()){
@@ -760,8 +798,10 @@ void TreeImpl::redraw(HDC dc)
 	}
 }
 
-TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 point, const Rect& rowRect)
+TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 pointInWindowSpace, const Rect& rowRect)
 {
+	Vect2 point = pointToRootSpace(pointInWindowSpace);
+
 	if(!row->hasVisibleChildren(tree()) && row->plusRect().pointInside(point))
 		return TREE_HIT_PLUS;
 
@@ -774,9 +814,16 @@ TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 point, const Rec
 	return TREE_HIT_NONE;
 }
 
+Vect2 TreeImpl::pointToRootSpace(Vect2 point) const
+{
+	return Vect2(point.x + offset_.x - area_.left(), point.y + offset_.y - area_.top());
+}
+
 PropertyRow* TreeImpl::rowByPoint(Vect2 point)
 {
-    return model()->root()->hit(tree_, point);
+	if (!area_.pointInside(point))
+		return 0;
+    return model()->root()->hit(tree_, pointToRootSpace(point));
 }
 
 bool TreeImpl::toggleRow(PropertyRow* row)

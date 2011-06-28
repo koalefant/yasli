@@ -85,14 +85,19 @@ public:
 
 	void redraw(HDC dc);
 
-	PropertyRow* rowByPoint(Vect2 point);
-	TreeHitTest hitTest(PropertyRow* row, Vect2 pt, const Rect& rowRect);
-	bool getRowRect(PropertyRow* row, Rect& rect, bool onlyVisible = true);
+	Vect2 pointToRootSpace(Vect2 pointInWindowSpace) const;
+	PropertyRow* rowByPoint(Vect2 pointInWindowSpace);
+
+	TreeHitTest hitTest(PropertyRow* row, Vect2 pointInWindowSpace, const Rect& rowRect);
+
+	bool getRowRect(PropertyRow* row, Rect& rectInWindowSpace, bool onlyVisible = true);
 	bool toggleRow(PropertyRow* node);
 	void ensureVisible(PropertyRow* row, bool update = true);
 
+    void updateArea();
 	void updateScrollBar();
 
+	int onMessageChar(UINT code, USHORT count, USHORT flags);
 	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
 
 	void onMessageMouseWheel(SHORT delta);

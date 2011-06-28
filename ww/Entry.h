@@ -9,6 +9,7 @@ namespace Win32{
 }
 
 namespace ww{
+struct KeyPress;
 class WW_API EntrySelection{
 public:
 	EntrySelection(int start = 0, int end = 0)
@@ -64,7 +65,10 @@ public:
 	virtual void onSelectionChanged() { signalSelectionChanged_.emit(); }
 	sigslot::signal0& signalSelectionChanged() { return signalSelectionChanged_; }
 protected:
+    virtual bool onKeyPress(const KeyPress& key);
+
 	EntryImpl* impl() const;
+private:
 
 	sigslot::signal0 signalEdited_;
 	sigslot::signal0 signalChanged_;

@@ -26,6 +26,36 @@
 
 namespace ww{
 
+class FilterEntry : public Entry
+{
+public:
+    FilterEntry(PropertyTree* tree)
+    : tree_(tree)
+    {
+    }
+protected:
+    bool onKeyPress(const KeyPress& key)
+    {
+        if (key.key == KEY_UP ||
+            key.key == KEY_DOWN ||
+            key.key == KEY_ESCAPE ||
+            key.key == KEY_RETURN)
+        {
+            PostMessage(tree_->impl()->get(), WM_KEYDOWN, key.key, 0);
+            return true;
+        }
+		if (key.key == KEY_BACK && text()[0] == '\0')
+		{
+			tree_->setFilterMode(false);
+		}
+        return false;
+    }
+private:
+    PropertyTree* tree_;
+};
+
+// ---------------------------------------------------------------------------
+
 YASLI_CLASS(Widget, PropertyTree, "PropertyTree")
 
 TreeConfig TreeConfig::defaultConfig;
@@ -50,6 +80,7 @@ PropertyTree::PropertyTree(int border)
 , propertyTree_(0)
 , autoRevert_(true)
 , needUpdate_(true)
+, filterMode_(false)
 {
 	(TreeConfig&)*this = defaultConfig;
 
@@ -61,6 +92,10 @@ PropertyTree::PropertyTree(int border)
 	model_->setFullUndo(fullUndo_);
 
 	model_->signalUpdated().connect(this, &PropertyTree::onModelUpdated);
+
+    filterEntry_ = new FilterEntry(this);
+    filterEntry_->_setParent(this);
+    filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
 
 	drawingInit();
 }
@@ -88,7 +123,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		return true;
 
     switch(key.fullCode){
-	case VK_SPACE:
+	case KEY_RETURN:
+	case KEY_SPACE:
 		if(activateRow(row))
 			return true;
 		break;
@@ -104,7 +140,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 			return true;
 		}
 		break;
-	case VK_F2:
+	case KEY_F2:
 		if(selectedRow())
 			selectedRow()->onActivate(this, true);
 		break;
@@ -128,12 +164,24 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 	PropertyRow* selectedRow = 0;
 	switch(key.fullCode){
 	case KEY_UP:
-		selectedRow = model()->root()->rowByVerticalIndex(this, --y);
-		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		if (filterMode_ && y == 0) {
+			setFilterMode(true);
+		}
+		else {
+			selectedRow = model()->root()->rowByVerticalIndex(this, --y);
+			if (selectedRow)
+				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		}
 		break;
 	case KEY_DOWN:
-		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
-		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		if (filterMode_ && filterEntry_ == _focusedWidget()) {
+			setFocus();
+		}
+		else {
+			selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
+			if (selectedRow)
+				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		}
 		break;
 	case KEY_LEFT:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
@@ -153,11 +201,13 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		break;
 	case KEY_HOME | KEY_MOD_CONTROL:
 		selectedRow = model()->root()->rowByVerticalIndex(this, 0);
-		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		if (selectedRow)
+			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	case KEY_END | KEY_MOD_CONTROL:
 		selectedRow = model()->root()->rowByVerticalIndex(this, INT_MAX);
-		selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		if (selectedRow)
+			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	case KEY_HOME:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
@@ -181,15 +231,15 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 
 bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
-	row = impl()->rowByPoint(point);
+	row = model()->root()->hit(this, point);
 	if(row){
 		if(!row->isRoot() && row->plusRect().pointInside(point) && impl()->toggleRow(row))
 			return true;
-		onRowSelected(row, multiSelectable() && Win32::isKeyPressed(VK_CONTROL), true);	
+		onRowSelected(row, multiSelectable() && Win32::isKeyPressed(KEY_CONTROL), true);	
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
-	row = impl()->rowByPoint(point);
+	row = model()->root()->hit(this, point);
 	if(row && !row->isRoot()){
 		bool changed = false;
 		bool capture = row->onMouseDown(this, point, changed);
@@ -306,7 +356,14 @@ void PropertyTree::updateHeights()
 	model()->root()->updateSize(this);
 	impl()->size_.y = 0;
 	int extraSize = 0;
-	model()->root()->adjustRect(this, impl()->area_, impl()->area_.leftTop(), impl()->size_.y, extraSize);
+
+    int padding = compact_ ? 0 : 4;
+
+    Rect rect(Vect2(padding, padding),
+              impl()->area_.size() - Vect2(padding, padding) * 2);
+
+	model()->root()->adjustRect(this, rect, rect.leftTop(),
+                                impl()->size_.y, extraSize);
 	impl()->updateScrollBar();
 }
 
@@ -414,6 +471,13 @@ void PropertyTree::revert()
 	}
 	else
 		model_->clear();
+
+	if (filterMode_)
+	{
+		model_->root()->updateLabel();		
+		onFilterChanged();
+	}
+
 	update();
 }
 
@@ -577,6 +641,29 @@ void PropertyTree::setWidget(PropertyRowWidget* widget)
 	}
 }
 
+void PropertyTree::setFilterMode(bool inFilterMode)
+{
+    bool changed = filterMode_ != inFilterMode;
+    filterMode_ = inFilterMode;
+    
+	if (filterMode_)
+	{
+        filterEntry_->show();
+		filterEntry_->setFocus();
+		filterEntry_->setSelection(ww::EntrySelection(0, -1));
+	}
+    else
+        filterEntry_->hide();
+
+    if (changed)
+    {
+        onFilterChanged();
+        impl()->updateArea();
+        needUpdate_ = true;
+        RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE);
+    }
+}
+
 void PropertyTree::visitChildren(WidgetVisitor& visitor) const
 {
 	if(widget_)
@@ -592,8 +679,8 @@ void PropertyTree::_arrangeChildren()
 			ASSERT(w);
 			if(w){
                 Rect rect = row->widgetRect();
-				rect = Rect(rect.leftTop() - impl()->offset_, 
-					rect.rightBottom() - impl()->offset_);
+				rect = Rect(rect.leftTop() - impl()->offset_ + impl()->area_.leftTop(), 
+							rect.rightBottom() - impl()->offset_ + impl()->area_.leftTop());
 				w->_setPosition(rect);
 				if(!w->isVisible()){
 					w->show();
@@ -612,6 +699,13 @@ void PropertyTree::_arrangeChildren()
 			widget_ = 0;
 		}
 	}
+
+    if (filterEntry_) {
+        Vect2 size = _position().size();
+        const int padding = 2;
+		Rect pos(60, padding, size.x - padding - GetSystemMetrics(SM_CXVSCROLL), filterEntry_->_minimalSize().y + padding);
+        filterEntry_->_setPosition(pos);
+    }
 }
 
 bool PropertyTree::isFocused() const
@@ -635,7 +729,7 @@ PropertyRow* PropertyTree::selectedRow()
 
 Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
-    POINT pt = { point.x - impl()->offset_.x, point.y - impl()->offset_.y };
+    POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), point.y - impl()->offset_.y + impl()->area_.top() };
     ClientToScreen(*impl(), &pt);
     return Vect2(pt.x, pt.y);
 }
@@ -700,5 +794,69 @@ void PropertyTree::updatePropertyTree()
 	}
 }
 
+struct FilterVisitor
+{
+	FilterVisitor(const char* labelStart) 
+    : labelStart_(labelStart)
+    {
+    }
+
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
+	{
+		bool filteredOut = false;
+		if (!labelStart_.empty())
+		{
+			if (labelStart_.c_str()[0] == ' ')
+			{
+				const char* label = row->labelUndecorated();
+				std::vector<char> buf(label, label + strlen(label));
+				buf.push_back('\0');
+				_strlwr(&buf[0]);
+
+				filteredOut = strstr(&buf[0], labelStart_.c_str() + 1) == 0;
+			}
+			else
+			filteredOut = _strnicmp(row->labelUndecorated(), labelStart_.c_str(), labelStart_.size()) != 0;
+		}
+		
+		int numChildren = int(row->count());
+
+		if (filteredOut) {
+			for (int i = 0; i < numChildren; ++i)
+			{
+				PropertyRow* child = row->childByIndex(i);
+				if (!child->filteredOut())
+				{
+					filteredOut = false;
+					break;
+				}
+			}
+		}
+
+		if (!filteredOut)
+		{
+			for (int i = 0; i < numChildren; ++i) {
+				PropertyRow* child = row->childByIndex(i);
+				child->setFilteredOut(false);
+			}
+		}
+
+		row->setFilteredOut(filteredOut);
+	
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+
+protected:
+	std::string labelStart_;
+};
+
+void PropertyTree::onFilterChanged()
+{
+	FilterVisitor filter(filterMode_ ? filterEntry_->text() : "");
+	model()->root()->scanChildrenBottomUp(filter, this);
+
+	needUpdate_ = true;
+    ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+}
 
 }

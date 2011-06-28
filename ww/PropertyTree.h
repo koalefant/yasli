@@ -12,6 +12,7 @@ class PopupMenuItem;
 class PropertyTreeModel;
 class PropertyRow;
 class PropertyRowWidget;
+class Entry;
 struct KeyPress;
 
 class TreeConfig
@@ -109,6 +110,7 @@ protected:
 
     bool onContextMenu(PropertyRow* row, PopupMenuItem& menu);
     bool onRowKeyDown(PropertyRow* row, KeyPress key);
+	// points here are specified in root-row space
     bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point);
     void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point);
     void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point);
@@ -118,12 +120,14 @@ protected:
     void onRowMenuCopy(PropertyRow* row);
     void onRowMenuPaste(PropertyRow* row);
     void onRowMenuDecompose(PropertyRow* row);
+    void onFilterChanged();
 
     void onModelUpdated();
     bool activateRow(PropertyRow* row);
     bool canBePasted(PropertyRow* destination);
     bool canBePasted(const char* destinationType);
 
+    void setFilterMode(bool inFilterMode);
     void setWidget(PropertyRowWidget* widget);
     void _arrangeChildren();
     void visitChildren(WidgetVisitor& visitor) const;
@@ -141,10 +145,15 @@ protected:
     ConstStringList constStrings_;
     Serializers attached_;
 	PropertyTree* propertyTree_;
+
+    bool filterMode_;
+    PolyPtr<Entry> filterEntry_; 
+
     bool autoRevert_;
 	bool needUpdate_;
 
     friend class TreeImpl;
+	friend class FilterEntry;
 };
 
 

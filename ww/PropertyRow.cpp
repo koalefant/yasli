@@ -70,6 +70,8 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	expanded_ = false;
 	selected_ = false;
 	visible_ = true;
+	filteredOut_ = false;
+	labelUndecorated_ = 0;
 	labelChanged_ = true;
 	
 	pos_ = size_ = Vect2::ZERO;
@@ -537,7 +539,7 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 	int extraSizeStorage;
 	int& extraSize = !pulledUp() ? extraSizeStorage : _extraSize;
 	if(!pulledUp()){
-		extraSize = rect.width() - size_.x;
+		extraSize = rect.width() - size_.x - pos.x;
 		if(extraSize < 0){
 			if(-extraSize > textSizeDelta_){
 				scaleSize(0, false);
@@ -929,7 +931,7 @@ void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expande
 
 bool PropertyRow::visible(const PropertyTree* tree) const
 {
-	return visible_ || !tree->hideUntranslated();
+	return (visible_ || !tree->hideUntranslated()) && !filteredOut_;
 }
 
 bool PropertyRow::fullRow(const PropertyTree* tree) const
@@ -1071,6 +1073,8 @@ PropertyRow* PropertyRow::hit(const PropertyTree* tree, Vect2 point)
     PropertyRow::const_iterator it;
     FOR_EACH(children_, it){
         PropertyRow* child = *it;
+		if (!child->visible(tree))
+			continue;
         if(!onlyPulled || child->pulledUp())
             if(PropertyRow* result = child->hit(tree, point))
                 return result;

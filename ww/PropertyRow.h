@@ -26,7 +26,7 @@ enum ScanResult {
 	SCAN_FINISHED, 
 	SCAN_CHILDREN, 
 	SCAN_SIBLINGS, 
-	SCAN_CHILDREN_SIBLINGS
+	SCAN_CHILDREN_SIBLINGS,
 };
 
 class PropertyRowWidget : public PolyRefCounter{
@@ -73,6 +73,8 @@ public:
 	void _setExpanded(bool expanded); // используйте PropertyTree::expandRow
 	void setExpandedRecursive(PropertyTree* tree, bool expanded);
 
+	void setFilteredOut(bool filteredOut) { filteredOut_ = filteredOut; }
+	bool filteredOut() const { return filteredOut_; }
 	bool visible(const PropertyTree* tree) const;
 	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
@@ -90,6 +92,7 @@ public:
 	template<class Op> bool scanChildren(Op& op);
 	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
 	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTree* tree);
 
 	PropertyRow* childByIndex(int index);
 	const PropertyRow* childByIndex(int index) const;
@@ -238,19 +241,20 @@ protected:
 	PropertyRow* parent_;
 	Rows children_;
 
-	bool visible_;
-	bool expanded_;
-	bool selected_;
-	bool updated_;
-	bool labelChanged_;
-	bool readOnly_;
-	bool readOnlyOver_;
-	bool fixedWidget_;
-	bool fullRow_;
-	bool pulledUp_;
-	bool pulledBefore_;
-	bool hasPulled_;
-	bool multiValue_;
+	bool visible_ : 1;
+	bool filteredOut_ : 1;
+	bool expanded_ : 1;
+	bool selected_ : 1;
+	bool updated_ : 1;
+	bool labelChanged_ : 1;
+	bool readOnly_ : 1;
+	bool readOnlyOver_ : 1;
+	bool fixedWidget_ : 1;
+	bool fullRow_ : 1;
+	bool pulledUp_ : 1;
+	bool pulledBefore_ : 1;
+	bool hasPulled_ : 1;
+	bool multiValue_ : 1;
 	char freePulledChildren_;
 
 	// do we really need Vect2s here? 
@@ -379,6 +383,21 @@ bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
 	}
 	return true;
 }
+
+template<class Op>
+bool PropertyRow::scanChildrenBottomUp(Op& op, PropertyTree* tree)
+{
+	for(Rows::iterator it = children_.begin(); it != children_.end(); ++it)
+	{
+		if(!(*it)->scanChildrenBottomUp(op, tree))
+			return false;
+		ScanResult result = op(*it, tree);
+		if(result == SCAN_FINISHED)
+			return false;
+	}
+	return true;
+}
+
 
 }
 
