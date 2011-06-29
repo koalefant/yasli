@@ -73,8 +73,12 @@ public:
 	void _setExpanded(bool expanded); // используйте PropertyTree::expandRow
 	void setExpandedRecursive(PropertyTree* tree, bool expanded);
 
-	void setFilteredOut(bool filteredOut) { filteredOut_ = filteredOut; }
-	bool filteredOut() const { return filteredOut_; }
+	void setMatchFilter(bool matchFilter) { matchFilter_ = matchFilter; }
+	bool matchFilter() const { return matchFilter_; }
+
+	void setBelongsToFilteredRow(bool belongs) { belongsToFilteredRow_ = belongs; }
+	bool belongsToFilteredRow() const { return belongsToFilteredRow_; }
+
 	bool visible(const PropertyTree* tree) const;
 	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
@@ -242,7 +246,8 @@ protected:
 	Rows children_;
 
 	bool visible_ : 1;
-	bool filteredOut_ : 1;
+	bool matchFilter_ : 1;
+	bool belongsToFilteredRow_ : 1;
 	bool expanded_ : 1;
 	bool selected_ : 1;
 	bool updated_ : 1;

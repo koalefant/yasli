@@ -801,9 +801,37 @@ struct FilterVisitor
     {
     }
 
+	static void markChildrenAsBelonging(PropertyRow* row, bool belongs)
+	{
+		int count = int(row->count());
+		for (int i = 0; i < count; ++i)
+		{
+			PropertyRow* child = row->childByIndex(i);
+			child->setBelongsToFilteredRow(belongs);
+
+			markChildrenAsBelonging(child, belongs);
+		}
+	}
+	
+	static bool hasMatchingChildren(PropertyRow* row)
+	{
+		int numChildren = (int)row->count();
+		for (int i = 0; i < numChildren; ++i)
+		{
+			PropertyRow* child = row->childByIndex(i);
+			if (!child)
+				continue;
+			if (child->matchFilter())
+				return true;
+			if (hasMatchingChildren(child))
+				return true;
+		}
+		return false;
+	}
+
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
 	{
-		bool filteredOut = false;
+		bool matchFilter = true;
 		if (!labelStart_.empty())
 		{
 			if (labelStart_.c_str()[0] == ' ')
@@ -813,36 +841,35 @@ struct FilterVisitor
 				buf.push_back('\0');
 				_strlwr(&buf[0]);
 
-				filteredOut = strstr(&buf[0], labelStart_.c_str() + 1) == 0;
+				matchFilter = strstr(&buf[0], labelStart_.c_str() + 1) != 0;
 			}
 			else
-			filteredOut = _strnicmp(row->labelUndecorated(), labelStart_.c_str(), labelStart_.size()) != 0;
+				matchFilter = _strnicmp(row->labelUndecorated(), labelStart_.c_str(), labelStart_.size()) == 0;
 		}
 		
 		int numChildren = int(row->count());
 
-		if (filteredOut) {
-			for (int i = 0; i < numChildren; ++i)
+		if (matchFilter)
+		{
+			markChildrenAsBelonging(row, true);
+			row->setBelongsToFilteredRow(false);
+		}
+		else 
+		{
+			bool belongs = hasMatchingChildren(row);
+			row->setBelongsToFilteredRow(belongs);
+			if (belongs)
 			{
-				PropertyRow* child = row->childByIndex(i);
-				if (!child->filteredOut())
+				for (int i = 0; i < numChildren; ++i)
 				{
-					filteredOut = false;
-					break;
+					PropertyRow* child = row->childByIndex(i);
+					if (child->pulledUp())
+						child->setBelongsToFilteredRow(true);
 				}
 			}
 		}
 
-		if (!filteredOut)
-		{
-			for (int i = 0; i < numChildren; ++i) {
-				PropertyRow* child = row->childByIndex(i);
-				child->setFilteredOut(false);
-			}
-		}
-
-		row->setFilteredOut(filteredOut);
-	
+		row->setMatchFilter(matchFilter);
 		return SCAN_CHILDREN_SIBLINGS;
 	}
 
@@ -854,7 +881,6 @@ void PropertyTree::onFilterChanged()
 {
 	FilterVisitor filter(filterMode_ ? filterEntry_->text() : "");
 	model()->root()->scanChildrenBottomUp(filter, this);
-
 	needUpdate_ = true;
     ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }

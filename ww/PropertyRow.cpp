@@ -70,9 +70,10 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	expanded_ = false;
 	selected_ = false;
 	visible_ = true;
-	filteredOut_ = false;
 	labelUndecorated_ = 0;
 	labelChanged_ = true;
+    belongsToFilteredRow_ = false;
+    matchFilter_ = true;
 	
 	pos_ = size_ = Vect2::ZERO;
 	plusSize_ = 0;
@@ -931,7 +932,7 @@ void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expande
 
 bool PropertyRow::visible(const PropertyTree* tree) const
 {
-	return (visible_ || !tree->hideUntranslated()) && !filteredOut_;
+	return ((visible_ || !tree->hideUntranslated()) && (matchFilter_ || belongsToFilteredRow_));
 }
 
 bool PropertyRow::fullRow(const PropertyTree* tree) const
