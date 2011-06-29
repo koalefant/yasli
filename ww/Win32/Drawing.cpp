@@ -71,7 +71,7 @@ void drawGrayedCheck(HDC dc, const RECT& checkRect)
 	int offsetX = ((rect.right - rect.left) - size) / 2;
 	{
 		Win32::StockSelector brush(dc, GetSysColorBrush(COLOR_BTNFACE));
-		Win32::AutoSelector  pen(dc, CreatePen(PS_SOLID, 1, GetSysColor(COLOR_3DSHADOW)));
+		Win32::DeletingSelector pen(dc, CreatePen(PS_SOLID, 1, GetSysColor(COLOR_3DSHADOW)));
 		::RoundRect(dc, rect.left + offsetX, rect.top + offsetY, rect.left + offsetX + size, rect.top + offsetY + size, 3, 3);
 	}
 	ASSERT(checkBitmap);

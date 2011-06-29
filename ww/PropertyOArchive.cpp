@@ -92,6 +92,7 @@ protected:
 void PropertyRowContainer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
 {
 	using namespace Gdiplus;
+	using Gdiplus::Color;
 
 	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
@@ -500,6 +501,7 @@ std::wstring PropertyRowPointer::generateLabel() const
 void PropertyRowPointer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
 {
 	using namespace Gdiplus;
+	using Gdiplus::Color;
 
 	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);

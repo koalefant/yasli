@@ -5,6 +5,7 @@
 #include "ww/Win32/Window.h" // for defaultFont
 
 using Win32::AutoSelector;
+using Win32::DeletingSelector;
 using Win32::StockSelector;
 using ww::toWideChar;
 
@@ -43,7 +44,7 @@ void Canvas::drawLine(const Vect2f& _start, const Vect2f& _end, const Color4c& c
     Vect2 start(toView(_start));
     Vect2 end(toView(_end));
 
-    AutoSelector pen(dc_, CreatePen(PS_SOLID, width, color.rgb()));
+    DeletingSelector pen(dc_, CreatePen(PS_SOLID, width, color.rgb()));
     MoveToEx(dc_, start.x, start.y, 0);
     LineTo(dc_, end.x, end.y);
 }
@@ -55,7 +56,7 @@ void Canvas::fillCircle(const Vect2f& pos, float radius, const Color4c& color)
     Vect2f center(p.x, p.y);
 	Rect r(toView(pos - Vect2f(radius, radius)),
 		   toView(pos + Vect2f(radius, radius)));
-    AutoSelector oldPen(dc_, CreateSolidBrush(RGB(color.r, color.g, color.b)));
+    DeletingSelector oldPen(dc_, CreateSolidBrush(RGB(color.r, color.g, color.b)));
     AutoSelector oldBrush(dc_, GetStockObject(NULL_PEN));
     Ellipse(dc_, r.left(), r.top(), r.right(), r.bottom());
 }

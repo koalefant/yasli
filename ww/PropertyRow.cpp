@@ -11,6 +11,7 @@
 #include "ww/Unicode.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Serialization.h"
+#include "ww/Color.h"
 
 #include "ww/Win32/Drawing.h"
 #include "gdiplus.h"
@@ -331,7 +332,7 @@ void PropertyRow::drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& wid
 	format.SetFormatFlags(StringFormatFlagsNoWrap);
 	format.SetTrimming(StringTrimmingEllipsisCharacter);
 
-	Color textColor;
+	Gdiplus::Color textColor;
 	textColor.SetFromCOLORREF(GetSysColor(pulledSelected() ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT));
 	SolidBrush brush(textColor);
 	gr->DrawString(text.c_str(), (int)text.size(), propertyTreeDefaultFont(), rt, &format, &brush);
@@ -816,13 +817,14 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 
     using namespace Gdiplus;
 	using Gdiplus::Rect;
+	using Gdiplus::Color;
 
     Graphics gr(dc);
     gr.SetSmoothingMode(SmoothingModeAntiAlias);
     gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
 
-    Color textColor;
-    textColor.SetFromCOLORREF(GetSysColor(COLOR_BTNTEXT));
+	::ww::Color textColor;
+	textColor.setGDI(GetSysColor(COLOR_BTNTEXT));
 
 	ww::Rect rowRect = rect();
 
@@ -876,7 +878,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
         }
     }
     if(pulledSelected())
-        textColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHTTEXT));
+		textColor.setGDI(GetSysColor(COLOR_HIGHLIGHTTEXT));
 
     if(!tree->compact() || !parent()->isRoot()){
         // рисуем плюсик
@@ -889,15 +891,9 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 	if(!isStatic())
 		redraw(&gr, gdiplusRect(widgetRect()), gdiplusRect(floorRect()));
 
-    StringFormat format;
-    format.SetAlignment(StringAlignmentNear);
-    format.SetLineAlignment(StringAlignmentCenter);
-    format.SetTrimming(StringTrimmingEllipsisCharacter);
-    format.SetFormatFlags(StringFormatFlagsNoWrap);
     if(textSize_ > 0){
-		SolidBrush brush(textColor);
         Font* font = rowFont(tree);
-        gr.DrawString(text.c_str(), (int)text.size(), font, gdiplusRectF(textRect()), &format, &brush);
+		tree->_drawRowLabel(&gr, text.c_str(), font, textRect(), textColor);
     }
 
     // краткое содержание
@@ -910,6 +906,12 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
             width = max(0, textRight - widgetPos_);
 
         if(width > 0){
+			StringFormat format;
+			format.SetAlignment(StringAlignmentNear);
+			format.SetLineAlignment(StringAlignmentCenter);
+			format.SetTrimming(StringTrimmingEllipsisCharacter);
+			format.SetFormatFlags(StringFormatFlagsNoWrap);
+
             RectF digestRect(textRight, pos_.y, width, ROW_DEFAULT_HEIGHT);
             gr.DrawString(digest_.c_str(), (int)digest_.size(), propertyTreeDefaultFont(), digestRect, &format, &SolidBrush(gdiplusSysColor(COLOR_3DSHADOW)));
         }

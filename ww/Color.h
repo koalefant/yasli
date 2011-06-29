@@ -11,7 +11,7 @@ struct Color
 	explicit Color(unsigned long _argb) { argb() = _argb; }
 	void set(int rc,int gc,int bc,int ac = 255) { r=rc; g=gc; b=bc; a=ac; }
 	
-	Color& setGDI(unsigned long color);
+	Color& setGDI(unsigned long color) { *this = Color(color | 0xff000000); return *this; }
 
 	void setHSV(float h,float s,float v, unsigned char alpha = 255);
 	void toHSV(float& h,float& s, float& v);

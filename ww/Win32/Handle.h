@@ -58,6 +58,29 @@ public:
 		    HGDIOBJ object = ::SelectObject(dc_, oldObject_);
 		    ASSERT(object == object_);
         }
+	}
+	operator HGDIOBJ() const{ return oldObject_; }
+protected:
+	bool deleteObject_;
+	HDC dc_;
+	HGDIOBJ object_;
+	HGDIOBJ oldObject_;
+};
+
+class DeletingSelector{
+public:
+	DeletingSelector(HDC dc, HGDIOBJ object)
+	: object_(object)
+	, dc_(dc)
+	{
+		oldObject_ = ::SelectObject(dc_, object_);
+	}
+
+	~DeletingSelector(){
+        if(oldObject_){
+		    HGDIOBJ object = ::SelectObject(dc_, oldObject_);
+		    ASSERT(object == object_);
+        }
 		::DeleteObject(object_);
 	}
 	operator HGDIOBJ() const{ return oldObject_; }

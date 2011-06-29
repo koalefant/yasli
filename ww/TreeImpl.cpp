@@ -740,6 +740,17 @@ void TreeImpl::redraw(HDC dc)
 			clientRect.top, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
 	}
 
+	if(tree_->filterMode_)
+	{
+		Win32::AutoSelector font(dc, Win32::defaultBoldFont());
+
+		SetBkMode(dc, TRANSPARENT);
+		const wchar_t filterStr[] = L"Filter:";
+		Vect2 size = Win32::calculateTextSize(get(), Win32::defaultBoldFont(), filterStr);
+		int right = tree_->filterEntry_->_position().left();
+		ExtTextOutW(dc, right - size.x - 6, 6, 0, 0, filterStr, ARRAY_LEN(filterStr), 0);
+	}
+
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
 	OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
@@ -758,6 +769,7 @@ void TreeImpl::redraw(HDC dc)
 	{
 		using namespace Gdiplus;
 		using Gdiplus::Rect;
+		using Gdiplus::Color;
 		Graphics gr(dc);
 		const int shadowHeight = 10;
 		//Color color1(gdiplusSysColor(COLOR_BTNFACE));

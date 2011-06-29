@@ -4,8 +4,14 @@
 #include "ww/ConstStringList.h"
 #include "yasli/Serializer.h"
 
+namespace Gdiplus {
+	class Font;
+	class Graphics;
+};
+
 namespace ww{
 
+struct Color;
 class TreeImpl;
 class PropertyTreeModel;
 class PopupMenuItem;
@@ -101,6 +107,7 @@ public:
     Vect2 _toScreen(Vect2 point) const;
     void _setFocus();
     void _cancelWidget(){ widget_ = 0; }
+	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 

@@ -5,6 +5,7 @@
 #include "ww/PropertyTreeModel.h"
 #include "ww/TreeImpl.h"
 #include "ww/Window.h"
+#include "ww/Color.h"
 
 #include "yasli/TypesFactory.h"
 
@@ -883,6 +884,61 @@ void PropertyTree::onFilterChanged()
 	model()->root()->scanChildrenBottomUp(filter, this);
 	needUpdate_ = true;
     ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+}
+
+void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+{
+	Gdiplus::StringFormat format;
+	format.SetAlignment(Gdiplus::StringAlignmentNear);
+	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+	format.SetTrimming(Gdiplus::StringTrimmingEllipsisCharacter);
+	format.SetFormatFlags(Gdiplus::StringFormatFlagsNoWrap);
+
+	Gdiplus::RectF textRect(gdiplusRectF(rect));
+	if (filterMode_)
+	{
+		const wchar_t* filter = filterEntry_->textW();
+		while (*filter == L' ')
+			++filter;
+		const size_t filterLen = wcslen(filter);
+		const size_t textLen = wcslen(text);
+
+		wchar_t* filterLowered = (wchar_t*)alloca(sizeof(wchar_t) * (filterLen + 1));
+		memcpy(filterLowered, filter, sizeof(wchar_t) * (filterLen + 1));
+		CharLowerW(filterLowered);
+
+		wchar_t* textLowered =  (wchar_t*)alloca(sizeof(wchar_t) * (textLen + 1));
+		memcpy(textLowered, text, sizeof(wchar_t) * (textLen + 1));
+		CharLowerW(textLowered);
+		const wchar_t* highlightStr = wcsstr(textLowered, filterLowered);
+		if (highlightStr)
+		{
+			Gdiplus::RectF boxStart;
+			Gdiplus::RectF boxEnd;
+			
+			int startLen = highlightStr - textLowered;
+			if (startLen > 0)
+				gr->MeasureString(text, startLen, font, textRect, &format, &boxStart, 0, 0);
+			else
+			{
+				gr->MeasureString(text, wcslen(text), font, textRect, &format, &boxStart, 0, 0);
+				boxStart.Width = 0.0;
+			}
+			gr->MeasureString(text, highlightStr + wcslen(filter) - textLowered, font, textRect, &format, &boxEnd, 0, 0);
+
+			Gdiplus::SolidBrush br(Gdiplus::Color(255, 192, 0));
+			Gdiplus::Rect highlightRect(int(boxStart.GetRight()) - 1,
+										int(boxStart.GetTop()), 
+										int(boxEnd.GetRight()) - int(boxStart.GetRight()) + 2, 
+										int(boxEnd.GetBottom()) - int(boxStart.GetTop()));
+
+			fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(255, 255, 128), 1);
+			//gr->FillRectangle(&br, highlightRect);
+		}
+	}
+
+	Gdiplus::SolidBrush brush(textColor.argb());
+	gr->DrawString(text, (int)wcslen(text), font, textRect, &format, &brush); 
 }
 
 }

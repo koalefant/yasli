@@ -8,6 +8,7 @@
 #include "Serialization.h"
 
 using Win32::AutoSelector;
+using Win32::DeletingSelector;
 
 namespace ww{
 
@@ -365,7 +366,7 @@ void Viewport2D::drawLine(HDC dc, const Vect2f& _start, const Vect2f& _end, cons
 	Vect2 start(coordsToScreen(_start));
 	Vect2 end(coordsToScreen(_end));
 
-	AutoSelector pen(dc, CreatePen(style, width, color.rgb()));
+	DeletingSelector pen(dc, CreatePen(style, width, color.rgb()));
 	MoveToEx(dc, start.x, start.y, 0);
 	LineTo(dc, end.x, end.y);
 }
