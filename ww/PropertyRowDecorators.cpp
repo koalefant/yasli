@@ -47,6 +47,7 @@ void PropertyRowButton::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widge
 {
 	using namespace Gdiplus;
 	using Gdiplus::Rect;
+	using Gdiplus::Color;
 	bool pressed = underMouse_ && value();
 	Rect buttonRect = widgetRect;
 	buttonRect.X -= 1;
@@ -134,6 +135,7 @@ public:
 	PropertyRowHLine();
 	PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
+	bool isSelectable() const{ return false; }
 };
 
 PropertyRowHLine::PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)

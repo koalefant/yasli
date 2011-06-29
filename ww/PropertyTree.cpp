@@ -236,7 +236,8 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 	if(row){
 		if(!row->isRoot() && row->plusRect().pointInside(point) && impl()->toggleRow(row))
 			return true;
-		onRowSelected(row, multiSelectable() && Win32::isKeyPressed(KEY_CONTROL), true);	
+		if (row->isSelectable())
+			onRowSelected(row, multiSelectable() && Win32::isKeyPressed(KEY_CONTROL), true);	
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
@@ -268,10 +269,22 @@ void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point
 void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
     SharedPtr<PropertyRow> handle = row;
-	onRowSelected(row, false, true);	
 	PopupMenu menu(300);
-	if(onContextMenu(row, menu.root()))
-		menu.spawn(this);
+	PropertyRow* menuRow = 0;
+
+	if (row->isSelectable()){
+		menuRow = row;
+	}
+	else{
+		if (row->parent() && row->parent()->isSelectable())
+			menuRow = row->parent();
+	}
+
+	if (menuRow) {
+		onRowSelected(menuRow, false, true);	
+		if(onContextMenu(menuRow, menu.root()))
+			menu.spawn(this);
+	}
 }
 
 void PropertyTree::expandParents(PropertyRow* row)
@@ -921,7 +934,7 @@ void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdi
 				gr->MeasureString(text, startLen, font, textRect, &format, &boxStart, 0, 0);
 			else
 			{
-				gr->MeasureString(text, wcslen(text), font, textRect, &format, &boxStart, 0, 0);
+				gr->MeasureString(text, (int)wcslen(text), font, textRect, &format, &boxStart, 0, 0);
 				boxStart.Width = 0.0;
 			}
 			gr->MeasureString(text, highlightStr + wcslen(filter) - textLowered, font, textRect, &format, &boxEnd, 0, 0);

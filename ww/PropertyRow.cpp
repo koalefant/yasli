@@ -1114,7 +1114,7 @@ int PropertyRow::verticalIndex(PropertyTree* tree, PropertyRow* row)
 		{
 			if(row == row_)
 				return SCAN_FINISHED;
-			if(row->visible(tree) && !row->pulledUp())
+			if(row->visible(tree) && row->isSelectable() && !row->pulledUp())
 				++index_;
 			return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
 		}
@@ -1135,7 +1135,7 @@ PropertyRow* PropertyRow::rowByVerticalIndex(PropertyTree* tree, int index)
 
 		ScanResult operator()(PropertyRow* row, PropertyTree* tree)
 		{
-			if(row->visible(tree) && !row->pulledUp()){
+			if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
 				row_ = row;
 				if(index_-- <= 0)
 					return SCAN_FINISHED;

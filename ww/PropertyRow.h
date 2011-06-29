@@ -183,6 +183,7 @@ public:
 
 	virtual bool isLeaf() const{ return false; }
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
+	virtual bool isSelectable() const{ return true; }
 	virtual bool activateOnAdd() const{ return false; }
 	
 	bool canBeToggled(const PropertyTree* tree) const;
