@@ -43,7 +43,7 @@ struct WidgetVisitor{
 	virtual void operator()(Widget& widget) = 0;
 };
 
-class WW_API Widget : public sigslot::has_slots, public RefCounter{
+class WW_API Widget : public sigslot::has_slots, public PolyRefCounter{
 public:
 	Widget();
 	virtual ~Widget();
