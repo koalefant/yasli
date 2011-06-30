@@ -160,7 +160,7 @@ class ActionSequence : public ActionBase
 public:
 	void serialize(Archive& ar)
 	{
-		ar(actions_, "actions", "Actions");
+		ar(actions_, "actions", "^Actions");
 	}
 	void act()
 	{
@@ -260,6 +260,7 @@ ww::Widget* createLogicEditor()
 {
 	ww::PropertyTree* propertyTree = new ww::PropertyTree();
 
+	propertyTree->setUndoEnabled(true, false);
 	propertyTree->attach(yasli::Serializer(conditionEditorData));
 	propertyTree->expandAll();
 
