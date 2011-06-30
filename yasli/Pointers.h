@@ -1,4 +1,5 @@
 #pragma once
+#include "yasli/Assert.h"
 
 namespace yasli{
 
@@ -19,7 +20,9 @@ private:
 
 class PolyRefCounter : public RefCounter{
 public:
-    virtual ~PolyRefCounter() {};
+    virtual ~PolyRefCounter() {}
+	enum { SIGNATURE = 987192387 };
+	virtual int signature() const { return SIGNATURE; }
 };
 
 class PolyPtrBase{
@@ -37,6 +40,7 @@ public:
     }
     void set(PolyRefCounter* const ptr){
         if(ptr_ != ptr){
+			ASSERT(!ptr || ptr->signature() == PolyRefCounter::SIGNATURE); // You should derive Your class from PolyRefCounter (not RefCounter) in the first place (to dynamic_cast == reinterpret_cast)
             release();
             ptr_ = ptr;
             if(ptr_)
@@ -81,8 +85,6 @@ public:
     }
     T* operator->() const{ return get(); }
 };
-
-#define CHECK_POLY_PTR ASSERT(reinterpret_cast<PolyRefCounter* const>(this) == dynamic_cast<PolyRefCounter* const>(this));
 
 class Archive;
 template<class T>
