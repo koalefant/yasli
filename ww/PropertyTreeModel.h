@@ -19,7 +19,7 @@ struct TreeSelection : std::vector<TreePath>
 
 //////////////////////////////////////////////////////////////////////////
 
-class WW_API PropertyTreeModel : public RefCounter, public sigslot::has_slots
+class WW_API PropertyTreeModel : public PolyRefCounter, public sigslot::has_slots
 {
 public:
     class LockedUpdate : public RefCounter{
