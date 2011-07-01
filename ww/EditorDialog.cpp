@@ -68,10 +68,9 @@ void EditorDialog::init(const Serializer& serializer, const char* stateFileName,
 
 void EditorDialog::onTreeChanged()
 {
-	//HWND ownerWnd = Dialog::_ownerWnd();
-	HWND ownerWnd = Dialog::parentWnd();
-	if (::IsWindow(ownerWnd))
-		::RedrawWindow(ownerWnd, 0, 0, RDW_INVALIDATE);
+	HWND parentWnd = Dialog::parentWnd();
+	if (::IsWindow(parentWnd))
+		::RedrawWindow(parentWnd, 0, 0, RDW_INVALIDATE);
 }
 
 void EditorDialog::onResponse(int response)

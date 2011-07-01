@@ -165,9 +165,11 @@ void Dialog::interruptModalLoop()
 {
 	signalClose_.emit();
 
-	if(parentWnd_)
+	if (parentWnd_)
+	{
 		::EnableWindow(parentWnd_, TRUE);
-
+		::SetActiveWindow(parentWnd_);
+	}
 	hide();
 }
 
@@ -175,31 +177,25 @@ int Dialog::showModal()
 {
 	spawnedDialogs.push_back(this);
 
-	showAll();
-
-	if(parentWnd_ && parentWnd_ != ::GetDesktopWindow()){
-		ASSERT(::IsWindow(parentWnd_));
+	if(parentWnd_){
+		ESCAPE(::IsWindow(parentWnd_), return 0);
 		if(::IsWindowEnabled(parentWnd_)){
 			::SetWindowPos(*_window(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            showAll();
 			::EnableWindow(parentWnd_, FALSE);
 		}
 	}
+    else
+    {
+        showAll();
+    }
 	vbox_->setFocus();
 	
 	Win32::MessageLoop loop;
 	signalClose().connect(&loop, &Win32::MessageLoop::quit);
 	loop.run();
-	if(parentWnd_ && parentWnd_ != ::GetDesktopWindow()){
+	if(parentWnd_){
 		ASSERT(::IsWindowEnabled(parentWnd_));
-		if(::SetActiveWindow(parentWnd_) == 0){
-			/*
-			::SetWindowPos(parentWnd_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-			char windowText[501];
-			GetWindowText(parentWnd_, windowText, 500);
-			OutputDebugString(windowText);
-			OutputDebugString("\n");
-			*/
-		}
 	}
 
 	ASSERT(!spawnedDialogs.empty() && spawnedDialogs.back() == this);
