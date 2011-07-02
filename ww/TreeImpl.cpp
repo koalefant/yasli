@@ -663,7 +663,7 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
-	if (code != ' ' && code != VK_ESCAPE)
+	if (code > 0x20 && code != ' ' && code != VK_ESCAPE)
 	{
         if (!(code == VK_BACK && !tree_->filterMode_))
             tree_->setFilterMode(true);
