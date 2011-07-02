@@ -3,13 +3,17 @@
 #include "ww/_WidgetWithWindow.h"
 #include "ww/ConstStringList.h"
 #include "yasli/Serializer.h"
+#include <string>
+#include <vector>
 
 namespace Gdiplus {
 	class Font;
 	class Graphics;
 };
 
-namespace ww{
+namespace ww {
+using std::wstring;
+using std::vector;
 
 struct Color;
 class TreeImpl;
@@ -108,10 +112,25 @@ public:
     void _setFocus();
     void _cancelWidget(){ widget_ = 0; }
 	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
+	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 
 protected:
+	struct RowFilter {
+		enum Type {
+			NAME,
+			VALUE,
+			TYPE,
+			NUM_TYPES
+		};
+
+		wstring start[NUM_TYPES];
+		vector<wstring> substrings[NUM_TYPES];
+
+		void parse(const wchar_t* filter);
+		bool match(const wchar_t* text, Type type, size_t* matchStart, size_t* matchEnd) const;
+	};
     void interruptDrag();
     void updateHeights();
 
@@ -140,6 +159,7 @@ protected:
     void visitChildren(WidgetVisitor& visitor) const;
 
 	void updatePropertyTree();
+	void drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 
 	PolyPtr<PropertyTreeModel> model_;
 	int cursorX_;
@@ -154,6 +174,7 @@ protected:
 	PropertyTree* propertyTree_;
 
     bool filterMode_;
+	RowFilter rowFilter_;
     PolyPtr<Entry> filterEntry_; 
 
     bool autoRevert_;
@@ -161,6 +182,7 @@ protected:
 
     friend class TreeImpl;
 	friend class FilterEntry;
+	friend struct FilterVisitor;
 };
 
 

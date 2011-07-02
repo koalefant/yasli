@@ -810,8 +810,10 @@ void PropertyTree::updatePropertyTree()
 
 struct FilterVisitor
 {
-	FilterVisitor(const char* labelStart) 
-    : labelStart_(labelStart)
+	const PropertyTree::RowFilter& filter_;
+
+	FilterVisitor(const PropertyTree::RowFilter& filter) 
+    : filter_(filter)
     {
     }
 
@@ -845,37 +847,23 @@ struct FilterVisitor
 
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
 	{
-		bool matchFilter = true;
-		if (!labelStart_.empty())
-		{
-			if (labelStart_.c_str()[0] == ' ')
-			{
-				const char* label = row->labelUndecorated();
-				std::vector<char> buf(label, label + strlen(label));
-				buf.push_back('\0');
-				_strlwr(&buf[0]);
-
-				matchFilter = strstr(&buf[0], labelStart_.c_str() + 1) != 0;
-			}
-			else
-				matchFilter = _strnicmp(row->labelUndecorated(), labelStart_.c_str(), labelStart_.size()) == 0;
-		}
+		wstring label = toWideChar(row->labelUndecorated());
+		bool matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
+		if (matchFilter)
+			matchFilter = filter_.match(row->valueAsWString().c_str(), filter_.VALUE, 0, 0);
+		if (matchFilter)
+			matchFilter = filter_.match(toWideChar(row->typeName()).c_str(), filter_.TYPE, 0, 0);						   
 		
 		int numChildren = int(row->count());
-
-		if (matchFilter)
-		{
+		if (matchFilter) {
 			markChildrenAsBelonging(row, true);
 			row->setBelongsToFilteredRow(false);
 		}
-		else 
-		{
+		else {
 			bool belongs = hasMatchingChildren(row);
 			row->setBelongsToFilteredRow(belongs);
-			if (belongs)
-			{
-				for (int i = 0; i < numChildren; ++i)
-				{
+			if (belongs) {
+				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
 					if (child->pulledUp())
 						child->setBelongsToFilteredRow(true);
@@ -891,16 +879,119 @@ protected:
 	std::string labelStart_;
 };
 
+
+
+void PropertyTree::RowFilter::parse(const wchar_t* filter)
+{
+	for (int i = 0; i < NUM_TYPES; ++i) {
+		start[i].clear();
+		substrings[i].clear();
+	}
+
+	ESCAPE(filter != 0, return);
+
+	vector<wchar_t> filterBuf(filter, filter + wcslen(filter) + 1);
+	CharLowerW(&filterBuf[0]);
+
+	const wchar_t* str = &filterBuf[0];
+
+	Type type = NAME;
+	while (true)
+	{
+		bool fromStart = true;
+		while (*str == L' ' || *str == L'*') {
+			fromStart = false;
+			++str;
+		}
+
+		const wchar_t* tokenStart = str;
+		while (*str != L'\0' && *str != L' ' && *str != L'*' && *str != L'=' && *str != ':')
+			++str;
+		if (str != tokenStart) {
+			if (fromStart) {
+				start[type].assign(tokenStart, str);
+				fromStart = false;
+			}
+			else
+				substrings[type].push_back(wstring(tokenStart, str));
+		}
+
+		if (*str == L'=') {
+			type = VALUE;
+			++str;
+		}
+		else if(*str == L':') {
+			type = TYPE;
+			++str;
+		}
+		else if (*str == L'\0')
+			break;
+	}
+}
+
+bool PropertyTree::RowFilter::match(const wchar_t* textOriginal, Type type, size_t* matchStart, size_t* matchEnd) const
+{
+	ESCAPE(textOriginal, return false);
+
+	wchar_t* text;
+	{
+		size_t textLen = wcslen(textOriginal);
+		text = (wchar_t*)_malloca((textLen + 1) * sizeof(wchar_t));
+		memcpy(text, textOriginal, (textLen + 1) * sizeof(wchar_t));
+		CharLowerW(text);
+	}
+
+	const wstring &start = this->start[type];
+	const vector<wstring> &substrings = this->substrings[type];
+
+	const wchar_t* startPos = text;
+
+	if (matchStart)
+		*matchStart = 0;
+	if (matchEnd)
+		*matchEnd = 0;
+	if (!start.empty()) {
+		if (wcsncmp(text, start.c_str(), start.size()) != 0){
+			_freea(text);
+			return false;
+		}
+		if (matchEnd)
+			*matchEnd = start.size();
+		startPos += start.size();
+	}
+
+	size_t numSubstrings = substrings.size();
+	for (size_t i = 0; i < numSubstrings; ++i) {
+		const wchar_t* substr = wcsstr(startPos, substrings[i].c_str());
+		if (!substr){
+			_freea(text);
+			return false;
+		}
+		startPos += substrings[i].size();
+		if (matchStart && i == 0 && start.empty()) {
+			*matchStart = substr - text;
+		}
+		if (matchEnd)
+			*matchEnd = substr - text + substrings[i].size();
+	}
+	_freea(text);
+	return true;
+}
+
 void PropertyTree::onFilterChanged()
 {
-	FilterVisitor filter(filterMode_ ? filterEntry_->text() : "");
-	model()->root()->scanChildrenBottomUp(filter, this);
+	const wchar_t* filterStr = filterMode_ ? filterEntry_->textW() : L"";
+	rowFilter_.parse(filterStr);
+	FilterVisitor visitor(rowFilter_);
+	model()->root()->scanChildrenBottomUp(visitor, this);
 	needUpdate_ = true;
     ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
-void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
 {
+	int textLen = (int)wcslen(text);
+
 	Gdiplus::StringFormat format;
 	format.SetAlignment(Gdiplus::StringAlignmentNear);
 	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
@@ -908,36 +999,20 @@ void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdi
 	format.SetFormatFlags(Gdiplus::StringFormatFlagsNoWrap);
 
 	Gdiplus::RectF textRect(gdiplusRectF(rect));
-	if (filterMode_)
-	{
-		const wchar_t* filter = filterEntry_->textW();
-		while (*filter == L' ')
-			++filter;
-		const size_t filterLen = wcslen(filter);
-		const size_t textLen = wcslen(text);
-
-		wchar_t* filterLowered = (wchar_t*)alloca(sizeof(wchar_t) * (filterLen + 1));
-		memcpy(filterLowered, filter, sizeof(wchar_t) * (filterLen + 1));
-		CharLowerW(filterLowered);
-
-		wchar_t* textLowered =  (wchar_t*)alloca(sizeof(wchar_t) * (textLen + 1));
-		memcpy(textLowered, text, sizeof(wchar_t) * (textLen + 1));
-		CharLowerW(textLowered);
-		const wchar_t* highlightStr = wcsstr(textLowered, filterLowered);
-		if (highlightStr)
-		{
+	if (filterMode_) {
+		size_t hiStart = 0;
+		size_t hiEnd = 0;
+		if (rowFilter_.match(text, rowFilter_.NAME, &hiStart, &hiEnd)) {
 			Gdiplus::RectF boxStart;
 			Gdiplus::RectF boxEnd;
 			
-			int startLen = highlightStr - textLowered;
-			if (startLen > 0)
-				gr->MeasureString(text, startLen, font, textRect, &format, &boxStart, 0, 0);
-			else
-			{
-				gr->MeasureString(text, (int)wcslen(text), font, textRect, &format, &boxStart, 0, 0);
+			if (hiStart > 0)
+				gr->MeasureString(text, (int)hiStart, font, textRect, &format, &boxStart, 0, 0);
+			else {
+				gr->MeasureString(text, textLen, font, textRect, &format, &boxStart, 0, 0);
 				boxStart.Width = 0.0;
 			}
-			gr->MeasureString(text, highlightStr + wcslen(filter) - textLowered, font, textRect, &format, &boxEnd, 0, 0);
+			gr->MeasureString(text, (int)hiEnd, font, textRect, &format, &boxEnd, 0, 0);
 
 			Gdiplus::SolidBrush br(Gdiplus::Color(255, 192, 0));
 			Gdiplus::Rect highlightRect(int(boxStart.GetRight()) - 1,
@@ -946,12 +1021,21 @@ void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdi
 										int(boxEnd.GetBottom()) - int(boxStart.GetTop()));
 
 			fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(255, 255, 128), 1);
-			//gr->FillRectangle(&br, highlightRect);
 		}
 	}
 
 	Gdiplus::SolidBrush brush(textColor.argb());
-	gr->DrawString(text, (int)wcslen(text), font, textRect, &format, &brush); 
+	gr->DrawString(text, textLen, font, textRect, &format, &brush); 
+}
+
+void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+{
+	drawFilteredString(gr, text, RowFilter::NAME, font, rect, textColor);
+}
+
+void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+{
+	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor);
 }
 
 }

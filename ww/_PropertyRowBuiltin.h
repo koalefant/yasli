@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "ww/API.h"
 #include "ww/PropertyRowImpl.h"
 #include "ww/Entry.h"
@@ -11,6 +12,8 @@ class EnumDescription;
 }
 
 namespace ww{
+using std::string;
+using std::wstring;
 
 class PropertyTreeModel;
 
@@ -123,7 +126,8 @@ public:
     bool isStatic() const{ return false; }
 
 	bool onActivate(PropertyTree* tree, bool force);
-	std::string valueAsString() const { return value_ ? label() : ""; }
+	string valueAsString() const { return value_ ? "true" : "false"; }
+	wstring valueAsWString() const { return value_ ? L"true" : L"false"; }
 	bool hasIcon() const{ return true; }
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowBool(name_, label_, value_), this);
