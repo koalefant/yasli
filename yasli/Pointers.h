@@ -58,15 +58,25 @@ public:
     : PolyPtrBase()
     {
     }
-    PolyPtr(T* const ptr)
-    : PolyPtrBase()
+
+    PolyPtr(PolyRefCounter* ptr)
     {
-        set(reinterpret_cast<PolyRefCounter*>(ptr));
+        set(ptr);
     }
+
+	template<class U>
+    PolyPtr(U* ptr)
+    {
+		// TODO: replace with static_assert
+		ASSERT("PolyRefCounter must be a first base when used with multiple inheritance." && 
+			   static_cast<PolyRefCounter*>(ptr) == reinterpret_cast<PolyRefCounter*>(ptr));
+        set(static_cast<PolyRefCounter*>(ptr));
+    }
+
     PolyPtr(const PolyPtr& ptr)
     : PolyPtrBase()
     {
-        set(reinterpret_cast<PolyRefCounter*>(ptr.ptr_));
+        set(ptr.ptr_);
     }
     ~PolyPtr(){
         release();
@@ -75,7 +85,8 @@ public:
     template<class U>
     operator PolyPtr<U>() const{ return PolyPtr<U>(get()); }
     operator bool() const{ return ptr_ != 0; }
-    PolyPtr& operator=(const PolyPtr& ptr){
+
+	PolyPtr& operator=(const PolyPtr& ptr){
         set(ptr.ptr_);
         return *this;
     }
