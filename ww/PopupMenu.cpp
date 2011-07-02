@@ -77,7 +77,7 @@ void PopupMenu::spawn(Vect2 point, Widget* widget)
     while(current = nextItem(current)){
         if(current->children().empty()){
 			UINT_PTR id = current->menuID();
-			std::wstring text = toWideChar(current->text());
+			wstring text = current->textW();
 			if(text == L"-")
 				AppendMenu(current->parent()->menuHandle(), MF_SEPARATOR, id, L"");
 			else{
@@ -95,7 +95,7 @@ void PopupMenu::spawn(Vect2 point, Widget* widget)
 		else{
 			HMENU handle = ::CreatePopupMenu();
 			current->setMenuHandle(handle);
-			BOOL result = ::InsertMenu(current->parent()->menuHandle(), -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), toWideChar(current->text()).c_str());
+			BOOL result = ::InsertMenu(current->parent()->menuHandle(), -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
 			ASSERT(result == TRUE);
 		}
     }
@@ -138,11 +138,16 @@ PopupMenuItem::~PopupMenuItem()
 	}
 }
 
-PopupMenuItem0& PopupMenuItem::add(const char* text)
+PopupMenuItem0& PopupMenuItem::add(const wchar_t* text)
 {
 	PopupMenuItem0* item = new PopupMenuItem0(text);
 	addChildren(item);
 	return *item;
+}
+
+PopupMenuItem0& PopupMenuItem::add(const char* text)
+{
+	return add(toWideChar(text).c_str());
 }
 
 
@@ -157,15 +162,25 @@ PopupMenuItem& PopupMenuItem::addSeparator()
 	return add("-");
 }
 
-PopupMenuItem* PopupMenuItem::find(const char* text)
+string PopupMenuItem::text() const
+{ 
+	return fromWideChar(text_.c_str()) ;
+}
+
+PopupMenuItem* PopupMenuItem::find(const wchar_t* text)
 {
     Children::iterator it;
     FOR_EACH(children_, it){
         PopupMenuItem* item = *it;
-        if(strcmp(item->text(), text) == 0)
+        if(wcscmp(item->textW(), text) == 0)
             return item;
     };
     return 0;
+}
+
+PopupMenuItem* PopupMenuItem::find(const char* text)
+{
+	return find(toWideChar(text).c_str());
 }
 
 }

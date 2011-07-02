@@ -5,6 +5,7 @@
 #include "ww/API.h"
 #include "ww/sigslot.h"
 #include "ww/Vect2.h"
+#include "ww/Unicode.h"
 #include "yasli/Pointers.h"
 #include "yasli/Assert.h"
 #include "KeyPress.h"
@@ -13,6 +14,9 @@ struct HMENU__;
 typedef HMENU__* HMENU;
 
 namespace ww{
+using std::wstring;
+using std::string;
+using std::vector;
 
 class Widget;
 class PopupMenu;
@@ -24,9 +28,9 @@ template<class Arg1, class Arg2, class Arg3> class PopupMenuItem3;
 class WW_API PopupMenuItem: public RefCounter{
 public:
 	friend PopupMenu;
-    typedef std::vector<SharedPtr<PopupMenuItem> > Children;
+    typedef vector<SharedPtr<PopupMenuItem> > Children;
 
-    PopupMenuItem(const char* text = "")
+    PopupMenuItem(const wchar_t* text = L"")
     : id_(0)
 	, parent_(0)
 	, text_(text)
@@ -49,20 +53,29 @@ public:
 	void setDefault(bool defaultItem = true){ default_ = defaultItem; }
 	bool isDefault() const{ return default_; }
 
-    const char* text() { return text_.c_str(); }
+    const wchar_t* textW() const { return text_.c_str(); }
+    string text() const;
 	PopupMenuItem& addSeparator();
     PopupMenuItem0& add(const char* text);
+    PopupMenuItem0& add(const wchar_t* text);
 
     template<class Arg1>
     PopupMenuItem1<Arg1>& add(const char* text, const Arg1& arg1);
+    template<class Arg1>
+    PopupMenuItem1<Arg1>& add(const wchar_t* text, const Arg1& arg1);
 
     template<class Arg1, class Arg2>
     PopupMenuItem2<Arg1, Arg2>& add(const char* text, const Arg1& arg1, const Arg2& arg2);
+    template<class Arg1, class Arg2>
+    PopupMenuItem2<Arg1, Arg2>& add(const wchar_t* text, const Arg1& arg1, const Arg2& arg2);
 
     template<class Arg1, class Arg2, class Arg3>
     PopupMenuItem3<Arg1, Arg2, Arg3>& add(const char* text, const Arg1& arg1, const Arg2& arg2, const Arg3& arg3);
+    template<class Arg1, class Arg2, class Arg3>
+    PopupMenuItem3<Arg1, Arg2, Arg3>& add(const wchar_t* text, const Arg1& arg1, const Arg2& arg2, const Arg3& arg3);
 
 	PopupMenuItem* find(const char* text);
+	PopupMenuItem* find(const wchar_t* text);
 
 	PopupMenuItem* parent() { return parent_; }
 	Children& children() { return children_; };
@@ -98,7 +111,7 @@ private:
 	bool default_;
 	bool checked_;
 	bool enabled_;
-    std::string text_;
+    wstring text_;
     PopupMenuItem* parent_;
     Children children_;
 	KeyPress hotkey_;
@@ -106,7 +119,7 @@ private:
 
 class PopupMenuItem0 : public PopupMenuItem, public sigslot::signal0{
 public:
-    PopupMenuItem0(const char* text = "")
+    PopupMenuItem0(const wchar_t* text = L"")
     : PopupMenuItem(text)
     {}
 
@@ -120,31 +133,10 @@ protected:
 };
 
 
-/*class PopupMenuItemDynamic : public PopupMenuItem, public sigslot::signal1<PopupMenuItem&>{
-public:
-    PopupMenuItem0(const char* text = "")
-    : PopupMenuItem(text)
-    {}
-
-    void call(){ emit(); }
-	template<class desttype>
-	PopupMenuItem0& connect(desttype* pclass, void (desttype::*pmemfun)(PopupMenuItem&)){
-		sigslot::signal0::connect(pclass, pmemfun);
-		return *this;
-	}
-	void generate(){
-		clear();
-		emit(*this);
-	}
-protected:
-};
-*/
-
-
 template<class Arg1>
 class PopupMenuItem1 : public PopupMenuItem, public sigslot::signal1<Arg1>{
 public:
-    PopupMenuItem1(const char* text, Arg1 arg1)
+    PopupMenuItem1(const wchar_t* text, Arg1 arg1)
     : PopupMenuItem(text)
     , arg1_(arg1)
     {}
@@ -163,7 +155,7 @@ protected:
 template<class Arg1, class Arg2>
 class PopupMenuItem2 : public PopupMenuItem, public sigslot::signal2<Arg1, Arg2>{
 public:
-    PopupMenuItem2(const char* text, Arg1 arg1, Arg2 arg2)
+    PopupMenuItem2(const wchar_t* text, Arg1 arg1, Arg2 arg2)
     : PopupMenuItem(text)
     , arg1_(arg1)
     , arg2_(arg2)
@@ -184,7 +176,7 @@ protected:
 template<class Arg1, class Arg2, class Arg3>
 class PopupMenuItem3 : public PopupMenuItem, public sigslot::signal3<Arg1, Arg2, Arg3>{
 public:
-    PopupMenuItem3(const char* text, Arg1 arg1, Arg2 arg2, Arg3 arg3)
+    PopupMenuItem3(const wchar_t* text, Arg1 arg1, Arg2 arg2, Arg3 arg3)
     : PopupMenuItem(text)
     , arg1_(arg1)
     , arg2_(arg2)
@@ -205,24 +197,36 @@ protected:
 };
 
 template<class Arg1>
-PopupMenuItem1<Arg1>& PopupMenuItem::add(const char* text, const Arg1& arg1){
+PopupMenuItem1<Arg1>& PopupMenuItem::add(const wchar_t* text, const Arg1& arg1){
 	PopupMenuItem1<Arg1>* item = new PopupMenuItem1<Arg1>(text, arg1);
 	addChildren(item);
 	return *item;
 }
+template<class Arg1>
+PopupMenuItem1<Arg1>& PopupMenuItem::add(const char* text, const Arg1& arg1){
+	return add(toWideChar(text).c_str(), arg1);
+}
 
 template<class Arg1, class Arg2>
-PopupMenuItem2<Arg1, Arg2>& PopupMenuItem::add(const char* text, const Arg1& arg1, const Arg2& arg2){
+PopupMenuItem2<Arg1, Arg2>& PopupMenuItem::add(const wchar_t* text, const Arg1& arg1, const Arg2& arg2){
 	PopupMenuItem2<Arg1, Arg2>* item = new PopupMenuItem2<Arg1, Arg2>(text, arg1, arg2);
 	addChildren(item);
 	return *item;
 }
+template<class Arg1, class Arg2>
+PopupMenuItem2<Arg1, Arg2>& PopupMenuItem::add(const char* text, const Arg1& arg1, const Arg2& arg2){
+	return add(toWideChar(text).c_str(), arg1, arg2);
+}
 
 template<class Arg1, class Arg2, class Arg3>
-PopupMenuItem3<Arg1, Arg2, Arg3>& PopupMenuItem::add(const char* text, const Arg1& arg1, const Arg2& arg2, const Arg3& arg3){
+PopupMenuItem3<Arg1, Arg2, Arg3>& PopupMenuItem::add(const wchar_t* text, const Arg1& arg1, const Arg2& arg2, const Arg3& arg3){
 	PopupMenuItem3<Arg1, Arg2, Arg3>* item = new PopupMenuItem3<Arg1, Arg2, Arg3>(text, arg1, arg2, arg3);
 	addChildren(item);
 	return *item;
+}
+template<class Arg1, class Arg2, class Arg3>
+PopupMenuItem3<Arg1, Arg2, Arg3>& PopupMenuItem::add(const char* text, const Arg1& arg1, const Arg2& arg2, const Arg3& arg3){
+	return add(toWideChar(text).c_str(), arg1, arg2, arg3);
 }
 
 
