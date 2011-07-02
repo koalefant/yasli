@@ -124,11 +124,6 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		return true;
 
     switch(key.fullCode){
-	case KEY_RETURN:
-	case KEY_SPACE:
-		if(activateRow(row))
-			return true;
-		break;
 	case 'C' | KEY_MOD_CONTROL:
 	    onRowMenuCopy(row);
 		return true;
