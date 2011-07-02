@@ -18,7 +18,7 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model)
 
 bool PropertyIArchive::operator()(std::string& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(std::wstring).name())){
+	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_))
  			row->assignTo(value);
 		closeRow(name);
@@ -30,7 +30,7 @@ bool PropertyIArchive::operator()(std::string& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(std::wstring& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(std::wstring).name())){
+	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_))
 	 		row->assignTo(value);
 		closeRow(name);

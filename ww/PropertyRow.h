@@ -131,6 +131,7 @@ public:
 	void updateLabel();
 	const char* parseControlCodes(const char* ptr);
 	const char* typeName() const{ return typeName_; }
+	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
 	std::string rowText() const;
 

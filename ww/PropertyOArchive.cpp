@@ -676,12 +676,12 @@ protected:
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
 PropertyRowString::PropertyRowString(const char* name, const char* label, const std::wstring& value)
-: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, value)
+: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, value, "string")
 {
 }
 
 PropertyRowString::PropertyRowString(const char* name, const char* label, const std::string& value)
-: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, toWideChar(value.c_str()))
+: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, toWideChar(value.c_str()), "string")
 {
 }
 

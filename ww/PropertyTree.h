@@ -126,10 +126,20 @@ protected:
 		};
 
 		wstring start[NUM_TYPES];
+		bool tillEnd[NUM_TYPES];
 		vector<wstring> substrings[NUM_TYPES];
 
 		void parse(const wchar_t* filter);
 		bool match(const wchar_t* text, Type type, size_t* matchStart, size_t* matchEnd) const;
+		bool typeRelevant(Type type) const{
+			return !start[type].empty() || !substrings[type].empty();
+		}
+
+		RowFilter()
+		{
+			for (int i = 0; i < NUM_TYPES; ++i)
+				tillEnd[i] = false;
+		}
 	};
     void interruptDrag();
     void updateHeights();
@@ -154,6 +164,7 @@ protected:
     bool canBePasted(const char* destinationType);
 
     void setFilterMode(bool inFilterMode);
+	void startFilter(wstring filter);
     void setWidget(PropertyRowWidget* widget);
     void _arrangeChildren();
     void visitChildren(WidgetVisitor& visitor) const;

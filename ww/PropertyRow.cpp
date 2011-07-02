@@ -462,6 +462,29 @@ const char* PropertyRow::parseControlCodes(const char* ptr)
 	return ptr;
 }
 
+const char* PropertyRow::typeNameForFilter() const
+{
+	const char* typeName = this->typeName();
+#ifdef _MSC_VER
+	if (strncmp(typeName, "struct ", 7) == 0)
+		typeName += 7;
+	else if(strncmp(typeName, "class ", 6) == 0)
+		typeName += 6;
+	else if(strncmp(typeName, "enum ", 5) == 0)
+		typeName += 5;
+
+#endif
+	if(strncmp(typeName, "yasli::", 7) == 0)
+		typeName += 7;
+	else if(strncmp(typeName, "ww::", 4) == 0)
+		typeName += 4;
+	else if(strncmp(typeName, "std::", 5) == 0)
+		typeName += 5;
+	
+	return typeName;
+}
+
+
 void PropertyRow::updateSize(const PropertyTree* tree)
 {
 	updateLabel();

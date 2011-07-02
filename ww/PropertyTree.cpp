@@ -555,6 +555,24 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 		    .setHotkey(KeyPress(Key('V'), KEY_MOD_CONTROL))
 		    .enable(canBePasted(row));
     }
+	menu.addSeparator();
+	PopupMenuItem& filter = menu.add("Filter by");
+	{
+		wstring nameFilter = L"\"";
+		nameFilter += toWideChar(row->labelUndecorated());
+		nameFilter += L"\"";
+		filter.add((wstring(L"Name:\t") + nameFilter).c_str(), nameFilter).connect(this, &PropertyTree::startFilter);
+
+		wstring valueFilter = L"=\"";
+		valueFilter += row->valueAsWString();
+		valueFilter += L"\"";
+		filter.add((wstring(L"Value:\t") + valueFilter).c_str(), valueFilter).connect(this, &PropertyTree::startFilter);
+
+		wstring typeFilter = L":\"";
+		typeFilter += toWideChar(row->typeNameForFilter());
+		typeFilter += L"\"";
+		filter.add((wstring(L"Type:\t") + typeFilter).c_str(), typeFilter).connect(this, &PropertyTree::startFilter);
+	}
 //#ifndef NDEBUG
 //	menu.addSeparator();
 //	menu.add(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
@@ -677,6 +695,14 @@ void PropertyTree::setFilterMode(bool inFilterMode)
         RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE);
     }
 }
+
+void PropertyTree::startFilter(wstring filter)
+{
+	setFilterMode(true);
+	filterEntry_->setText(filter.c_str());
+	onFilterChanged();
+}
+
 
 void PropertyTree::visitChildren(WidgetVisitor& visitor) const
 {
@@ -851,8 +877,8 @@ struct FilterVisitor
 		bool matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
 		if (matchFilter)
 			matchFilter = filter_.match(row->valueAsWString().c_str(), filter_.VALUE, 0, 0);
-		if (matchFilter)
-			matchFilter = filter_.match(toWideChar(row->typeName()).c_str(), filter_.TYPE, 0, 0);						   
+		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
+			matchFilter = filter_.match(toWideChar(row->typeNameForFilter()).c_str(), filter_.TYPE, 0, 0);						   
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {
@@ -886,6 +912,7 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 	for (int i = 0; i < NUM_TYPES; ++i) {
 		start[i].clear();
 		substrings[i].clear();
+		tillEnd[i] = false;
 	}
 
 	ESCAPE(filter != 0, return);
@@ -905,15 +932,32 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 		}
 
 		const wchar_t* tokenStart = str;
-		while (*str != L'\0' && *str != L' ' && *str != L'*' && *str != L'=' && *str != ':')
+		
+		if (*str == L'\"')
+		{
+			tokenStart;
 			++str;
+			while(*str != L'\0' && *str != L'\"')
+				++str;
+		}
+		else
+		{
+			while (*str != L'\0' && *str != L' ' && *str != L'*' && *str != L'=' && *str != L':')
+					++str;
+		}
 		if (str != tokenStart) {
-			if (fromStart) {
-				start[type].assign(tokenStart, str);
-				fromStart = false;
+			if (*tokenStart == L'\"' && *str == L'\"') {
+				start[type].assign(tokenStart + 1, str);
+				tillEnd[type] = true;
+				++str;
 			}
 			else
-				substrings[type].push_back(wstring(tokenStart, str));
+			{
+				if (fromStart)
+					start[type].assign(tokenStart, str);
+				else
+					substrings[type].push_back(wstring(tokenStart, str));
+			}
 		}
 
 		if (*str == L'=') {
@@ -940,8 +984,20 @@ bool PropertyTree::RowFilter::match(const wchar_t* textOriginal, Type type, size
 		memcpy(text, textOriginal, (textLen + 1) * sizeof(wchar_t));
 		CharLowerW(text);
 	}
-
+	
 	const wstring &start = this->start[type];
+	if (tillEnd[type]){
+		if (start == text) {
+			if (matchStart)
+				*matchStart = 0;
+			if (matchEnd)
+				*matchEnd = start.size();
+			return true;
+		}
+		else
+			return false;
+	}
+
 	const vector<wstring> &substrings = this->substrings[type];
 
 	const wchar_t* startPos = text;

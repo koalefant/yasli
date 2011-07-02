@@ -8,5 +8,6 @@ YASLI_CLASS(PolyBase, PolyDerivedB, "Derived B")
 
 int main(int argc, char* argv[])
 {
+	yasli::setTestMode(true);
 	return UnitTest::RunAllTests();
 }
