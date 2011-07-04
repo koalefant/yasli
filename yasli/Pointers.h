@@ -21,8 +21,6 @@ private:
 class PolyRefCounter : public RefCounter{
 public:
     virtual ~PolyRefCounter() {}
-	enum { SIGNATURE = 987192387 };
-	virtual int signature() const { return SIGNATURE; }
 };
 
 class PolyPtrBase{
@@ -40,7 +38,6 @@ public:
     }
     void set(PolyRefCounter* const ptr){
         if(ptr_ != ptr){
-			ASSERT(!ptr || ptr->signature() == PolyRefCounter::SIGNATURE); // You should derive Your class from PolyRefCounter (not RefCounter) in the first place (to dynamic_cast == reinterpret_cast)
             release();
             ptr_ = ptr;
             if(ptr_)
