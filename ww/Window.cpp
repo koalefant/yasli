@@ -313,6 +313,8 @@ void Window::setIconFromFile(const char* resourceName)
 
 void Window::add(Widget* widget)
 {
+	if(child_)
+		remove();
 	child_ = widget;
 	widget->_setParent(this);
 	_arrangeChildren();

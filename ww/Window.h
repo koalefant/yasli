@@ -32,8 +32,8 @@ enum WindowPosition{
 class WW_API Window : public Container{
 public:
 	Window(Application* app, int border = 4);
-	//Window(Widget* owner, int border = 4);
 	Window(int border = 4, int style = 0);
+	Window(HWND parent, int border);
 
 	// virtuals:
 	~Window();
@@ -100,7 +100,6 @@ public:
 	Widget* _focusedWidget(){ return focusedWidget_; }
 
 protected:
-	Window(HWND parent, int border);
 	void init(HWND parent, int border, Application* app);
 
 	void _updateVisibility();
