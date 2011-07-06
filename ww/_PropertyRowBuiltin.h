@@ -24,7 +24,7 @@ public:
 	bool isContainer() const{ return true; }
 	bool onActivate( PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& item, PropertyTree* tree);
-	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect);
+	void redraw(const PropertyDrawContext& context);
 	bool onKeyDown(PropertyTree* tree, KeyPress key);
 
 	void onMenuAppendElement(PropertyTree* tree);
@@ -102,7 +102,7 @@ public:
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, derivedType_, factory_), this);
 	}
-	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
+	void redraw(const PropertyDrawContext& context);
 	void serializeValue(Archive& ar);
 protected:
 	void updateTitle();
@@ -121,11 +121,12 @@ public:
 	PropertyRowBool(const char* name = "", const char* nameAlt = "", bool value = false);
 	bool assignTo(void* val, size_t size);
 
-	void redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
+	void redraw(const PropertyDrawContext& context);
     bool isLeaf() const{ return true; }
     bool isStatic() const{ return false; }
 
 	bool onActivate(PropertyTree* tree, bool force);
+	void digestReset();
 	string valueAsString() const { return value_ ? "true" : "false"; }
 	wstring valueAsWString() const { return value_ ? L"true" : L"false"; }
 	bool hasIcon() const{ return true; }

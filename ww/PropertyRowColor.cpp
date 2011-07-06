@@ -4,7 +4,7 @@
 #include "ww/_PropertyRowBuiltin.h"
 
 #include "ww/PropertyTree.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/PropertyDrawContext.h"
 #include "ww/PropertyRow.h"
 #include "ww/ColorChooserDialog.h"
 #include "ww/Serialization.h"
@@ -67,7 +67,7 @@ public:
 	static const bool Custom = true;
 	PropertyRowColor(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowColor();
-	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
+	void redraw(const PropertyDrawContext& context);
 
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
@@ -96,18 +96,18 @@ PropertyRowColor<ColorType>::PropertyRowColor(void* object, size_t size, const c
 }
 
 template<class ColorType>
-void PropertyRowColor<ColorType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
 {
 	using namespace Gdiplus;
 	using Gdiplus::Rect;
 	using Gdiplus::Color;
 
 	if(multiValue()){
-		__super::redraw(gr, widgetRect, floorRect);
+		__super::redraw(context);
 		return;
 	}
 
-	Rect rect = widgetRect;
+	Rect rect = gdiplusRect(context.widgetRect);
 	rect.Y += 1;
 	rect.Height -= 2;
 	Gdiplus::Color color(toARGB(value()));
@@ -118,12 +118,12 @@ void PropertyRowColor<ColorType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::R
 	HatchBrush hatchBrush(HatchStyleSmallCheckerBoard, Color::Black, Color::White);
 
 	Rect rectb(rect.GetRight() - ICON_SIZE - 3, rect.Y, ICON_SIZE, rect.Height);
-	fillRoundRectangle(gr, &hatchBrush, rectb, Color(0, 0, 0, 0), 6);
-	fillRoundRectangle(gr, &brush, rectb, penColor, 6);
+	fillRoundRectangle(context.graphics, &hatchBrush, rectb, Color(0, 0, 0, 0), 6);
+	fillRoundRectangle(context.graphics, &brush, rectb, penColor, 6);
 
 	SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
 	Rect recta(rect.X, rect.Y, rect.Width - ICON_SIZE - 5, rect.Height);
-	fillRoundRectangle(gr, &brushb, recta, penColor, 6);
+	fillRoundRectangle(context.graphics, &brushb, recta, penColor, 6);
 }
 
 template<class ColorType>

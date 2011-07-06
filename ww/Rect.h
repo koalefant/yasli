@@ -2,6 +2,8 @@
 
 #include "ww/Vect2.h"
 
+struct tagRECT; // Win32 RECT
+
 namespace ww {
 
 class Rect
@@ -39,7 +41,7 @@ public:
 	Rect operator+(Vect2 offset){
 		return Rect( min_ + offset, max_ + offset );
 	}
-
+	
     void setLeft( int _left ){ min_.x = _left; }
     void setTop( int _top ){ min_.y = _top; }
     void setRight( int _right ){ max_.x = _right; }
@@ -74,8 +76,8 @@ public:
 			max_.y = point.y;
 	}
 
-	struct tagRECT& rect() { return (tagRECT&)(*this); }
-	const tagRECT& rect() const { return (tagRECT&)(*this); }
+	operator tagRECT&() { return (tagRECT&)(*this); }
+	operator const tagRECT&() const { return (tagRECT&)(*this); }
 
 	void serialize(yasli::Archive& ar);
 

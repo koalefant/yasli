@@ -4,7 +4,7 @@
 #include "ww/Win32/Window.h"
 #include "ww/Win32/Handle.h"
 #include "ww/gdiplus.h"
-#include "ww/PropertyTreeDrawing.h" // FIXME привести в порядок
+#include "ww/PropertyDrawContext.h" // FIXME привести в порядок
 #include "ww/Color.h"
 
 #ifdef _MSC_VER

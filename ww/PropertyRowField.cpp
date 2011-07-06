@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PropertyRowField.h"
-#include "PropertyTreeDrawing.h"
+#include "PropertyDrawContext.h"
 #include "gdiplus.h"
 
 namespace ww{
@@ -23,14 +23,14 @@ PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const 
 }
 
 
-void PropertyRowField::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowField::redraw(const PropertyDrawContext& context)
 {
     if(multiValue())
-        drawEdit(gr, widgetRect, L" ... ", propertyTreeDefaultFont(), false, true);
+		context.drawEntry(L" ... ", false, true);
     else if(readOnly())
-        drawStaticText(gr, widgetRect);
+		context.drawValueText(pulledSelected(), valueAsWString().c_str());
     else
-        drawEdit(gr, widgetRect, valueAsWString().c_str(), propertyTreeDefaultFont(), false, false);
+        context.drawEntry(valueAsWString().c_str(), false, false);
 }
 
 }

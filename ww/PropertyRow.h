@@ -20,6 +20,7 @@ class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
 class PopupMenuItem;
+struct PropertyDrawContext;
 struct KeyPress;
 
 enum ScanResult {
@@ -176,6 +177,8 @@ public:
 	void drawRow(HDC dc, const PropertyTree* tree);
     void drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expanded, bool selected, bool grayed) const;
 	void drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect);
+
+	virtual void redraw(const PropertyDrawContext& context);
 	virtual void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect) {}
 	virtual PropertyRowWidget* createWidget(PropertyTree* tree) { return 0; }
 	

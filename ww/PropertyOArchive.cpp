@@ -3,7 +3,7 @@
 
 #include "PropertyOArchive.h"
 #include "ww/PropertyTreeModel.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/PropertyDrawContext.h"
 #include "ww/PropertyTree.h"
 
 #include "ww/_PropertyRowBuiltin.h"
@@ -25,7 +25,7 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/Color.h"
 #include "gdiplus.h"
 
 #ifndef TRANSLATE
@@ -89,20 +89,21 @@ protected:
 	bool insert_;
 };
 
-void PropertyRowContainer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 {
 	using namespace Gdiplus;
 	using Gdiplus::Color;
-
-	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
+	using Gdiplus::Rect;
+	Rect widgetRect = gdiplusRect(context.widgetRect);
+	Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
-	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
+	LinearGradientBrush brush(Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
 
 	Color colors[3] = { brushColor, brushColor, gdiplusSysColor(COLOR_3DSHADOW) };
 	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };
 	brush.SetInterpolationColors(colors, positions, 3);
 
-	fillRoundRectangle(gr, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
+	fillRoundRectangle(context.graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
 
 	Color textColor;
     textColor.SetFromCOLORREF(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
@@ -114,7 +115,7 @@ void PropertyRowContainer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& wi
 	format.SetFormatFlags(StringFormatFlagsNoWrap);
 	format.SetTrimming(StringTrimmingNone);
 	wchar_t* text = multiValue() ? L"..." : buttonLabel_; 
-	gr->DrawString(text, (int)wcslen(text), propertyTreeDefaultFont(), textRect, &format, &textBrush);
+	context.graphics->DrawString(text, (int)wcslen(text), propertyTreeDefaultFont(), textRect, &format, &textBrush);
 }
 
 bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
@@ -498,10 +499,12 @@ std::wstring PropertyRowPointer::generateLabel() const
     return str;
 }
 
-void PropertyRowPointer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 {
 	using namespace Gdiplus;
 	using Gdiplus::Color;
+	using Gdiplus::Rect;
+	Rect widgetRect = gdiplusRect(context.widgetRect);
 
 	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
@@ -511,20 +514,24 @@ void PropertyRowPointer::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widg
 	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };
 	brush.SetInterpolationColors(colors, positions, 3);
 
-	fillRoundRectangle(gr, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
+	fillRoundRectangle(context.graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
 
-	Color textColor;
-    textColor.SetFromCOLORREF(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
-	Gdiplus::SolidBrush textBrush(textColor);
-	RectF textRect( float(widgetRect.X + 4), float(widgetRect.Y), float(widgetRect.Width - 5), float(widgetRect.Height) );
+	ww::Color textColor;
+    textColor.setGDI(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+
+	ww::Rect textRect(widgetRect.X + 4, widgetRect.Y, widgetRect.GetRight() - 5, widgetRect.GetBottom());
+	/*
 	StringFormat format;
 	format.SetAlignment(StringAlignmentNear);
 	format.SetLineAlignment(StringAlignmentCenter);
 	format.SetFormatFlags(StringFormatFlagsNoWrap);
 	format.SetTrimming(StringTrimmingNone);
+	*/
 	std::wstring str = generateLabel();
 	const wchar_t* text = str.c_str();;
-	gr->DrawString(text, (int)wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
+	//context.drawValueText(false, text);
+	context.tree->_drawRowValue(context.graphics, text, propertyTreeDefaultBoldFont(), textRect, textColor, false, false);
+	//context.graphics->DrawString(text, (int)wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{

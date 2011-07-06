@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "ww/PropertyTree.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/PropertyDrawContext.h"
 #include "ww/Serialization.h"
 #include "ww/PropertyTreeModel.h"
 #include "ww/TreeImpl.h"
@@ -1039,23 +1039,26 @@ void PropertyTree::onFilterChanged()
     ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
-void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
 {
 	int textLen = (int)wcslen(text);
 
 	Gdiplus::StringFormat format;
-	format.SetAlignment(Gdiplus::StringAlignmentNear);
+	format.SetAlignment(center ? Gdiplus::StringAlignmentCenter : Gdiplus::StringAlignmentNear);
 	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-	format.SetTrimming(Gdiplus::StringTrimmingEllipsisCharacter);
+	format.SetTrimming(pathEllipsis ? Gdiplus::StringTrimmingEllipsisPath : Gdiplus::StringTrimmingEllipsisCharacter);
 	format.SetFormatFlags(Gdiplus::StringFormatFlagsNoWrap);
 
 	Gdiplus::RectF textRect(gdiplusRectF(rect));
 	if (filterMode_) {
 		size_t hiStart = 0;
 		size_t hiEnd = 0;
-		if (rowFilter_.match(text, rowFilter_.NAME, &hiStart, &hiEnd)) {
+		if (rowFilter_.match(text, type, &hiStart, &hiEnd)) {
+			Gdiplus::RectF boxFull;
 			Gdiplus::RectF boxStart;
 			Gdiplus::RectF boxEnd;
+			
+			gr->MeasureString(text, textLen, font, textRect, &format, &boxFull, 0, 0);
 			
 			if (hiStart > 0)
 				gr->MeasureString(text, (int)hiStart, font, textRect, &format, &boxStart, 0, 0);
@@ -1066,10 +1069,11 @@ void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text
 			gr->MeasureString(text, (int)hiEnd, font, textRect, &format, &boxEnd, 0, 0);
 
 			Gdiplus::SolidBrush br(Gdiplus::Color(255, 192, 0));
-			Gdiplus::Rect highlightRect(int(boxStart.GetRight()) - 1,
-										int(boxStart.GetTop()), 
-										int(boxEnd.GetRight()) - int(boxStart.GetRight()) + 2, 
-										int(boxEnd.GetBottom()) - int(boxStart.GetTop()));
+			int left = int(boxFull.X + boxStart.Width) - 1;
+			int top = int(boxFull.Y);
+			int right = int(boxFull.X + boxEnd.Width);
+			int bottom = int(boxFull.Y + boxEnd.Height);
+			Gdiplus::Rect highlightRect(left, top, right - left, bottom - top);
 
 			fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(255, 255, 128), 1);
 		}
@@ -1081,12 +1085,12 @@ void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text
 
 void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
 {
-	drawFilteredString(gr, text, RowFilter::NAME, font, rect, textColor);
+	drawFilteredString(gr, text, RowFilter::NAME, font, rect, textColor, false, false);
 }
 
-void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
+void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
 {
-	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor);
+	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }
 
 }

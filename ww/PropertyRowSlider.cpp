@@ -6,6 +6,7 @@
 #include "ww/PropertyTree.h"
 #include "ww/TreeImpl.h"
 #include "ww/PropertyRow.h"
+#include "ww/PropertyDrawContext.h"
 
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window.h"
@@ -24,7 +25,7 @@ public:
 	PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowSlider();
 	int floorHeight() const{ return 12; }
-	void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect);
+	void redraw(const PropertyDrawContext& context);
 
 	bool onKeyDown(PropertyTree* tree, KeyPress key);
 	bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
@@ -102,16 +103,16 @@ PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, size
 }
 
 template<class WrapperType, class ScalarType>
-void PropertyRowSlider<WrapperType, ScalarType>::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowSlider<WrapperType, ScalarType>::redraw(const PropertyDrawContext& context)
 {
-	__super::redraw(gr, widgetRect, floorRect);
+	__super::redraw(context);
 	ScalarType val = value();
-	RECT rt = { floorRect.X, floorRect.Y, floorRect.GetRight(), floorRect.GetBottom() };
+	RECT rt = context.lineRect;
 	rt.top += 1;
 	rt.bottom -= 1;
-    HDC dc = gr->GetHDC();
+    HDC dc = context.graphics->GetHDC();
 	Win32::drawSlider(dc, rt, float(val - value().minValue()) / (value().maxValue() - value().minValue()), false/*state == FOCUSED*/);
-    gr->ReleaseHDC(dc);
+    context.graphics->ReleaseHDC(dc);
 }
 
 template<class WrapperType, class ScalarType>

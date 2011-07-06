@@ -2,7 +2,7 @@
 #include "ww/Serialization.h"
 #include "ww/PropertyTree.h"
 #include "ww/PropertyTreeModel.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/PropertyDrawContext.h"
 #include "ww/PropertyRowImpl.h"
 #include "ww/FileDialog.h"
 #include "ww/PopupMenu.h"
@@ -27,6 +27,17 @@ public:
 	bool onActivate(PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);
 	void onMenuClear(PropertyTreeModel* model);
+
+	void redraw(const PropertyDrawContext& context)
+	{
+		if(multiValue())
+			context.drawEntry(L" ... ", false, true);
+		else if(readOnly())
+			context.drawValueText(pulledSelected(), valueAsWString().c_str());
+		else
+			context.drawEntry(valueAsWString().c_str(), true, false);
+	}
+
 
 	std::string valueAsString() const{ return value().c_str(); }
 

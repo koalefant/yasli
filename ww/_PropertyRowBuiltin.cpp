@@ -2,7 +2,7 @@
 #include "_PropertyRowBuiltin.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
-#include "PropertyTreeDrawing.h"
+#include "PropertyDrawContext.h"
 #include "Unicode.h"
 #include "Serialization.h"
 #include "Win32/Rectangle.h"
@@ -26,25 +26,23 @@ bool PropertyRowBool::assignTo(void* object, size_t size)
 	return true;
 }
 
-void PropertyRowBool::redraw(Gdiplus::Graphics* gr, const Gdiplus::Rect& _widgetRect, const Gdiplus::Rect& floorRect)
+void PropertyRowBool::redraw(const PropertyDrawContext& context)
 {
-	using namespace Gdiplus;
-	if(multiValue())
-	{
-		HDC dc = gr->GetHDC();
-		Win32::drawGrayedCheck(dc, widgetRect().rect());
-		gr->ReleaseHDC(dc);
-	}
-	else
-		drawCheck(gr, gdiplusRect(widgetRect()), value_);
+	const bool grayed = multiValue();
+	context.drawCheck(widgetRect(), grayed, value_);
 }
 
 bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
 {
-    tree->model()->push(this);
+	tree->model()->push(this);
 	value_ = !value_;
 	tree->model()->rowChanged(this);
 	return true;
+}
+
+void PropertyRowBool::digestReset()
+{
+	digest_ = value_ ? toWideChar(labelUndecorated()) : L"";
 }
 
 void PropertyRowBool::serializeValue(Archive& ar)

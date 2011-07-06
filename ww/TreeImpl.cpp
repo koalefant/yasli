@@ -19,7 +19,7 @@
 #include <windows.h>
 #include <CommCtrl.h>
 #include "gdiplus.h"
-#include "PropertyTreeDrawing.h" // shall be renamed
+#include "PropertyDrawContext.h"
 #include "PropertyRow.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"

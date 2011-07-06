@@ -1,9 +1,12 @@
 #include "stdafx.h"
-#include "PropertyTreeDrawing.h"
+#include "PropertyDrawContext.h"
 #include <windows.h>
 #include <memory>
 #include "gdiplus.h"
 #include "yasli/Assert.h"
+#include "Win32/Drawing.h"
+#include "PropertyTree.h"
+#include "Color.h"
 
 using namespace Gdiplus;
 
@@ -146,6 +149,7 @@ void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdip
 
 void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* text, const Gdiplus::Font *font, bool pathEllipsis, bool grayBackground)
 {
+	using Gdiplus::Color;
     Gdiplus::Rect rt = rect;
     rt.Inflate( -1, -1 );
 	
@@ -176,6 +180,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 
 void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 {
+	using Gdiplus::Color;
 	int size = 17;
 
 	int offsetY = ((rect.Height) - size) / 2;
@@ -194,6 +199,62 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 		DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.X + offsetX + 3, rect.Y + offsetY + 2, size - 5, size - 3, DST_BITMAP);
 		gr->ReleaseHDC(dc);
 	}
+}
+
+// ---------------------------------------------------------------------------
+
+void PropertyDrawContext::drawCheck(const Rect& rect, bool grayed, bool checked) const
+{
+	if (grayed) {
+		HDC dc = graphics->GetHDC();
+
+		RECT rt = { rect.left(), rect.top(), rect.right(), rect.bottom() };
+		Win32::drawGrayedCheck(dc, rt);
+		graphics->ReleaseHDC(dc);
+	}
+	else {
+		ww::drawCheck(graphics, gdiplusRect(rect), checked);
+	}
+}
+
+
+void PropertyDrawContext::drawValueText(bool highlighted, const wchar_t* text) const
+{
+	Color textColor;
+	textColor.setGDI(GetSysColor(highlighted ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT));
+
+	Rect textRect(widgetRect.left() + 3, widgetRect.top() + 2, widgetRect.right() - 3, widgetRect.bottom() - 2);
+
+	tree->_drawRowValue(graphics, text, propertyTreeDefaultFont(), textRect, textColor, false, false);
+}
+
+void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const
+{
+	using Gdiplus::Color;
+    Gdiplus::Rect rt = gdiplusRect(widgetRect);
+	Gdiplus::Font* font = propertyTreeDefaultFont();
+    rt.Inflate( -1, -1 );
+	
+	Color lightColor = gdiplusSysColor(grayBackground ? COLOR_BTNFACE : COLOR_WINDOW);
+	Color darkColor = gdiplusSysColor(grayBackground ? COLOR_3DSHADOW : COLOR_BTNFACE);
+	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height), Color(), Color(), LinearGradientModeVertical);
+
+	Color colors[3] = { darkColor, lightColor, lightColor };
+	Gdiplus::REAL positions[3] = { 0.0f, 0.4f, 1.0f };
+	brush.SetInterpolationColors(colors, positions, 3);
+
+	Color penColor;
+	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
+    fillRoundRectangle(graphics, &brush, rt, penColor, 5);
+
+	rt.Inflate(-3, -1);
+	rt.Height -= 1;
+	Rect textRect( rt.GetLeft(), rt.GetTop(), rt.GetRight(), rt.GetBottom() );
+	
+	ww::Color color;
+	color.setGDI(GetSysColor(COLOR_WINDOWTEXT));
+	tree->_drawRowValue(graphics, text, font, textRect, color, pathEllipsis, false);
+    //gr->DrawString(text, (int)wcslen(text), font, gdiplusRectF(textRect), gdiplusSysColor(COLOR_WINDOWTEXT) );
 }
 
 }

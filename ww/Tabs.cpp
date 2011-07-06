@@ -9,7 +9,7 @@
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
 #include "gdiplus.h"
-#include "PropertyTreeDrawing.h" // rename
+#include "PropertyDrawContext.h" // rename
 #include "yasli/Archive.h"
 
 namespace ww{

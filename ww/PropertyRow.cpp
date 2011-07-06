@@ -5,7 +5,7 @@
 #include "ww/PropertyTreeModel.h"
 #include "ww/PopupMenu.h"
 #include "ww/_PropertyRowBuiltin.h"
-#include "ww/PropertyTreeDrawing.h"
+#include "ww/PropertyDrawContext.h"
 #include "yasli/TypesFactory.h"
 #include "ww/Win32/Window.h"
 #include "ww/Unicode.h"
@@ -321,21 +321,6 @@ PropertyRow* PropertyRow::cloneChildren(PropertyRow* result, const PropertyRow* 
 
 void PropertyRow::drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect)
 {
-	using namespace Gdiplus;
-	RectF rt(float(widgetRect.X), float(widgetRect.Y), float(widgetRect.Width), float(widgetRect.Height));
-	rt.Inflate(-3, -2);
-	std::wstring text(valueAsWString());
-
-	StringFormat format;
-	format.SetAlignment(StringAlignmentNear);
-	format.SetLineAlignment(StringAlignmentCenter);
-	format.SetFormatFlags(StringFormatFlagsNoWrap);
-	format.SetTrimming(StringTrimmingEllipsisCharacter);
-
-	Gdiplus::Color textColor;
-	textColor.SetFromCOLORREF(GetSysColor(pulledSelected() ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT));
-	SolidBrush brush(textColor);
-	gr->DrawString(text.c_str(), (int)text.size(), propertyTreeDefaultFont(), rt, &format, &brush);
 }
 
 void PropertyRow::serialize(Archive& ar)
@@ -846,6 +831,12 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     gr.SetSmoothingMode(SmoothingModeAntiAlias);
     gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
 
+	PropertyDrawContext context;
+	context.graphics = &gr;
+	context.tree = tree;
+	context.widgetRect = widgetRect();
+   	context.lineRect = floorRect();
+
 	::ww::Color textColor;
 	textColor.setGDI(GetSysColor(COLOR_BTNTEXT));
 
@@ -912,7 +903,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 
     // рисуем custom-ную часть
 	if(!isStatic())
-		redraw(&gr, gdiplusRect(widgetRect()), gdiplusRect(floorRect()));
+		redraw(context);
 
     if(textSize_ > 0){
         Font* font = rowFont(tree);
@@ -1234,6 +1225,11 @@ PropertyRow* PropertyRow::rowByHorizontalIndex(PropertyTree* tree, int index)
 	else
 		scanChildren(op, tree);
 	return op.row_ ? op.row_ : this;
+}
+
+void PropertyRow::redraw(const PropertyDrawContext& context)
+{
+	redraw(context.graphics, gdiplusRect(context.widgetRect), gdiplusRect(context.lineRect));
 }
 
 

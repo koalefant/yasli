@@ -112,7 +112,7 @@ public:
     void _setFocus();
     void _cancelWidget(){ widget_ = 0; }
 	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
-	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
+	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 
@@ -170,7 +170,7 @@ protected:
     void visitChildren(WidgetVisitor& visitor) const;
 
 	void updatePropertyTree();
-	void drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
+	void drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 
 	PolyPtr<PropertyTreeModel> model_;
 	int cursorX_;

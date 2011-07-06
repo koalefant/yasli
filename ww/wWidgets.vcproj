@@ -1373,6 +1373,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropertyDrawContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyDrawContext.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertyRow.h"
 				>
 			</File>
@@ -1390,14 +1398,6 @@
 			</File>
 			<File
 				RelativePath=".\PropertyTree.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PropertyTreeDrawing.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PropertyTreeDrawing.h"
 				>
 			</File>
 			<File
