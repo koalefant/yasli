@@ -884,6 +884,7 @@ struct FilterVisitor
 			bool belongs = hasMatchingChildren(row);
 			row->setBelongsToFilteredRow(belongs);
 			if (belongs) {
+				tree->expandRow(row);
 				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
 					if (child->pulledUp())
