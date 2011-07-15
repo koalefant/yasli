@@ -4,13 +4,7 @@
 #include "ExampleLogicEditor.h"
 #include "ww/PropertyTree.h"
 
-#include "yasli/Serializer.h"
-#include "yasli/STL.h"
-#include "yasli/Pointers.h"
-#include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
-#include "yasli/PointersImpl.h"
-
+#include "ww/Serialization.h"
 #include "ww/Decorators.h"
 #include "ww/SliderDecorator.h"
 #include "ww/FileSelector.h"

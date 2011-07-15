@@ -9,31 +9,13 @@
 #include "ww/ScrolledWindow.h"
 #include "ww/Tabs.h"
 
-#include "ww/ImageStore.h"
 #include "ww/PropertyTree.h"
 
-#include "ww/Entry.h"
-#include "ww/ComboBox.h"
-#include "ww/Label.h"
-#include "ww/Button.h"
-#include "ww/ProgressBar.h"
-#include "ww/RadioButton.h"
-#include "ww/RadioButtonBox.h"
-#include "ww/CheckBox.h"
 #include "ww/Frame.h"
-#include "ww/Dialog.h"
 #include "ww/Serialization.h"
-#include "ww/HotkeyDialog.h"
-#include "ww/Clipboard.h"
-#include "ww/PropertyEditor.h"
-#include "ww/Win32Proxy.h"
 #include "ww/Win32/Window.h"
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
-#include "yasli/BinaryOArchive.h"
-#include "yasli/BinaryIArchive.h"
-#include "yasli/BinArchive.h"
-#include "ExampleLogicEditor.h"
 
 #include "TestData.h"
 
@@ -64,10 +46,16 @@ MainWindow::MainWindow(ww::Application& app)
 	setDefaultSize(800, 600);
 	setDefaultPosition(ww::POSITION_CENTER);
 
-	signalClose().connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);
+	signalClose().connect(&app, &ww::Application::quit);
 
 	ww::TabPages* pages = new ww::TabPages();
+
+	ww::Widget* createLogicEditor();
 	pages->add("Logic Editor", createLogicEditor());
+
+	ww::Widget* createDigestSample();
+	pages->add("Digests", createDigestSample());
+
     add(pages);
 
 	TextIArchive sa;

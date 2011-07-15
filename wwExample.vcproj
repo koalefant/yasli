@@ -508,11 +508,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\ExampleLogicEditor.cpp"
+			RelativePath=".\ExampleDigest.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\ExampleLogicEditor.h"
+			RelativePath=".\ExampleLogicEditor.cpp"
 			>
 		</File>
 		<File
