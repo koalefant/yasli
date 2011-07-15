@@ -1,7 +1,6 @@
 #include <windows.h>
 #undef ERROR
 
-#include "ExampleLogicEditor.h"
 #include "ww/PropertyTree.h"
 
 #include "ww/Serialization.h"
