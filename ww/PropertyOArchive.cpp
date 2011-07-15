@@ -275,13 +275,14 @@ void PropertyRowContainer::digestReset()
 {
 	swprintf_s(buttonLabel_, ARRAY_LEN(buttonLabel_), L"%i", count());
 
+	/*
 	wchar_t buffer[14];
 	if(multiValue())
 		swprintf_s(buffer, L"[...]");
 	else
-		swprintf_s(buffer, L"[ %i ]", int(count()));
+		swprintf_s(buffer, L"[ %i ]", int(count()));*/
 	__super::digestReset();
-	digestAppend(buffer);
+	//digestAppend(buffer);
 }
 
 void PropertyRowContainer::serializeValue(Archive& ar)

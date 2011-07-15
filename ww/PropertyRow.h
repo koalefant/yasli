@@ -52,6 +52,13 @@ class PropertyTreeTransaction;
 class WW_API PropertyRow : public RefCounter
 {
 public:
+	enum WidgetPosition {
+		WIDGET_POS_ICON,
+		WIDGET_POS_AFTER_NAME,
+		WIDGET_POS_VALUE,
+		NUM_WIDGET_POS
+	};
+
 	static const int ROW_DEFAULT_HEIGHT = 21; 
 	static const int ICON_SIZE = 21; 
 	static const int TEXT_SIZE_MIN = 30; 
@@ -130,7 +137,7 @@ public:
 	void setLabel(const char* label) { label_ = label ? label : ""; setLabelChanged(); }
 	void setLabelChanged();
 	void updateLabel();
-	const char* parseControlCodes(const char* ptr);
+	void parseControlCodes(const char* label);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
@@ -164,6 +171,19 @@ public:
 	void scaleSize(float t, bool scaleWidget);
 	void cutSize(int& extraSize, bool cutWidget);
 
+	virtual bool isWidgetFixed(WidgetPosition pos) const{ 
+		if (pos == WIDGET_POS_ICON || pos == WIDGET_POS_AFTER_NAME)
+			return true;
+		else
+			return userFixedWidget();
+	}
+	virtual bool hasWidgetAt(WidgetPosition pos) const 
+	{
+		if (hasIcon())
+			return pos == WIDGET_POS_ICON;
+		else
+			return pos == WIDGET_POS_VALUE;
+	}
 	virtual bool hasIcon() const{ return false; }
 
 	const Rect rect() const{ return Rect(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
@@ -179,7 +199,6 @@ public:
 	void drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect);
 
 	virtual void redraw(const PropertyDrawContext& context);
-	virtual void redraw(Gdiplus::Graphics *gr, const Gdiplus::Rect& widgetRect, const Gdiplus::Rect& lineRect) {}
 	virtual PropertyRowWidget* createWidget(PropertyTree* tree) { return 0; }
 	
 	virtual bool isContainer() const{ return false; }
@@ -202,11 +221,14 @@ public:
 	virtual void onMouseUp(PropertyTree* tree, Vect2 point) {}
 	virtual bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
 
+	// user states, assign using control codes (characters in the beginning of label)
 	void setUpdated(bool updated) { updated_ = updated; }
 	bool updated() const { return updated_; }
 	bool readOnly() const { return readOnly_; }
 	bool readOnlyOver() const { return readOnlyOver_; }
-	bool fixedWidget() const{ return fixedWidget_ || hasIcon(); }
+	// fixed widget doesn't expand automatically to occupy all available place
+	bool userFixedWidget() const{ return userFixedWidget_; }
+	// multiValue is used to edit properties of multiple objects simulateneously
 	bool multiValue() const { return multiValue_; }
 	void setMultiValue(bool multiValue) { multiValue_ = multiValue; }
 	bool fullRow(const PropertyTree* tree) const;
@@ -229,6 +251,7 @@ public:
 	}
 
 	const wchar_t* digest() const{ return digest_.c_str(); }
+	virtual std::wstring searchValue() const { return valueAsWString(); }
 	virtual void digestReset();
 	void digestAppend(const wchar_t* text);
 
@@ -259,7 +282,7 @@ protected:
 	bool labelChanged_ : 1;
 	bool readOnly_ : 1;
 	bool readOnlyOver_ : 1;
-	bool fixedWidget_ : 1;
+	bool userFixedWidget_ : 1;
 	bool fullRow_ : 1;
 	bool pulledUp_ : 1;
 	bool pulledBefore_ : 1;
@@ -274,6 +297,7 @@ protected:
 	short int textPos_;
 	short int textSizeInitial_;
 	short int textSize_;
+	short int digestPos_;
 	short int widgetPos_; // widget == icon!
 	short int widgetSize_;
 	short int widgetSizeMin_;

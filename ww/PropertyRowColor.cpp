@@ -20,6 +20,25 @@
 
 namespace ww{
 
+
+template<size_t Size>
+void formatColor(char (&str)[Size], const ww::Color& c)
+{
+	sprintf(str, "%i %i %i %i", c.r, c.g, c.b, c.a);
+}
+
+#ifndef WW_DISABLE_XMATH
+template<size_t Size>
+void formatColor(char (&str)[Size], const Color4c& c) { sprintf(str, "%i %i %i %i", c.r, c.g, c.b, c.a); }
+template<size_t Size>
+void formatColor(char (&str)[Size], const Color3c& c) { sprintf(str, "%i %i %i", c.r, c.g, c.b); }
+template<size_t Size>
+void formatColor(char (&str)[Size], const Color4f& c) { sprintf(str, "%g %g %g", c.r, c.g, c.b); }
+
+#endif
+
+
+
 unsigned int toARGB(Color color)
 {
 	return color.argb();
@@ -71,7 +90,11 @@ public:
 
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
-	std::string valueAsString() const { return (MemoryWriter() << toARGB(value_)).c_str(); }
+	std::string valueAsString() const { 
+		char buf[32];
+		formatColor(buf, value_);
+		return string(buf);
+	}
 };
 
 template<class ColorType>

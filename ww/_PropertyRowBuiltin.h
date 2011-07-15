@@ -46,7 +46,11 @@ public:
 
 	const char* elementTypeName() const{ return elementTypeName_; }
     std::string valueAsString() const;
-	bool hasFixedSize() const{ return fixedSize_; }
+	// C-array is an example of fixed size container
+	bool isFixedSize() const{ return fixedSize_; }
+	bool hasWidgetAt(WidgetPosition pos) const{
+		return pos == WIDGET_POS_AFTER_NAME;
+	}
 
 protected:
 	void generateMenu(PopupMenuItem& root, PropertyTree* tree);
@@ -127,9 +131,11 @@ public:
 
 	bool onActivate(PropertyTree* tree, bool force);
 	void digestReset();
-	string valueAsString() const { return value_ ? "true" : "false"; }
-	wstring valueAsWString() const { return value_ ? L"true" : L"false"; }
-	bool hasIcon() const{ return true; }
+	string valueAsString() const { return value_ ? labelUndecorated() : ""; }
+	wstring searchValue() const{ return value_ ? L"true" : L"false"; }
+	bool hasWidgetAt(WidgetPosition pos) const{
+		return pos == WIDGET_POS_ICON;
+	}
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowBool(name_, label_, value_), this);
 	}

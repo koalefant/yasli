@@ -871,7 +871,7 @@ struct FilterVisitor
 		wstring label = toWideChar(row->labelUndecorated());
 		bool matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
 		if (matchFilter)
-			matchFilter = filter_.match(row->valueAsWString().c_str(), filter_.VALUE, 0, 0);
+			matchFilter = filter_.match(row->searchValue().c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
 			matchFilter = filter_.match(toWideChar(row->typeNameForFilter()).c_str(), filter_.TYPE, 0, 0);						   
 		

@@ -168,13 +168,14 @@ public:
 	PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
-	bool hasIcon() const{ return true; }
+	bool hasWidgetAt(WidgetPosition pos) const{ return pos == WIDGET_POS_ICON; }
 	std::string valueAsString() const { return value_ ? label() : ""; }
 };
 
 PropertyRowNot::PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<NotDecorator, PropertyRowNot>(object, size, name, nameAlt, typeName)
 {
+	widgetSizeMin_ = ICON_SIZE;
 }
 
 PropertyRowNot::PropertyRowNot()
@@ -204,13 +205,14 @@ public:
 	PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
-	bool hasIcon() const{ return true; }
+	bool hasWidgetAt(WidgetPosition pos) const{ return pos == WIDGET_POS_ICON; }
 	std::string valueAsString() const { return value() ? label() : ""; }
 };
 
 PropertyRowRadio::PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<RadioDecorator, PropertyRowRadio>(object, size, name, nameAlt, typeName)
 {
+	widgetSizeMin_ = ICON_SIZE;
 }
 
 PropertyRowRadio::PropertyRowRadio()

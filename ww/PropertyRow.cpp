@@ -83,6 +83,7 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	textHash_ = 0;
 	textSize_ = 0;
 	widgetPos_ = 0;
+	digestPos_ = 0;
     widgetSize_ = 0;
 	widgetSizeMin_ = 0;
 	freePulledChildren_ = 0;
@@ -98,7 +99,6 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	hasPulled_ = false;
 	readOnly_ = false;
 	readOnlyOver_ = false;
-	fixedWidget_ = false;
 	fullRow_ = false;
 	multiValue_ = false;
 	
@@ -217,7 +217,7 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	
 	readOnly_ = row->readOnly_;
 	readOnlyOver_ = row->readOnlyOver_;
-	fixedWidget_ = row->fixedWidget_;
+	userFixedWidget_ = row->userFixedWidget_;
 	pulledUp_ = row->pulledUp_;
 	pulledBefore_ = row->pulledBefore_;
 	size_ = row->size_;
@@ -371,7 +371,7 @@ void PropertyRow::updateLabel()
     FOR_EACH(children_, it)
 		(*it)->updateLabel();
 
-	labelUndecorated_ = parseControlCodes(label_);
+	parseControlCodes(label_);
 	visible_ = *labelUndecorated_ || fullRow_ || pulledUp_ || isRoot();
 	if(!*label_)
 		labelUndecorated_ = name();
@@ -380,13 +380,15 @@ void PropertyRow::updateLabel()
 		pulledContainer()->_setExpanded(expanded());
 }
 
-const char* PropertyRow::parseControlCodes(const char* ptr)
+void PropertyRow::parseControlCodes(const char* ptr)
 {
 	fullRow_ = false;
 	pulledUp_ = pulledBefore_ = false;
 	hasPulled_ = false;
 	readOnly_ = readOnlyOver_ = false;
-	fixedWidget_ = isContainer();
+	userFixedWidget_ = false;
+
+	bool appendValueToDigest = false;
 	while(true){
 		if(*ptr == '^'){
 			if(parent() && !parent()->isRoot()){
@@ -404,7 +406,7 @@ const char* PropertyRow::parseControlCodes(const char* ptr)
 		else if(*ptr == '<')
 			fullRow_ = true;
 		else if(*ptr == '>'){
-			fixedWidget_ = true;
+			userFixedWidget_ = true;
 			const char* p = ++ptr;
 			while(*p >= '0' && *p <= '9')
 				++p;
@@ -415,7 +417,7 @@ const char* PropertyRow::parseControlCodes(const char* ptr)
 			continue;
 		}
 		else if(*ptr == '&')
-			parent()->digestAppend(valueAsWString().c_str());
+			appendValueToDigest = true;
 		else if(*ptr == '~'){
 			struct Op{ ScanResult operator()(PropertyRow* row) { row->serializer_ = Serializer(); return SCAN_CHILDREN_SIBLINGS; } };
 			scanChildren(Op());
@@ -444,7 +446,10 @@ const char* PropertyRow::parseControlCodes(const char* ptr)
 			break;
 		++ptr;
 	}
-	return ptr;
+
+	labelUndecorated_ = ptr;
+	if (appendValueToDigest)
+		parent()->digestAppend(valueAsWString().c_str());
 }
 
 const char* PropertyRow::typeNameForFilter() const
@@ -513,7 +518,7 @@ void PropertyRow::updateSize(const PropertyTree* tree)
     }
 
 	textSize_ = textSizeInitial_;
-	widgetSize_ = hasIcon() ? ICON_SIZE : widgetSizeMin();
+	widgetSize_ = widgetSizeMin();
 	if(pulledUp() && isContainer())
 	{
 		//textSize_ = widgetSize_ = plusSize_ = 0;
@@ -524,7 +529,10 @@ void PropertyRow::updateSize(const PropertyTree* tree)
 	size_.set(plusSize_ + textSize_ + widgetSize_, ROW_DEFAULT_HEIGHT + floorHeight());
 	textSizeDelta_ = textSize_ > TEXT_SIZE_MIN ? textSize_ - TEXT_SIZE_MIN : 0;
 	widgetSizeDelta_ = widgetSize_ > WIDGET_SIZE_MIN ? widgetSize_ - WIDGET_SIZE_MIN : 0;
-	freePulledChildren_ = widgetSize_ && !fixedWidget() ? 1 : 0;
+	bool hasResizeableWidget = (hasWidgetAt(WIDGET_POS_VALUE) && !isWidgetFixed(WIDGET_POS_VALUE)) || 
+		                       (hasWidgetAt(WIDGET_POS_VALUE) && !isWidgetFixed(WIDGET_POS_ICON)) || 
+							   (hasWidgetAt(WIDGET_POS_AFTER_NAME) && !isWidgetFixed(WIDGET_POS_AFTER_NAME));
+	freePulledChildren_ = widgetSize_ && hasResizeableWidget ? 1 : 0;
     Rows::iterator it;
     FOR_EACH(children_, it){
 		PropertyRow* row = *it;
@@ -546,7 +554,7 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 	pos_ = pos;
 	pos.x += plusSize_;
 
-	int extraSizeStorage;
+	int extraSizeStorage = 0;
 	int& extraSize = !pulledUp() ? extraSizeStorage : _extraSize;
 	if(!pulledUp()){
 		extraSize = rect.width() - size_.x - pos.x;
@@ -574,9 +582,10 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 		}
 	}
 
-	if(hasIcon()){
+	if(hasWidgetAt(WIDGET_POS_ICON)){
 		widgetPos_ = widgetSize_ ? pos.x : -1000;
-		textPos_ = pos.x += widgetSize_;
+		pos.x += widgetSize_;
+		textPos_ = pos.x;
 		pos.x += textSize_;
 	}
 
@@ -587,12 +596,17 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 			pos.x += (*it)->size_.x;
 		}
 
-	if(!hasIcon()){
+	if(!hasWidgetAt(WIDGET_POS_ICON)){
 		textPos_ = pos.x;
 		pos.x += textSize_;
 	}
 
-	if(!pulledUp() && extraSize > 0){
+	if(hasWidgetAt(WIDGET_POS_AFTER_NAME)){
+		widgetPos_ = pos.x;
+		pos.x += widgetSize_;
+	}
+
+	if(!pulledUp() && extraSize > 0/* && hasWidgetAt(WIDGET_POS_VALUE)*/){
 		int widgetsSize = size_.x - pos.x + pos_.x;
 		if(!fullRow(tree))
 			pos.x = max(rect.left() + round(rect.width()*(1.f - tree->valueColumnWidth())), pos.x);
@@ -605,8 +619,8 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 		}
 	}
 
-	if(!hasIcon()){
-		if(widgetSize_ && !fixedWidget() && extraSize > 0){
+	if(hasWidgetAt(WIDGET_POS_VALUE)){
+		if(widgetSize_ && !isWidgetFixed(WIDGET_POS_VALUE) && extraSize > 0){
 			widgetSize_ += extraSize;
 			size_.x += extraSize;
 		}
@@ -641,11 +655,13 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
         }
     }
 
+	digestPos_ = pos.x;
 
 	if(!pulledUp())
 	{
-		if (!hasChildrenPulledAfter && !hasIcon())
-			widgetPos_ = rect.right() - widgetSize_;
+		// widget at end
+		//if (!hasChildrenPulledAfter && hasWidgetAt(WIDGET_POS_ICON))
+		//	widgetPos_ = rect.right() - widgetSize_;
 		size_.x = rect.right() - pos_.x;
 	}
 }
@@ -695,7 +711,7 @@ void PropertyRow::cutSize(int& extraSize, bool cutWidget)
 		else{
 			widgetSize_ += extraSize;
 			extraSize = 0;
-			if(hasIcon())
+			if(hasWidgetAt(WIDGET_POS_ICON))
 				widgetSize_ = 0;
 		}
 	}
@@ -842,10 +858,10 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 
 	ww::Rect rowRect = rect();
 
-    // рисуем горизонтальную линию
+    // drawing a horizontal line
     std::wstring text = toWideChar(rowText().c_str());
 
-    if(textSize_ && widgetSize_ && !isStatic() && !hasIcon() && !pulledUp() && !fullRow(tree) && !hasPulled()){
+    if(textSize_ && widgetSize_ && !isStatic() && hasWidgetAt(WIDGET_POS_VALUE) && !pulledUp() && !fullRow(tree) && !hasPulled()){
 		Color color1;
         color1.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
         Color color2;
@@ -875,7 +891,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     }
 
     if(selected()){
-		// заливаем фон цветом выделения
+		// drawing selection rectangle
         if(tree->isFocused()){
             Color brushColor;
             brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
@@ -895,13 +911,12 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 		textColor.setGDI(GetSysColor(COLOR_HIGHLIGHTTEXT));
 
     if(!tree->compact() || !parent()->isRoot()){
-        // рисуем плюсик
         if(hasVisibleChildren(tree)){
 			drawPlus(&gr, plusRect(), expanded(), selected(), expanded());
         }
     }
 
-    // рисуем custom-ную часть
+    // custom drawing
 	if(!isStatic())
 		redraw(context);
 
@@ -910,14 +925,14 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 		tree->_drawRowLabel(&gr, text.c_str(), font, textRect(), textColor);
     }
 
-    // краткое содержание
+    // drawing digest
     if(!digest_.empty()){
-		int textRight = textPos_ + textSize_;
+		int digestPos = digestPos_;
         int width = 0;
-        if(!widgetSize_)
-            width = rowRect.right() - textRight;
+        if(widgetSize_ == 0)
+            width = rowRect.right() - digestPos;
         else
-            width = max(0, textRight - widgetPos_);
+            width = max(0, widgetPos_ - digestPos);
 
         if(width > 0){
 			StringFormat format;
@@ -926,7 +941,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 			format.SetTrimming(StringTrimmingEllipsisCharacter);
 			format.SetFormatFlags(StringFormatFlagsNoWrap);
 
-            RectF digestRect(textRight, pos_.y, width, ROW_DEFAULT_HEIGHT);
+            RectF digestRect(digestPos, pos_.y, width, ROW_DEFAULT_HEIGHT);
             gr.DrawString(digest_.c_str(), (int)digest_.size(), propertyTreeDefaultFont(), digestRect, &format, &SolidBrush(gdiplusSysColor(COLOR_3DSHADOW)));
         }
     }
@@ -984,7 +999,7 @@ bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow
 	if(parentRow->isContainer()){
 		const PropertyRowContainer* container = safe_cast<const PropertyRowContainer*>(parentRow);
 				
-		if((container->hasFixedSize() || container->readOnly()) && parent() != parentRow)
+		if((container->isFixedSize() || container->readOnly()) && parent() != parentRow)
 			return false;
 
 		if(beforeChild && beforeChild->parent() != parentRow)
@@ -1229,7 +1244,7 @@ PropertyRow* PropertyRow::rowByHorizontalIndex(PropertyTree* tree, int index)
 
 void PropertyRow::redraw(const PropertyDrawContext& context)
 {
-	redraw(context.graphics, gdiplusRect(context.widgetRect), gdiplusRect(context.lineRect));
+
 }
 
 
