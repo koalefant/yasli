@@ -24,16 +24,16 @@ namespace ww{
 template<size_t Size>
 void formatColor(char (&str)[Size], const ww::Color& c)
 {
-	sprintf(str, "%i %i %i %i", c.r, c.g, c.b, c.a);
+	sprintf(str, "(%i %i %i %i)", c.r, c.g, c.b, c.a);
 }
 
 #ifndef WW_DISABLE_XMATH
 template<size_t Size>
-void formatColor(char (&str)[Size], const Color4c& c) { sprintf(str, "%i %i %i %i", c.r, c.g, c.b, c.a); }
+void formatColor(char (&str)[Size], const Color4c& c) { sprintf_s(str, sizeof(str), "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
 template<size_t Size>
-void formatColor(char (&str)[Size], const Color3c& c) { sprintf(str, "%i %i %i", c.r, c.g, c.b); }
+void formatColor(char (&str)[Size], const Color3c& c) { sprintf_s(str, sizeof(str), "(%i %i %i)", c.r, c.g, c.b); }
 template<size_t Size>
-void formatColor(char (&str)[Size], const Color4f& c) { sprintf(str, "%g %g %g", c.r, c.g, c.b); }
+void formatColor(char (&str)[Size], const Color4f& c) { sprintf_s(str, sizeof(str), "(%g %g %g %g)", c.r, c.g, c.b, c.a); }
 
 #endif
 

@@ -285,9 +285,11 @@ PropertyRow* PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 
 void PropertyRow::digestAppend(const wchar_t* text)
 {
-	if(!digest_.empty())
-		digest_ += L", ";
-	digest_ += text;
+	if(text[0] != L'\0'){
+		if(!digest_.empty())
+			digest_ += L", ";
+		digest_ += text;
+	}
 }
 
 void PropertyRow::digestReset()
