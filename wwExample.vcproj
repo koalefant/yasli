@@ -516,6 +516,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ExampleTable.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\Resource.h"
 			>
 		</File>

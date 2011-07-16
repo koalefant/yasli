@@ -56,6 +56,9 @@ MainWindow::MainWindow(ww::Application& app)
 	ww::Widget* createDigestSample();
 	pages->add("Digests", createDigestSample());
 
+	ww::Widget* createTableSample();
+	pages->add("Table", createTableSample());
+
     add(pages);
 
 	TextIArchive sa;
