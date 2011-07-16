@@ -88,6 +88,7 @@ class ContainerSerializationInterface{
 public:
 	virtual std::size_t size() const = 0;
 	virtual std::size_t resize(std::size_t size) = 0;
+	virtual bool isFixedSize() const{ return false; }
 
 	virtual void* pointer() const = 0;
 	virtual TypeID type() const = 0;
@@ -237,6 +238,7 @@ public:
 	TypeID type() const{ return TypeID::get<T>(); }
 	void* elementPointer() const { return &array_[index_]; }
 	size_t elementSize() const { return sizeof(T); }
+	virtual bool isFixedSize() const{ return true; }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
 		ESCAPE(size_t(index_) < size_, return false);
