@@ -244,7 +244,7 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 			if(capture)
 				return true;
 			else if(row->widgetRect().pointInside(point)){
-				if(!row->hasIcon())
+				if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
 					interruptDrag();
 				row->onActivate(this, false);
 				return false;
@@ -362,17 +362,15 @@ void PropertyTree::interruptDrag()
 void PropertyTree::updateHeights()
 {
 	needUpdate_ = false;
-	model()->root()->updateSize(this);
+	model()->root()->calculateMinimalSize(this);
 	impl()->size_.y = 0;
-	int extraSize = 0;
 
     int padding = compact_ ? 0 : 4;
 
-    Rect rect(Vect2(padding, padding),
-              impl()->area_.size() - Vect2(padding, padding) * 2);
+    Rect rect(Vect2(padding, padding), impl()->area_.size() - Vect2(padding, padding) * 2);
 
-	model()->root()->adjustRect(this, rect, rect.leftTop(),
-                                impl()->size_.y, extraSize);
+	int extraSize = 0;
+	model()->root()->adjustRect(this, rect, rect.leftTop(), impl()->size_.y, extraSize);
 	impl()->updateScrollBar();
 }
 
@@ -508,7 +506,7 @@ bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 	if(!widget_ || widget_->row() != row){
 		interruptDrag();
 		setWidget(0);
-		PropertyRowWidget* newWidget = ignoreReadOnly && row->readOnlyOver() || !row->readOnly() ? row->createWidget(this) : 0;
+		PropertyRowWidget* newWidget = ignoreReadOnly && row->userReadOnlyRecurse() || !row->userReadOnly() ? row->createWidget(this) : 0;
 		setWidget(newWidget);
 		return newWidget != 0;
 	}
@@ -543,10 +541,10 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	menu.add(TRANSLATE("Copy"), row)
 		.connect(this, &PropertyTree::onRowMenuCopy)
 		.setHotkey(KeyPress(Key('C'), KEY_MOD_CONTROL));
-    if(!row->readOnly()){
+    if(!row->userReadOnly()){
 	    menu.add(TRANSLATE("Paste"), row)
 		    .connect(this, &PropertyTree::onRowMenuPaste)
-		    .enable(!row->readOnly())
+		    .enable(!row->userReadOnly())
 		    .setHotkey(KeyPress(Key('V'), KEY_MOD_CONTROL))
 		    .enable(canBePasted(row));
     }
@@ -607,7 +605,7 @@ void PropertyTree::onRowMenuPaste(PropertyRow* row)
 
 bool PropertyTree::canBePasted(PropertyRow* destination)
 {
-	if(destination->readOnly())
+	if(destination->userReadOnly())
 		return false;
 	Clipboard clipboard(this, &constStrings_, model());
 	return clipboard.paste(destination, true);
@@ -764,7 +762,8 @@ PropertyRow* PropertyTree::selectedRow()
 
 Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
-    POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), point.y - impl()->offset_.y + impl()->area_.top() };
+    POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), 
+		         point.y - impl()->offset_.y + impl()->area_.top() };
     ClientToScreen(*impl(), &pt);
     return Vect2(pt.x, pt.y);
 }

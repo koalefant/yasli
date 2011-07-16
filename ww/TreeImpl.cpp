@@ -442,7 +442,7 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 		else{
 			// row могла уже быть пересоздана	
 			row = rowByPoint(Vect2(x, y));
-            if(row && !row->readOnly()){
+            if(row && !row->userReadOnly()){
 				POINT cursorPos;
 				GetCursorPos(&cursorPos);
 				drag_.beginDrag(row, cursorPos);
@@ -710,7 +710,9 @@ struct DrawVisitor
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				return SCAN_FINISHED;
 
-			row->drawRow(dc_, tree);
+			if (row->rect().bottom() > scrollOffset_)
+				row->drawRow(dc_, tree);
+
 			return SCAN_CHILDREN_SIBLINGS;
 		}
 		else

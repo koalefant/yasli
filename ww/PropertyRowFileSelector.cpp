@@ -32,7 +32,7 @@ public:
 	{
 		if(multiValue())
 			context.drawEntry(L" ... ", false, true);
-		else if(readOnly())
+		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsWString().c_str());
 		else
 			context.drawEntry(valueAsWString().c_str(), true, false);

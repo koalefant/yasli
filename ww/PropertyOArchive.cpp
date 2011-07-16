@@ -67,7 +67,6 @@ PropertyRowContainer::PropertyRowContainer(const char* name = "", const char* la
 , elementTypeName_(elementTypeName)
 {
 	buttonLabel_[0] = 0;
-	widgetSizeMin_ = 32;
 
 	if(pulledUp())
 		_setExpanded(true);		
@@ -106,7 +105,7 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	fillRoundRectangle(context.graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
 
 	Color textColor;
-    textColor.SetFromCOLORREF(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+    textColor.SetFromCOLORREF(userReadOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
 	Gdiplus::SolidBrush textBrush(textColor);
 	RectF textRect( float(widgetRect.X), float(widgetRect.Y), float(widgetRect.Width), float(widgetRect.Height) );
 	StringFormat format;
@@ -133,7 +132,7 @@ bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
 
 bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
-    if(readOnly())
+    if(userReadOnly())
         return false;
     PopupMenu menu(512);
     generateMenu(menu.root(), tree);
@@ -143,11 +142,19 @@ bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 
 void PropertyRowContainer::generateMenu(PopupMenuItem& root, PropertyTree* tree)
 {
-    if(!readOnly())
+	if (fixedSize_)
+	{
+		root.add("[ Fixed Size Container ]").enable(false);
+	}
+    else if(userReadOnly())
     {
-	    PopupMenuItem& createItem = root.add(TRANSLATE("Add"), tree)
-		    .connect(this, &PropertyRowContainer::onMenuAppendElement)
-		    .setHotkey(KeyPress(VK_INSERT));
+		root.add("[ Read Only Container ]").enable(false);
+	}
+	else
+	{
+		PopupMenuItem& createItem = root.add(TRANSLATE("Add"), tree)
+			.connect(this, &PropertyRowContainer::onMenuAppendElement)
+			.setHotkey(KeyPress(VK_INSERT));
 
 		root.addSeparator();
 
@@ -157,12 +164,12 @@ void PropertyRowContainer::generateMenu(PopupMenuItem& root, PropertyTree* tree)
 			ClassMenuItemAdderRowContainer(this, tree).generateMenu(createItem, tree->model()->typeStringList(pointerRow->typeName()));
 		}
 		createItem.enable(true);
-	}
 
-    if(!readOnly())
 	    root.add(TRANSLATE("Remove All"), tree->model()).connect(this, &PropertyRowContainer::onMenuClear)
 		    .setHotkey(KeyPress(KEY_DELETE, KEY_MOD_SHIFT))
-		    .enable(!readOnly());
+		    .enable(!userReadOnly());
+	}
+
 }
 
 bool PropertyRowContainer::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
@@ -207,7 +214,7 @@ void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 	PropertyRow* defaultType = defaultRow(tree->model());
 	ESCAPE(defaultType != 0, return);
 	PropertyRow* clonedRow = defaultType->clone();
-	clonedRow->setFullRow(true);
+	// clonedRow->setFullRow(true); TODO
     if(count() == 0)
         tree->expandRow(this);
 	add(clonedRow);
@@ -228,7 +235,7 @@ void PropertyRowContainer::onMenuAppendPointerByIndex(int index, PropertyTree* t
 {
 	PropertyRow* defaultType = defaultRow(tree->model());
 	PropertyRow* clonedRow = defaultType->clone();
-	clonedRow->setFullRow(true);
+	// clonedRow->setFullRow(true); TODO
     if(count() == 0)
         tree->expandRow(this);
     add(clonedRow);
@@ -250,7 +257,7 @@ void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyT
 	if(!defaultType)
 		return;
 	PropertyRow* clonedRow = defaultType->clone();
-	clonedRow->setFullRow(true);
+	// clonedRow->setFullRow(true); TODO
 	addBefore(clonedRow, child);
 	setMultiValue(false);
 	tree->model()->selectRow(clonedRow, true);
@@ -338,7 +345,6 @@ PropertyRowEnum::PropertyRowEnum(const char* name, const char* label, int value,
 , value_(value)
 , descriptor_(descriptor)
 {
-	widgetSizeMin_ = 100;
 }
 
 void PropertyRowEnum::setVisibleIndex(int visibleIndex)
@@ -518,7 +524,7 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	fillRoundRectangle(context.graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
 
 	ww::Color textColor;
-    textColor.setGDI(readOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+    textColor.setGDI(userReadOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
 
 	ww::Rect textRect(widgetRect.X + 4, widgetRect.Y, widgetRect.GetRight() - 5, widgetRect.GetBottom());
 	/*
@@ -548,7 +554,7 @@ protected:
 
 bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
 {
-    if(readOnly())
+    if(userReadOnly())
         return false;
     PopupMenu menu(512);
     ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu.root(), tree->model()->typeStringList(typeName()));
@@ -569,7 +575,7 @@ bool PropertyRowPointer::onContextMenu(PopupMenuItem &menu, PropertyTree* tree)
 {
 	if(!menu.empty())
 		menu.addSeparator();
-    if(!readOnly()){
+    if(!userReadOnly()){
 	    PopupMenuItem0& createItem = menu.add(TRANSLATE("Set"));
 	    ClassMenuItemAdderRowPointer(this, tree).generateMenu(createItem, tree->model()->typeStringList(typeName()));
     }
@@ -773,13 +779,11 @@ protected:
 PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const char* label, const StringListValue& value)
 : PropertyRowImpl<StringListValue, PropertyRowStringListValue>(name, label, value)
 {
-	widgetSizeMin_ = 80;
 }
 
 PropertyRowStringListValue::PropertyRowStringListValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<StringListValue, PropertyRowStringListValue>(object, size, name, label, typeName)
 {
-	widgetSizeMin_ = 80;
 }
 
 PropertyRowWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
@@ -793,13 +797,11 @@ REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* name, const char* label, const StringListStaticValue& value)
 : PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(name, label, value)
 {
-	widgetSizeMin_ = 100;
 }
 
 PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
 : PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(object, size, name, label, typeName)
 {
-	widgetSizeMin_ = 100;
 }
 
 PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
@@ -932,8 +934,6 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 		return result;
 	}
 	else{
-		if(currentNode_->isContainer())
-			newRow->setFullRow(true);
 		if(updateMode_ || block){
 			PropertyRow* row = currentNode_->find(newRow->name(), 0, newRow->typeName(), !block);
 
@@ -1112,8 +1112,8 @@ bool PropertyOArchive::operator()(ContainerSerializationInterface& ser, const ch
 {
     const char* typeName = ser.type().name();
     const char* elementTypeName = ser.type().name();
-    bool readOnly = false;
-	PropertyRow* container = new PropertyRowContainer(name, label, typeName, elementTypeName, readOnly);
+    bool fixedSizeContainer = ser.isFixedSize();
+	PropertyRow* container = new PropertyRowContainer(name, label, typeName, elementTypeName, fixedSizeContainer);
 	lastNode_ = currentNode_;
 	enterNode(addRow(container, false));
 

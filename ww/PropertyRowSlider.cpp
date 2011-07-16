@@ -99,7 +99,6 @@ template<class WrapperType, class ScalarType>
 PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowNumeric<WrapperType, PropertyRowSlider>(object, size, name, nameAlt, typeName)
 {
-	widgetSizeMin_ = 40;
 }
 
 template<class WrapperType, class ScalarType>
@@ -118,7 +117,6 @@ void PropertyRowSlider<WrapperType, ScalarType>::redraw(const PropertyDrawContex
 template<class WrapperType, class ScalarType>
 PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider()
 {
-	widgetSizeMin_ = 40;
 }
 
 typedef PropertyRowSlider<SliderDecoratorf, float> PropertyRowSliderf;

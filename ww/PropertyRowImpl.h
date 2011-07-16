@@ -36,6 +36,7 @@ public:
 	void serializeValue(Archive& ar){
 		ar(value_, "value", "Value");
 	}
+	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	PropertyRow* clone() const{
 		// если здесь возникла ошибка "error C2440: 'static_cast' : cannot convert from..."
 		// скорее всего вы забыли указать Derived аргумент при наследовании от PropertyRowImpl

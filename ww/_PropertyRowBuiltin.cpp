@@ -17,7 +17,6 @@ PropertyRowBool::PropertyRowBool(const char* name, const char* label, bool value
 : PropertyRow(name, label, "bool")
 , value_(value)
 {
-	widgetSizeMin_ = ICON_SIZE;
 }
 
 bool PropertyRowBool::assignTo(void* object, size_t size)

@@ -52,11 +52,11 @@ class PropertyTreeTransaction;
 class WW_API PropertyRow : public RefCounter
 {
 public:
-	enum WidgetPosition {
-		WIDGET_POS_ICON,
-		WIDGET_POS_AFTER_NAME,
-		WIDGET_POS_VALUE,
-		NUM_WIDGET_POS
+	enum WidgetPlacement {
+		WIDGET_NONE,
+		WIDGET_ICON,
+		WIDGET_AFTER_NAME,
+		WIDGET_VALUE
 	};
 
 	static const int ROW_DEFAULT_HEIGHT = 21; 
@@ -137,7 +137,7 @@ public:
 	void setLabel(const char* label) { label_ = label ? label : ""; setLabelChanged(); }
 	void setLabelChanged();
 	void updateLabel();
-	void parseControlCodes(const char* label);
+	void parseControlCodes(const char* label, bool updateLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
@@ -163,28 +163,17 @@ public:
 
 	int height() const{ return size_.y; }
 
-	virtual int widgetSizeMin() const { return widgetSizeMin_; } 
+	virtual int widgetSizeMin() const { return userWidgetSize(); } 
 	virtual int floorHeight() const{ return 0; }
 
-    void updateSize(const PropertyTree* tree);
+    void calculateMinimalSize(const PropertyTree* tree);
+	void setTextSize(float multiplier);
+	void calculateTotalSizes(int* minTextSize);
     void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 pos, int& totalHeight, int& extraSize);
-	void scaleSize(float t, bool scaleWidget);
-	void cutSize(int& extraSize, bool cutWidget);
 
-	virtual bool isWidgetFixed(WidgetPosition pos) const{ 
-		if (pos == WIDGET_POS_ICON || pos == WIDGET_POS_AFTER_NAME)
-			return true;
-		else
-			return userFixedWidget();
-	}
-	virtual bool hasWidgetAt(WidgetPosition pos) const 
-	{
-		if (hasIcon())
-			return pos == WIDGET_POS_ICON;
-		else
-			return pos == WIDGET_POS_VALUE;
-	}
-	virtual bool hasIcon() const{ return false; }
+	virtual bool isWidgetFixed() const{ return widgetPlacement() != WIDGET_VALUE; }
+
+	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	const Rect rect() const{ return Rect(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
 	const Rect textRect() const{ return Rect(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
@@ -221,18 +210,23 @@ public:
 	virtual void onMouseUp(PropertyTree* tree, Vect2 point) {}
 	virtual bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
 
-	// user states, assign using control codes (characters in the beginning of label)
-	void setUpdated(bool updated) { updated_ = updated; }
-	bool updated() const { return updated_; }
-	bool readOnly() const { return readOnly_; }
-	bool readOnlyOver() const { return readOnlyOver_; }
+	bool isFullRow(const PropertyTree* tree) const;
+
+	// User states.
+	// Assigned using control codes (characters in the beginning of label)
 	// fixed widget doesn't expand automatically to occupy all available place
 	bool userFixedWidget() const{ return userFixedWidget_; }
+	bool userFullRow() const { return userFullRow_; }
+	bool userReadOnly() const { return userReadOnly_; }
+	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
+	int userWidgetSize() const{ return userWidgetSize_; }
+
+	void setUpdated(bool updated) { updated_ = updated; }
+	bool updated() const { return updated_; }
+
 	// multiValue is used to edit properties of multiple objects simulateneously
 	bool multiValue() const { return multiValue_; }
 	void setMultiValue(bool multiValue) { multiValue_ = multiValue; }
-	bool fullRow(const PropertyTree* tree) const;
-	void setFullRow(bool fullRow) { fullRow_ = fullRow; }
 
 	// pulledRow - это та, что "выт€гиваетс€" на уровень вверх
 	// (по символу '^' в начале nameAlt)
@@ -280,19 +274,21 @@ protected:
 	bool selected_ : 1;
 	bool updated_ : 1;
 	bool labelChanged_ : 1;
-	bool readOnly_ : 1;
-	bool readOnlyOver_ : 1;
+	bool userReadOnly_ : 1;
+	bool userReadOnlyRecurse_ : 1;
 	bool userFixedWidget_ : 1;
-	bool fullRow_ : 1;
+	bool userFullRow_ : 1;
 	bool pulledUp_ : 1;
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
+	// number of pulled childrens
 	char freePulledChildren_;
 
 	// do we really need Vect2s here? 
 	Vect2 pos_;
 	Vect2 size_;
+	short int minimalWidth_;
     short int plusSize_;
 	short int textPos_;
 	short int textSizeInitial_;
@@ -300,9 +296,7 @@ protected:
 	short int digestPos_;
 	short int widgetPos_; // widget == icon!
 	short int widgetSize_;
-	short int widgetSizeMin_;
-	short int textSizeDelta_;
-	short int widgetSizeDelta_;
+	short int userWidgetSize_;
 	unsigned textHash_;
 
 	yasli::SharedPtr<PropertyRow> pulledContainer_;

@@ -20,7 +20,7 @@ class PropertyTreeModel;
 class PropertyRowContainer : public PropertyRow, public sigslot::has_slots{
 public:
 	enum { Custom = false };
-	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool readOnly);
+	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool fixedSizeContainer);
 	bool isContainer() const{ return true; }
 	bool onActivate( PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& item, PropertyTree* tree);
@@ -35,7 +35,7 @@ public:
 	void onMenuChildRemove(PropertyRow* child, PropertyTreeModel* model);
 
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowContainer(name_, label_, typeName_, elementTypeName_, readOnly_), this);
+		return cloneChildren(new PropertyRowContainer(name_, label_, typeName_, elementTypeName_, userReadOnly_), this);
 	}
 	void digestReset();
 	bool isStatic() const{ return false; }
@@ -48,9 +48,8 @@ public:
     std::string valueAsString() const;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
-	bool hasWidgetAt(WidgetPosition pos) const{
-		return pos == WIDGET_POS_AFTER_NAME;
-	}
+	WidgetPlacement widgetPlacement() const{ return WIDGET_AFTER_NAME; }
+	int widgetSizeMin() const{ return 36; }
 
 protected:
 	void generateMenu(PopupMenuItem& root, PropertyTree* tree);
@@ -76,7 +75,7 @@ public:
 
 	void serializeValue(Archive& ar);
 	std::string valueAsString() const;
-
+	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 40; }
 protected:
 	int value_;
 	const EnumDescription* descriptor_;
@@ -107,6 +106,7 @@ public:
 		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, derivedType_, factory_), this);
 	}
 	void redraw(const PropertyDrawContext& context);
+	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	void serializeValue(Archive& ar);
 protected:
 	void updateTitle();
@@ -133,13 +133,12 @@ public:
 	void digestReset();
 	string valueAsString() const { return value_ ? labelUndecorated() : ""; }
 	wstring searchValue() const{ return value_ ? L"true" : L"false"; }
-	bool hasWidgetAt(WidgetPosition pos) const{
-		return pos == WIDGET_POS_ICON;
-	}
+	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowBool(name_, label_, value_), this);
 	}
     void serializeValue(Archive& ar);
+	int widgetSizeMin() const{ return ICON_SIZE; }
 protected:
     bool value_;
 };
@@ -170,6 +169,7 @@ public:
 		*reinterpret_cast<StringListValue*>(object) = value().c_str();
 		return true;
 	}
+	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 80; }
 };
 
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>{
@@ -185,6 +185,7 @@ public:
 		*reinterpret_cast<StringListStaticValue*>(object) = value().index();
 		return true;
 	}
+	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 80; }
 };
 
 // используется widget-ом редактриования
@@ -239,15 +240,20 @@ public:
 	PropertyRowNumeric(const char* name = "", const char* nameAlt = "", Type value = Type())
 	: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, typeid(Type).name())
 	{
-		widgetSizeMin_ = 60;
 	}
 	PropertyRowNumeric(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRowImpl<Type, Derived>(object, size, name, nameAlt, typeName)
 	{
-		widgetSizeMin_ = 60;
 	}
 	PropertyRowWidget* createWidget(PropertyTree* tree){
 		return new PropertyRowWidgetNumeric(this, tree->model(), this, tree);
+	}
+
+	virtual int widgetSizeMin() const{ 
+		if (userWidgetSize() != 0)
+			return userWidgetSize();
+		else
+			return 40;
 	}
 
 	bool setValueFromString(const char* str){

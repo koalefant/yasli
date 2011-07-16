@@ -76,6 +76,7 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
     belongsToFilteredRow_ = false;
     matchFilter_ = true;
 	
+	minimalWidth_ = 0;
 	pos_ = size_ = Vect2::ZERO;
 	plusSize_ = 0;
 	textPos_ = 0;
@@ -85,10 +86,8 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	widgetPos_ = 0;
 	digestPos_ = 0;
     widgetSize_ = 0;
-	widgetSizeMin_ = 0;
+	userWidgetSize_ = 0;
 	freePulledChildren_ = 0;
-	textSizeDelta_ = 0;
-	widgetSizeDelta_ = 0;
 	
 	name_ = name[0] || !nameAlt ? name : nameAlt;
 	typeName_ = typeName;
@@ -97,9 +96,9 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	pulledUp_ = false;
 	pulledBefore_ = false;
 	hasPulled_ = false;
-	readOnly_ = false;
-	readOnlyOver_ = false;
-	fullRow_ = false;
+	userReadOnly_ = false;
+	userReadOnlyRecurse_ = false;
+	userFullRow_ = false;
 	multiValue_ = false;
 	
 	setLabel(nameAlt ? TRANSLATE(nameAlt) : 0);
@@ -215,8 +214,8 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
     ESCAPE(row, return);
 	parent_ = row->parent_;
 	
-	readOnly_ = row->readOnly_;
-	readOnlyOver_ = row->readOnlyOver_;
+	userReadOnly_ = row->userReadOnly_;
+	userReadOnlyRecurse_ = row->userReadOnlyRecurse_;
 	userFixedWidget_ = row->userFixedWidget_;
 	pulledUp_ = row->pulledUp_;
 	pulledBefore_ = row->pulledBefore_;
@@ -229,10 +228,8 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	textSize_ = row->textSize_;
 	widgetPos_ = row->widgetPos_;
 	widgetSize_ = row->widgetSize_;
-	widgetSizeMin_ = row->widgetSizeMin_;
+	userWidgetSize_ = row->userWidgetSize_;
 	freePulledChildren_ = row->freePulledChildren_;
-	textSizeDelta_ = row->textSizeDelta_;
-	widgetSizeDelta_ = row->widgetSizeDelta_;
 
     assignRowState(*row, false);
 }
@@ -373,8 +370,8 @@ void PropertyRow::updateLabel()
     FOR_EACH(children_, it)
 		(*it)->updateLabel();
 
-	parseControlCodes(label_);
-	visible_ = *labelUndecorated_ || fullRow_ || pulledUp_ || isRoot();
+	parseControlCodes(label_, true);
+	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
 	if(!*label_)
 		labelUndecorated_ = name();
 
@@ -382,13 +379,16 @@ void PropertyRow::updateLabel()
 		pulledContainer()->_setExpanded(expanded());
 }
 
-void PropertyRow::parseControlCodes(const char* ptr)
+void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 {
-	fullRow_ = false;
-	pulledUp_ = pulledBefore_ = false;
+	userFullRow_ = false;
+	pulledUp_ = false;
+	pulledBefore_ = false;
 	hasPulled_ = false;
-	readOnly_ = readOnlyOver_ = false;
+	userReadOnly_ = false;
+	userReadOnlyRecurse_ = false;
 	userFixedWidget_ = false;
+	userWidgetSize_ = 0;
 
 	bool appendValueToDigest = false;
 	while(true){
@@ -406,14 +406,14 @@ void PropertyRow::parseControlCodes(const char* ptr)
 		else if(*ptr == '+')
 			_setExpanded(true);
 		else if(*ptr == '<')
-			fullRow_ = true;
+			userFullRow_ = true;
 		else if(*ptr == '>'){
 			userFixedWidget_ = true;
 			const char* p = ++ptr;
 			while(*p >= '0' && *p <= '9')
 				++p;
 			if(*p == '>'){
-				widgetSizeMin_ = atoi(ptr);
+				userWidgetSize_ = atoi(ptr);
 				ptr = ++p;
 			}
 			continue;
@@ -425,15 +425,15 @@ void PropertyRow::parseControlCodes(const char* ptr)
 			scanChildren(Op());
 		}
 		else if(*ptr == '!'){
-			if(readOnly_)
-				readOnlyOver_ = true;
-			readOnly_ = true;
+			if(userReadOnly_)
+				userReadOnlyRecurse_ = true;
+			userReadOnly_ = true;
 		}
 		else if(*ptr == '['){
 			++ptr;
 			PropertyRow::iterator it;
 			FOR_EACH(children_, it)
-				(*it)->parseControlCodes(ptr);
+				(*it)->parseControlCodes(ptr, false);
 
 			int counter = 1;
 			while(*ptr){
@@ -449,7 +449,9 @@ void PropertyRow::parseControlCodes(const char* ptr)
 		++ptr;
 	}
 
-	labelUndecorated_ = ptr;
+	if (updateLabel)
+		labelUndecorated_ = ptr;
+
 	if (appendValueToDigest)
 		parent()->digestAppend(valueAsWString().c_str());
 }
@@ -477,7 +479,7 @@ const char* PropertyRow::typeNameForFilter() const
 }
 
 
-void PropertyRow::updateSize(const PropertyTree* tree)
+void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 {
 	updateLabel();
 
@@ -519,33 +521,26 @@ void PropertyRow::updateSize(const PropertyTree* tree)
 		}
     }
 
-	textSize_ = textSizeInitial_;
-	widgetSize_ = widgetSizeMin();
 	if(pulledUp() && isContainer())
 	{
 		//textSize_ = widgetSize_ = plusSize_ = 0;
-		textSize_ = plusSize_ = 0;
-		widgetSize_ = widgetSizeMin_;
+		plusSize_ = 0;
 	}
 
-	size_.set(plusSize_ + textSize_ + widgetSize_, ROW_DEFAULT_HEIGHT + floorHeight());
-	textSizeDelta_ = textSize_ > TEXT_SIZE_MIN ? textSize_ - TEXT_SIZE_MIN : 0;
-	widgetSizeDelta_ = widgetSize_ > WIDGET_SIZE_MIN ? widgetSize_ - WIDGET_SIZE_MIN : 0;
-	bool hasResizeableWidget = (hasWidgetAt(WIDGET_POS_VALUE) && !isWidgetFixed(WIDGET_POS_VALUE)) || 
-		                       (hasWidgetAt(WIDGET_POS_VALUE) && !isWidgetFixed(WIDGET_POS_ICON)) || 
-							   (hasWidgetAt(WIDGET_POS_AFTER_NAME) && !isWidgetFixed(WIDGET_POS_AFTER_NAME));
-	freePulledChildren_ = widgetSize_ && hasResizeableWidget ? 1 : 0;
+	int widgetSizeMin = this->widgetSizeMin();
+	minimalWidth_ = textSizeInitial_ + widgetSizeMin;
+	size_.set(minimalWidth_, ROW_DEFAULT_HEIGHT + floorHeight());
+	freePulledChildren_ = widgetPlacement() == WIDGET_VALUE && !isWidgetFixed() ? 1 : 0;
     Rows::iterator it;
     FOR_EACH(children_, it){
 		PropertyRow* row = *it;
 		if(!row->visible(tree))
 			continue;
-        row->updateSize(tree);
+        row->calculateMinimalSize(tree);
 		if(row->pulledUp()){
 			size_.x += row->size_.x;
 			size_.y = max(size_.y, row->size_.y);
-			textSizeDelta_ += row->textSizeDelta_;
-			widgetSizeDelta_ += row->widgetSizeDelta_;
+			minimalWidth_ += row->minimalWidth_;
 			freePulledChildren_ += row->freePulledChildren_;
 		}
     }
@@ -555,36 +550,38 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 {
 	pos_ = pos;
 	pos.x += plusSize_;
+	widgetSize_ = widgetSizeMin();
 
 	int extraSizeStorage = 0;
 	int& extraSize = !pulledUp() ? extraSizeStorage : _extraSize;
 	if(!pulledUp()){
-		extraSize = rect.width() - size_.x - pos.x;
-		if(extraSize < 0){
-			if(-extraSize > textSizeDelta_){
-				scaleSize(0, false);
-				extraSize += textSizeDelta_;
-			}
-			else{
-				scaleSize(float(textSizeDelta_ + extraSize)/textSizeDelta_, false);
-				extraSize = 0;
+		extraSize = rect.width() - minimalWidth_ - pos.x;
+
+		float textScale = 1.0f;
+		bool hideOwnText = false;
+		if (extraSize < 0)
+		{
+			int minTextSize = 0;
+			calculateTotalSizes(&minTextSize);
+
+			// hide container item text first
+			if (parent() && parent()->isContainer()){
+				extraSize += textSizeInitial_;
+				minTextSize -= textSizeInitial_;
+				hideOwnText = true;
 			}
 
-			if(-extraSize > widgetSizeDelta_){
-				scaleSize(0, true);
-				extraSize += widgetSizeDelta_;
-			}
-			else{
-				scaleSize(float(widgetSizeDelta_ + extraSize)/widgetSizeDelta_, true);
-				extraSize = 0;
-			}
-
-			cutSize(extraSize, false);
-			cutSize(extraSize, true);
+			textScale = clamp(1.0f - float(-extraSize) / minTextSize, 0.0f, 1.0f);
 		}
+		setTextSize(textScale);
+
+		if (hideOwnText)
+			textSize_ = 0;
 	}
 
-	if(hasWidgetAt(WIDGET_POS_ICON)){
+	WidgetPlacement widgetPlace = widgetPlacement();
+	
+	if(widgetPlace == WIDGET_ICON){
 		widgetPos_ = widgetSize_ ? pos.x : -1000;
 		pos.x += widgetSize_;
 		textPos_ = pos.x;
@@ -598,34 +595,44 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 			pos.x += (*it)->size_.x;
 		}
 
-	if(!hasWidgetAt(WIDGET_POS_ICON)){
+	if(widgetPlace != WIDGET_ICON){
 		textPos_ = pos.x;
 		pos.x += textSize_;
 	}
 
-	if(hasWidgetAt(WIDGET_POS_AFTER_NAME)){
+	if(widgetPlace == WIDGET_AFTER_NAME){
 		widgetPos_ = pos.x;
 		pos.x += widgetSize_;
 	}
 
-	if(!pulledUp() && extraSize > 0/* && hasWidgetAt(WIDGET_POS_VALUE)*/){
-		int widgetsSize = size_.x - pos.x + pos_.x;
-		if(!fullRow(tree))
-			pos.x = max(rect.left() + round(rect.width()*(1.f - tree->valueColumnWidth())), pos.x);
-		extraSize = rect.right() - pos.x - widgetsSize;
-		if(extraSize > 0)
-			extraSize = freePulledChildren_ > 0 ? extraSize/freePulledChildren_ : extraSize;
-		else{
-			pos.x = max(pos.x + extraSize, textPos_ + (parent()->isContainer() ? textSize_ : 0));
-			extraSize = 0;
+	if(widgetPlace == WIDGET_VALUE || freePulledChildren_ > 0){
+		if(!pulledUp() && extraSize > 0){
+			// align widget value to value column
+			if(!isFullRow(tree))
+			{
+				int oldX = pos.x;
+				int newX = max(rect.left() + round(rect.width()* (1.f - tree->valueColumnWidth())), pos.x);
+				int xDelta = newX - oldX;
+				if (xDelta <= extraSize)
+				{
+					extraSize -= xDelta;
+					pos.x = newX;
+				}
+				else
+				{
+					pos.x += extraSize;
+					extraSize = 0;
+				}
+			}
 		}
 	}
+	if (freePulledChildren_ > 0)
+		extraSize = extraSize / freePulledChildren_;
 
-	if(hasWidgetAt(WIDGET_POS_VALUE)){
-		if(widgetSize_ && !isWidgetFixed(WIDGET_POS_VALUE) && extraSize > 0){
+	if (widgetPlace == WIDGET_VALUE)
+	{
+		if(widgetSize_ && !isWidgetFixed() && extraSize > 0)
 			widgetSize_ += extraSize;
-			size_.x += extraSize;
-		}
 
 		widgetPos_ = pos.x;
 		pos.x += widgetSize_;
@@ -644,10 +651,8 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 			if(row->pulledBefore())
 				continue;
 			row->adjustRect(tree, rect, pos, totalHeight, extraSize);
-			//if(!row->isContainer()){
-				pos.x += row->size_.x;
-				size_.x += row->size_.x;
-			//}
+			pos.x += row->size_.x;
+			size_.x += row->size_.x;
 			hasChildrenPulledAfter = true;
         }
 		else if(row->visible(tree) && nonPulled->expanded()){
@@ -660,64 +665,29 @@ void PropertyRow::adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 p
 	digestPos_ = pos.x;
 
 	if(!pulledUp())
-	{
-		// widget at end
-		//if (!hasChildrenPulledAfter && hasWidgetAt(WIDGET_POS_ICON))
-		//	widgetPos_ = rect.right() - widgetSize_;
 		size_.x = rect.right() - pos_.x;
-	}
 }
 
-void PropertyRow::scaleSize(float t, bool scaleWidget)
+void PropertyRow::setTextSize(float mult)
 {
-	if(!scaleWidget){
-		if(textSize_ > TEXT_SIZE_MIN)
-			textSize_ = TEXT_SIZE_MIN + round((textSize_ - TEXT_SIZE_MIN)*t);
-	}
-	else{
-		if(widgetSize_ > WIDGET_SIZE_MIN)
-			widgetSize_ = WIDGET_SIZE_MIN + round((widgetSize_ - WIDGET_SIZE_MIN)*t);
-	}
+	textSize_ = round(textSizeInitial_ * mult);
 
 	Rows::iterator i;
 	FOR_EACH(children_, i)
 		if((*i)->pulledUp())
-			(*i)->scaleSize(t, scaleWidget);
+			(*i)->setTextSize(mult);
 }
 
-void PropertyRow::cutSize(int& extraSize, bool cutWidget)
+void PropertyRow::calculateTotalSizes(int* minTextSize)
 {
-	if(extraSize >= 0)
-		return;
+	*minTextSize += textSizeInitial_;
 
-	if(!cutWidget){
-		if(-extraSize > textSize_){
-			extraSize += textSize_;
-			textSize_ = 0;
-		}
-		else{
-			textSize_ += extraSize;
-			extraSize = 0;
-		}
-	}
-
-	for(Rows::reverse_iterator i = children_.rbegin(); i != children_.rend(); i++)
-		if((*i)->pulledUp())
-			(*i)->cutSize(extraSize, cutWidget);
-
-	if(cutWidget){
-		if(-extraSize > widgetSize_){
-			extraSize += widgetSize_;
-			widgetSize_ = 0;
-		}
-		else{
-			widgetSize_ += extraSize;
-			extraSize = 0;
-			if(hasWidgetAt(WIDGET_POS_ICON))
-				widgetSize_ = 0;
-		}
-	}
+	Rows::iterator it;
+	FOR_EACH(children_, it)
+		if((*it)->pulledUp())
+			(*it)->calculateTotalSizes(minTextSize);
 }
+
 
 PropertyRow* PropertyRow::findSelected()
 {
@@ -771,17 +741,17 @@ bool PropertyRow::onContextMenu(PopupMenuItem &root, PropertyTree* tree)
 {
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = safe_cast<PropertyRowContainer*>(parent());
-        if(!container->readOnly()){
+		if(!container->isFixedSize()){
 		    if(!root.empty())
 			    root.addSeparator();
 		    root.add(TRANSLATE("Insert Before"), this, tree)
 			    .connect(container, &PropertyRowContainer::onMenuChildInsertBefore)
 			    .setHotkey(KeyPress(KEY_INSERT, KEY_MOD_SHIFT))
-			    .enable(!container->readOnly());
+			    .enable(!container->userReadOnly());
 		    root.add(TRANSLATE("Remove"), this, tree->model())
 			    .connect(container, &PropertyRowContainer::onMenuChildRemove)
 			    .setHotkey(KeyPress(KEY_DELETE, KEY_MOD_SHIFT))
-			    .enable(!container->readOnly());
+			    .enable(!container->userReadOnly());
         }
 	}
 
@@ -841,7 +811,8 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     if(!visible(tree))
         return;
 
-    using namespace Gdiplus;
+
+	using namespace Gdiplus;
 	using Gdiplus::Rect;
 	using Gdiplus::Color;
 
@@ -850,10 +821,11 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
 
 	PropertyDrawContext context;
-	context.graphics = &gr;
 	context.tree = tree;
 	context.widgetRect = widgetRect();
    	context.lineRect = floorRect();
+	context.graphics = &gr;
+
 
 	::ww::Color textColor;
 	textColor.setGDI(GetSysColor(COLOR_BTNTEXT));
@@ -863,7 +835,9 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     // drawing a horizontal line
     std::wstring text = toWideChar(rowText().c_str());
 
-    if(textSize_ && widgetSize_ && !isStatic() && hasWidgetAt(WIDGET_POS_VALUE) && !pulledUp() && !fullRow(tree) && !hasPulled()){
+    if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
+	   !pulledUp() && !isFullRow(tree) && !hasPulled())
+	{
 		Color color1;
         color1.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
         Color color2;
@@ -872,7 +846,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
         rect.X = textPos_ - 1;
         rect.Y = rowRect.bottom() - 3;
         rect.Height = 1;
-        rect.Width = rowRect.width() - textPos_ - 3;
+		rect.Width = max(textSize_ + 8, rowRect.width() - textPos_ - 3);
         Gdiplus::LinearGradientBrush gradientBrush(rect, color1, color2, Gdiplus::LinearGradientModeHorizontal);
         rect.X += 1;
         rect.Width -= 2;
@@ -893,7 +867,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     }
 
     if(selected()){
-		// drawing selection rectangle
+		// drawing a selection rectangle
         if(tree->isFocused()){
             Color brushColor;
             brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
@@ -931,7 +905,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     if(!digest_.empty()){
 		int digestPos = digestPos_;
         int width = 0;
-        if(widgetSize_ == 0)
+		if(widgetPlacement() != WIDGET_VALUE)
             width = rowRect.right() - digestPos;
         else
             width = max(0, widgetPos_ - digestPos);
@@ -968,11 +942,6 @@ bool PropertyRow::visible(const PropertyTree* tree) const
 	return ((visible_ || !tree->hideUntranslated()) && (matchFilter_ || belongsToFilteredRow_));
 }
 
-bool PropertyRow::fullRow(const PropertyTree* tree) const
-{
-	return fullRow_ || tree->fullRowMode();
-}
-
 bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 {
 	if(!visible(tree))
@@ -1001,7 +970,7 @@ bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow
 	if(parentRow->isContainer()){
 		const PropertyRowContainer* container = safe_cast<const PropertyRowContainer*>(parentRow);
 				
-		if((container->isFixedSize() || container->readOnly()) && parent() != parentRow)
+		if((container->isFixedSize() || container->userReadOnly()) && parent() != parentRow)
 			return false;
 
 		if(beforeChild && beforeChild->parent() != parentRow)
@@ -1249,8 +1218,17 @@ void PropertyRow::redraw(const PropertyDrawContext& context)
 
 }
 
+bool PropertyRow::isFullRow(const PropertyTree* tree) const
+{
+	if (tree->fullRowMode())
+		return true;
+	if (parent() && parent()->isContainer())
+		return true;
+	return userFullRow();
+}
 
-YASLI_CLASS(PropertyRow, PropertyRow, "Структура");
+
+YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
 
 // ---------------------------------------------------------------------------
 

@@ -113,6 +113,7 @@ public:
     void _cancelWidget(){ widget_ = 0; }
 	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
+	Rect _visibleRect() const;
 
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 

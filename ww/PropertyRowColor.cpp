@@ -11,7 +11,7 @@
 
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window.h"
-#include "ww/Color.h"
+#include "ww/Color.h"	
 #ifndef WW_DISABLE_XMATH
 #include "XMath/Colors.h"
 #endif
@@ -22,10 +22,7 @@ namespace ww{
 
 
 template<size_t Size>
-void formatColor(char (&str)[Size], const ww::Color& c)
-{
-	sprintf(str, "(%i %i %i %i)", c.r, c.g, c.b, c.a);
-}
+void formatColor(char (&str)[Size], const ww::Color& c) { sprintf_s(str, "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
 
 #ifndef WW_DISABLE_XMATH
 template<size_t Size>
@@ -95,6 +92,9 @@ public:
 		formatColor(buf, value_);
 		return string(buf);
 	}
+	virtual int widgetSizeMin() const{ 
+		return userWidgetSize() ? userWidgetSize() : ICON_SIZE; 
+	}
 };
 
 template<class ColorType>
@@ -115,14 +115,12 @@ template<class ColorType>
 PropertyRowColor<ColorType>::PropertyRowColor(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 : PropertyRowImpl<ColorType, PropertyRowColor>(object, size, name, nameAlt, typeName)
 {
-	widgetSizeMin_ = 26;
 }
 
 template<class ColorType>
 void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
 {
 	using namespace Gdiplus;
-	using Gdiplus::Rect;
 	using Gdiplus::Color;
 
 	if(multiValue()){
@@ -130,9 +128,9 @@ void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
 		return;
 	}
 
-	Rect rect = gdiplusRect(context.widgetRect);
-	rect.Y += 1;
-	rect.Height -= 2;
+	Rect rect = context.widgetRect;
+	rect.setLeft(rect.left() + 1);
+	rect.setHeight(rect.height() - 1);
 	Gdiplus::Color color(toARGB(value()));
 	SolidBrush brush(color);
 	Color penColor;
@@ -140,19 +138,25 @@ void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
 	
 	HatchBrush hatchBrush(HatchStyleSmallCheckerBoard, Color::Black, Color::White);
 
-	Rect rectb(rect.GetRight() - ICON_SIZE - 3, rect.Y, ICON_SIZE, rect.Height);
-	fillRoundRectangle(context.graphics, &hatchBrush, rectb, Color(0, 0, 0, 0), 6);
-	fillRoundRectangle(context.graphics, &brush, rectb, penColor, 6);
+	if (rect.width() > ICON_SIZE * 2 + 5){
+		Rect rectb(rect.right() - ICON_SIZE - 3, rect.top(), rect.right(), rect.bottom());
+		fillRoundRectangle(context.graphics, &hatchBrush, gdiplusRect(rectb), Color(0, 0, 0, 0), 6);
+		fillRoundRectangle(context.graphics, &brush, gdiplusRect(rectb), penColor, 6);
 
-	SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
-	Rect recta(rect.X, rect.Y, rect.Width - ICON_SIZE - 5, rect.Height);
-	fillRoundRectangle(context.graphics, &brushb, recta, penColor, 6);
+		SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
+		Rect recta(rect.left(), rect.top(), rect.right() - ICON_SIZE - 5, rect.bottom());
+		fillRoundRectangle(context.graphics, &brushb, gdiplusRect(recta), penColor, 6);
+	
+	}
+	else{
+		fillRoundRectangle(context.graphics, &hatchBrush, gdiplusRect(rect), Color(0, 0, 0, 0), 6);
+		fillRoundRectangle(context.graphics, &brush, gdiplusRect(rect), penColor, 6);
+	}
 }
 
 template<class ColorType>
 PropertyRowColor<ColorType>::PropertyRowColor()
 {
-	widgetSizeMin_ = 26;
 }
 
 DECLARE_SEGMENT(PropertyRowColor)
