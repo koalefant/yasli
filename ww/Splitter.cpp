@@ -557,22 +557,6 @@ Rect HSplitter::rectByPosition(int start, int end)
 	return rect;
 }
 
-Widget* HSplitter::_nextWidget(Widget* last, FocusDirection focusDirection) const
-{
-	switch(focusDirection)
-	{
-	case FOCUS_LEFT:
-		return Container::_nextWidget(last, FOCUS_PREVIOUS);
-	case FOCUS_RIGHT:
-		return Container::_nextWidget(last, FOCUS_NEXT);
-	case FOCUS_UP:
-	case FOCUS_DOWN:
-		return 0;
-	default:
-		return Container::_nextWidget(last, focusDirection);
-	}
-}
-
 Vect2 HSplitter::elementSize(Widget* widget) const
 {
 	return widget->_minimalSize();
@@ -622,24 +606,6 @@ Vect2 VSplitter::elementSize(Widget* widget) const
 	Vect2 size = widget->_minimalSize();
 	return Vect2(size.y, size.x);
 }
-
-
-Widget* VSplitter::_nextWidget(Widget* last, FocusDirection focusDirection) const
-{
-	switch(focusDirection)
-	{
-	case FOCUS_UP:
-		return Container::_nextWidget(last, FOCUS_PREVIOUS);
-	case FOCUS_DOWN:
-		return Container::_nextWidget(last, FOCUS_NEXT);
-	case FOCUS_LEFT:
-	case FOCUS_RIGHT:
-		return 0;
-	default:
-		return Container::_nextWidget(last, focusDirection);
-	}
-}
-
 
 }
 

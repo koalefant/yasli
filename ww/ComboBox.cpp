@@ -339,7 +339,7 @@ int ComboBox::dropDownHeight() const
 
 void ComboBox::setFocus()
 {
-	if(_focusable() && _window())
+	if(_window())
 		::SetFocus(impl()->comboBoxHandle_);
 }
 

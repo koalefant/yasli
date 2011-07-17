@@ -228,9 +228,6 @@ void Window::init(HWND owner, int border, Application* app)
 	window_ = new WindowImpl(this);
 	WW_VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Rect(0, 0, 400, 400), owner));
 	setBorder(border);
-	
-	hotkeyContext_->signalPressed(KeyPress(KEY_TAB)).connect(this, &Window::onHotkeyFocusNext);
-	hotkeyContext_->signalPressed(KeyPress(KEY_TAB, KEY_MOD_SHIFT)).connect(this, &Window::onHotkeyFocusPrev);
 }
 
 unsigned int Window::calculateStyle()
@@ -527,12 +524,6 @@ void Window::_relayoutParents()
 	__super::_relayoutParents();
 }
 
-void Window::_setFocus()
-{
-    if(_focusable())
-    	__super::_setFocus();
-}
-
 void Window::onClose()
 {
 	hide();
@@ -565,16 +556,6 @@ void Window::serialize(Archive& ar)
         if(child_)
             ar(*child_, "widget", "Widget");
 	}
-}
-
-void Window::onHotkeyFocusNext()
-{
-	passFocus(ww::FOCUS_NEXT);
-}
-
-void Window::onHotkeyFocusPrev()
-{
-	passFocus(ww::FOCUS_PREVIOUS);
 }
 
 void Window::_setFocusedWidget(Widget* widget)

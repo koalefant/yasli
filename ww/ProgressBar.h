@@ -15,7 +15,6 @@ namespace ww{
 		float position() const { return pos_; }
 		
 		void serialize(Archive& ar);
-		bool _focusable() const{ return false; }
 	protected:
 		// внутренние функции
 		ProgressBarImpl* window() const{ return reinterpret_cast<ProgressBarImpl*>(_window()); }

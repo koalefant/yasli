@@ -14,7 +14,6 @@ protected:
 	VSplitter(int splitterSpacing, int border, SplitterImpl* impl);
 	bool vertical() { return true; }
 
-	Widget* _nextWidget(Widget* last, FocusDirection focusDirection) const;
 	int boxLength() const;
 	Vect2 elementSize(Widget* widget) const;
 	Rect rectByPosition(int start, int end);

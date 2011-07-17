@@ -60,27 +60,6 @@ void FrameImpl::setFrameText(const wchar_t* text)
 LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message){
-	case WM_SYSKEYDOWN:
-	case WM_KEYDOWN:
-		{
-			UINT keyCode = UINT(wparam);
-			if(keyCode == VK_TAB){
-				if(Win32::isKeyPressed(VK_SHIFT))
-					owner_->passFocus(ww::FOCUS_PREVIOUS);
-				else
-					owner_->passFocus(ww::FOCUS_NEXT);
-			}
-			else if(keyCode == VK_LEFT)
-				owner_->passFocus(ww::FOCUS_LEFT);
-			else if(keyCode == VK_RIGHT)
-				owner_->passFocus(ww::FOCUS_RIGHT);
-			else if(keyCode == VK_UP)
-				owner_->passFocus(ww::FOCUS_UP);
-			else if(keyCode == VK_DOWN)
-				owner_->passFocus(ww::FOCUS_DOWN);
-            
-			break;
-		}
 	case WM_PAINT:
 		{
 			PAINTSTRUCT paintStruct;
@@ -224,24 +203,6 @@ void Frame::_relayoutParents()
 		::RedrawWindow(*_window(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
 
 	Widget::_relayoutParents();
-}
-
-Widget* Frame::_nextWidget(Widget* last, FocusDirection focusDirection) const
-{
-	switch(focusDirection)
-	{
-	case FOCUS_NEXT:
-	case FOCUS_PREVIOUS:
-		if(last == child_)
-			return 0;
-		else
-			return child_;
-	case FOCUS_FIRST:
-	case FOCUS_LAST:
-		return child_;
-	default:
-		return 0;
-	}
 }
 
 void Frame::visitChildren(WidgetVisitor& visitor) const

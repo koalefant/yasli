@@ -28,7 +28,6 @@ public:
 	void onMessageRButtonUp(UINT button, int x, int y);
 	int onMessageSetFocus(HWND lastFocusedWindow);
 	int onMessageKillFocus(HWND focusedWindow);
-	bool _focusable() const{ return true; }
 protected:
 	HotkeyButton* owner_;
 	bool pressed_;
@@ -99,12 +98,8 @@ void HotkeyButtonImpl::onMessageLButtonDblClk(int x, int y)
 
 int HotkeyButtonImpl::onMessageSetFocus(HWND lastFocusedWindow)
 {
-    if(owner_->_focusable()){
-		owner_->_setFocus();
-	    return 0;
-    }
-    else
-        return 0;
+	owner_->_setFocus();
+    return 0;
 }
 
 int HotkeyButtonImpl::onMessageKillFocus(HWND focusedWindow)

@@ -306,23 +306,6 @@ void VBox::setBoxSize(const Vect2& size)
 	minimalSize_.y = size.x;
 }
 
-Widget* VBox::_nextWidget(Widget* last, FocusDirection focusDirection) const
-{
-	switch(focusDirection)
-	{
-	case FOCUS_UP:
-		return Container::_nextWidget(last, FOCUS_PREVIOUS);
-	case FOCUS_DOWN:
-		return Container::_nextWidget(last, FOCUS_NEXT);
-	case FOCUS_LEFT:
-		return 0;//Container::_nextWidget(last, FOCUS_FIRST);
-	case FOCUS_RIGHT:
-		return 0;//Container::_nextWidget(last, FOCUS_LAST);
-	default:
-		return Container::_nextWidget(last, focusDirection);
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////////
 HBox::HBox(int spacing, int border)
 : Box(spacing, border)
@@ -366,22 +349,6 @@ void HBox::setBoxSize(const Vect2& size)
 {
 	minimalSize_.x = size.x;
 	minimalSize_.y = size.y;
-}
-
-Widget* HBox::_nextWidget(Widget* last, FocusDirection focusDirection) const
-{
-	switch(focusDirection)
-	{
-	case FOCUS_LEFT:
-		return Container::_nextWidget(last, FOCUS_PREVIOUS);
-	case FOCUS_RIGHT:
-		return Container::_nextWidget(last, FOCUS_NEXT);
-	case FOCUS_UP:
-	case FOCUS_DOWN:
-		return 0;
-	default:
-		return Container::_nextWidget(last, focusDirection);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

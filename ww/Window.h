@@ -93,9 +93,6 @@ public:
 	sigslot::signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
 	sigslot::signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
-	void onHotkeyFocusNext();
-	void onHotkeyFocusPrev();
-
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget);
 	Widget* _focusedWidget(){ return focusedWidget_; }
@@ -109,7 +106,6 @@ protected:
 	// little workarounds for Dialogs:
 	virtual void _onWMCommand(int command) {}
 
-	void _setFocus();
 	unsigned int calculateStyle();
 	void reposition();
 

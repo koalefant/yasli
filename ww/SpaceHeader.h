@@ -20,7 +20,6 @@ public:
 	void onMenuSplit();
 protected:
 	friend class SpaceHeaderImpl;
-	bool _focusable() const{ return false; }
 
 	void updateMinimalSize();
 

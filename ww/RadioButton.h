@@ -21,8 +21,6 @@ namespace ww{
 		void serialize(Archive& ar);
 		RadioButtonGroup* group() const;
 
-		bool _focusable() const;
-
 	protected:
 		friend class RadioButtonImpl;
 		RadioButtonImpl* window() const;

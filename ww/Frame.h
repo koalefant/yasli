@@ -32,7 +32,6 @@ public:
 
 	void _arrangeChildren();
 	void _relayoutParents();
-	Widget* _nextWidget(Widget* last, FocusDirection focusDirection) const;
 protected:
 
 	SharedPtr<Widget> child_;

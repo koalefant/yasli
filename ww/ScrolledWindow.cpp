@@ -257,27 +257,6 @@ bool ScrolledWindow::verticalScrollVisible() const
 	return true;
 }
 
-Widget* ScrolledWindow::_nextWidget(Widget* last, FocusDirection direction) const
-{
-	switch(direction)
-	{
-	case FOCUS_NEXT:
-	case FOCUS_PREVIOUS:
-		if(last == child_)
-			return 0;
-		else
-			return child_;
-	case FOCUS_FIRST:
-	case FOCUS_LAST:
-		if(last == child_)
-			return 0;
-		else
-			return child_;
-	default:
-		return 0;
-	}
-}
-
 void ScrolledWindow::serialize(Archive& ar)
 {
     if(ar.filter(SERIALIZE_DESIGN)){

@@ -90,7 +90,7 @@ BOOL TabsImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 int TabsImpl::onMessageSetFocus(HWND lastFocusedWindow)
 {
 	bool redraw = false;
-	if(owner_ && owner_->_focusable()){
+	if(owner_){
 		owner_->_setFocus();
 		redraw = true;
 	}

@@ -202,11 +202,6 @@ RadioButtonGroup* RadioButton::group() const
 	return window()->group(); 
 }
 
-bool RadioButton::_focusable() const
-{
-	return Widget::_focusable() && status();
-}
-
 void RadioButton::setText(const char* text)
 {
 	text_ = text;

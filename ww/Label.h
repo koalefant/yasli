@@ -30,7 +30,6 @@ public:
 protected:
 	LabelImpl* impl() const{ return reinterpret_cast<LabelImpl*>(_window()); }
 	friend class LabelImpl;
-	bool _focusable() const { return mnemonicWidget_ != 0; }
 
 	std::string text_;
 	Widget* mnemonicWidget_;

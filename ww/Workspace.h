@@ -91,7 +91,6 @@ protected:
 	void _arrangeChildren();
 	void _setParent(Container* container);
 	void _setFocus();
-	Widget* _nextWidget(Widget* last, FocusDirection direction) const;
 
 	void loadState(const char* fileName);
 	void saveState(const char* fileName);

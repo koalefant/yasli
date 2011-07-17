@@ -11,7 +11,6 @@ public:
 protected:
 	HSplitter(int splitterSpacing, int border, SplitterImpl* impl);
 
-	Widget* _nextWidget(Widget* last, FocusDirection focusDirection) const;
 	bool vertical() { return false; }
 	int boxLength() const;
 	Vect2 elementSize(Widget* widget) const;

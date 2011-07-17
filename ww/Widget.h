@@ -69,7 +69,6 @@ public:
 	void setRequestSize(int w, int h);
 	virtual void setRequestSize(const Vect2 size);
 
-	virtual void passFocus(FocusDirection direction);
 	virtual void setFocus();
 
 	/// доступ к родительскому контейнеру
@@ -101,10 +100,7 @@ public:
 	virtual Widget* _focusedWidget();
 	virtual void _setFocusedWidget(Widget* widget);
 
-	virtual Widget* _nextWidget(Widget* last, FocusDirection direction) const;
-	Widget* _nextFocusableWidget(Widget* last, FocusDirection direction) const;
 	virtual void _setFocus();
-	virtual bool _focusable() const{ return sensitive() && _visible() && _visibleInLayout(); }
 
 	virtual bool canBeDefault() const { return false; }
 	virtual void setDefaultFrame(bool enable) {}

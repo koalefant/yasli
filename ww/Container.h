@@ -13,9 +13,6 @@ public:
 
 	// методы для внутреннего пользования:
 	virtual void _arrangeChildren() {}
-	void _setFocus();
-	Widget* _nextWidget(Widget* last, FocusDirection direction) const;
-	bool _focusable() const;
 protected:
 };
 

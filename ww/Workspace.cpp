@@ -475,28 +475,6 @@ void Workspace::_setFocus()
 	__super::_setFocus();
 }
 
-Widget* Workspace::_nextWidget(Widget* last, FocusDirection direction) const
-{
-	switch(direction)
-	{
-	case FOCUS_NEXT:
-	case FOCUS_PREVIOUS:
-		if(last == rootWidget_)
-			return 0;
-		else
-			return rootWidget_;
-	case FOCUS_FIRST:
-	case FOCUS_LAST:
-		if(last == rootWidget_)
-			return 0;
-		else
-			return rootWidget_;
-	default:
-		return 0;
-	}
-}
-
-
 // ---------------------------------------------------------------------------
 
 Space::Space(float position)

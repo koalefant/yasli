@@ -55,14 +55,9 @@ int _WidgetWindow::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 int _WidgetWindow::onMessageSetFocus(HWND lastFocusedWindow)
 {
-    if(owner_->_focusable()){
-	    int result = __super::onMessageSetFocus(lastFocusedWindow);
-        owner_->_setFocus();
-        return result;
-    }
-    else{
-        return 0;
-    }
+    int result = __super::onMessageSetFocus(lastFocusedWindow);
+    owner_->_setFocus();
+    return result;
 }
 
 // ---------------------------------------------------------------------------

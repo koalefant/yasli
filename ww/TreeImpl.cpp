@@ -357,7 +357,7 @@ int TreeImpl::onMessageSetFocus(HWND lastFocusedWindow)
 
 {
     int result = 0;
-	if(!creating() && owner_->_focusable()){
+	if(!creating()){
 	    result = Window32::onMessageSetFocus(lastFocusedWindow);
 		owner_->_setFocus();
 		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);

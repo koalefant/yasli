@@ -137,7 +137,7 @@ void Widget::_updateVisibility()
 
 void Widget::setFocus()
 {
-    if(_focusable() && _window())
+    if(_window())
         ::SetFocus(*_window());
 }
 
@@ -151,83 +151,9 @@ Widget* Widget::_focusedWidget()
 	return parent_ ? parent_->_focusedWidget() : 0; 
 }
 
-Widget* Widget::_nextWidget(Widget* last, FocusDirection direction) const
-{
-	return 0;
-}
-
-Widget* Widget::_nextFocusableWidget(Widget* last, FocusDirection direction) const
-{
-	switch(direction){
-	case FOCUS_FIRST:
-		if(ww::Widget* widget = _nextWidget(last, direction)){
-			if(!widget->_focusable())
-				return _nextFocusableWidget(widget, FOCUS_NEXT);
-		}
-		else
-			return 0;
-	case FOCUS_LAST:
-		if(ww::Widget* widget = _nextWidget(last, direction)){
-			if(!widget->_focusable())
-				return _nextFocusableWidget(widget, FOCUS_PREVIOUS);
-		}
-		else
-			return 0;
-	case FOCUS_NEXT:
-	case FOCUS_PREVIOUS:
-	{
-		ww::Widget* widget = last;
-		while(widget = _nextWidget(widget, direction))
-			if(widget->_focusable())
-				return widget;
-        return 0;
-	}
-	}
-	return 0;
-}
-
-void Widget::passFocus(FocusDirection direction)
-{
-	Widget* focused = _focusedWidget();
-    if(!focused)
-        focused = this;
-	Widget* next = 0;
-	Widget* container = focused->parent();
-
-	if(container){
-		do{
-			if(!container)
-				break;
-
-			next = container->_nextFocusableWidget(focused, direction);
-			if(next){
-				ASSERT(next->_focusable());
-				if(next->_focusable()){
-					next->_setFocus();
-					break;
-				}
-				else{
-					focused = 0;
-					container = next;
-					next = 0;
-				}
-			}
-			else{
-				focused = container;
-				if(container->parent()){
-					container = container->parent();
-				}
-				else{
-					container = container->parent();
-				}
-			}
-		} while(next == 0);
-	}
-}
-
 void Widget::_setFocus()
 {
-    if(_focusable() && _focusedWidget() != this)
+    if(_focusedWidget() != this)
         _setFocusedWidget(this);
 }
 
@@ -269,20 +195,6 @@ void Container::setBorder(int border)
 	_arrangeChildren();
 }
 
-bool Container::_focusable() const
-{
-	return _nextFocusableWidget(0, FOCUS_FIRST) != 0;
-}
-
-void Container::_setFocus()
-{
-	ASSERT(_focusable());
-	ww::Widget* widget = _nextFocusableWidget(0, FOCUS_FIRST);
-	ASSERT(widget != 0);
-	if(widget)
-		widget->_setFocus();
-}
-
 struct FocusMover : public WidgetVisitor{
 	FocusMover(Widget* current, FocusDirection direction)
 	: direction_(direction)
@@ -320,25 +232,6 @@ protected:
 	Widget* previous_;
 	Widget* current_;
 };
-
-Widget* Container::_nextWidget(Widget* last, FocusDirection direction) const
-{
-	switch(direction){
-	case FOCUS_DOWN:
-	case FOCUS_RIGHT:
-		direction = FOCUS_NEXT;
-		break;
-	case FOCUS_UP:
-	case FOCUS_LEFT:
-		direction = FOCUS_PREVIOUS;
-		break;
-	default:
-		break;
-	}
-	FocusMover mover(last, direction);
-	visitChildren(mover);
-	return mover.result();
-}
 
 bool Container::isActive() const
 {

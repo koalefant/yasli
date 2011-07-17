@@ -30,7 +30,6 @@ public:
 
 	void _arrangeChildren();
 	void _relayoutParents();
-	Widget* _nextWidget(Widget* last, FocusDirection direction) const;
 protected:
 	ScrolledWindowImpl* impl();	
 

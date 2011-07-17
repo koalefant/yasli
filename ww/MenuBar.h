@@ -70,7 +70,6 @@ public:
 protected:
     friend class MenuBarImpl;
     MenuBarImpl* impl();
-    bool _focusable() const{ return false; }
 };
 
 }

@@ -417,10 +417,7 @@ void PropertyTree::redraw()
 
 void PropertyTree::_setFocus()
 {
-    if(_ContainerWithWindow::_focusable())
-        _ContainerWithWindow::_setFocus();
-    else
-        Widget::_setFocus();
+	_ContainerWithWindow::_setFocus();
 }
 
 void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos)
@@ -636,8 +633,7 @@ void PropertyTree::onModelUpdated()
 		    revert();
 	}
 
-    if(Widget::_focusable())
-	    setFocus();
+    setFocus();
 
 	update();
 
@@ -717,11 +713,7 @@ void PropertyTree::_arrangeChildren()
 				w->_setPosition(rect);
 				if(!w->isVisible()){
 					w->show();
-					if(w->_focusable())
-						w->setFocus();
-					else{
-						//ASSERT(w->_focusable());
-					}
+					w->setFocus();
 				}
 			}
 			else{
@@ -792,13 +784,6 @@ void PropertyTree::setUndoEnabled(bool enabled, bool full)
 	undoEnabled_ = enabled; fullUndo_ = full;
     model()->setUndoEnabled(enabled);
     model()->setFullUndo(full);
-}
-
-bool PropertyTree::_focusable() const
-{
-    if(_ContainerWithWindow::_focusable())
-        return true;
-    return Widget::_focusable();
 }
 
 void PropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
