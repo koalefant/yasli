@@ -245,7 +245,7 @@ public:
 	}
 
 	const wchar_t* digest() const{ return digest_.c_str(); }
-	virtual std::wstring searchValue() const { return valueAsWString(); }
+	virtual std::wstring digestValue() const{ return valueAsWString(); }
 	virtual void digestReset();
 	void digestAppend(const wchar_t* text);
 

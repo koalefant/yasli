@@ -453,7 +453,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 		labelUndecorated_ = ptr;
 
 	if (appendValueToDigest)
-		parent()->digestAppend(valueAsWString().c_str());
+		parent()->digestAppend(digestValue().c_str());
 }
 
 const char* PropertyRow::typeNameForFilter() const

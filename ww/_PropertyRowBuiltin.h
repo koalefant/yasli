@@ -5,6 +5,7 @@
 #include "ww/PropertyRowImpl.h"
 #include "ww/Entry.h"
 #include "ww/Win32/Drawing.h"
+#include "ww/Unicode.h"
 #include "yasli/MemoryWriter.h"
 
 namespace yasli{
@@ -131,8 +132,8 @@ public:
 
 	bool onActivate(PropertyTree* tree, bool force);
 	void digestReset();
-	string valueAsString() const { return value_ ? labelUndecorated() : ""; }
-	wstring searchValue() const{ return value_ ? L"true" : L"false"; }
+	wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
+	wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowBool(name_, label_, value_), this);
