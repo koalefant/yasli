@@ -119,6 +119,7 @@ public:
 
 	virtual void onMessagePaint();
 	virtual void onMessageTimer(int id);
+	virtual int onMessageGetDlgCode(int keyCode, MSG* msg);
 
 	bool isWindow() const;
 

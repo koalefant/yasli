@@ -2,7 +2,9 @@
 #include "ww/Window.h"
 #include "ww/Widget.h"
 
+#include "ww/Application.h"
 #include "ww/Win32/Window.h"
+#include "ww/Win32/MessageLoop.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
 #include "ww/HotkeyContext.h"
@@ -16,6 +18,43 @@
 #include <windows.h>
 
 namespace ww{
+
+class WindowMessageFilter : public Win32::MessageFilter
+{
+public:
+	WindowMessageFilter(HWND wnd)
+	: wnd_(wnd)
+	{
+		ASSERT(wnd_ != 0);
+	}
+
+	bool filter(MSG* msg)
+	{
+		if (!msg->hwnd)
+			return false;
+
+		if (!::IsChild(wnd_, msg->hwnd))
+			return false;
+
+		// We are using IsDialogMessage as convenient implementation of
+		// focus navigation.
+		//
+		// Children with WS_TABSTOP style can receive focus.
+		// WS_EX_CONTROLCONTAINER style is used to tell when control is a
+		// container itself, so its children can gain focus.
+		//
+		// IsDialogMessage sends WM_GETDLGCODE to a focused control to
+		// allow it to override defaults keys behaviour.
+		//
+		// This call may be replaced in future to implement more customized
+		// Navigation logic.
+		return IsDialogMessage(wnd_, msg) != FALSE;
+	}
+private:
+	HWND wnd_;
+};
+
+// ---------------------------------------------------------------------------
 YASLI_CLASS(Container, Window, "Application Window")
 
 class WindowImpl : public Win32::Window32{
@@ -29,26 +68,44 @@ public:
 	// ^^^
 protected:
 	ww::Window* owner_;
+	SharedPtr<WindowMessageFilter> filter_;
 };
 
 WindowImpl::WindowImpl(ww::Window* owner)
 : Win32::Window32()
 , owner_(owner)
 {
-
 }
 
 
 WindowImpl::~WindowImpl()
 {
+	if (Application::get()) {
+		Application::get()->_messageLoop()->uninstallFilter(filter_);
+		filter_ = 0;
+	}
 }
+
 
 LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message){
+	case WM_CREATE:
+		{
+			BOOL result = __super::onMessage(message, wparam, lparam);
+			filter_ = new WindowMessageFilter(get());
+
+			if (Application::get()) {
+				Application::get()->_messageLoop()->installFilter(filter_);
+			}
+			return result;
+		}
 	case WM_CLOSE:
 		owner_->onClose();
 		return 0;
+	case WM_COMMAND:
+		owner_->_onWMCommand(wparam);
+		return __super::onMessage(message, wparam, lparam);
     case WM_ACTIVATE:
         {
             UINT activationMethod = LOWORD(wparam);
@@ -141,8 +198,10 @@ Window::Window(HWND parent, int border)
 
 Window::~Window()
 {
-    if(hotkeyContext_ && app_)
-        hotkeyContext_->uninstallFilter(app_);
+	if(app_){
+		if(hotkeyContext_ )
+			hotkeyContext_->uninstallFilter(app_);
+	}
 	defWidget_ = 0;
 	if(child_)
 		child_->_setParent(0);

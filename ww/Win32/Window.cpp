@@ -243,7 +243,7 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 	ASSERT(isClassRegistered(className()));
 	ASSERT(!parentWnd || ::IsWindow(parentWnd));
 	handle_ = ::CreateWindowEx(exStyle, className(), windowName, style,
-		position.left(), position.top(), position.width(), position.height(), parentWnd, 0, 0, (LPVOID)(this));
+		position.left(), position.top(), position.width(), position.height(), parentWnd, 0, 0, (LPVOID)(this));	
 	
 	handleOwner_ = true;
 	creating_ = false;
@@ -404,6 +404,11 @@ void Window32::onMessageTimer(int id)
 	}
 	
 	defaultWindowProcedure(WM_TIMER, id, 0); // упускаем callback
+}
+
+int Window32::onMessageGetDlgCode(int keyCode, MSG* msg)
+{
+	return defaultWindowProcedure(WM_GETDLGCODE, keyCode, LPARAM(msg));
 }
 
 LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
@@ -604,6 +609,12 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			int id = int(wparam);
 			onMessageTimer(id);
 			return 0;
+		}
+		case WM_GETDLGCODE:
+		{
+			int keyCode = int(wparam);
+			MSG* msg = (MSG*)lparam;
+			return onMessageGetDlgCode(keyCode, msg);
 		}
 	}
 	return defaultWindowProcedure(message, wparam, lparam);

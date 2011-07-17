@@ -22,6 +22,7 @@ public:
 	
 	BOOL onMessageWindowPosChanged(WINDOWPOS *windowPos);
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
+	int onMessageGetDlgCode(int keyCode, MSG* msg);
 
 	void setButtonText(const wchar_t* text);
 	void setDefaultButton(bool defaultBtn);
@@ -37,6 +38,19 @@ static WNDPROC buttonWindowProc_ = 0;
 
 LRESULT CALLBACK buttonWindowProcedure(HWND handle, UINT message, WPARAM wparam, LPARAM lparam)
 {
+
+	if(message == WM_GETDLGCODE)
+	{
+		int keyCode = int(wparam);
+		MSG* msg = (MSG*)lparam;
+		if (!msg)
+			return DLGC_WANTMESSAGE;
+
+		if (msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN)
+			return DLGC_WANTMESSAGE;
+
+		return 0;
+	}
 	if(message == WM_KEYDOWN)
 	{
 		SendMessage(::GetParent(handle), WM_KEYDOWN, wparam, lparam);
@@ -100,6 +114,17 @@ BOOL ButtonImpl::onMessageWindowPosChanged(WINDOWPOS *windowPos)
 	return FALSE;
 }
 
+int ButtonImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
+{
+	if (!msg)
+		return DLGC_WANTMESSAGE;
+
+	if (msg->message == WM_KEYDOWN && keyCode == VK_RETURN)
+		return DLGC_WANTMESSAGE;
+
+	return 0;
+}
+
 LRESULT ButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message){
@@ -124,6 +149,7 @@ LRESULT ButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	case WM_SETFOCUS:
 		{
 			::SetFocus(button_);
+			break;
 		}
 		/*
 	case WM_ERASEBKGND:
@@ -132,6 +158,13 @@ LRESULT ButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			//::ExcludeClipRect(dc, 0, 0, 
 			return FALSE;
 		}*/
+
+	case WM_KEYDOWN:
+		{
+			if (wparam == VK_RETURN)
+				owner_->onPressed();
+			break;
+		}
 	case WM_COMMAND:
 		if(HWND(lparam) == button_){
 			switch(HIWORD(wparam)){

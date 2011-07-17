@@ -82,7 +82,7 @@ void CheckBoxImpl::updateMinimalSize()
 
 int CheckBoxImpl::generateWin32Style()
 {
-	int style = WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_NOTIFY;
+	int style = WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP;
 	if(owner_ && owner_->buttonLike_)
 		style |= BS_PUSHLIKE;
 	return style;
@@ -105,26 +105,6 @@ void CheckBoxImpl::setCheckBoxText(const wchar_t* text)
 LRESULT CheckBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message){
-		/*
-	case WM_SIZE:
-	{
-		if(handle_){
-			UINT width = LOWORD(lparam);
-			UINT height = HIWORD(lparam);
-			::MoveWindow(handle_, 0, 0, width, height, TRUE);
-		}
-		return TRUE;
-	}
-	case WM_ENABLE:
-	{
-		BOOL enabled = BOOL(wparam);
-		if(handle_){
-			::EnableWindow(handle_, enabled);
-			ASSERT(::IsWindowEnabled(handle_) == enabled);
-		}
-		return TRUE;
-	}
-	*/
 	case WM_SETFOCUS:
 	{
         int result = __super::onMessage(message, wparam, lparam);

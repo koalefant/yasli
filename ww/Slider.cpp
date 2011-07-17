@@ -14,8 +14,17 @@ public:
 
 	void redraw(HDC dc);
 
+	int onMessageGetDlgCode(int keyCode, MSG* msg)
+	{
+		if (!msg)
+			return DLGC_WANTMESSAGE;
+		if (msg->message == WM_KEYDOWN && (keyCode == VK_LEFT || keyCode == VK_RIGHT))
+			return DLGC_WANTMESSAGE;
+		return 0;
+	}
 	int onMessageSetFocus(HWND lastFocusedWindow);
 	int onMessageKillFocus(HWND focusedWindow);
+	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
 	void onMessageLButtonDown(UINT button, int x, int y);
 	void onMessageLButtonUp(UINT button, int x, int y);
 	void onMessageMouseMove(UINT button, int x, int y);
@@ -33,7 +42,7 @@ SliderImpl::SliderImpl(Slider* owner)
 , owner_(owner)
 , dragging_(false)
 {
-	create(L"", WS_CHILD, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
 }
 
 void SliderImpl::redraw(HDC dc)
@@ -77,6 +86,37 @@ int SliderImpl::onMessageKillFocus(HWND focusedWindow)
 {
 	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
 	return __super::onMessageKillFocus(focusedWindow);
+}
+
+int SliderImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
+{
+	float value = owner_->value_;
+	if (keyCode == VK_LEFT){
+		if (GetKeyState(VK_CONTROL) >> 15)
+			value = value - 0.1f * count;
+		else
+			value = value - 0.01f * count;
+	}
+	else if (keyCode == VK_RIGHT){
+		if (GetKeyState(VK_CONTROL) >> 15)
+			value = value + 0.1f * count;
+		else
+			value = value + 0.01f * count;
+	}
+	else if (keyCode == VK_HOME){
+		value = 0.0f;
+	}
+	else if (keyCode == VK_END){
+		value = 1.0f;
+	}
+
+	if (value != owner_->value_)
+	{
+		owner_->value_ = clamp(value, 0.0f, 1.0f);
+		owner_->signalChanged_.emit();
+		InvalidateRect(get(), 0, FALSE);
+	}
+	return __super::onMessageKeyDown(keyCode, count, flags);
 }
 
 float SliderImpl::mousePositionToValue(int x, int y) const

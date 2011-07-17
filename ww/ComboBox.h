@@ -51,6 +51,8 @@ public:
 	virtual void onSelectionChanged(){ signalSelectionChanged_.emit(); }
 	sigslot::signal0& signalSelectionChanged() { return signalSelectionChanged_; }
 
+	void setFocus();
+
 protected:
 	ComboBox(ComboBoxImpl* impl, bool expandByContent, int border);
 

@@ -25,6 +25,7 @@ public:
 	const wchar_t* className() const{ return L"ww.Tabs"; }
 
 	void redraw(HDC dc);
+	int onMessageGetDlgCode(int keyCode, MSG* msg);
 	void onMessagePaint();
 	BOOL onMessageSize(UINT type, USHORT width, USHORT height);
 	BOOL onMessageEraseBkgnd(HDC dc);
@@ -41,14 +42,12 @@ protected:
 	Items items_;
 	Tabs* owner_;
 	int selectedTab_;
-	int focusedTab_;
 	friend class Tabs;
 };
 
 TabsImpl::TabsImpl(Tabs* tabs)
 : _WidgetWindow(tabs)
 , selectedTab_(0)
-, focusedTab_(-1)
 , owner_(0)
 {
 	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow));
@@ -60,13 +59,11 @@ int TabsImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 	if(keyCode == VK_LEFT){
 		if(selectedTab_ > 0){
 			owner_->setSelectedTab(selectedTab_ - 1, owner_);
-			focusedTab_ = selectedTab_;
 		}
 	}
 	if(keyCode == VK_RIGHT){
 		if(size_t(selectedTab_ + 1) < items_.size()){
 			owner_->setSelectedTab(selectedTab_ + 1, owner_);
-			focusedTab_ = selectedTab_;
 		}
 	}
 	return __super::onMessageKeyDown(keyCode, count, flags);
@@ -92,11 +89,15 @@ BOOL TabsImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 
 int TabsImpl::onMessageSetFocus(HWND lastFocusedWindow)
 {
+	bool redraw = false;
 	if(owner_ && owner_->_focusable()){
 		owner_->_setFocus();
-		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+		redraw = true;
 	}
-	return Window32::onMessageSetFocus(lastFocusedWindow);
+	int result = Window32::onMessageSetFocus(lastFocusedWindow);
+	if (redraw)
+		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	return result;
 }
 
 int TabsImpl::onMessageKillFocus(HWND focusedWindow)
@@ -109,6 +110,16 @@ int TabsImpl::onMessageKillFocus(HWND focusedWindow)
 BOOL TabsImpl::onMessageEraseBkgnd(HDC dc)
 {
 	return FALSE;
+}
+
+int TabsImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
+{
+	if (msg == 0)
+		return DLGC_WANTMESSAGE;
+	if (msg->message == WM_KEYDOWN && (keyCode == VK_LEFT || keyCode == VK_RIGHT))
+		return DLGC_WANTMESSAGE;
+	
+	return 0;
 }
 
 void TabsImpl::recalculateRects()
@@ -170,7 +181,7 @@ void TabsImpl::redraw(HDC dc)
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
 		bool selected = selectedTab_ == index;
-		bool focused = index == focusedTab_ && GetFocus() == *this;
+		bool focused = selected && GetFocus() == get();
 
 		const int roundness = 8;
 		if(selected){
@@ -275,7 +286,6 @@ void TabsImpl::onMessageLButtonDown(UINT button, int x, int y)
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
 		if(item.rect.pointIn(Vect2(x, y))){
-			focusedTab_ = index;
 			if(index != selectedTab_){
 				owner_->setSelectedTab(index);
 			}
@@ -342,7 +352,6 @@ void Tabs::remove(int index)
 
 void Tabs::clear()
 {
-	impl().focusedTab_ = -1;
 	impl().selectedTab_ = -1;
 	impl().items_.clear();
 }

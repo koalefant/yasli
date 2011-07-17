@@ -30,7 +30,7 @@ SplitterImpl::SplitterImpl(ww::Splitter* owner)
 , grabbedSplitter_(-1)
 , lastCursorPosition_(0, 0)
 {
-	create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0, 0, 100, 100), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0, 0, 100, 100), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT);
 }
 
 void SplitterImpl::onMessagePaint()

@@ -48,7 +48,7 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 , owner_(owner)
 , comboBoxHandle_(0)
 {
-	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT));
 	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
 							 0, 0, 42, 42, *this, 0, (HINSTANCE)(GetWindowLong(*this, GWLP_HINSTANCE)), 0);
@@ -141,11 +141,14 @@ int ComboBoxImpl::onMessageSetFocus(HWND lastFocusedWindow)
 {
 	int result = __super::onMessageSetFocus(lastFocusedWindow);
     owner_->_setFocus();
-    return result;
+	//if (comboBoxHandle_)
+	//	SetFocus(comboBoxHandle_);
+    return 0;
 }
 
 void ComboBoxImpl::showDropDown()
 {
+	//SetFocus(comboBoxHandle_);
 	ComboBox_ShowDropdown(comboBoxHandle_, TRUE);
 }
 
@@ -334,13 +337,18 @@ int ComboBox::dropDownHeight() const
 	return dropDownHeight_;
 }
 
+void ComboBox::setFocus()
+{
+	if(_focusable() && _window())
+		::SetFocus(impl()->comboBoxHandle_);
+}
 
 void ComboBox::serialize(Archive& ar)
 {
-	ar.serialize(items_, "items", "Элементы");
-	ar.serialize(selectedIndex_, "selectedIndex", "&Выбранный элемент");
-	ar.serialize(dropDownHeight_, "dropDownHeight_", "Высота списка");
-	ar.serialize(expandByContent_, "expandByContent", "Расширять по содержимому");
+	ar.serialize(items_, "items", "Items");
+	ar.serialize(selectedIndex_, "selectedIndex", "&Selected Item Index");
+	ar.serialize(dropDownHeight_, "dropDownHeight_", "Drop Down Height");
+	ar.serialize(expandByContent_, "expandByContent", "Expand by Content");
 	Widget::serialize(ar);
 }
 

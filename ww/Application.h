@@ -13,8 +13,10 @@ namespace ww{
 class WW_API Application : public sigslot::has_slots
 {
 public:
-    Application(void* instance = 0);
+    Application(void* hInstance = 0);
     ~Application();
+
+	static Application* get();
 
     int run();
     void quit();
@@ -33,6 +35,8 @@ private:
     sigslot::signal0 signalQuit_;
 
     AutoPtr<Win32::MessageLoop> messageLoop_;
+
+	static Application* globalInstance_;
 };
 
 };

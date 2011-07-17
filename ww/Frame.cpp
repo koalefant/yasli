@@ -38,7 +38,7 @@ FrameImpl::FrameImpl(Frame* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT));
 }
 
 #pragma warning(pop)

@@ -70,7 +70,7 @@ public:
 	virtual void setRequestSize(const Vect2 size);
 
 	virtual void passFocus(FocusDirection direction);
-	void setFocus();
+	virtual void setFocus();
 
 	/// доступ к родительскому контейнеру
 	Container* parent() const{ return parent_; }

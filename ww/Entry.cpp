@@ -28,6 +28,7 @@ public:
 
 	int onMessageChar(UINT code, USHORT count, USHORT flags);
 	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
+	int onMessageGetDlgCode(int keyCode, MSG* msg);
 	
 	BOOL onMessageEraseBkgnd(HDC dc);
 	int onMessageCommand(USHORT command, USHORT id, HWND wnd);
@@ -130,6 +131,28 @@ void EntryImpl::setText(const wchar_t* text)
 LRESULT EntryImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+}
+
+int EntryImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
+{
+	if (!msg)
+		return DLGC_WANTMESSAGE;
+
+	int key = msg->wParam;
+	if ((msg->message == WM_KEYDOWN || msg->message == WM_CHAR))
+	{
+		if (!owner_->multiline_){
+			if (key == VK_UP || key == VK_DOWN)
+				return 0;
+			if (!owner_->swallowReturn_){
+				if (key == VK_RETURN)
+					return 0;
+			}
+		}
+		if (key == VK_TAB)
+			return 0;
+	}
+	return DLGC_WANTMESSAGE;
 }
 
 int EntryImpl::onMessageChar(UINT code, USHORT count, USHORT flags)

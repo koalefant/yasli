@@ -47,6 +47,8 @@ void _WidgetWithWindow::_setParent(Container* container)
 	ASSERT(::IsWindow(*window_));
 	if(::IsWindow(*window_)){
 		window_->setParent(window);
+		// moves window to the end of tab-focus order
+		::SetWindowPos(window_->get(), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		_setPosition(position_);
 	}
 }
@@ -109,6 +111,8 @@ void _ContainerWithWindow::_setParent(Container* container)
 	ASSERT(::IsWindow(*window_));
 	if(::IsWindow(*window_)){
 		window_->setParent(window);
+		// moves window to the end of tab-focus order
+		::SetWindowPos(window_->get(), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		_setPosition(position_);
 	}
 }

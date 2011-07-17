@@ -97,6 +97,7 @@ public:
     void updateArea();
 	void updateScrollBar();
 
+	int onMessageGetDlgCode(int keyCode, MSG* msg);
 	int onMessageChar(UINT code, USHORT count, USHORT flags);
 	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
 

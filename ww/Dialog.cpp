@@ -12,6 +12,8 @@ public:
 	: ww::Button(text, border)
 	, response_(response)
 	{
+		HWND wnd = _window()->get();
+		SetWindowLongPtr(wnd, GWLP_ID, (LONG_PTR)response);
 	}
 
 	void onPressed(){
@@ -97,6 +99,8 @@ void Dialog::onKeyCancel()
 
 void Dialog::init(int border)
 {
+	activeDialogLoop_ = 0;
+
 	setDefaultPosition(POSITION_CENTER);
 	setResizeable(false);
 	setMinimizeable(false);
@@ -112,11 +116,6 @@ void Dialog::init(int border)
 
 	response_ = defaultResponse_ = cancelResponse_ = RESPONSE_CANCEL;
 
-	signalPressed(KeyPress(KEY_RETURN)).connect(this, &Dialog::onKeyDefault);
-	signalPressed(KeyPress(KEY_ESCAPE)).connect(this, &Dialog::onKeyCancel);
-
-	signalPressed(KeyPress(KEY_RIGHT)).connect((Window*)this, &Window::onHotkeyFocusNext);
-	signalPressed(KeyPress(KEY_LEFT)).connect((Window*)this, &Window::onHotkeyFocusPrev);
 }
 
 void Dialog::add(Widget* widget, PackMode packMode)
@@ -142,13 +141,14 @@ void Dialog::addButton(const char* label, int response, bool atRight)
 void Dialog::onResponse(int response)
 {
 	response_ = response;
-	interruptModalLoop();
+	
+	if (activeDialogLoop_)
+		activeDialogLoop_->interruptDialogLoop();
 }
 
 void Dialog::onClose()
 {
 	onResponse(cancelResponse_);
-	signalClose_.emit();
 }
 
 void Dialog::setCancelResponse(int response)
@@ -159,18 +159,6 @@ void Dialog::setCancelResponse(int response)
 void Dialog::setDefaultResponse(int response)
 {
 	defaultResponse_ = response; 
-}
-
-void Dialog::interruptModalLoop()
-{
-	signalClose_.emit();
-
-	if (parentWnd_)
-	{
-		::EnableWindow(parentWnd_, TRUE);
-		::SetActiveWindow(parentWnd_);
-	}
-	hide();
 }
 
 int Dialog::showModal()
@@ -192,16 +180,36 @@ int Dialog::showModal()
 	vbox_->setFocus();
 	
 	Win32::MessageLoop loop;
-	signalClose().connect(&loop, &Win32::MessageLoop::quit);
-	loop.run();
-	if(parentWnd_){
-		ASSERT(::IsWindowEnabled(parentWnd_));
+	signalClose().connect(this, &Dialog::onClose);
+
+	activeDialogLoop_ = &loop;
+	loop.runDialogLoop(_window()->get());
+	activeDialogLoop_ = 0;
+
+	if (parentWnd_) {
+		::EnableWindow(parentWnd_, TRUE);
+		::SetActiveWindow(parentWnd_);
 	}
+	hide();
 
 	ASSERT(!spawnedDialogs.empty() && spawnedDialogs.back() == this);
 	spawnedDialogs.pop_back();
 	return response_;
 }
+
+void Dialog::_onWMCommand(int command)
+{
+	if (command == IDOK) {
+		onResponse(defaultResponse_);
+	}
+	else if (command == IDCANCEL){
+		onResponse(cancelResponse_);
+	}
+	else{
+		ASSERT(0);
+	}
+}
+
 
 Dialog::~Dialog()
 {

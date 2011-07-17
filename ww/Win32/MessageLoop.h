@@ -16,26 +16,35 @@ public:
 class WW_API MessageLoop : public sigslot::has_slots
 {
 public:
-    int run();
+	MessageLoop();
+
+	int run();
+
 	static void processPendingMessages();
 
-    sigslot::signal0& signalIdle() { return signalIdle_; }
-    sigslot::signal0& signalQuit() { return signalQuit_; }
+	void interruptDialogLoop();
+	int runDialogLoop(HWND dialog);
 
-    void quit();
-    void quit(int code);
-    void onQuit() { signalQuit().emit(); }
+	sigslot::signal0& signalIdle() { return signalIdle_; }
+	sigslot::signal0& signalQuit() { return signalQuit_; }
 
-    void installFilter(MessageFilter* filter);
-    void uninstallFilter(MessageFilter* filter);
-    
-    static MessageLoop& instance();
+	void quit();
+	void quit(int code);
+	void onQuit() { signalQuit().emit(); }
+
+	void installFilter(MessageFilter* filter);
+	void uninstallFilter(MessageFilter* filter);
+
+	static MessageLoop& instance();
 protected:
-    static sigslot::signal0 signalIdle_;
-    sigslot::signal0 signalQuit_;
+	static sigslot::signal0 signalIdle_;
+	sigslot::signal0 signalQuit_;
 
-    typedef std::vector<yasli::SharedPtr<MessageFilter> > Filters;
-    Filters filters_;
+	HWND dialog_;
+	bool dialogLoopInterrupted_;
+
+	typedef std::vector<yasli::SharedPtr<MessageFilter> > Filters;
+	Filters filters_;
 };
 
 }

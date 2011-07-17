@@ -6,9 +6,17 @@
 
 namespace ww{
 
-Application::Application(void* instance)
-: messageLoop_( new Win32::MessageLoop() )
+Application* Application::globalInstance_;
+
+Application* Application::get()
 {
+	return globalInstance_;
+}
+
+Application::Application(void* instance)
+: messageLoop_(new Win32::MessageLoop())
+{
+	globalInstance_ = this;
     messageLoop_->signalIdle().connect(this, &Application::onLoopIdle);
     messageLoop_->signalQuit().connect(this, &Application::onLoopQuit);
 
@@ -20,6 +28,7 @@ Application::Application(void* instance)
 
 Application::~Application()
 {
+	globalInstance_ = 0;
 }
 
 int Application::run()

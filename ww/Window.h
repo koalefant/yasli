@@ -32,6 +32,7 @@ enum WindowPosition{
 class WW_API Window : public Container{
 public:
 	Window(Application* app, int border = 4);
+
 	Window(int border = 4, int style = 0);
 	Window(HWND parent, int border);
 
@@ -105,6 +106,8 @@ protected:
 	void _updateVisibility();
 	void _arrangeChildren();
 	void _relayoutParents();
+	// little workarounds for Dialogs:
+	virtual void _onWMCommand(int command) {}
 
 	void _setFocus();
 	unsigned int calculateStyle();

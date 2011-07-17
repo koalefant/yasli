@@ -10,6 +10,11 @@ namespace Win32{
 
 sigslot::signal0 MessageLoop::signalIdle_;
 
+MessageLoop::MessageLoop()
+: dialogLoopInterrupted_(0)
+{
+}
+
 int MessageLoop::run()
 {
     MSG msg;
@@ -22,19 +27,53 @@ int MessageLoop::run()
             if(msg.message == WM_QUIT)
                 return int(msg.wParam);
 
-            TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
-
             bool filtered = false;
-            for(Filters::iterator it = filters_.begin(); it != filters_.end(); ++it)
-                if(it->get()->filter(&msg))
+            for(size_t i = 0; i < filters_.size(); ++i)
+                if(filters_[i]->filter(&msg))
                     filtered = true;
 
-            if(!filtered)
+            if(!filtered) {
+	            TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
                 DispatchMessage(&msg);
+			}
             profiler_quant();
         }
     }
     return 0;
+}
+
+
+int MessageLoop::runDialogLoop(HWND dialog)
+{
+	dialog_ = dialog;
+
+	MSG msg;
+	while(true){
+		GetMessage(&msg, 0, 0, 0);
+
+		if(msg.message == WM_QUIT){
+			// repost QUIT-message, so main window can get it
+			PostQuitMessage(msg.wParam);
+			return int(msg.wParam);
+		}
+
+		if(!IsDialogMessage(dialog, &msg)){
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (dialogLoopInterrupted_) {
+			dialogLoopInterrupted_ = false;
+			return 0;
+		}
+	}
+	return 0;
+}
+
+void MessageLoop::interruptDialogLoop()
+{
+	dialogLoopInterrupted_ = true;
+	::PostMessage(dialog_, WM_NULL, 0, 0);
 }
 
 void MessageLoop::quit()

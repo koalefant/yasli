@@ -672,6 +672,11 @@ int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 	return __super::onMessageChar(code, count, flags);
 }
 
+int TreeImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
+{
+	return DLGC_WANTARROWS | DLGC_WANTCHARS;
+}
+
 LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	redrawLock_ = true;
