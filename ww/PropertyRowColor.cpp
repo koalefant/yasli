@@ -88,7 +88,7 @@ public:
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
 	std::string valueAsString() const { 
-		char buf[32];
+		char buf[64];
 		formatColor(buf, value_);
 		return string(buf);
 	}
