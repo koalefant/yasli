@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 
 #include "ww/PropertyTree.h"
 #include "ww/TreeImpl.h"
@@ -991,7 +991,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, Prope
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();
 	if(parentRow->isContainer()){
-        tree->model()->push(tree->model()->root()); // FIXME: выбрать оптимальный узел
+        tree->model()->push(tree->model()->root()); // FIXME: select optimal row
 		PropertyRowContainer* container = safe_cast<PropertyRowContainer*>(parentRow);
 		PropertyRow* oldParent = parent();
 		oldParent->erase(this);
@@ -1246,6 +1246,3 @@ FORCE_SEGMENT(PropertyRowHotkey)
 FORCE_SEGMENT(PropertyRowSlider)
 
 }
-
-// [] boolLabel0 [] boolLabel1 HostLabel [hostValue] intLabel0 [intValue0] [] boolLabel3 intLabel1 [intValue1] Digest
-
