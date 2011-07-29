@@ -11,7 +11,8 @@ using sigslot::signal0;
 class WW_API MessageFilter : public yasli::RefCounter
 {
 public:
-    virtual bool filter(MSG* msg) = 0; // возвращаем true чтобы заблокировать обработку сообщения
+	// return true to prevent further message processing
+    virtual bool filter(MSG* msg) = 0;
 };
 
 class WW_API MessageLoop : public sigslot::has_slots
