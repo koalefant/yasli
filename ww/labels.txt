@@ -1,26 +1,38 @@
-ѕри использовании PropertyI/OArchive-ов доступен набор управл€ющих символов.
-¬писываютс€ как первые символы в Label, в любом пор€дке:
+Following control character sequences available during serialiazation of data
+trough PropertyTree (using PropertyI/OArchive-s). Label of the serialized value
+should start with sequence of such characters. 
 
- "&" - вынести значение в дайджест родительского элемента. ƒайджест - серенький текст после имени.
- ќтражает краткое содержание структуры. ”добно выносить именна и другие важные данные
- (чаще всего используетс€, дл€ поиска нужного элемента в списке).
+List of characters:
+ "&" - Put value to the "digest" of parent element.
+	   Digest shown as gray text following the name of the parent. Useful to
+	   show content of the structure without need to open it.
  
- "!" - только чтение. «апрещает изменение значени€ элемента (не рекурсивно, только текущий уровень). 
- ƒл€ контейнеров запрещает измен€ть количество элементов в нем.
- "!!" - элемент выгл€дит как readOnly, но может быть изменен по F2.
- 
- "^" - выносит значение в корень структуры. ћожет быть сделано не более двух раз внутри одной
- структуры: один раз дл€ контейнера (тогда элементы отображаютс€ сразу после остальных значений) и
- один раз дл€ пол€ или галочки. ≈сли в nameAlt после управл€ющих символов имени нет (напр. просто
- "^"), то элемент пр€четс€ идоступен только через корень стурктуры.
- "^^" - выносит значение в корень структуры слева от имени.
- 
- "<" - распахивает поле со значением на максимальную ширину. ”добно дл€ длинных полей.
- nameAlt может быть и просто "<", тогда вс€ строчка будет зан€та значением.
+ "!" - Read only field. Prevents user from changing value of the field. 
+	   Doesn't affect nested members.
 
- ">" - фиксирует размер виджета по минимуму
- ">size>" - фиксирует размер виджета на заданную ширину
+ "!!" - Text field looks like read only, but can be changed with F2
  
- "~" - временный элемент (занул€етс€ Serializer)
+ "^" - Pull up the row. The row will appear in the same line with parent one, after it's value.
+	   Works for containers as well.
+
+ "^^" - Put value of a child element before name of the parent.
  
- "[controls]" - передает управл€ющие символы элементам контейнера
+ "<" - Expand value field to maximal width. Handeful for long fields.
+	   label can contain only "<" character, in this case the whole line will
+	   be occupied with the value.
+
+ ">" - Set widget size to minimal, it will not resize anymore.
+ ">size>" - Set minimal widget width to "size".
+ 
+ "~" - Temporary element (with null Serializer).
+ 
+ "[controls]" - Forward control characters to container elements.
+
+Examples:
+
+	// will bring the Name to the line of parent structure
+	ar(name_, "name", "^Name"); 
+
+	// appears as nameless, read-only, full-line value field
+	ar(description_, "description", "!<"); 
+
