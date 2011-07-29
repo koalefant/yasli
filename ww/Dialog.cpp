@@ -4,8 +4,10 @@
 
 #include "ww/Serialization.h"
 
+namespace ww
+{
 
-class ButtonResponse : public ww::Button
+class ButtonResponse : public Button
 {
 public:
 	ButtonResponse(const char* text, int response, int border = 0)
@@ -19,16 +21,13 @@ public:
 	void onPressed(){
 		signalPressed_.emit(response_);
 	}
-	sigslot::signal1<int>& signalPressed() { return signalPressed_; }
+	signal1<int>& signalPressed() { return signalPressed_; }
 
 protected:
-	sigslot::signal1<int> signalPressed_;
+	signal1<int> signalPressed_;
 	int response_;
 
 };
-
-namespace ww
-{
 
 typedef std::vector<Widget*> SpawnedDialogs;
 static SpawnedDialogs spawnedDialogs;

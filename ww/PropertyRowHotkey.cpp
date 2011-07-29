@@ -16,7 +16,7 @@
 
 namespace ww{
 
-class PropertyRowHotkey : public PropertyRowImpl<KeyPress, PropertyRowHotkey>, public sigslot::has_slots{
+class PropertyRowHotkey : public PropertyRowImpl<KeyPress, PropertyRowHotkey>, public has_slots{
 public:
 	PropertyRowHotkey(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	PropertyRowHotkey() {}

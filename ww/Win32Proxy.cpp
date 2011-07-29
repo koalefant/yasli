@@ -49,7 +49,6 @@ BOOL Win32ProxyImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 Win32Proxy::Win32Proxy(HWND parent, int border)
 : _ContainerWithWindow(new Win32ProxyImpl(this, parentHwnd_ = parent), border)
 {
-	focusedWidget_ = 0;
 	hotkeyContext_ = new HotkeyContext;
 }
 #pragma warning(pop)

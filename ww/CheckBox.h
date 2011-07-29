@@ -4,6 +4,7 @@
 
 
 namespace ww{
+using std::string;
 
 class CheckBoxImpl;
 class WW_API CheckBox : public _WidgetWithWindow{
@@ -20,15 +21,15 @@ public:
 	bool status() const { return status_; }
 
 	virtual void onChanged();
-	sigslot::signal0& signalChanged() { return signalChanged_; }
+	signal0& signalChanged() { return signalChanged_; }
 
 	void serialize(Archive& ar);
 protected:
 	// внутренние функции
 	CheckBoxImpl* window() const{ return reinterpret_cast<CheckBoxImpl*>(_window()); }
 
-	sigslot::signal0 signalChanged_;
-	std::string text_;
+	signal0 signalChanged_;
+	string text_;
 	bool status_;
 	bool buttonLike_;
 

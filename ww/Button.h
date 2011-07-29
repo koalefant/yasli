@@ -13,7 +13,7 @@ public:
 	void setText(const char* text);
 
 	virtual void onPressed();
-	sigslot::signal0& signalPressed() { return signalPressed_; }
+	signal0& signalPressed() { return signalPressed_; }
 
 	void serialize(Archive& ar);
 	
@@ -23,7 +23,7 @@ protected:
 	// внутренние функции
 	ButtonImpl* window() const{ return reinterpret_cast<ButtonImpl*>(_window()); }
 
-	sigslot::signal0 signalPressed_;
+	signal0 signalPressed_;
 	std::string text_;
 	bool defaultBtn_;
 };

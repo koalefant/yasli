@@ -17,16 +17,16 @@ public:
 
 	bool injectPress(KeyPress key);
 
-	sigslot::signal0& signalPressed(KeyPress key) { return signalsPressed_[key]; }
-	sigslot::signal2<KeyPress, bool&>& signalPressedAny(){ return signalPressedAny_; }
+	signal0& signalPressed(KeyPress key) { return signalsPressed_[key]; }
+	signal2<KeyPress, bool&>& signalPressedAny(){ return signalPressedAny_; }
 
     void installFilter(Application* app);
     void uninstallFilter(Application* app);
 protected:
-	typedef std::map<KeyPress, sigslot::signal0> HotkeySignals;
+	typedef std::map<KeyPress, signal0> HotkeySignals;
 	HotkeySignals signalsPressed_;
 
-	sigslot::signal2<KeyPress, bool&> signalPressedAny_;
+	signal2<KeyPress, bool&> signalPressedAny_;
     HotkeyFilter* filter_;
 };
 

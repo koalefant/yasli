@@ -13,10 +13,11 @@ public:
 
 	void set(const Color& color);
 	const Color& get() const{ return color_; }
-	sigslot::signal0& signalActivate(){ return signalActivate_; }
+
+	signal0& signalActivate(){ return signalActivate_; }
 protected:
 	ColorRectImpl& impl();
-	sigslot::signal0 signalActivate_;
+	signal0 signalActivate_;
 	Color color_;
 	friend class ColorRectImpl;
 };

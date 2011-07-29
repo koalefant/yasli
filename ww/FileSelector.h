@@ -13,6 +13,9 @@ bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name,
 
 namespace ww{
 
+// File selector is a serialization decorator.
+// It allows you to select filename with file open/save dialog.
+// Editor part is implement in class PropertyRowFileSelector.
 class FileSelector{
 public:
 	struct Options{

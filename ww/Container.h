@@ -11,7 +11,7 @@ public:
 	void setBorder(int border);
 	// ^^^
 
-	// методы для внутреннего пользования:
+	// internal methods:
 	virtual void _arrangeChildren() {}
 protected:
 };

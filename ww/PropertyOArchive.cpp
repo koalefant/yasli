@@ -316,7 +316,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class PropertyRowWidgetEnum : public PropertyRowWidget, public sigslot::has_slots{
+class PropertyRowWidgetEnum : public PropertyRowWidget, public has_slots{
 public:
 	PropertyRowWidgetEnum(PropertyRowEnum* row, PropertyTreeModel* model)
 	: PropertyRowWidget(row, model)
@@ -647,7 +647,7 @@ void PropertyRowWidgetNumeric::commit()
 
 // ---------------------------------------------------------------------------
 
-class PropertyRowWidgetString : public PropertyRowWidget, public sigslot::has_slots{
+class PropertyRowWidgetString : public PropertyRowWidget, public has_slots{
 public:
     PropertyRowWidgetString(PropertyRowString* row, PropertyTree* tree)
 	: PropertyRowWidget(row, tree->model())
@@ -731,7 +731,7 @@ std::string PropertyRowString::valueAsString() const
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
-class PropertyRowWidgetStringListValue : public PropertyRowWidget, public sigslot::has_slots{
+class PropertyRowWidgetStringListValue : public PropertyRowWidget, public has_slots{
 public:
 	PropertyRowWidgetStringListValue(PropertyRowStringListValue* row, PropertyTreeModel* model)
 	: PropertyRowWidget(row, model)

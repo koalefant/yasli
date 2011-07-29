@@ -170,7 +170,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		}
 		break;
 	case KEY_DOWN:
-		if (filterMode_ && filterEntry_ == _focusedWidget()) {
+		if (filterMode_ && filterEntry_->hasFocus()) {
 			setFocus();
 		}
 		else {
@@ -389,7 +389,7 @@ void PropertyTree::serialize(Archive& ar)
 			update();
 	}
 	if(ar.filter(SERIALIZE_STATE)){
-		bool focused = _focusedWidget() == this;
+		bool focused = hasFocus();
 		ar(focused, "focused", 0);
 		ar(impl()->offset_, "offset", 0);		
 		model()->serialize(ar, this);
@@ -563,10 +563,10 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 		typeFilter += L"\"";
 		filter.add((wstring(L"Type:\t") + typeFilter).c_str(), typeFilter).connect(this, &PropertyTree::startFilter);
 	}
-//#ifndef NDEBUG
-//	menu.addSeparator();
-//	menu.add(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
-//#endif
+#ifndef NDEBUG
+	menu.addSeparator();
+	menu.add(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
+#endif
 	return true;
 }
 

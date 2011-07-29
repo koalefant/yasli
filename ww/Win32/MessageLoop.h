@@ -6,6 +6,7 @@
 #include "yasli/Pointers.h"
 
 namespace Win32{
+using sigslot::signal0;
 
 class WW_API MessageFilter : public yasli::RefCounter
 {
@@ -25,8 +26,8 @@ public:
 	void interruptDialogLoop();
 	int runDialogLoop(HWND dialog);
 
-	sigslot::signal0& signalIdle() { return signalIdle_; }
-	sigslot::signal0& signalQuit() { return signalQuit_; }
+	signal0& signalIdle() { return signalIdle_; }
+	signal0& signalQuit() { return signalQuit_; }
 
 	void quit();
 	void quit(int code);
@@ -37,8 +38,8 @@ public:
 
 	static MessageLoop& instance();
 protected:
-	static sigslot::signal0 signalIdle_;
-	sigslot::signal0 signalQuit_;
+	static signal0 signalIdle_;
+	signal0 signalQuit_;
 
 	HWND dialog_;
 	bool dialogLoopInterrupted_;

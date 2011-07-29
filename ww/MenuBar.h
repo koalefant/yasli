@@ -9,7 +9,7 @@ class HotkeyContext;
 class MenuBarImpl;
 class Window;
 
-class WW_API MenuItem : public RefCounter, public sigslot::has_slots
+class WW_API MenuItem : public RefCounter, public has_slots
 {
 public:
     MenuItem(const char* text)
@@ -25,9 +25,9 @@ public:
     void setHotkey(const KeyPress &hotkey){ hotkey_ = hotkey; }
     const KeyPress& hotkey() const{ return hotkey_; }
 
-    typedef sigslot::signal0 SignalActivate;
+    typedef signal0 SignalActivate;
     SignalActivate& signalActivate(){ return signalActivate_; }
-    typedef sigslot::signal1<MenuItem*> SignalUpdate;
+    typedef signal1<MenuItem*> SignalUpdate;
     SignalUpdate& signalUpdate(){ return signalUpdate_; }
     void activate(){
         signalActivate_.emit();

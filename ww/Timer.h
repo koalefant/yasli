@@ -5,17 +5,19 @@
 #include "yasli/Pointers.h"
 
 namespace ww{
+using yasli::SharedPtr;
+
 class Widget;
 class TimerImpl;
 class Timer : public RefCounter{
 public:
 	Timer(Widget* owner, int intervalMs);
 	virtual ~Timer();
-	sigslot::signal0& signalTimer(){ return signalTimer_; }
+	signal0& signalTimer(){ return signalTimer_; }
 protected:
 	
-	sigslot::signal0 signalTimer_;
-	yasli::SharedPtr<TimerImpl> impl_;
+	signal0 signalTimer_;
+	SharedPtr<TimerImpl> impl_;
     Widget* owner_;
 
 private:

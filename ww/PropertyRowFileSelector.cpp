@@ -18,7 +18,7 @@ using std::string;
 
 namespace ww{
 
-class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public sigslot::has_slots{
+class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public has_slots{
 	bool locked_;
 public:
 	PropertyRowFileSelector(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);

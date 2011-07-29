@@ -11,10 +11,10 @@ public:
 
 	void setValue(float value);
 	float value() const{ return value_; }
-	sigslot::signal0& signalChanged(){ return signalChanged_; }
+	signal0& signalChanged(){ return signalChanged_; }
 	void setStepsCount(int stepsCount);
 protected:
-	sigslot::signal0 signalChanged_;
+	signal0 signalChanged_;
 	float value_;
 	int stepsCount_;
 

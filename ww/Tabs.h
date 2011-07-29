@@ -5,6 +5,7 @@
 #include "ww/VBox.h"
 
 namespace ww{
+using std::vector;
 
 class TabsImpl;
 
@@ -21,10 +22,10 @@ public:
 	int selectedTab();
 	void setSelectedTab(int index, const TabChanger* changer = 0);
 
-	typedef sigslot::signal1<const TabChanger*> SignalChanged;
+	typedef signal1<const TabChanger*> SignalChanged;
 	SignalChanged& signalChanged(){ return signalChanged_; }
 	
-	typedef sigslot::signal2<MouseButton, int> SignalMouseButtonDown;
+	typedef signal2<MouseButton, int> SignalMouseButtonDown;
 	SignalMouseButtonDown& signalMouseButtonDown(){ return signalMouseButtonDown_; }
 
 	void serialize(yasli::Archive& ar);
@@ -51,12 +52,12 @@ public:
 
 	void serialize(yasli::Archive& ar);
 
-	typedef sigslot::signal1<const TabChanger*> SignalChanged;
+	typedef signal1<const TabChanger*> SignalChanged;
     SignalChanged &signalChanged(){ return tabs_->signalChanged(); }
 protected:
 	void onTabChange(const TabChanger* changer);
-	yasli::SharedPtr<Tabs> tabs_;
-	typedef std::vector<yasli::SharedPtr<Widget> > Widgets;
+	SharedPtr<Tabs> tabs_;
+	typedef vector<yasli::SharedPtr<Widget> > Widgets;
 	Widgets widgets_;
 };
 

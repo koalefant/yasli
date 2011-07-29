@@ -43,7 +43,12 @@ struct WidgetVisitor{
 	virtual void operator()(Widget& widget) = 0;
 };
 
-class WW_API Widget : public PolyRefCounter, public sigslot::has_slots{
+// IMPORTANT: All methods, that start with underscore('_') are not supposed
+// to be used by library users.
+// When you override one of these methods in custom widget, please keep them
+// protected or private.
+	
+class WW_API Widget : public PolyRefCounter, public has_slots{
 public:
 	Widget();
 	virtual ~Widget();
@@ -56,35 +61,37 @@ public:
 
 	virtual void visitChildren(WidgetVisitor& visitor) const{};
 
-	/// по другому: enabled/active
+	/// sensitive to user input (enabled/active otherwise)
 	virtual void setSensitive(bool sensitive){ sensitive_ = sensitive; }
-	/// по другому: enabled/active
 	bool sensitive() const{ return sensitive_; }
 
-	/// рамочка вокруг контрола, в пикселях
+	/// invisible border around control in pixels
 	virtual void setBorder(int border);
 	int border() const{ return border_; }
-	/// пользовательский минимальный размер в пикселях
+
+	/// minimal size requested by user
 	Vect2 requestSize() const{ return requestSize_; }
 	void setRequestSize(int w, int h);
 	virtual void setRequestSize(const Vect2 size);
 
 	virtual void setFocus();
+	bool hasFocus() const;
 
-	/// доступ к родительскому контейнеру
+	/// parent container
 	Container* parent() const{ return parent_; }
 
-	sigslot::signal0& signalDelete() { return signalDelete_; };
+	signal0& signalDelete() { return signalDelete_; };
 
 	virtual void serialize(Archive& ar);
 
-	// ВАЖНО: все методы, начинающиеся с underscore('_') не должны вызываться
-	// пользователями библиотеки и в случае переопределения в производных от 
-	// Widget и Container классах должны помещаться в секцию protected или private
+	void setToolTip(Tooltip* toolTip) { toolTip_ = toolTip; }
+	Tooltip* toolTip() const { return toolTip_; }
 
-	/// пересчитать размеры родительских контролов
+	// All methods that start with underscore(_) may be considered as internal
+	// and not supposed to be used by library users.
+	
+	// internal methods:
     virtual void _setParent(Container* container);
-
 	const Rect& _position() const{ return position_; }
 	virtual void _setPosition(const Rect& position);
 	void _relayoutParents(bool propagate);
@@ -97,7 +104,7 @@ public:
 
 	virtual Win32::Window32* _window() const{ return 0; }
     
-	virtual Widget* _focusedWidget();
+	virtual Widget* _focusedWidget() const;
 	virtual void _setFocusedWidget(Widget* widget);
 
 	virtual void _setFocus();
@@ -111,42 +118,31 @@ public:
 	bool _visible() const{ return visible_; }
 
 	virtual HotkeyContext* _hotkeyContext();
-	
-	void setToolTip(Tooltip* toolTip) { toolTip_ = toolTip; }
-	Tooltip* toolTip() const { return toolTip_; }
-
 protected:
-	/// вызывается из дестуктора
-	sigslot::signal0 signalDelete_;
+	/// called from destructor
+	signal0 signalDelete_;
 
-	/// положение контрола в родительском контейнере, в пикселях (не путать с координатами в окне)
+	/// location in parent container (in pixels), don't confuse with coordinates in parent windows
 	Rect position_;
-	/// родительский контейнер, владеющий контролом
+	/// parent container, that owns widget
     Container* parent_;
-	/// минимально-возможный размер
+	/// minimal adequate size of the control
 	Vect2 minimalSize_;
-	/// минимальный размер запрашиваемый пользователем
+	/// minimal size requested by user
 	Vect2 requestSize_;
-	/// рамка вокруг контрола, в пикселях
+	/// border around control in pixels
 	int border_;
 
-	// * перенести в Container?
-	/// рамка вокруг контрола, в пикселях
-	int focusedChildIndex_;
-	// * ^^^
-
-	/// нужно ли пересчитать раскладку перед отображением
+	/// request to relayout before showing widget
 	bool relayoutQueued_;
-	/// а-ля enabled
+	/// sensitive to user input (enabled in windows terminology)
 	bool sensitive_;
-	/// видим ли контрол (в случае если видим его родительский контрол)
+	/// visibility flag (doesn't guarantee that control visible, e.g. if parent is hidden)
 	bool visible_;
-	/// некоторые контейнеры могут прятать контролы (например Splitter сворачивать)
+	/// visible in layout - some container may hide children (e.g. splitter)
 	bool visibleInLayout_;
 
 	Tooltip* toolTip_;
-
-	static Widget* focusedWidget_;
 };
 
 Win32::Window32* _findWindow(const Widget* widget);

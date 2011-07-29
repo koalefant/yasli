@@ -15,20 +15,20 @@ public:
 	void visitChildren(WidgetVisitor& visitor) const;
 	void serialize(yasli::Archive& ar);
 
-	sigslot::signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
-	sigslot::signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
+	signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
+	signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
 protected:
 	void _arrangeChildren();
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget) { focusedWidget_ = widget; }
-	Widget* _focusedWidget(){ return focusedWidget_; }
+	Widget* _focusedWidget() const{ return focusedWidget_; }
 
 	Win32ProxyImpl& impl();
 
-	yasli::SharedPtr<Widget> child_;
+	SharedPtr<Widget> child_;
 	HWND parentHwnd_;
-	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
+	SharedPtr<HotkeyContext> hotkeyContext_;
 	Widget* focusedWidget_;
 
 	friend Win32ProxyImpl;

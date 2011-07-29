@@ -141,12 +141,17 @@ void Widget::setFocus()
         ::SetFocus(*_window());
 }
 
+bool Widget::hasFocus() const
+{
+	return _focusedWidget() == this;
+}
+
 HotkeyContext* Widget::_hotkeyContext() 
 { 
 	return parent_ ? parent_->_hotkeyContext() : 0; 
 }
 
-Widget* Widget::_focusedWidget() 
+Widget* Widget::_focusedWidget() const
 { 
 	return parent_ ? parent_->_focusedWidget() : 0; 
 }

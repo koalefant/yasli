@@ -18,7 +18,7 @@ using std::wstring;
 
 class PropertyTreeModel;
 
-class PropertyRowContainer : public PropertyRow, public sigslot::has_slots{
+class PropertyRowContainer : public PropertyRow, public has_slots{
 public:
 	enum { Custom = false };
 	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool fixedSizeContainer);
@@ -82,7 +82,7 @@ protected:
 	const EnumDescription* descriptor_;
 };
 
-class PropertyRowPointer : public PropertyRow, public sigslot::has_slots{
+class PropertyRowPointer : public PropertyRow, public has_slots{
 public:
 	enum { Custom = false };
 	PropertyRowPointer();
@@ -197,7 +197,7 @@ public:
 };
 
 
-class PropertyRowWidgetNumeric : public PropertyRowWidget, public sigslot::has_slots{
+class PropertyRowWidgetNumeric : public PropertyRowWidget, public has_slots{
 public:
     PropertyRowWidgetNumeric(PropertyRow* row, PropertyTreeModel* mode, PropertyRowNumericInterface * numeric, PropertyTree* tree);
 	~PropertyRowWidgetNumeric(){}

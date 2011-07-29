@@ -10,27 +10,29 @@
 
 namespace ww{
 
-	class WW_API RadioButtonBox : public ww::Frame 
-	{
-	public:
-		RadioButtonBox(const char* text = "RadioButtonBox", int border = 0);
-		~RadioButtonBox();
+using std::vector;
 
-		void addRadioButton(const char * name);
+class WW_API RadioButtonBox : public ww::Frame 
+{
+public:
+	RadioButtonBox(const char* text = "RadioButtonBox", int border = 0);
+	~RadioButtonBox();
 
-		void setSelectedIndex(int index);
-		int selectedIndex() const;
+	void addRadioButton(const char * name);
 
-		virtual void onChangedSelection();
-		sigslot::signal0& signalChangedSelection() { return signalChangedSelection_; }
+	void setSelectedIndex(int index);
+	int selectedIndex() const;
 
-		void serialize(Archive& ar);
-		
-	protected:
-		sigslot::signal0 signalChangedSelection_;
+	virtual void onChangedSelection();
+	signal0& signalChangedSelection() { return signalChangedSelection_; }
 
-		std::vector<ww::RadioButton*> radioButtons_;
-		ww::VBox* box_;
-	};
+	void serialize(Archive& ar);
+	
+protected:
+	signal0 signalChangedSelection_;
+
+	vector<RadioButton*> radioButtons_;
+	VBox* box_;
+};
+
 }
-

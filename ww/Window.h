@@ -16,7 +16,6 @@ class WindowImpl;
 enum WindowPosition{
 	POSITION_DEFAULT,
 	POSITION_CENTER,
-	//POSITION_CENTER_PARENT,
 	POSITION_LEFT_TOP,
 	POSITION_LEFT,
 	POSITION_LEFT_BOTTOM,
@@ -27,7 +26,6 @@ enum WindowPosition{
 	POSITION_BOTTOM,
 	POSITION_CURSOR
 };
-
 
 class WW_API Window : public Container{
 public:
@@ -46,12 +44,12 @@ public:
 	// ^^^
 
 
-	/// добавить контрол в окно
+	/// add widget into window
 	void add(Widget* widget);
-	/// убирает единственный дочерний виджет
+	/// remove the single child widget
 	void remove();
 
-	/// устанавливает заголок окна (тот, что в TitleBar-е)
+	/// sets window titlebar
 	void setTitle(std::string str);
 
 	void setShowTitleBar(bool showTitleBar);
@@ -62,10 +60,9 @@ public:
 	void setDefaultSize(int w, int h);
 	void setDefaultSize(Vect2 size);
 
-	/// разрешает/запрещает изменение размеров окна
 	void setResizeable(bool allowResize);
 	bool resizeable() const{ return resizeable_; }
-	/// разрешает/запрещает сворачивание окна
+
 	void setMinimizeable(bool allowMinimize);
 	bool minimizeable() const{ return minimizeable_; }
 
@@ -75,34 +72,32 @@ public:
 	void setMaximized(bool maximized);
 	bool maximized() const;
 
-	// signals
-	sigslot::signal0& signalClose(){ return signalClose_; }
-	sigslot::signal0& signalActivate(){ return signalActivate_; }
-
 	// virtual events:
 	virtual void onClose();
 	virtual void onResize(int width, int height) {}
 	virtual void onSetFocus() {}
 
 	void serialize(Archive& ar);
-
-	Win32::Window32* _window() const{ return window_; }
-
-	void setDefaultWidget(Widget* widget);
-
+	
+	// signals
+	signal0& signalClose(){ return signalClose_; }
+	signal0& signalActivate(){ return signalActivate_; }
 	sigslot::signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
 	sigslot::signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
+	// internal methods:
+	void setDefaultWidget(Widget* widget);
+Win32::Window32* _window() const{ return window_; }
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget);
 	Widget* _focusedWidget(){ return focusedWidget_; }
-
 protected:
 	void init(HWND parent, int border, Application* app);
 
 	void _updateVisibility();
 	void _arrangeChildren();
 	void _relayoutParents();
+
 	// little workarounds for Dialogs:
 	virtual void _onWMCommand(int command) {}
 
@@ -122,7 +117,11 @@ protected:
 	int style_;
 
 	yasli::SharedPtr<Widget> child_;
+
+	// we need to know focused widget so we can restore it when focus goes away 
+	// and then comes back to the window
 	Widget* focusedWidget_;
+
 	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
 
 	Win32::Window32* window_;

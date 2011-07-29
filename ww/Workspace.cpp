@@ -908,7 +908,7 @@ void DarkOverlay::onMessagePaint()
 
 class SpaceHSplitter;
 class SpaceVSplitter;
-class SpaceSplitterImpl: public SplitterImpl, public sigslot::has_slots{
+class SpaceSplitterImpl: public SplitterImpl, public has_slots{
 public:
 	typedef SpaceSplitterImpl Self;
 

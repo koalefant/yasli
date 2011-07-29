@@ -8,7 +8,7 @@
 
 namespace Win32{
 
-sigslot::signal0 MessageLoop::signalIdle_;
+signal0 MessageLoop::signalIdle_;
 
 MessageLoop::MessageLoop()
 : dialogLoopInterrupted_(0)

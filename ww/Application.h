@@ -10,7 +10,7 @@ namespace Win32{
 
 namespace ww{
 
-class WW_API Application : public sigslot::has_slots
+class WW_API Application : public has_slots
 {
 public:
     Application(void* hInstance = 0);
@@ -22,8 +22,8 @@ public:
     void quit();
     void quit(int returnCode);
 
-    sigslot::signal0& signalIdle() { return signalIdle_; }
-    sigslot::signal0& signalQuit() { return signalQuit_; }
+    signal0& signalIdle() { return signalIdle_; }
+    signal0& signalQuit() { return signalQuit_; }
 
 	void processPendingMessages();
     Win32::MessageLoop* _messageLoop(){ return messageLoop_.get(); }
@@ -31,8 +31,8 @@ private:
     void onLoopIdle();
     void onLoopQuit();
 
-    sigslot::signal0 signalIdle_;
-    sigslot::signal0 signalQuit_;
+    signal0 signalIdle_;
+    signal0 signalQuit_;
 
     AutoPtr<Win32::MessageLoop> messageLoop_;
 

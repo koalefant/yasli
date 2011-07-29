@@ -16,7 +16,7 @@ public:
 	}
 };
 
-class PropertyRowWidgetBitVector : public PropertyRowWidget, public sigslot::has_slots{
+class PropertyRowWidgetBitVector : public PropertyRowWidget, public has_slots{
 public:
 	PropertyRowWidgetBitVector(PropertyRowBitVector* row, PropertyTreeModel* model)
 	: PropertyRowWidget(row, model)

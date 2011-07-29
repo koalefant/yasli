@@ -21,8 +21,8 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase; // mega-hint!
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
 #if _MSC_VER <= 1500
-// При использовании typeid().name() выделяется память для кеширования андекорированных имен. 
-// VC ее не освобождает, видимо, не знает, в какой момент.
+// typeid().name() allocates memory to store undecoreated type name,
+// VC doesn't free it.
 struct TypeInfoNamesCleaner { 
 	~TypeInfoNamesCleaner()
 	{
@@ -145,9 +145,9 @@ int WW_API basicMessageLoop(HACCEL acceleratorTable)
 {
 	MSG msg;
 	
-	while(GetMessage(&msg, 0, 0, 0)){ // бегает в цикле пока не получит WM_QUIT
+	while(GetMessage(&msg, 0, 0, 0)){ // runs in loop until WM_QUIT arrives
 		if(!TranslateAccelerator(msg.hwnd, acceleratorTable, &msg)){ 
-			TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
+			TranslateMessage(&msg); // generates WM_CHAR out of WM_KEYDOWN
 			DispatchMessage(&msg);
 		}
 #if _MSC_VER <= 1500
@@ -169,12 +169,12 @@ bool Window32::registerClass(const wchar_t* className)
 	windowClass.cbClsExtra		= 0;
 	windowClass.cbWndExtra		= 0;
 	windowClass.hInstance		= globalApplicationInstance_ ;
-	windowClass.hIcon			= 0; //LoadIcon(0, (LPCTSTR)IDI_KDWTEST);
+	windowClass.hIcon			= 0;
 	windowClass.hCursor		    = LoadCursor(NULL, IDC_ARROW);
 	windowClass.hbrBackground	= (HBRUSH)(COLOR_BTNFACE + 1);
 	windowClass.lpszMenuName	= 0;
 	windowClass.lpszClassName	= className;
-	windowClass.hIconSm		    = 0; //LoadIcon(wcex.hInstance, (LPCTSTR)IDI_SMALL);
+	windowClass.hIconSm		    = 0;
 	
 	if(::RegisterClassEx(&windowClass) != 0)
 		return true;
@@ -235,7 +235,7 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 {
 	if(!Win32::_globalInstance())
 		_setGlobalInstance(HINST_THISCOMPONENT);
-	//ASSERT(Win32::_globalInstance() && " is not set!");
+
 	creating_ = true;
 	if(!isClassRegistered(className()))
 		WW_VERIFY(registerClass(className()));
@@ -463,7 +463,7 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			USHORT command = HIWORD(wparam);
 			USHORT id = LOWORD(wparam);
 			HWND wnd = HWND(lparam);
-			// возвращаем WM_COMMAND обратно
+			// forward WM_COMMAND back
 			if(wnd != handle_)
 				::SendMessage(wnd, message, wparam, lparam);
 			return onMessageCommand(command, id, wnd);

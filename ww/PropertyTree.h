@@ -84,8 +84,8 @@ public:
 	Vect2 treeSize() const;
 	bool multiSelectable() const { return propertyTree_ != 0; }
 
-    sigslot::signal0& signalChanged(){ return signalChanged_; }
-    sigslot::signal0& signalSelected(){ return signalSelected_; }
+    signal0& signalChanged(){ return signalChanged_; }
+    signal0& signalSelected(){ return signalSelected_; }
 
     bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
     PropertyRow* selectedRow();
@@ -104,18 +104,17 @@ public:
     void update(); // нужно вызывать после изменения модели
     void redraw();
 
-    TreeImpl* impl() const;
-
     bool isFocused() const;
+
+	// internal methods:
+    TreeImpl* impl() const;
+	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
     Vect2 _toScreen(Vect2 point) const;
     void _setFocus();
     void _cancelWidget(){ widget_ = 0; }
 	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 	Rect _visibleRect() const;
-
-	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
-
 protected:
 	struct RowFilter {
 		enum Type {
@@ -175,8 +174,8 @@ protected:
 	PolyPtr<PropertyTreeModel> model_;
 	int cursorX_;
 
-    sigslot::signal0 signalChanged_;
-    sigslot::signal0 signalSelected_;
+    signal0 signalChanged_;
+    signal0 signalSelected_;
 
     PolyPtr<PropertyRowWidget> widget_; // in-place widget
 

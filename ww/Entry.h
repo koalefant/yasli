@@ -9,6 +9,8 @@ namespace Win32{
 }
 
 namespace ww{
+using std::string;
+using std::wstring;
 struct KeyPress;
 class WW_API EntrySelection{
 public:
@@ -56,11 +58,11 @@ public:
 	void serialize(Archive& ar);
 
 	virtual void onChanged() { signalChanged_.emit(); }
-	sigslot::signal0& signalChanged() { return signalChanged_; }
+	signal0& signalChanged() { return signalChanged_; }
 
-	void commit(); // вызывает onEdited, если есть изменения
+	void commit(); // calls onEdited, if changed
 	virtual void onEdited() { signalEdited_.emit(); }
-	sigslot::signal0& signalEdited() { return signalEdited_; }
+	signal0& signalEdited() { return signalEdited_; }
 
 	virtual void onSelectionChanged() { signalSelectionChanged_.emit(); }
 	sigslot::signal0& signalSelectionChanged() { return signalSelectionChanged_; }
@@ -69,13 +71,12 @@ protected:
 
 	EntryImpl* impl() const;
 private:
+	signal0 signalEdited_;
+	signal0 signalChanged_;
+	signal0 signalSelectionChanged_;
 
-	sigslot::signal0 signalEdited_;
-	sigslot::signal0 signalChanged_;
-	sigslot::signal0 signalSelectionChanged_;
-
-	std::string text_;
-	std::wstring textW_;
+	string text_;
+	wstring textW_;
 	bool flat_;
     bool multiline_;
 	TextAlignHorizontal align_;

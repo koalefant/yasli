@@ -5,8 +5,9 @@
 #include "PropertyTreeOperator.h"
 
 namespace ww{
+using std::vector;
 
-struct TreeSelection : std::vector<TreePath>
+struct TreeSelection : vector<TreePath>
 {
 	bool operator==(const TreeSelection& rhs){
 		if(size() != rhs.size())
@@ -19,7 +20,7 @@ struct TreeSelection : std::vector<TreePath>
 
 //////////////////////////////////////////////////////////////////////////
 
-class WW_API PropertyTreeModel : public PolyRefCounter, public sigslot::has_slots
+class WW_API PropertyTreeModel : public PolyRefCounter, public has_slots
 {
 public:
     class LockedUpdate : public RefCounter{
@@ -79,10 +80,10 @@ public:
     int expandLevels() const{ return expandLevels_; }
 
     void onUpdated();
-    sigslot::signal0& signalUpdated() { return signalUpdated_; };
+    signal0& signalUpdated() { return signalUpdated_; };
 
     void applyOperator(PropertyTreeOperator* op, bool createRedo);
-    typedef sigslot::signal2<PropertyTreeOperator*, bool*> SignalPushUndo;
+    typedef signal2<PropertyTreeOperator*, bool*> SignalPushUndo;
     SignalPushUndo& signalPushUndo(){ return signalPushUndo_; }
 
     // для defaultArchive
@@ -101,7 +102,7 @@ private:
 
     TreePath focusedRow_;
     Selection selection_;
-    sigslot::signal0 signalUpdated_;
+    signal0 signalUpdated_;
     SignalPushUndo signalPushUndo_;
 
     yasli::SharedPtr<PropertyRow> root_;

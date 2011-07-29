@@ -22,9 +22,9 @@ public:
 	void setShowAlpha(bool showAlpha);
 	bool showAlpha()const{ return showAlpha_; }
 
-	sigslot::signal0& signalChanged() { return signalChanged_; }
+	signal0& signalChanged() { return signalChanged_; }
 protected:
-	sigslot::signal0 signalChanged_;
+	signal0 signalChanged_;
 	void relayout();
 	void onRampChanged();
 	void onSliderChanged();

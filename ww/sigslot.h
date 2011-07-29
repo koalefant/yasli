@@ -2171,5 +2171,18 @@ namespace sigslot {
 
 }; // namespace sigslot
 
+namespace ww{
+	using sigslot::has_slots;
+	using sigslot::signal0;
+	using sigslot::signal1;
+	using sigslot::signal2;
+	using sigslot::signal3;
+	using sigslot::signal4;
+	using sigslot::signal5;
+	using sigslot::signal6;
+	using sigslot::signal7;
+	using sigslot::signal8;
+};
+
 #endif // SIGSLOT_H__
 
