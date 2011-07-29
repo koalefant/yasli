@@ -9,7 +9,7 @@ ConstStringList globalConstStringList;
 
 const char* ConstStringList::findOrAdd(const char* string)
 {
-	// TODO: попробовать вектор стрингов по указателям с сортировкой
+	// TODO: try sorted vector of const char*
 	Strings::iterator it = std::find(strings_.begin(), strings_.end(), string);
 	if(it == strings_.end()){
 		strings_.push_back(string);

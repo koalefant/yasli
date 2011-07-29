@@ -4,6 +4,7 @@
 namespace yasli{ class Archive; }
 
 namespace ww{
+using yasli::SharedPtr;
 class PropertyRow;
 
 struct TreePathLeaf
@@ -42,7 +43,7 @@ public:
 private:
     Type type_;
     TreePath path_;
-    yasli::SharedPtr<PropertyRow> row_;
+    SharedPtr<PropertyRow> row_;
     int index_;
     friend class PropertyTreeModel;
 };

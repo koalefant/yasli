@@ -253,4 +253,3 @@ protected:
 
 
 }
-//bool serialize(yasli::Archive& ar, ww::KeyPress &key, const char* name, const char* label);

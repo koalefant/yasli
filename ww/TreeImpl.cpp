@@ -779,8 +779,6 @@ void TreeImpl::redraw(HDC dc)
 		using Gdiplus::Color;
 		Graphics gr(dc);
 		const int shadowHeight = 10;
-		//Color color1(gdiplusSysColor(COLOR_BTNFACE));
-		//Color color2(gdiplusSysColor(COLOR_BTNSHADOW));
 		Color color1(0, 0, 0, 0);
 		Color color2(96, 0, 0, 0);
 

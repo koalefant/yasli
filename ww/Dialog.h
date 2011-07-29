@@ -15,14 +15,14 @@ namespace ww{
 	class Button;
 
 	enum Response{
-		RESPONSE_NO, //  = 7
-		RESPONSE_YES, //  = 6
-		RESPONSE_CANCEL, //  = 2
-		RESPONSE_OK, //  = 1
-		RESPONSE_SAVE, //  
-		RESPONSE_ABORT, //  = 3
-		RESPONSE_IGNORE, //  = 5
-		RESPONSE_RETRY // = 4
+		RESPONSE_NO,
+		RESPONSE_YES,
+		RESPONSE_CANCEL,
+		RESPONSE_OK,
+		RESPONSE_SAVE,
+		RESPONSE_ABORT,
+		RESPONSE_IGNORE,
+		RESPONSE_RETRY
 	};
 
 	class WW_API Dialog : public ww::Window
