@@ -803,12 +803,20 @@ void PropertyTree::updateAttachedPropertyTree()
 		TreeSelection::const_iterator i;
 		FOR_EACH(model()->selection(), i){
 			PropertyRow* row = model()->rowFromPath(*i);
-			if(row && row->serializer())
-				serializers.push_back(row->serializer());
-			else{
-				serializers.clear();
-				break;
+			if (!row)
+				continue;
+
+			Serializer ser = row->serializer();
+
+			if (!ser) {
+				if(row->pulledUp() || row->pulledBefore()) {
+					if (PropertyRow* parent = row->parent())
+						ser = parent->serializer();
+				}
 			}
+			
+			if (ser)
+				serializers.push_back(ser);
 		}
 		attachedPropertyTree_->attach(serializers);
 	}

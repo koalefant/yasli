@@ -883,6 +883,30 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
             fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
         }
     }
+	else 
+	{
+		bool pulledChildrenSelected = false;
+
+		for (size_t i = 0; i < children_.size(); ++i) {
+			PropertyRow* child = children_[i];
+			if (!child)
+				continue;
+			if ((child->pulledBefore() || child->pulledUp()) && child->selected())
+				pulledChildrenSelected = true;
+		}
+
+		if (pulledChildrenSelected) {
+			// draw rectangle around parent of selected pulled row
+			ww::Color color1(GetSysColor(COLOR_3DFACE));
+			ww::Color color2(GetSysColor(COLOR_HIGHLIGHT));
+            Color brushColor;
+			brushColor.SetFromCOLORREF(color1.interpolate(color2, 0.33f).argb());
+            SolidBrush brush(brushColor);
+            Color borderColor(brushColor.GetA() / 8, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
+            fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
+		}
+	}
+
     if(pulledSelected())
 		textColor.setGDI(GetSysColor(COLOR_HIGHLIGHTTEXT));
 
