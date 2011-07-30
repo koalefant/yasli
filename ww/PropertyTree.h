@@ -82,7 +82,7 @@ public:
     void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
 	
 	Vect2 treeSize() const;
-	bool multiSelectable() const { return propertyTree_ != 0; }
+	bool multiSelectable() const { return attachedPropertyTree_ != 0; }
 
     signal0& signalChanged(){ return signalChanged_; }
     signal0& signalSelected(){ return signalSelected_; }
@@ -168,7 +168,7 @@ protected:
     void _arrangeChildren();
     void visitChildren(WidgetVisitor& visitor) const;
 
-	void updatePropertyTree();
+	void updateAttachedPropertyTree();
 	void drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 
 	PolyPtr<PropertyTreeModel> model_;
@@ -181,7 +181,7 @@ protected:
 
     ConstStringList constStrings_;
     Serializers attached_;
-	PropertyTree* propertyTree_;
+	PropertyTree* attachedPropertyTree_;
 
     bool filterMode_;
 	RowFilter rowFilter_;

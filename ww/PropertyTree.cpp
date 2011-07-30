@@ -78,7 +78,7 @@ PropertyTree::PropertyTree(int border)
 : _ContainerWithWindow(new TreeImpl(this), border)
 , model_(0)
 , cursorX_(0)
-, propertyTree_(0)
+, attachedPropertyTree_(0)
 , autoRevert_(true)
 , needUpdate_(true)
 , filterMode_(false)
@@ -396,7 +396,7 @@ void PropertyTree::serialize(Archive& ar)
 
 		if(ar.isInput()){
 			ensureVisible(model()->focusedRow());
-			updatePropertyTree();
+			updateAttachedPropertyTree();
 			if(focused)
 				setFocus();
 			update();
@@ -427,7 +427,7 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 	ensureVisible(row);
 	if(adjustCursorPos)
 		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
-	updatePropertyTree();
+	updateAttachedPropertyTree();
 	signalSelected_.emit();
 }
 
@@ -483,6 +483,7 @@ void PropertyTree::revert()
 	}
 
 	update();
+	updateAttachedPropertyTree();
 }
 
 void PropertyTree::apply()
@@ -637,7 +638,7 @@ void PropertyTree::onModelUpdated()
 
 	update();
 
-	updatePropertyTree();
+	updateAttachedPropertyTree();
     if(!immediateUpdate_)
 	    signalChanged_.emit();
 }
@@ -788,16 +789,16 @@ void PropertyTree::setUndoEnabled(bool enabled, bool full)
 
 void PropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
 { 
-	if(propertyTree_)
-		propertyTree_->signalChanged().disconnect(this);
-	propertyTree_ = propertyTree; 
-//	propertyTree_->signalChanged().connect(this, &PropertyTree::revert);
-	updatePropertyTree(); 
+	if(attachedPropertyTree_)
+		attachedPropertyTree_->signalChanged().disconnect(this);
+	attachedPropertyTree_ = propertyTree; 
+//	attachedPropertyTree_->signalChanged().connect(this, &PropertyTree::revert);
+	updateAttachedPropertyTree(); 
 }
 
-void PropertyTree::updatePropertyTree()
+void PropertyTree::updateAttachedPropertyTree()
 {
-	if(propertyTree_){
+	if(attachedPropertyTree_){
 		Serializers serializers;
 		TreeSelection::const_iterator i;
 		FOR_EACH(model()->selection(), i){
@@ -809,7 +810,7 @@ void PropertyTree::updatePropertyTree()
 				break;
 			}
 		}
-		propertyTree_->attach(serializers);
+		attachedPropertyTree_->attach(serializers);
 	}
 }
 
