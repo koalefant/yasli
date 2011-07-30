@@ -868,20 +868,14 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 
     if(selected()){
 		// drawing a selection rectangle
-        if(tree->isFocused()){
-            Color brushColor;
-            brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
-            SolidBrush brush(brushColor);
-            Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
-            fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
-        }
-        else{
-            Color brushColor;
-            brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
-            SolidBrush brush(brushColor);
-            Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
-            fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
-        }
+        Color brushColor;
+		if (tree->isFocused())
+			brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
+		else
+			brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
+        SolidBrush brush(brushColor);
+        Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
+        fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
     }
 	else 
 	{
@@ -898,9 +892,9 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 		if (pulledChildrenSelected) {
 			// draw rectangle around parent of selected pulled row
 			ww::Color color1(GetSysColor(COLOR_3DFACE));
-			ww::Color color2(GetSysColor(COLOR_HIGHLIGHT));
+			ww::Color color2(tree->isFocused() ? GetSysColor(COLOR_HIGHLIGHT) : GetSysColor(COLOR_3DDKSHADOW));
             Color brushColor;
-			brushColor.SetFromCOLORREF(color1.interpolate(color2, 0.33f).argb());
+			brushColor.SetFromCOLORREF(color1.interpolate(color2, 0.22f).argb());
             SolidBrush brush(brushColor);
             Color borderColor(brushColor.GetA() / 8, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
             fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
