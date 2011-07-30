@@ -37,15 +37,13 @@ struct Node
 
 	void serialize(Archive& ar)
 	{
-		if (ar.filter(FILTER_OUTLINE))
-		{
-			ar(name_, "name", "^!!");
+		if (ar.filter(FILTER_OUTLINE)) {
 			ar(color_, "color", "^>");
+			ar(name_, "name", "^!!");
 			ar(children_, "children", "^");
 		}
 
-		if (ar.filter(FILTER_PROPERTIES))
-		{
+		if (ar.filter(FILTER_PROPERTIES)) {
 			if (!ar.filter(FILTER_OUTLINE)) { // prevent duplication when bot filters enabled
 				ar(name_, "name", "^");
 				ar(color_, "color", "Color");
@@ -77,7 +75,7 @@ struct TwoTreesData
 		root_.children_.clear();
 		
 		static int index = 0;
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 5; ++i) {
 			char name[32];
 			sprintf_s(name, sizeof(name), "Node %d", index);
 
