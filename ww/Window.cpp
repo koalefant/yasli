@@ -114,10 +114,8 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
         }
         return 0;
 	case WM_SETFOCUS:
-        if(owner_->_focusedWidget()){
-            Widget* focusedOne = owner_->_focusedWidget();
-            SetFocus(*focusedOne->_window());
-        }
+		if (Widget* focusedWidget = owner_->_focusedWidget())
+			focusedWidget->setFocus();
 		owner_->onSetFocus();
 		break;
 	case WM_WINDOWPOSCHANGED:
@@ -137,17 +135,15 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		}
 	case WM_SIZING: 
 		{
-			// здесь будем проверять чтобы окно не сделали меньше размера
-			UINT edge = (UINT)wparam;   // угол/ребро за которое тянет пользователь
-			RECT* rect = (RECT*)lparam; // прямоугольник содержащий координаты окна
-										// (не клиентской области - а внешней рамки), меняем ниже
+			// here we are limiting minimal size of the window
+			UINT edge = (UINT)wparam;   // edge or corner which is moved by user
+			RECT* rect = (RECT*)lparam; // non-client window rectangle
 			RECT windowRect;
 			RECT clientRect;
 			::GetWindowRect(*this, &windowRect);
 			::GetClientRect(*this, &clientRect);
 
-			POINT borderSize; // размер рамок и TitleBar-а с обоих сторон
-							  // (точнее разница в полном размере окна и клиетнской области)
+			POINT borderSize; // difference between non-client and client size
 			borderSize.x = windowRect.right - windowRect.left - (clientRect.right - clientRect.left);
 			borderSize.y = windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top);
 
@@ -219,11 +215,11 @@ void Window::init(HWND owner, int border, Application* app)
 	positioned_ = false;
 	defaultSize_.set(0, 0);
 	defWidget_ = 0;
-    focusedWidget_ = 0;
-    app_ = app;
+	focusedWidget_ = 0;
+	app_ = app;
 	hotkeyContext_ = new HotkeyContext;
-    if(app_)
-        hotkeyContext_->installFilter(app_);
+	if(app_)
+		hotkeyContext_->installFilter(app_);
 
 	window_ = new WindowImpl(this);
 	WW_VERIFY(window_->create(toWideChar(title_.c_str()).c_str(), calculateStyle(), Rect(0, 0, 400, 400), owner));
@@ -232,27 +228,27 @@ void Window::init(HWND owner, int border, Application* app)
 
 unsigned int Window::calculateStyle()
 {
-    if(style_)
-        return style_;  
+	if(style_)
+		return style_;  
 
-    int style = WS_CLIPCHILDREN/* | WS_SYSMENU*/;
-    if(showTitleBar_)
-        style |= WS_CAPTION | WS_SYSMENU;
-    else
-        if(resizeable_)
-            style |= WS_DLGFRAME;
+	int style = WS_CLIPCHILDREN/* | WS_SYSMENU*/;
+	if(showTitleBar_)
+		style |= WS_CAPTION | WS_SYSMENU;
+	else
+		if(resizeable_)
+			style |= WS_DLGFRAME;
 
-    if(resizeable_)
-        style |= WS_MAXIMIZEBOX | WS_THICKFRAME; 
-    else{
-        style |= WS_POPUP;
-        if(!showTitleBar_)
-            style |= WS_DLGFRAME;
-    }
-    if(minimizeable_)
-        style |= WS_MINIMIZEBOX;
+	if(resizeable_)
+		style |= WS_MAXIMIZEBOX | WS_THICKFRAME; 
+	else{
+		style |= WS_POPUP;
+		if(!showTitleBar_)
+			style |= WS_DLGFRAME;
+	}
+	if(minimizeable_)
+		style |= WS_MINIMIZEBOX;
 
-    return style;
+	return style;
 }
 
 void Window::setResizeable(bool allowResize)
@@ -355,7 +351,7 @@ void Window::setIconFromResource(const char* resourceName)
 {
 	HICON icon = LoadIcon(Win32::_globalInstance(), toWideChar(resourceName).c_str());
 	ASSERT(icon);
- 
+
 	SetClassLongPtr(*window_, GCLP_HICON, (LONG_PTR)icon);
 }
 
@@ -443,11 +439,11 @@ void Window::reposition()
         break;
     case POSITION_CURSOR:
     {
-        POINT point;
-        GetCursorPos(&point);
+		POINT point;
+		GetCursorPos(&point);
 		left = point.x;
 		top = point.y;
-        break;
+		break;
     } 
     }
     Rect rect(left, top, left + width, top + height);
@@ -512,7 +508,7 @@ void Window::_relayoutParents()
 	}
 	if(clientRect.bottom - clientRect.top < _minimalSize().y){
 		windowRect.bottom = windowRect.top + _minimalSize().y + borderSize.cy;
-        move = true;
+		move = true;
 	}
 	if(move){
 		window_->move(Rect(windowRect.left, windowRect.top, windowRect.right, windowRect.bottom));
