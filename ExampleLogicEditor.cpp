@@ -30,7 +30,7 @@ private:
 	bool isNegated_;
 };
 YASLI_CLASS(ConditionBase, ConditionBase, "Always True")
-YASLI_CLASS_NULL(ConditionBase, 0)
+YASLI_CLASS_NULL(ConditionBase, 0) // remove NULL value from the list of available types
 
 class ConditionSwitch : public ConditionBase
 {

@@ -59,6 +59,9 @@ MainWindow::MainWindow(ww::Application& app)
 	ww::Widget* createTableSample();
 	pages->add("Table", createTableSample());
 
+	ww::Widget* createTwoTrees();
+	pages->add("Two Trees", createTwoTrees());
+
     add(pages);
 
 	TextIArchive sa;
