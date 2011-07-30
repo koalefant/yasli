@@ -171,7 +171,7 @@ public:
 	void calculateTotalSizes(int* minTextSize);
     void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 pos, int& totalHeight, int& extraSize);
 
-	virtual bool isWidgetFixed() const{ return widgetPlacement() != WIDGET_VALUE; }
+	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
