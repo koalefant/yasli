@@ -734,9 +734,10 @@ void PropertyTree::_arrangeChildren()
     }
 }
 
-bool PropertyTree::isFocused() const
+bool PropertyTree::hasFocus() const
 {
-	return GetFocus() == *impl() || (widget_ && GetFocus() == *widget_->actualWidget()->_window());
+	HWND focusedWindow = GetFocus();
+	return focusedWindow == impl()->get() || IsChild(impl()->get(), focusedWindow);
 }
 
 void PropertyTree::setExpandLevels(int levels)

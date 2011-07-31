@@ -524,6 +524,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\wwTest.exe.manifest"
+			>
+		</File>
+		<File
 			RelativePath=".\wwTest.rc"
 			>
 		</File>

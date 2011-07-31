@@ -53,6 +53,7 @@ static Win32::Window32* initializeGlobalDummyWindow()
 {
 	static Win32::Window32 window;
 	WW_VERIFY(window.create(L"dummy", 0, ww::Rect(0, 0, 100, 100), 0));
+	Win32::initializeCommonControls();
 	return &window; 
 }
 

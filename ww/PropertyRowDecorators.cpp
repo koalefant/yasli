@@ -51,44 +51,16 @@ PropertyRowButton::PropertyRowButton()
 void PropertyRowButton::redraw(const PropertyDrawContext& context)
 {
 	using namespace Gdiplus;
-	using Gdiplus::Rect;
 	using Gdiplus::Color;
-	bool pressed = underMouse_ && value();
-	Rect buttonRect = gdiplusRect(context.widgetRect);
-	Graphics* gr = context.graphics;
-	buttonRect.X -= 1;
-	buttonRect.Width += 1;
-	buttonRect.Height += 2;
 
-	Color brushColor;
-	brushColor.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
-	Gdiplus::SolidBrush brush(brushColor);
-	gr->FillRectangle(&brush, buttonRect);
+	Rect buttonRect(context.widgetRect);
+	buttonRect.setLeft(buttonRect.left() - 1);
+	buttonRect.setRight(buttonRect.right() + 1);
+	buttonRect.setBottom(buttonRect.bottom() + 2);
 
-	RECT edgeRect = { buttonRect.X, buttonRect.Y, buttonRect.GetRight(), buttonRect.GetBottom() };
-	HDC dc =  gr->GetHDC();
-	DrawEdge(dc, &edgeRect, pressed ? EDGE_SUNKEN : EDGE_RAISED, BF_RECT);
-	gr->ReleaseHDC(dc);
 	std::wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
-
-	Rect textRect = gdiplusRect(context.widgetRect);
-	textRect.X += 2;
-	textRect.Y += 1;
-	textRect.Width -= 4;
-	if(pressed){
-		textRect.X += 1;
-		textRect.Y += 1;
-	}
-	
-	StringFormat format;
-	format.SetAlignment(StringAlignmentCenter);
-	format.SetLineAlignment(StringAlignmentCenter);
-	format.SetFormatFlags(StringFormatFlagsNoWrap);
-	format.SetTrimming(StringTrimmingEllipsisCharacter);
-	Color textColor;
-	textColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOWTEXT));
-	SolidBrush textBrush(textColor);
-	gr->DrawString( text.c_str(), (int)wcslen(text.c_str()), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
+	bool pressed = underMouse_ && value();
+	context.drawButton(buttonRect, text.c_str(), pressed, selected() && context.tree->hasFocus());
 }
 
 bool PropertyRowButton::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)

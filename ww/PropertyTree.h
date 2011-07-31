@@ -104,7 +104,7 @@ public:
     void update(); // нужно вызывать после изменения модели
     void redraw();
 
-    bool isFocused() const;
+    bool hasFocus() const;
 
 	// internal methods:
     TreeImpl* impl() const;

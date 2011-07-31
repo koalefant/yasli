@@ -33,6 +33,7 @@ namespace ww{
 		Rect lineRect;
 
 		void drawCheck(const Rect& rect, bool grayed, bool checked) const;
+		void drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused) const;
 		void drawValueText(bool highlighted, const wchar_t* text) const;
 		void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const;
 

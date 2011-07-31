@@ -869,7 +869,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
     if(selected()){
 		// drawing a selection rectangle
         Color brushColor;
-		if (tree->isFocused())
+		if (tree->hasFocus())
 			brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
 		else
 			brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
@@ -892,7 +892,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 		if (pulledChildrenSelected) {
 			// draw rectangle around parent of selected pulled row
 			ww::Color color1(GetSysColor(COLOR_3DFACE));
-			ww::Color color2(tree->isFocused() ? GetSysColor(COLOR_HIGHLIGHT) : GetSysColor(COLOR_3DDKSHADOW));
+			ww::Color color2(tree->hasFocus() ? GetSysColor(COLOR_HIGHLIGHT) : GetSysColor(COLOR_3DDKSHADOW));
             Color brushColor;
 			brushColor.SetFromCOLORREF(color1.interpolate(color2, 0.22f).argb());
             SolidBrush brush(brushColor);

@@ -5,10 +5,95 @@
 #include "gdiplus.h"
 #include "yasli/Assert.h"
 #include "Win32/Drawing.h"
+#include "Win32/Window.h"
 #include "PropertyTree.h"
 #include "Color.h"
 
+#include <uxtheme.h>
+#include <vssym32.h>
+
 using namespace Gdiplus;
+
+// uxtheme.dll provides an API for drawing XP-themes
+// Linking at runtime to stay compatible with Windows 2000.
+struct DynamicUxTheme
+{
+	typedef BOOL(__stdcall *PFNISAPPTHEMED)();
+	typedef HRESULT(__stdcall *PFNCLOSETHEMEDATA)(HTHEME hTheme);
+	typedef HRESULT(__stdcall *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
+	typedef HTHEME(__stdcall *PFNOPENTHEMEDATA)(HWND hwnd, LPCWSTR pszClassList);
+	typedef HRESULT (__stdcall *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, DWORD dwTextFlags2, const RECT *pRect);
+	typedef HRESULT (__stdcall *PFNGETTHEMEBACKGROUNDCONTENTRECT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pBoundingRect, RECT *pContentRect);
+
+	HMODULE module_;
+	PFNISAPPTHEMED IsAppThemed;
+	PFNOPENTHEMEDATA OpenThemeData;
+	PFNDRAWTHEMEBACKGROUND DrawThemeBackground;
+	PFNCLOSETHEMEDATA CloseThemeData;
+	PFNDRAWTHEMETEXT DrawThemeText;
+	PFNGETTHEMEBACKGROUNDCONTENTRECT GetThemeBackgroundContentRect;
+
+	DynamicUxTheme()
+	: module_(0)
+	, OpenThemeData(0)
+	, DrawThemeBackground(0)
+	, CloseThemeData(0)
+	, DrawThemeText(0)
+	, GetThemeBackgroundContentRect(0)
+	{
+	}
+
+	~DynamicUxTheme()
+	{
+		freeLibrary();
+	}
+
+	bool isLoaded() const{ return module_ != 0; }
+
+	void loadLibrary()
+	{
+		module_ = LoadLibrary(L"uxtheme.dll");
+		if (!module_)
+			return;
+
+		IsAppThemed = (PFNISAPPTHEMED)GetProcAddress(module_, "IsAppThemed");
+		OpenThemeData = (PFNOPENTHEMEDATA)GetProcAddress(module_, "OpenThemeData");
+		DrawThemeBackground = (PFNDRAWTHEMEBACKGROUND)GetProcAddress(module_, "DrawThemeBackground");
+		CloseThemeData = (PFNCLOSETHEMEDATA)GetProcAddress(module_, "CloseThemeData");
+		DrawThemeText = (PFNDRAWTHEMETEXT)GetProcAddress(module_, "DrawThemeText");
+		GetThemeBackgroundContentRect = (PFNGETTHEMEBACKGROUNDCONTENTRECT)GetProcAddress(module_, "GetThemeBackgroundContentRect");
+
+		if (!OpenThemeData ||
+			!DrawThemeBackground ||
+			!CloseThemeData ||
+			!DrawThemeText ||
+			!GetThemeBackgroundContentRect)
+		{
+			FreeLibrary(module_);
+			module_ = 0;
+			return;
+		}	 
+	}
+
+	void freeLibrary()
+	{
+		if (!module_)
+			return;
+
+		FreeLibrary(module_);
+		module_ = 0;
+
+		IsAppThemed = 0;
+		OpenThemeData = 0;
+		DrawThemeBackground = 0;
+		CloseThemeData = 0;
+		DrawThemeText = 0;
+		GetThemeBackgroundContentRect = 0;
+	}
+
+} static uxTheme;
+
+// ---------------------------------------------------------------------------
 
 namespace ww{
 
@@ -40,6 +125,7 @@ void drawingInit()
 	startup.SuppressBackgroundThread = FALSE;
 
 	if(drawingUsers == 0){
+		uxTheme.loadLibrary();
 		ESCAPE(GdiplusStartup(&drawingToken, &startup, 0) == Ok, return);
 
 		NONCLIENTMETRICS nonClientMetrics;
@@ -64,6 +150,7 @@ void drawingFinish()
 		defaultFont.reset();
 		defaultBoldFont.reset();
 		GdiplusShutdown(drawingToken);
+		uxTheme.freeLibrary();
 	}
 }
 
@@ -215,6 +302,63 @@ void PropertyDrawContext::drawCheck(const Rect& rect, bool grayed, bool checked)
 	else {
 		ww::drawCheck(graphics, gdiplusRect(rect), checked);
 	}
+}
+
+void PropertyDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused) const
+{
+	using Gdiplus::Color;
+	using Gdiplus::Rect;
+
+	if (uxTheme.isLoaded() && uxTheme.IsAppThemed())
+	{
+		// XP-style drawing
+		HTHEME theme = uxTheme.OpenThemeData(tree->_window()->get(), L"Button");
+		if (theme) {
+			HDC dc = graphics->GetHDC();
+			RECT buttonRect = rect;
+			int state = (pressed ? PBS_PRESSED : PBS_NORMAL) | (focused ? PBS_HOT : 0);
+			uxTheme.DrawThemeBackground(theme, dc, BP_PUSHBUTTON, state, &buttonRect, 0);
+			graphics->ReleaseHDC(dc);
+			uxTheme.CloseThemeData(theme);
+		}
+		else {
+			OutputDebugStringA("Failed to OpenThemeData\n");
+		}
+	}
+	else
+	{
+		Color brushColor;
+		brushColor.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
+		Gdiplus::SolidBrush brush(brushColor);
+
+		Rect buttonRect = gdiplusRect(rect);
+		graphics->FillRectangle(&brush, buttonRect);
+
+		HDC dc =  graphics->GetHDC();
+		RECT rt = rect;
+		DrawFrameControl(dc, &rt, DFC_BUTTON, (pressed ? DFCS_PUSHED : 0) | DFCS_BUTTONPUSH);
+		graphics->ReleaseHDC(dc);
+	}
+	
+	StringFormat format;
+	format.SetAlignment(StringAlignmentCenter);
+	format.SetLineAlignment(StringAlignmentCenter);
+	format.SetFormatFlags(StringFormatFlagsNoWrap);
+	format.SetTrimming(StringTrimmingEllipsisCharacter);
+	Color textColor;
+	textColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOWTEXT));
+	SolidBrush textBrush(textColor);
+
+	Rect textRect = gdiplusRect(rect);
+	textRect.X += 2;
+	textRect.Y += 1;
+	textRect.Width -= 4;
+	if(pressed){
+		textRect.X += 1;
+		textRect.Y += 1;
+	}
+
+	graphics->DrawString( text, (int)wcslen(text), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
 
 

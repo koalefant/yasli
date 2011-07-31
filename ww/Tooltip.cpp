@@ -20,7 +20,6 @@ Tooltip::Tooltip(const char* text, bool baloon)
 , toolTipWindow_(0)
 , offset_(15, 15)
 {
-	Win32::initializeCommonControls();
 }
 
 #pragma warning(pop)

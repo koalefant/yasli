@@ -807,7 +807,7 @@ void TreeImpl::redraw(HDC dc)
 		OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 	}
 	else{
-		if(model()->focusedRow()->isRoot() && tree_->isFocused()){
+		if(model()->focusedRow()->isRoot() && tree_->hasFocus()){
 			clientRect.left += 2; clientRect.top += 2;
 			clientRect.right -= 2; clientRect.bottom -= 2;
 			DrawFocusRect(dc, &clientRect);

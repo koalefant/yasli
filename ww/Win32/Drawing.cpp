@@ -20,6 +20,7 @@ static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
 
 namespace Win32{
 
+
 int round(float v)
 {
 	return int(v);
