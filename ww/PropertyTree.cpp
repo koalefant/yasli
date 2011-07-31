@@ -567,7 +567,7 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 		typeFilter += L"\"";
 		filter.add((wstring(L"Type:\t") + typeFilter).c_str(), typeFilter).connect(this, &PropertyTree::startFilter);
 	}
-#ifndef NDEBUG
+#if 0
 	menu.addSeparator();
 	menu.add(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
 #endif

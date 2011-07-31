@@ -54,7 +54,7 @@ struct TableData
 			sprintf_s(buf, sizeof(buf), "Item %i", int(i));
 			items_[i].name_ = buf;
 			items_[i].color_.setHSV((i * 360.0f) / items_.size(), 1.0f, 1.0f);
-			items_[i].color_.a = 200.0f + 55.0f * sinf(float(i) * 3.1415926f / 10.0f);
+			items_[i].color_.a = int(200.0f + 55.0f * sinf(float(i) * 3.1415926f / 10.0f));
 		}
 	}
 
