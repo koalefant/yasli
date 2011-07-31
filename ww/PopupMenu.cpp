@@ -48,7 +48,6 @@ void PopupMenu::assignIDs()
 	--nextId_;
     PopupMenuItem* current = &root_;
     while(current){
-        ASSERT(currentID < idRangeEnd_);
         if(current->children().empty()) {
             current->id_ = nextId_;
 			if (nextId_ > 0) {
