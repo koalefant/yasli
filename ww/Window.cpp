@@ -80,6 +80,7 @@ protected:
 WindowImpl::WindowImpl(ww::Window* owner)
 : Win32::Window32()
 , owner_(owner)
+, menu_(0)
 {
 }
 

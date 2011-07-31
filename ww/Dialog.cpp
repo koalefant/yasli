@@ -201,7 +201,7 @@ void Dialog::_onWMCommand(int command)
 	if (command == IDOK) {
 		onResponse(defaultResponse_);
 	}
-	else if (command == IDCANCEL){
+	else if (command == IDCANCEL || command == 0){
 		onResponse(cancelResponse_);
 	}
 	else{
