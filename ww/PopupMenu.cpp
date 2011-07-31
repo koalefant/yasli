@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "ww/PopupMenu.h"
 #include <algorithm>
+#include <map>
 #include "ww/Unicode.h"
 #include "ww/Widget.h"
 #include "ww/Win32/Window.h"
@@ -8,14 +9,12 @@
 
 namespace ww{
 
-PopupMenu::PopupMenu(int maxItems)
+PopupMenu::PopupMenu()
 {
-    idRangeStart_ = ID_RANGE_MAX - maxItems;
-    idRangeEnd_   = ID_RANGE_MAX;
+	nextId_ = 65535;
 }
 
-
-PopupMenuItem* PopupMenu::nextItem(PopupMenuItem* item) const
+static PopupMenuItem* nextItem(PopupMenuItem* item)
 {
     if(!item->children().empty())
         return item->children().front();
@@ -38,14 +37,27 @@ PopupMenuItem* PopupMenu::nextItem(PopupMenuItem* item) const
     }
 }
 
+static const PopupMenuItem* nextItem(const PopupMenuItem* item)
+{
+	return nextItem(const_cast<PopupMenuItem*>(item));
+}
+
 void PopupMenu::assignIDs()
 {
-    DWORD currentID = idRangeStart_;
+    DWORD currentID = nextId_;
+	--nextId_;
     PopupMenuItem* current = &root_;
     while(current){
         ASSERT(currentID < idRangeEnd_);
-        if(current->children().empty())
-            current->id_ = currentID++;
+        if(current->children().empty()) {
+            current->id_ = nextId_;
+			if (nextId_ > 0) {
+				--nextId_;
+			}
+			else {
+				ASSERT(0 && "Out of Menu IDs")
+			}
+		}
         else
             current->id_ = 0;
 
@@ -65,47 +77,71 @@ void PopupMenu::spawn(Widget* widget)
 	spawn(Vect2(pt.x, pt.y), widget);
 }
 
+template<class TKey, class TValue>
+TValue find_in_map(const std::map<TKey, TValue>& map, const typename std::map<TKey, TValue>::key_type& key, const typename std::map<TKey, TValue>::mapped_type& defaultValue)
+{
+	std::map<TKey, TValue>::const_iterator it = map.find(key);
+	if (it == map.end())
+		return defaultValue;
+	else
+		return it->second;
+}
+
+static HMENU createNativeMenu(const PopupMenuItem& root, bool popupMenu)
+{
+	HMENU handle = 0;
+	if (popupMenu)
+		handle = ::CreatePopupMenu();
+	else
+		handle = ::CreateMenu();
+
+	std::map<const PopupMenuItem*, HMENU> submenuHandles;
+	submenuHandles[&root] = handle;
+
+	const PopupMenuItem* current = &root;
+	while(current = nextItem(current)){
+		if(current->children().empty()){
+			UINT_PTR id = current->_menuID();
+			wstring text = current->textW();
+
+			HMENU parentHandle = find_in_map(submenuHandles, current->parent(), 0);
+			ASSERT(parentHandle != 0);
+
+			if(text == L"-")
+				AppendMenu(parentHandle, MF_SEPARATOR, id, L"");
+			else{
+				if(current->hotkey() != KeyPress()){
+					text += L"\t";
+					text += toWideChar(current->hotkey().toString(true).c_str());
+				}
+				AppendMenu(parentHandle, 
+						   MF_STRING | (current->isChecked() ? MF_CHECKED : 0)
+						   | (current->isEnabled() ? 0 : MF_GRAYED)
+						   | (current->isDefault() ? MF_DEFAULT : 0),
+						   id, text.c_str());			
+			}
+		}
+		else{
+			HMENU handle = ::CreatePopupMenu();
+			submenuHandles[current] = handle;
+			HMENU parentHandle = find_in_map(submenuHandles, current->parent(), 0);
+			ASSERT(parentHandle != 0);
+			BOOL result = ::InsertMenu(parentHandle, -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
+			ASSERT(result == TRUE);
+		}
+	}
+
+	return handle;
+}
+
 void PopupMenu::spawn(Vect2 point, Widget* widget)
 {
 	if(root_.children().empty())
 		return;
 
     assignIDs();
-	root_.setMenuHandle(::CreatePopupMenu());
 
-    PopupMenuItem* current = &root_;
-    while(current = nextItem(current)){
-        if(current->children().empty()){
-			UINT_PTR id = current->menuID();
-			wstring text = current->textW();
-			if(text == L"-")
-				AppendMenu(current->parent()->menuHandle(), MF_SEPARATOR, id, L"");
-			else{
-				if(current->hotkey() != KeyPress()){
-					text += L"\t";
-					text += toWideChar(current->hotkey().toString(true).c_str());
-				}
-				AppendMenu(current->parent()->menuHandle(), 
-						   MF_STRING | (current->isChecked() ? MF_CHECKED : 0)
-						   | (current->isEnabled() ? 0 : MF_GRAYED)
-						   | (current->isDefault() ? MF_DEFAULT : 0),
-						   id, text.c_str());			
-			}
-        }
-		else{
-			HMENU handle = ::CreatePopupMenu();
-			current->setMenuHandle(handle);
-			BOOL result = ::InsertMenu(current->parent()->menuHandle(), -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
-			ASSERT(result == TRUE);
-		}
-    }
-
-	current = &root_;
-    while(current = nextItem(current)){
-        if(!current->children().empty()){
-			UINT_PTR handle = UINT_PTR(current->menuHandle());
-		}
-    }
+	HMENU menu = createNativeMenu(root_, true);
 
 	Win32::Window32* parentWindow = 0;
 	if (widget)
@@ -113,29 +149,30 @@ void PopupMenu::spawn(Vect2 point, Widget* widget)
 	HWND parentWindowHandle =  parentWindow ? parentWindow->get() : 0;
 	ASSERT(::IsWindow(parentWindowHandle));
 
-	UINT id = ::TrackPopupMenu(root_.menuHandle(), TPM_LEFTBUTTON | TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, 0, parentWindowHandle, 0);
+	UINT id = ::TrackPopupMenu(menu, TPM_LEFTBUTTON | TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, 0, parentWindowHandle, 0);
 
-	if(root_.children().empty())
-		return;
-	
-    current = &root_;
-    while(current = nextItem(current)){
-        if(current->children().empty()){
-			UINT current_id = current->menuID();
-			if(current_id == id){
-                current->call();
-			}
-        }
-    }
+	PopupMenuItem* item = root_.findById(id);
+	if (item)
+		item->_call();
+
+	DestroyMenu(menu);
+}
+
+void* PopupMenu::_generateMenuBar()
+{
+	if (root_.children().empty())
+		return 0;
+
+	assignIDs();
+	HMENU menu = createNativeMenu(root_, false);
+	ASSERT(menu != 0);
+	return menu;
 }
 
 // ---------------------------------------------------------------------------
 
 PopupMenuItem::~PopupMenuItem()
 {
-	if(id_ && !children_.empty()){
-		::DestroyMenu(menuHandle());
-	}
 }
 
 PopupMenuItem0& PopupMenuItem::add(const wchar_t* text)
@@ -181,6 +218,20 @@ PopupMenuItem* PopupMenuItem::find(const wchar_t* text)
 PopupMenuItem* PopupMenuItem::find(const char* text)
 {
 	return find(toWideChar(text).c_str());
+}
+
+PopupMenuItem* PopupMenuItem::findById(unsigned int id)
+{
+	PopupMenuItem* current = this;
+	while(current = nextItem(current)){
+		if(current->children().empty()){
+			UINT current_id = current->_menuID();
+			if(current_id == id){
+				return current;
+			}
+		}
+	}
+	return 0;
 }
 
 }

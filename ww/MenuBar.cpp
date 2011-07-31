@@ -245,7 +245,7 @@ void MenuBarImpl::onMessageLButtonDown(UINT button, int x, int y)
         inMenu_ = false;
         if(activeItem_ != -1){
             MenuBarItem& item = rootItems_.at(activeItem_);
-            PopupMenu menu(100);
+            PopupMenu menu;
             generateMenu(&menu.root(), *item.item());
             POINT pt = { item.rect().left(), item.rect().bottom() };
             ClientToScreen(*this, &pt);

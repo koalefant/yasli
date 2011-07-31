@@ -7,6 +7,7 @@
 #include "ww/Win32/MessageLoop.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
+#include "ww/PopupMenu.h"
 #include "ww/HotkeyContext.h"
 
 
@@ -64,9 +65,14 @@ public:
 	// virtuals:
 	const wchar_t* className() const{ return L"ww.WindowImpl"; }
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
+	int onMessageCommand(USHORT command, USHORT id, HWND wnd);
 	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
 	// ^^^
+	
+	void setMenu(ww::PopupMenu* root);
 protected:
+	HMENU menu_;
+
 	ww::Window* owner_;
 	SharedPtr<WindowMessageFilter> filter_;
 };
@@ -84,6 +90,49 @@ WindowImpl::~WindowImpl()
 		Application::get()->_messageLoop()->uninstallFilter(filter_);
 		filter_ = 0;
 	}
+
+	if (menu_) {
+		::DestroyMenu(menu_);
+	}
+}
+
+void WindowImpl::setMenu(PopupMenu* popupMenu)
+{
+	if (menu_) {
+		DestroyMenu(menu_);
+		menu_ = 0;
+	}
+
+	if (!popupMenu)
+		return;
+
+	menu_ = (HMENU)popupMenu->_generateMenuBar();
+	::SetMenu(get(), menu_);
+}
+
+int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
+{
+	if (command == 0) {
+		// menu command
+		if (menu_ != 0) {
+			if (owner_->menu_) {
+				ww::PopupMenuItem* item = owner_->menu_->root().findById(id);
+				if (item) {
+					item->_call();
+				}
+				else {
+					ASSERT(item != 0 && "Missing menu item for command");
+				}
+			}
+			else {
+				ASSERT(owner_->menu_ != 0);
+			}
+		}
+	}
+	else {
+		owner_->_onWMCommand(command);
+	}
+	return __super::onMessageCommand(command, id, wnd);
 }
 
 
@@ -103,9 +152,6 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	case WM_CLOSE:
 		owner_->onClose();
 		return 0;
-	case WM_COMMAND:
-		owner_->_onWMCommand(wparam);
-		return __super::onMessage(message, wparam, lparam);
     case WM_ACTIVATE:
         {
             UINT activationMethod = LOWORD(wparam);
@@ -291,6 +337,22 @@ void Window::setMaximized(bool maximized)
 bool Window::maximized() const
 {
 	return (_window()->getStyle() & WS_MAXIMIZE) != 0;
+}
+
+void Window::setMenu(PopupMenu* menu)
+{
+	menu_ = menu;
+	updateMenu();
+}
+
+PopupMenu* Window::menu()
+{
+	return menu_;
+}
+
+void Window::updateMenu()
+{
+	((WindowImpl*)_window())->setMenu(menu_);
 }
 
 bool Window::isVisible() const

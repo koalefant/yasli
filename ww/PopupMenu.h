@@ -76,35 +76,31 @@ public:
 
 	PopupMenuItem* find(const char* text);
 	PopupMenuItem* find(const wchar_t* text);
+	PopupMenuItem* findById(unsigned int id);
 
 	PopupMenuItem* parent() { return parent_; }
+	const PopupMenuItem* parent() const{ return parent_; }
 	Children& children() { return children_; };
     const Children& children() const { return children_; }
 	bool empty() const { return children_.empty(); }
+
+	// internal methods:
+    unsigned int _menuID() const{
+        ASSERT(children_.empty());
+        return id_;
+    }
+	void _setMenuID(unsigned int id){
+        ASSERT(children_.empty());
+		id_ = unsigned int(id);
+	}
+    virtual void _call() = 0;
 private:
     void addChildren(PopupMenuItem* item){
         children_.push_back(item);
         item->parent_ = this;
     }
 
-    HMENU menuHandle(){
-        ASSERT(!children_.empty());
-        return HMENU(id_);
-    }
-	void setMenuHandle(HMENU menu){
-        ASSERT(!children_.empty());
-		id_ = unsigned int(menu);
-	}
-    unsigned int menuID(){
-        ASSERT(children_.empty());
-        return id_;
-    }
-	void setMenuID(unsigned int id){
-        ASSERT(children_.empty());
-		id_ = unsigned int(id);
-	}
 
-    virtual void call() = 0;
 
     unsigned int id_;
 
@@ -123,7 +119,7 @@ public:
     : PopupMenuItem(text)
     {}
 
-    void call(){ emit(); }
+    void _call(){ emit(); }
 	template<class desttype>
 	PopupMenuItem0& connect(desttype* pclass, void (desttype::*pmemfun)()){
 		signal0::connect(pclass, pmemfun);
@@ -141,7 +137,7 @@ public:
     , arg1_(arg1)
     {}
 
-    void call(){ emit(arg1_); }
+    void _call(){ emit(arg1_); }
 
 	template<class desttype>
 	PopupMenuItem1& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1)){
@@ -161,7 +157,7 @@ public:
     , arg2_(arg2)
     {}
 
-    void call(){ emit(arg1_, arg2_); }
+    void _call(){ emit(arg1_, arg2_); }
 
 	template<class desttype>
 	PopupMenuItem2& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1, Arg2)){
@@ -183,7 +179,7 @@ public:
     , arg3_(arg3)
     {}
 
-    void call(){ emit(arg1_, arg2_, arg3_); }
+    void _call(){ emit(arg1_, arg2_, arg3_); }
 
 	template<class desttype>
 	PopupMenuItem3& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1, Arg2, Arg3)){
@@ -231,29 +227,24 @@ PopupMenuItem3<Arg1, Arg2, Arg3>& PopupMenuItem::add(const char* text, const Arg
 
 
 
-class WW_API PopupMenu{
+class WW_API PopupMenu : public RefCounter{
 public:
-    enum {
-        ID_RANGE_MIN = 32768,
-        ID_RANGE_MAX = 32767 + 16384
-    };
-    PopupMenu(int maxItems);
+    PopupMenu();
     PopupMenuItem0& root() { return root_; };
     const PopupMenuItem0& root() const { return root_; };
     void spawn(Widget* widget);
     void spawn(Vect2 screenPoint, Widget* widget);
 	void clear();
 
-	//BOOL onCommand(WPARAM wParam, LPARAM lParam);
+	// internal methods:
+	// generates HMENU, used by ww::Window, caller is responsible to call DestroyMenu
+	void* _generateMenuBar();
 private:
-    PopupMenuItem* nextItem(PopupMenuItem* item) const;
-
     PopupMenuItem0 root_;
 
     void assignIDs();
 
-    unsigned int idRangeStart_;
-    unsigned int idRangeEnd_;
+    unsigned int nextId_;
 };
 
 }

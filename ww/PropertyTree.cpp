@@ -141,7 +141,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 			selectedRow()->onActivate(this, true);
 		break;
 	case KEY_APPS: {
-		PopupMenu menu(300);
+		PopupMenu menu;
 		if(onContextMenu(row, menu.root())){
             Win32::Rect rect(row->rect());
 			_window()->clientToScreen(rect);
@@ -264,7 +264,7 @@ void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point
 void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
     SharedPtr<PropertyRow> handle = row;
-	PopupMenu menu(300);
+	PopupMenu menu;
 	PropertyRow* menuRow = 0;
 
 	if (row->isSelectable()){

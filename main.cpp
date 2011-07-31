@@ -25,6 +25,7 @@
 #include "ww/HotkeyDialog.h"
 #include "ww/Clipboard.h"
 #include "ww/PropertyEditor.h"
+#include "ww/PopupMenu.h"
 #include "ww/Win32Proxy.h"
 #include "ww/Win32/Window.h"
 #include "yasli/TextOArchive.h"
@@ -110,6 +111,14 @@ MainWindow::MainWindow(ww::Application& app)
 
 	setDefaultSize(800, 600);
 	setDefaultPosition(ww::POSITION_CENTER);
+
+	ww::PopupMenu* menu = new ww::PopupMenu();
+	ww::PopupMenuItem& file = menu->root().add("&File");
+	file.add("Test");
+	file.addSeparator();
+	file.add("E&xit").connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);
+
+	setMenu(menu);
 
 	signalClose().connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);
 

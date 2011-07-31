@@ -134,7 +134,7 @@ bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
     if(userReadOnly())
         return false;
-    PopupMenu menu(512);
+    PopupMenu menu;
     generateMenu(menu.root(), tree);
     menu.spawn(tree->_toScreen(Vect2(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
     return true;
@@ -556,7 +556,7 @@ bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
 {
     if(userReadOnly())
         return false;
-    PopupMenu menu(512);
+    PopupMenu menu;
     ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu.root(), tree->model()->typeStringList(typeName()));
     menu.spawn(tree->_toScreen(Vect2(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
     return true;

@@ -3,7 +3,9 @@
 #include <string>
 #include "ww/Container.h"
 #include "ww/HotkeyContext.h"
-#include "Win32/Types.h"
+
+struct HWND__;
+typedef HWND__* HWND;
 
 namespace Win32{
     class Window;
@@ -26,6 +28,8 @@ enum WindowPosition{
 	POSITION_BOTTOM,
 	POSITION_CURSOR
 };
+
+class PopupMenu;
 
 class WW_API Window : public Container{
 public:
@@ -71,6 +75,11 @@ public:
 
 	void setMaximized(bool maximized);
 	bool maximized() const;
+
+	void setMenu(PopupMenu* menu);
+	PopupMenu* menu();
+	// this method should be called after each manual change of menu
+	void updateMenu();
 
 	// virtual events:
 	virtual void onClose();
@@ -122,7 +131,8 @@ protected:
 	// and then comes back to the window
 	Widget* focusedWidget_;
 
-	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
+	SharedPtr<PopupMenu> menu_;
+	SharedPtr<HotkeyContext> hotkeyContext_;
 
 	Win32::Window32* window_;
 
