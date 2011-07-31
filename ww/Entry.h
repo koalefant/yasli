@@ -54,6 +54,8 @@ public:
 	bool multiline() const{ return multiline_; }
 
 	void setSwallowReturn(bool swallow){ swallowReturn_ = swallow; }
+	void setSwallowEscape(bool swallow){ swallowEscape_ = swallow; }
+	void setSwallowArrows(bool swallow){ swallowArrows_ = swallow; }
 
 	void serialize(Archive& ar);
 
@@ -80,7 +82,9 @@ private:
 	bool flat_;
     bool multiline_;
 	TextAlignHorizontal align_;
-	bool swallowReturn_;
+	bool swallowReturn_ : 1;
+	bool swallowEscape_ : 1;
+	bool swallowArrows_ : 1;
 	friend EntryImpl;
 };
 

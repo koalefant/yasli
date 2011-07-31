@@ -627,6 +627,8 @@ PropertyRowWidgetNumeric::PropertyRowWidgetNumeric(PropertyRow* row, PropertyTre
 	entry_->signalEdited().connect(this, &PropertyRowWidgetNumeric::onChange);
 	entry_->setSelection(EntrySelection(0, -1));
 	entry_->setSwallowReturn(true);
+	entry_->setSwallowArrows(true);
+	entry_->setSwallowEscape(true);
 	entry_->setFlat(true);
 }
 
@@ -658,6 +660,8 @@ public:
 		entry_->signalEdited().connect(this, &PropertyRowWidgetString::onChange);
 		entry_->setSelection(EntrySelection(0, -1));
 		entry_->setSwallowReturn(true);
+		entry_->setSwallowArrows(true);
+		entry_->setSwallowEscape(true);
 		entry_->setFlat(true);
 	}
 	~PropertyRowWidgetString()

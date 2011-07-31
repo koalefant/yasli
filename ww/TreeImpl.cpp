@@ -674,6 +674,14 @@ int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 
 int TreeImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 {
+	if (tree_->filterMode_) {
+		if (!msg)
+			return DLGC_WANTMESSAGE;
+		else {
+			if (keyCode == VK_ESCAPE)
+				return DLGC_WANTMESSAGE;
+		}
+	}
 	return DLGC_WANTARROWS | DLGC_WANTCHARS;
 }
 

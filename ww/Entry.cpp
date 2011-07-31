@@ -142,12 +142,14 @@ int EntryImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 	if ((msg->message == WM_KEYDOWN || msg->message == WM_CHAR))
 	{
 		if (!owner_->multiline_){
-			if (key == VK_UP || key == VK_DOWN)
+			if ((key == VK_UP || key == VK_DOWN) && !owner_->swallowArrows_)
 				return 0;
-			if (!owner_->swallowReturn_){
-				if (key == VK_RETURN)
-					return 0;
-			}
+			if ((key == VK_LEFT || key == VK_RIGHT) && owner_->swallowArrows_)
+				return DLGC_WANTMESSAGE;
+			if (key == VK_ESCAPE && owner_->swallowEscape_)
+				return DLGC_WANTMESSAGE;
+			if (key == VK_RETURN && !owner_->swallowReturn_)
+				return 0;
 		}
 		if (key == VK_TAB)
 			return 0;
@@ -217,6 +219,8 @@ BOOL EntryImpl::onMessageEraseBkgnd(HDC dc)
 Entry::Entry(const char* text, bool multiline, int border)
 : _WidgetWithWindow(0, border)
 , swallowReturn_(false)
+, swallowEscape_(false)
+, swallowArrows_(false)
 , flat_(false)
 , multiline_(false)
 {
@@ -229,6 +233,8 @@ Entry::Entry(const char* text, bool multiline, int border)
 Entry::Entry(const wchar_t* text, bool multiline, int border)
 : _WidgetWithWindow(0, border)
 , swallowReturn_(false)
+, swallowEscape_(false)
+, swallowArrows_(false)
 , multiline_(false)
 , flat_(false)
 {

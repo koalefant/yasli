@@ -33,6 +33,9 @@ public:
     FilterEntry(PropertyTree* tree)
     : tree_(tree)
     {
+		setSwallowArrows(true);
+		setSwallowReturn(true);
+		setSwallowEscape(true);
     }
 protected:
     bool onKeyPress(const KeyPress& key)
