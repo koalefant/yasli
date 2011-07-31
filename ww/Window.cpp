@@ -112,7 +112,7 @@ void WindowImpl::setMenu(PopupMenu* popupMenu)
 
 int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
 {
-	if (command == 0) {
+	if (command == 0 && wnd == 0) {
 		// menu command
 		if (menu_ != 0) {
 			if (owner_->menu_) {
