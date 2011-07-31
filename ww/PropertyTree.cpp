@@ -30,32 +30,33 @@ namespace ww{
 class FilterEntry : public Entry
 {
 public:
-    FilterEntry(PropertyTree* tree)
-    : tree_(tree)
-    {
+	FilterEntry(PropertyTree* tree)
+	: tree_(tree)
+	{
 		setSwallowArrows(true);
 		setSwallowReturn(true);
 		setSwallowEscape(true);
-    }
+	}
 protected:
-    bool onKeyPress(const KeyPress& key)
-    {
-        if (key.key == KEY_UP ||
-            key.key == KEY_DOWN ||
-            key.key == KEY_ESCAPE ||
-            key.key == KEY_RETURN)
-        {
-            PostMessage(tree_->impl()->get(), WM_KEYDOWN, key.key, 0);
-            return true;
-        }
+	bool onKeyPress(const KeyPress& key)
+	{
+		if (key.key == KEY_UP ||
+			key.key == KEY_DOWN ||
+			key.key == KEY_ESCAPE ||
+			key.key == KEY_RETURN)
+		{
+			SetFocus(tree_->impl()->get());
+			PostMessage(tree_->impl()->get(), WM_KEYDOWN, key.key, 0);
+			return true;
+		}
 		if (key.key == KEY_BACK && text()[0] == '\0')
 		{
 			tree_->setFilterMode(false);
 		}
-        return false;
-    }
+		return false;
+	}
 private:
-    PropertyTree* tree_;
+	PropertyTree* tree_;
 };
 
 // ---------------------------------------------------------------------------
