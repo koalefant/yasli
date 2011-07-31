@@ -30,5 +30,6 @@ namespace Win32{
 	void drawButton(HDC dc, const RECT& rect, const wchar_t* text, HFONT font);
 	void drawComboBox(HDC dc, const RECT& rect, const wchar_t* text, HFONT font);
 	void drawSlider(HDC dc, const RECT& rect, float value, bool focused);
+	bool isAppThemed();
 }
 

@@ -93,6 +93,13 @@ struct DynamicUxTheme
 
 } static uxTheme;
 
+namespace Win32 {
+	bool isAppThemed()
+	{
+		return uxTheme.isLoaded() && uxTheme.IsAppThemed();
+	}
+}
+
 // ---------------------------------------------------------------------------
 
 namespace ww{

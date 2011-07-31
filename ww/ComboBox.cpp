@@ -4,6 +4,7 @@
 
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/Rectangle.h"
+#include "ww/Win32/Drawing.h" // for Win32::isAppThemed
 
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
@@ -187,7 +188,8 @@ void ComboBox::updateMinimalSize()
 			size.y = std::max(anotherSize.y, size.y);
 		}
 	}
-	_setMinimalSize(size + Vect2(4, 4) + Vect2(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
+	bool themed = Win32::isAppThemed(); // FIXME: hack
+	_setMinimalSize(size + (themed ? Vect2(4, 4) : Vect2(4, 2)) + Vect2(GetSystemMetrics(SM_CXFOCUSBORDER), GetSystemMetrics(SM_CYFOCUSBORDER)) * 2
 		            + Vect2(border_, border_) * 2 + Vect2(GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER)));
 }
 
