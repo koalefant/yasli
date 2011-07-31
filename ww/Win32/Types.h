@@ -1,6 +1,6 @@
 #pragma once
 
-// основные типы <windows.h>:
+// basic types from <windows.h>:
 typedef unsigned long       DWORD;
 typedef int                 BOOL;
 typedef unsigned char       BYTE;
