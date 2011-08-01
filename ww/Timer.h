@@ -5,7 +5,6 @@
 #include "yasli/Pointers.h"
 
 namespace ww{
-using yasli::SharedPtr;
 
 class Widget;
 class TimerImpl;

@@ -26,9 +26,9 @@ protected:
 
 	Win32ProxyImpl& impl();
 
-	SharedPtr<Widget> child_;
+	yasli::SharedPtr<Widget> child_;
 	HWND parentHwnd_;
-	SharedPtr<HotkeyContext> hotkeyContext_;
+	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
 	Widget* focusedWidget_;
 
 	friend Win32ProxyImpl;

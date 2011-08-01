@@ -131,8 +131,8 @@ protected:
 	// and then comes back to the window
 	Widget* focusedWidget_;
 
-	SharedPtr<PopupMenu> menu_;
-	SharedPtr<HotkeyContext> hotkeyContext_;
+	yasli::SharedPtr<PopupMenu> menu_;
+	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
 
 	Win32::Window32* window_;
 

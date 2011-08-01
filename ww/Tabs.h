@@ -56,7 +56,7 @@ public:
     SignalChanged &signalChanged(){ return tabs_->signalChanged(); }
 protected:
 	void onTabChange(const TabChanger* changer);
-	SharedPtr<Tabs> tabs_;
+	yasli::SharedPtr<Tabs> tabs_;
 	typedef vector<yasli::SharedPtr<Widget> > Widgets;
 	Widgets widgets_;
 };
