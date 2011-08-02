@@ -149,9 +149,10 @@ void Box::_arrangeChildren()
 	float element_length = sizeable_elements > 0 && sizeable_length > FLT_EPSILON ? sizeable_length/float(sizeable_elements) : 0;
 
 	float offset = 0;
+	Win32::Window32* window = _findWindow(this);
+	if (!window)
+		return;
 	if(!elements_.empty()){
-		Win32::Window32* window = _findWindow(this);
-		ASSERT(window);
 		Win32::Window32::PositionDeferer deferer = window->positionDeferer((int)elements_.size());
 		FOR_EACH(elements_, it){
 			if(it->widget){
@@ -166,7 +167,7 @@ void Box::_arrangeChildren()
 			}
 		}
 	}
-	::RedrawWindow(*_findWindow(this), 0, 0, RDW_ALLCHILDREN);
+	::RedrawWindow(window->handle(), 0, 0, RDW_ALLCHILDREN);
 }
 
 void Box::_setParent(Container* container)
@@ -250,6 +251,10 @@ void Box::setClipChildren(bool clipChildren)
 
 bool Box::updateMinimalSize()
 {
+	Win32::Window32* window = _findWindow(this);
+	if (!window)
+		return false;
+
     Vect2 oldMinimalSize = _minimalSize();
 
     float length = 0;
@@ -266,7 +271,7 @@ bool Box::updateMinimalSize()
         setBoxSize(Vect2(0, round(width)));
     else
         setBoxSize(Vect2(round(length), round(width)));
-    ::RedrawWindow(*_findWindow(this), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
+    ::RedrawWindow(window->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
     return oldMinimalSize != _minimalSize();
 
 }

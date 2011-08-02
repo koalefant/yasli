@@ -57,19 +57,44 @@ static HFONT initializeDefaultFont()
 	return CreateFontIndirect(&nonClientMetrics.lfMessageFont);
 }
 
+HINSTANCE globalApplicationInstance_ = HINST_THISCOMPONENT;
 
-static Win32::Window32* initializeGlobalDummyWindow()
+struct DefaultWindowCreator
 {
-	static Win32::Window32 window;
-	WW_VERIFY(window.create(L"dummy", 0, ww::Rect(0, 0, 100, 100), 0));
-	Win32::initializeCommonControls();
-	return &window; 
+	Window32 defaultWindow;
+
+	DefaultWindowCreator()
+	{
+		WW_VERIFY(defaultWindow.create(L"Default Dummy Window", 0, ww::Rect(0, 0, 100, 100), HWND_MESSAGE));
+		Win32::initializeCommonControls();
+	}
+
+	~DefaultWindowCreator()
+	{
+		defaultWindow.destroy();
+		WW_VERIFY(::UnregisterClass(defaultWindow.className(), _globalInstance()));
+	}
+};
+
+Win32::Window32* getDefaultWindow()
+{
+	// A hidden service window that is used as default parent for
+	// windows that are not yet composed.
+
+	// We could use HWND_MESSAGE for this purpose,
+	// but parenting EDIT and BUTTON windows to HWND_MESSAGE prevents
+	// them from sending notification messages later.
+	
+	// Created during first call.
+	static DefaultWindowCreator creator;
+	return &creator.defaultWindow;
 }
 
+HWND getDefaultWindowHandle()
+{
+	return getDefaultWindow()->handle();
+}
 
-
-HINSTANCE globalApplicationInstance_ = HINST_THISCOMPONENT;
-Win32::Window32* _globalDummyWindow = initializeGlobalDummyWindow();
 HFONT _globalDefaultFont = initializeDefaultFont();
 
 void WW_API _setGlobalInstance(HINSTANCE instance)
@@ -239,8 +264,6 @@ HWND Window32::detach()
 	return attach(0);
 }
 
-
-
 bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& position, HWND parentWnd, UINT exStyle)
 {
 	if(!Win32::_globalInstance())
@@ -249,9 +272,9 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 	creating_ = true;
 	if(!isClassRegistered(className()))
 		WW_VERIFY(registerClass(className()));
-
 	ASSERT(isClassRegistered(className()));
-	ASSERT(!parentWnd || ::IsWindow(parentWnd));
+
+	ASSERT(!parentWnd || parentWnd == HWND_MESSAGE || ::IsWindow(parentWnd));
 	handle_ = ::CreateWindowEx(exStyle, className(), windowName, style,
 		position.left(), position.top(), position.width(), position.height(), parentWnd, 0, 0, (LPVOID)(this));	
 	
@@ -261,6 +284,13 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 		return true;
 	else
 		return false;
+}
+
+void Window32::destroy()
+{
+	ASSERT(IsWindow(handle_));
+	DestroyWindow(handle_);
+	handle_ = 0;
 }
 
 LRESULT Window32::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
@@ -696,8 +726,8 @@ UINT Window32::getStyle()
 void Window32::setParent(Window32* newParent)
 {
 	ASSERT(::IsWindow(handle_));
-	::SetParent(handle_, newParent->get());
-	ASSERT(::GetParent(handle_) == newParent->get());
+	::SetParent(handle_, newParent->handle());
+	ASSERT(::GetParent(handle_) == newParent->handle());
 	ASSERT(::IsWindow(handle_));
 }
 
@@ -735,8 +765,8 @@ Window32::PositionDeferer Window32::positionDeferer(int numWindows)
 
 void Window32::clientToScreen(RECT& rect)
 {
-	::ClientToScreen(*this, (POINT*)(&rect));
-	::ClientToScreen(*this, (POINT*)(&rect) + 1);
+	::ClientToScreen(handle(), (POINT*)(&rect));
+	::ClientToScreen(handle(), (POINT*)(&rect) + 1);
 }
 
 void Window32::attachTimer(TimerInterface* timer, int interval)
@@ -755,7 +785,7 @@ void Window32::attachTimer(TimerInterface* timer, int interval)
 		index = int(timers_.size() - 1);
 	}
 	timer->setWindow(this);
-	SetTimer(*this, 100 + index, interval, 0);
+	SetTimer(handle(), 100 + index, interval, 0);
 }
 
 void Window32::detachTimer(TimerInterface* timer)
@@ -766,7 +796,7 @@ void Window32::detachTimer(TimerInterface* timer)
 	ASSERT(it != timers_.end());
 	if(it != timers_.end()){
 		int index = std::distance(timers_.begin(), it);
-		KillTimer(*this, 100 + index);
+		KillTimer(handle(), 100 + index);
 		timer->setWindow(0);
 		*it = 0;
 		while(!timers_.empty() && timers_.back() == 0)
@@ -776,8 +806,8 @@ void Window32::detachTimer(TimerInterface* timer)
 
 void Window32::screenToClient(RECT& rect)
 {
-	::ScreenToClient(*this, (POINT*)(&rect));
-	::ScreenToClient(*this, (POINT*)(&rect) + 1);
+	::ScreenToClient(handle(), (POINT*)(&rect));
+	::ScreenToClient(handle(), (POINT*)(&rect) + 1);
 }
 
 WindowPositionDeferer::WindowPositionDeferer(Window32* parent, int numWindows)
@@ -797,8 +827,8 @@ WindowPositionDeferer::~WindowPositionDeferer()
 void WindowPositionDeferer::defer(Window32* window, const ww::Rect& position)
 {
 	ASSERT(handle_);
-	ASSERT(::IsWindow(*window));
-	WW_VERIFY(::DeferWindowPos(handle_, *window, 0, position.left(), position.top(), position.width(), position.height(), SWP_NOZORDER));
+	ASSERT(::IsWindow(window->handle()));
+	WW_VERIFY(::DeferWindowPos(handle_, window->handle(), 0, position.left(), position.top(), position.width(), position.height(), SWP_NOZORDER));
 }
 
 void initializeCommonControls()

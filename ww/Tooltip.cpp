@@ -45,8 +45,8 @@ void Tooltip::attach(Widget* widget)
 
 	Win32::Window32* window = _findWindow(widget);
 	ASSERT(window);
-	HWND ownerHandle = *window;
-	ASSERT(::IsWindow(*window));
+	HWND ownerHandle = window->handle();
+	ASSERT(::IsWindow(ownerHandle));
 
 	if(!toolTipWindow_){
 		toolTipWindow_ = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, 0,
@@ -83,7 +83,9 @@ void Tooltip::setText(const char* text)
 		ZeroMemory((void*)(&event), sizeof(event));
 		event.cbSize = sizeof(event);
 		event.dwFlags = TME_LEAVE;
-		event.hwndTrack = *_findWindow(widget_);
+		event.hwndTrack = 0;
+		if(Win32::Window32* window = _findWindow(widget_))
+			event.hwndTrack = window->handle();
 		WW_VERIFY(TrackMouseEvent(&event));
 	}
 }
@@ -103,7 +105,9 @@ void Tooltip::hide()
 	TOOLINFO    ti;
 	ti.cbSize = 44;//sizeof(TOOLINFO);
 	ti.uFlags = TTF_TRACK;
-	ti.hwnd   = *_findWindow(widget_);
+	ti.hwnd   = 0;
+	if (Win32::Window32* window = _findWindow(widget_))
+		ti.hwnd = window->handle();
 	ti.uId    = 12345;
 	ti.hinst  = Win32::_globalInstance();
 	ti.lpszText  = LPSTR_TEXTCALLBACK;

@@ -17,7 +17,6 @@ namespace ww{
 
 class ColorRectImpl : public _WidgetWindow{
 public:
-	const wchar_t* className() const{ return L"ww.ColorRect"; }
 	ColorRectImpl(ColorRect* owner);
 
 	BOOL onMessageEraseBkgnd(HDC);
@@ -32,14 +31,14 @@ ColorRectImpl::ColorRectImpl(ColorRect* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), Win32::getDefaultWindowHandle()));
 }
 
 
 void ColorRectImpl::redraw(HDC dc)
 {
 	RECT rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	::FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 
 	int roundness = 7;
@@ -83,12 +82,12 @@ void ColorRectImpl::redraw(HDC dc)
 void ColorRectImpl::onMessagePaint()
 {
 	PAINTSTRUCT ps;
-	HDC dc = BeginPaint(*this, &ps);
+	HDC dc = BeginPaint(handle(), &ps);
 	{
 		Win32::MemoryDC memoryDC(dc);
 		redraw(memoryDC);
 	}
-	EndPaint(*this, &ps);
+	EndPaint(handle(), &ps);
 }
 
 BOOL ColorRectImpl::onMessageEraseBkgnd(HDC)
@@ -110,8 +109,8 @@ ColorRect::ColorRect(Color color, int border)
 void ColorRect::set(const Color& color)
 {
 	color_ = color;
-	if(::IsWindowVisible(impl()))
-		RedrawWindow(impl(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	if(::IsWindowVisible(impl().handle()))
+		RedrawWindow(impl().handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 

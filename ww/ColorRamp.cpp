@@ -114,8 +114,6 @@ public:
 	static const int HUE_WIDTH = 10;
 	static const int BORDER_WIDTH = 4;
 
-	const wchar_t* className() const{ return L"ww.ColorRamp"; }
-
 	ColorRampImpl(ColorRamp* owner);
 	void createRampBitmap();
 	void handleMouse(POINT point);
@@ -143,16 +141,16 @@ ColorRampImpl::ColorRampImpl(ColorRamp* owner)
 , mouseArea_(0)
 , owner_(owner)
 {
-	create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow, WS_EX_CLIENTEDGE);
+	create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 40, 40), Win32::getDefaultWindowHandle(), WS_EX_CLIENTEDGE);
 	createRampBitmap();
 }
 
 void ColorRampImpl::setColor(const Color& color)
 {
 	hlsColor_.set(color);
-	if(::IsWindow(*this)){
+	if(::IsWindow(handle())){
 		createRampBitmap();
-        InvalidateRect(*this, 0, FALSE);
+        InvalidateRect(handle(), 0, FALSE);
 	}
 }
 
@@ -247,18 +245,18 @@ void ColorRampImpl::createRampBitmap()
 void ColorRampImpl::onMessagePaint()
 {
 	PAINTSTRUCT paintStruct;
-	HDC dc = BeginPaint(*this, &paintStruct);
+	HDC dc = BeginPaint(handle(), &paintStruct);
 	{
 		Win32::MemoryDC memoryDC(dc);
 		redraw(memoryDC);
 	}
-	EndPaint(*this, &paintStruct);
+	EndPaint(handle(), &paintStruct);
 }
 
 void ColorRampImpl::redraw(HDC dc)
 {
 	Win32::Rect rect;
-    GetClientRect(*this, &rect);
+    GetClientRect(handle(), &rect);
     int width = rect.width();
     int height = rect.height();
 
@@ -310,7 +308,7 @@ void ColorRampImpl::redraw(HDC dc)
 void ColorRampImpl::handleMouse(POINT point)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	int cx = rect.width() - BORDER_WIDTH - HUE_WIDTH;
 	int cy = rect.height();
 
@@ -321,15 +319,15 @@ void ColorRampImpl::handleMouse(POINT point)
 	owner_->color_ = hlsColor_.toRGB();
 	owner_->signalChanged_.emit();
 	mouseArea_ = 1;
-	SetCapture(*this);
+	SetCapture(handle());
 	
-	RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 void ColorRampImpl::handleMouseHue(POINT point)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	int cx = rect.width() - BORDER_WIDTH - HUE_WIDTH;
 	int cy = rect.height();
 
@@ -339,16 +337,16 @@ void ColorRampImpl::handleMouseHue(POINT point)
 		createRampBitmap();
 		owner_->color_ = hlsColor_.toRGB();
 		owner_->signalChanged_.emit();
-		RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+		RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 	mouseArea_ = 0;
-	SetCapture(*this);
+	SetCapture(handle());
 }
 
 void ColorRampImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	int cx = rect.width() - BORDER_WIDTH - HUE_WIDTH;
 	int cy = rect.height();
 
@@ -357,15 +355,15 @@ void ColorRampImpl::onMessageLButtonDown(UINT button, int x, int y)
 		handleMouseHue(point);
 	else
 		handleMouse(point);
-	SetFocus(*this);    
+	SetFocus(handle());    
 	__super::onMessageLButtonDown(button, x, y);
 }
 
 void ColorRampImpl::onMessageMouseMove(UINT button, int x, int y)
 {
-	if(button & MK_LBUTTON && GetCapture() == *this){
+	if(button & MK_LBUTTON && GetCapture() == handle()){
 		Win32::Rect rect;
-		GetClientRect(*this, &rect);
+		GetClientRect(handle(), &rect);
 		int cx = rect.width() - BORDER_WIDTH - HUE_WIDTH;
 		int cy = rect.height();
 
@@ -380,7 +378,7 @@ void ColorRampImpl::onMessageMouseMove(UINT button, int x, int y)
 
 void ColorRampImpl::onMessageLButtonUp(UINT button, int x, int y)
 {
-	if(GetCapture() == *this){
+	if(GetCapture() == handle()){
 		ReleaseCapture();
 	}
 	__super::onMessageLButtonUp(button, x, y);

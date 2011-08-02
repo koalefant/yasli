@@ -31,7 +31,6 @@ struct TabsItem{
 class TabsImpl : public _WidgetWindow{
 public:
 	TabsImpl(Tabs* tabs);
-	const wchar_t* className() const{ return L"ww.Tabs"; }
 
 	void redraw(HDC dc);
 	int onMessageGetDlgCode(int keyCode, MSG* msg);
@@ -59,7 +58,7 @@ TabsImpl::TabsImpl(Tabs* tabs)
 , selectedTab_(0)
 , owner_(0)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), Win32::getDefaultWindowHandle()));
 	owner_ = tabs;
 }
 
@@ -134,7 +133,7 @@ int TabsImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 void TabsImpl::recalculateRects()
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	int offset = 0;
 	Items::iterator it;
 
@@ -148,7 +147,7 @@ void TabsImpl::recalculateRects()
 		TabsItem& item = *it;
 
 		HFONT font = selectedTab_ == index ? Win32::defaultBoldFont() : Win32::defaultFont();
-		Vect2 size = Win32::calculateTextSize(*this, font, toWideChar(item.text.c_str()).c_str());
+		Vect2 size = Win32::calculateTextSize(handle(), font, toWideChar(item.text.c_str()).c_str());
 
 		size.x += PADDING_X * 2;
 		size.y += PADDING_Y * 2;
@@ -168,14 +167,14 @@ void TabsImpl::recalculateRects()
 		}
 	}
 	owner_->_setMinimalSize(20, height);
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 }
 
 
 void TabsImpl::redraw(HDC dc)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
     using namespace Gdiplus;
 
     Graphics gr(dc);
@@ -190,7 +189,7 @@ void TabsImpl::redraw(HDC dc)
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
 		bool selected = selectedTab_ == index;
-		bool focused = selected && GetFocus() == get();
+		bool focused = selected && GetFocus() == handle();
 
 		const int roundness = 8;
 		if(selected){
@@ -289,7 +288,7 @@ void TabsImpl::onMessageRButtonDown(UINT button, int x, int y)
 
 void TabsImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
-	::SetFocus(*this);
+	::SetFocus(handle());
 	int index = 0;
 	Items::iterator it;
     for( it = items_.begin(); it != items_.end(); ++it ){
@@ -301,7 +300,7 @@ void TabsImpl::onMessageLButtonDown(UINT button, int x, int y)
 		}
 		++index;
 	}
-	RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
+	RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 	__super::onMessageLButtonDown(button, x, y);
 }
 
@@ -336,7 +335,7 @@ void Tabs::setSelectedTab(int index, const TabChanger* changer)
 		impl().recalculateRects();
 		signalChanged_.emit(changer);
 	}
-	RedrawWindow(impl(), 0, 0, RDW_INVALIDATE);
+	RedrawWindow(impl().handle(), 0, 0, RDW_INVALIDATE);
 }
 
 size_t Tabs::add(const char* tabTitle, int before)

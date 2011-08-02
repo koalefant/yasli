@@ -17,7 +17,6 @@ namespace ww{
 class Splitter;
 class SplitterImpl : public Win32::Window32{
 public:
-	const wchar_t* className() const{ return L"ww.SplitterImpl"; }
 	SplitterImpl(ww::Splitter* owner);
 protected:
 	BOOL	onMessageSetCursor(HWND window, USHORT hitTest, USHORT message);

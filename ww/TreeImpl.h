@@ -22,7 +22,6 @@ class TreeImpl;
 class DragWindow : public Win32::Window32
 {
 public:
-	const wchar_t* className() const{ return L"ww.DragWindow"; }
 	DragWindow(TreeImpl* treeImpl);
 
 	void set(TreeImpl* treeImpl, PropertyRow* row, const Rect& rowRect);
@@ -87,8 +86,6 @@ public:
 	TreeImpl(PropertyTree* owner);
 	~TreeImpl();
 
-	const wchar_t* className() const { return L"ww.TreeImpl"; }
-	
 	PropertyTree* tree() { return tree_; };
 	PropertyTreeModel* model() { return tree_->model(); }
 

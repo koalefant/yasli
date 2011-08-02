@@ -27,7 +27,6 @@ YASLI_CLASS(Widget, Button, "Button");
 class ButtonImpl: public _WidgetWindow{
 public:
 	ButtonImpl(ww::Button* owner);
-	const wchar_t* className() const{ return L"ww.ButtonOwner"; }
 	
 	BOOL onMessageWindowPosChanged(WINDOWPOS *windowPos);
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
@@ -78,8 +77,9 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 , owner_(owner)
 , button_(0)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
-	button_ = ::CreateWindow( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, *this, 0, (HINSTANCE)GetWindowLong(*this, GWLP_HINSTANCE), 0);
+	HINSTANCE instance = (HINSTANCE)GetWindowLong(handle(), GWLP_HINSTANCE);
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
+	button_ = ::CreateWindow( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, handle(), 0, instance, 0);
 	ASSERT(button_);
 	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(button_, GWLP_WNDPROC));
 	::SetWindowLongPtr(button_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&buttonWindowProcedure));

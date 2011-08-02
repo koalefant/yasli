@@ -23,7 +23,7 @@ public:
 	: ww::Button(text, border)
 	, response_(response)
 	{
-		HWND wnd = _window()->get();
+		HWND wnd = _window()->handle();
 		SetWindowLongPtr(wnd, GWLP_ID, (LONG_PTR)response);
 	}
 
@@ -47,7 +47,8 @@ static ww::Widget* lastDialog()
 		return 0;
 	ww::Widget* last = spawnedDialogs.back();
 	ASSERT(last);
-	if(!IsWindowEnabled(*_findWindow(last)))
+	Win32::Window32* window = _findWindow(last);
+	if(window && !IsWindowEnabled(window->handle()))
 		return 0;
 	return last;
 }
@@ -55,8 +56,10 @@ static ww::Widget* lastDialog()
 static HWND findOwner(HWND wnd){
 	if(!wnd){
 		Widget* last = lastDialog();
-		if(last)
-			return *_findWindow(last);
+		if(last) {
+			Win32::Window32* window = _findWindow(last);
+			return window ? window->handle() : 0;
+		}
 		else
 			return 0;
 	}
@@ -68,8 +71,10 @@ static HWND findOwner(HWND wnd){
 static HWND findOwner(Widget* widget){
 	if(!widget){
 		Widget* last = lastDialog();
-		if(last)
-			return *_findWindow(last);
+		if(last) {
+			Win32::Window32* window = _findWindow(last);
+			return window ? window->handle() : 0;
+		}
 		else
 			return 0;
 	}
@@ -77,7 +82,7 @@ static HWND findOwner(Widget* widget){
 	Win32::Window32* window = _findWindow(widget);
 	ASSERT(window);
 	if(window)
-		return findOwner(*window);
+		return findOwner(window->handle());
 	else
 		return 0;
 }
@@ -176,7 +181,7 @@ int Dialog::showModal()
 	if(parentWnd_){
 		ESCAPE(::IsWindow(parentWnd_), return 0);
 		if(::IsWindowEnabled(parentWnd_)){
-			::SetWindowPos(*_window(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			::SetWindowPos(_window()->handle(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
             showAll();
 			::EnableWindow(parentWnd_, FALSE);
 		}
@@ -191,7 +196,7 @@ int Dialog::showModal()
 	signalClose().connect(this, &Dialog::onClose);
 
 	activeDialogLoop_ = &loop;
-	loop.runDialogLoop(_window()->get());
+	loop.runDialogLoop(_window()->handle());
 	activeDialogLoop_ = 0;
 
 	if (parentWnd_) {

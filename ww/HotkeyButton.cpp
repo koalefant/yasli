@@ -51,8 +51,8 @@ HotkeyButtonImpl::HotkeyButtonImpl(HotkeyButton* owner)
 , pressed_(false)
 , ticksLeft_(-1)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
-	::SetTimer(*this, TIMER_ID, 100, 0);
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
+	::SetTimer(handle(), TIMER_ID, 100, 0);
 }
 
 void HotkeyButtonImpl::redraw(HDC dc)
@@ -61,7 +61,7 @@ void HotkeyButtonImpl::redraw(HDC dc)
 	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
 	
 	RECT rt;
-	GetClientRect(*this, &rt);
+	GetClientRect(handle(), &rt);
 	const wchar_t* str = L"Press a Key, Please...";
 	::DrawText(dc, str, (int)wcslen(str), &rt, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 
@@ -76,9 +76,9 @@ LRESULT HotkeyButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 void HotkeyButtonImpl::onMessagePaint()
 {
 	PAINTSTRUCT ps;
-	HDC dc = BeginPaint(*this, &ps);
+	HDC dc = BeginPaint(handle(), &ps);
 	redraw(dc);
-	EndPaint(*this, &ps);
+	EndPaint(handle(), &ps);
 }
 
 void HotkeyButtonImpl::onMessageTimer(int id)
@@ -164,7 +164,7 @@ int HotkeyButtonImpl::onMessageSysKeyUp(UINT keyCode, USHORT count, USHORT flags
 
 void HotkeyButtonImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
-	::SetFocus(*this);
+	::SetFocus(handle());
 	pressed_ = true;
 }
 

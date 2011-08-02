@@ -19,7 +19,6 @@ namespace ww{
 class Win32ProxyImpl : public _ContainerWindow{
 public:
 	Win32ProxyImpl(Win32Proxy* owner, HWND parent);
-	const wchar_t* className() const{ return L"ww.Win32Proxy"; }
 	BOOL onMessageSize(UINT type, USHORT width, USHORT height);
 
 protected:
@@ -33,7 +32,7 @@ Win32ProxyImpl::Win32ProxyImpl(Win32Proxy* owner, HWND _parent)
 	Win32::Window32 parent(_parent);
 	Win32::Rect rect;
 	GetClientRect(_parent, &rect);
-	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPCHILDREN, rect.recti(), parent));
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPCHILDREN, rect.recti(), parent.handle()));
 	
 
 	ASSERT(::IsWindow(handle_));

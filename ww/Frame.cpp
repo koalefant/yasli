@@ -29,7 +29,6 @@ YASLI_CLASS(Container, Frame, "Frame");
 class FrameImpl: public _ContainerWindow{
 public:
 	FrameImpl(Frame* owner);
-	const wchar_t* className() const{ return L"ww.FrameImpl"; }
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
 
 	HFONT font() { return owner_->emphasis() ? Win32::defaultBoldFont() : Win32::defaultFont(); }
@@ -47,7 +46,7 @@ FrameImpl::FrameImpl(Frame* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN, Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle(), WS_EX_CONTROLPARENT));
 }
 
 #pragma warning(pop)
@@ -76,7 +75,7 @@ LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			{
 				HDC dc = paintDC;
 				RECT clientRect;
-				::GetClientRect(*this, &clientRect);
+				::GetClientRect(handle(), &clientRect);
 				::FillRect(dc, &clientRect, ::GetSysColorBrush(COLOR_BTNFACE));
 
 				Rect rect(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
@@ -174,7 +173,7 @@ void Frame::_arrangeChildren()
 {
 	if(child_){
 		RECT rect;
-		WW_VERIFY(::GetClientRect(*_window(), &rect));
+		WW_VERIFY(::GetClientRect(_window()->handle(), &rect));
 		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		child_->_setPosition(Rect(rect.left + space_, rect.top + 2 * space_, 
 			                       rect.right - space_, rect.bottom - 2 * space_));
@@ -189,10 +188,10 @@ void Frame::_relayoutParents()
 		_setMinimalSize(border_ * 2, border_ * 2);
 	
 	RECT clientRect;
-	::GetClientRect(*_window(), &clientRect);
+	::GetClientRect(_window()->handle(), &clientRect);
 	bool move = false;
 	RECT windowRect;
-	::GetWindowRect(*_window(), &windowRect);
+	::GetWindowRect(_window()->handle(), &windowRect);
 	SIZE borderSize = { windowRect.right - windowRect.left - (clientRect.right - clientRect.left),
 		windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top) };
 
@@ -209,7 +208,7 @@ void Frame::_relayoutParents()
 		_window()->update();
 	}
 	else
-		::RedrawWindow(*_window(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		::RedrawWindow(_window()->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
 
 	Widget::_relayoutParents();
 }

@@ -83,7 +83,7 @@ bool PropertyRowSlider<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree,
         tree->model()->push(this);
 		handleMouse(point);
 		tree->redraw();
-		::SetCapture(tree->impl()->get());
+		::SetCapture(tree->impl()->handle());
 		return true;
 	}
 	return false;
@@ -100,7 +100,7 @@ template<class WrapperType, class ScalarType>
 void PropertyRowSlider<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, Vect2 point)
 {
 	tree->model()->rowChanged(this);
-	if(::GetCapture() == tree->impl()->get())
+	if(::GetCapture() == tree->impl()->handle())
 		::ReleaseCapture();
 }
 

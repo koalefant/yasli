@@ -33,7 +33,6 @@ class ComboBoxImpl : public _WidgetWindow{
 public:
 	ComboBoxImpl(ww::ComboBox* owner);
 	~ComboBoxImpl();
-	const wchar_t* className() const{ return L"ww.ComboBoxImpl"; }
 	
 	BOOL onMessageEraseBkgnd(HDC dc);
 	BOOL onMessageEnable(BOOL enabled);
@@ -58,10 +57,10 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 , owner_(owner)
 , comboBoxHandle_(0)
 {
-	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), Win32::getDefaultWindowHandle(), WS_EX_CONTROLPARENT));
 	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
-							 0, 0, 42, 42, *this, 0, (HINSTANCE)(GetWindowLong(*this, GWLP_HINSTANCE)), 0);
+							 0, 0, 42, 42, handle(), 0, (HINSTANCE)(GetWindowLong(handle(), GWLP_HINSTANCE)), 0);
 	
 	ASSERT(comboBoxHandle_);
 	SetWindowFont(comboBoxHandle_, Win32::defaultFont(), FALSE);
@@ -91,13 +90,13 @@ LRESULT ComboBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				case CBN_SELENDOK:
 				{
 					owner_->selectedIndex_ = SendMessage(comboBoxHandle_, CB_GETCURSEL, wparam, lparam);
-					PostMessage(*this, WM_WW_FINISH, WPARAM(HWND(*this)), 0);
+					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
 				case CBN_CLOSEUP:
 				{
-					PostMessage(*this, WM_WW_FINISH, WPARAM(HWND(*this)), 0);
+					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
@@ -108,7 +107,7 @@ LRESULT ComboBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				case CBN_KILLFOCUS:
 				{
 					owner_->selectedIndex_ = SendMessage(comboBoxHandle_, CB_GETCURSEL, 0, 0);
-					PostMessage(*this, WM_WW_FINISH, WPARAM(HWND(*this)), 0);
+					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
@@ -188,11 +187,11 @@ ComboBox::ComboBox(ComboBoxImpl* impl, bool expandByContent, int border)
 
 void ComboBox::updateMinimalSize()
 {
-	Vect2 size = Win32::calculateTextSize(impl()->comboBox(), GetWindowFont(*impl()), L" ");
+	Vect2 size = Win32::calculateTextSize(impl()->comboBox(), GetWindowFont(impl()->handle()), L" ");
 	if(expandByContent_){
 		Items::iterator it;
 		FOR_EACH(items_, it){
-			Vect2 anotherSize = Win32::calculateTextSize(*impl(), GetWindowFont(*impl()), toWideChar(it->c_str()).c_str());
+			Vect2 anotherSize = Win32::calculateTextSize(impl()->handle(), GetWindowFont(impl()->handle()), toWideChar(it->c_str()).c_str());
 			size.x = std::max(anotherSize.x, size.x);
 			size.y = std::max(anotherSize.y, size.y);
 		}

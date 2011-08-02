@@ -38,7 +38,6 @@ namespace ww{
 
 class FloatingSplitter : public Win32::Window32{
 public:
-	const wchar_t* className() const{ return L"ww.FloatingSplitter"; }
 	FloatingSplitter();
 
 	void set(const Rect& rect);
@@ -77,8 +76,8 @@ void FloatingSplitter::redraw(HDC dc)
 void FloatingSplitter::set(const Rect& rect)
 {
 	rect_ = rect;
-	if(::IsWindow(*this)){
-		bool visible = ::IsWindowVisible(*this);
+	if(::IsWindow(handle())){
+		bool visible = ::IsWindowVisible(handle());
 		show(visible);
 	}
 }
@@ -86,7 +85,7 @@ void FloatingSplitter::set(const Rect& rect)
 void FloatingSplitter::show(bool visible)
 {
 	updateLayeredWindow();
-	SetWindowPos(*this, HWND_TOP, rect_.left(),  rect_.top(),
+	SetWindowPos(handle(), HWND_TOP, rect_.left(),  rect_.top(),
 				 rect_.width(), rect_.height(), 
 				 SWP_NOOWNERZORDER | (visible ? SWP_SHOWWINDOW : SWP_HIDEWINDOW)| SWP_NOACTIVATE);
 	updateLayeredWindow();
@@ -106,7 +105,7 @@ void FloatingSplitter::updateLayeredWindow()
 	blendFunction.AlphaFormat = 0;	
 
 	PAINTSTRUCT ps;
-	HDC realDC = BeginPaint(*this, &ps);
+	HDC realDC = BeginPaint(handle(), &ps);
 	{
 		Win32::MemoryDC dc(realDC);
 		redraw(dc);
@@ -114,10 +113,10 @@ void FloatingSplitter::updateLayeredWindow()
 		POINT leftTop = { rect_.left(), rect_.top() };
 		SIZE size = { rect_.width(), rect_.height() };
 		POINT point = { 0, 0 };
-		UpdateLayeredWindow(*this, realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
-		SetLayeredWindowAttributes(*this, 0, 192, ULW_ALPHA);
+		UpdateLayeredWindow(handle(), realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
+		SetLayeredWindowAttributes(handle(), 0, 192, ULW_ALPHA);
 	}
-	EndPaint(*this, &ps);
+	EndPaint(handle(), &ps);
 }
 
 void FloatingSplitter::onMessagePaint()
@@ -156,8 +155,6 @@ public:
 	WorkspaceImpl(Workspace* owner);
 	~WorkspaceImpl();
 
-	const wchar_t* className() const{ return L"ww.WorkspaceImpl"; }
-
 	BOOL onMessageSetCursor(HWND window, USHORT hitTest, USHORT message);
 	BOOL setCursor();
 	void onMessageLButtonDown(UINT button, int x, int y);
@@ -179,7 +176,7 @@ WorkspaceImpl::WorkspaceImpl(Workspace* owner)
 , splitting_(false)
 {
 	floatingSplitter_ = new FloatingSplitter();
-	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0,0, 20, 20), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0,0, 20, 20), Win32::getDefaultWindowHandle()));
 }
 
 WorkspaceImpl::~WorkspaceImpl()
@@ -191,7 +188,7 @@ BOOL WorkspaceImpl::setCursor()
 {
 	POINT pos;
 	GetCursorPos(&pos);
-	::ScreenToClient(*this, &pos);
+	::ScreenToClient(handle(), &pos);
 
 	bool vertical = false;
 	if(Space* space = canBeSplitted(pos.x, pos.y, vertical)){
@@ -237,14 +234,14 @@ void WorkspaceImpl::startSplit()
 {
 	splitting_ = true;
 	floatingSplitter_->show();
-	SetCapture(*this);
+	SetCapture(handle());
 }
 
 
 Space* WorkspaceImpl::canBeSplitted(int x, int y, bool& outVertical)
 {
 	POINT pt = { x, y };
-	::ClientToScreen(*this, &pt);
+	::ClientToScreen(handle(), &pt);
 	Vect2 point(pt.x, pt.y);
 
 	if(Space* space = owner_->rootSpace_.spaceByPoint(point)){
@@ -262,7 +259,7 @@ Space* WorkspaceImpl::canBeSplitted(int x, int y, bool& outVertical)
 
 void WorkspaceImpl::onMessageRButtonDown(UINT button, int x, int y)
 {
-	if(splitting_ && GetCapture() == *this){
+	if(splitting_ && GetCapture() == handle()){
 		ReleaseCapture();
 		splitting_ = false;
 		floatingSplitter_->show(false);
@@ -273,11 +270,11 @@ void WorkspaceImpl::onMessageRButtonDown(UINT button, int x, int y)
 void WorkspaceImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	POINT pt = { x, y };
-	::ClientToScreen(*this, &pt);
+	::ClientToScreen(handle(), &pt);
 	Vect2 point(pt.x, pt.y);
 
 	if(splitting_){
-		if(GetCapture() == *this){
+		if(GetCapture() == handle()){
 			ReleaseCapture();
 
 			bool vertical = false;
@@ -321,7 +318,7 @@ void WorkspaceImpl::onMessageMouseMove(UINT button, int x, int y)
 {
 	if(splitting_){
 		POINT pt = { x, y };
-		::ClientToScreen(*this, &pt);
+		::ClientToScreen(handle(), &pt);
 
 		setCursor();
 
@@ -344,13 +341,13 @@ void WorkspaceImpl::onMessageMouseMove(UINT button, int x, int y)
 				GetClientRect(*window, &rt);
 				//window->clientToScreen(rt);
 
-				HDC dc = GetDCEx(*this, 0, DCX_CACHE | DCX_LOCKWINDOWUPDATE | DCX_CLIPSIBLINGS);
+				HDC dc = GetDCEx(handle(), 0, DCX_CACHE | DCX_LOCKWINDOWUPDATE | DCX_CLIPSIBLINGS);
 				//FrameRect(dc, &rt, GetSysColorBrush(COLOR_ACTIVECAPTION));
 				HBRUSH brush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
 				HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, brush);
 				PatBlt(dc, rt.left, rt.top, rt.right, rt.bottom, PATINVERT);
 				::SelectObject(dc, oldBrush);                
-				ReleaseDC(*this, dc);
+				ReleaseDC(handle(), dc);
 				*/
 			}
 		}
@@ -462,7 +459,7 @@ void Workspace::_arrangeChildren()
 {
 	if(rootWidget_){
 		RECT rect;
-		WW_VERIFY(::GetClientRect(*impl(), &rect));
+		WW_VERIFY(::GetClientRect(impl()->handle(), &rect));
 		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		rootWidget_->_setPosition(Rect(rect.left , rect.top, rect.right + rect.left, rect.bottom));
 	}
@@ -830,7 +827,6 @@ Space* SpaceBox::spaceByPoint(Vect2 screenPoint)
 // ---------------------------------------------------------------------------
 class DarkOverlay : public Win32::Window32{
 public:
-	const wchar_t* className() const{ return L"ww.DarkOverlay"; }
 	DarkOverlay();
 
 	void set(const Rect& rect);
@@ -868,8 +864,8 @@ void DarkOverlay::redraw(HDC dc)
 void DarkOverlay::set(const Rect& rect)
 {
 	rect_ = rect;
-	if(::IsWindow(*this)){
-		bool visible = ::IsWindowVisible(*this);
+	if(::IsWindow(handle())){
+		bool visible = ::IsWindowVisible(handle());
 		show(visible);
 	}
 }
@@ -877,7 +873,7 @@ void DarkOverlay::set(const Rect& rect)
 void DarkOverlay::show(bool visible)
 {
 	updateLayeredWindow();
-	SetWindowPos(*this, HWND_TOP, rect_.left(),  rect_.top(),
+	SetWindowPos(handle(), HWND_TOP, rect_.left(),  rect_.top(),
 				 rect_.width(), rect_.height(), 
 				 SWP_NOOWNERZORDER | (visible ? SWP_SHOWWINDOW : SWP_HIDEWINDOW)| SWP_NOACTIVATE);
 	updateLayeredWindow();
@@ -897,7 +893,7 @@ void DarkOverlay::updateLayeredWindow()
 	blendFunction.AlphaFormat = 0;	
 
 	PAINTSTRUCT ps;
-	HDC realDC = BeginPaint(*this, &ps);
+	HDC realDC = BeginPaint(handle(), &ps);
 	{
 		Win32::MemoryDC dc(realDC);
 		redraw(dc);
@@ -905,10 +901,10 @@ void DarkOverlay::updateLayeredWindow()
 		POINT leftTop = { rect_.left(), rect_.top() };
 		SIZE size = { rect_.width(), rect_.height() };
 		POINT point = { 0, 0 };
-		UpdateLayeredWindow(*this, realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
-		SetLayeredWindowAttributes(*this, 0, 64, ULW_ALPHA);
+		UpdateLayeredWindow(handle(), realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
+		SetLayeredWindowAttributes(handle(), 0, 64, ULW_ALPHA);
 	}
-	EndPaint(*this, &ps);
+	EndPaint(handle(), &ps);
 }
 
 void DarkOverlay::onMessagePaint()
@@ -1008,7 +1004,7 @@ int SpaceSplitterImpl::hoveredHalf(int x, int y)
 
 void SpaceSplitterImpl::startJoin(int splitterIndex)
 {
-	SetCapture(*this);
+	SetCapture(handle());
     joining_ = true;
 	splitterIndex_ = splitterIndex;
 	darkOverlay_->show(true);
@@ -1154,7 +1150,7 @@ SpaceHeaderImpl::SpaceHeaderImpl(SpaceHeader* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	create(L"", WS_CHILD, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD, Rect(0, 0, 20, 20), Win32::getDefaultWindowHandle());
 }
 
 
@@ -1180,9 +1176,9 @@ void SpaceHeaderImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	SharedPtr<Widget> ownerReference(owner_);
 	RECT rect;
-	::GetClientRect(*this, &rect);
-	::ClientToScreen(*this, (POINT*)&rect);
-	::ClientToScreen(*this, (POINT*)&rect + 1);
+	::GetClientRect(handle(), &rect);
+	::ClientToScreen(handle(), (POINT*)&rect);
+	::ClientToScreen(handle(), (POINT*)&rect + 1);
 	
 	PopupMenu menu(100);
     
@@ -1209,7 +1205,7 @@ void SpaceHeaderImpl::onMessageRButtonDown(UINT button, int x, int y)
 void SpaceHeaderImpl::redraw(HDC dc)
 {
 	Win32::Rect clientRect;
-	::GetClientRect(*this, &clientRect);
+	::GetClientRect(handle(), &clientRect);
 
 	RECT lineRect = clientRect;
 	lineRect.top = lineRect.bottom - 1;
@@ -1242,11 +1238,11 @@ void SpaceHeaderImpl::onMessagePaint()
 {
 
 	PAINTSTRUCT paintStruct;
-	HDC dc = BeginPaint(*this, &paintStruct);
+	HDC dc = BeginPaint(handle(), &paintStruct);
 
 	redraw(dc);
 
-	EndPaint(*this, &paintStruct);
+	EndPaint(handle(), &paintStruct);
 }
 
 // ---------------------------------------------------------------------------
@@ -1299,7 +1295,7 @@ void SpaceHeader::serialize(Archive& ar)
 
 void SpaceHeader::updateMinimalSize()
 {
-	Vect2 size = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), label_.c_str());
+	Vect2 size = Win32::calculateTextSize(Win32::getDefaultWindowHandle(), Win32::defaultFont(), label_.c_str());
 	size += Vect2(GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE)) * 2;
 	size.x += GetSystemMetrics(SM_CXVSCROLL) + 4;
 	_setMinimalSize(size);

@@ -54,8 +54,8 @@ protected:
 			key.key == KEY_ESCAPE ||
 			key.key == KEY_RETURN)
 		{
-			SetFocus(tree_->impl()->get());
-			PostMessage(tree_->impl()->get(), WM_KEYDOWN, key.key, 0);
+			SetFocus(tree_->impl()->handle());
+			PostMessage(tree_->impl()->handle(), WM_KEYDOWN, key.key, 0);
 			return true;
 		}
 		if (key.key == KEY_BACK && text()[0] == '\0')
@@ -123,7 +123,7 @@ PropertyTree::~PropertyTree()
 void PropertyTree::update()
 {
 	needUpdate_ = true;
-    ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+    ::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 TreeImpl* PropertyTree::impl() const
@@ -224,7 +224,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 	case KEY_END:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		break;
-	case KEY_SPACE:
+	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
 		else
@@ -270,7 +270,7 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
 	row->onMouseUp(this, point);
-	if(GetCapture() == *_window())
+	if(GetCapture() == _window()->handle())
 		ReleaseCapture();
 }
 
@@ -425,7 +425,7 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 
 void PropertyTree::redraw()
 {
-	RedrawWindow(*impl(), 0, 0, RDW_INVALIDATE);
+	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
 }
 
 void PropertyTree::_setFocus()
@@ -517,7 +517,9 @@ bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 	if(!widget_ || widget_->row() != row){
 		interruptDrag();
 		setWidget(0);
-		PropertyRowWidget* newWidget = ignoreReadOnly && row->userReadOnlyRecurse() || !row->userReadOnly() ? row->createWidget(this) : 0;
+		PropertyRowWidget* newWidget = 0;
+		if (ignoreReadOnly && row->userReadOnlyRecurse() || !row->userReadOnly())
+			newWidget = row->createWidget(this);
 		setWidget(newWidget);
 		return newWidget != 0;
 	}
@@ -658,13 +660,15 @@ void PropertyTree::onModelUpdated()
 
 void PropertyTree::setWidget(PropertyRowWidget* widget)
 {
-	if(widget_){
-		widget_->commit();
-		ASSERT(widget_->actualWidget());
-		if(widget_->actualWidget())
-			widget_->actualWidget()->hide();
-		widget_->acquire();
-		widget_ = 0;
+	PolyPtr<PropertyRowWidget> oldWidget = widget_;
+	widget_ = 0;
+	if(oldWidget){
+		oldWidget->commit();
+		ASSERT(oldWidget->actualWidget());
+		if(oldWidget->actualWidget())
+			oldWidget->actualWidget()->hide();
+		oldWidget->acquire();
+		oldWidget = 0;
 	}
 	widget_ = widget;
 	model()->dismissUpdate();
@@ -695,7 +699,7 @@ void PropertyTree::setFilterMode(bool inFilterMode)
         onFilterChanged();
         impl()->updateArea();
         needUpdate_ = true;
-        RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE);
+        RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
     }
 }
 
@@ -750,7 +754,7 @@ void PropertyTree::_arrangeChildren()
 bool PropertyTree::hasFocus() const
 {
 	HWND focusedWindow = GetFocus();
-	return focusedWindow == impl()->get() || IsChild(impl()->get(), focusedWindow);
+	return focusedWindow == impl()->handle() || IsChild(impl()->handle(), focusedWindow);
 }
 
 void PropertyTree::setExpandLevels(int levels)
@@ -771,7 +775,7 @@ Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
     POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), 
 		         point.y - impl()->offset_.y + impl()->area_.top() };
-    ClientToScreen(*impl(), &pt);
+    ClientToScreen(impl()->handle(), &pt);
     return Vect2(pt.x, pt.y);
 }
 
@@ -1044,7 +1048,7 @@ void PropertyTree::onFilterChanged()
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
 	needUpdate_ = true;
-    ::RedrawWindow(impl()->get(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+    ::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const

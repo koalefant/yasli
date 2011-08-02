@@ -17,7 +17,12 @@ namespace ww{
 
 bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, Widget* parent, const char* title)
 {
-	return edit(ser, stateFileName, flags, parent ? *_findWindow(parent) : HWND(0), title);
+	HWND parentHandle = 0;
+	if (parent)	{
+		Win32::Window32* parentWindow = _findWindow(parent);
+		parentHandle = parentWindow->handle();
+	}
+	return edit(ser, stateFileName, flags, parentHandle, title);
 }
 
 bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, HWND parent, const char* title)

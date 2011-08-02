@@ -31,7 +31,6 @@ public:
 	Viewport2DImpl(Viewport2D* owner);
 	~Viewport2DImpl();
 
-	const wchar_t* className() const{ return L"ww.Viewport2D"; }
 	BOOL onMessageEraseBkgnd(HDC dc);
 
 	void onMessagePaint();
@@ -62,7 +61,7 @@ Viewport2DImpl::Viewport2DImpl(Viewport2D* owner)
 , owner_(owner)
 , initialized_(false)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 0, 0), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 0, 0), Win32::getDefaultWindowHandle()));
 	initialized_ = true;
 }
 
@@ -170,7 +169,7 @@ void Viewport2DImpl::onMessageMButtonUp(UINT button, int x, int y)
 
 int Viewport2DImpl::onMessageKillFocus(HWND focusedWindow)
 {
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_NOERASE);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_NOERASE);
 	return __super::onMessageKillFocus(focusedWindow);
 }
 
@@ -333,17 +332,17 @@ void Viewport2D::onMouseMove(const Vect2& delta)
 
 void Viewport2D::redraw(bool updateNow)
 {
-	RedrawWindow(*impl(), 0, 0, RDW_INVALIDATE | (updateNow ? RDW_UPDATENOW : 0));
+	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | (updateNow ? RDW_UPDATENOW : 0));
 }
 
 void Viewport2D::captureMouse()
 {
-	::SetCapture(*impl());
+	::SetCapture(impl()->handle());
 }
 
 void Viewport2D::releaseMouse()
 {
-	if(::GetCapture() == *impl())
+	if(::GetCapture() == impl()->handle())
 		::ReleaseCapture();
 }
 

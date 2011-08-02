@@ -63,14 +63,14 @@ void PropertyRowBool::serializeValue(Archive& ar)
 
 int PropertyRowPointer::widgetSizeMin() const
 {
-    HDC dc = GetDC(*Win32::_globalDummyWindow);
+    HDC dc = GetDC(Win32::getDefaultWindowHandle());
     Gdiplus::Graphics gr(dc);
     Gdiplus::Font* font = propertyTreeDefaultBoldFont();
     std::wstring wstr(generateLabel());
     Gdiplus::StringFormat format;
     Gdiplus::RectF bound;
     gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
-    ReleaseDC(*Win32::_globalDummyWindow, dc);
+    ReleaseDC(Win32::getDefaultWindowHandle(), dc);
     return bound.Width + 10;
 }
 

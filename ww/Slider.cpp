@@ -19,7 +19,6 @@ namespace ww{
 class SliderImpl : public _WidgetWindow{
 public:
 	SliderImpl(Slider* owner);
-	const wchar_t* className()const{ return L"ww.Slider"; }
 
 	void redraw(HDC dc);
 
@@ -51,16 +50,16 @@ SliderImpl::SliderImpl(Slider* owner)
 , owner_(owner)
 , dragging_(false)
 {
-	create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), *Win32::_globalDummyWindow);
+	create(L"", WS_CHILD | WS_TABSTOP, Rect(0, 0, 20, 20), Win32::getDefaultWindowHandle());
 }
 
 void SliderImpl::redraw(HDC dc)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 
 	FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
-	bool focused = GetFocus() == get();
+	bool focused = GetFocus() == handle();
 	if (focused)
 		DrawFocusRect(dc, &rect);
 	rect.left += 1;	rect.top += 1;
@@ -71,12 +70,12 @@ void SliderImpl::redraw(HDC dc)
 void SliderImpl::onMessagePaint()
 {
 	PAINTSTRUCT paintStruct;
-	HDC dc = BeginPaint(*this, &paintStruct);
+	HDC dc = BeginPaint(handle(), &paintStruct);
 	{
 		Win32::MemoryDC memoryDC(dc);
 		redraw(memoryDC);
 	}
-	EndPaint(*this, &paintStruct);
+	EndPaint(handle(), &paintStruct);
 }
 
 BOOL SliderImpl::onMessageEraseBkgnd(HDC dc)
@@ -87,13 +86,13 @@ BOOL SliderImpl::onMessageEraseBkgnd(HDC dc)
 
 int SliderImpl::onMessageSetFocus(HWND lastFocusedWindow)
 {
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 	return __super::onMessageSetFocus(lastFocusedWindow);
 }
 
 int SliderImpl::onMessageKillFocus(HWND focusedWindow)
 {
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 	return __super::onMessageKillFocus(focusedWindow);
 }
 
@@ -123,7 +122,7 @@ int SliderImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 	{
 		owner_->value_ = clamp(value, 0.0f, 1.0f);
 		owner_->signalChanged_.emit();
-		InvalidateRect(get(), 0, FALSE);
+		InvalidateRect(handle(), 0, FALSE);
 	}
 	return __super::onMessageKeyDown(keyCode, count, flags);
 }
@@ -131,7 +130,7 @@ int SliderImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 float SliderImpl::mousePositionToValue(int x, int y) const
 {
     Win32::Rect rect;
-    GetClientRect(get(), &rect);
+    GetClientRect(handle(), &rect);
     const int handleWidth = 4;
     return clamp(float(x - handleWidth / 2) / float(rect.width() - handleWidth - 2), 0.0f, 1.0f);
 }
@@ -143,7 +142,7 @@ void SliderImpl::onMessageMouseMove(UINT button, int x, int y)
 		float value = mousePositionToValue(x, y);
 		owner_->value_ = value;
 		owner_->signalChanged_.emit();
-		::RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_NOERASE);
+		::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_NOERASE);
 	}
 	else
 		dragging_ = false;
@@ -153,23 +152,23 @@ void SliderImpl::onMessageMouseMove(UINT button, int x, int y)
 void SliderImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	Win32::Rect rect;
-	GetClientRect(*this, &rect);
+	GetClientRect(handle(), &rect);
 	float value = mousePositionToValue(x, y);
 	owner_->value_ = value;
 	owner_->signalChanged_.emit();
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	dragging_ = true;
-	SetFocus(*this);
+	SetFocus(handle());
 	owner_->_setFocus();
-	SetCapture(*this);
+	SetCapture(handle());
 	__super::onMessageLButtonDown(button, x ,y);
 }
 
 void SliderImpl::onMessageLButtonUp(UINT button, int x, int y)
 {
 	dragging_ = false;
-	if(GetCapture() == *this)
+	if(GetCapture() == handle())
 		ReleaseCapture();
 }
 
@@ -193,7 +192,7 @@ SliderImpl& Slider::impl()
 void Slider::setValue(float value)
 {
 	value_ = value;
-	RedrawWindow(impl(), 0, 0, RDW_INVALIDATE);
+	RedrawWindow(impl().handle(), 0, 0, RDW_INVALIDATE);
 }
 
 void Slider::setStepsCount(int stepsCount)

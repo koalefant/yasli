@@ -51,8 +51,7 @@ CheckBoxImpl::CheckBoxImpl(ww::CheckBox* owner)
 : _WidgetWindow(owner)
 , owner_(0)
 {
-//	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP , Rect(0, 0, 42, 42), Win32::_globalDummyWindow));
-	WW_VERIFY(create(L"", generateWin32Style(), Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", generateWin32Style(), Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));

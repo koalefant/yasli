@@ -45,7 +45,7 @@ public:
 	LRESULT defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam);
 
 	void commit();
-	HWND edit() { return *this; }
+	HWND edit() { return handle(); }
 protected:
 	unsigned int generateStyle() const;
 	unsigned int generateStyleEx() const;
@@ -63,7 +63,7 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 , owner_(owner)
 , setting_(false)
 {
-	WW_VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), *Win32::_globalDummyWindow, generateStyleEx()));
+	WW_VERIFY(create(L"", generateStyle(), Rect(0, 0, 800, 60), Win32::getDefaultWindowHandle(), generateStyleEx()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
@@ -71,9 +71,9 @@ EntryImpl::EntryImpl(ww::Entry* owner)
 	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	HFONT font = Win32::defaultFont();
-	SetWindowFont(*this, font, FALSE);
+	SetWindowFont(handle(), font, FALSE);
 
-	Vect2 textSize = Win32::calculateTextSize(*this, font, L" ");
+	Vect2 textSize = Win32::calculateTextSize(handle(), font, L" ");
 	owner_->_setMinimalSize(textSize + Vect2(GetSystemMetrics(SM_CXBORDER) * 2 + 6 + 1, GetSystemMetrics(SM_CYBORDER) * 2 + 6 + 1));
 }
 
@@ -105,13 +105,13 @@ void EntryImpl::updateStyle()
 
 void EntryImpl::updateOwnerText()
 {
-    int length = GetWindowTextLength(*this) + 1;
+    int length = GetWindowTextLength(handle()) + 1;
 	std::wstring text;
     if(length > 0)
     {
         std::vector<wchar_t> buf;
         buf.resize(length);
-        GetWindowText(*this, &buf[0], length);
+        GetWindowText(handle(), &buf[0], length);
 
         ASSERT(owner_);
         text = &buf[0];
@@ -132,7 +132,7 @@ void EntryImpl::commit()
 void EntryImpl::setText(const wchar_t* text)
 {
 	setting_ = true;
-	WW_VERIFY(::SetWindowText(*this, text));
+	WW_VERIFY(::SetWindowText(handle(), text));
 	setting_ = false;
 }
 
@@ -205,11 +205,11 @@ int EntryImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
         {
 		int result = __super::onMessageCommand(command, code, wnd);
         owner_->_setFocus();
-		Edit_SetSel(*this, 0, -1);
+		Edit_SetSel(handle(), 0, -1);
         return result;
         }
 	case EN_KILLFOCUS:
-		if(GetFocus() != *this)
+		if(GetFocus() != handle())
 			commit();
 		return TRUE;
 	}
@@ -269,7 +269,7 @@ void Entry::setSelection(EntrySelection selection)
 
 EntrySelection Entry::selection() const
 {
-	DWORD range = SendMessage(*impl(), EM_GETSEL, 0, 0);
+	DWORD range = SendMessage(impl()->handle(), EM_GETSEL, 0, 0);
 	WORD start = LOWORD(range);
 	WORD end = HIWORD(range);
 	return EntrySelection(start, end);
@@ -278,7 +278,7 @@ EntrySelection Entry::selection() const
 void Entry::replace(EntrySelection selection, const char* text)
 {
 	setSelection(selection);
-	WW_VERIFY(SendMessage(*impl(), EM_REPLACESEL, 0, (LPARAM)text));
+	WW_VERIFY(SendMessage(impl()->handle(), EM_REPLACESEL, 0, (LPARAM)text));
 }
 
 void Entry::setText(const char* text)

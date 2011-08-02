@@ -26,7 +26,6 @@ public:
 	LabelImpl(Label* owner, bool emphasis);
 	~LabelImpl();
 
-	const wchar_t* className() const{ return L"ww.LabelImpl"; }
 	int onMessageDestroy();
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
 	void recreateFont(bool emphasis);
@@ -41,7 +40,7 @@ LabelImpl::LabelImpl(Label* owner, bool emphasis)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"", WS_CHILD , Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD , Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 }
 
 LabelImpl::~LabelImpl()
@@ -51,7 +50,7 @@ LabelImpl::~LabelImpl()
 
 void LabelImpl::setText(const wchar_t* text)
 {
-	Vect2 textSize = Win32::calculateTextSize(*this, font(), text);
+	Vect2 textSize = Win32::calculateTextSize(handle(), font(), text);
 	if(owner_->expandByContent_)
 		owner_->_setMinimalSize(textSize + Vect2(2 + owner_->border() * 2, 2 + owner_->border() * 2));
 	else
@@ -76,7 +75,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	case WM_PAINT:
 		{
 			PAINTSTRUCT ps;
-			HDC dc = ::BeginPaint(*this, &ps); 
+			HDC dc = ::BeginPaint(handle(), &ps); 
 			ASSERT(dc != 0);
 			std::wstring text = toWideChar(owner_->text_.c_str());
 			
@@ -109,7 +108,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			};
 
 			RECT rect;
-			WW_VERIFY(GetClientRect(*this, &rect));
+			WW_VERIFY(GetClientRect(handle(), &rect));
 			HFONT oldFont = HFONT(::SelectObject(dc, (HGDIOBJ)font()));
 			HBRUSH oldBrush = HBRUSH(::SelectObject(dc, (HGDIOBJ)(::GetStockObject(GRAY_BRUSH))));
 			int oldBackMode = ::SetBkMode(dc, OPAQUE);
@@ -121,7 +120,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			::SetBkMode(dc, oldBackMode);
 			::SetBkColor(dc, oldBkColor);
 
-			::EndPaint(*this, &ps);
+			::EndPaint(handle(), &ps);
 			return TRUE;
 		}
 	}
@@ -156,7 +155,7 @@ void Label::setAlignment(ww::TextAlignHorizontal alignh, ww::TextAlignVertical a
 	alignHorizontal_ = alignh;
 	alignVertical_ =  alignv;
 
-	::RedrawWindow(*impl(), 0, 0, RDW_INVALIDATE);
+	::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
 }
 
 void Label::setExpandByContent(bool expand)

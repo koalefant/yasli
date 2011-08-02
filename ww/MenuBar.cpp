@@ -12,6 +12,7 @@
 #include "ww/PopupMenu.h"
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/Rectangle.h"
+#include "ww/Win32/Window.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Unicode.h"
 #include "ww/HotkeyContext.h"
@@ -95,7 +96,6 @@ class MenuBarImpl : public _WidgetWindow, public has_slots
 public:
     MenuBarImpl(ww::MenuBar* owner);
     virtual ~MenuBarImpl();
-    const wchar_t* className() const{ return L"ww.MenuBarImpl"; }
     void redraw(HDC dc);
 
     LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
@@ -129,7 +129,7 @@ MenuBarImpl::MenuBarImpl(ww::MenuBar* owner)
 , activeItem_(-1)
 , root_("")
 {
-    create(L"", WS_CHILD, Rect(0, 0, 24, 24), *Win32::_globalDummyWindow);
+    create(L"", WS_CHILD, Rect(0, 0, 24, 24), Win32::getDefaultWindowHandle());
 }
 
 MenuBarImpl::~MenuBarImpl()
@@ -140,7 +140,7 @@ MenuBarImpl::~MenuBarImpl()
 void MenuBarImpl::redraw(HDC dc)
 {
     RECT rect;
-    GetClientRect(*this, &rect);
+    GetClientRect(handle(), &rect);
     FillRect(dc, &rect, GetSysColorBrush(COLOR_MENU));
 
     MenuBarItems::iterator it;
@@ -174,7 +174,7 @@ LRESULT MenuBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
     LRESULT result = __super::onMessage(message, wparam, lparam);
     if(message == WM_MOUSELEAVE){
         if(updateActiveItem())
-            RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
+            RedrawWindow(handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
     }
     else if(message == WM_ENTERIDLE){
         UINT reason = (UINT)wparam;
@@ -183,9 +183,9 @@ LRESULT MenuBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
             if(!showMenu_)
                 return result;
             if(updateActiveItem()){
-                RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
+                RedrawWindow(this->handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
                 inMenu_ = true;
-                SendMessage(*this, WM_CANCELMODE, 0, 0);
+                SendMessage(this->handle(), WM_CANCELMODE, 0, 0);
             }
             return 0;
         }
@@ -196,15 +196,15 @@ LRESULT MenuBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 void MenuBarImpl::onMessagePaint()
 {
     PAINTSTRUCT ps;
-    HDC dc = BeginPaint(*this, &ps);
+    HDC dc = BeginPaint(handle(), &ps);
     redraw(dc);
-    EndPaint(*this, &ps);
+    EndPaint(handle(), &ps);
 }
 
 void MenuBarImpl::onMessageMouseMove(UINT button, int x, int y)
 {
     if(updateActiveItem())
-        RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
+        RedrawWindow(handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
     HWND captureWindow = GetCapture();
     ASSERT(captureWindow == 0);
     if(activeItem_ != -1){
@@ -212,7 +212,7 @@ void MenuBarImpl::onMessageMouseMove(UINT button, int x, int y)
         ZeroMemory((void*)(&event), sizeof(event));
         event.cbSize = sizeof(event);
         event.dwFlags = TME_LEAVE;
-        event.hwndTrack = *this;
+        event.hwndTrack = handle();
         WW_VERIFY(TrackMouseEvent(&event));
     }
 
@@ -257,12 +257,12 @@ void MenuBarImpl::onMessageLButtonDown(UINT button, int x, int y)
             PopupMenu menu;
             generateMenu(&menu.root(), *item.item());
             POINT pt = { item.rect().left(), item.rect().bottom() };
-            ClientToScreen(*this, &pt);
-            RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
+            ClientToScreen(handle(), &pt);
+            RedrawWindow(handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
             menu.spawn(Vect2(pt.x, pt.y), owner_);
             activeItem_ = -1;
             updateActiveItem();
-            RedrawWindow(*this, 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
+            RedrawWindow(handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
         }
     } while(inMenu_);
     showMenu_ = false;
@@ -282,7 +282,7 @@ void MenuBarImpl::onItemActivate(MenuItem* item)
 void MenuBarImpl::updateRootItems()
 {
     Rect pos(owner_->_position());
-    Vect2 size = calculateTextSize(*this, Win32::defaultFont(), L" ");
+	Vect2 size = Win32::calculateTextSize(handle(), Win32::defaultFont(), L" ");
     size.y +=  + GetSystemMetrics(SM_CYEDGE) * 4;
     int height = std::max(size.y, owner_->_position().height());
     rootItems_.clear();
@@ -291,7 +291,7 @@ void MenuBarImpl::updateRootItems()
     for(it = root_.subItems_.begin(); it != root_.subItems_.end(); ++it){
         MenuItem& item = *it->get();
         const std::wstring text = toWideChar(item.text_.c_str());
-        Vect2 textSize = Win32::calculateTextSize(*Win32::_globalDummyWindow, Win32::defaultFont(), text.c_str());
+        Vect2 textSize = Win32::calculateTextSize(Win32::getDefaultWindowHandle(), Win32::defaultFont(), text.c_str());
         textSize.x += 10;
         Rect rect(offset, (pos.height() - height) / 2, offset + textSize.x, (pos.height() - height) / 2 + height);
         rootItems_.push_back(MenuBarItem(&item, rect));
@@ -306,7 +306,7 @@ bool MenuBarImpl::updateActiveItem()
 {
     POINT cursorPos;
     GetCursorPos(&cursorPos);
-    ScreenToClient(*this, &cursorPos);
+    ScreenToClient(handle(), &cursorPos);
 
     MenuBarItems::iterator it;
     int index = 0;

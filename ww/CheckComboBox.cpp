@@ -17,6 +17,7 @@
 
 #include "ww/_WidgetWindow.h"
 #include "ww/Unicode.h"
+#include "ww/Win32/Window.h"
 
 #include "ww/Serialization.h"
 #include "yasli/TypesFactory.h"
@@ -110,7 +111,7 @@ CheckComboListBoxImpl::~CheckComboListBoxImpl()
 
 int CheckComboListBoxImpl::onMessageDestroy()
 {
-	ASSERT(::IsWindow(*owner_));
+	ASSERT(::IsWindow(owner_->handle()));
 	owner_->listBox_ = 0;
 	return 0;
 }
@@ -130,7 +131,7 @@ void CheckComboListBoxImpl::onMessageRButtonDown(UINT button, int x, int y)
 			selectedCount++;
 	}
 	owner_->owner_->selectAll(count != selectedCount);
-	SendMessage(*owner_, WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
+	SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
 	InvalidateRect(handle_, 0, FALSE);
 }
 
@@ -152,7 +153,7 @@ void CheckComboListBoxImpl::onMessageLButtonDown(UINT button, int x, int y)
 
 		if(PtInRect(&rcItem, pt)) {
 			owner_->setCheck(nIndex, !owner_->getCheck(nIndex));
-			SendMessage(*owner_, WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), (LPARAM)handle_);
+			SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), (LPARAM)handle_);
 			owner_->updateValue();
 			InvalidateRect(handle_, &rcItem, FALSE);
 		}
@@ -170,7 +171,7 @@ int CheckComboListBoxImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 
 		owner_->setCheck(index, !owner_->getCheck(index));
 		owner_->updateValue();
-		SendMessage(*owner_, WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
+		SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
 	}
 	return 0;
 }
@@ -183,11 +184,8 @@ CheckComboBoxImpl::CheckComboBoxImpl(ww::CheckComboBox* owner)
 , owner_(owner)
 , itemHeightSet_(false)
 {
-	
-	//WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST, Rect(0, 0, 24, 24), Win32::_globalDummyWindow));
-
 	bool created = false;
-	WW_VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Rect(0, 0, 30, 30), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_HASSTRINGS, Rect(0, 0, 30, 30), Win32::getDefaultWindowHandle()));
 
 	if(!created){
 		DWORD error = GetLastError();
@@ -312,7 +310,7 @@ int CheckComboBoxImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
 
 BOOL CheckComboBoxImpl::onMessageMeasureItem(UINT id, MEASUREITEMSTRUCT* measureItemStruct)
 {
-	HDC dc = GetDC(*this);
+	HDC dc = GetDC(handle());
 	HFONT oldFont = (HFONT)::SelectObject(dc, GetWindowFont(handle_));
 	if(oldFont != 0){
 		TEXTMETRIC metrics;
@@ -442,11 +440,11 @@ CheckComboBox::CheckComboBox(bool expandByContent, int border)
 
 void CheckComboBox::updateMinimalSize()
 {
-	Vect2 size = Win32::calculateTextSize(window()->comboBox(), GetWindowFont(*window()), L" ");
+	Vect2 size = Win32::calculateTextSize(window()->comboBox(), GetWindowFont(window()->handle()), L" ");
 	if(expandByContent_){
 		Items::iterator it;
 		FOR_EACH(items_, it){
-			Vect2 anotherSize = Win32::calculateTextSize(*window(), GetWindowFont(*window()), toWideChar(it->c_str()).c_str());
+			Vect2 anotherSize = Win32::calculateTextSize(window()->handle(), GetWindowFont(window()->handle()), toWideChar(it->c_str()).c_str());
 			size.x = std::max(anotherSize.x, size.x);
 			size.y = std::max(anotherSize.y, size.y);
 		}

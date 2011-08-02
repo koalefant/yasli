@@ -328,7 +328,7 @@ void PropertyDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool
 	if (uxTheme.isLoaded() && uxTheme.IsAppThemed())
 	{
 		// XP-style drawing
-		HTHEME theme = uxTheme.OpenThemeData(tree->_window()->get(), L"Button");
+		HTHEME theme = uxTheme.OpenThemeData(tree->_window()->handle(), L"Button");
 		if (theme) {
 			HDC dc = graphics->GetHDC();
 			RECT buttonRect = rect;

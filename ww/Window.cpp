@@ -72,7 +72,6 @@ public:
 	WindowImpl(ww::Window* window);
 	~WindowImpl();
 	// virtuals:
-	const wchar_t* className() const{ return L"ww.WindowImpl"; }
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
 	int onMessageCommand(USHORT command, USHORT id, HWND wnd);
 	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
@@ -117,7 +116,7 @@ void WindowImpl::setMenu(PopupMenu* popupMenu)
 		return;
 
 	menu_ = (HMENU)popupMenu->_generateMenuBar();
-	::SetMenu(get(), menu_);
+	::SetMenu(handle(), menu_);
 }
 
 int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
@@ -130,9 +129,9 @@ int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
 				if (item) {
 					item->_call();
 				}
-				else {
-					ASSERT(item != 0 && "Missing menu item for command");
-				}
+				// else {
+				//	ASSERT(item != 0 && "Missing menu item for command");
+				//}
 			}
 			else {
 				ASSERT(owner_->menu_ != 0);
@@ -152,7 +151,7 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	case WM_CREATE:
 		{
 			BOOL result = __super::onMessage(message, wparam, lparam);
-			filter_ = new WindowMessageFilter(get());
+			filter_ = new WindowMessageFilter(handle());
 
 			if (Application::get()) {
 				Application::get()->_messageLoop()->installFilter(filter_);
@@ -184,7 +183,7 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				if(mode != SIZE_MINIMIZED){
 					owner_->_arrangeChildren();
 
-					RedrawWindow(*this, 0, 0, RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
+					RedrawWindow(handle(), 0, 0, RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
 				}
 			}
 			return TRUE;
@@ -196,8 +195,8 @@ LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			RECT* rect = (RECT*)lparam; // non-client window rectangle
 			RECT windowRect;
 			RECT clientRect;
-			::GetWindowRect(*this, &windowRect);
-			::GetClientRect(*this, &clientRect);
+			::GetWindowRect(handle(), &windowRect);
+			::GetClientRect(handle(), &clientRect);
 
 			POINT borderSize; // difference between non-client and client size
 			borderSize.x = windowRect.right - windowRect.left - (clientRect.right - clientRect.left);
@@ -317,16 +316,16 @@ void Window::setRestoredPosition(const Rect& position)
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
-	WW_VERIFY(GetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(GetWindowPlacement(_window()->handle(), &placement));
 	placement.rcNormalPosition = Win32::Rect(position);
-	WW_VERIFY(SetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(SetWindowPlacement(_window()->handle(), &placement));
 }
 
 Rect Window::restoredPosition() const
 {
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
-	WW_VERIFY(GetWindowPlacement(*_window(), &placement));
+	WW_VERIFY(GetWindowPlacement(_window()->handle(), &placement));
 	return Win32::Rect(placement.rcNormalPosition).recti();
 }
 
@@ -339,8 +338,8 @@ void Window::setMinimizeable(bool allowMinimize)
 void Window::setMaximized(bool maximized)
 {
 	if(this->maximized() != maximized){
-		ShowWindow(*_window(), maximized ? SW_MAXIMIZE : SW_RESTORE);
-		RedrawWindow(*_window(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
+		ShowWindow(_window()->handle(), maximized ? SW_MAXIMIZE : SW_RESTORE);
+		RedrawWindow(_window()->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
 	}	
 }
 
@@ -424,7 +423,7 @@ void Window::setIconFromResource(const char* resourceName)
 	HICON icon = LoadIcon(Win32::_globalInstance(), toWideChar(resourceName).c_str());
 	ASSERT(icon);
 
-	SetClassLongPtr(*window_, GCLP_HICON, (LONG_PTR)icon);
+	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);
 }
 
 void Window::setIconFromFile(const char* resourceName)
@@ -432,7 +431,7 @@ void Window::setIconFromFile(const char* resourceName)
 	HANDLE icon = LoadImage(0, toWideChar(resourceName).c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 	ASSERT(icon);
 
-	SetClassLongPtr(*window_, GCLP_HICON, (LONG_PTR)icon);
+	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);
 }
 
 void Window::add(Widget* widget)
@@ -520,7 +519,7 @@ void Window::reposition()
     }
     Rect rect(left, top, left + width, top + height);
 
-	::SetWindowPos(*window_, 0, rect.left(), rect.top(), rect.width(), rect.height(), SWP_NOZORDER | SWP_NOACTIVATE | (visible_ ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
+	::SetWindowPos(window_->handle(), 0, rect.left(), rect.top(), rect.width(), rect.height(), SWP_NOZORDER | SWP_NOACTIVATE | (visible_ ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
 	positioned_ = true;
 }
 
@@ -553,7 +552,7 @@ void Window::_arrangeChildren()
 {
 	if(child_){
 		RECT rect;
-		WW_VERIFY(::GetClientRect(*window_, &rect));
+		WW_VERIFY(::GetClientRect(window_->handle(), &rect));
 		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		child_->_setPosition(Rect(rect.left, rect.top, rect.right, rect.bottom));
 	}
@@ -567,10 +566,10 @@ void Window::_relayoutParents()
 		_setMinimalSize(border_ * 2, border_ * 2);
 
 	RECT clientRect;
-	::GetClientRect(*window_, &clientRect);
+	::GetClientRect(window_->handle(), &clientRect);
 	bool move = false;
 	RECT windowRect;
-	::GetWindowRect(*window_, &windowRect);
+	::GetWindowRect(window_->handle(), &windowRect);
 	SIZE borderSize = { windowRect.right - windowRect.left - (clientRect.right - clientRect.left),
 						windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top) };
 
@@ -587,7 +586,7 @@ void Window::_relayoutParents()
 		window_->update();
 	}
 	else
-		::RedrawWindow(*window_, 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		::RedrawWindow(window_->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
 
 	__super::_relayoutParents();
 }

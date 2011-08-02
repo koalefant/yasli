@@ -154,7 +154,7 @@ void PopupMenu::spawn(Vect2 point, Widget* widget)
 	Win32::Window32* parentWindow = 0;
 	if (widget)
 		parentWindow = _findWindow(widget);
-	HWND parentWindowHandle =  parentWindow ? parentWindow->get() : 0;
+	HWND parentWindowHandle =  parentWindow ? parentWindow->handle() : 0;
 	ASSERT(::IsWindow(parentWindowHandle));
 
 	UINT id = ::TrackPopupMenu(menu, TPM_LEFTBUTTON | TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, 0, parentWindowHandle, 0);

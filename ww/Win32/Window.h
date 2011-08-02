@@ -85,7 +85,7 @@ public:
 	HWND attach(HWND handle);
 	HWND detach();
 
-	virtual const wchar_t* className() const{ return L"ww.Win32.Window"; }
+	virtual const wchar_t* className() const{ return L"ww.Window"; }
 	virtual bool registerClass(const wchar_t* className);
 		
 	virtual LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
@@ -164,8 +164,7 @@ public:
 	void screenToClient(RECT& rect);
 	//
 
-	HWND get() const{ return handle_; }
-	operator HWND() const{ return get(); }
+	HWND handle() const{ return handle_; }
 
 	void attachTimer(TimerInterface* timer, int interval);
 	void detachTimer(TimerInterface* timer);
@@ -179,7 +178,10 @@ protected:
 	HWND handle_;
 };
 
-extern Win32::Window32* _globalDummyWindow;
+// A hidden service window that is used as default parent for
+// windows that are not yet composed.
+HWND getDefaultWindowHandle();
+Win32::Window32* getDefaultWindow();
 
 inline TimerInterface::~TimerInterface()
 {

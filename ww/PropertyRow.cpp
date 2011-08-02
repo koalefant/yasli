@@ -519,13 +519,13 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 		hash = calcHash(font, hash);
 		if(hash != textHash_){
 			textHash_ = hash;
-			HDC dc = GetDC(*Win32::_globalDummyWindow);
+			HDC dc = GetDC(Win32::getDefaultWindowHandle());
 			Gdiplus::Graphics gr(dc);
 			std::wstring wstr(toWideChar(text.c_str()));
 			Gdiplus::StringFormat format;
 			Gdiplus::RectF bound;
 			gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
-			ReleaseDC(*Win32::_globalDummyWindow, dc);
+			ReleaseDC(Win32::getDefaultWindowHandle(), dc);
 			textSizeInitial_ = bound.Width + 3;
 		}
     }

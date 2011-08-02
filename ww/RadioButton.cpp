@@ -83,7 +83,7 @@ RadioButtonImpl::RadioButtonImpl(RadioButton* owner, RadioButton* groupWith)
 	else
 		group_ = groupWith->group();
 	group_->add(owner);
-	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_RADIOBUTTON | BS_NOTIFY, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_RADIOBUTTON | BS_NOTIFY, Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
@@ -106,7 +106,7 @@ void RadioButtonImpl::setFocusPrev()
 	FOR_EACH(group()->group, i){
 		if((*i) == owner_){
 			if(i != group()->group.begin())
-				::SetFocus((*j)->window()->get());
+				::SetFocus((*j)->window()->handle());
 			break;
 		}
 		j = i;
@@ -119,7 +119,7 @@ void RadioButtonImpl::setFocusNext()
 	bool mustBreak = false;
 	FOR_EACH(group()->group, i){
 		if(mustBreak){
-			::SetFocus((*i)->window()->get());
+			::SetFocus((*i)->window()->handle());
 			break;
 		}
 		if((*i) == owner_)

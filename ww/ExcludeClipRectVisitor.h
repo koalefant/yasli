@@ -22,9 +22,9 @@ struct ExcludeClipRectVisitor : public ww::WidgetVisitor{
 
 	void operator()(ww::Widget& widget){
 		if(Win32::Window32* window = widget._window()){
-			if(widget._visible() && widget._visibleInLayout() && ::IsWindowVisible(*window)){
+			if(widget._visible() && widget._visibleInLayout() && ::IsWindowVisible(window->handle())){
 				Win32::Rect rect;
-				::GetClientRect(*window, &rect);
+				::GetClientRect(window->handle(), &rect);
 				window->clientToScreen(rect);
 				window->parent()->screenToClient(rect);
 				::ExcludeClipRect(dc_, rect.left, rect.top, rect.right, rect.bottom);

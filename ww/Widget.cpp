@@ -147,7 +147,7 @@ void Widget::_updateVisibility()
 void Widget::setFocus()
 {
     if(_window())
-        ::SetFocus(*_window());
+        ::SetFocus(_window()->handle());
 }
 
 bool Widget::hasFocus() const
@@ -222,7 +222,8 @@ Win32::Window32* _findWindow(const Widget* widget)
 		else
 			widget = widget->parent();
 	}
-	return Win32::_globalDummyWindow;
+	// TODO: review this logic
+	return Win32::getDefaultWindow();
 }
 
 void _ensureChildren(ww::Container* container, ww::Widget* widget)

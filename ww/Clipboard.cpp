@@ -136,7 +136,7 @@ bool Clipboard::empty()
 	Win32::Window32* window = ww::_findWindow(widget_);
 	ASSERT(window);
 
-	if(!::OpenClipboard(*window))
+	if(!::OpenClipboard(window->handle()))
 		return false;
 
 	bool result = false;
@@ -233,7 +233,7 @@ bool Clipboard::copy(PropertyRow* row)
 		return false;
 	}
 
-	if(::OpenClipboard(*window)){
+	if(::OpenClipboard(window->handle())){
 		HGLOBAL memoryHandle = GlobalAlloc(GPTR, oa.length());
 		ASSERT(memoryHandle);
 		if(!memoryHandle){
@@ -265,7 +265,7 @@ bool Clipboard::pasteFunc(PasteFunc& func)
 	Win32::Window32* window = ww::_findWindow(widget_);
 	ASSERT(window);
 
-	if(!::OpenClipboard(*window))
+	if(!::OpenClipboard(window->handle()))
 		return false;
 
     HGLOBAL memoryHandle = (HGLOBAL)(::GetClipboardData(clipboardFormat_));

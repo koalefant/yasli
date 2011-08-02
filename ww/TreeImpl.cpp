@@ -60,9 +60,9 @@ DragWindow::DragWindow(TreeImpl* treeImpl)
 void DragWindow::set(TreeImpl* treeImpl, PropertyRow* row, const Rect& rowRect)
 {
 	RECT rect;
-	GetClientRect(*treeImpl_, &rect);
-	ClientToScreen(*treeImpl_, (POINT*)&rect);
-	ClientToScreen(*treeImpl_, (POINT*)&rect + 1);
+	GetClientRect(treeImpl_->handle(), &rect);
+	ClientToScreen(treeImpl_->handle(), (POINT*)&rect);
+	ClientToScreen(treeImpl_->handle(), (POINT*)&rect + 1);
 
 	offset_.x = rect.left;
 	offset_.y = rect.top;
@@ -73,7 +73,7 @@ void DragWindow::set(TreeImpl* treeImpl, PropertyRow* row, const Rect& rowRect)
 
 void DragWindow::setWindowPos(bool visible)
 {
-	SetWindowPos(*this, HWND_TOP, rect_.left() + offset_.x,  rect_.top() + offset_.y,
+	SetWindowPos(handle(), HWND_TOP, rect_.left() + offset_.x,  rect_.top() + offset_.y,
 				 rect_.width(), rect_.height(), 
 				 SWP_NOOWNERZORDER | (visible ? SWP_SHOWWINDOW : SWP_HIDEWINDOW)| SWP_NOACTIVATE);
 }
@@ -93,7 +93,7 @@ void DragWindow::show()
 void DragWindow::move(int deltaX, int deltaY)
 {
 	offset_ += Vect2(deltaX, deltaY);
-	setWindowPos(::IsWindowVisible(*this) ? true : false);
+	setWindowPos(::IsWindowVisible(handle()) ? true : false);
 }
 
 void DragWindow::hide()
@@ -149,7 +149,7 @@ void DragWindow::updateLayeredWindow()
 	blendFunction.AlphaFormat = 0;	
 
 	PAINTSTRUCT ps;
-	HDC realDC = BeginPaint(*this, &ps);
+	HDC realDC = BeginPaint(handle(), &ps);
 	{
 		Win32::MemoryDC dc(realDC);
 		drawRow(dc);
@@ -157,10 +157,10 @@ void DragWindow::updateLayeredWindow()
 		POINT leftTop = { rect_.left() + offset_.x, rect_.top() + offset_.y };
 		SIZE size = { rect_.width(), rect_.height() };
 		POINT point = { 0, 0 };
-		UpdateLayeredWindow(*this, realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
-		SetLayeredWindowAttributes(*this, 0, 64, ULW_ALPHA);
+		UpdateLayeredWindow(handle(), realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
+		SetLayeredWindowAttributes(handle(), 0, 64, ULW_ALPHA);
 	}
-	EndPaint(*this, &ps);
+	EndPaint(handle(), &ps);
 }
 
 void DragWindow::onMessagePaint()
@@ -219,7 +219,7 @@ bool DragController::dragOn(POINT screenPoint)
 
 	if(dragging_){
 		POINT point = screenPoint;
-		ScreenToClient(*treeImpl_, &point);
+		ScreenToClient(treeImpl_->handle(), &point);
 		trackRow(point);
 	}
 	lastPoint_ = screenPoint;
@@ -347,7 +347,7 @@ TreeImpl::TreeImpl(PropertyTree* tree)
 , redrawLock_(false)
 , redrawRequest_(false)
 {
-	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL, Rect(0, 0, 40, 40), Win32::getDefaultWindowHandle()));
 }
 #pragma warning(pop)
 
@@ -409,7 +409,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 		ASSERT(::IsWindow(focusedWindow));
 		Win32::Window32 wnd(focusedWindow);
 		if(Win32::Window32* window = reinterpret_cast<Win32::Window32*>(wnd.getUserDataLongPtr())){
-			ASSERT(*window == focusedWindow);
+			ASSERT(window->handle() == focusedWindow);
 		}
 	}
 	//::SetFocus(handle_);
@@ -417,7 +417,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 	if(drag_.captured()){
 		POINT pos;
 		GetCursorPos(&pos);
-		if(GetCapture() == *this)
+		if(GetCapture() == handle())
 			ReleaseCapture();
 		drag_.drop(pos);
 		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE);
@@ -477,7 +477,7 @@ void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 	}
 	else{
 		Win32::Rect rect;
-		GetClientRect(*this, &rect);
+		GetClientRect(handle(), &rect);
 		tree_->onRowRMBDown(model()->root(), rect.recti(), pointToRootSpace(point));
 	}
 	__super::onMessageRButtonDown(button, x, y);
@@ -510,9 +510,9 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
 	if(drag_.captured()){
 		POINT pos;
 		GetCursorPos(&pos);
-		if(drag_.dragOn(pos) && GetCapture() != *this)
-			SetCapture(*this);
-        RedrawWindow(*this, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+		if(drag_.dragOn(pos) && GetCapture() != handle())
+			SetCapture(handle());
+        RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 	else{
 		Vect2 point(x, y);
@@ -558,14 +558,14 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 	info.cbSize = sizeof(info);
 	info.fMask  = SIF_ALL;
 
-	HDC dc = GetDC(*this);
+	HDC dc = GetDC(handle());
 	ASSERT(dc);
 	HGDIOBJ oldFont = ::SelectObject(dc, Win32::defaultFont());
 	TEXTMETRIC textMetric;
 	WW_VERIFY(GetTextMetrics(dc, &textMetric));
 	::SelectObject(dc, oldFont);
 	int lineScrollHeight = textMetric.tmHeight + 2;
-	ReleaseDC(*this, dc);
+	ReleaseDC(handle(), dc);
 
 	::GetScrollInfo(handle_, message == WM_VSCROLL ? SB_VERT : SB_HORZ, &info);
 	int oldPosition = info.nPos;
@@ -663,7 +663,7 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 	PropertyRow* row = model()->focusedRow();
 	bool result = tree_->onRowKeyDown(row, keyPress);
-	::RedrawWindow(*this, 0, 0, RDW_INVALIDATE);
+	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 	if(!result)
 		return __super::onMessageKeyDown(keyCode, count, flags);
 	else
@@ -672,24 +672,26 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
-	if (code > 0x20 && code != ' ' && code != VK_ESCAPE)
+	if (code >= 0x20 && code != VK_ESCAPE)
 	{
         if (!(code == VK_BACK && !tree_->filterMode_))
             tree_->setFilterMode(true);
-	   PostMessage(tree_->filterEntry_->_window()->get(), WM_CHAR, code, MAKELPARAM(count, flags));
+	   PostMessage(tree_->filterEntry_->_window()->handle(), WM_CHAR, code, MAKELPARAM(count, flags));
 	}
 	return __super::onMessageChar(code, count, flags);
 }
 
 int TreeImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 {
-	if (tree_->filterMode_) {
-		if (!msg)
-			return DLGC_WANTMESSAGE;
-		else {
+	if (!msg)
+		return DLGC_WANTMESSAGE;
+	else {
+		if (tree_->filterMode_) {
 			if (keyCode == VK_ESCAPE)
 				return DLGC_WANTMESSAGE;
 		}
+		if (keyCode == VK_RETURN)
+			return DLGC_WANTMESSAGE;
 	}
 	return DLGC_WANTARROWS | DLGC_WANTCHARS;
 }
@@ -770,7 +772,7 @@ void TreeImpl::redraw(HDC dc)
 
 		SetBkMode(dc, TRANSPARENT);
 		const wchar_t filterStr[] = L"Filter:";
-		Vect2 size = Win32::calculateTextSize(get(), Win32::defaultBoldFont(), filterStr);
+		Vect2 size = Win32::calculateTextSize(handle(), Win32::defaultBoldFont(), filterStr);
 		int right = tree_->filterEntry_->_position().left();
 		ExtTextOutW(dc, right - size.x - 6, 6, 0, 0, filterStr, ARRAY_LEN(filterStr), 0);
 	}

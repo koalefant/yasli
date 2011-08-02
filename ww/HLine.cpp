@@ -25,7 +25,6 @@ YASLI_CLASS(Widget, HLine, "Horizontal Line");
 class HLineImpl: public _WidgetWindow{
 public:
 	HLineImpl(HLine* owner);
-	const wchar_t* className() const{ return L"ww.HLine"; }
 	void onMessagePaint();
 	BOOL onMessageEraseBkgnd(HDC dc);
 protected:
@@ -39,7 +38,7 @@ HLineImpl::HLineImpl(HLine* owner)
 : _WidgetWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 42, 42), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 }
 
 #pragma warning(pop)
@@ -52,7 +51,7 @@ void HLineImpl::onMessagePaint()
 		HDC dc = paintDC;
 		RECT clientRect;
 		Rect rect;
-		::GetClientRect(*this, &clientRect);
+		::GetClientRect(handle(), &clientRect);
 		::FillRect(dc, &clientRect, ::GetSysColorBrush(COLOR_BTNFACE));
 		::DrawEdge(dc, &clientRect, EDGE_ETCHED, BF_TOP);
 	}

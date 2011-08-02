@@ -35,7 +35,7 @@ ScrolledWindowImpl::ScrolledWindowImpl(ScrolledWindow* owner)
 : _ContainerWindow(owner)
 , owner_(owner)
 {
-	WW_VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Rect(0, 0, 40, 40), *Win32::_globalDummyWindow));
+	WW_VERIFY(create(L"scrolledWindow", WS_CHILD | WS_TABSTOP | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN, Rect(0, 0, 40, 40), Win32::getDefaultWindowHandle()));
 }
 
 
@@ -90,7 +90,7 @@ LRESULT ScrolledWindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam
 		return 0;
     //case WM_ERASEBKGND:
     //    if(this)
-    //        FillRect(GetDC(*this), 0, GetSysColorBrush(COLOR_BTNSHADOW));
+    //        FillRect(GetDC(handle()), 0, GetSysColorBrush(COLOR_BTNSHADOW));
     //    return 0;
 	default:
 		break;

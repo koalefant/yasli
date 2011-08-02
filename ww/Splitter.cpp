@@ -39,13 +39,13 @@ SplitterImpl::SplitterImpl(ww::Splitter* owner)
 , grabbedSplitter_(-1)
 , lastCursorPosition_(0, 0)
 {
-	create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0, 0, 100, 100), *Win32::_globalDummyWindow, WS_EX_CONTROLPARENT);
+	create(L"", WS_CHILD | WS_CLIPCHILDREN, Rect(0, 0, 100, 100), Win32::getDefaultWindowHandle(), WS_EX_CONTROLPARENT);
 }
 
 void SplitterImpl::onMessagePaint()
 {
 	PAINTSTRUCT paintStruct;
-	HDC paintDC = ::BeginPaint(*this, &paintStruct);
+	HDC paintDC = ::BeginPaint(handle(), &paintStruct);
     {
         //Win32::MemoryDC memoryDC(paintDC);
         HDC dc = paintDC;//memoryDC;
@@ -69,7 +69,7 @@ void SplitterImpl::onMessagePaint()
             }
         }
     }
-	EndPaint(*this, &paintStruct);
+	EndPaint(handle(), &paintStruct);
 	return Win32::Window32::onMessagePaint();
 }
 
@@ -103,7 +103,7 @@ void SplitterImpl::onMessageMouseMove(UINT button, int x, int y)
 	cursorPosition -= Vect2(owner_->border(), owner_->border());
 	if(cursorPosition != lastCursorPosition_){
 		bool buttonPressed = button & MK_LBUTTON;
-		if(grabbedSplitter_ >= 0 && buttonPressed && ::GetCapture() == *this){
+		if(grabbedSplitter_ >= 0 && buttonPressed && ::GetCapture() == handle()){
 			owner_->setPanePosition(grabbedSplitter_, owner_->positionFromPoint(cursorPosition));
 		}
 	}
@@ -138,7 +138,7 @@ void SplitterImpl::onMessageLButtonDown(UINT button, int x, int y)
 
 	grabbedSplitter_ = splitterByPoint(Vect2(x, y));
 	if(grabbedSplitter_ >= 0){
-		::SetCapture(*this);
+		::SetCapture(handle());
 		return;
 	}
 	Win32::Window32::onMessageLButtonDown(button, x, y);
@@ -146,7 +146,7 @@ void SplitterImpl::onMessageLButtonDown(UINT button, int x, int y)
 
 void SplitterImpl::onMessageLButtonUp(UINT button, int x, int y)
 {
-	if(::GetCapture() == *this){
+	if(::GetCapture() == handle()){
 		::ReleaseCapture();
 	}
 	Win32::Window32::onMessageLButtonUp(button, x, y);
@@ -228,7 +228,9 @@ void Splitter::_setParent(Container* container)
 	Widget::_setParent(container);
 
 	Win32::Window32* window = _findWindow(container);
-	ASSERT(window);
+	if (!window)
+		return;
+	
 	window_->setParent(window);
 
 	Elements::iterator it;
@@ -256,7 +258,7 @@ void Splitter::_arrangeChildren()
 			Widget* widget = it->widget;
 			ESCAPE(widget, continue);
 			Win32::Window32* window = widget->_window();
-			ASSERT(!window || ::IsWindow(*window));
+			ASSERT(!window || ::IsWindow(window->handle()));
 		}
 
 		float lastPosition = 0.0f;
@@ -439,8 +441,8 @@ void Splitter::remove(int index, bool inFavourOfPrevious)
 	}
 	_arrangeChildren();
 	_queueRelayout();
-	if(::IsWindowVisible(*_window()))
-		::RedrawWindow(*_window(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
+	if(::IsWindowVisible(_window()->handle()))
+		::RedrawWindow(_window()->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
 }
 
 void Splitter::replace(Widget* oldWidget, Widget* newWidget)
@@ -485,7 +487,7 @@ void Splitter::setSplitterPosition(float position, int splitterIndex)
 
 		it->position = max(limitMin, std::min(position, limitMax));
 		_arrangeChildren();
-		::RedrawWindow(*window_, 0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+		::RedrawWindow(window_->handle(), 0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 	}
 }
 

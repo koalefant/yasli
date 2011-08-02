@@ -37,7 +37,7 @@ static HWND findOwner(Widget* widget){
 	Win32::Window32* window = _findWindow(widget);
 	ASSERT(window);
 	if(window)
-		return findOwner(*window);
+		return findOwner(window->handle());
 	else
 		return 0;
 }
