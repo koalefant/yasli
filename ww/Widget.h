@@ -24,19 +24,6 @@ class HotkeyContext;
 class Container;
 class Tooltip;
 
-enum FocusDirection{
-	FOCUS_FIRST,
-	FOCUS_LAST,
-
-	FOCUS_PREVIOUS,
-	FOCUS_NEXT,
-
-	FOCUS_UP,
-	FOCUS_DOWN,
-	FOCUS_LEFT,
-	FOCUS_RIGHT
-};
-
 class Widget;
 
 struct WidgetVisitor{

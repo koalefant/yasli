@@ -200,67 +200,9 @@ void Container::setBorder(int border)
 	_arrangeChildren();
 }
 
-struct FocusMover : public WidgetVisitor{
-	FocusMover(Widget* current, FocusDirection direction)
-	: direction_(direction)
-	, current_(current)
-	, previous_(0)
-	, result_(0)
-	{}
-
-	Widget* result(){ return result_; }
-	void operator()(Widget& widget){
-		//if(widget._focusable()){
-		switch(direction_){
-		case FOCUS_FIRST:
-			if(!result_)
-				result_ = &widget;
-			break;
-		case FOCUS_LAST:
-			result_ = &widget;
-			break;
-		case FOCUS_NEXT:
-			if(previous_ == current_)
-				result_ = &widget;
-			break;
-		case FOCUS_PREVIOUS:
-			if(&widget == current_)
-				result_ = previous_;
-			break;
-		}
-		previous_ = &widget;
-		// }
-	}
-protected:
-	FocusDirection direction_;
-	Widget* result_;
-	Widget* previous_;
-	Widget* current_;
-};
-
-bool Container::isActive() const
-{
-	Win32::Window32* window = _findWindow(this);
-	if(window){
-		// получаем родительское окно и смотрим активно ли оно
-		while(window->parent())
-			window = window->parent();
-		return (::GetActiveWindow() == *window);
-	}
-	else{
-		ASSERT(0);
-		return false;
-	}
-}
-
 bool Container::isVisible() const
 {
 	return parent() ? parent()->isVisible() : false;
-	/*
-	if(Win32::Window32* window = _findWindow())
-		return ::IsWindowVisible(*window) ? TRUE : FALSE;
-	return false;
-	*/
 }
 
 Win32::Window32* _findWindow(const Widget* widget)
