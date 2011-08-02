@@ -75,6 +75,7 @@ public:
 	}
 	int getFilter() const{ return filter_; }
 	bool filter(int flags) const{
+		ASSERT(flags != 0 && "flags is supposed to be a bit mask");
 		ASSERT(filter_ && "Filter is not set!");
 		return (filter_ & flags) != 0;
 	}
