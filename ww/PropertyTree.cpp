@@ -888,8 +888,17 @@ struct FilterVisitor
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {
-			markChildrenAsBelonging(row, true);
-			row->setBelongsToFilteredRow(false);
+			if (row->pulledBefore() || row->pulledUp()) {
+				// treat pulled rows as part of parent
+				PropertyRow* parent = row->parent();
+				parent->setMatchFilter(true);
+				markChildrenAsBelonging(parent, true);
+				parent->setBelongsToFilteredRow(false);
+			}
+			else {
+				markChildrenAsBelonging(row, true);
+				row->setBelongsToFilteredRow(false);
+			}
 		}
 		else {
 			bool belongs = hasMatchingChildren(row);
