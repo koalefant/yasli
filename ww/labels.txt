@@ -1,5 +1,5 @@
 Following control character sequences available during serialiazation of data
-trough PropertyTree (using PropertyI/OArchive-s). Label of the serialized value
+through PropertyTree (using PropertyI/OArchive-s). Label of the serialized value
 should start with sequence of such characters. 
 
 List of characters:

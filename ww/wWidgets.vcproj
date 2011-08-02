@@ -1494,6 +1494,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\LICENSE.txt"
+			>
+		</File>
+		<File
 			RelativePath=".\StdAfx.cpp"
 			>
 			<FileConfiguration
