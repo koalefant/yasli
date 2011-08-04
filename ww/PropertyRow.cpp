@@ -1189,7 +1189,7 @@ int PropertyRow::horizontalIndex(PropertyTree* tree, PropertyRow* row)
 		{
 			if(!row->pulledUp())
 				return SCAN_SIBLINGS;
-			if(row->visible(tree) && row->pulledUp() && row->pulledBefore() == pulledBefore_){
+			if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
 				index_ += pulledBefore_ ? -1 : 1;
 				if(row == row_)
 					return SCAN_FINISHED;
@@ -1221,7 +1221,7 @@ PropertyRow* PropertyRow::rowByHorizontalIndex(PropertyTree* tree, int index)
 		{
 			if(!row->pulledUp())
 				return SCAN_SIBLINGS;
-			if(row->visible(tree) && row->pulledUp() && row->pulledBefore() == pulledBefore_){
+			if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
 				row_ = row;
 				if(pulledBefore_ ? ++index_ >= 0 : --index_ <= 0)
 					return SCAN_FINISHED;
@@ -1271,5 +1271,6 @@ FORCE_SEGMENT(PropertyRowFileSelector)
 FORCE_SEGMENT(PropertyRowColor)
 FORCE_SEGMENT(PropertyRowHotkey)
 FORCE_SEGMENT(PropertyRowSlider)
+FORCE_SEGMENT(PropertyRowIcon)
 
 }

@@ -984,6 +984,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PropertyRowIcon.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\PropertyTree.cpp"
 					>
 				</File>
@@ -1214,6 +1218,14 @@
 			</File>
 			<File
 				RelativePath=".\gdiplus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon.h"
 				>
 			</File>
 			<File

@@ -244,8 +244,11 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 	if(row){
 		if(!row->isRoot() && row->plusRect().pointInside(point) && impl()->toggleRow(row))
 			return true;
-		if (row->isSelectable())
-			onRowSelected(row, multiSelectable() && Win32::isKeyPressed(KEY_CONTROL), true);	
+		PropertyRow* rowToSelect = row;
+		while (rowToSelect && !rowToSelect->isSelectable())
+			rowToSelect = rowToSelect->parent();
+		if (rowToSelect)
+			onRowSelected(rowToSelect, multiSelectable() && Win32::isKeyPressed(KEY_CONTROL), true);	
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
