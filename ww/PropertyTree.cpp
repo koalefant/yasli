@@ -111,13 +111,13 @@ PropertyTree::PropertyTree(int border)
     filterEntry_->_setParent(this);
     filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
 
-	drawingInit();
+	DrawingCache::get()->initialize();
 }
 #pragma warning(pop)
 
 PropertyTree::~PropertyTree()
 {
-	drawingFinish();
+	DrawingCache::get()->finalize();
 }
 
 void PropertyTree::update()

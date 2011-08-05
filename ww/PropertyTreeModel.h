@@ -54,6 +54,7 @@ public:
     typedef TreeSelection Selection;
 
     PropertyTreeModel();
+    ~PropertyTreeModel();
 
     void clear();
     bool canUndo() const{ return !undoOperators_.empty(); }

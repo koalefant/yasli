@@ -23,6 +23,11 @@ PropertyTreeModel::PropertyTreeModel()
 	clear();
 }
 
+PropertyTreeModel::~PropertyTreeModel()
+{
+}
+
+
 TreePath PropertyTreeModel::pathFromRow(PropertyRow* row)
 {
 	TreePath result;

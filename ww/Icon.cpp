@@ -1,11 +1,17 @@
 #include "stdafx.h"
 #include "Icon.h"
+#include "yasli/Archive.h"
 
 namespace ww {
 
+void IconToggle::serialize(yasli::Archive& ar)
+{
+	ar(value_, "value", "Value");
+}
+
 // ---------------------------------------------------------------------------
 
-bool Icon::getImage(RGBAImage* image)
+bool Icon::getImage(RGBAImage* image) const
 {
 	if (lineCount_ < 3) {
 		return false;
@@ -53,7 +59,7 @@ bool Icon::getImage(RGBAImage* image)
 		if (*p == '\0')
 			return false;
 
-		if (*p != 'c')
+		if (*p != 'c' && *p != 'g')
 			return false;
 		++p;
 
@@ -77,9 +83,10 @@ bool Icon::getImage(RGBAImage* image)
 			}
 		}
 		else {
-			if(strcmp(p, "None") == 0 ||
-			   strcmp(p, "none") == 0)
+			if(_stricmp(p, "None") == 0)
 				colors[colorIndex].second = Color(0, 0, 0, 0);
+			else if (_stricmp(p, "Black") == 0)
+				colors[colorIndex].second.setGDI(GetSysColor(COLOR_BTNTEXT));
 			else {
 				// unknown color
 				colors[colorIndex].second = Color(255, 0, 0, 255);

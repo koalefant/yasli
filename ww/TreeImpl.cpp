@@ -286,7 +286,7 @@ void DragController::drawOver(HDC dc)
 	{
 		Win32::StockSelector brush(dc, GetSysColorBrush(COLOR_BTNFACE));
 		Win32::StockSelector pen(dc, GetStockObject(NULL_PEN));
-		Rectangle(dc, rowRect.left() - 1, rowRect.top() - 1, rowRect.right() + 3, rowRect.bottom() + 1);
+		Rectangle(dc, rowRect.left() - 1, rowRect.top() - 1, rowRect.right() + 3, rowRect.bottom() + 2);
 	}
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
@@ -445,13 +445,17 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 	ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
 	PropertyRow* row = rowByPoint(Vect2(x, y));
+	if(row && !row->isSelectable())
+		row = row->parent();
 	if(row){
 		if(tree_->onRowLMBDown(row, row->rect(), pointToRootSpace(Vect2(x, y))))
 			capturedRow_ = row;
 		else{
 			// row могла уже быть пересоздана	
 			row = rowByPoint(Vect2(x, y));
-            if(row && !row->userReadOnly()){
+			if(row && (!row->isSelectable() || row->pulledUp()))
+				row = row->parent();
+			if(row && !row->userReadOnly() && !tree_->widget_){
 				POINT cursorPos;
 				GetCursorPos(&cursorPos);
 				drag_.beginDrag(row, cursorPos);
@@ -813,11 +817,11 @@ void TreeImpl::redraw(HDC dc)
 		lowerRect.Height -= 2;
 		gr.FillRectangle(&lowerBrush, lowerRect);
 
-		SolidBrush brush(gdiplusSysColor(COLOR_BTNSHADOW));
+		SolidBrush brush(gdiplusSysColor(COLOR_3DDKSHADOW));
 		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), 1, area_.height()));
-		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), area_.width(), 2));
+		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), area_.width(), 1));
 		gr.FillRectangle(&brush, Rect(clientRect.right - 1, area_.top(), 1, area_.height()));
-		gr.FillRectangle(&brush, Rect(clientRect.left, area_.bottom() - 2, area_.width(), 2));
+		gr.FillRectangle(&brush, Rect(clientRect.left, area_.bottom() - 1, area_.width(), 1));
 	}
 
 	if(drag_.captured()){

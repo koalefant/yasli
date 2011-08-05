@@ -25,16 +25,25 @@ public:
 	Icon()
 	: source_(0)
 	, lineCount_(0)
+	, width_(0)
+	, height_(0)
 	{
 	}
 	template<size_t Size>
-	Icon(char* (&xpm)[Size])
+	explicit Icon(char* (&xpm)[Size])
+	: width_(0)
+	, height_(0)
 	{
 		set(xpm, Size);
+		ESCAPE(sscanf_s(xpm[0], "%d %d", &width_, &height_) == 2, return);
 	}
 
-	bool getImage(RGBAImage* out);
+	bool getImage(RGBAImage* out) const;
 	void serialize(yasli::Archive& ar) {}
+	bool operator<(const Icon& rhs) const { return source_ < rhs.source_; }
+
+	int width() const{ return width_; }
+	int height() const{ return height_; }
 private:
 	void set(const char* const* source, size_t lineCount)
 	{
@@ -44,6 +53,8 @@ private:
 
 	const char* const* source_;
 	size_t lineCount_;
+	int width_;
+	int height_;
 };
 
 struct IconToggle
@@ -62,9 +73,29 @@ struct IconToggle
 	{
 	}
 
+	IconToggle(bool& variable, const Icon& iconTrue, const Icon& iconFalse)
+	: iconTrue_(iconTrue)
+	, iconFalse_(iconFalse)
+	, variable_(&variable)
+	, value_(variable)
+	{
+	}
+
+	IconToggle(const IconToggle& orig)
+	: variable_(0)
+	, value_(orig.value_)
+	, iconTrue_(orig.iconTrue_)
+	, iconFalse_(orig.iconFalse_)
+	{
+	}
+
 	IconToggle()
 	: variable_(0)
 	{
+	}
+	IconToggle& operator=(const IconToggle& rhs){
+		value_ = rhs.value_;
+		return *this;
 	}
 	~IconToggle()
 	{
@@ -72,9 +103,7 @@ struct IconToggle
 			*variable_ = value_;
 	}
 
-	void serialize(yasli::Archive& ar) {
-		//ar(value_, "");
-	}
+	void serialize(yasli::Archive& ar);
 };
 
 }

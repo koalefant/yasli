@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Rect.h"
+#include <map>
 
 namespace Gdiplus{
 	class Color;
@@ -18,40 +19,65 @@ namespace Gdiplus{
     class Rect;
     class Font;
 	class GraphicsPath;
+	class Bitmap;
 }
 
 namespace ww{
 
-	class PropertyTree;
+class Icon;
 
-	void drawingInit();
-	void drawingFinish();
-	void createRoundRectanglePath(Gdiplus::GraphicsPath* path, const Gdiplus::Rect &_rect, int roundness);
-	void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdiplus::Rect& r, const Gdiplus::Color& borderColor, int radius);
-	void drawRoundRectangle(Gdiplus::Graphics* graphics, const Gdiplus::Rect &_r, unsigned int color, int radius, int width);
-	void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked);
-	void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* text, const Gdiplus::Font* font, bool pathEllipsis, bool grayBackground);
+struct DrawingCache
+{
+	HANDLE theme_;
 
-	Gdiplus::Font* propertyTreeDefaultFont();
-	Gdiplus::Font* propertyTreeDefaultBoldFont();
+	void initialize();
+	void finalize();
+	void flush();
 
-	struct PropertyDrawContext {
-		const PropertyTree* tree;
-		Gdiplus::Graphics* graphics;
-		Rect widgetRect;
-		Rect lineRect;
+	~DrawingCache();
 
-		void drawCheck(const Rect& rect, bool grayed, bool checked) const;
-		void drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused) const;
-		void drawValueText(bool highlighted, const wchar_t* text) const;
-		void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const;
+	static DrawingCache* get();
 
-		PropertyDrawContext()
-		: tree(0)
-		, graphics(0)
-		{
-		}
-	};
+	Gdiplus::Bitmap* getBitmapForIcon(const Icon& icon);
+private:
+	typedef std::map<Icon, Gdiplus::Bitmap*> IconToBitmap;
+	IconToBitmap iconToBitmapMap_;
+
+	ULONG_PTR token_;
+	int users_;
+};
+
+class PropertyTree;
+
+void drawingInit();
+void drawingFinish();
+void createRoundRectanglePath(Gdiplus::GraphicsPath* path, const Gdiplus::Rect &_rect, int roundness);
+void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdiplus::Rect& r, const Gdiplus::Color& borderColor, int radius);
+void drawRoundRectangle(Gdiplus::Graphics* graphics, const Gdiplus::Rect &_r, unsigned int color, int radius, int width);
+void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked);
+void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* text, const Gdiplus::Font* font, bool pathEllipsis, bool grayBackground);
+
+Gdiplus::Font* propertyTreeDefaultFont();
+Gdiplus::Font* propertyTreeDefaultBoldFont();
+
+struct PropertyDrawContext {
+	const PropertyTree* tree;
+	Gdiplus::Graphics* graphics;
+	Rect widgetRect;
+	Rect lineRect;
+
+	void drawIcon(const Rect& rect, const Icon& icon) const;
+	void drawCheck(const Rect& rect, bool grayed, bool checked) const;
+	void drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused) const;
+	void drawValueText(bool highlighted, const wchar_t* text) const;
+	void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const;
+
+	PropertyDrawContext()
+	: tree(0)
+	, graphics(0)
+	{
+	}
+};
 
 }
 

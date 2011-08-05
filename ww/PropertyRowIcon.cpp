@@ -36,8 +36,8 @@ public:
 	PropertyRowIcon(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRow(name, nameAlt, typeName)
 	{
+		ESCAPE(size == sizeof(Icon), return);
 		icon_ = *(Icon*)(object);
-		WW_VERIFY(icon_.getImage(&image_));
 	}
 
 	bool assignTo(void* val, size_t size)
@@ -48,11 +48,7 @@ public:
 	void redraw(const PropertyDrawContext& context)
 	{
 		Rect rect = context.widgetRect;
-		Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(image_.width_, image_.height_, image_.width_ * 4, PixelFormat32bppARGB, (BYTE*)&image_.pixels_[0]);
-		int x = rect.left();
-		int y = rect.top() + (ROW_DEFAULT_HEIGHT - image_.height_) / 2;
-		context.graphics->DrawImage(bitmap, x, y);
-		delete bitmap;
+		context.drawIcon(rect, icon_);
 	}
 
 	bool isLeaf() const{ return true; }
@@ -72,10 +68,9 @@ public:
 		return cloneChildren(new PropertyRowIcon((void*)&icon_, sizeof(icon_), name_, label_, typeid(Icon).name()), this);
 	}
 	void serializeValue(Archive& ar) {}
-	int widgetSizeMin() const{ return image_.width_; }
-	int height() const{ return image_.height_; }
+	int widgetSizeMin() const{ return icon_.width() + 2; }
+	int height() const{ return icon_.height(); }
 protected:
-	RGBAImage image_;
 	Icon icon_;
 };
 
@@ -90,19 +85,12 @@ public:
 	PropertyRowIconToggle(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRowImpl<IconToggle, PropertyRowIconToggle>(object, size, name, nameAlt, typeName)
 	{
-		WW_VERIFY(value().iconTrue_.getImage(&imageTrue_));
-		WW_VERIFY(value().iconFalse_.getImage(&imageFalse_));
 	}
 
 	void redraw(const PropertyDrawContext& context)
 	{
-		Rect rect = context.widgetRect;
-		RGBAImage& image = value().value_ ? imageTrue_ : imageFalse_;
-		Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(image.width_, image.height_, image.width_ * 4, PixelFormat32bppARGB, (BYTE*)&image.pixels_[0]);
-		int x = rect.left();
-		int y = rect.top() + (ROW_DEFAULT_HEIGHT - image.height_) / 2;
-		context.graphics->DrawImage(bitmap, x, y);
-		delete bitmap;
+		Icon& icon = value().value_ ? value().iconTrue_ : value().iconFalse_;
+		context.drawIcon(context.widgetRect, icon);
 	}
 
 	bool isLeaf() const{ return true; }
@@ -117,16 +105,12 @@ public:
 		return true;
 	}
 	void digestReset() {}
-	wstring valueAsWString() const{ return L""; }
+	wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
 	wstring digestValue() const { return wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
-	int widgetSizeMin() const{ return imageFalse_.width_ + 1; }
-	int height() const{ return imageFalse_.height_; }
-protected:
-	RGBAImage imageTrue_;
-	RGBAImage imageFalse_;
-	IconToggle iconToggle_;
+	int widgetSizeMin() const{ return value().iconFalse_.width() + 1; }
+	int height() const{ return value().iconFalse_.height(); }
 };
 
 REGISTER_PROPERTY_ROW(Icon, PropertyRowIcon); 

@@ -23,6 +23,7 @@
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
 #include "yasli/TypesFactory.h"
+#include "ww/PropertyDrawContext.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -148,6 +149,11 @@ int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
 LRESULT WindowImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch(message){
+	case WM_SYSCOLORCHANGE:
+		{
+			DrawingCache::get()->flush();
+			break;
+		}
 	case WM_CREATE:
 		{
 			BOOL result = __super::onMessage(message, wparam, lparam);

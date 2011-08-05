@@ -17,6 +17,7 @@
 #include "Win32/Window.h"
 #include "PropertyTree.h"
 #include "Color.h"
+#include "ww/Icon.h"
 
 #include <uxtheme.h>
 #include <vssym32.h>
@@ -111,17 +112,94 @@ namespace Win32 {
 
 // ---------------------------------------------------------------------------
 
-namespace ww{
-
-static int drawingUsers = 0;
-static ULONG_PTR drawingToken;
 enum{
 	OBM_CHECK = 32760
 };
-
 static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
 static std::auto_ptr<Gdiplus::Font> defaultFont;
 static std::auto_ptr<Gdiplus::Font> defaultBoldFont;
+
+namespace ww{
+
+static DrawingCache drawingCache;
+
+DrawingCache* DrawingCache::get()
+{
+	return &drawingCache;
+}
+
+DrawingCache::~DrawingCache()
+{
+}
+
+void DrawingCache::initialize()
+{
+	Gdiplus::GdiplusStartupInput startup;
+	startup.DebugEventCallback = 0;
+	startup.GdiplusVersion = 1;
+	startup.SuppressBackgroundThread = FALSE;
+
+	if(users_ == 0){
+		uxTheme.loadLibrary();
+		theme_ = uxTheme.OpenThemeData(Win32::getDefaultWindowHandle(), L"Button");
+
+		ESCAPE(GdiplusStartup(&token_, &startup, 0) == Ok, return);
+
+		NONCLIENTMETRICS nonClientMetrics;
+		nonClientMetrics.cbSize = sizeof(nonClientMetrics);
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(nonClientMetrics), (PVOID)&nonClientMetrics, 0);
+		defaultFont.reset(new Gdiplus::Font(GetDC(GetDesktopWindow()), &nonClientMetrics.lfMessageFont));
+
+		nonClientMetrics.lfMessageFont.lfWeight = FW_BOLD;
+		defaultBoldFont.reset(new Gdiplus::Font(GetDC(GetDesktopWindow()), &nonClientMetrics.lfMessageFont));
+	}
+
+	++users_;
+}
+
+void DrawingCache::flush()
+{
+	IconToBitmap::iterator it;
+	for (it = iconToBitmapMap_.begin(); it != iconToBitmapMap_.end(); ++it)
+		delete it->second;
+	iconToBitmapMap_.clear();
+}
+
+void DrawingCache::finalize()
+{
+	ESCAPE(users_ > 0, return);
+	--users_;
+	if(users_ == 0)
+	{
+		defaultFont.reset();
+		defaultBoldFont.reset();
+
+		flush();
+
+		GdiplusShutdown(token_);
+		if (theme_) {
+			uxTheme.CloseThemeData(theme_);
+			theme_ = 0;
+		}
+		uxTheme.freeLibrary();
+	}
+}
+
+Gdiplus::Bitmap* DrawingCache::getBitmapForIcon(const Icon& icon)
+{
+	IconToBitmap::iterator it = iconToBitmapMap_.find(icon);
+	if (it != iconToBitmapMap_.end())
+		return it->second;
+
+	RGBAImage* image = new RGBAImage;
+	ESCAPE(icon.getImage(image), return 0);
+
+	Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(image->width_, image->height_, image->width_ * 4, PixelFormat32bppARGB, (BYTE*)&image->pixels_[0]);
+	iconToBitmapMap_[icon] = bitmap;
+	return bitmap;
+}
+
+// ---------------------------------------------------------------------------
 
 Gdiplus::Font* propertyTreeDefaultFont()
 {
@@ -133,42 +211,6 @@ Gdiplus::Font* propertyTreeDefaultBoldFont()
 	return defaultBoldFont.get();
 }
 
-void drawingInit()
-{
-	Gdiplus::GdiplusStartupInput startup;
-	startup.DebugEventCallback = 0;
-	startup.GdiplusVersion = 1;
-	startup.SuppressBackgroundThread = FALSE;
-
-	if(drawingUsers == 0){
-		uxTheme.loadLibrary();
-		ESCAPE(GdiplusStartup(&drawingToken, &startup, 0) == Ok, return);
-
-		NONCLIENTMETRICS nonClientMetrics;
-		nonClientMetrics.cbSize = sizeof(nonClientMetrics);
-		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(nonClientMetrics), (PVOID)&nonClientMetrics, 0);
-        defaultFont.reset(new Gdiplus::Font(GetDC(GetDesktopWindow()), &nonClientMetrics.lfMessageFont));
-		
-		nonClientMetrics.lfMessageFont.lfWeight = FW_BOLD;
-        defaultBoldFont.reset(new Gdiplus::Font(GetDC(GetDesktopWindow()), &nonClientMetrics.lfMessageFont));
-    }
-
-
-	++drawingUsers;
-}
-
-void drawingFinish()
-{
-	ESCAPE(drawingUsers >= 0, return);
-	--drawingUsers;
-	if(drawingUsers == 0)
-	{
-		defaultFont.reset();
-		defaultBoldFont.reset();
-		GdiplusShutdown(drawingToken);
-		uxTheme.freeLibrary();
-	}
-}
 
 void createRoundRectanglePath(GraphicsPath* path, const Gdiplus::Rect &_rect, int dia)
 {
@@ -294,17 +336,33 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 	SolidBrush brush(brushColor);
 	Color penColor;
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-	fillRoundRectangle(gr, &brush, Gdiplus::Rect(rect.X + offsetX, rect.Y + offsetY, size, size), penColor, 4);
+	Gdiplus::Rect checkRect(rect.X + offsetX, rect.Y + offsetY, size, size);
+	fillRoundRectangle(gr, &brush, checkRect, penColor, 4);
 
 	if(checked){
+		/*
 		ASSERT(checkBitmap);
 		HDC dc = gr->GetHDC();
 		DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.X + offsetX + 3, rect.Y + offsetY + 2, size - 5, size - 3, DST_BITMAP);
 		gr->ReleaseHDC(dc);
+		*/
+		#include "Icons/check.xpm"
+		static Icon checkIcon(check_xpm);
+		Gdiplus::Bitmap* bitmap = drawingCache.getBitmapForIcon(checkIcon);
+		gr->DrawImage(bitmap, checkRect);
 	}
 }
 
 // ---------------------------------------------------------------------------
+
+void PropertyDrawContext::drawIcon(const Rect& rect, const Icon& icon) const
+{
+	Gdiplus::Bitmap* bitmap = DrawingCache::get()->getBitmapForIcon(icon);
+	ESCAPE(bitmap != 0, return);
+	int x = rect.left() + (rect.width() - icon.width()) / 2;
+	int y = rect.top() + (rect.height() - icon.height()) / 2;
+	graphics->DrawImage(bitmap, x, y);
+}
 
 void PropertyDrawContext::drawCheck(const Rect& rect, bool grayed, bool checked) const
 {
@@ -325,21 +383,13 @@ void PropertyDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool
 	using Gdiplus::Color;
 	using Gdiplus::Rect;
 
-	if (uxTheme.isLoaded() && uxTheme.IsAppThemed())
+	if (uxTheme.isLoaded() && uxTheme.IsAppThemed() && drawingCache.theme_)
 	{
-		// XP-style drawing
-		HTHEME theme = uxTheme.OpenThemeData(tree->_window()->handle(), L"Button");
-		if (theme) {
-			HDC dc = graphics->GetHDC();
-			RECT buttonRect = rect;
-			int state = (pressed ? PBS_PRESSED : PBS_NORMAL) | (focused ? PBS_HOT : 0);
-			uxTheme.DrawThemeBackground(theme, dc, BP_PUSHBUTTON, state, &buttonRect, 0);
-			graphics->ReleaseHDC(dc);
-			uxTheme.CloseThemeData(theme);
-		}
-		else {
-			OutputDebugStringA("Failed to OpenThemeData\n");
-		}
+		HDC dc = graphics->GetHDC();
+		RECT buttonRect = rect;
+		int state = (pressed ? PBS_PRESSED : PBS_NORMAL) | (focused ? PBS_HOT : 0);
+		uxTheme.DrawThemeBackground(DrawingCache::get()->theme_, dc, BP_PUSHBUTTON, state, &buttonRect, 0);
+		graphics->ReleaseHDC(dc);
 	}
 	else
 	{
