@@ -161,7 +161,7 @@ void DrawingCache::flush()
 {
 	IconToBitmap::iterator it;
 	for (it = iconToBitmapMap_.begin(); it != iconToBitmapMap_.end(); ++it)
-		delete it->second;
+		delete it->second.bitmap;
 	iconToBitmapMap_.clear();
 }
 
@@ -189,14 +189,15 @@ Gdiplus::Bitmap* DrawingCache::getBitmapForIcon(const Icon& icon)
 {
 	IconToBitmap::iterator it = iconToBitmapMap_.find(icon);
 	if (it != iconToBitmapMap_.end())
-		return it->second;
+		return it->second.bitmap;
 
-	RGBAImage* image = new RGBAImage;
-	ESCAPE(icon.getImage(image), return 0);
+	RGBAImage image;
+	ESCAPE(icon.getImage(&image), return 0);
 
-	Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(image->width_, image->height_, image->width_ * 4, PixelFormat32bppARGB, (BYTE*)&image->pixels_[0]);
-	iconToBitmapMap_[icon] = bitmap;
-	return bitmap;
+	BitmapCache& cache = iconToBitmapMap_[icon];
+	cache.pixels.swap(image.pixels_);
+	cache.bitmap = new Gdiplus::Bitmap(image.width_, image.height_, image.width_ * 4, PixelFormat32bppARGB, (BYTE*)&cache.pixels[0]);
+	return cache.bitmap;
 }
 
 // ---------------------------------------------------------------------------

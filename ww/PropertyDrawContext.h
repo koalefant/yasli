@@ -24,6 +24,7 @@ namespace Gdiplus{
 
 namespace ww{
 
+struct Color;
 class Icon;
 
 struct DrawingCache
@@ -40,7 +41,11 @@ struct DrawingCache
 
 	Gdiplus::Bitmap* getBitmapForIcon(const Icon& icon);
 private:
-	typedef std::map<Icon, Gdiplus::Bitmap*> IconToBitmap;
+	struct BitmapCache {
+		std::vector<Color> pixels;
+		Gdiplus::Bitmap* bitmap;
+	};
+	typedef std::map<Icon, BitmapCache> IconToBitmap;
 	IconToBitmap iconToBitmapMap_;
 
 	ULONG_PTR token_;
