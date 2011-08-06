@@ -1092,14 +1092,26 @@ void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text
 			}
 			gr->MeasureString(text, (int)hiEnd, font, textRect, &format, &boxEnd, 0, 0);
 
-			Gdiplus::SolidBrush br(Gdiplus::Color(255, 192, 0));
+			ww::Color highlightColor, highlightBorderColor;
+			{
+				highlightColor.setGDI(GetSysColor(COLOR_HIGHLIGHT));
+				float h, s, v;
+				highlightColor.toHSV(h, s, v);
+				h -= 175.0f;
+				if (h < 0.0f)
+					h += 360.0f;
+				highlightColor.setHSV(h, min(1.0f, s * 1.33f), 1.0f, 255);
+				highlightBorderColor.setHSV(h, s * 0.5f, 1.0f, 255);
+			}
+
+			Gdiplus::SolidBrush br(Gdiplus::Color(highlightColor.argb()));
 			int left = int(boxFull.X + boxStart.Width) - 1;
 			int top = int(boxFull.Y);
 			int right = int(boxFull.X + boxEnd.Width);
 			int bottom = int(boxFull.Y + boxEnd.Height);
 			Gdiplus::Rect highlightRect(left, top, right - left, bottom - top);
 
-			fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(255, 255, 128), 1);
+			fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(highlightBorderColor.argb()) /*Gdiplus::Color(255, 255, 128)*/, 1);
 		}
 	}
 

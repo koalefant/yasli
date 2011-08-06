@@ -20,9 +20,7 @@ inline int round(float v)
 }
 
 // HSV
-//Y = 0.30*R + 0.59*G + 0.11*B перевод цветного в чёрно-белый
-//h=0..360,s=0..1,v=0..1
-
+// h=0..360, s=0..1, v=0..1
 inline void HSVtoRGB(float h,float s,float v,
 					 float& r,float& g,float& b)
 {
