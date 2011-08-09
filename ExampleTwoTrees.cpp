@@ -9,6 +9,7 @@ using std::vector;
 #include "ww/VBox.h"
 #include "ww/Button.h"
 #include "ww/Color.h"
+#include "ww/Icon.h"
 
 using yasli::Archive;
 using yasli::SharedPtr;
@@ -24,13 +25,17 @@ struct Node
 {
 	string name_;
 	bool enabled_;
+	bool favourite_;
 	Color color_;
 	float weight_;
+	bool isRoot_;
 
 	vector<Node> children_;
 
 	Node()
 	: enabled_(false)
+	, favourite_(false)
+	, isRoot_(false)
 	, weight_(1.0f)
 	{
 	}
@@ -38,16 +43,31 @@ struct Node
 	void serialize(Archive& ar)
 	{
 		if (ar.filter(FILTER_OUTLINE)) {
-			ar(color_, "color", "^>");
+			if (isRoot_) {
+				#include "Icons/package.xpm"
+				ar(Icon(package_xpm), "typeIcon", "^^");
+			}
+			else  if (children_.empty()) {
+				#include "Icons/page.xpm"
+				ar(Icon(page_xpm), "typeIcon", "^^");
+			}
+			else {
+				#include "Icons/folder.xpm"
+				ar(Icon(folder_xpm), "typeIcon", "^^");
+			}
+
 			ar(name_, "name", "^!!");
 			ar(children_, "children", "^");
+			#include "Icons/favourites.xpm"
+			#include "Icons/favouritesDisabled.xpm"
+			ar(IconToggle(favourite_, favourites_xpm, favouritesDisabled_xpm), "favourite", "^");
 		}
 
 		if (ar.filter(FILTER_PROPERTIES)) {
 			if (!ar.filter(FILTER_OUTLINE)) { // prevent duplication when bot filters enabled
 				ar(name_, "name", "^");
-				ar(color_, "color", "Color");
 			}
+			ar(color_, "color", "Color");
 			ar(enabled_, "enabled", "Enabled");
 			ar(weight_, "weight", "Weight");
 		}
@@ -67,6 +87,7 @@ struct TwoTreesData
 	TwoTreesData()
 	{
 		generate();
+		root_.isRoot_ = true;
 	}
 
 	void generate()

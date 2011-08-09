@@ -6,14 +6,20 @@ using std::vector;
 #include "ww/PropertyTree.h"
 #include "ww/Serialization.h"
 #include "ww/Color.h"
+#include "ww/Icon.h"
 
 using yasli::Archive;
 using yasli::SharedPtr;
 using namespace ww;
 
+#include "Icons/favourites.xpm"
+#include "Icons/favouritesDisabled.xpm"
+static Icon iconFavourite(favourites_xpm);
+static Icon iconFavouriteDisabled(favouritesDisabled_xpm);
 
 struct TableItem
 {
+	bool favourite_;
 	string name_;
 	bool enabled_;
 	Color color_;
@@ -22,7 +28,7 @@ struct TableItem
 
 	void serialize(Archive& ar)
 	{
-		// & character makes item appear in a digest of parent row
+		ar(IconToggle(favourite_, iconFavourite, iconFavouriteDisabled), "favourite", "^^");
 		ar(name_, "name", "^Name");
 		ar(enabled_, "enabled", "^");
 		ar(color_, "color", "^");
@@ -30,7 +36,8 @@ struct TableItem
 	}
 
 	TableItem()
-	: enabled_(false)
+	: favourite_(false)
+	, enabled_(false)
 	, weight_(1.0f)
 	{
 	}
