@@ -194,9 +194,9 @@ void TabsImpl::redraw(HDC dc)
 		const int roundness = 8;
 		if(selected){
 			Gdiplus::Rect rect(gdiplusRect(item.rect));
-			LinearGradientBrush brush(Gdiplus::Rect(rect.X, rect.Y, rect.Width, rect.Height), Color(), Color(), LinearGradientModeVertical);
+			LinearGradientBrush brush(Gdiplus::Rect(rect.X, rect.Y, rect.Width, rect.Height), Gdiplus::Color(), Gdiplus::Color(), LinearGradientModeVertical);
 
-            Color colors[3] = {
+            Gdiplus::Color colors[3] = {
                 gdiplusSysColor(COLOR_WINDOW),
                 gdiplusSysColor(COLOR_WINDOW),
                 gdiplusSysColor(COLOR_BTNFACE)
