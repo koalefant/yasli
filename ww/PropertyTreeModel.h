@@ -118,12 +118,12 @@ private:
     yasli::SharedPtr<PropertyRow> root_;
     UpdateLock updateLock_;
 
-    typedef std::map<std::string, SharedPtr<PropertyRow> > DefaultTypes;
+	typedef std::map<std::string, yasli::SharedPtr<PropertyRow> > DefaultTypes;
     DefaultTypes defaultTypes_;
 
     struct DerivedClass{
         std::string name;
-        SharedPtr<PropertyRow> row;
+		yasli::SharedPtr<PropertyRow> row;
     };
     typedef std::vector<DerivedClass> DerivedTypes;
 

@@ -96,6 +96,8 @@ public:
     signal0& signalChanged(){ return signalChanged_; }
     signal0& signalSelected(){ return signalSelected_; }
 
+	void onSignalChanged() { signalChanged_.emit(); }
+
     bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
     PropertyRow* selectedRow();
     void selectByAddress(void*);

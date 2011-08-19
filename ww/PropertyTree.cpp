@@ -647,7 +647,7 @@ void PropertyTree::onModelUpdated()
 
 	if(immediateUpdate_){
 		apply();
-    	signalChanged_.emit();
+    	onSignalChanged();
         if(autoRevert_)
 		    revert();
 	}
@@ -658,7 +658,7 @@ void PropertyTree::onModelUpdated()
 
 	updateAttachedPropertyTree();
     if(!immediateUpdate_)
-	    signalChanged_.emit();
+	    onSignalChanged();
 }
 
 void PropertyTree::setWidget(PropertyRowWidget* widget)
