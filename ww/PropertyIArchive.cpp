@@ -18,7 +18,7 @@
 namespace ww{
 
 PropertyIArchive::PropertyIArchive(PropertyTreeModel* model)
-: Archive( true, true )
+: Archive(INPUT | EDIT)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)

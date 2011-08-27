@@ -837,7 +837,7 @@ void setUpdatedRecurse(PropertyRow* row, bool updated)
 }
 
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model)
-: Archive( false, true )
+: Archive(OUTPUT | EDIT)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)
@@ -854,7 +854,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model)
 
 
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt)
-: Archive( false, true )
+: Archive(OUTPUT | EDIT)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)
