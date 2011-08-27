@@ -491,7 +491,7 @@ Token Tokenizer::operator()(const char* ptr) const
 // ---------------------------------------------------------------------------
 
 TextIArchive::TextIArchive()
-: Archive(true)
+: Archive(INPUT | TEXT)
 {
 }
 

@@ -17,7 +17,7 @@ namespace yasli{
 const unsigned int BINARY_MAGIC = 0xb1a4c17e;
 
 BinaryIArchive::BinaryIArchive(bool pretendToBeEdit)
-: Archive(true, pretendToBeEdit)
+: Archive(INPUT | (pretendToBeEdit ? EDIT : 0))
 , buffer_(0)
 , size_(0)
 , end_(0)

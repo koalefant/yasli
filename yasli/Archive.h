@@ -45,34 +45,26 @@ public:
 
 	enum ArchiveCaps{
 		INPUT = 1 << 0,
-		EDIT = 1 << 1,
-		INPLACE = 1 << 2,
+		OUTPUT = 1 << 1,
+		TEXT = 1 << 2,
+		BINARY = 1 << 3,
+		EDIT = 1 << 4,
+		INPLACE = 1 << 5,
 	};
 
-	Archive(bool isInput, bool isEdit = false)
-	: isInput_(isInput)
-	, isEdit_(isEdit)
-	, isInPlace_(false)
-	, filter_(0)
-	{
-	}
-
 	Archive(int caps)
-	: isInput_((caps & INPUT) != 0)
-	, isEdit_((caps & EDIT) != 0)
-	, isInPlace_((caps & INPLACE) != 0)
+	: caps_(caps)
 	, filter_(0)
 	{
-
 	}
 
 	virtual ~Archive() {}
 
-	bool isPermanent() const{ return true; }
-	bool isInput() const{ return isInput_; }
-	bool isOutput() const{ return !isInput_; }
-	bool isEdit() const{ return isEdit_; }
-	bool isInPlace() const{ return isInPlace_; }
+	bool isInput() const{ return caps_ & INPUT ? true : false; }
+	bool isOutput() const{ return caps_ & OUTPUT ? true : false; }
+	bool isEdit() const{ return caps_ & EDIT ? true : false; }
+	bool isInPlace() const{ return caps_ & INPLACE ? true : false; }
+	bool operator()(int caps) const { return (caps_ & caps) == caps; }
 	virtual void inPlacePointer(void** pointer, size_t offset) { ASSERT(0 && "Not implemented"); }
 
 	virtual void warning(const char* message);
@@ -156,13 +148,11 @@ public:
 	const ContextMap& contextMap() const{ return contextMap_; }
 protected:
 	ContextMap contextMap_;
+	int caps_;
 
 private:
 	void notImplemented();
 
-	bool isInput_;
-	bool isEdit_;
-	bool isInPlace_;
 	int filter_;
 };
 

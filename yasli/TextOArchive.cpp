@@ -319,7 +319,7 @@ void escapeString(MemoryWriter& dest, const char* begin, const char* end)
 static const int TAB_WIDTH = 2;
 
 TextOArchive::TextOArchive(int textWidth, const char* header)
-: Archive(false)
+: Archive(OUTPUT | TEXT)
 , header_(header)
 , textWidth_(textWidth)
 {

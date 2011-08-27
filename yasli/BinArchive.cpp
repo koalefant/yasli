@@ -28,7 +28,7 @@ static HashMap hashMap;
 #endif
 
 BinOArchive::BinOArchive()
-: Archive(false)
+: Archive(OUTPUT | BINARY)
 {
     clear();
 }
@@ -298,7 +298,7 @@ bool BinOArchive::operator()(const PointerSerializationInterface& ptr, const cha
 //////////////////////////////////////////////////////////////////////////
 
 BinIArchive::BinIArchive()
-: Archive(true)
+: Archive(INPUT | BINARY)
 , loadedData_(0)
 {
 }
