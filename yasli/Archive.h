@@ -50,6 +50,9 @@ public:
 		BINARY = 1 << 3,
 		EDIT = 1 << 4,
 		INPLACE = 1 << 5,
+		CUSTOM1 = 1 << 6,
+		CUSTOM2 = 1 << 6,
+		CUSTOM3 = 1 << 7
 	};
 
 	Archive(int caps)
