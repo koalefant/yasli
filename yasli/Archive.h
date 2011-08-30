@@ -67,7 +67,7 @@ public:
 	bool isOutput() const{ return caps_ & OUTPUT ? true : false; }
 	bool isEdit() const{ return caps_ & EDIT ? true : false; }
 	bool isInPlace() const{ return caps_ & INPLACE ? true : false; }
-	bool operator()(int caps) const { return (caps_ & caps) == caps; }
+	bool caps(int caps) const { return (caps_ & caps) == caps; }
 	virtual void inPlacePointer(void** pointer, size_t offset) { ASSERT(0 && "Not implemented"); }
 
 	virtual void warning(const char* message);
