@@ -503,6 +503,9 @@ TextIArchive::~TextIArchive()
 
 bool TextIArchive::open(const char* buffer, size_t length, bool free)
 {
+	if(!length)
+		return false;
+
 	if(buffer)
 		reader_.reset(new MemoryReader(buffer, length, free));
 
