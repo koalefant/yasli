@@ -730,22 +730,19 @@ struct DrawVisitor
 		, dc_(dc)
 		, offset_(0)
 		, scrollOffset_(scrollOffset)
-		, parent_(0)
+		, lastParent_(0)
 	{}
 
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
 	{
-		if(row->visible(tree) && (row->parent()->expanded() || row->pulledUp())){
-			if(parent_ && row->parent() != parent_)
-				return SCAN_FINISHED;
-
+		if(row->visible(tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
 			if(row->rect().top() > scrollOffset_ + area_.height())
-				parent_ = row->parent();
+				lastParent_ = row->parent();
 
-			if(row->rect().bottom() > scrollOffset_ && (!parent_ || row->pulledUp()))
+			if(row->rect().bottom() > scrollOffset_)
 				row->drawRow(dc_, tree);
 
-			return !parent_ ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
+			return SCAN_CHILDREN_SIBLINGS;
 		}
 		else
 			return SCAN_SIBLINGS;
@@ -756,7 +753,7 @@ protected:
 	Rect area_;
 	int offset_;
 	int scrollOffset_;
-	PropertyRow* parent_;
+	PropertyRow* lastParent_;
 };
 
 void TreeImpl::redraw(HDC dc)
