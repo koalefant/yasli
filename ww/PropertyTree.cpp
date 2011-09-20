@@ -914,6 +914,8 @@ struct FilterVisitor
 						child->setBelongsToFilteredRow(true);
 				}
 			}
+			else 
+				row->_setExpanded(false);
 		}
 
 		row->setMatchFilter(matchFilter);
