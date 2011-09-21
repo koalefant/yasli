@@ -80,6 +80,7 @@ public:
     void attach(Serializers& serializers);
 	void attachPropertyTree(PropertyTree* propertyTree);
     void detach();
+	bool attached() const { return !attached_.empty(); }
 
     void revert();
     void apply();
