@@ -667,6 +667,8 @@ unsigned int BinIArchive::Block::readPackedSize()
 
 bool BinIArchive::Block::get(const char* name, Block& block) 
 {
+	if(begin_ == end_)
+		return false;
 	complex_ = true;
 	unsigned short hashName = calcHash(name);
 	const char* currInitial = curr_;
