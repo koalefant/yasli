@@ -360,9 +360,9 @@ bool BinIArchive::openNode(const char* name)
 	return false;
 }
 
-void BinIArchive::closeNode(const char* name) 
+void BinIArchive::closeNode(const char* name, bool check) 
 {
-	ASSERT(currentBlock().validToClose());
+	ASSERT(!check || currentBlock().validToClose());
 	blocks_.pop_back();
 }
 
@@ -588,7 +588,7 @@ bool BinIArchive::operator()(const Serializer& ser, const char* name, const char
 		return false;
 
 	ser(*this);
-	closeNode(name);
+	closeNode(name, false);
 	return true;
 }
 

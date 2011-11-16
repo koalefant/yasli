@@ -157,7 +157,7 @@ private:
 	const char* loadedData_;
 
 	bool openNode(const char* name);
-	void closeNode(const char* name);
+	void closeNode(const char* name, bool check = true);
 	Block& currentBlock() { return blocks_.back(); }
 	template<class T>
 	void read(T& t) { currentBlock().read(t); }
