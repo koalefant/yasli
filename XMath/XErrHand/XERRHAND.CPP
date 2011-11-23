@@ -8,11 +8,11 @@ class XErrorHandler
 public:
 	 XErrorHandler();
 
-	void	 Abort(const char* message, const char* subj = NULL);
-	void	 WriteLog(char* error, char* msg);
+	void	 Abort(const char* subj = NULL);
+	void	 WriteLog(const char* msg);
 };
 
-char exceptMSG[512] 	= "EXCEPTION OCCURED";
+char exceptMSG[512] 	= "";
 
 void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, 511); }
 
@@ -59,7 +59,8 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 
 	static char msg[100000];
 
-	strcpy(msg, "");
+	strcpy(msg, exceptMSG);
+	strcat(msg, "\r\n");
 
 	switch(except_info->ExceptionRecord->ExceptionCode)
 	{
@@ -169,8 +170,8 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 		}
 
 
-	ErrH.WriteLog(exceptMSG, msg);
-	ErrH.Abort(exceptMSG, msg);
+	ErrH.WriteLog(msg);
+	ErrH.Abort(msg);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -180,22 +181,13 @@ XErrorHandler::XErrorHandler()
 		SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)&exHandler);
 }
 
-void XErrorHandler::Abort(const char* message, const char* subj)
+void XErrorHandler::Abort(const char* msg)
 {
-	static char outmsg[10000]="";
-	UINT attr=MB_OK;
-
-	strcpy(outmsg,message);
-	if(subj){
-		strcat(outmsg,"\r");
-		strcat(outmsg,subj);
-	}
-
-	MessageBox(NULL,outmsg,exceptMSG,attr | MB_TOPMOST | MB_SYSTEMMODAL);
+	MessageBox(NULL, msg, "EXCEPTION OCCURED", MB_TOPMOST | MB_SYSTEMMODAL);
 	exit(0);
 }
 
-void XErrorHandler::WriteLog(char* error, char* msg)
+void XErrorHandler::WriteLog(const char* msg)
 {
     FILE* f = fopen("Error.log", "wb");
     if(!f)
