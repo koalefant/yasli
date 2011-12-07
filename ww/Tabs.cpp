@@ -435,7 +435,8 @@ void TabPages::setSelectedTab(int index)
 	ESCAPE(size_t(index) < widgets_.size(), return);
 	Widget* widget = widgets_.at(index);
 	VBox::add(widget, PACK_FILL);
-	widget->showAll();
+	tabs_->setSelectedTab(index);
+	showAll();
 }
 
 void TabPages::serialize(yasli::Archive& ar)
