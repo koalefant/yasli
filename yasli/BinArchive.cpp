@@ -672,16 +672,24 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 	complex_ = true;
 	unsigned short hashName = calcHash(name);
 	const char* currInitial = curr_;
+	bool restarted = false;
 	for(;;){
+		if(curr_ >= end_)
+			return false;
+
 		unsigned short hash;
 		read(hash);
 		unsigned int size = readPackedSize();
 		
 		const char* currPrev = curr_;
-		if((curr_ += size) == end_)
+		if((curr_ += size) == end_){
+			if(restarted)
+				return false;
 			curr_ = begin_;
+			restarted = true;
+		}
 
-		ASSERT(curr_ < end_);
+		//ASSERT(curr_ < end_);
 		
 		if(hash == hashName){
 			block = Block(currPrev, size);
