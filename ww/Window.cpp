@@ -320,11 +320,13 @@ void Window::setResizeable(bool allowResize)
 
 void Window::setRestoredPosition(const Rect& position)
 {
+	HWND handle = _window()->handle();
 	WINDOWPLACEMENT placement;
 	placement.length = sizeof(placement);
-	WW_VERIFY(GetWindowPlacement(_window()->handle(), &placement));
+	WW_VERIFY(GetWindowPlacement(handle, &placement));
 	placement.rcNormalPosition = Win32::Rect(position);
-	WW_VERIFY(SetWindowPlacement(_window()->handle(), &placement));
+	placement.length = sizeof(placement);
+	WW_VERIFY(SetWindowPlacement(handle, &placement));
 }
 
 Rect Window::restoredPosition() const
