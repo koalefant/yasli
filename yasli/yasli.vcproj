@@ -700,6 +700,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SerializerImpl.h"
+			>
+		</File>
+		<File
 			RelativePath=".\StdAfx.cpp"
 			>
 			<FileConfiguration

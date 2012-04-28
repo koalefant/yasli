@@ -72,7 +72,7 @@ private:
 
     typedef std::vector<Level> Stack;
     Stack stack_;
-    SharedPtr<MemoryWriter> buffer_;
+	std::auto_ptr<MemoryWriter> buffer_;
     const char* header_;
     int textWidth_;
 	std::string fileName_;

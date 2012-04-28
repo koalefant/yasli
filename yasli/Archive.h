@@ -230,4 +230,6 @@ bool serialize(yasli::Archive& ar, T& object, const char* name, const char* labe
 		>::type::invoke(ar, object, name, label);
 }
 
+#include "yasli/SerializerImpl.h"
+
 // vim: ts=4 sw=4:
