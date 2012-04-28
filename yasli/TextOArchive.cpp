@@ -9,8 +9,8 @@
 
 #include "StdAfx.h"
 #include "yasli/TextOArchive.h"
-
 #include "yasli/MemoryWriter.h"
+#include <float.h>
 
 namespace yasli{
 
@@ -30,7 +30,7 @@ static const char* escapeTable[256] = {
     "\\n"   /* 0x0A: \n */,
     "\\x0B" /* 0x0B: */,
     "\\x0C" /* 0x0C: */,
-    "\\x0D" /* 0x0D: */,
+    "\\r" /* 0x0D: */,
     "\\x0E" /* 0x0E: */,
     "\\x0F" /* 0x0F: */,
     
@@ -322,6 +322,7 @@ TextOArchive::TextOArchive(int textWidth, const char* header)
 : Archive(OUTPUT | TEXT)
 , header_(header)
 , textWidth_(textWidth)
+, compactOffset_(0)
 {
     buffer_.reset(new MemoryWriter(1024, true));
     if(header_)
@@ -368,22 +369,22 @@ size_t TextOArchive::length() const
 
 void TextOArchive::openBracket()
 {
-	*buffer_ << "{\r\n";
+	*buffer_ << "{";
 }
 
 void TextOArchive::closeBracket()
 {
-	*buffer_ << "}\r\n";
+	*buffer_ << "}";
 }
 
 void TextOArchive::openContainerBracket()
 {
-    *buffer_ << "[\r\n";
+    *buffer_ << "[";
 }
 
 void TextOArchive::closeContainerBracket()
 {
-    *buffer_ << "]\r\n";
+    *buffer_ << "]";
 }
 
 void TextOArchive::placeName(const char* name)
@@ -396,164 +397,185 @@ void TextOArchive::placeName(const char* name)
 
 void TextOArchive::placeIndent()
 {
+	if (buffer_->size())
+		*buffer_ << "\r\n";
+	int count = int(stack_.size() - 1);
+	stack_.back().indentCount += count;
+	for(int i = 0; i < count; ++i)
+		*buffer_ << "\t";
+	compactOffset_ = 0;
+}
+
+void TextOArchive::placeIndentCompact()
+{
+  if ((compactOffset_ % 32) != 0 && stack_.back().isContainer){
+		*buffer_ << " ";
+		compactOffset_ += 1;
+	}
+  else if (buffer_->size())
+  {
+	*buffer_ << "\r\n";
     int count = int(stack_.size() - 1);
     stack_.back().indentCount += count/* * TAB_WIDTH*/;
     for(int i = 0; i < count; ++i)
         *buffer_ << "\t";
+	 compactOffset_ = 1;
+  }
 }
 
 bool TextOArchive::operator()(bool& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    *buffer_ << (value ? "true" : "false");
-    *buffer_ << "\r\n";
-    return true;
+	placeIndent();
+	placeName(name);
+	*buffer_ << (value ? "true" : "false");
+	return true;
 }
 
 
 bool TextOArchive::operator()(std::string& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << "\""; 
-    const char* str = value.c_str();
-    escapeString(*buffer_, str, str + value.size());
-    (*buffer_) << "\"\r\n";
-    return true;
+	placeIndent();
+	placeName(name);
+	(*buffer_) << "\""; 
+	const char* str = value.c_str();
+	escapeString(*buffer_, str, str + value.size());
+	(*buffer_) << "\"";
+	return true;
 }
 
 bool TextOArchive::operator()(float& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(double& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(int& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(short& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(long long& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(signed char& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(char& value, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    (*buffer_) << value << "\r\n";
-    return true;
+	placeIndentCompact();
+	placeName(name);
+	(*buffer_) << value;
+	return true;
 }
 
 bool TextOArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    std::size_t position = buffer_->position();
-    openBracket();
-    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2)));
+	placeIndent();
+	placeName(name);
+	std::size_t position = buffer_->position();
+	openBracket();
+	stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2)));
 
-    ASSERT(ser);
-    ser(*this);
+	ASSERT(ser);
+	ser(*this);
 
-    bool joined = joinLinesIfPossible();
-    stack_.pop_back();
-    if(!joined)
-        placeIndent();
-    //else
-    //    *buffer_ << " ";
-    closeBracket();
-    return true;
+	bool joined = joinLinesIfPossible();
+	stack_.pop_back();
+	if(!joined)
+		placeIndent();
+	else
+		*buffer_ << " ";
+	closeBracket();
+	return true;
 }
 
 
 bool TextOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    std::size_t position = buffer_->position();
-    openContainerBracket();
-    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
+	placeIndent();
+	placeName(name);
+	std::size_t position = buffer_->position();
+	openContainerBracket();
+	stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
 
-    std::size_t size = ser.size();
-    if(size > 0){
-        do{
-            ser(*this, "", "");
-        }while(ser.next());
-    }
+	std::size_t size = ser.size();
+	if(size > 0){
+		do{
+			ser(*this, "", "");
+		}while(ser.next());
+	}
 
-    bool joined = joinLinesIfPossible();
-    stack_.pop_back();
-    if(!joined)
-        placeIndent();
-    closeContainerBracket();
-    return true;
+	bool joined = joinLinesIfPossible();
+	stack_.pop_back();
+	if(!joined)
+		placeIndent();
+	else
+		*buffer_ << " ";
+	closeContainerBracket();
+	return true;
 }
 
 static char* joinLines(char* start, char* end)
@@ -580,16 +602,16 @@ bool TextOArchive::joinLinesIfPossible()
     ASSERT(startPosition < buffer_->size());
     int indentCount = stack_.back().indentCount;
     //ASSERT(startPosition >= indentCount);
-    if(buffer_->position() - startPosition - indentCount < std::size_t(textWidth_)){
-        char* buffer = buffer_->buffer();
-        char* start = buffer + startPosition;
-        char* end = buffer + buffer_->position();
-        end = joinLines(start, end);
-        std::size_t newPosition = end - buffer;
-        ASSERT(newPosition <= buffer_->position());
-        buffer_->setPosition(newPosition);
-        return true;
-    }
+	if(buffer_->position() - startPosition - indentCount < std::size_t(textWidth_)){
+		char* buffer = buffer_->buffer();
+		char* start = buffer + startPosition;
+		char* end = buffer + buffer_->position();
+		end = joinLines(start, end);
+		std::size_t newPosition = end - buffer;
+		ASSERT(newPosition <= buffer_->position());
+		buffer_->setPosition(newPosition);
+		return true;
+	}
     return false;
 }
 

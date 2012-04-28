@@ -46,7 +46,7 @@ public:
     bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
     bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
     // ^^^
-	
+    
 	using Archive::operator();
 private:
     void openBracket();
@@ -55,6 +55,7 @@ private:
     void closeContainerBracket();
     void placeName(const char* name);
     void placeIndent();
+    void placeIndentCompact();
 
     bool joinLinesIfPossible();
 
@@ -71,10 +72,11 @@ private:
 
     typedef std::vector<Level> Stack;
     Stack stack_;
-	std::auto_ptr<MemoryWriter> buffer_;
+    SharedPtr<MemoryWriter> buffer_;
     const char* header_;
     int textWidth_;
 	std::string fileName_;
+	int compactOffset_;
 };
 
 }
