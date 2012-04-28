@@ -973,7 +973,7 @@ bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 {
 	if(!visible(tree))
 		return false;
-	if((tree->compact() && parent()->isRoot()) || isContainer() && pulledUp() || !hasVisibleChildren(tree))
+	if((tree->compact() && (parent() && parent()->isRoot())) || isContainer() && pulledUp() || !hasVisibleChildren(tree))
 		return false;
 	return !empty();
 }
