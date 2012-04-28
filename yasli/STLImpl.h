@@ -135,4 +135,3 @@ bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* n
 	yasli::ContainerSerializationSTLImpl<std::list<T, Alloc>, T> ser(&container);
 	return ar(static_cast<yasli::ContainerSerializationInterface&>(ser), name, label);
 }
-

@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "yasli/MemoryWriter.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactoryBase.h"
+#include "yasli/ClassFactory.h"
 
 namespace yasli{
 

@@ -9,7 +9,7 @@
 
 #include "StdAfx.h"
 #include "InPlaceOArchive.h"
-#include "TypesFactory.h"
+#include "ClassFactory.h"
 
 namespace yasli {
 

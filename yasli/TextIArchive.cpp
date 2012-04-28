@@ -568,9 +568,9 @@ void TextIArchive::readToken()
 void TextIArchive::putToken()
 {
 #ifdef DEBUG_TEXTIARCHIVE
-	std::cout << " putToken: \'" << token_.str() << "\'" << std::endl;
+    std::cout << " putToken: \'" << token_.str() << "\'" << std::endl;
 #endif
-	token_ = Token(token_.start, token_.start);
+    token_ = Token(token_.start, token_.start);
 }
 
 int TextIArchive::line(const char* position) const
@@ -586,8 +586,8 @@ bool TextIArchive::isName(Token token) const
 	ASSERT(firstChar != '\0');
 	ASSERT(firstChar != ' ');
 	ASSERT(firstChar != '\n');
-	if((firstChar >= 'a' && firstChar <= 'z') ||
-	   (firstChar >= 'A' && firstChar <= 'Z'))
+    if((firstChar >= 'a' && firstChar <= 'z') ||
+       (firstChar >= 'A' && firstChar <= 'Z'))
 	{
 		size_t len = token_.length();
 		if(len == 4)
@@ -606,35 +606,35 @@ bool TextIArchive::isName(Token token) const
 		}
 		return true;
 	}
-	return false;
+    return false;
 }
 
 
 void TextIArchive::expect(char token)
 {
-	if(token_ != token){
-		const char* lineEnd = token_.start;
-		while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
-			++lineEnd;
+    if(token_ != token){
+      const char* lineEnd = token_.start;
+      while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
+        ++lineEnd;
 
-		MemoryWriter msg;
-		msg << "Error parsing file, expected '=' at line " << line(token_.start) << ":\n"
-		<< std::string(token_.start, lineEnd).c_str();
+        MemoryWriter msg;
+        msg << "Error parsing file, expected '=' at line " << line(token_.start) << ":\n"
+         << std::string(token_.start, lineEnd).c_str();
 		ASSERT_STR(0, msg.c_str());
-	}
+    }
 }
 
 void TextIArchive::skipBlock()
 {
 #ifdef DEBUG_TEXTIARCHIVE
-	std::cout << "Skipping block from " << token_.end - reader_->start << " ..." << std::endl;
+    std::cout << "Skipping block from " << token_.end - reader_->start << " ..." << std::endl;
 #endif
-	if(openBracket() || openContainerBracket())
-		closeBracket(); // Skipping entire block
-	else
-		readToken(); // Skipping value
+    if(openBracket() || openContainerBracket())
+        closeBracket(); // Skipping entire block
+    else
+        readToken(); // Skipping value
 #ifdef DEBUG_TEXTIARCHIVE
-	std::cout << "...till " << token_.end - reader_->start << std::endl;
+    std::cout << "...till " << token_.end - reader_->start << std::endl;
 #endif
 }
 
@@ -642,183 +642,183 @@ bool TextIArchive::findName(const char* name)
 {
 
 #ifdef DEBUG_TEXTIARCHIVE
-	std::cout << " * finding name '" << name << "'" << std::endl;
-	std::cout << "   started at byte " << int(token_.start - reader_->start) << std::endl;
+    std::cout << " * finding name '" << name << "'" << std::endl;
+    std::cout << "   started at byte " << int(token_.start - reader_->start) << std::endl;
 #endif
-	ASSERT(!stack_.empty());
-	const char* start = 0;
-	const char* blockBegin = stack_.back().start;
+    ASSERT(!stack_.empty());
+    const char* start = 0;
+    const char* blockBegin = stack_.back().start;
 	if(*blockBegin == '\0')
 		return false;
 
-	readToken();
-	if(!token_){
-		start = blockBegin;
-		token_.set(blockBegin, blockBegin);
+    readToken();
+    if(!token_){
+	    start = blockBegin;
+        token_.set(blockBegin, blockBegin);
 		readToken();
 	}
 
-	if(name[0] == '\0'){
-		if(isName(token_)){
+    if(name[0] == '\0'){
+        if(isName(token_)){
 #ifdef DEBUG_TEXTIARCHIVE
-			std::cout << "Token: '" << token_.str() << "'" << std::endl;
+            std::cout << "Token: '" << token_.str() << "'" << std::endl;
 #endif
 
-			start = token_.start;
-			readToken();
-			expect('=');
-			skipBlock();
-		}
-		else{
+            start = token_.start;
+            readToken();
+            expect('=');
+            skipBlock();
+        }
+        else{
 			if(token_ == ']' || token_ == '}'){ // CONVERSION
 #ifdef DEBUG_TEXTIARCHIVE
-				std::cout << "Got close bracket..." << std::endl;
+                std::cout << "Got close bracket..." << std::endl;
 #endif
-				putToken();
-				return false;
-			}
-			else{
+                putToken();
+                return false;
+            }
+            else{
 #ifdef DEBUG_TEXTIARCHIVE
-				std::cout << "Got unnamed value: '" << token_.str() << "'" << std::endl;
+                std::cout << "Got unnamed value: '" << token_.str() << "'" << std::endl;
 #endif
-				putToken();
-				return true;
-			}
-		}
-	}
-	else{
-		if(isName(token_)){
+                putToken();
+                return true;
+            }
+        }
+    }
+    else{
+        if(isName(token_)){
 #ifdef DEBUG_TEXTIARCHIVE
-			std::cout << "Seems to be a name '" << token_.str() << "'" << std::endl ;
+            std::cout << "Seems to be a name '" << token_.str() << "'" << std::endl ;
 #endif
-			if(token_ == name){
-				readToken();
-				expect('=');
+            if(token_ == name){
+                readToken();
+                expect('=');
 #ifdef DEBUG_TEXTIARCHIVE
-				std::cout << "Got one" << std::endl;
+                std::cout << "Got one" << std::endl;
 #endif
-				return true;
-			}
-			else{
-				start = token_.start;
+                return true;
+            }
+            else{
+                start = token_.start;
 
-				readToken();
-				expect('=');
-				skipBlock();
-			}
-		}
-		else{
-			start = token_.start;
+                readToken();
+                expect('=');
+                skipBlock();
+            }
+        }
+        else{
+            start = token_.start;
 			if(token_ == ']' || token_ == '}') // CONVERSION
-				token_ = Token(blockBegin, blockBegin);
-			else{
-				putToken();
-				skipBlock();
-			}
-		}
-	}
+                token_ = Token(blockBegin, blockBegin);
+            else{
+                putToken();
+                skipBlock();
+            }
+        }
+    }
 
-	while(true){
-		readToken();
+    while(true){
+        readToken();
 		if(!token_){
 			token_.set(blockBegin, blockBegin);
 			continue;
 		}
-		//return false; // Reached end of file while searching for name
+            //return false; // Reached end of file while searching for name
 #ifdef DEBUG_TEXTIARCHIVE
-		std::cout << "'" << token_.str() << "'" << std::endl;
-		std::cout << "Checking for loop: " << token_.start - reader_->start << " and " << start - reader_->begin() << std::endl;
+        std::cout << "'" << token_.str() << "'" << std::endl;
+        std::cout << "Checking for loop: " << token_.start - reader_->start << " and " << start - reader_->begin() << std::endl;
 #endif
-		ASSERT(start != 0);
-		if(token_.start == start){
-			putToken();
+				ASSERT(start != 0);
+        if(token_.start == start){
+            putToken();
 #ifdef DEBUG_TEXTIARCHIVE
-			std::cout << "unable to find..." << std::endl;
+            std::cout << "unable to find..." << std::endl;
 #endif
-			return false; // Reached a full circle: unable to find name
-		}
+            return false; // Reached a full circle: unable to find name
+        }
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
 #ifdef DEBUG_TEXTIARCHIVE
-			std::cout << "Going to begin of block, from " << token_.start - reader_->begin();
+            std::cout << "Going to begin of block, from " << token_.start - reader_->begin();
 #endif
-			token_ = Token(blockBegin, blockBegin);
+            token_ = Token(blockBegin, blockBegin);
 #ifdef DEBUG_TEXTIARCHIVE
-			std::cout << " to " << token_.start - reader_->begin() << std::endl;
+            std::cout << " to " << token_.start - reader_->begin() << std::endl;
 #endif
-			continue; // Reached '}' or ']' while searching for name, continue from begin of block
-		}
+            continue; // Reached '}' or ']' while searching for name, continue from begin of block
+        }
 
-		if(name[0] == '\0'){
-			if(isName(token_)){
-				readToken();
-				if(!token_)
-					return false; // Reached end of file while searching for name
-				expect('=');
-				skipBlock();
-			}
-			else{
-				putToken(); // Not a name - put it back
-				return true;
-			}
-		}
-		else{
-			if(isName(token_)){
-				Token nameToken = token_; // token seems to be a name
-				readToken();
-				expect('=');
-				if(nameToken == name)
-					return true; // Success! we found our name
-				else
-					skipBlock();
-			}
-			else{
-				putToken();
-				skipBlock();
-			}
-		}
+        if(name[0] == '\0'){
+            if(isName(token_)){
+                readToken();
+                if(!token_)
+                    return false; // Reached end of file while searching for name
+                expect('=');
+                skipBlock();
+            }
+            else{
+                putToken(); // Not a name - put it back
+                return true;
+            }
+        }
+        else{
+            if(isName(token_)){
+                Token nameToken = token_; // token seems to be a name
+                readToken();
+                expect('=');
+                if(nameToken == name)
+                    return true; // Success! we found our name
+                else
+                    skipBlock();
+            }
+            else{
+                putToken();
+                skipBlock();
+            }
+        }
 
-	}
+    }
 
-	return false;
+    return false;
 }
 
 bool TextIArchive::openBracket()
 {
 	readToken();
 	if(token_ != '{'){
-		putToken();
-		return false;
-	}
-	return true;
+        putToken();
+        return false;
+    }
+    return true;
 }
 
 bool TextIArchive::closeBracket()
 {
-	int relativeLevel = 0;
-	while(true){
-		readToken();
+    int relativeLevel = 0;
+    while(true){
+        readToken();
 
-		if(!token_){
-			MemoryWriter msg;
-			ASSERT(!stack_.empty());
-			const char* start = stack_.back().start;
-			msg << filename_.c_str() << ": " << line(start) << " line";
-			msg << ": End of file while no matching bracket found";
+        if(!token_){
+            MemoryWriter msg;
+            ASSERT(!stack_.empty());
+            const char* start = stack_.back().start;
+            msg << filename_.c_str() << ": " << line(start) << " line";
+            msg << ": End of file while no matching bracket found";
 			ASSERT_STR(0, msg.c_str());
 			return false;
-		}
+        }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
-			if(relativeLevel == 0)
+            if(relativeLevel == 0)
 				return token_ == '}';
-			else
-				--relativeLevel;
-		}
+            else
+                --relativeLevel;
+        }
 		else if(token_ == '{' || token_ == '['){ // CONVERSION
-			++relativeLevel;
-		}
-	}
-	return false;
+            ++relativeLevel;
+        }
+    }
+    return false;
 }
 
 bool TextIArchive::openContainerBracket()
@@ -833,273 +833,273 @@ bool TextIArchive::openContainerBracket()
 
 bool TextIArchive::closeContainerBracket()
 {
-	readToken();
-	if(token_ == ']'){
+    readToken();
+    if(token_ == ']'){
 #ifdef DEBUG_TEXTIARCHIVE
-		std::cout << "closeContainerBracket(): ok" << std::endl;
+        std::cout << "closeContainerBracket(): ok" << std::endl;
 #endif
-		return true;
-	}
-	else{
+        return true;
+    }
+    else{
 #ifdef DEBUG_TEXTIARCHIVE
-		std::cout << "closeContainerBracket(): failed ('" << token_.str() << "')" << std::endl;
+        std::cout << "closeContainerBracket(): failed ('" << token_.str() << "')" << std::endl;
 #endif
-		putToken();
-		return false;
-	}
+        putToken();
+        return false;
+    }
 }
 
 bool TextIArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
-	if(findName(name)){
-		if(openBracket()){
-			stack_.push_back(Level());
-			stack_.back().start = token_.end;
-			ser(*this);
-			ASSERT(!stack_.empty());
-			stack_.pop_back();
-			bool closed = closeBracket();
-			ASSERT(closed);
-			return true;
-		}
-	}
-	return false;
+    if(findName(name)){
+        if(openBracket()){
+            stack_.push_back(Level());
+            stack_.back().start = token_.end;
+            ser(*this);
+            ASSERT(!stack_.empty());
+            stack_.pop_back();
+            bool closed = closeBracket();
+            ASSERT(closed);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
 {
-	if(findName(name)){
-		if(openContainerBracket()){
-			stack_.push_back(Level());
-			stack_.back().start = token_.end;
+    if(findName(name)){
+        if(openContainerBracket()){
+            stack_.push_back(Level());
+            stack_.back().start = token_.end;
 
-			std::size_t size = ser.size();
-			std::size_t index = 0;
+            std::size_t size = ser.size();
+            std::size_t index = 0;
 
-			while(true){
-				readToken();
+            while(true){
+                readToken();
 				if(token_ == '}')
 				{
-					ASSERT(0 && "Syntax error: closing container with '}'");
+				    ASSERT(0 && "Syntax error: closing container with '}'");
 					return false;
 				}
-				if(token_ == ']')
-					break;
-				else if(!token_)
+                if(token_ == ']')
+                    break;
+                else if(!token_)
 				{
-					ASSERT(0 && "Reached end of file while reading container!");
+                    ASSERT(0 && "Reached end of file while reading container!");
 					return false;
 				}
-				putToken();
-				if(index == size)
-					size = index + 1;
-				if(index < size){
-					ser(*this, "", "");
-				}
-				else{
-					skipBlock();
-				}
-				ser.next();
+                putToken();
+                if(index == size)
+                    size = index + 1;
+                if(index < size){
+                    ser(*this, "", "");
+                }
+                else{
+                    skipBlock();
+                }
+                ser.next();
 				++index;
-			}
-			if(size > index)
-				ser.resize(index);
+            }
+            if(size > index)
+                ser.resize(index);
 
-			ASSERT(!stack_.empty());
-			stack_.pop_back();
-			return true;
-		}
-	}
-	return false;
+            ASSERT(!stack_.empty());
+            stack_.pop_back();
+            return true;
+        }
+    }
+    return false;
 }
 
 void TextIArchive::checkValueToken()
 {
-	if(!token_){
-		ASSERT(!stack_.empty());
-		MemoryWriter msg;
-		const char* start = stack_.back().start;
-		msg << filename_.c_str() << ": " << line(start) << " line";
-		msg << ": End of file while reading element's value";
-		ASSERT_STR(0, msg.c_str());
-	}
+    if(!token_){
+        ASSERT(!stack_.empty());
+        MemoryWriter msg;
+        const char* start = stack_.back().start;
+        msg << filename_.c_str() << ": " << line(start) << " line";
+        msg << ": End of file while reading element's value";
+        ASSERT_STR(0, msg.c_str());
+    }
 }
 
 bool TextIArchive::checkStringValueToken()
 {
-	if(!token_){
+    if(!token_){
+        return false;
+        MemoryWriter msg;
+        const char* start = stack_.back().start;
+        msg << filename_.c_str() << ": " << line(start) << " line";
+        msg << ": End of file while reading element's value";
+        ASSERT_STR(0, msg.c_str());
 		return false;
-		MemoryWriter msg;
-		const char* start = stack_.back().start;
-		msg << filename_.c_str() << ": " << line(start) << " line";
-		msg << ": End of file while reading element's value";
-		ASSERT_STR(0, msg.c_str());
+    }
+    if(token_.start[0] != '"' || token_.end[-1] != '"'){
+        return false;
+        MemoryWriter msg;
+        const char* start = stack_.back().start;
+        msg << filename_.c_str() << ": " << line(start) << " line";
+        msg << ": Expected string";
+        ASSERT_STR(0, msg.c_str());
 		return false;
-	}
-	if(token_.start[0] != '"' || token_.end[-1] != '"'){
-		return false;
-		MemoryWriter msg;
-		const char* start = stack_.back().start;
-		msg << filename_.c_str() << ": " << line(start) << " line";
-		msg << ": Expected string";
-		ASSERT_STR(0, msg.c_str());
-		return false;
-	}
-	return true;
+    }
+    return true;
 }
 
 bool TextIArchive::operator()(int& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = strtol(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = strtol(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = strtoul(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = strtoul(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 
 bool TextIArchive::operator()(short& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = (short)strtol(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (short)strtol(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = (unsigned short)strtoul(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (unsigned short)strtoul(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(long long& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
+    if(findName(name)){
+        readToken();
+        checkValueToken();
 #ifdef _MSC_VER
 		value = _strtoi64(token_.start, 0, 10);
 #else
 		value = strtoll(token_.start, 0, 10);
 #endif
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
+    if(findName(name)){
+        readToken();
+        checkValueToken();
 #ifdef _MSC_VER
 		value = _strtoui64(token_.start, 0, 10);
 #else
 		value = strtoull(token_.start, 0, 10);
 #endif
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(float& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
+    if(findName(name)){
+        readToken();
+        checkValueToken();
 #ifdef _MSC_VER
-		value = float(std::atof(token_.str().c_str()));
+        value = float(std::atof(token_.str().c_str()));
 #else
-		value = std::strtof(token_.start, 0);
+        value = std::strtof(token_.start, 0);
 #endif
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(double& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
+    if(findName(name)){
+        readToken();
+        checkValueToken();
 #ifdef _MSC_VER
-		value = std::atof(token_.str().c_str());
+        value = std::atof(token_.str().c_str());
 #else
-		value = std::strtod(token_.start, 0);
+        value = std::strtod(token_.start, 0);
 #endif
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(std::string& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		if(checkStringValueToken())
+    if(findName(name)){
+        readToken();
+        if(checkStringValueToken())
 			unescapeString(value, token_.start + 1, token_.end - 1);
 		else
 			return false;
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(bool& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		if(token_ == "true" || token_ == "True" || token_ == "TRUE")
-			value = true;
-		else
-			value = false;
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        if(token_ == "true" || token_ == "True" || token_ == "TRUE")
+            value = true;
+        else
+            value = false;
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = (signed char)strtol(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (signed char)strtol(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	if(findName(name)){
-		readToken();
-		checkValueToken();
-		value = (unsigned char)strtol(token_.start, 0, 10);
-		return true;
-	}
-	return false;
+    if(findName(name)){
+        readToken();
+        checkValueToken();
+        value = (unsigned char)strtol(token_.start, 0, 10);
+        return true;
+    }
+    return false;
 }
 
 bool TextIArchive::operator()(char& value, const char* name, const char* label)

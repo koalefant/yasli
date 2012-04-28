@@ -551,10 +551,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Context.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Factory.h"
 				>
 			</File>

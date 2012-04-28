@@ -9,10 +9,9 @@
 
 #include "StdAfx.h"
 #include "BinaryOArchive.h"
-//#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 namespace yasli{
 

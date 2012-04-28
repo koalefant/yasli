@@ -10,7 +10,7 @@
 #pragma once
 #include "yasli/BitVector.h"
 #include "yasli/Archive.h"
-#include "yasli/EnumDescription.h"
+#include "yasli/Enum.h"
 
 namespace yasli{
 

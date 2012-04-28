@@ -11,7 +11,7 @@
 #include "BinArchive.h"
 #include <map>
 #include "yasli/MemoryWriter.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 using namespace std;
 
