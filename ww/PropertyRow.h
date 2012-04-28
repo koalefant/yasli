@@ -145,12 +145,12 @@ public:
 	const char* labelUndecorated() const { return labelUndecorated_; }
 	void setLabel(const char* label) { label_ = label ? label : ""; setLabelChanged(); }
 	void setLabelChanged();
-	void updateLabel();
+	void updateLabel(const PropertyTree* tree);
 	void parseControlCodes(const char* label, bool updateLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
-	std::string rowText() const;
+	std::string rowText(const PropertyTree* tree) const;
 
 	PropertyRow* findSelected();
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false);
@@ -255,7 +255,7 @@ public:
 
 	const wchar_t* digest() const{ return digest_.c_str(); }
 	virtual std::wstring digestValue() const{ return valueAsWString(); }
-	virtual void digestReset();
+	virtual void digestReset(const PropertyTree* tree);
 	void digestAppend(const wchar_t* text);
 
 	Serializer serializer() const{ return serializer_; }

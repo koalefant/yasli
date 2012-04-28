@@ -288,7 +288,7 @@ void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeMod
 	model->rowChanged(this);
 }
 
-void PropertyRowContainer::digestReset()
+void PropertyRowContainer::digestReset(const PropertyTree* tree)
 {
 	swprintf_s(buttonLabel_, ARRAY_LEN(buttonLabel_), L"%i", count());
 
@@ -298,7 +298,7 @@ void PropertyRowContainer::digestReset()
 		swprintf_s(buffer, L"[...]");
 	else
 		swprintf_s(buffer, L"[ %i ]", int(count()));*/
-	__super::digestReset();
+	__super::digestReset(tree);
 	//digestAppend(buffer);
 }
 

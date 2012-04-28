@@ -84,6 +84,7 @@ TreeConfig::TreeConfig()
 , filter_(0)
 , compact_(false)
 , fullRowMode_(false)
+, showContainerIndices_(true)
 , tabSize_(PropertyRow::ROW_DEFAULT_HEIGHT)
 {
 }
@@ -497,7 +498,7 @@ void PropertyTree::revert()
 
 	if (filterMode_)
 	{
-		model_->root()->updateLabel();		
+		model_->root()->updateLabel(this);		
 		onFilterChanged();
 	}
 

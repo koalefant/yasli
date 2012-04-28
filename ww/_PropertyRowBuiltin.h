@@ -47,7 +47,7 @@ public:
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowContainer(name_, label_, typeName_, elementTypeName_, userReadOnly_), this);
 	}
-	void digestReset();
+	void digestReset(const PropertyTree* tree);
 	bool isStatic() const{ return false; }
 
 	PropertyRow* defaultRow(PropertyTreeModel* model);
@@ -140,7 +140,7 @@ public:
     bool isStatic() const{ return false; }
 
 	bool onActivate(PropertyTree* tree, bool force);
-	void digestReset();
+	void digestReset(const PropertyTree* tree);
 	wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
 	wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }

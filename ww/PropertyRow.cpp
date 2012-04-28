@@ -298,7 +298,7 @@ void PropertyRow::digestAppend(const wchar_t* text)
 	}
 }
 
-void PropertyRow::digestReset()
+void PropertyRow::digestReset(const PropertyTree* tree)
 {
 	digest_.clear();
 }
@@ -367,17 +367,17 @@ void PropertyRow::setLabelChanged()
 		row->labelChanged_ = true;
 }
 
-void PropertyRow::updateLabel()
+void PropertyRow::updateLabel(const PropertyTree* tree)
 {
 	if(!labelChanged_)
 		return;
 	labelChanged_ = false;
 
-	digestReset();
+	digestReset(tree);
 
 	PropertyRow::iterator it;
     FOR_EACH(children_, it)
-		(*it)->updateLabel();
+		(*it)->updateLabel(tree);
 
 	parseControlCodes(label_, true);
 	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
@@ -490,7 +490,7 @@ const char* PropertyRow::typeNameForFilter() const
 
 void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 {
-	updateLabel();
+	updateLabel(tree);
 
 	plusSize_ = 0;
     if(isRoot())
@@ -510,7 +510,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 		}
 	}
 
-	std::string text = rowText();
+	std::string text = rowText(tree);
 	if(text.empty())
 		textSizeInitial_ = 0;
 	else{
@@ -842,7 +842,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 	ww::Rect rowRect = rect();
 
     // drawing a horizontal line
-    std::wstring text = toWideChar(rowText().c_str());
+    std::wstring text = toWideChar(rowText(tree).c_str());
 
     if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 	   !pulledUp() && !isFullRow(tree) && !hasPulled())
@@ -1052,7 +1052,7 @@ void PropertyRow::intersect(const PropertyRow* row)
 	}
 }
 
-std::string PropertyRow::rowText() const
+std::string PropertyRow::rowText(const PropertyTree* tree) const
 {
 	if(parent() && parent()->isContainer()){
 		std::string text;
@@ -1062,10 +1062,15 @@ std::string PropertyRow::rowText() const
 			++index;
 			++it;
 		}
-		char buffer[15];
-		sprintf_s(buffer, " %i.", index);
-		text = buffer;
-		return text;
+		if (tree->showContainerIndices())
+		{
+			char buffer[15];
+			sprintf_s(buffer, " %i.", index);
+			text = buffer;
+			return text;
+		}
+		else
+			return std::string();
 	}
 	else
 		return labelUndecorated();

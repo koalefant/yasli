@@ -49,7 +49,7 @@ bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
 	return true;
 }
 
-void PropertyRowBool::digestReset()
+void PropertyRowBool::digestReset(const PropertyTree* tree)
 {
 	digest_ = value_ ? toWideChar(labelUndecorated()) : L"";
 }

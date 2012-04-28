@@ -53,6 +53,8 @@ public:
 	void setFilter(int filter) { filter_ = filter; }
 	void setExpandLevels(int levels) { expandLevels_ = levels; }
 	void setUndoEnabled(bool enabled, bool full = false) { undoEnabled_ = enabled; fullUndo_ = full; }
+	void setShowContainerIndices(bool showContainerIndices) { showContainerIndices_ = showContainerIndices; }
+	bool showContainerIndices() const{ return showContainerIndices_; }
 
 	static TreeConfig defaultConfig;
 
@@ -61,6 +63,7 @@ protected:
 	bool fullRowMode_;
 	bool immediateUpdate_;
 	bool hideUntranslated_;
+	bool showContainerIndices_;
 	float valueColumnWidth_;
 	int filter_;
 	int tabSize_;

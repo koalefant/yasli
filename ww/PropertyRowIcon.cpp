@@ -104,7 +104,7 @@ public:
 		tree->model()->rowChanged(this);
 		return true;
 	}
-	void digestReset() {}
+	void digestReset(const PropertyTree* tree) {}
 	wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
 	wstring digestValue() const { return wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
