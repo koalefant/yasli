@@ -45,8 +45,8 @@ public:
   bool operator()(char &value, const char *name, const char* label);
 
   bool operator()(const Serializer &ser, const char *name, const char* label);
-  bool operator()(ContainerSerializationInterface &ser, const char *name, const char* label);
-  bool operator()(const PointerSerializationInterface &ptr, const char *name, const char* label);
+  bool operator()(ContainerInterface &ser, const char *name, const char* label);
+  bool operator()(PointerInterface &ptr, const char *name, const char* label);
 
   using Archive::operator();
 

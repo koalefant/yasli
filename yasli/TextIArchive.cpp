@@ -66,16 +66,16 @@ void unescapeString(string& buf, const char* begin, const char* end)
 			case '\"': *ptr = '\"'; ++ptr; break;
 			case '\'': *ptr = '\''; ++ptr; break;
 			case 'x':
-					   if(begin + 2 < end){
-						   *ptr = (hexValueTable[int(begin[1])] << 4) + hexValueTable[int(begin[2])];
-						   ++ptr;
-						   begin += 2;
-						   break;
-					   }
+								 if(begin + 2 < end){
+									 *ptr = (hexValueTable[int(begin[1])] << 4) + hexValueTable[int(begin[2])];
+									 ++ptr;
+									 begin += 2;
+									 break;
+								 }
 			default:
-					   *ptr = *begin;
-					   ++ptr;
-					   break;
+								 *ptr = *begin;
+								 ++ptr;
+								 break;
 			}
 		}
 		++begin;
@@ -870,7 +870,7 @@ bool TextIArchive::operator()(const Serializer& ser, const char* name, const cha
     return false;
 }
 
-bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool TextIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     if(findName(name)){
         if(openContainerBracket()){

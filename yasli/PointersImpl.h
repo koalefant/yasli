@@ -16,7 +16,7 @@
 namespace yasli{
 
 template<class T>
-class SharedPtrSerializationImpl : public PointerSerializationInterface
+class SharedPtrSerializationImpl : public PointerInterface
 {
 public:
 	SharedPtrSerializationImpl(SharedPtr<T>& ptr)
@@ -53,7 +53,7 @@ protected:
 };
 
 template<class T>
-class PolyPtrSerializationImpl : public PointerSerializationInterface
+class PolyPtrSerializationImpl : public PointerInterface
 {
 public:
 	PolyPtrSerializationImpl(PolyPtr<T>& ptr)
@@ -142,11 +142,11 @@ void SharedPtr<T>::serialize(Archive& ar)
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
-	return ar(static_cast<const yasli::PointerSerializationInterface&>(yasli::SharedPtrSerializationImpl<T>(ptr)), name, label);
+	return ar(static_cast<const yasli::PointerInterface&>(yasli::SharedPtrSerializationImpl<T>(ptr)), name, label);
 }
 
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label)
 {
-	return ar(static_cast<const yasli::PointerSerializationInterface&>(yasli::PolyPtrSerializationImpl<T>(ptr)), name, label);
+	return ar(static_cast<const yasli::PointerInterface&>(yasli::PolyPtrSerializationImpl<T>(ptr)), name, label);
 }

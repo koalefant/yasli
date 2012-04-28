@@ -87,34 +87,32 @@ public:
 
 	// basic types
 	virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
-	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
-	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
-	virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
-	virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
-  // there is no point to support long double since it is represented as double on MSVC
-	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
-
-	virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
-	virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
-
-	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
-	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
-
-	virtual bool operator()(long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
-	virtual bool operator()(unsigned long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
-
-	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(signed short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
 
 	virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
 	virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
+	virtual bool operator()(short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
+	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
+	virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
+	virtual bool operator()(long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
+	virtual bool operator()(unsigned long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
+	virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
+	virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
 
+	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
+	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0) { return false; }
-	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
+	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
+	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
 
+  // there is no point to support long double since it is represented as double on MSVC
+	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+	// fall back to int implementation for long
+	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
+	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
 
+	// block call are osbolete, please do not use
 	virtual bool openBlock(const char* name, const char* label) { return true; }
 	virtual void closeBlock() {}
 
@@ -181,8 +179,8 @@ struct SerializeArray{};
 template<class T, int Size>
 struct SerializeArray<T[Size]>{
 	static bool invoke(Archive& ar, T value[Size], const char* name, const char* label){
-		ContainerSerializationArrayImpl<T> ser(value, Size);
-		return ar(static_cast<ContainerSerializationInterface&>(ser), name, label);
+		ContainerArray<T> ser(value, Size);
+		return ar(static_cast<ContainerInterface&>(ser), name, label);
 	}
 };
 
@@ -193,9 +191,9 @@ bool Archive::operator()(const T& value, const char* name, const char* label){
     return ::serialize(*this, const_cast<T&>(value), name, label);
 }
 
-inline bool Archive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+inline bool Archive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
-	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name, label);
+	return (*this)(Serializer(const_cast<PointerInterface&>(ptr)), name, label);
 }
 
 }

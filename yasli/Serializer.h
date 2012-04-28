@@ -93,7 +93,7 @@ typedef std::vector<Serializer> Serializers;
 
 // ---------------------------------------------------------------------------
 
-class ContainerSerializationInterface{
+class ContainerInterface{
 public:
 	virtual size_t size() const = 0;
 	virtual size_t resize(size_t size) = 0;
@@ -113,10 +113,10 @@ public:
 };
 
 template<class T>
-class ContainerSerializationArrayImpl : public ContainerSerializationInterface{/*{{{*/
+class ContainerArray : public ContainerInterface{/*{{{*/
 	friend class Archive;
 public:
-	explicit ContainerSerializationArrayImpl(T* array = 0, int size = 0)
+	explicit ContainerArray(T* array = 0, int size = 0)
 	: array_(array)
 	, size_(size)
 	, index_(0)
@@ -162,7 +162,7 @@ private:
 };/*}}}*/
 
 class ClassFactoryBase;
-class PointerSerializationInterface
+class PointerInterface
 {
 public:
 	virtual TypeID type() const = 0;

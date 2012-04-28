@@ -14,10 +14,10 @@
 namespace yasli {
 
 template<class Container, class Element>
-class ContainerSerializationSTLImpl : public ContainerSerializationInterface/*{{{*/
+class ContainerSTL : public ContainerInterface/*{{{*/
 {
 public:
-	explicit ContainerSerializationSTLImpl(Container* container = 0)
+	explicit ContainerSTL(Container* container = 0)
 	: container_(container)
 	, size_(container->size())
 	, it_(container->begin())
@@ -127,24 +127,24 @@ protected:
 template<class T, class Alloc>
 bool serialize(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label)
 {
-	yasli::ContainerSerializationSTLImpl<std::vector<T, Alloc>, T> ser(&container);
-	return ar(static_cast<yasli::ContainerSerializationInterface&>(ser), name, label);
+	yasli::ContainerSTL<std::vector<T, Alloc>, T> ser(&container);
+	return ar(static_cast<yasli::ContainerInterface&>(ser), name, label);
 }
 
 template<class T, class Alloc>
 bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label)
 {
-	yasli::ContainerSerializationSTLImpl<std::list<T, Alloc>, T> ser(&container);
-	return ar(static_cast<yasli::ContainerSerializationInterface&>(ser), name, label);
+	yasli::ContainerSTL<std::list<T, Alloc>, T> ser(&container);
+	return ar(static_cast<yasli::ContainerInterface&>(ser), name, label);
 }
 
 // ---------------------------------------------------------------------------
 namespace yasli {
 
-class StlStringInterface : public StringInterface
+class StringSTL : public StringInterface
 {
 public:
-	StlStringInterface(std::string& str) : str_(str) { }
+	StringSTL(std::string& str) : str_(str) { }
 
 	void set(const char* value) { str_ = value; }
 	const char* get() const { return str_.c_str(); }
@@ -167,7 +167,7 @@ private:
 
 inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label)
 {
-	yasli::StlStringInterface str(value);
+	yasli::StringSTL str(value);
 	return ar(static_cast<yasli::StringInterface&>(str), name, label);
 }
 
@@ -175,10 +175,10 @@ inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, 
 
 namespace yasli {
 
-class StlWStringInterface : public WStringInterface
+class WStringSTL : public WStringInterface
 {
 public:
-	StlWStringInterface(std::wstring& str) : str_(str) { }
+	WStringSTL(std::wstring& str) : str_(str) { }
 
 	void set(const wchar_t* value) { str_ = value; }
 	const wchar_t* get() const { return str_.c_str(); }
@@ -190,6 +190,6 @@ private:
 
 inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
 {
-	yasli::StlWStringInterface str(value);
+	yasli::WStringSTL str(value);
 	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
 }

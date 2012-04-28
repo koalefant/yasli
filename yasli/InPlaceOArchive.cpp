@@ -191,7 +191,7 @@ bool InPlaceOArchive::operator()(const Serializer& ser, const char* name, const 
 	return true;
 }
 
-bool InPlaceOArchive::operator()(ContainerSerializationInterface &container, const char* name, const char* label)
+bool InPlaceOArchive::operator()(ContainerInterface &container, const char* name, const char* label)
 {
 	container.extractInPlacePointers(*this);
 
@@ -225,7 +225,7 @@ void InPlaceOArchive::inPlacePointer(void** pointer, size_t offset)
 	pushPointer(memberOffset, buffer_.position() + offset);
 }
 
-bool InPlaceOArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+bool InPlaceOArchive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
 	if(!ptr.get())
 		return false;

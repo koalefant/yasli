@@ -237,7 +237,7 @@ bool BinOArchive::operator()(const Serializer& ser, const char* name, const char
     return true;
 }
 
-bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool BinOArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
 	openNode(name, false);
 
@@ -275,7 +275,7 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
     return true;
 }
 
-bool BinOArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+bool BinOArchive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
     YASLI_ASSERT_STR(ptr.baseType().registered() && "Writing type with unregistered base", ptr.baseType().name());
     YASLI_ASSERT_STR(!ptr.get() || ptr.type().registered() && "Writing unregistered type", ptr.type().name());
@@ -596,7 +596,7 @@ bool BinIArchive::operator()(const Serializer& ser, const char* name, const char
 	return true;
 }
 
-bool BinIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool BinIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
 	if(strlen(name)){
 		if(!openNode(name))
@@ -629,7 +629,7 @@ bool BinIArchive::operator()(ContainerSerializationInterface& ser, const char* n
 	}
 }
 
-bool BinIArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
 	if(strlen(name) && !openNode(name))
 		return false;

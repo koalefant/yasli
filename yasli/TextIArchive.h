@@ -44,7 +44,7 @@ public:
 	bool operator()(char& value, const char* name = "", const char* label = 0);
 
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
-	bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
+	bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0);
 
 	using Archive::operator();
 private:

@@ -14,7 +14,7 @@ inline bool Serializer::operator()(Archive& ar, const char* name, const char* la
 }
 
 
-inline void PointerSerializationInterface::serialize(Archive& ar) const
+inline void PointerInterface::serialize(Archive& ar) const
 {
 		TypeID baseTypeID = baseType();
 		TypeID oldTypeID = type();

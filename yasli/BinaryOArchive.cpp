@@ -232,7 +232,7 @@ bool BinaryOArchive::operator()(const Serializer &ser, const char *_name, const 
     return true;
 }
 
-bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char *_name, const char* label)
+bool BinaryOArchive::operator()(ContainerInterface &ser, const char *_name, const char* label)
 {
     int size = int(ser.size());
     TypeID type = ser.type();
@@ -253,7 +253,7 @@ bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char
 }
 
 
-bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const char *_name, const char* label)
+bool BinaryOArchive::operator()(PointerInterface &_ptr, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_POINTER, _name);
     YASLI_ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());

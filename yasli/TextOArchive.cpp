@@ -9,7 +9,6 @@
 
 #include "StdAfx.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
 #include <float.h>
 
@@ -435,52 +434,52 @@ bool TextOArchive::operator()(bool& value, const char* name, const char* label)
 
 bool TextOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-	placeIndent();
-	placeName(name);
-	(*buffer_) << "\""; 
-	const char* str = value.get();
-	escapeString(*buffer_, str, str + strlen(value.get()));
-	(*buffer_) << "\"";
-	return true;
+    placeIndent();
+    placeName(name);
+    (*buffer_) << "\""; 
+    const char* str = value.get();
+    escapeString(*buffer_, str, str + strlen(value.get()));
+    (*buffer_) << "\"";
+    return true;
 }
 
 inline char* writeUtf16ToUtf8(char* s, unsigned int ch)
 {
-	const unsigned char byteMark = 0x80;
-	const unsigned char byteMask = 0xBF;
+  const unsigned char byteMark = 0x80;
+  const unsigned char byteMask = 0xBF;
 
-	size_t len;
+  size_t len;
 
-	if (ch < 0x80)
-		len = 1;
-	else if (ch < 0x800)
-		len = 2;
-	else if (ch < 0x10000)
-		len = 3;
-	else if (ch < 0x200000)
-		len = 4;
-	else
-		return s;
+  if (ch < 0x80)
+    len = 1;
+  else if (ch < 0x800)
+    len = 2;
+  else if (ch < 0x10000)
+    len = 3;
+  else if (ch < 0x200000)
+    len = 4;
+  else
+    return s;
 
-	s += len;
+  s += len;
 
-	const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
-	switch(len)
-	{
-	case 4:
-	*--s = (char)((ch | byteMark) & byteMask); 
-	ch >>= 6;
-	case 3:
-	*--s = (char)((ch | byteMark) & byteMask); 
-	ch >>= 6;
-	case 2:
-	*--s = (char)((ch | byteMark) & byteMask); 
-	ch >>= 6;
-	case 1:
-	*--s = (char)(ch | firstByteMark[len]);
-	}
+  const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+  switch(len)
+  {
+  case 4:
+  *--s = (char)((ch | byteMark) & byteMask); 
+  ch >>= 6;
+  case 3:
+  *--s = (char)((ch | byteMark) & byteMask); 
+  ch >>= 6;
+  case 2:
+  *--s = (char)((ch | byteMark) & byteMask); 
+  ch >>= 6;
+  case 1:
+  *--s = (char)(ch | firstByteMark[len]);
+  }
 
-	return s + len;
+  return s + len;
 }
 
 bool TextOArchive::operator()(WStringInterface& value, const char* name, const char* label)
@@ -490,11 +489,11 @@ bool TextOArchive::operator()(WStringInterface& value, const char* name, const c
 	(*buffer_) << "\""; 
 
 	const wchar_t* in = value.get();
-	for(; *in; ++in)
-	{
-		char buf[6];
+  for(; *in; ++in)
+  {
+    char buf[6];
 		escapeString(*buffer_, buf, writeUtf16ToUtf8(buf, *in));
-	}
+  }
 
 	(*buffer_) << "\"";
 	return true;
@@ -610,7 +609,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name, const cha
 }
 
 
-bool TextOArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool TextOArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     placeIndent();
     placeName(name);

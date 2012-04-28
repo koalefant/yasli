@@ -263,9 +263,9 @@ bool BinaryIArchive::operator()(bool& value, const char* name, const char* label
 
 bool BinaryIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-    const char *start, *end;
+	const char *start, *end;
 
-    if(findNode(BINARY_NODE_STRING, Token(name), &start, &end))
+	if(findNode(BINARY_NODE_STRING, Token(name), &start, &end))
 	{
 		// TODO: use stack string
 		std::string temp(pos_, end);
@@ -273,7 +273,7 @@ bool BinaryIArchive::operator()(StringInterface& value, const char* name, const 
 		pos_ = end;
 		return true;
 	}
-    return false;
+	return false;
 }
 
 bool BinaryIArchive::operator()(float& value, const char* name, const char* label)
@@ -401,7 +401,7 @@ bool BinaryIArchive::operator()(const Serializer& ser, const char* _name, const 
     return false;
 }
 
-bool BinaryIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool BinaryIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     int size;
     Token typeName;
@@ -424,7 +424,7 @@ bool BinaryIArchive::operator()(ContainerSerializationInterface& ser, const char
     return false;
 }
 
-bool BinaryIArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+bool BinaryIArchive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
     Token baseTypeName;
     Token typeName;

@@ -37,8 +37,8 @@ public:
 	bool operator()(char& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 
 	bool operator()(const Serializer &ser, const char* name, const char* label);
-	bool operator()(ContainerSerializationInterface &container, const char* name, const char* label);
-	bool operator()(const PointerSerializationInterface& ptr, const char* name, const char* label);
+	bool operator()(ContainerInterface &container, const char* name, const char* label);
+	bool operator()(PointerInterface& ptr, const char* name, const char* label);
 	void inPlacePointer(void** pointer, size_t offset);
 
 	using Archive::operator();
