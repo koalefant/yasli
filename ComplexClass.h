@@ -11,7 +11,7 @@
 #include "yasli/StringList.h" 
 using namespace yasli;
 
-#define YCHECK(x) ASSERT(x); CHECK(x)
+#define YCHECK(x) YASLI_ASSERT(x); CHECK(x)
 
 #ifdef _MSC_VER
 # pragma warning(disable: 4146) // unary minus operator applied to unsigned type, result still unsigned
