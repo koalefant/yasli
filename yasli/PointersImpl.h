@@ -90,53 +90,6 @@ protected:
 };
 
 
-template<class T>
-void SharedPtr<T>::serialize(Archive& ar)
-{
-    static TypeID baseTypeID = TypeID::get<T>();
-
-    TypeID oldTypeID;
-    if(*this)
-        oldTypeID = TypeID::get(&**this);
-
-    if(ar.isOutput()){
-        if(*this){
-            if(ar(oldTypeID, "", "<")){
-                YASLI_ASSERT(*this);
-                ar(**this, "", "<");
-            }
-            else
-                ar.warning("Unable to write typeID!");
-        }
-    }
-    else{
-        TypeID typeID;
-        if(!ar(typeID, "", "<")){
-            if(*this){
-                YASLI_ASSERT((*this)->refCount() == 1);
-                this->set((T*)0);
-            }
-            return;
-        }
-
-        if(oldTypeID && (!typeID || (typeID != oldTypeID))){
-            YASLI_ASSERT((*this)->refCount() == 1);
-            this->set((T*)0);
-        }
-
-        if(typeID){
-            if(!this->get()){
-                T* ptr = ClassFactory<T>::the().create(typeID);
-                YASLI_ASSERT(ptr);
-                this->set(ptr);
-                YASLI_ASSERT(this->get());
-            }
-            YASLI_ASSERT(*this);
-            ar(**this, "", "<");
-        }
-    }
-}
-
 }
 
 template<class T>
