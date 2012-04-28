@@ -503,6 +503,7 @@ void PropertyTree::revert()
 
 	update();
 	updateAttachedPropertyTree();
+	signalReverted_.emit();
 }
 
 void PropertyTree::apply()

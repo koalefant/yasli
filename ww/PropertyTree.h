@@ -97,6 +97,7 @@ public:
 
     signal0& signalChanged(){ return signalChanged_; }
     signal0& signalSelected(){ return signalSelected_; }
+    signal0& signalReverted(){ return signalReverted_; }
 
 	void onSignalChanged() { signalChanged_.emit(); }
 
@@ -188,6 +189,7 @@ protected:
 	int cursorX_;
 
     signal0 signalChanged_;
+    signal0 signalReverted_;
     signal0 signalSelected_;
 
     PolyPtr<PropertyRowWidget> widget_; // in-place widget
