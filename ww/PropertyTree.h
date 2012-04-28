@@ -79,6 +79,7 @@ public:
     void attach(Serializer serializer);
     void attach(Serializers& serializers);
 	void attachPropertyTree(PropertyTree* propertyTree);
+	void getSelectionSerializers(Serializers* serializers);
     void detach();
 	bool attached() const { return !attached_.empty(); }
 

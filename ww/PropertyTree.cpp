@@ -832,10 +832,8 @@ void PropertyTree::attachPropertyTree(PropertyTree* propertyTree)
 	updateAttachedPropertyTree(); 
 }
 
-void PropertyTree::updateAttachedPropertyTree()
+void PropertyTree::getSelectionSerializers(Serializers* serializers)
 {
-	if(attachedPropertyTree_){
-		Serializers serializers;
 		TreeSelection::const_iterator i;
 		FOR_EACH(model()->selection(), i){
 			PropertyRow* row = model()->rowFromPath(*i);
@@ -845,15 +843,22 @@ void PropertyTree::updateAttachedPropertyTree()
 			Serializer ser = row->serializer();
 
 			if (!ser) {
-				if(row->pulledUp() || row->pulledBefore()) {
-					if (PropertyRow* parent = row->parent())
-						ser = parent->serializer();
+				while(row && (row->pulledUp() || row->pulledBefore())) {
+					row = row->parent();
 				}
+				ser = row->serializer();
 			}
 			
 			if (ser)
-				serializers.push_back(ser);
+				serializers->push_back(ser);
 		}
+}
+
+void PropertyTree::updateAttachedPropertyTree()
+{
+	if(attachedPropertyTree_){
+		Serializers serializers;
+		getSelectionSerializers(&serializers);
 		attachedPropertyTree_->attach(serializers);
 	}
 }
