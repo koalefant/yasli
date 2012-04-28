@@ -87,12 +87,12 @@ public:
 
 	// basic types
 	virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
-	virtual bool operator()(std::string& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
-	virtual bool operator()(std::wstring& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
+	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
 	virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
 	virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
   // there is no point to support long double since it is represented as double on MSVC
-	virtual bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
 
 	virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
 	virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }

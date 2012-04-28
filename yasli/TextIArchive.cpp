@@ -18,6 +18,9 @@
 
 namespace yasli{
 
+using std::string;
+using std::wstring;
+
 static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -40,43 +43,44 @@ static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void unescapeString(std::string& dest, const char* begin, const char* end)
+void unescapeString(string& buf, const char* begin, const char* end)
 {
-    dest.resize(end - begin);
-    char* ptr = &dest[0];
-    while(begin != end){
-        if(*begin != '\\'){
-            *ptr = *begin;
-            ++ptr;
-        }
-        else{
-            ++begin;
-            if(begin == end)
-                break;
+	// TODO: use stack string
+	buf.resize(end-begin);
+	char* ptr = &buf[0];
+	while(begin != end){
+		if(*begin != '\\'){
+			*ptr = *begin;
+			++ptr;
+		}
+		else{
+			++begin;
+			if(begin == end)
+				break;
 
-            switch(*begin){
-            case '0':  *ptr = '\0'; ++ptr; break;
-            case 't':  *ptr = '\t'; ++ptr; break;
-            case 'n':  *ptr = '\n'; ++ptr; break;
-            case '\\': *ptr = '\\'; ++ptr; break;
-            case '\"': *ptr = '\"'; ++ptr; break;
-            case '\'': *ptr = '\''; ++ptr; break;
-            case 'x':
-                if(begin + 2 < end){
-                    *ptr = (hexValueTable[int(begin[1])] << 4) + hexValueTable[int(begin[2])];
-                    ++ptr;
-                    begin += 2;
-                    break;
-                }
-            default:
-                *ptr = *begin;
-                ++ptr;
-                break;
-            }
-        }
-        ++begin;
-    }
-    dest.resize(ptr - &dest[0]);
+			switch(*begin){
+			case '0':  *ptr = '\0'; ++ptr; break;
+			case 't':  *ptr = '\t'; ++ptr; break;
+			case 'n':  *ptr = '\n'; ++ptr; break;
+			case '\\': *ptr = '\\'; ++ptr; break;
+			case '\"': *ptr = '\"'; ++ptr; break;
+			case '\'': *ptr = '\''; ++ptr; break;
+			case 'x':
+					   if(begin + 2 < end){
+						   *ptr = (hexValueTable[int(begin[1])] << 4) + hexValueTable[int(begin[2])];
+						   ++ptr;
+						   begin += 2;
+						   break;
+					   }
+			default:
+					   *ptr = *begin;
+					   ++ptr;
+					   break;
+			}
+		}
+		++begin;
+	}
+	buf.resize(ptr - &buf[0]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1053,17 +1057,123 @@ bool TextIArchive::operator()(double& value, const char* name, const char* label
     return false;
 }
 
-bool TextIArchive::operator()(std::string& value, const char* name, const char* label)
+bool TextIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        if(checkStringValueToken())
-			unescapeString(value, token_.start + 1, token_.end - 1);
+        if(checkStringValueToken()){
+			string buf;
+			unescapeString(buf, token_.start + 1, token_.end - 1);
+			value.set(buf.c_str());
+		}
 		else
 			return false;
         return true;
     }
     return false;
+}
+
+
+inline size_t utf8InUtf16Len(const char* p)
+{
+  size_t result = 0;
+
+  for(; *p; ++p)
+  {
+    unsigned char ch = (unsigned char)(*p);
+
+    if(ch < 0x80 || (ch >= 0xC0 && ch < 0xFC))
+      ++result;
+  }
+
+  return result;
+}
+
+inline const char* readUtf16FromUtf8(unsigned int* ch, const char* s)
+{
+  const unsigned char byteMark = 0x80;
+  const unsigned char byteMaskRead = 0x3F;
+
+  const unsigned char* str = (const unsigned char*)s;
+
+  size_t len;
+  if(*str < byteMark)
+  {
+    *ch = *str;
+    return s + 1;
+  }
+  else if(*str < 0xC0)
+  {
+    *ch = ' ';
+    return s + 1;
+  }
+  else if(*str < 0xE0)
+    len = 2;
+  else if(*str < 0xF0)
+    len = 3;
+  else if(*str < 0xF8)
+    len = 4;
+  else if(*str < 0xFC)
+    len = 5;
+  else{
+    *ch = ' ';
+    return s + 1;
+  }
+
+  const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+  *ch = (*str++ & ~firstByteMark[len]);
+
+  switch(len) 
+  {
+  case 5:
+    (*ch) <<= 6;
+    (*ch) += (*str++ & byteMaskRead);
+  case 4:
+    (*ch) <<= 6;
+    (*ch) += (*str++ & byteMaskRead);
+  case 3:
+    (*ch) <<= 6;
+    (*ch) += (*str++ & byteMaskRead);
+  case 2:
+    (*ch) <<= 6;
+    (*ch) += (*str++ & byteMaskRead);
+  }
+  
+  return (const char*)str;
+}
+
+
+inline void utf8ToUtf16(std::wstring* out, const char* in)
+{
+  out->clear();
+  out->reserve(utf8InUtf16Len(in));
+
+  for (; *in;)
+  {
+    unsigned int character;
+    in = readUtf16FromUtf8(&character, in);
+    (*out) += (wchar_t)character;
+  }
+}
+
+
+bool TextIArchive::operator()(WStringInterface& value, const char* name, const char* label)
+{
+	if(findName(name)){
+		readToken();
+		if(checkStringValueToken()){
+			string buf;
+			unescapeString(buf, token_.start + 1, token_.end - 1);
+			wstring wbuf;
+			utf8ToUtf16(&wbuf, buf.c_str());
+			value.set(wbuf.c_str());
+		}
+		else
+			return false;
+		return true;
+	}
+	return false;
+
 }
 
 bool TextIArchive::operator()(bool& value, const char* name, const char* label)
@@ -1114,3 +1224,4 @@ bool TextIArchive::operator()(char& value, const char* name, const char* label)
 }
 
 }
+// vim:ts=4 sw=4:

@@ -25,7 +25,7 @@ public:
   void close();
 
   bool operator()(bool& value, const char* name = "", const char* label = 0);
-  bool operator()(std::string& value, const char* name = "", const char* label = 0);
+  bool operator()(StringInterface& value, const char* name = "", const char* label = 0);
   bool operator()(float& value, const char* name = "", const char* label = 0);
   bool operator()(double& value, const char* name = "", const char* label = 0);
   bool operator()(short& value, const char* name = "", const char* label = 0);

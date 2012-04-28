@@ -123,19 +123,19 @@ bool BinOArchive::operator()(bool& value, const char* name, const char* label)
     return true;
 }
 
-bool BinOArchive::operator()(string& value, const char* name, const char* label)
+bool BinOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
     openNode(name);
-	stream_ << value.c_str();
+	stream_ << value.get();
 	stream_.write(char(0));
     closeNode(name);
     return true;
 }
 
-bool BinOArchive::operator()(wstring& value, const char* name, const char* label)
+bool BinOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	openNode(name);
-	stream_ << value.c_str();
+	stream_ << value.get();
 	stream_.write(short(0));
 	closeNode(name);
 	return true;
@@ -381,7 +381,7 @@ bool BinIArchive::operator()(bool& value, const char* name, const char* label)
 	return true;
 }
 
-bool BinIArchive::operator()(string& value, const char* name, const char* label)
+bool BinIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -391,12 +391,14 @@ bool BinIArchive::operator()(string& value, const char* name, const char* label)
 	if(!openNode(name))
 		return false;
 
-	read(value);
+	string str;
+	read(str);
+	value.set(str.c_str());
 	closeNode(name);
 	return true;
 }
 
-bool BinIArchive::operator()(wstring& value, const char* name, const char* label)
+bool BinIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -406,7 +408,9 @@ bool BinIArchive::operator()(wstring& value, const char* name, const char* label
 	if(!openNode(name))
 		return false;
 
-	read(value);
+	wstring str;
+	read(str);
+	value.set(str.c_str());
 	closeNode(name);
 	return true;
 }

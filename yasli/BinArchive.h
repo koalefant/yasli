@@ -44,8 +44,8 @@ public:
 	bool save(const char* fileName);
 
 	bool operator()(bool& value, const char* name, const char* label);
-	bool operator()(std::string& value, const char* name, const char* label);
-	bool operator()(std::wstring& value, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label);
+	bool operator()(WStringInterface& value, const char* name, const char* label);
 	bool operator()(float& value, const char* name, const char* label);
 	bool operator()(double& value, const char* name, const char* label);
 	bool operator()(int& value, const char* name, const char* label);
@@ -88,8 +88,8 @@ public:
 	void close();
 
 	bool operator()(bool& value, const char* name, const char* label);
-	bool operator()(std::string& value, const char* name, const char* label);
-	bool operator()(std::wstring& value, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label);
+	bool operator()(WStringInterface& value, const char* name, const char* label);
 	bool operator()(float& value, const char* name, const char* label);
 	bool operator()(double& value, const char* name, const char* label);
 	bool operator()(short& value, const char* name, const char* label);

@@ -124,10 +124,10 @@ bool BinaryOArchive::operator()(bool &value, const char *_name, const char* labe
     return true;
 }
 
-bool BinaryOArchive::operator()(std::string &value, const char *_name, const char* label)
+bool BinaryOArchive::operator()(StringInterface &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_STRING, _name);
-    stream_->write(value.c_str(), value.length());
+    stream_->write(value.get(), strlen(value.get()));
     closeNode();
     return true;
 }

@@ -9,9 +9,11 @@
 
 #include "StdAfx.h"
 
+#include "yasli/STL.h"
 #include "yasli/ClassFactory.h"
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
+#include "yasli/STLImpl.h"
 
 namespace yasli{
 

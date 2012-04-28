@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "yasli/Serializer.h"
+
 namespace yasli {
 
 template<class Container, class Element>
@@ -134,4 +136,60 @@ bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* n
 {
 	yasli::ContainerSerializationSTLImpl<std::list<T, Alloc>, T> ser(&container);
 	return ar(static_cast<yasli::ContainerSerializationInterface&>(ser), name, label);
+}
+
+// ---------------------------------------------------------------------------
+namespace yasli {
+
+class StlStringInterface : public StringInterface
+{
+public:
+	StlStringInterface(std::string& str) : str_(str) { }
+
+	void set(const char* value) { str_ = value; }
+	const char* get() const { return str_.c_str(); }
+	const char** getInplacePointer() const
+	{
+#ifdef _MSC_VER
+		bool usesInternalBuffer = str_.c_str() >= (const char*)&str_ && str_.c_str() < (const char*)&str_ + sizeof(str_);
+		if (!usesInternalBuffer)
+			return ((const char**)&str_) + 2;
+#else
+		YASLI_ASSERT(0 && "Unsupported platform");
+#endif
+		return 0;
+	}
+private:
+	std::string& str_;
+};
+
+}
+
+inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label)
+{
+	yasli::StlStringInterface str(value);
+	return ar(static_cast<yasli::StringInterface&>(str), name, label);
+}
+
+// ---------------------------------------------------------------------------
+
+namespace yasli {
+
+class StlWStringInterface : public WStringInterface
+{
+public:
+	StlWStringInterface(std::wstring& str) : str_(str) { }
+
+	void set(const wchar_t* value) { str_ = value; }
+	const wchar_t* get() const { return str_.c_str(); }
+private:
+	std::wstring& str_;
+};
+
+}
+
+inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
+{
+	yasli::StlWStringInterface str(value);
+	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
 }

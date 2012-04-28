@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "yasli/Pointers.h"
 #include "yasli/ClassFactoryBase.h"
 #include "yasli/ClassFactory.h"
 

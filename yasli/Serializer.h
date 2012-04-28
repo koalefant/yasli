@@ -89,6 +89,7 @@ private:
 	size_t size_;
 	SerializeStructFunc serializeFunc_;
 };/*}}}*/
+typedef std::vector<Serializer> Serializers;
 
 // ---------------------------------------------------------------------------
 
@@ -175,7 +176,20 @@ public:
 	void serialize(Archive& ar) const;
 };
 
-typedef std::vector<Serializer> Serializers;
+class StringInterface
+{
+public:
+	virtual void set(const char* value) = 0;
+	virtual const char* get() const = 0;
+	virtual const char** getInplacePointer() const{ return 0; }
+};
+class WStringInterface
+{
+public:
+	virtual void set(const wchar_t* value) = 0;
+	virtual const wchar_t* get() const = 0;
+	virtual const wchar_t** getInplacePointer() const{ return 0; }
+};
 
 }
 // vim:ts=4 sw=4:

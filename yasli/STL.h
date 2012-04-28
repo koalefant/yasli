@@ -21,3 +21,6 @@ bool serialize(yasli::Archive& ar, std::vector<T, Alloc>& container, const char*
 
 template<class T, class Alloc>
 bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label);
+
+bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label);

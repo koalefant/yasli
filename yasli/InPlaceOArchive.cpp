@@ -114,37 +114,33 @@ void InPlaceOArchive::popChunk()
 }
 
 
-bool InPlaceOArchive::operator()(std::string& value, const char* name, const char* label)
+bool InPlaceOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-	size_t offset;
-	if (!findOffset(&offset, &value, name))
-		return false;
-#ifdef _MSC_VER
-	bool usesInternalBuffer = value.c_str() >= (const char*)&value && value.c_str() < (const char*)&value + sizeof(value);
-	if (!usesInternalBuffer)
-		pushPointer(offset + 8, buffer_.position());
-#else
-  YASLI_ASSERT(0 && "Unsupported platform");
-#endif
+	if (const char** ptr = value.getInplacePointer()){
+		if (!ptr)
+			return true;
+		size_t offset;
+		if (!findOffset(&offset, ptr, name))
+			return false;
+		pushPointer(offset, buffer_.position());
+	}
 
-	appendChunk((void*)value.c_str(), TypeID::get<char>(), sizeof(char), value.size() + 1);
+	appendChunk((void*)value.get(), TypeID::get<char>(), sizeof(char), strlen(value.get()) + 1);
 	return true;
 }
 
-bool InPlaceOArchive::operator()(std::wstring& value, const char* name, const char* label)
+bool InPlaceOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
-	size_t offset;
-	if (!findOffset(&offset, &value, name))
-		return false;
-#ifdef _MSC_VER
-	bool usesInternalBuffer = value.c_str() >= (const wchar_t*)&value && value.c_str() < (wchar_t*)&value + sizeof(value) / sizeof(wchar_t);
-	if (!usesInternalBuffer)
-		pushPointer(offset + 8, buffer_.position());
-#else
-  YASLI_ASSERT(0 && "Unsupported platform");
-#endif
+	if (const wchar_t** ptr = value.getInplacePointer()){
+		if (!ptr)
+			return true;
+		size_t offset;
+		if (!findOffset(&offset, ptr, name))
+			return false;
+		pushPointer(offset, buffer_.position());
+	}
 
-	appendChunk((void*)value.c_str(), TypeID::get<wchar_t>(), sizeof(wchar_t), value.size() + 1);
+	appendChunk((void*)value.get(), TypeID::get<wchar_t>(), sizeof(wchar_t), wcslen(value.get()) + 1);
 	return true;
 }
 

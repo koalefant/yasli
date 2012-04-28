@@ -21,8 +21,8 @@ public:
 	bool save(const char* filename);
 
 	bool operator()(bool& value, const char* name, const char* label) { return findOffset(0, &value, name); }
-	bool operator()(std::string& value, const char* name, const char* label);
-	bool operator()(std::wstring& value, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label);
+	bool operator()(WStringInterface& value, const char* name, const char* label);
 	bool operator()(float& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 	bool operator()(double& value, const char* name, const char* label) { return findOffset(0, &value, name); }
 	bool operator()(int& value, const char* name, const char* label) { return findOffset(0, &value, name); }

@@ -10,8 +10,6 @@
 #include "StdAfx.h"
 #include "BinaryIArchive.h"
 
-using std::string;
-
 namespace yasli{
 
 const unsigned int BINARY_MAGIC = 0xb1a4c17e;
@@ -263,16 +261,18 @@ bool BinaryIArchive::operator()(bool& value, const char* name, const char* label
     return false;
 }
 
-bool BinaryIArchive::operator()(string& value, const char* name, const char* label)
+bool BinaryIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
     const char *start, *end;
 
     if(findNode(BINARY_NODE_STRING, Token(name), &start, &end))
-    {
-        value.assign(pos_, end);
-        pos_ = end;
-        return true;
-    }
+	{
+		// TODO: use stack string
+		std::string temp(pos_, end);
+		value.set(temp.c_str());
+		pos_ = end;
+		return true;
+	}
     return false;
 }
 
@@ -456,3 +456,4 @@ bool BinaryIArchive::operator()(const PointerSerializationInterface& ptr, const 
 
 }
 
+// vim:ts=4 sw=4:
