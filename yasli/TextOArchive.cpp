@@ -9,7 +9,7 @@
 
 #include "StdAfx.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/ArchiveWStringImpl.h"
+#include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h"
 #include <float.h>
 
