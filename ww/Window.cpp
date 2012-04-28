@@ -411,10 +411,10 @@ void Window::showAll()
 }
 
 
-void Window::setTitle(std::string title)
+void Window::setTitle(const char* title)
 {
 	title_ = title;
-	window_->setWindowText(toWideChar(title.c_str()).c_str());
+	window_->setWindowText(toWideChar(title).c_str());
 }
 
 void Window::setShowTitleBar(bool showTitleBar)
@@ -606,7 +606,7 @@ void Window::onClose()
 void Window::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar(_property(title_, this, &Window::setTitle), "title", "Title");
+		//ar(_property(title_, this, &Window::setTitle), "title", "Title");
 		ar(_property(defaultSize_, this, &Window::setDefaultSize), "defaultSize", "Default Size");
 		ar(resizeable_, "resizeable", "Resizeable");
 		if(resizeable_){

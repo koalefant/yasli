@@ -63,7 +63,7 @@ public:
 	void remove();
 
 	/// sets window titlebar
-	void setTitle(std::string str);
+	void setTitle(const char* str);
 
 	void setShowTitleBar(bool showTitleBar);
 	void setIconFromResource(const char* resourceName);
