@@ -21,7 +21,7 @@ InPlaceOArchive::InPlaceOArchive(bool resolveGraphs)
 
 bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, const char* name)
 {
-	ESCAPE(!stack_.empty(), return false);
+	YASLI_ESCAPE(!stack_.empty(), return false);
 
 	if (!stack_.empty())
 	{
@@ -38,7 +38,7 @@ bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, 
 			MemoryWriter msg;
 			msg << "Address of member '" << name << "' lies out of '" << chunk.typeID.name() << "' struct. Are you serializing a stack variable?";
 			warning(msg.c_str());
-			ASSERT_STR(0, msg.c_str());
+			YASLI_ASSERT_STR(0, msg.c_str());
 			return false;
 		}
 	}
@@ -51,7 +51,7 @@ bool InPlaceOArchive::save(const char* filename)
 	buf.write("YINPA32", 8);
 
 	size_t headerSize = int(pointerOffsets_.size() * sizeof(size_t));
-    ESCAPE(headerSize <= UINT_MAX, return false);
+    YASLI_ESCAPE(headerSize <= UINT_MAX, return false);
 	buf.write(size_t(headerSize));
 	if (!pointerOffsets_.empty())
 		buf.write((const char*)&pointerOffsets_[0], int(headerSize));
@@ -73,7 +73,7 @@ void InPlaceOArchive::pushPointer(size_t offset, size_t pointToOffset)
 	pointerOffsets_.push_back(offset);
 	if (!resolveGraphs_)
 	{
-		ASSERT(offset + sizeof(void*) <= buffer_.position());
+		YASLI_ASSERT(offset + sizeof(void*) <= buffer_.position());
 		size_t* ptr = (size_t*)&buffer_.buffer()[offset];
 		*ptr = pointToOffset;
 	}
@@ -124,7 +124,7 @@ bool InPlaceOArchive::operator()(std::string& value, const char* name, const cha
 	if (!usesInternalBuffer)
 		pushPointer(offset + 8, buffer_.position());
 #else
-  ASSERT(0 && "Unsupported platform");
+  YASLI_ASSERT(0 && "Unsupported platform");
 #endif
 
 	appendChunk((void*)value.c_str(), TypeID::get<char>(), sizeof(char), value.size() + 1);
@@ -141,7 +141,7 @@ bool InPlaceOArchive::operator()(std::wstring& value, const char* name, const ch
 	if (!usesInternalBuffer)
 		pushPointer(offset + 8, buffer_.position());
 #else
-  ASSERT(0 && "Unsupported platform");
+  YASLI_ASSERT(0 && "Unsupported platform");
 #endif
 
 	appendChunk((void*)value.c_str(), TypeID::get<wchar_t>(), sizeof(wchar_t), value.size() + 1);
@@ -162,7 +162,7 @@ void InPlaceOArchive::rewritePointers()
 		}
 
 		PointerToOffset::iterator it = pointerToOffset_.find(address);
-		ESCAPE(it != pointerToOffset_.end(), continue);
+		YASLI_ESCAPE(it != pointerToOffset_.end(), continue);
 		size_t dehydratedOffset = it->second;
 
 		(size_t&)(buffer_.buffer()[offset]) = dehydratedOffset;
@@ -224,7 +224,7 @@ bool InPlaceOArchive::operator()(ContainerSerializationInterface &container, con
 void InPlaceOArchive::inPlacePointer(void** pointer, size_t offset)
 {
 	size_t memberOffset;
-	ESCAPE(findOffset(&memberOffset, (void*)pointer, sizeof(pointer), "pointer"), return);
+	YASLI_ESCAPE(findOffset(&memberOffset, (void*)pointer, sizeof(pointer), "pointer"), return);
 
 	pushPointer(memberOffset, buffer_.position() + offset);
 }
@@ -239,14 +239,14 @@ bool InPlaceOArchive::operator()(const PointerSerializationInterface& ptr, const
 	const ClassFactoryBase *factory = ClassFactoryManager::the().find(ptr.baseType());
 	if (!factory)
 	{
-		ASSERT_STR(0 && "Base type is not registered", ptr.baseType().name());;
+		YASLI_ASSERT_STR(0 && "Base type is not registered", ptr.baseType().name());;
 		return false;
 	}
 
 	size_t size = factory->sizeOf(derivedType);
 	if (size == 0)
 	{
-		ASSERT_STR(0 && "No type description for type", ptr.type().name());;
+		YASLI_ASSERT_STR(0 && "No type description for type", ptr.type().name());;
 		return false;
 	}
 

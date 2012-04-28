@@ -47,15 +47,15 @@ public:
     : stringList_(&stringList)
     , index_(stringList.find(value))
     {
-        ASSERT(index_ != StringListStatic::npos);
+        YASLI_ASSERT(index_ != StringListStatic::npos);
     }
     StringListStaticValue& operator=(const char* value){
         index_ = stringList_->find(value);
 		return *this;
     }
     StringListStaticValue& operator=(int value){
-		ASSERT(value >= 0 && std::size_t(value) < stringList_->size());
-        ASSERT(this != 0);
+		YASLI_ASSERT(value >= 0 && std::size_t(value) < stringList_->size());
+        YASLI_ASSERT(this != 0);
         index_ = value;
 		return *this;
     }
@@ -126,21 +126,21 @@ public:
     : stringList_(stringList)
     , index_(stringList.find(value))
     {
-        ASSERT(index_ != StringList::npos);
+        YASLI_ASSERT(index_ != StringList::npos);
     }
     StringListValue(const StringListStatic& stringList, const char* value)
     : stringList_(stringList)
     , index_(stringList.find(value))
     {
-        ASSERT(index_ != StringList::npos);
+        YASLI_ASSERT(index_ != StringList::npos);
     }
     StringListValue& operator=(const char* value){
         index_ = stringList_.find(value);
 		return *this;
     }
     StringListValue& operator=(int value){
-		ASSERT(value >= 0 && std::size_t(value) < stringList_.size());
-        ASSERT(this != 0);
+		YASLI_ASSERT(value >= 0 && std::size_t(value) < stringList_.size());
+        YASLI_ASSERT(this != 0);
         index_ = value;
 		return *this;
     }

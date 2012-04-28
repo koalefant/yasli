@@ -39,7 +39,7 @@ const TypeDescription* TypeLibrary::find(TypeID typeID) const
 
 const TypeDescription* TypeLibrary::findByName(const char* name) const
 {
-    ASSERT(name && strlen(name));
+    YASLI_ASSERT(name && strlen(name));
     TypeToDescriptionMap::const_iterator it;
 
     for(it = typeToDescriptionMap_.begin(); it != typeToDescriptionMap_.end(); ++it)

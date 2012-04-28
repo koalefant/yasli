@@ -97,8 +97,8 @@ public:
     };
 
     void add(const _Key& key, CreatorBase *const creator){
-        ASSERT(creators_.find(key) == creators_.end());
-        ASSERT(creator);
+        YASLI_ASSERT(creators_.find(key) == creators_.end());
+        YASLI_ASSERT(creator);
         creators_[key] = creator;
     }
 
@@ -134,7 +134,7 @@ public:
     std::size_t size() const { return creators_.size(); }
 
     _Product* createByIndex(int index, Constructor ctor = Constructor()) const{
-        ASSERT(index >= 0 && index < creators_.size());
+        YASLI_ASSERT(index >= 0 && index < creators_.size());
         typename Creators::const_iterator it = creators_.begin();
         std::advance(it, index);
         return it->second->create(ctor);

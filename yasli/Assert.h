@@ -10,16 +10,16 @@
 #pragma once 
 #include <stdio.h>
 
-#ifdef ASSERT
-# undef ASSERT
+#ifdef YASLI_ASSERT
+# undef YASLI_ASSERT
 #endif
 
-#ifdef VERIFY
-# undef VERIFY
+#ifdef YASLI_VERIFY
+# undef YASLI_VERIFY
 #endif
 
-#ifdef ESCAPE
-# undef ESCAPE
+#ifdef YASLI_ESCAPE
+# undef YASLI_ESCAPE
 #endif
 
 namespace yasli{
@@ -32,7 +32,7 @@ void setInteractiveAssertion(bool interactive);
 int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line);
 }
 # ifdef WIN32
-#  define ASSERT(x) \
+#  define YASLI_ASSERT(x) \
       { \
           static bool ignore = false; \
           if(!(x) && !ignore) \
@@ -42,7 +42,7 @@ int assertionDialog(const char* message, const char* str, const char* function, 
           case 2: __debugbreak(); break;  \
           }  \
       } 
-#  define ASSERT_STR(x, str) \
+#  define YASLI_ASSERT_STR(x, str) \
       { \
           static bool ignore = false; \
           if(!(x) && !ignore) \
@@ -53,12 +53,12 @@ int assertionDialog(const char* message, const char* str, const char* function, 
           }  \
       } 
 # else
-#  define ASSERT(x) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x "\n\tin %s()\n", __LINE__, __FUNCTION__); }  }
-#  define ASSERT_STR(x, str) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x " (%s)\n\tin %s()\n", __LINE__, str, __FUNCTION__); }  }
+#  define YASLI_ASSERT(x) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x "\n\tin %s()\n", __LINE__, __FUNCTION__); }  }
+#  define YASLI_ASSERT_STR(x, str) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x " (%s)\n\tin %s()\n", __LINE__, str, __FUNCTION__); }  }
 # endif
 #else
-# define ASSERT(x)
-# define ASSERT_STR(x, str)
+# define YASLI_ASSERT(x)
+# define YASLI_ASSERT_STR(x, str)
 #endif
 
-#define ESCAPE(x, action) if(!(x)) { ASSERT(0 && #x); action; };
+#define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; };

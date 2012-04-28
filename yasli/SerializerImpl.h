@@ -5,7 +5,7 @@
 namespace yasli {
 
 inline bool Serializer::operator()(Archive& ar) const{
-	ESCAPE(serializeFunc_ && object_, return false);
+	YASLI_ESCAPE(serializeFunc_ && object_, return false);
 	return serializeFunc_(object_, ar);
 }
 

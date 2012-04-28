@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 #include "BinaryOArchive.h"
+//#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/ClassFactory.h"
@@ -32,13 +33,13 @@ void BinaryOArchive::clear()
 
 size_t BinaryOArchive::length() const
 { 
-    ESCAPE(stream_.get() != 0, return 0);
+    YASLI_ESCAPE(stream_.get() != 0, return 0);
     return stream_->position();
 }
 
 const char* BinaryOArchive::buffer()
 {
-    ESCAPE(stream_.get() != 0, return 0);
+    YASLI_ESCAPE(stream_.get() != 0, return 0);
     return stream_->buffer();
 }
 
@@ -88,7 +89,7 @@ void BinaryOArchive::closeStruct()
 void BinaryOArchive::write(const char *_string)
 {
     size_t length = strlen(_string);
-    ASSERT(length < 256 && "Unable to write string longer than 255 chars");
+    YASLI_ASSERT(length < 256 && "Unable to write string longer than 255 chars");
 	unsigned char len = (unsigned char)std::min<int>(255, (int)length);
     stream_->write((const char*)&len, 1);
     stream_->write(_string, len);
@@ -255,9 +256,9 @@ bool BinaryOArchive::operator()(ContainerSerializationInterface &ser, const char
 bool BinaryOArchive::operator()(const PointerSerializationInterface &_ptr, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_POINTER, _name);
-    ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());
-    //ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().shortName()); TODO
-    ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().name());
+    YASLI_ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());
+    //YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().shortName()); TODO
+    YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().name());
 
     TypeID baseType = _ptr.baseType();
     write(baseType.name());

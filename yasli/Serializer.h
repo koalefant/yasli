@@ -40,7 +40,7 @@ public:
 	, size_(size)
 	, serializeFunc_(serialize)
 	{
-		ASSERT(object != 0);
+		YASLI_ASSERT(object != 0);
 	}
 
 	Serializer(const Serializer& _original)
@@ -76,12 +76,12 @@ public:
 
 	template<class T>
 	static bool serializeRaw(void* rawPointer, Archive& ar){
-		ESCAPE(rawPointer, return false);
+		YASLI_ESCAPE(rawPointer, return false);
 		((T*)(rawPointer))->serialize(ar);
 		return true;
 	}
 
-	void serialize(Archive& ar) { ASSERT(0); }
+	void serialize(Archive& ar) { YASLI_ASSERT(0); }
 private:
 
 	TypeID type_;
@@ -101,7 +101,7 @@ public:
 	virtual void* pointer() const = 0;
 	virtual TypeID type() const = 0;
 	virtual bool next() = 0;
-	virtual void extractInPlacePointers(Archive& ar) const { ASSERT(0 && "Not implemented"); }
+	virtual void extractInPlacePointers(Archive& ar) const { YASLI_ASSERT(0 && "Not implemented"); }
 
 	virtual void* elementPointer() const = 0;
 	virtual size_t elementSize() const = 0;
@@ -140,7 +140,7 @@ public:
 	virtual bool isFixedSize() const{ return true; }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
-		ESCAPE(size_t(index_) < size_, return false);
+		YASLI_ESCAPE(size_t(index_) < size_, return false);
 		return ar(array_[index_], name, label);
 	}
 	operator bool() const{ return array_ != 0; }
@@ -170,7 +170,7 @@ public:
 	virtual Serializer serializer() const = 0;
 	virtual void* get() const = 0;
 	virtual ClassFactoryBase* factory() const = 0;
-	virtual void extractInPlacePointers(Archive& ar) const{ ASSERT(0 && "Not implemented"); }
+	virtual void extractInPlacePointers(Archive& ar) const{ YASLI_ASSERT(0 && "Not implemented"); }
 	
 	void serialize(Archive& ar) const;
 };

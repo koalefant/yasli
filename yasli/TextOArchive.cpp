@@ -328,7 +328,7 @@ TextOArchive::TextOArchive(int textWidth, const char* header)
     if(header_)
         (*buffer_) << header_;
 
-    ASSERT(stack_.empty());
+    YASLI_ASSERT(stack_.empty());
     stack_.push_back(Level(false, 0, 0));
 }
 
@@ -339,10 +339,10 @@ TextOArchive::~TextOArchive()
 
 bool TextOArchive::save(const char* fileName)
 {
-    ESCAPE(fileName && strlen(fileName) > 0, return false);
-    ESCAPE(stack_.size() == 1, return false);
-    ESCAPE(buffer_.get() != 0, return false);
-    ESCAPE(buffer_->position() <= buffer_->size(), return false);
+    YASLI_ESCAPE(fileName && strlen(fileName) > 0, return false);
+    YASLI_ESCAPE(stack_.size() == 1, return false);
+    YASLI_ESCAPE(buffer_.get() != 0, return false);
+    YASLI_ESCAPE(buffer_->position() <= buffer_->size(), return false);
     stack_.pop_back();
     if(FILE* file = fopen(fileName, "wb")){
         if(fwrite(buffer_->c_str(), 1, buffer_->position(), file) != buffer_->position()){
@@ -539,7 +539,7 @@ bool TextOArchive::operator()(const Serializer& ser, const char* name, const cha
     openBracket();
     stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2)));
 
-    ASSERT(ser);
+    YASLI_ASSERT(ser);
     ser(*this);
 
     bool joined = joinLinesIfPossible();
@@ -580,7 +580,7 @@ bool TextOArchive::operator()(ContainerSerializationInterface& ser, const char* 
 
 static char* joinLines(char* start, char* end)
 {
-    ASSERT(start <= end);
+    YASLI_ASSERT(start <= end);
     char* next = start;
     while(next != end){
         if(*next != '\t' && *next != '\r'){
@@ -597,22 +597,22 @@ static char* joinLines(char* start, char* end)
 
 bool TextOArchive::joinLinesIfPossible()
 {
-	ASSERT(!stack_.empty());
-	std::size_t startPosition = stack_.back().startPosition;
-	ASSERT(startPosition < buffer_->size());
-	int indentCount = stack_.back().indentCount;
-	//ASSERT(startPosition >= indentCount);
-	if(buffer_->position() - startPosition - indentCount < std::size_t(textWidth_)){
-		char* buffer = buffer_->buffer();
-		char* start = buffer + startPosition;
-		char* end = buffer + buffer_->position();
-		end = joinLines(start, end);
-		std::size_t newPosition = end - buffer;
-		ASSERT(newPosition <= buffer_->position());
-		buffer_->setPosition(newPosition);
-		return true;
-	}
-	return false;
+    YASLI_ASSERT(!stack_.empty());
+    std::size_t startPosition = stack_.back().startPosition;
+    YASLI_ASSERT(startPosition < buffer_->size());
+    int indentCount = stack_.back().indentCount;
+    //YASLI_ASSERT(startPosition >= indentCount);
+    if(buffer_->position() - startPosition - indentCount < std::size_t(textWidth_)){
+        char* buffer = buffer_->buffer();
+        char* start = buffer + startPosition;
+        char* end = buffer + buffer_->position();
+        end = joinLines(start, end);
+        std::size_t newPosition = end - buffer;
+        YASLI_ASSERT(newPosition <= buffer_->position());
+        buffer_->setPosition(newPosition);
+        return true;
+    }
+    return false;
 }
 
 }

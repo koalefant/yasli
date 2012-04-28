@@ -67,7 +67,7 @@ public:
 	bool isEdit() const{ return caps_ & EDIT ? true : false; }
 	bool isInPlace() const{ return caps_ & INPLACE ? true : false; }
 	bool caps(int caps) const { return (caps_ & caps) == caps; }
-	virtual void inPlacePointer(void** pointer, size_t offset) { ASSERT(0 && "Not implemented"); }
+	virtual void inPlacePointer(void** pointer, size_t offset) { YASLI_ASSERT(0 && "Not implemented"); }
 
 	virtual void warning(const char* message) {}
 	virtual void close() {}
@@ -78,8 +78,8 @@ public:
 	}
 	int getFilter() const{ return filter_; }
 	bool filter(int flags) const{
-		ASSERT(flags != 0 && "flags is supposed to be a bit mask");
-		ASSERT(filter_ && "Filter is not set!");
+		YASLI_ASSERT(flags != 0 && "flags is supposed to be a bit mask");
+		YASLI_ASSERT(filter_ && "Filter is not set!");
 		return (filter_ & flags) != 0;
 	}
 
@@ -153,7 +153,7 @@ protected:
 	int caps_;
 
 private:
-	void notImplemented() { ASSERT(0 && "Not implemented!"); }
+	void notImplemented() { YASLI_ASSERT(0 && "Not implemented!"); }
 
 	int filter_;
 };
@@ -203,7 +203,7 @@ inline bool Archive::operator()(const PointerSerializationInterface& ptr, const 
 template<class T, int Size>
 bool serialize(yasli::Archive& ar, T object[Size], const char* name, const char* label)
 {
-	ASSERT(0);
+	YASLI_ASSERT(0);
 	return false;
 }
 
@@ -211,7 +211,7 @@ template<class T>
 bool serialize(yasli::Archive& ar, const T& object, const char* name, const char* label)
 {
 	T::unable_to_serialize_CONST_object();
-	ASSERT(0);
+	YASLI_ASSERT(0);
 	return false;
 }
 

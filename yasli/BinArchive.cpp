@@ -100,7 +100,7 @@ inline void BinOArchive::closeNode(const char* name, bool size8)
 		}
 	}
 	else{
-		ASSERT(!size8);
+		YASLI_ASSERT(!size8);
 		if(size < 0x10000){
 			*sizePtr = SIZE16;
 			*((unsigned short*)(sizePtr + 1)) = size;
@@ -277,8 +277,8 @@ bool BinOArchive::operator()(ContainerSerializationInterface& ser, const char* n
 
 bool BinOArchive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
 {
-    ASSERT_STR(ptr.baseType().registered() && "Writing type with unregistered base", ptr.baseType().name());
-    ASSERT_STR(!ptr.get() || ptr.type().registered() && "Writing unregistered type", ptr.type().name());
+    YASLI_ASSERT_STR(ptr.baseType().registered() && "Writing type with unregistered base", ptr.baseType().name());
+    YASLI_ASSERT_STR(!ptr.get() || ptr.type().registered() && "Writing unregistered type", ptr.type().name());
 
 	openNode(name, false);
 
@@ -362,7 +362,7 @@ bool BinIArchive::openNode(const char* name)
 
 void BinIArchive::closeNode(const char* name, bool check) 
 {
-	ASSERT(!check || currentBlock().validToClose());
+	YASLI_ASSERT(!check || currentBlock().validToClose());
 	blocks_.pop_back();
 }
 

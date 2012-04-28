@@ -108,7 +108,7 @@ bool BinaryIArchive::read(Token* str)
   unsigned char len;
   if(!read(&len))
     return false;
-  ESCAPE(pos_ + len <= end_, return false;);
+  YASLI_ESCAPE(pos_ + len <= end_, return false;);
   *str = Token(pos_, pos_ + len);
   pos_ += len;
   return true;
@@ -129,12 +129,12 @@ bool BinaryIArchive::readUnsafe(char *_data, int _size)
 
 bool BinaryIArchive::openStruct(const char *_name, Token* typeName)
 {
-	ESCAPE(!blocks_.empty(), return false);
+	YASLI_ESCAPE(!blocks_.empty(), return false);
     const char *start;
     const char *end;
     if(findNode (BINARY_NODE_STRUCT, Token(_name), &start, &end))
     {
-        ESCAPE(read(typeName), return false;);
+        YASLI_ESCAPE(read(typeName), return false;);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -147,8 +147,8 @@ bool BinaryIArchive::openContainer(const char *_name, Token *_typeName, int *_si
     const char *start, *end;
     if(findNode(BINARY_NODE_CONTAINER, Token(_name), &start, &end))
     {
-        ESCAPE(read(_typeName), return false);
-        ESCAPE(read(_size), return false);
+        YASLI_ESCAPE(read(_typeName), return false);
+        YASLI_ESCAPE(read(_size), return false);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -161,8 +161,8 @@ bool BinaryIArchive::openPointer(const char *_name, Token *_baseType, Token *_ty
     const char *start, *end;
     if(findNode(BINARY_NODE_POINTER, Token(_name), &start, &end))
     {
-        ESCAPE(read(_baseType), return false;);
-        ESCAPE(read(_type), return false;;);
+        YASLI_ESCAPE(read(_baseType), return false;);
+        YASLI_ESCAPE(read(_type), return false;;);
         blocks_.push_back(Block(start, pos_, end));
         pullPosition_ = 0;
         return true;
@@ -178,7 +178,7 @@ void BinaryIArchive::closeStruct()
     pullPosition_ = block.start;
     pos_ = block.end;
 
-    ASSERT(*((unsigned int*)pullPosition_) == block.end - block.start);
+    YASLI_ASSERT(*((unsigned int*)pullPosition_) == block.end - block.start);
 }
 
 void BinaryIArchive::closeContainer()
@@ -194,14 +194,14 @@ void BinaryIArchive::closePointer()
 size_t BinaryIArchive::readNodeHeader(BinaryNode* _type, Token* name)
 {
     unsigned int blockSize;
-    ESCAPE(read(&blockSize), return 0);
+    YASLI_ESCAPE(read(&blockSize), return 0);
 	size_t lastBlockSize = blocks_.back().end - blocks_.back().start;
-    ASSERT(blockSize >= 4 && blockSize <= (unsigned int)(lastBlockSize));
+    YASLI_ASSERT(blockSize >= 4 && blockSize <= (unsigned int)(lastBlockSize));
     unsigned char type;
-    ESCAPE(read(&type), return 0);
+    YASLI_ESCAPE(read(&type), return 0);
     *_type = BinaryNode(type);
 
-    ESCAPE(read(name), return blockSize);
+    YASLI_ESCAPE(read(name), return blockSize);
     return blockSize;
 }
 
@@ -256,7 +256,7 @@ bool BinaryIArchive::operator()(bool& value, const char* name, const char* label
     if(findNode(BINARY_NODE_BOOL, name))
     {
 		unsigned char byteValue;
-        ESCAPE(read(&byteValue), return false);
+        YASLI_ESCAPE(read(&byteValue), return false);
 		value = byteValue ? true : false;
         return true;
     }
@@ -280,7 +280,7 @@ bool BinaryIArchive::operator()(float& value, const char* name, const char* labe
 {
     if(findNode(BINARY_NODE_FLOAT, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -290,7 +290,7 @@ bool BinaryIArchive::operator()(double& value, const char* name, const char* lab
 {
     if(findNode(BINARY_NODE_DOUBLE, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -300,7 +300,7 @@ bool BinaryIArchive::operator()(short& value, const char* name, const char* labe
 {
     if(findNode(BINARY_NODE_INT16, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -310,7 +310,7 @@ bool BinaryIArchive::operator()(unsigned short& value, const char* name, const c
 {
     if(findNode(BINARY_NODE_UINT16, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -321,7 +321,7 @@ bool BinaryIArchive::operator()(int& value, const char* name, const char* label)
 {
     if(findNode(BINARY_NODE_INT32, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -331,7 +331,7 @@ bool BinaryIArchive::operator()(unsigned int& value, const char* name, const cha
 {
     if(findNode(BINARY_NODE_UINT32, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -341,7 +341,7 @@ bool BinaryIArchive::operator()(long long& value, const char* name, const char* 
 {
     if(findNode(BINARY_NODE_INT64, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -351,7 +351,7 @@ bool BinaryIArchive::operator()(unsigned long long& value, const char* name, con
 {
     if(findNode(BINARY_NODE_UINT64, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -361,7 +361,7 @@ bool BinaryIArchive::operator()(signed char& value, const char* name, const char
 {
     if(findNode(BINARY_NODE_SBYTE, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -371,7 +371,7 @@ bool BinaryIArchive::operator()(unsigned char& value, const char* name, const ch
 {
     if(findNode(BINARY_NODE_BYTE, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -381,7 +381,7 @@ bool BinaryIArchive::operator()(char& value, const char* name, const char* label
 {
     if(findNode(BINARY_NODE_SBYTE, name))
     {
-        ESCAPE(read(&value), return false);
+        YASLI_ESCAPE(read(&value), return false);
         return true;
     }
     return false;
@@ -407,7 +407,7 @@ bool BinaryIArchive::operator()(ContainerSerializationInterface& ser, const char
     Token typeName;
     if(openContainer( name, &typeName, &size))
     {
-		ESCAPE(size < 1024 * 1024, return false);
+		YASLI_ESCAPE(size < 1024 * 1024, return false);
         ser.resize(size_t(size));
 
         if(ser.size() > 0)

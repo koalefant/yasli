@@ -123,13 +123,13 @@ public:
 
 	BaseType* createByIndex(int index) const
 	{
-		ASSERT(size_t(index) < creators_.size());
+		YASLI_ASSERT(size_t(index) < creators_.size());
 		return creators_[index]->create();
 	}
 
 	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label)
 	{
-		ESCAPE(size_t(index) < creators_.size(), return);
+		YASLI_ESCAPE(size_t(index) < creators_.size(), return);
 		BaseType* ptr = creators_[index]->create();
 		ar(*ptr, name, label);
 		delete ptr;

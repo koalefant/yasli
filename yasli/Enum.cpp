@@ -17,7 +17,7 @@ namespace yasli{
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
-	ESCAPE( name && label, return );
+	YASLI_ESCAPE( name && label, return );
 	nameToValue_[name] = value;
 	labelToValue_[label] = value;
 	valueToName_[value] = name;
@@ -86,13 +86,13 @@ bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* na
 const char* EnumDescription::name(int value) const
 {
     ValueToName::const_iterator it = valueToName_.find(value);
-    ESCAPE(it != valueToName_.end(), return "");
+    YASLI_ESCAPE(it != valueToName_.end(), return "");
     return it->second;
 }
 const char* EnumDescription::label(int value) const
 {
     ValueToLabel::const_iterator it = valueToLabel_.find(value);
-    ESCAPE(it != valueToLabel_.end(), return "");
+    YASLI_ESCAPE(it != valueToLabel_.end(), return "");
     return it->second;
 }
 
@@ -104,7 +104,7 @@ StringListStatic EnumDescription::nameCombination(int bitVector) const
             bitVector &= ~i->first;
             strings.push_back(i->second);
         }
-	ASSERT(!bitVector && "Unregistered enum value");
+	YASLI_ASSERT(!bitVector && "Unregistered enum value");
     return strings;
 }
 
@@ -116,7 +116,7 @@ StringListStatic EnumDescription::labelCombination(int bitVector) const
             bitVector &= ~i->first;
             strings.push_back(i->second);
         }
-	ASSERT(!bitVector && "Unregistered enum value");
+	YASLI_ASSERT(!bitVector && "Unregistered enum value");
 	return strings;
 }
 
@@ -132,13 +132,13 @@ int EnumDescription::indexByValue(int value) const
 int EnumDescription::value(const char* name) const
 {
     NameToValue::const_iterator it = nameToValue_.find(name);
-    ESCAPE(it != nameToValue_.end(), return 0);
+    YASLI_ESCAPE(it != nameToValue_.end(), return 0);
     return it->second;
 }
 int EnumDescription::valueByLabel(const char* label) const
 {
     LabelToValue::const_iterator it = labelToValue_.find(label);
-    ESCAPE(it != labelToValue_.end(), return 0);
+    YASLI_ESCAPE(it != labelToValue_.end(), return 0);
     return it->second;
 }
 

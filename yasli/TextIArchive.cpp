@@ -428,7 +428,7 @@ Token Tokenizer::operator()(const char* ptr) const
 #endif
 			cur.start = cur.end;
 		}
-		ASSERT(!isSpace(*cur.end));
+		YASLI_ASSERT(!isSpace(*cur.end));
 		if(isQuote(*cur.end)){
 			++cur.end;
 			while(*cur.end){ 
@@ -456,7 +456,7 @@ Token Tokenizer::operator()(const char* ptr) const
 			}
 		}
 		else{
-			//ASSERT(*cur.end);
+			//YASLI_ASSERT(*cur.end);
 			if(!*cur.end)
 				return cur;
 
@@ -531,10 +531,10 @@ bool TextIArchive::load(const char* filename)
 		void* buffer = 0;
 		if(fileSize > 0){
 			buffer = std::malloc(fileSize + 1);
-			ASSERT(buffer != 0);
+			YASLI_ASSERT(buffer != 0);
 			memset(buffer, 0, fileSize + 1);
 			size_t elementsRead = std::fread(buffer, fileSize, 1, file);
-			ASSERT(((char*)(buffer))[fileSize] == '\0');
+			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
 				return false;
 			}
@@ -559,8 +559,8 @@ void TextIArchive::readToken()
 #ifdef DEBUG_TEXTIARCHIVE
 	std::cout << " ~ read token '" << token_.str() << "' at " << token_.start - reader_->begin() << std::endl ;
 	if(token_){
-		ASSERT(token_.start < reader_->end());
-		ASSERT(token_.start[0] != '\001');
+		YASLI_ASSERT(token_.start < reader_->end());
+		YASLI_ASSERT(token_.start[0] != '\001');
 	}
 #endif
 }
@@ -583,9 +583,9 @@ bool TextIArchive::isName(Token token) const
 	if(!token)
 		return false;
 	char firstChar = token.start[0];
-	ASSERT(firstChar != '\0');
-	ASSERT(firstChar != ' ');
-	ASSERT(firstChar != '\n');
+	YASLI_ASSERT(firstChar != '\0');
+	YASLI_ASSERT(firstChar != ' ');
+	YASLI_ASSERT(firstChar != '\n');
     if((firstChar >= 'a' && firstChar <= 'z') ||
        (firstChar >= 'A' && firstChar <= 'Z'))
 	{
@@ -620,7 +620,7 @@ void TextIArchive::expect(char token)
         MemoryWriter msg;
         msg << "Error parsing file, expected '=' at line " << line(token_.start) << ":\n"
          << std::string(token_.start, lineEnd).c_str();
-		ASSERT_STR(0, msg.c_str());
+		YASLI_ASSERT_STR(0, msg.c_str());
     }
 }
 
@@ -645,7 +645,7 @@ bool TextIArchive::findName(const char* name)
     std::cout << " * finding name '" << name << "'" << std::endl;
     std::cout << "   started at byte " << int(token_.start - reader_->start) << std::endl;
 #endif
-    ASSERT(!stack_.empty());
+    YASLI_ASSERT(!stack_.empty());
     const char* start = 0;
     const char* blockBegin = stack_.back().start;
 	if(*blockBegin == '\0')
@@ -729,7 +729,7 @@ bool TextIArchive::findName(const char* name)
         std::cout << "'" << token_.str() << "'" << std::endl;
         std::cout << "Checking for loop: " << token_.start - reader_->start << " and " << start - reader_->begin() << std::endl;
 #endif
-				ASSERT(start != 0);
+				YASLI_ASSERT(start != 0);
         if(token_.start == start){
             putToken();
 #ifdef DEBUG_TEXTIARCHIVE
@@ -801,11 +801,11 @@ bool TextIArchive::closeBracket()
 
         if(!token_){
             MemoryWriter msg;
-            ASSERT(!stack_.empty());
+            YASLI_ASSERT(!stack_.empty());
             const char* start = stack_.back().start;
             msg << filename_.c_str() << ": " << line(start) << " line";
             msg << ": End of file while no matching bracket found";
-			ASSERT_STR(0, msg.c_str());
+			YASLI_ASSERT_STR(0, msg.c_str());
 			return false;
         }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
@@ -856,10 +856,10 @@ bool TextIArchive::operator()(const Serializer& ser, const char* name, const cha
             stack_.push_back(Level());
             stack_.back().start = token_.end;
             ser(*this);
-            ASSERT(!stack_.empty());
+            YASLI_ASSERT(!stack_.empty());
             stack_.pop_back();
             bool closed = closeBracket();
-            ASSERT(closed);
+            YASLI_ASSERT(closed);
             return true;
         }
     }
@@ -880,14 +880,14 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
                 readToken();
 				if(token_ == '}')
 				{
-				    ASSERT(0 && "Syntax error: closing container with '}'");
+				    YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
 					return false;
 				}
                 if(token_ == ']')
                     break;
                 else if(!token_)
 				{
-                    ASSERT(0 && "Reached end of file while reading container!");
+                    YASLI_ASSERT(0 && "Reached end of file while reading container!");
 					return false;
 				}
                 putToken();
@@ -905,7 +905,7 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
             if(size > index)
                 ser.resize(index);
 
-            ASSERT(!stack_.empty());
+            YASLI_ASSERT(!stack_.empty());
             stack_.pop_back();
             return true;
         }
@@ -916,12 +916,12 @@ bool TextIArchive::operator()(ContainerSerializationInterface& ser, const char* 
 void TextIArchive::checkValueToken()
 {
     if(!token_){
-        ASSERT(!stack_.empty());
+        YASLI_ASSERT(!stack_.empty());
         MemoryWriter msg;
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
     }
 }
 
@@ -933,7 +933,7 @@ bool TextIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
 		return false;
     }
     if(token_.start[0] != '"' || token_.end[-1] != '"'){
@@ -942,7 +942,7 @@ bool TextIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": Expected string";
-        ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
 		return false;
     }
     return true;

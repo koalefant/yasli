@@ -26,7 +26,7 @@ const void* InPlaceIArchive::load(size_t rootSize, const char* filename)
   size_t fileSize = ftell(file);
   fseek(file, 0, SEEK_SET);
 
-	ESCAPE(fileSize >= rootSize, return 0);
+	YASLI_ESCAPE(fileSize >= rootSize, return 0);
 
 	char header[8];
 	if (fread(header, sizeof(header), 1, file) != 1)
@@ -39,7 +39,7 @@ const void* InPlaceIArchive::load(size_t rootSize, const char* filename)
 	if (fread(&offsetsSize, sizeof(offsetsSize), 1, file) != 1)
 		return 0;
 
-	ESCAPE(offsetsSize < 1024 * 1024 * 1024, return 0);
+	YASLI_ESCAPE(offsetsSize < 1024 * 1024 * 1024, return 0);
 	std::vector<size_t> pointerOffsets;
 	pointerOffsets.resize(offsetsSize / sizeof(size_t));
 	if (!pointerOffsets.empty())
@@ -66,7 +66,7 @@ const void* InPlaceIArchive::load(size_t rootSize, const char* filename)
 	for (size_t i = 0; i < numPointers; ++i)
 	{
 		size_t pointerOffset = pointerOffsets[i];
-		ESCAPE(pointerOffset <= dataSize, return 0);
+		YASLI_ESCAPE(pointerOffset <= dataSize, return 0);
 		size_t offset = (size_t&)data[pointerOffset];
 		reinterpret_cast<char*&>(data[pointerOffset]) = data + offset;
 	}

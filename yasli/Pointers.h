@@ -74,7 +74,7 @@ public:
     PolyPtr(U* ptr)
     {
 		// TODO: replace with static_assert
-		ASSERT("PolyRefCounter must be a first base when used with multiple inheritance." && 
+		YASLI_ASSERT("PolyRefCounter must be a first base when used with multiple inheritance." && 
 			   static_cast<PolyRefCounter*>(ptr) == reinterpret_cast<PolyRefCounter*>(ptr));
         set(static_cast<PolyRefCounter*>(ptr));
     }

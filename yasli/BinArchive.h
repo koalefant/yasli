@@ -120,7 +120,7 @@ private:
 
 		  void read(void *data, int size)
 		  {
-			  ASSERT(curr_ + size <= end_);
+			  YASLI_ASSERT(curr_ + size <= end_);
 			  memcpy(data, curr_, size);
 			  curr_ += size;	
 		  }
@@ -130,13 +130,13 @@ private:
 
 		  void read(std::string& s)
 		  {
-			  ASSERT(curr_ + strlen(curr_) < end_);
+			  YASLI_ASSERT(curr_ + strlen(curr_) < end_);
 			  s = curr_;
 			  curr_ += strlen(curr_) + 1;
 		  }
 		  void read(std::wstring& s)
 		  {
-			  ASSERT(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_);
+			  YASLI_ASSERT(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_);
 			  s = (wchar_t*)curr_;
 			  curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
 		  }

@@ -20,7 +20,7 @@ public:
 	, size_(container->size())
 	, it_(container->begin())
 	{
-		ASSERT(container_ != 0);
+		YASLI_ASSERT(container_ != 0);
 	}
 
 	template<class T, class A>
@@ -43,7 +43,7 @@ public:
 
 	void extractInPlacePointersHelper(Archive& ar, ...) const
 	{
-		ASSERT(0 && "Container is not supported");
+		YASLI_ASSERT(0 && "Container is not supported");
 	}
 
 	template<class T, class A> 
@@ -63,18 +63,18 @@ public:
 		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
 		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
 #else
-    ASSERT(0 && "Unsupported platform");
+    YASLI_ASSERT(0 && "Unsupported platform");
 // # warning Unsupported platform
 #endif
 	}
 
 	// from ContainerSerializationInterface
 	size_t size() const{
-		ESCAPE(container_ != 0, return 0);
+		YASLI_ESCAPE(container_ != 0, return 0);
 		return container_->size();
 	}
 	size_t resize(size_t size){
-		ESCAPE(container_ != 0, return 0);
+		YASLI_ESCAPE(container_ != 0, return 0);
 		resizeHelper(size, container_);
 		it_ = container_->begin();
 		size_ = size;
@@ -86,7 +86,7 @@ public:
 
 	bool next()
 	{
-		ESCAPE(container_ && it_ != container_->end(), return false);
+		YASLI_ESCAPE(container_ && it_ != container_->end(), return false);
 		++it_;
 		return it_ != container_->end();
 	}
@@ -95,7 +95,7 @@ public:
   size_t elementSize() const { return sizeof(typename Container::value_type); }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
-		ESCAPE(container_, return false);
+		YASLI_ESCAPE(container_, return false);
 		if(it_ == container_->end())
 		{
 			it_ = container_->insert(container_->end(), Element());

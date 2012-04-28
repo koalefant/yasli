@@ -25,14 +25,14 @@ MemoryReader::MemoryReader()
 MemoryReader::MemoryReader(const char* fileName)
 {
     FILE* file = fopen(fileName, "rb");
-    ASSERT(file != 0);
+    YASLI_ASSERT(file != 0);
     if(file){
         fseek(file, 0, SEEK_END);
         std::size_t len = ftell(file);
         fseek(file, 0, SEEK_SET);
         memory_ = new char[len];
         std::size_t count = fread((void*)memory_, 1, len, file);
-        ASSERT(count == len);
+        YASLI_ASSERT(count == len);
         ownedMemory_ = true;
         position_ = memory_;
         size_ = len;
@@ -64,8 +64,8 @@ void MemoryReader::setPosition(const char* position)
 
 void MemoryReader::read(void* data, std::size_t size)
 {
-    ASSERT(memory_ && position_);
-    ASSERT(position_ - memory_ + size <= size_);
+    YASLI_ASSERT(memory_ && position_);
+    YASLI_ASSERT(position_ - memory_ + size <= size_);
     ::memcpy(data, position_, size);
     position_ += size;
 }

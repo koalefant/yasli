@@ -44,10 +44,10 @@ void MemoryWriter::alloc(std::size_t initialSize)
 
 void MemoryWriter::realloc(std::size_t newSize)
 {
-    ASSERT(newSize > size_);
+    YASLI_ASSERT(newSize > size_);
     std::size_t pos = position();
     memory_ = (char*)std::realloc(memory_, newSize + 1);
-    ASSERT(memory_ != 0);
+    YASLI_ASSERT(memory_ != 0);
     position_ = memory_ + pos;
     size_ = newSize;
 }
@@ -148,7 +148,7 @@ inline void cutRightZeros(const char* str)
 
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
-	ASSERT(!isnan(value));
+	// YASLI_ASSERT(!isnan(value)); disabled, because physics data is not always initialized
 
 	int point = 0;
 	int sign = 0;
@@ -188,7 +188,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 MemoryWriter& MemoryWriter::operator<<(const char* value)
 {
     write((void*)value, strlen(value));
-    ASSERT(position() < size());
+    YASLI_ASSERT(position() < size());
     *position_ = '\0';
     return *this;
 }
@@ -196,15 +196,15 @@ MemoryWriter& MemoryWriter::operator<<(const char* value)
 MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
 {
     write((void*)value, wcslen(value) * sizeof(wchar_t));
-    ASSERT(position() < size());
+    YASLI_ASSERT(position() < size());
     *position_ = '\0';
     return *this;
 }
 
 void MemoryWriter::setPosition(std::size_t pos)
 {
-    ASSERT(pos < size_);
-    ASSERT(memory_ + pos <= position_);
+    YASLI_ASSERT(pos < size_);
+    YASLI_ASSERT(memory_ + pos <= position_);
     position_ = memory_ + pos;
 }
 
@@ -215,8 +215,8 @@ void MemoryWriter::write(const char* value)
 
 bool MemoryWriter::write(const void* data, std::size_t size)
 {
-    ASSERT(memory_ <= position_);
-    ASSERT(position() < this->size());
+    YASLI_ASSERT(memory_ <= position_);
+    YASLI_ASSERT(position() < this->size());
     if(size_ - position() > size){
         memcpy(position_, data, size);
         position_ += size;
@@ -228,7 +228,7 @@ bool MemoryWriter::write(const void* data, std::size_t size)
         realloc(size_ * 2);
         write(data, size);
     }
-    ASSERT(position() < this->size());
+    YASLI_ASSERT(position() < this->size());
     return true;
 }
 
@@ -239,11 +239,11 @@ void MemoryWriter::write(char c)
         ++position_;
     }
     else{
-		ESCAPE(reallocate_, return);
+		YASLI_ESCAPE(reallocate_, return);
         realloc(size_ * 2);
         write(c);
     }
-    ASSERT(position() < this->size());
+    YASLI_ASSERT(position() < this->size());
 }
 
 }

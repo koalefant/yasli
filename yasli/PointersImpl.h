@@ -29,7 +29,7 @@ public:
 			return TypeID();
 	}
 	void create(TypeID type) const{
-		ASSERT(!ptr_ || ptr_->refCount() == 1);
+		YASLI_ASSERT(!ptr_ || ptr_->refCount() == 1);
 		if(type)
 			ptr_.set(ClassFactory<T>::the().create(type));
 		else
@@ -66,7 +66,7 @@ public:
 			return TypeID();
 	}
 	void create(TypeID type) const{
-		// ASSERT(!ptr_ || ptr_->refCount() == 1); not necessary to be true
+		// YASLI_ASSERT(!ptr_ || ptr_->refCount() == 1); not necessary to be true
 		if(type)
 			ptr_.set(ClassFactory<T>::the().create(type));
 		else
@@ -101,7 +101,7 @@ void SharedPtr<T>::serialize(Archive& ar)
     if(ar.isOutput()){
         if(*this){
             if(ar(oldTypeID, "", "<")){
-                ASSERT(*this);
+                YASLI_ASSERT(*this);
                 ar(**this, "", "<");
             }
             else
@@ -112,25 +112,25 @@ void SharedPtr<T>::serialize(Archive& ar)
         TypeID typeID;
         if(!ar(typeID, "", "<")){
             if(*this){
-                ASSERT((*this)->refCount() == 1);
+                YASLI_ASSERT((*this)->refCount() == 1);
                 this->set((T*)0);
             }
             return;
         }
 
         if(oldTypeID && (!typeID || (typeID != oldTypeID))){
-            ASSERT((*this)->refCount() == 1);
+            YASLI_ASSERT((*this)->refCount() == 1);
             this->set((T*)0);
         }
 
         if(typeID){
             if(!this->get()){
                 T* ptr = ClassFactory<T>::the().create(typeID);
-                ASSERT(ptr);
+                YASLI_ASSERT(ptr);
                 this->set(ptr);
-                ASSERT(this->get());
+                YASLI_ASSERT(this->get());
             }
-            ASSERT(*this);
+            YASLI_ASSERT(*this);
             ar(**this, "", "<");
         }
     }
