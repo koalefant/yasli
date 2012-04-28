@@ -680,11 +680,23 @@
 			>
 		</File>
 		<File
-			RelativePath=".\EnumDescription.cpp"
+			RelativePath=".\ClassFactory.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\EnumDescription.h"
+			RelativePath=".\ClassFactory.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ClassFactoryBase.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Enum.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Enum.h"
 			>
 		</File>
 		<File
@@ -777,14 +789,6 @@
 		</File>
 		<File
 			RelativePath=".\TypeID.h"
-			>
-		</File>
-		<File
-			RelativePath=".\TypesFactory.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TypesFactory.h"
 			>
 		</File>
 	</Files>
