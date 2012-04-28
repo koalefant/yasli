@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <string>
 #include <map>
 
 #include "yasli/Helpers.h"
@@ -59,7 +58,6 @@ public:
 	, filter_(0)
 	{
 	}
-
 	virtual ~Archive() {}
 
 	bool isInput() const{ return caps_ & INPUT ? true : false; }
@@ -67,11 +65,6 @@ public:
 	bool isEdit() const{ return caps_ & EDIT ? true : false; }
 	bool isInPlace() const{ return caps_ & INPLACE ? true : false; }
 	bool caps(int caps) const { return (caps_ & caps) == caps; }
-	virtual void inPlacePointer(void** pointer, size_t offset) { YASLI_ASSERT(0 && "Not implemented"); }
-
-	virtual void warning(const char* message) {}
-	virtual void close() {}
-	virtual void clear() {};
 
 	void setFilter(int filter){
 		filter_ = filter;
@@ -83,11 +76,9 @@ public:
 		return (filter_ & flags) != 0;
 	}
 
-	virtual const char* pull(){ return 0; }
-
-	// basic types
+	virtual void warning(const char* message) {}
+	virtual void inPlacePointer(void** pointer, size_t offset) { YASLI_ASSERT(0 && "Not implemented"); }
 	virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
-
 	virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
 	virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }

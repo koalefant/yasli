@@ -334,7 +334,6 @@ TextOArchive::TextOArchive(int textWidth, const char* header)
 
 TextOArchive::~TextOArchive()
 {
-    close();
 }
 
 bool TextOArchive::save(const char* fileName)

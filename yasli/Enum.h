@@ -12,13 +12,19 @@
 #include <vector>
 #include <map>
 
-#include "yasli/ConstString.h"
 #include "yasli/StringList.h"
 #include "yasli/TypeID.h"
 
 namespace yasli{
 
 class Archive;
+
+struct LessStrCmp : std::binary_function<const char*, const char*, bool>
+{
+	bool operator()(const char* l, const char* r) const{
+		return strcmp(l, r) < 0;
+	}
+};
 
 class EnumDescription{
 public:
@@ -44,9 +50,9 @@ private:
 	StringListStatic names_;
 	StringListStatic labels_;
 
-	typedef std::map<ConstString, int> NameToValue;
+	typedef std::map<const char*, int, LessStrCmp> NameToValue;
 	NameToValue nameToValue_;
-	typedef std::map<ConstString, int> LabelToValue;
+	typedef std::map<const char*, int, LessStrCmp> LabelToValue;
 	LabelToValue labelToValue_;
 	typedef std::map<int, int> ValueToIndex;
 	ValueToIndex valueToIndex_;

@@ -11,7 +11,7 @@
 
 #include "yasli/Archive.h"
 #include "yasli/Pointers.h"
-#include "yasli/ConstString.h"
+#include "yasli/Token.h"
 #include <memory>
 
 namespace yasli{

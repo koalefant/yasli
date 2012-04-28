@@ -10,7 +10,7 @@
 #pragma once
 #include "Archive.h"
 #include "BinaryNode.h"
-#include "ConstString.h"
+#include "Token.h"
 
 namespace yasli{
 
