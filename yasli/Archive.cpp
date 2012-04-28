@@ -10,8 +10,3 @@
 #include "StdAfx.h"
 #include "yasli/Archive.h"
 #include <string>
-
-// #include "yasli/TypesFactory.h"
-// namespace std{
-// YASLI_TYPE_NAME(string, "string")
-// }
