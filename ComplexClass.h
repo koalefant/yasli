@@ -2,6 +2,7 @@
 
 #include "yasli/Assert.h"
 #include "yasli/STL.h"
+#include "yasli/Pointers.h"
 #include "yasli/Archive.h"
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
