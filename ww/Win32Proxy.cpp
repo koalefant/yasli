@@ -35,10 +35,10 @@ Win32ProxyImpl::Win32ProxyImpl(Win32Proxy* owner, HWND _parent)
 	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_VISIBLE | WS_CLIPCHILDREN, rect.recti(), parent.handle()));
 	
 
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SetParent(handle_, _parent);
-	ASSERT(::GetParent(handle_) == _parent);
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::GetParent(handle_) == _parent);
+	YASLI_ASSERT(::IsWindow(handle_));
 }
 
 BOOL Win32ProxyImpl::onMessageSize(UINT type, USHORT width, USHORT height)

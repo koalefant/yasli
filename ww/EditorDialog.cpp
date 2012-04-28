@@ -32,6 +32,11 @@ EditorDialog::EditorDialog(const Serializer& serializer, const char* stateFileNa
 	init(serializer, stateFileName, flags);
 }
 
+EditorDialog::~EditorDialog()
+{
+}
+
+
 void EditorDialog::init(const Serializer& serializer, const char* stateFileName, int flags)
 {
 	serializer_ = serializer;
@@ -67,7 +72,7 @@ void EditorDialog::init(const Serializer& serializer, const char* stateFileName,
 	else
 	{
 		tree_->signalChanged().connect(this, &EditorDialog::onTreeChanged);
-		originalData_.set(new BinaryOArchive(true));
+		originalData_.reset(new BinaryOArchive(true));
 		serializer(*originalData_);
 	}
 
@@ -94,7 +99,7 @@ void EditorDialog::onResponse(int response)
 		tree_->apply();
 	}
 
-	if(response == ww::RESPONSE_CANCEL && originalData_)
+	if(response == ww::RESPONSE_CANCEL && originalData_.get() != 0)
 	{
 		BinaryIArchive ia(true);
 		if(ia.open(originalData_->buffer(), originalData_->length()))

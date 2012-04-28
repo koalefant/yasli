@@ -18,7 +18,7 @@ class _WidgetWindow;
 class _ContainerWindow;
 
 
-class WW_API _WidgetWithWindow : public Widget{
+class _WidgetWithWindow : public Widget{
 public:
 	void setSensitive(bool sensitive);
 	bool isVisible() const;
@@ -39,7 +39,7 @@ private:
 };
 
 
-class WW_API _ContainerWithWindow : public Container{
+class _ContainerWithWindow : public Container{
 public:
 	void setSensitive(bool sensitive);
 	bool isVisible() const;

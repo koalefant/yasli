@@ -15,7 +15,7 @@
 
 namespace ww{
 
-bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, Widget* parent, const char* title)
+bool edit(const Serializer& ser, const char* stateFileName, int flags, Widget* parent, const char* title)
 {
 	HWND parentHandle = 0;
 	if (parent)	{
@@ -25,7 +25,7 @@ bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, Wi
 	return edit(ser, stateFileName, flags, parentHandle, title);
 }
 
-bool WW_API edit(const Serializer& ser, const char* stateFileName, int flags, HWND parent, const char* title)
+bool edit(const Serializer& ser, const char* stateFileName, int flags, HWND parent, const char* title)
 {
 	bool result = false;
 	const char* typeName = ser.type().name();

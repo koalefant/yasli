@@ -14,11 +14,6 @@
 
 namespace ww {
 
-inline int round(float v)
-{
-	return int(v);
-}
-
 // HSV
 // h=0..360, s=0..1, v=0..1
 inline void HSVtoRGB(float h,float s,float v,
@@ -63,13 +58,13 @@ inline void HSVtoRGB(float h,float s,float v,
 			r=v; g=m; b=n;
 			break;
 		default:
-			ASSERT(0);
+			YASLI_ASSERT(0);
 		}
 	}
 
-	ASSERT(r>=0 && r<=1);
-	ASSERT(g>=0 && g<=1);
-	ASSERT(b>=0 && b<=1);
+	YASLI_ASSERT(r>=0 && r<=1);
+	YASLI_ASSERT(g>=0 && g<=1);
+	YASLI_ASSERT(b>=0 && b<=1);
 }
 
 void Color::setHSV(float h,float s,float v, unsigned char alpha)

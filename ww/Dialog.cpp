@@ -46,7 +46,7 @@ static ww::Widget* lastDialog()
 	if(spawnedDialogs.empty())
 		return 0;
 	ww::Widget* last = spawnedDialogs.back();
-	ASSERT(last);
+	YASLI_ASSERT(last);
 	Win32::Window32* window = _findWindow(last);
 	if(window && !IsWindowEnabled(window->handle()))
 		return 0;
@@ -80,7 +80,7 @@ static HWND findOwner(Widget* widget){
 	}
 	HWND parentWnd = 0;
 	Win32::Window32* window = _findWindow(widget);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	if(window)
 		return findOwner(window->handle());
 	else
@@ -179,7 +179,7 @@ int Dialog::showModal()
 	spawnedDialogs.push_back(this);
 
 	if(parentWnd_){
-		ESCAPE(::IsWindow(parentWnd_), return 0);
+		YASLI_ESCAPE(::IsWindow(parentWnd_), return 0);
 		if(::IsWindowEnabled(parentWnd_)){
 			::SetWindowPos(_window()->handle(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
             showAll();
@@ -205,7 +205,7 @@ int Dialog::showModal()
 	}
 	hide();
 
-	ASSERT(!spawnedDialogs.empty() && spawnedDialogs.back() == this);
+	YASLI_ASSERT(!spawnedDialogs.empty() && spawnedDialogs.back() == this);
 	spawnedDialogs.pop_back();
 	return response_;
 }
@@ -219,7 +219,7 @@ void Dialog::_onWMCommand(int command)
 		onResponse(cancelResponse_);
 	}
 	else{
-		ASSERT(0);
+		YASLI_ASSERT(0);
 	}
 }
 

@@ -18,7 +18,7 @@ class HotkeyContext;
 class MenuBarImpl;
 class Window;
 
-class WW_API MenuItem : public RefCounter, public has_slots
+class MenuItem : public RefCounter, public has_slots
 {
 public:
     MenuItem(const char* text)
@@ -28,6 +28,7 @@ public:
     }
 
     MenuItem& add(const char* text);
+    void addSeparator();
 
     void setText(const char* text);
     const char* text() const{ return text_.c_str(); }
@@ -57,7 +58,7 @@ private:
     friend MenuBarImpl;
 };
 
-class WW_API MenuBar : public _WidgetWithWindow{
+class MenuBar : public _WidgetWithWindow{
 public:
     MenuBar(int border = 0);
     ~MenuBar();

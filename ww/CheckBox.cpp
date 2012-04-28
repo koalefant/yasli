@@ -13,7 +13,7 @@
 #include "ww/_WidgetWindow.h"
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windowsx.h>
 
@@ -70,7 +70,7 @@ LRESULT CheckBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM
 
 void CheckBoxImpl::setCheckBoxStatus(bool status)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SendMessage(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
 }
 
@@ -103,7 +103,7 @@ void CheckBoxImpl::updateStyle()
 
 void CheckBoxImpl::setCheckBoxText(const wchar_t* text)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	WW_VERIFY(::SetWindowText(handle_, text));
 
 	updateMinimalSize();

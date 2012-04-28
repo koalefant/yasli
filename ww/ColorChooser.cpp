@@ -194,7 +194,7 @@ void ColorChooser::updateSliders(const Color& color)
 
 void ColorChooser::onRampChanged()
 {
-	ASSERT(ramp_);
+	YASLI_ASSERT(ramp_);
 	color_.set(ramp_->get().r, ramp_->get().g, ramp_->get().b, color_.a);
 	updateSliders(color_);
 	updateEntries(color_);

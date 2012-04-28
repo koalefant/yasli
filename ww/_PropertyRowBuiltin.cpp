@@ -30,7 +30,7 @@ PropertyRowBool::PropertyRowBool(const char* name, const char* label, bool value
 
 bool PropertyRowBool::assignTo(void* object, size_t size)
 {
-	ASSERT(size == sizeof(bool));
+	YASLI_ASSERT(size == sizeof(bool));
 	*reinterpret_cast<bool*>(object) = value_;
 	return true;
 }

@@ -30,7 +30,7 @@ static PopupMenuItem* nextItem(PopupMenuItem* item)
     else{
         PopupMenuItem0::Children& items = item->parent()->children();
         PopupMenuItem0::Children::iterator it = std::find(items.begin(), items.end(), item);
-        ASSERT(it != items.end());
+        YASLI_ASSERT(it != items.end());
         while(item->parent() && *it == item->parent()->children().back()){
             item = item->parent();
 			if(item->parent())
@@ -63,7 +63,7 @@ void PopupMenu::assignIDs()
 				--nextId_;
 			}
 			else {
-				ASSERT(0 && "Out of Menu IDs")
+				YASLI_ASSERT(0 && "Out of Menu IDs")
 			}
 		}
         else
@@ -113,7 +113,7 @@ static HMENU createNativeMenu(const PopupMenuItem& root, bool popupMenu)
 			wstring text = current->textW();
 
 			HMENU parentHandle = find_in_map(submenuHandles, current->parent(), 0);
-			ASSERT(parentHandle != 0);
+			YASLI_ASSERT(parentHandle != 0);
 
 			if(text == L"-")
 				AppendMenu(parentHandle, MF_SEPARATOR, id, L"");
@@ -133,9 +133,9 @@ static HMENU createNativeMenu(const PopupMenuItem& root, bool popupMenu)
 			HMENU handle = ::CreatePopupMenu();
 			submenuHandles[current] = handle;
 			HMENU parentHandle = find_in_map(submenuHandles, current->parent(), 0);
-			ASSERT(parentHandle != 0);
+			YASLI_ASSERT(parentHandle != 0);
 			BOOL result = ::InsertMenu(parentHandle, -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
-			ASSERT(result == TRUE);
+			YASLI_ASSERT(result == TRUE);
 		}
 	}
 
@@ -155,7 +155,7 @@ void PopupMenu::spawn(Vect2 point, Widget* widget)
 	if (widget)
 		parentWindow = _findWindow(widget);
 	HWND parentWindowHandle =  parentWindow ? parentWindow->handle() : 0;
-	ASSERT(::IsWindow(parentWindowHandle));
+	YASLI_ASSERT(::IsWindow(parentWindowHandle));
 
 	UINT id = ::TrackPopupMenu(menu, TPM_LEFTBUTTON | TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, 0, parentWindowHandle, 0);
 
@@ -173,7 +173,7 @@ void* PopupMenu::_generateMenuBar()
 
 	assignIDs();
 	HMENU menu = createNativeMenu(root_, false);
-	ASSERT(menu != 0);
+	YASLI_ASSERT(menu != 0);
 	return menu;
 }
 

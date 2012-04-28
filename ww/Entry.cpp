@@ -13,7 +13,7 @@
 #include "ww/_WidgetWindow.h"
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/KeyPress.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -113,7 +113,7 @@ void EntryImpl::updateOwnerText()
         buf.resize(length);
         GetWindowText(handle(), &buf[0], length);
 
-        ASSERT(owner_);
+        YASLI_ASSERT(owner_);
         text = &buf[0];
     }
 	bool changed = owner_->textW_ != text;

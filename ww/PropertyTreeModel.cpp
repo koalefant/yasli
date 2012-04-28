@@ -34,7 +34,7 @@ TreePath PropertyTreeModel::pathFromRow(PropertyRow* row)
 	if(row)
 		while(row->parent()){
             int childIndex = row->parent()->childIndex(row);
-            ESCAPE(childIndex >= 0, return TreePath());
+            YASLI_ESCAPE(childIndex >= 0, return TreePath());
 			result.insert(result.begin(), childIndex);
 			row = row->parent();
 		}
@@ -56,7 +56,7 @@ void PropertyTreeModel::selectRow(PropertyRow* row, bool select, bool exclusive)
 	}
 	else if(it != selection_.end()){
 		PropertyRow* it_row = rowFromPath(*it);
-		ASSERT(it_row->refCount() > 0 && it_row->refCount() < 0xFFFF);
+		YASLI_ASSERT(it_row->refCount() > 0 && it_row->refCount() < 0xFFFF);
 		selection_.erase(it);
 	}
 }
@@ -118,12 +118,12 @@ void PropertyTreeModel::onUpdated()
 
 void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
 {
-    ESCAPE(op, return);
+    YASLI_ESCAPE(op, return);
     PropertyRow *dest = rowFromPath(op->path_);
-    ESCAPE(dest && "Unable to apply operator!", return);
+    YASLI_ESCAPE(dest && "Unable to apply operator!", return);
     if(op->type_ == PropertyTreeOperator::NONE)
         return;
-    ESCAPE(op->row_, return);
+    YASLI_ESCAPE(op->row_, return);
     if(dest->parent())
         dest->parent()->replaceAndPreserveState(dest, op->row_, false);
     else{
@@ -138,7 +138,7 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
 
 void PropertyTreeModel::undo()
 {
-    ESCAPE(!undoOperators_.empty(), return);
+    YASLI_ESCAPE(!undoOperators_.empty(), return);
     applyOperator(&undoOperators_.back(), true);
     undoOperators_.pop_back();
 }
@@ -231,7 +231,7 @@ void PropertyTreeModel::pushUndo(const PropertyTreeOperator& op)
 
 void PropertyTreeModel::push(PropertyRow* row)
 {
-    ESCAPE(row, return);
+    YASLI_ESCAPE(row, return);
     if(fullUndo_){
         if(undoEnabled_){
             PropertyRow* clonedRow = root()->clone();
@@ -256,7 +256,7 @@ void PropertyTreeModel::push(PropertyRow* row)
 
 void PropertyTreeModel::rowChanged(PropertyRow* row)
 {
-	ESCAPE(row, return);
+	YASLI_ESCAPE(row, return);
 	row->setMultiValue(false);
 	while(row->parent()){
 		row->setLabelChanged();
@@ -272,22 +272,22 @@ bool PropertyTreeModel::defaultTypeRegistered(const char* typeName) const
 
 void PropertyTreeModel::addDefaultType(PropertyRow* row, const char* typeName)
 {
-	ESCAPE(typeName != 0, return);
+	YASLI_ESCAPE(typeName != 0, return);
 	defaultTypes_[typeName] = row;
 }
 
 PropertyRow* PropertyTreeModel::defaultType(const char* typeName) const
 {
 	DefaultTypes::const_iterator it = defaultTypes_.find(typeName);
-	ESCAPE(it != defaultTypes_.end(), return 0);
+	YASLI_ESCAPE(it != defaultTypes_.end(), return 0);
 	return it->second;
 }
 
 void PropertyTreeModel::addDefaultType(PropertyRow* row, const char* baseName, const char* derivedTypeName, const char* derivedTypeNameAlt)
 {
-	ASSERT(baseName);
-	ASSERT(derivedTypeName);
-	ASSERT(derivedTypeNameAlt);
+	YASLI_ASSERT(baseName);
+	YASLI_ASSERT(derivedTypeName);
+	YASLI_ASSERT(derivedTypeNameAlt);
 	DefaultTypesPoly::iterator it = defaultTypesPoly_.find(baseName);
 	BaseClass& base = (it == defaultTypesPoly_.end()) ? defaultTypesPoly_[baseName] : it->second;
 	DerivedTypes::iterator dit = base.types.begin();
@@ -295,7 +295,7 @@ void PropertyTreeModel::addDefaultType(PropertyRow* row, const char* baseName, c
 		if(dit->name == derivedTypeName){
 			DerivedClass& derived = *dit;
 			derived.name = derivedTypeName;
-			ASSERT(derived.row == 0);
+			YASLI_ASSERT(derived.row == 0);
 			derived.row = row;
 			return;
 		}
@@ -311,10 +311,10 @@ void PropertyTreeModel::addDefaultType(PropertyRow* row, const char* baseName, c
 PropertyRow* PropertyTreeModel::defaultType(const char* baseName, int derivedIndex) const
 {
 	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseName);
-	ASSERT(it != defaultTypesPoly_.end());
+	YASLI_ASSERT(it != defaultTypesPoly_.end());
 	const BaseClass& base = it->second;
-	ASSERT(derivedIndex >= 0);
-	ASSERT(derivedIndex < int(base.types.size()));
+	YASLI_ASSERT(derivedIndex >= 0);
+	YASLI_ASSERT(derivedIndex < int(base.types.size()));
 	DerivedTypes::const_iterator tit = base.types.begin();
 	std::advance(tit, derivedIndex);
 	return tit->row;
@@ -345,7 +345,7 @@ const StringList& PropertyTreeModel::typeStringList(const char* baseTypeName) co
 	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseTypeName);
 
 	static StringList empty;
-	ESCAPE(it != defaultTypesPoly_.end(), return empty);
+	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return empty);
 	const BaseClass& base = it->second;
 	return base.strings;
 }

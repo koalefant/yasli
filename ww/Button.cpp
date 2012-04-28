@@ -13,7 +13,7 @@
 #include "ww/_WidgetWindow.h"
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windowsx.h>
@@ -80,7 +80,7 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 	HINSTANCE instance = (HINSTANCE)GetWindowLong(handle(), GWLP_HINSTANCE);
 	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 	button_ = ::CreateWindow( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, handle(), 0, instance, 0);
-	ASSERT(button_);
+	YASLI_ASSERT(button_);
 	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(button_, GWLP_WNDPROC));
 	::SetWindowLongPtr(button_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&buttonWindowProcedure));
 	::SetWindowLongPtr(button_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
@@ -99,7 +99,7 @@ void ButtonImpl::setDefaultButton(bool defaultBtn)
 
 void ButtonImpl::setButtonText(const wchar_t* text)
 {
-	ESCAPE(::IsWindow(button_), return);
+	YASLI_ESCAPE(::IsWindow(button_), return);
 	WW_VERIFY(::SetWindowText(button_, text));
 
 	HFONT font = GetWindowFont(button_);
@@ -151,7 +151,7 @@ LRESULT ButtonImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			BOOL enabled = BOOL(wparam);
 			if(button_){
 				::EnableWindow(button_, enabled);
-				ASSERT(::IsWindowEnabled(button_) == enabled);
+				YASLI_ASSERT(::IsWindowEnabled(button_) == enabled);
 			}
 			return TRUE;
 		}

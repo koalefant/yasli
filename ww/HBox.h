@@ -13,7 +13,7 @@
 
 namespace ww{
 
-class WW_API HBox : public Box{
+class HBox : public Box{
 public:
 	HBox(int spacing = 0, int border = 0);
 protected:

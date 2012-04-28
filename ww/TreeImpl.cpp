@@ -20,7 +20,7 @@
 #include "ww/Win32/Rectangle.h"
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/ImageStore.h"
 #include "ww/Unicode.h"
 #include "ww/Win32/Window.h"
@@ -317,7 +317,7 @@ void DragController::drop(POINT screenPoint)
 {
 	PropertyTreeModel* model = treeImpl_->tree()->model();
 	if(row_ && hoveredRow_){
-		ASSERT(destinationRow_);
+		YASLI_ASSERT(destinationRow_);
 		row_->dropInto(destinationRow_, destinationRow_ == hoveredRow_ ? 0 : hoveredRow_, treeImpl_->tree(), before_);
 	}
 
@@ -390,7 +390,7 @@ void TreeImpl::onMessageLButtonDblClk(int x, int y)
 	Vect2 point(x, y);
 	PropertyRow* row = rowByPoint(point);
 	if(row){
-		ASSERT(row->refCount() > 0);
+		YASLI_ASSERT(row->refCount() > 0);
 		if(row->widgetRect().pointInside(pointToRootSpace(point))){
 			if(!row->onActivate(tree_, true))
 				toggleRow(row);	
@@ -403,13 +403,13 @@ void TreeImpl::onMessageLButtonDblClk(int x, int y)
 
 void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	HWND focusedWindow = GetFocus();
 	if(focusedWindow){
-		ASSERT(::IsWindow(focusedWindow));
+		YASLI_ASSERT(::IsWindow(focusedWindow));
 		Win32::Window32 wnd(focusedWindow);
 		if(Win32::Window32* window = reinterpret_cast<Win32::Window32*>(wnd.getUserDataLongPtr())){
-			ASSERT(window->handle() == focusedWindow);
+			YASLI_ASSERT(window->handle() == focusedWindow);
 		}
 	}
 	//::SetFocus(handle_);
@@ -442,7 +442,7 @@ void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 
 void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
 	PropertyRow* row = rowByPoint(Vect2(x, y));
 	if(row && !row->isSelectable())
@@ -468,7 +468,7 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 
 void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SetFocus(handle_);
 
 	Vect2 point(x, y);
@@ -563,7 +563,7 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 	info.fMask  = SIF_ALL;
 
 	HDC dc = GetDC(handle());
-	ASSERT(dc);
+	YASLI_ASSERT(dc);
 	HGDIOBJ oldFont = ::SelectObject(dc, Win32::defaultFont());
 	TEXTMETRIC textMetric;
 	WW_VERIFY(GetTextMetrics(dc, &textMetric));
@@ -703,7 +703,7 @@ int TreeImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
 	redrawLock_ = true;
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
     
 	switch(message){
 	case WM_HSCROLL:
@@ -711,7 +711,7 @@ LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		onMessageScroll(message, LOWORD(wparam));
 		break;
 	case WM_ENABLE:
-		ASSERT(wparam && "Disabling Window");
+		YASLI_ASSERT(wparam && "Disabling Window");
 		break;
     }
     LRESULT result = __super::onMessage(message, wparam, lparam);
@@ -918,7 +918,7 @@ bool TreeImpl::getRowRect(PropertyRow* row, Rect& outRect, bool onlyVisible)
 
 void TreeImpl::ensureVisible(PropertyRow* row, bool update)
 {
-    ESCAPE(row != 0, return);
+    YASLI_ESCAPE(row != 0, return);
 	if(row->isRoot())
 		return;
 

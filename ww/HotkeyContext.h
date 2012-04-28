@@ -19,7 +19,7 @@ namespace ww{
 
 class Application;
 class HotkeyFilter;
-class WW_API HotkeyContext : public RefCounter{
+class HotkeyContext : public RefCounter{
 public:
     HotkeyContext();
     ~HotkeyContext();

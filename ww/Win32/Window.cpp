@@ -35,11 +35,13 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase; // mega-hint!
 struct TypeInfoNamesCleaner { 
 	~TypeInfoNamesCleaner()
 	{
+#if 0
 		for(__type_info_node *pNode = __type_info_root_node.next, *tmpNode=NULL; pNode!=NULL; pNode = tmpNode){
 			tmpNode = pNode->next;
 			free(pNode->memPtr);
 			free(pNode);
 		}
+#endif
 	}
 };
 TypeInfoNamesCleaner typeInfoNamesCleaner;
@@ -97,12 +99,12 @@ HWND getDefaultWindowHandle()
 
 HFONT _globalDefaultFont = initializeDefaultFont();
 
-void WW_API _setGlobalInstance(HINSTANCE instance)
+void _setGlobalInstance(HINSTANCE instance)
 {
 	globalApplicationInstance_ = instance;
 }
 
-HINSTANCE WW_API _globalInstance(){
+HINSTANCE _globalInstance(){
 	return globalApplicationInstance_;
 }
 
@@ -138,7 +140,7 @@ HFONT defaultBoldFont()
 ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 {
 	HDC dc = ::GetDC(window);
-	ASSERT(dc);
+	YASLI_ASSERT(dc);
 	SIZE size = { 0, 0 };
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
 	WW_VERIFY(::GetTextExtentPoint32(dc, text, (int)wcslen(text), &size));
@@ -165,18 +167,18 @@ LRESULT CALLBACK universalWindowProcedure(HWND handle, UINT message, WPARAM wpar
 	return window->onMessage(message, wparam, lparam);
 }
 
-bool WW_API isKeyPressed(UINT keyCode)
+bool isKeyPressed(UINT keyCode)
 {
 	return (GetAsyncKeyState(keyCode) & 0x8000) != 0;
 }
 
-bool WW_API isClassRegistered(const wchar_t* className)
+bool isClassRegistered(const wchar_t* className)
 {
 	WNDCLASS classInfo;
 	return GetClassInfo(globalApplicationInstance_, className, &classInfo) ? true : false;
 }
 
-int WW_API basicMessageLoop(HACCEL acceleratorTable)
+int basicMessageLoop(HACCEL acceleratorTable)
 {
 	MSG msg;
 	
@@ -241,13 +243,13 @@ Window32::~Window32()
 			handle_ = 0;
 		}
 		else{
-			ASSERT(getUserDataLongPtr() != reinterpret_cast<LONG_PTR>(this));
+			YASLI_ASSERT(getUserDataLongPtr() != reinterpret_cast<LONG_PTR>(this));
 		}
 	}
 
-	//ASSERT(positionDeferer_ = 0);
+	//YASLI_ASSERT(positionDeferer_ = 0);
 	if(positionDeferer_){
-		ASSERT(positionDeferer_->refCount() == 0);
+		YASLI_ASSERT(positionDeferer_->refCount() == 0);
 		delete positionDeferer_;
 	}
 }
@@ -272,9 +274,9 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 	creating_ = true;
 	if(!isClassRegistered(className()))
 		WW_VERIFY(registerClass(className()));
-	ASSERT(isClassRegistered(className()));
+	YASLI_ASSERT(isClassRegistered(className()));
 
-	ASSERT(!parentWnd || parentWnd == HWND_MESSAGE || ::IsWindow(parentWnd));
+	YASLI_ASSERT(!parentWnd || parentWnd == HWND_MESSAGE || ::IsWindow(parentWnd));
 	handle_ = ::CreateWindowEx(exStyle, className(), windowName, style,
 		position.left(), position.top(), position.width(), position.height(), parentWnd, 0, 0, (LPVOID)(this));	
 	
@@ -288,7 +290,7 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 
 void Window32::destroy()
 {
-	ASSERT(IsWindow(handle_));
+	YASLI_ASSERT(IsWindow(handle_));
 	DestroyWindow(handle_);
 	handle_ = 0;
 }
@@ -453,7 +455,7 @@ int Window32::onMessageGetDlgCode(int keyCode, MSG* msg)
 
 LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	switch(message){
 		case WM_CREATE:
 		{
@@ -669,7 +671,7 @@ ww::Rect Window32::getRect() const
 
 void Window32::move(const ww::Rect& rect, bool redraw)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	if(::IsWindow(handle_))
 	WW_VERIFY(::MoveWindow(handle_, rect.left(), rect.top(), rect.width(), rect.height(), redraw ? TRUE : FALSE));
 }
@@ -690,7 +692,7 @@ LONG_PTR Window32::getLongPtr(int index)
 
 LONG_PTR Window32::setLongPtr(int index, LONG_PTR newLongPtr)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	return ::SetWindowLongPtr(handle_, index, LONG(newLongPtr));
 }
 
@@ -725,21 +727,21 @@ UINT Window32::getStyle()
 
 void Window32::setParent(Window32* newParent)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SetParent(handle_, newParent->handle());
-	ASSERT(::GetParent(handle_) == newParent->handle());
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::GetParent(handle_) == newParent->handle());
+	YASLI_ASSERT(::IsWindow(handle_));
 }
 
 void Window32::enable(bool enabled)
 {
 	::EnableWindow(handle_, enabled);
-	ASSERT(::IsWindowEnabled(handle_) == (enabled ? TRUE : FALSE));
+	YASLI_ASSERT(::IsWindowEnabled(handle_) == (enabled ? TRUE : FALSE));
 }
 
 void Window32::show(int showCommand)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::ShowWindow(handle_, showCommand);
 }
 
@@ -771,7 +773,7 @@ void Window32::clientToScreen(RECT& rect)
 
 void Window32::attachTimer(TimerInterface* timer, int interval)
 {
-	ASSERT(std::find(timers_.begin(), timers_.end(), timer) == timers_.end());
+	YASLI_ASSERT(std::find(timers_.begin(), timers_.end(), timer) == timers_.end());
 	if(timer->window())
 		timer->window()->detachTimer(timer);
 	Timers::iterator it = std::find(timers_.begin(), timers_.end(), SharedPtr<TimerInterface>(0));
@@ -790,10 +792,10 @@ void Window32::attachTimer(TimerInterface* timer, int interval)
 
 void Window32::detachTimer(TimerInterface* timer)
 {
-	ASSERT(timer);
-	ASSERT(timer->window() == this);
+	YASLI_ASSERT(timer);
+	YASLI_ASSERT(timer->window() == this);
 	Timers::iterator it = std::find(timers_.begin(), timers_.end(), timer);
-	ASSERT(it != timers_.end());
+	YASLI_ASSERT(it != timers_.end());
 	if(it != timers_.end()){
 		int index = std::distance(timers_.begin(), it);
 		KillTimer(handle(), 100 + index);
@@ -814,20 +816,20 @@ WindowPositionDeferer::WindowPositionDeferer(Window32* parent, int numWindows)
 : parent_(parent)
 {
 	handle_ = BeginDeferWindowPos(numWindows);
-	ASSERT(handle_);
+	YASLI_ASSERT(handle_);
 }
 
 WindowPositionDeferer::~WindowPositionDeferer()
 {
-	ASSERT(handle_);
+	YASLI_ASSERT(handle_);
 	WW_VERIFY(::EndDeferWindowPos(handle_));
 	parent_->positionDeferer_ = 0;
 }
 
 void WindowPositionDeferer::defer(Window32* window, const ww::Rect& position)
 {
-	ASSERT(handle_);
-	ASSERT(::IsWindow(window->handle()));
+	YASLI_ASSERT(handle_);
+	YASLI_ASSERT(::IsWindow(window->handle()));
 	WW_VERIFY(::DeferWindowPos(handle_, window->handle(), 0, position.left(), position.top(), position.width(), position.height(), SWP_NOZORDER));
 }
 

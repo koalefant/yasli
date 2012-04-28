@@ -30,7 +30,7 @@
 #include "ww/Serialization.h"
 #include "Serialization/XPrmArchive.h"
 #include "Serialization/BinaryArchive.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "FileUtils/FileUtils.h"
 
 namespace ww{

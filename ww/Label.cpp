@@ -16,7 +16,7 @@
 #include <windowsx.h>
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 namespace ww{
 
@@ -76,7 +76,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		{
 			PAINTSTRUCT ps;
 			HDC dc = ::BeginPaint(handle(), &ps); 
-			ASSERT(dc != 0);
+			YASLI_ASSERT(dc != 0);
 			std::wstring text = toWideChar(owner_->text_.c_str());
 			
 			UINT flags = DT_SINGLELINE;

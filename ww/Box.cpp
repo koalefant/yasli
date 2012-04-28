@@ -17,7 +17,8 @@
 #include "ww/Win32/Window.h"
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/Enum.h"
+#include "yasli/ClassFactory.h"
 
 
 namespace ww{
@@ -43,7 +44,7 @@ Box::Box(int spacing, int border)
 , clipChildren_(false)
 {
 	border_ = border;
-	ASSERT(parent_ == 0);
+	YASLI_ASSERT(parent_ == 0);
 }
 
 Box::~Box()
@@ -62,12 +63,12 @@ void Box::remove(Widget* widget)
 		}
 		++index;
 	}
- 	ASSERT(0);
+ 	YASLI_ASSERT(0);
 }
 
 void Box::remove(int index)
 {
-	ASSERT(size_t(index) < elements_.size());
+	YASLI_ASSERT(size_t(index) < elements_.size());
 	Widget* widget = elements_[index].widget;
 	widget->_setParent(0);
 	elements_.erase(elements_.begin() + index);
@@ -76,7 +77,7 @@ void Box::remove(int index)
 
 void Box::add(Widget* widget, PackMode packMode, int padding)
 {
-	ASSERT(widget);
+	YASLI_ASSERT(widget);
 
 	elements_.push_back(Element(widget, packMode, padding));
 
@@ -86,7 +87,7 @@ void Box::add(Widget* widget, PackMode packMode, int padding)
 
 void Box::insert(Widget* widget, int beforeIndex, PackMode packMode, int padding)
 {
-	ASSERT(widget);
+	YASLI_ASSERT(widget);
 
 	if(beforeIndex == -1)
 		elements_.push_back(Element(widget, packMode, padding));

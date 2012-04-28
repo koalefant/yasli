@@ -113,8 +113,8 @@ void Viewport2DImpl::onMessagePaint()
 
 void Viewport2DImpl::onMessageMouseMove(UINT button, int x, int y)
 {
-	ASSERT(x > -0xFFFF && x < 0xFFFF);
-	ASSERT(y > -0xFFFF && y < 0xFFFF);
+	YASLI_ASSERT(x > -0xFFFF && x < 0xFFFF);
+	YASLI_ASSERT(y > -0xFFFF && y < 0xFFFF);
 	Vect2 delta = Vect2(x, y) - owner_->mousePosition_;
 	owner_->mousePosition_.x = x;
 	owner_->mousePosition_.y = y;

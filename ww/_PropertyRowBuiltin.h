@@ -95,10 +95,10 @@ class PropertyRowPointer : public PropertyRow, public has_slots{
 public:
 	enum { Custom = false };
 	PropertyRowPointer();
-	PropertyRowPointer(const char* name, const char* label, const PointerSerializationInterface &ptr);
+	PropertyRowPointer(const char* name, const char* label, const PointerInterface &ptr);
 	PropertyRowPointer(const char* name, const char* label, TypeID baseType, TypeID derivedType, ClassFactoryBase* factory);
 
-	bool assignTo(const PointerSerializationInterface &ptr);
+	bool assignTo(PointerInterface &ptr);
 
 	TypeID baseType() const{ return baseType_; }
 	TypeID derivedType() const{ return derivedType_; }
@@ -156,8 +156,8 @@ protected:
 class PropertyRowString : public PropertyRowImpl<std::wstring, PropertyRowString>{
 public:
 	enum { Custom = false };
-	PropertyRowString(const char* name = "", const char* nameAlt = "", const std::wstring& value = std::wstring());
-	PropertyRowString(const char* name, const char* nameAlt, const std::string& value);
+	PropertyRowString(const char* name = "", const char* nameAlt = "", const wchar_t* value = L"");
+	PropertyRowString(const char* name, const char* nameAlt, const char* value);
 	PropertyRowString(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 	bool assignTo(std::string& str);
 	bool assignTo(std::wstring& str);

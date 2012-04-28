@@ -8,6 +8,7 @@
  */
 
 #include "StdAfx.h"
+#include "yasli/STL.h"
 #include "yasli/Archive.h"
 #include "ww/FileSelector.h"
 

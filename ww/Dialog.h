@@ -34,7 +34,7 @@ namespace ww{
 		RESPONSE_RETRY
 	};
 
-	class WW_API Dialog : public ww::Window
+	class Dialog : public ww::Window
 	{
 	public:
 		Dialog(ww::Widget* owner, int border = 12);

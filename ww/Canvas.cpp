@@ -30,7 +30,7 @@ Canvas::Canvas(HDC dc, HWND wnd)
 
 void Canvas::drawText(const Vect2f& pos, const char* _text, const Color4c& textColor, float xAlign, float yAlign)
 {
-    ESCAPE(dc_, return);
+    YASLI_ESCAPE(dc_, return);
     StockSelector font(dc_, (HGDIOBJ)Win32::defaultFont());
     std::wstring text(toWideChar(_text));
     RECT rt;
@@ -49,7 +49,7 @@ void Canvas::drawText(const Vect2f& pos, const char* _text, const Color4c& textC
 
 void Canvas::drawLine(const Vect2f& _start, const Vect2f& _end, const Color4c& color, int width)
 {
-    ESCAPE(dc_, return);
+    YASLI_ESCAPE(dc_, return);
     Vect2 start(toView(_start));
     Vect2 end(toView(_end));
 
@@ -60,7 +60,7 @@ void Canvas::drawLine(const Vect2f& _start, const Vect2f& _end, const Color4c& c
 
 void Canvas::fillCircle(const Vect2f& pos, float radius, const Color4c& color)
 {
-    ESCAPE(dc_, return);
+    YASLI_ESCAPE(dc_, return);
     Vect2 p(toView(pos));
     Vect2f center(p.x, p.y);
 	Rect r(toView(pos - Vect2f(radius, radius)),

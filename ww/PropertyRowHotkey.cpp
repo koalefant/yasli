@@ -17,7 +17,7 @@
 #include "ww/PopupMenu.h"
 #include "ww/Serialization.h"
 
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #include "KeyPress.h"
 #include "ww/Win32/Drawing.h"

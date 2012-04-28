@@ -15,7 +15,7 @@
 #include <CommCtrl.h>
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #define MAX_RANGE 10000
 
@@ -91,7 +91,7 @@ void ProgressBar::serialize(Archive& ar)
 
 void ProgressBar::setPosition(float pos)
 {
-    ASSERT((pos >= 0) && (pos <= 1));
+    YASLI_ASSERT((pos >= 0) && (pos <= 1));
     pos_ = pos;
     window()->setProgressBarPosition(pos_);
 }

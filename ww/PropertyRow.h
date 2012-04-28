@@ -14,7 +14,7 @@
 #include "ww/Widget.h"
 #include "yasli/Serializer.h"
 #include "yasli/StringList.h"
-#include "yasli/Factory.h"
+#include "ww/Factory.h"
 #include "ww/ConstStringList.h"
 #include "ww/Win32/Types.h"
 
@@ -58,7 +58,7 @@ protected:
 
 class PropertyTreeTransaction;
 
-class WW_API PropertyRow : public RefCounter
+class PropertyRow : public RefCounter
 {
 public:
 	enum WidgetPlacement {
@@ -319,7 +319,7 @@ struct StaticBool{
 	enum { Value = value };
 };
 
-class WW_API PropertyRowArg{
+class PropertyRowArg{
 public:
 	PropertyRowArg(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName){
 		object_ = object;

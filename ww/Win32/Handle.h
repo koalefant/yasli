@@ -59,13 +59,13 @@ public:
 	, dc_(dc)
 	{
 		oldObject_ = ::SelectObject(dc_, object_);
-        //ASSERT(oldObject_ != 0);
+        //YASLI_ASSERT(oldObject_ != 0);
 	}
 
 	~AutoSelector(){
         if(oldObject_){
 		    HGDIOBJ object = ::SelectObject(dc_, oldObject_);
-		    ASSERT(object == object_);
+		    YASLI_ASSERT(object == object_);
         }
 	}
 	operator HGDIOBJ() const{ return oldObject_; }
@@ -88,7 +88,7 @@ public:
 	~DeletingSelector(){
         if(oldObject_){
 		    HGDIOBJ object = ::SelectObject(dc_, oldObject_);
-		    ASSERT(object == object_);
+		    YASLI_ASSERT(object == object_);
         }
 		::DeleteObject(object_);
 	}
@@ -111,7 +111,7 @@ public:
 
 	~StockSelector(){
 		HGDIOBJ object = ::SelectObject(dc_, oldObject_);
-		ASSERT(object == object_);
+		YASLI_ASSERT(object == object_);
 	}
 	operator HGDIOBJ() const{ return oldObject_; }
 protected:

@@ -84,7 +84,7 @@ void drawGrayedCheck(HDC dc, const RECT& checkRect)
 		Win32::DeletingSelector pen(dc, CreatePen(PS_SOLID, 1, GetSysColor(COLOR_3DSHADOW)));
 		::RoundRect(dc, rect.left + offsetX, rect.top + offsetY, rect.left + offsetX + size, rect.top + offsetY + size, 3, 3);
 	}
-	ASSERT(checkBitmap);
+	YASLI_ASSERT(checkBitmap);
 	DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.left + offsetX + 2, rect.top + offsetY + 1, size - 2, size - 2, DST_BITMAP | DSS_DISABLED);
 }
 
@@ -104,7 +104,7 @@ void drawCheck(HDC dc, const RECT& checkRect, bool checked)
 	::SelectObject(dc, oldBrush);
 
 	if(checked){
-		ASSERT(checkBitmap);
+		YASLI_ASSERT(checkBitmap);
 		DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.left + offsetX + 2, rect.top + offsetY + 1, size - 2, size - 2, DST_BITMAP);
 	}
 }
@@ -265,6 +265,7 @@ void drawVerticalBlend(HDC dc, const RECT& rect, COLORREF color1, COLORREF color
 
 void drawSlider(HDC dc, const RECT& rect, float value, bool focused)
 {
+	using ww::clamp;
 	using namespace Gdiplus;
 	int roundness = 5;
 

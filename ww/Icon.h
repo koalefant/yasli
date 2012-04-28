@@ -35,7 +35,7 @@ public:
 	, height_(0)
 	{
 		set(xpm, Size);
-		ESCAPE(sscanf_s(xpm[0], "%d %d", &width_, &height_) == 2, return);
+		YASLI_ESCAPE(sscanf_s(xpm[0], "%d %d", &width_, &height_) == 2, return);
 	}
 
 	bool getImage(RGBAImage* out) const;

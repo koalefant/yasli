@@ -27,8 +27,8 @@ public:
 protected:
 	PropertyOArchive(PropertyTreeModel* model, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
 
-	bool operator()(std::string& value, const char* name, const char* label);
-	bool operator()(std::wstring& value, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label);
+	bool operator()(WStringInterface& value, const char* name, const char* label);
     bool operator()(bool& value, const char* name, const char* label);
     bool operator()(char& value, const char* name, const char* label);
     
@@ -48,15 +48,14 @@ protected:
     bool operator()(double& value, const char* name, const char* label);
 
     bool operator()(const Serializer& ser, const char* name, const char* label);
-	bool operator()(const PointerSerializationInterface& ptr, const char *name, const char *label);
-	bool operator()(ContainerSerializationInterface& ser, const char *name, const char *label);
+	bool operator()(PointerInterface& ptr, const char *name, const char *label);
+	bool operator()(ContainerInterface& ser, const char *name, const char *label);
 
     bool openBlock(const char* name, const char* label);
     void closeBlock();
 
 private:
 	Archive* openDefaultArchive(const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
-    void closeDefaultArchive(SharedPtr<Archive> base_ar, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
 	bool needDefaultArchive(const char* baseName) const { return true; }
 
 	PropertyRow* addRow(SharedPtr<PropertyRow> newRow, bool block = false, PropertyRow* previousNode = 0);

@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include "yasli/STL.h"
 #include "PropertyRowField.h"
 
 namespace ww{
@@ -30,7 +31,7 @@ public:
 	: PropertyRowField(name, nameAlt, typeName)
 	, value_(*reinterpret_cast<Type*>(object))
 	{
-		ASSERT(sizeof(Type) == size);
+		YASLI_ASSERT(sizeof(Type) == size);
 	}
 	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<Type*>(object) = value();

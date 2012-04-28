@@ -13,7 +13,7 @@ namespace ww{
 
 class Widget;
 
-class WW_API Tooltip{
+class Tooltip{
 public:
 	Tooltip(const char* text = "", bool baloon = false);
 	void attach(Widget* widget);

@@ -22,7 +22,7 @@
 
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/PropertyDrawContext.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -36,7 +36,7 @@ public:
 	WindowMessageFilter(HWND wnd)
 	: wnd_(wnd)
 	{
-		ASSERT(wnd_ != 0);
+		YASLI_ASSERT(wnd_ != 0);
 	}
 
 	bool filter(MSG* msg)
@@ -131,11 +131,11 @@ int WindowImpl::onMessageCommand(USHORT command, USHORT id, HWND wnd)
 					item->_call();
 				}
 				// else {
-				//	ASSERT(item != 0 && "Missing menu item for command");
+				//	YASLI_ASSERT(item != 0 && "Missing menu item for command");
 				//}
 			}
 			else {
-				ASSERT(owner_->menu_ != 0);
+				YASLI_ASSERT(owner_->menu_ != 0);
 			}
 		}
 	}
@@ -427,7 +427,7 @@ void Window::setShowTitleBar(bool showTitleBar)
 void Window::setIconFromResource(const char* resourceName)
 {
 	HICON icon = LoadIcon(Win32::_globalInstance(), toWideChar(resourceName).c_str());
-	ASSERT(icon);
+	YASLI_ASSERT(icon);
 
 	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);
 }
@@ -435,7 +435,7 @@ void Window::setIconFromResource(const char* resourceName)
 void Window::setIconFromFile(const char* resourceName)
 {
 	HANDLE icon = LoadImage(0, toWideChar(resourceName).c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
-	ASSERT(icon);
+	YASLI_ASSERT(icon);
 
 	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);
 }

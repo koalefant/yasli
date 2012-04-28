@@ -1201,6 +1201,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Factory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileDialog.cpp"
 				>
 			</File>
@@ -1226,14 +1230,6 @@
 			</File>
 			<File
 				RelativePath=".\Icon.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageStore.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageStore.h"
 				>
 			</File>
 			<File

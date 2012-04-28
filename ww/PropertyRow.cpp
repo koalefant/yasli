@@ -15,7 +15,7 @@
 #include "ww/PopupMenu.h"
 #include "ww/_PropertyRowBuiltin.h"
 #include "ww/PropertyDrawContext.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/Win32/Window.h"
 #include "ww/Unicode.h"
 #include "ww/Win32/Rectangle.h"
@@ -27,11 +27,11 @@
 
 namespace ww{
 
-WW_API void* PropertyRowArg::object_(0);
-WW_API size_t PropertyRowArg::size_(0);
-WW_API const char* PropertyRowArg::name_(0);
-WW_API const char* PropertyRowArg::nameAlt_(0);
-WW_API const char* PropertyRowArg::typeName_(0);
+void* PropertyRowArg::object_(0);
+size_t PropertyRowArg::size_(0);
+const char* PropertyRowArg::name_(0);
+const char* PropertyRowArg::nameAlt_(0);
+const char* PropertyRowArg::typeName_(0);
 
 // ---------------------------------------------------------------------------
 
@@ -72,8 +72,8 @@ PropertyRow::PropertyRow(const char* name, const char* nameAlt, const Serializer
 
 void PropertyRow::init(const char* name, const char* nameAlt, const char* typeName)
 {
-	ASSERT(name != 0);
-	ASSERT(typeName);
+	YASLI_ASSERT(name != 0);
+	YASLI_ASSERT(typeName);
 
 	parent_ = 0;
 
@@ -159,9 +159,9 @@ void PropertyRow::setExpandedRecursive(PropertyTree* tree, bool expanded)
 
 int PropertyRow::childIndex(PropertyRow* row)
 {
-	ASSERT(row);
+	YASLI_ASSERT(row);
 	Rows::iterator it = std::find(children_.begin(), children_.end(), row);
-	ESCAPE(it != children_.end(), return -1);
+	YASLI_ESCAPE(it != children_.end(), return -1);
 	return std::distance(children_.begin(), it);
 }
 
@@ -203,7 +203,7 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
         Rows::iterator it;
         for(it = children_.begin(); it != children_.end(); ++it){
             PropertyRow* child = it->get();
-            ESCAPE(child, continue);
+            YASLI_ESCAPE(child, continue);
             if(child->name()[0] != '\0'){
                 const PropertyRow* rhsChild = row.find(child->name(), child->label(), child->typeName());
                 if(rhsChild)
@@ -220,7 +220,7 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
 
 void PropertyRow::assignRowProperties(PropertyRow* row)
 {
-    ESCAPE(row, return);
+    YASLI_ESCAPE(row, return);
 	parent_ = row->parent_;
 	
 	userReadOnly_ = row->userReadOnly_;
@@ -246,7 +246,7 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 void PropertyRow::replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, bool preserveChildren)
 {
 	Rows::iterator it = std::find(children_.begin(), children_.end(), oldRow);
-	ASSERT(it != children_.end());
+	YASLI_ASSERT(it != children_.end());
 	if(it != children_.end()){
 		newRow->assignRowProperties(*it);
 		if(preserveChildren)
@@ -259,7 +259,7 @@ void PropertyRow::erase(PropertyRow* row)
 {
 	row->setParent(0);
 	Rows::iterator it = std::find(children_.begin(), children_.end(), row);
-	ASSERT(it != children_.end());
+	YASLI_ASSERT(it != children_.end());
 	if(it != children_.end())
 		children_.erase(it);
 }
@@ -989,7 +989,7 @@ bool PropertyRow::canBeDragged() const
 
 bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const
 {
-	ASSERT(parentRow);
+	YASLI_ASSERT(parentRow);
 
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();

@@ -15,7 +15,7 @@
 
 namespace ww{
 	class ProgressBarImpl;
-	class WW_API ProgressBar : public _WidgetWithWindow{
+	class ProgressBar : public _WidgetWithWindow{
 	public:
 		ProgressBar(int border = 0);
 		

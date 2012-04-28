@@ -19,7 +19,7 @@ namespace ww{
 
 class SplitterImpl;
 
-class WW_API Splitter: public Container{
+class Splitter: public Container{
 public:
     Splitter(int splitterSize, int border, SplitterImpl* impl);
 	~Splitter();

@@ -27,19 +27,19 @@ typedef tagMEASUREITEMSTRUCT MEASUREITEMSTRUCT;
 namespace Win32{
 using namespace yasli;
 
-void WW_API _setGlobalInstance(HINSTANCE instance);
-HINSTANCE WW_API _globalInstance();
+void _setGlobalInstance(HINSTANCE instance);
+HINSTANCE _globalInstance();
 /// проверяет зарегиистрирован ли класс кна
-bool WW_API isClassRegistered(const wchar_t* className);
-bool WW_API isKeyPressed(UINT keyCode);
+bool isClassRegistered(const wchar_t* className);
+bool isKeyPressed(UINT keyCode);
 
 LRESULT CALLBACK universalWindowProcedure(HWND handle, UINT message, WPARAM wparam, LPARAM lparam);
 
 /// регистрирует класс окна использую обработчик сообщений библиотеки (вызывает метод onMessage)
-//bool WW_API registerClass(const char* className);
+//bool registerClass(const char* className);
 
 /// приступить к обработки сообщений вплоть до получения WM_QUIT 
-int WW_API basicMessageLoop(HACCEL acceleratorTable = 0);
+int basicMessageLoop(HACCEL acceleratorTable = 0);
 
 ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text);
 HFONT defaultFont();
@@ -57,7 +57,7 @@ public:
 
 	virtual void onTimer(){}
 	void setWindow(Win32::Window32* window){ 
-		ASSERT(window_ == 0 || window == 0);
+		YASLI_ASSERT(window_ == 0 || window == 0);
 		window_ = window;
 	}
 	Window32* window(){ return window_; }
@@ -78,7 +78,7 @@ protected:
 };
 
 /// инкапсулирует Windows-окно
-class WW_API Window32 : public ww::RefCounter{
+class Window32 : public ww::RefCounter{
 public:
 	Window32(HWND handle = 0);
 	virtual ~Window32();

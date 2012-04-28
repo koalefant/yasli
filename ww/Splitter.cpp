@@ -17,7 +17,7 @@
 #include "ww/Win32/Rectangle.h"
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #include "SplitterImpl.h"
 
@@ -191,7 +191,7 @@ void Splitter::resize(int newSize)
 
 void Splitter::add(Widget* widget, float position, bool fold, int beforeIndex)
 {
-	ASSERT(widget);
+	YASLI_ASSERT(widget);
 	Element element;
 	element.widget = widget;
 	element.position = position;
@@ -200,7 +200,7 @@ void Splitter::add(Widget* widget, float position, bool fold, int beforeIndex)
 	if(beforeIndex < 0 || beforeIndex >= int(elements_.size()))
 		elements_.push_back(element);
 	else{
-		ASSERT(beforeIndex >= 0 && beforeIndex < int (elements_.size()));
+		YASLI_ASSERT(beforeIndex >= 0 && beforeIndex < int (elements_.size()));
 		Elements::iterator it = elements_.begin();
 		Element& currentElement = *it;
 
@@ -243,10 +243,10 @@ void Splitter::_setParent(Container* container)
 
 void Splitter::_arrangeChildren()
 {
-	ASSERT(this);
+	YASLI_ASSERT(this);
 	if(!elements_.empty()){
 		Win32::Window32* window = _findWindow(this);
-		ASSERT(window);
+		YASLI_ASSERT(window);
 		Win32::Window32::PositionDeferer deferer = window->positionDeferer(int(elements_.size()));
 
 		int totalLength = this->boxLength() - (int(elements_.size()) - 1) * splitterWidth();
@@ -256,9 +256,9 @@ void Splitter::_arrangeChildren()
 
 		FOR_EACH(elements_, it){
 			Widget* widget = it->widget;
-			ESCAPE(widget, continue);
+			YASLI_ESCAPE(widget, continue);
 			Win32::Window32* window = widget->_window();
-			ASSERT(!window || ::IsWindow(window->handle()));
+			YASLI_ASSERT(!window || ::IsWindow(window->handle()));
 		}
 
 		float lastPosition = 0.0f;
@@ -371,7 +371,7 @@ float Splitter::widgetPosition(Widget* widget) const
 		if(it->widget == widget)
 			return it->position;
 	}
-	ASSERT(0 && "Unable to find widget!");
+	YASLI_ASSERT(0 && "Unable to find widget!");
 	return 0.0f;
 }
 
@@ -391,7 +391,7 @@ Widget* Splitter::widgetByPosition(float position)
 
 Widget* Splitter::widgetByIndex(int index)
 {
-	ASSERT(size_t(index) < elements_.size());
+	YASLI_ASSERT(size_t(index) < elements_.size());
 	Elements::iterator it = elements_.begin();
 	std::advance(it, index);
 	return it->widget;
@@ -404,7 +404,7 @@ Widget* Splitter::widgetByScreenPoint(Vect2 point)
 		Element& element = *it;
 		if(Widget* widget = element.widget){
 			Win32::Window32* window = _findWindow(widget);
-			ASSERT(window);
+			YASLI_ASSERT(window);
 			Win32::Rect rect(widget->_position());
 			window->clientToScreen(rect);
 			if(rect.pointIn(point))
@@ -421,7 +421,7 @@ int Splitter::splittersCount()
 
 Rect Splitter::getSplitterRect(int splitterIndex)
 {
-	ASSERT(splitterIndex < int(elements_.size()) - 1);
+	YASLI_ASSERT(splitterIndex < int(elements_.size()) - 1);
 	Elements::iterator it = elements_.begin();
 	std::advance(it, splitterIndex);
 	return it->splitterRect;
@@ -429,7 +429,7 @@ Rect Splitter::getSplitterRect(int splitterIndex)
 
 void Splitter::remove(int index, bool inFavourOfPrevious)
 {
-	ASSERT(index >= 0 && index <= splittersCount());
+	YASLI_ASSERT(index >= 0 && index <= splittersCount());
 	Elements::iterator it = elements_.begin();
 	std::advance(it, index);
 	float endPosition = it->position;
@@ -447,7 +447,7 @@ void Splitter::remove(int index, bool inFavourOfPrevious)
 
 void Splitter::replace(Widget* oldWidget, Widget* newWidget)
 {
-	ASSERT(newWidget);
+	YASLI_ASSERT(newWidget);
 	Elements::iterator it;
 	for(it = elements_.begin(); it != elements_.end(); ++it){
 		Element& element = *it;
@@ -460,12 +460,12 @@ void Splitter::replace(Widget* oldWidget, Widget* newWidget)
 			return;
 		}
 	}
-	ASSERT(0 && "Unable to find oldWidget!");
+	YASLI_ASSERT(0 && "Unable to find oldWidget!");
 }
 
 void Splitter::setSplitterPosition(float position, int splitterIndex)
 {
-	ASSERT(splitterIndex >= 0 && splitterIndex < int(elements_.size()));
+	YASLI_ASSERT(splitterIndex >= 0 && splitterIndex < int(elements_.size()));
 	Elements::iterator it = elements_.begin();
 	if(!elements_.empty()){
 		int length = boxLength() - (int(elements_.size()) - 1) * splitterWidth();

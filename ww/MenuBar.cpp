@@ -47,6 +47,11 @@ MenuItem& MenuItem::add(const char* text)
     }
 }
 
+void MenuItem::addSeparator()
+{
+	add("-");
+}
+
 MenuItem* MenuItem::findSubItem(const char* name)
 {
     Items::iterator it;
@@ -59,7 +64,7 @@ MenuItem* MenuItem::findSubItem(const char* name)
 
 void MenuItem::registerHotkeys(HotkeyContext* context)
 {
-    ESCAPE(context, return);
+    YASLI_ESCAPE(context, return);
     context->signalPressed(hotkey()).connect(this, &MenuItem::activate);
 
     for(Items::iterator it = subItems_.begin(); it != subItems_.end(); ++it){
@@ -206,7 +211,7 @@ void MenuBarImpl::onMessageMouseMove(UINT button, int x, int y)
     if(updateActiveItem())
         RedrawWindow(handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
     HWND captureWindow = GetCapture();
-    ASSERT(captureWindow == 0);
+    YASLI_ASSERT(captureWindow == 0);
     if(activeItem_ != -1){
         TRACKMOUSEEVENT event;
         ZeroMemory((void*)(&event), sizeof(event));
@@ -275,7 +280,7 @@ void MenuBarImpl::onMessageRButtonDown(UINT button, int x, int y)
 
 void MenuBarImpl::onItemActivate(MenuItem* item)
 {
-    ESCAPE(item, return);
+    YASLI_ESCAPE(item, return);
     item->signalActivate().emit();
 }
 

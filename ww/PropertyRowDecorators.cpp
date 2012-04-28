@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "PropertyRowImpl.h"
 #include "yasli/Archive.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/Decorators.h"
 #include "ww/PropertyTree.h"
 #include "ww/PropertyDrawContext.h"

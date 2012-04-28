@@ -70,7 +70,7 @@ protected:
 	bool fullUndo_;
 };
 
-class WW_API PropertyTree : public _ContainerWithWindow, public TreeConfig
+class PropertyTree : public _ContainerWithWindow, public TreeConfig
 {
 public:
     PropertyTree(int border = 0);
@@ -208,7 +208,7 @@ protected:
 };
 
 
-std::wstring WW_API generateDigest(Serializer& ser);
+std::wstring generateDigest(Serializer& ser);
 
 }
 

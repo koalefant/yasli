@@ -15,7 +15,7 @@
 #include <windowsx.h>
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ExcludeClipRectVisitor.h"
 
 
@@ -53,7 +53,7 @@ FrameImpl::FrameImpl(Frame* owner)
 
 void FrameImpl::setFrameText(const wchar_t* text)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	WW_VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);

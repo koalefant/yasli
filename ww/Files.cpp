@@ -83,7 +83,7 @@ string currentDirectory() // TODO make unicode!
     GetCurrentDirectoryW(ARRAY_LEN(buf), buf);
     return ww::fromWideChar(buf);
 #else
-    ASSERT(0 && "Not implemented");
+    YASLI_ASSERT(0 && "Not implemented");
     return string();
 #endif
 }
@@ -148,7 +148,7 @@ string extractFilePath(const char* path)
 
 string relativePath(const char* path, const char* toDirectory)
 {
-    ESCAPE(path != 0 && toDirectory != 0, return string());
+    YASLI_ESCAPE(path != 0 && toDirectory != 0, return string());
 #ifdef WIN32
 	// TODO: здесь нужно использовать Unicode. Возможность использовать "..".
     wchar_t fullPath[MAX_PATH + 1];
@@ -169,14 +169,14 @@ string relativePath(const char* path, const char* toDirectory)
 	else
 		return string();
 #else
-    ASSERT(0 && "Not implemented");
+    YASLI_ASSERT(0 && "Not implemented");
     return string();
 #endif
 }
 
 string extractFileBase(const char* path)
 {
-    ESCAPE(path != 0, return string());
+    YASLI_ESCAPE(path != 0, return string());
     const char* fileNameStart = path;
     const char* end = path + strlen(path);
     const char* p = std::find(path, end, pathSeparator()[0]);
@@ -196,7 +196,7 @@ string extractFileBase(const char* path)
 
 bool createDirectoryForFile(const char* path)
 {
-    ESCAPE(path != 0, return false);
+    YASLI_ESCAPE(path != 0, return false);
     size_t len = strlen(path);
     const char* p = path + len;
     while(--p != path){
@@ -284,7 +284,7 @@ public:
 
 	bool next()
 	{
-		ASSERT(handle_ != INVALID_HANDLE_VALUE && "Incrementing bad Files::iterator");
+		YASLI_ASSERT(handle_ != INVALID_HANDLE_VALUE && "Incrementing bad Files::iterator");
 		if(!FindNextFileA(handle_, &findData_)){
 			FindClose(handle_);
 			handle_ = INVALID_HANDLE_VALUE;
@@ -323,11 +323,11 @@ public:
 		if(!dir_)
 			return;
 		dirent* entry = readdir(dir_);
-		ASSERT(entry);
-		ASSERT(strcmp(entry->d_name, ".") == 0);
+		YASLI_ASSERT(entry);
+		YASLI_ASSERT(strcmp(entry->d_name, ".") == 0);
 		entry = readdir(dir_);
-		ASSERT(entry);
-		ASSERT(strcmp(entry->d_name, "..") == 0);
+		YASLI_ASSERT(entry);
+		YASLI_ASSERT(strcmp(entry->d_name, "..") == 0);
 		entry = readdir(dir_);
 		if(entry){
 			entry_.name_ = entry->d_name;
@@ -353,7 +353,7 @@ public:
 
 	bool next()
 	{
-		ASSERT(dir_ && "Incrementing bad Files::iterator");
+		YASLI_ASSERT(dir_ && "Incrementing bad Files::iterator");
 		dirent* entry = readdir(dir_);
 		if(!entry){
 			closedir(dir_);
@@ -412,7 +412,7 @@ DirectoryEntry& iterator::operator*()
 	if(impl_)
 		return impl_->entry_;
 	else{
-		ASSERT(0 && "Accessing invalid Files::iterator");
+		YASLI_ASSERT(0 && "Accessing invalid Files::iterator");
 		return *(DirectoryEntry*)(0);
 	}
 }
@@ -439,13 +439,13 @@ bool iterator::operator==(const iterator& rhs)
 iterator& iterator::operator++()
 {
 	if(impl_){
-		ASSERT(impl_->refCount() == 1);
+		YASLI_ASSERT(impl_->refCount() == 1);
 
 		if(!impl_->next())
 			set(0);
 	}
 	else{
-		ASSERT(0 && "Incrementing invalid Files::iterator");
+		YASLI_ASSERT(0 && "Incrementing invalid Files::iterator");
 	}
 	return *this;
 }

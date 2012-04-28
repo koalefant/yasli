@@ -14,7 +14,7 @@
 namespace ww{
 class SliderImpl;
 
-class WW_API Slider : public _WidgetWithWindow{
+class Slider : public _WidgetWithWindow{
 public:
 	Slider(int border = 0);
 

@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #include "ww/PropertyDrawContext.h"
 #include "ww/PropertyRowImpl.h"
@@ -36,7 +36,7 @@ public:
 	PropertyRowIcon(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
 	: PropertyRow(name, nameAlt, typeName)
 	{
-		ESCAPE(size == sizeof(Icon), return);
+		YASLI_ESCAPE(size == sizeof(Icon), return);
 		icon_ = *(Icon*)(object);
 	}
 

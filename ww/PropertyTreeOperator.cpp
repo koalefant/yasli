@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "PropertyTreeOperator.h"
 #include "PropertyRow.h"
-#include "yasli/EnumDescription.h"
+#include "yasli/Enum.h"
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"

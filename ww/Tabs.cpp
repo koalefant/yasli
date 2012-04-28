@@ -17,6 +17,7 @@
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
+#include "ww/gdiplus.h"
 #include "gdiplus.h"
 #include "PropertyDrawContext.h" // rename
 #include "yasli/Archive.h"
@@ -176,6 +177,7 @@ void TabsImpl::redraw(HDC dc)
 	Win32::Rect rect;
 	GetClientRect(handle(), &rect);
     using namespace Gdiplus;
+		using Gdiplus::Color;
 
     Graphics gr(dc);
     gr.FillRectangle( &SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), gdiplusRect(rect) );
@@ -350,7 +352,7 @@ size_t Tabs::add(const char* tabTitle, int before)
 
 void Tabs::remove(int index)
 {
-	ASSERT(size_t(index) < impl().items_.size());
+	YASLI_ASSERT(size_t(index) < impl().items_.size());
 	if(size_t(index) >= impl().items_.size())
 		return;
 
@@ -387,7 +389,7 @@ TabPages::TabPages(int border)
 
 int TabPages::add(const char* title, Widget* widget, int before)
 {
-	ASSERT(widget);
+	YASLI_ASSERT(widget);
 	tabs_->add(title, before);
 
 	if(before > -1)
@@ -432,7 +434,7 @@ void TabPages::setSelectedTab(int index)
 {
 	if(VBox::size() > 1)
 		VBox::remove(1);
-	ESCAPE(size_t(index) < widgets_.size(), return);
+	YASLI_ESCAPE(size_t(index) < widgets_.size(), return);
 	Widget* widget = widgets_.at(index);
 	VBox::add(widget, PACK_FILL);
 	tabs_->setSelectedTab(index);

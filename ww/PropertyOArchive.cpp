@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 #include <math.h>
+#include <memory>
 
 #include "PropertyOArchive.h"
 #include "ww/PropertyTreeModel.h"
@@ -26,8 +27,8 @@
 #include "yasli/BitVector.h"
 #include "yasli/Archive.h"
 #include "yasli/BitVectorImpl.h"
-#include "yasli/TypesFactory.h"
-#include "yasli/EnumDescription.h"
+#include "yasli/ClassFactory.h"
+#include "yasli/Enum.h"
 #include "ww/SafeCast.h"
 #include "ww/PopupMenu.h"
 #include "ww/Win32/Window.h"
@@ -205,8 +206,8 @@ void PropertyRowContainer::onMenuClear(PropertyTreeModel* model)
 PropertyRow* PropertyRowContainer::defaultRow(PropertyTreeModel* model)
 {
 	PropertyRow* defaultType = model->defaultType(elementTypeName_);
-	//ASSERT(defaultType);
-	//ASSERT(defaultType->numRef() == 1);
+	//YASLI_ASSERT(defaultType);
+	//YASLI_ASSERT(defaultType->numRef() == 1);
 	return defaultType;
 }
 
@@ -221,7 +222,7 @@ void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 {
     tree->model()->push(this);
 	PropertyRow* defaultType = defaultRow(tree->model());
-	ESCAPE(defaultType != 0, return);
+	YASLI_ESCAPE(defaultType != 0, return);
 	PropertyRow* clonedRow = defaultType->clone();
 	// clonedRow->setFullRow(true); TODO
     if(count() == 0)
@@ -371,12 +372,12 @@ void PropertyRowEnum::setVisibleIndex(int visibleIndex)
 		}
         ++index;
 	}
-	ASSERT(0);
+	YASLI_ASSERT(0);
 }
 
 bool PropertyRowEnum::assignTo(void* object, size_t size)
 {
-	ESCAPE(size == sizeof(int), return false);
+	YASLI_ESCAPE(size == sizeof(int), return false);
 	*reinterpret_cast<int*>(object) = value();
 	return true;
 }
@@ -415,7 +416,7 @@ PropertyRowPointer::PropertyRowPointer()
 {
 }
 
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const PointerSerializationInterface &ptr)
+PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const PointerInterface &ptr)
 : PropertyRow(name, label, ptr.baseType().name())
 , baseType_(ptr.baseType())
 , derivedType_(ptr.type())
@@ -433,7 +434,7 @@ PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, Type
 {
 }
 
-bool PropertyRowPointer::assignTo(const PointerSerializationInterface &ptr)
+bool PropertyRowPointer::assignTo(PointerInterface &ptr)
 {
 	if ( ptr.type() != derivedType_ )
 	{
@@ -455,10 +456,10 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 	    clear();
 	}
 	else{
-		ASSERT(typeName_);
+		YASLI_ASSERT(typeName_);
 		PropertyRow* def = tree->model()->defaultType(typeName_, index);
 		if(def){
-			ASSERT(def->refCount() == 1);
+			YASLI_ASSERT(def->refCount() == 1);
             if(useDefaultValue){
                 clear();
 			    cloneChildren(this, def);
@@ -509,7 +510,7 @@ std::wstring PropertyRowPointer::generateLabel() const
 	}
 	else
     {
-        ESCAPE(factory_ != 0, return L"NULL");
+        YASLI_ESCAPE(factory_ != 0, return L"NULL");
         str = toWideChar(factory_->nullLabel() ? factory_->nullLabel() : "[ null ]");
     }
     return str;
@@ -702,13 +703,13 @@ protected:
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
-PropertyRowString::PropertyRowString(const char* name, const char* label, const std::wstring& value)
+PropertyRowString::PropertyRowString(const char* name, const char* label, const wchar_t* value)
 : PropertyRowImpl<std::wstring, PropertyRowString>(name, label, value, "string")
 {
 }
 
-PropertyRowString::PropertyRowString(const char* name, const char* label, const std::string& value)
-: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, toWideChar(value.c_str()), "string")
+PropertyRowString::PropertyRowString(const char* name, const char* label, const char* value)
+: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, toWideChar(value), "string")
 {
 }
 
@@ -844,7 +845,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model)
 , updateMode_(false)
 , rootNode_(0)
 {
-	ASSERT(model != 0);
+	YASLI_ASSERT(model != 0);
 	if(!rootNode()->empty()){
 		updateMode_ = true;
 		setUpdatedRecurse(model->root(), false);
@@ -864,7 +865,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, const char* typeNam
 , derivedTypeNameAlt_(derivedTypeNameAlt ? derivedTypeNameAlt : "")
 , rootNode_(0)
 {
-	ASSERT(model != 0);
+	YASLI_ASSERT(model != 0);
 	if(derivedTypeName)
 		model->addDefaultType(0, typeName, derivedTypeName, derivedTypeNameAlt);
 	else
@@ -874,7 +875,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, const char* typeNam
 PropertyOArchive::~PropertyOArchive()
 {
 	if(!typeName_.empty()){
-		ESCAPE(rootNode_ != 0, return);
+		YASLI_ESCAPE(rootNode_ != 0, return);
 		if(derivedTypeName_){
 			rootNode_->setTypeName(derivedTypeName_);
 			model_->addDefaultType(rootNode_, typeName_.c_str(), derivedTypeName_, derivedTypeNameAlt_.c_str());
@@ -889,8 +890,8 @@ PropertyRow* PropertyOArchive::rootNode()
 	if(rootNode_)
 		return rootNode_;
 	else{
-		ASSERT(model_);
-		ASSERT(model_->root());
+		YASLI_ASSERT(model_);
+		YASLI_ASSERT(model_->root());
 		return model_->root();
 	}
 }
@@ -921,7 +922,7 @@ void PropertyOArchive::closeStruct(const char* name)
 
 PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block, PropertyRow* previousNode)
 {
-    ESCAPE(newRow, return 0);
+    YASLI_ESCAPE(newRow, return 0);
 	const char* label = newRow->label();
 	if(!previousNode) // FIXME перенести в место вызова
 		previousNode = lastNode_;
@@ -962,7 +963,7 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 			if(row){
 				currentNode_->replaceAndPreserveState(row, newRow);
 				newRow->setUpdated(true);
-				ASSERT(newRow->parent() == currentNode_);
+				YASLI_ASSERT(newRow->parent() == currentNode_);
 				result = newRow;
 				result->setLabel(label);
 			}
@@ -1018,15 +1019,15 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const
 	return true;
 }
 
-bool PropertyOArchive::operator()(std::string& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowString(name, label, value));
+	lastNode_ = addRow(new PropertyRowString(name, label, value.get()));
 	return true;
 }
 
-bool PropertyOArchive::operator()(std::wstring& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowString(name, label, value));
+	lastNode_ = addRow(new PropertyRowString(name, label, value.get()));
 	return true;
 }
 
@@ -1121,36 +1122,36 @@ bool PropertyOArchive::operator()(double& value, const char* name, const char* l
 }
 
 
-bool PropertyOArchive::operator()(ContainerSerializationInterface& ser, const char *name, const char *label)
+bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, const char *label)
 {
-    const char* typeName = ser.type().name();
-    const char* elementTypeName = ser.type().name();
-    bool fixedSizeContainer = ser.isFixedSize();
+	const char* typeName = ser.type().name();
+	const char* elementTypeName = ser.type().name();
+	bool fixedSizeContainer = ser.isFixedSize();
 	PropertyRow* container = new PropertyRowContainer(name, label, typeName, elementTypeName, fixedSizeContainer);
 	lastNode_ = currentNode_;
 	enterNode(addRow(container, false));
 
 	// TODO: rewrite
-	if ( SharedPtr<Archive> defaultArchive = openDefaultArchive( typeName, 0, 0 ) )
+	std::auto_ptr<Archive> defaultArchive(openDefaultArchive( typeName, 0, 0 ));
+	if (defaultArchive.get() != 0)
 	{
-        defaultArchive->setFilter(getFilter());
+		defaultArchive->setFilter(getFilter());
 		ser.serializeNewElement( *defaultArchive, "default", "[+]" );
-		closeDefaultArchive( defaultArchive, typeName, 0, 0 );
 	}
 
-    if ( ser.size() > 0 )
-        while( true )
-        {
-            ser(*this, "", "<");
-            if ( !ser.next() )
-                break;
-        }
+	if ( ser.size() > 0 )
+		while( true )
+		{
+			ser(*this, "", "<");
+			if ( !ser.next() )
+				break;
+		}
 
-    closeStruct(name);
-    return true;
+	closeStruct(name);
+	return true;
 }
 
-bool PropertyOArchive::operator()(const PointerSerializationInterface& ptr, const char *name, const char *label)
+bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const char *label)
 {
 	lastNode_ = currentNode_;
 	PropertyRow* row = new PropertyRowPointer(name, label, ptr);
@@ -1158,29 +1159,29 @@ bool PropertyOArchive::operator()(const PointerSerializationInterface& ptr, cons
 
 	if(needDefaultArchive(ptr.baseType().name()))
 	{
-        const char* baseTypeName = ptr.baseType().name();
+		const char* baseTypeName = ptr.baseType().name();
 		ClassFactoryBase* factory = ptr.factory();
 		size_t count = factory->size();		
-        if(factory->nullLabel() != 0){
-            if(factory->nullLabel()[0] != '\0')
-                model_->addDefaultType(0, baseTypeName, "", factory->nullLabel());
-        }
-        else
-            model_->addDefaultType(0, baseTypeName, "", "[ null ]");
+		if(factory->nullLabel() != 0){
+			if(factory->nullLabel()[0] != '\0')
+				model_->addDefaultType(0, baseTypeName, "", factory->nullLabel());
+		}
+		else
+			model_->addDefaultType(0, baseTypeName, "", "[ null ]");
 
-        for(size_t i = 0; i < count; ++i) {
+		for(size_t i = 0; i < count; ++i) {
 			const TypeDescription *desc = factory->descriptionByIndex((int)i);
 
 			const char* name = desc->name();
 			const char* label = desc->label();
 
-			if(SharedPtr<Archive> archive = openDefaultArchive(baseTypeName, name, label)){
-                archive->setContextMap(contextMap_);
-                archive->setFilter(getFilter());
+			std::auto_ptr<Archive> archive(openDefaultArchive(baseTypeName, name, label));
+			if(archive.get() != 0){
+				archive->setContextMap(contextMap_);
+				archive->setFilter(getFilter());
 				factory->serializeNewByIndex( *archive, (int)i, "name", "nameAlt" );
-      			closeDefaultArchive(archive, baseTypeName, name, label);
 			}
-        }
+		}
 	}
 
 	if(Serializer ser = ptr.serializer())
@@ -1216,8 +1217,4 @@ Archive* PropertyOArchive::openDefaultArchive(const char* typeName, const char* 
 	return 0;
 }
 
-void PropertyOArchive::closeDefaultArchive(SharedPtr<Archive> base_ar, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt)
-{
 }
-
-};

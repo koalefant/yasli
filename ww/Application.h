@@ -19,7 +19,7 @@ namespace Win32{
 
 namespace ww{
 
-class WW_API Application : public has_slots
+class Application : public has_slots
 {
 public:
     Application(void* hInstance = 0);

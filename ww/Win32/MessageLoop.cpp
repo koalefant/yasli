@@ -45,7 +45,6 @@ int MessageLoop::run()
 	            TranslateMessage(&msg); // генерит WM_CHAR из WM_KEYDOWN и т.п.
                 DispatchMessage(&msg);
 			}
-            profiler_quant();
         }
     }
     return 0;

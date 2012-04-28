@@ -15,7 +15,7 @@
 namespace ww{
 
 class Widget;
-class WW_API FileDialog{
+class FileDialog{
 public:
 	FileDialog(ww::Widget* owner, bool save, const char** masks, const char* startDirectory = 0, const char* startFileName = 0, bool allow_multiselect = false);
 	bool showModal();

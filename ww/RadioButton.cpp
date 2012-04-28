@@ -16,7 +16,7 @@
 
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 
 namespace ww{
@@ -135,12 +135,12 @@ void RadioButtonImpl::setRadioButtonStatus(bool status)
 			if(*it != owner_)
 				(*it)->setStatus(false);
 	}
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	::SendMessage(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
 }
 void RadioButtonImpl::setRadioButtonText(const wchar_t* text)
 {
-	ASSERT(::IsWindow(handle_));
+	YASLI_ASSERT(::IsWindow(handle_));
 	WW_VERIFY(::SetWindowText(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);

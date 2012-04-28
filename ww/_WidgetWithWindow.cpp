@@ -40,7 +40,7 @@ void _WidgetWithWindow::_setPosition(const ww::Rect& position)
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
 	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_, position.bottom() - border_);
@@ -54,7 +54,7 @@ void _WidgetWithWindow::_setParent(Container* container)
 		return;
 	
 	Widget::_setParent(container);
-	ASSERT(::IsWindow(window_->handle()));
+	YASLI_ASSERT(::IsWindow(window_->handle()));
 	if(::IsWindow(window_->handle())){
 		window_->setParent(window);
 		// moves window to the end of tab-focus order
@@ -118,8 +118,8 @@ void _ContainerWithWindow::_setParent(Container* container)
 		return;
 	
 	Widget::_setParent(container);
-	ASSERT(window_);
-	ASSERT(::IsWindow(window_->handle()));
+	YASLI_ASSERT(window_);
+	YASLI_ASSERT(::IsWindow(window_->handle()));
 	if(::IsWindow(window_->handle())){
 		window_->setParent(window);
 		// moves window to the end of tab-focus order

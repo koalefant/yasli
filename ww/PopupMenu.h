@@ -34,7 +34,7 @@ template<class Arg1> class PopupMenuItem1;
 template<class Arg1, class Arg2> class PopupMenuItem2;
 template<class Arg1, class Arg2, class Arg3> class PopupMenuItem3;
 
-class WW_API PopupMenuItem: public RefCounter{
+class PopupMenuItem: public RefCounter{
 public:
 	friend PopupMenu;
     typedef vector<SharedPtr<PopupMenuItem> > Children;
@@ -95,11 +95,11 @@ public:
 
 	// internal methods:
     unsigned int _menuID() const{
-        ASSERT(children_.empty());
+        YASLI_ASSERT(children_.empty());
         return id_;
     }
 	void _setMenuID(unsigned int id){
-        ASSERT(children_.empty());
+        YASLI_ASSERT(children_.empty());
 		id_ = unsigned int(id);
 	}
     virtual void _call() = 0;
@@ -236,7 +236,7 @@ PopupMenuItem3<Arg1, Arg2, Arg3>& PopupMenuItem::add(const char* text, const Arg
 
 
 
-class WW_API PopupMenu : public RefCounter{
+class PopupMenu : public RefCounter{
 public:
     PopupMenu();
     PopupMenuItem0& root() { return root_; };

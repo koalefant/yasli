@@ -16,7 +16,7 @@
 #include "ww/FileDialog.h"
 #include "ww/PopupMenu.h"
 #include "ww/Files.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/FileSelector.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window.h"

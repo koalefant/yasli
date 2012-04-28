@@ -21,7 +21,7 @@ static const int DIALOG_BORDER = 12;
 	ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color& color, bool showColor, bool showAlpha)
 : Dialog(parent, DIALOG_BORDER )
 {
-	ASSERT(showColor || showAlpha);
+	YASLI_ASSERT(showColor || showAlpha);
 
 	if(showColor)
 		setTitle("Choose Color");

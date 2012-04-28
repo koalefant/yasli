@@ -14,7 +14,7 @@
 namespace ww{
 
 class SplitterImpl;
-class WW_API VSplitter : public Splitter{
+class VSplitter : public Splitter{
 public:
 	VSplitter(int splitterSpacing = 1, int border = 0);
 	~VSplitter();

@@ -15,6 +15,7 @@
 #include "ww/PropertyTreeModel.h"
 #include "ww/SafeCast.h"
 #include "yasli/PointersImpl.h"
+#include "yasli/ClassFactory.h"
 
 namespace ww{
 class AutoDropCheckComboBox : public CheckComboBox{
@@ -77,11 +78,11 @@ PropertyRowBitVector::PropertyRowBitVector(void* object, size_t _size, const cha
 , description_(0)
 , flags_(0)
 {
-	ESCAPE(_size == sizeof(BitVectorWrapper), return);
+	YASLI_ESCAPE(_size == sizeof(BitVectorWrapper), return);
 	BitVectorWrapper* wrapper = reinterpret_cast<BitVectorWrapper*>(object);
-	ESCAPE(wrapper != 0, return);
+	YASLI_ESCAPE(wrapper != 0, return);
 	description_ = wrapper->description;
-	ESCAPE(description_ != 0, return);
+	YASLI_ESCAPE(description_ != 0, return);
 	flags_ = wrapper->value;
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);
@@ -98,7 +99,7 @@ PropertyRowBitVector::PropertyRowBitVector(void* object, size_t _size, const cha
 
 bool PropertyRowBitVector::assignTo(void* object, size_t size)
 {
-	ASSERT(size == sizeof(BitVectorWrapper));
+	YASLI_ASSERT(size == sizeof(BitVectorWrapper));
 	reinterpret_cast<BitVectorWrapper*>(object)->value = flags();
 	return true;
 }

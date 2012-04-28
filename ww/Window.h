@@ -40,7 +40,7 @@ enum WindowPosition{
 
 class PopupMenu;
 
-class WW_API Window : public Container{
+class Window : public Container{
 public:
 	Window(Application* app, int border = 4);
 

@@ -44,9 +44,9 @@ void Tooltip::attach(Widget* widget)
 	widget_->setToolTip(this);
 
 	Win32::Window32* window = _findWindow(widget);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	HWND ownerHandle = window->handle();
-	ASSERT(::IsWindow(ownerHandle));
+	YASLI_ASSERT(::IsWindow(ownerHandle));
 
 	if(!toolTipWindow_){
 		toolTipWindow_ = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, 0,
@@ -64,7 +64,7 @@ void Tooltip::attach(Widget* widget)
 	ti.lpszText  = LPSTR_TEXTCALLBACK;
 	ti.rect.left = ti.rect.top = ti.rect.bottom = ti.rect.right = 0; 
 
-	ASSERT(::IsWindow(toolTipWindow_));
+	YASLI_ASSERT(::IsWindow(toolTipWindow_));
 	WW_VERIFY(SendMessage(toolTipWindow_, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti));
 	WW_VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)TRUE, (LPARAM)&ti));
 }

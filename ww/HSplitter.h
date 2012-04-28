@@ -13,7 +13,7 @@
 
 namespace ww{
 class SplitterImpl;
-class WW_API HSplitter : public Splitter{
+class HSplitter : public Splitter{
 public:
 	HSplitter(int splitterSpacing = 1, int border = 0);
 	~HSplitter();

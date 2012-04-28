@@ -143,7 +143,7 @@ void DrawingCache::initialize()
 		uxTheme.loadLibrary();
 		theme_ = uxTheme.OpenThemeData(Win32::getDefaultWindowHandle(), L"Button");
 
-		ESCAPE(GdiplusStartup(&token_, &startup, 0) == Ok, return);
+		YASLI_ESCAPE(GdiplusStartup(&token_, &startup, 0) == Ok, return);
 
 		NONCLIENTMETRICS nonClientMetrics;
 		nonClientMetrics.cbSize = sizeof(nonClientMetrics);
@@ -167,7 +167,7 @@ void DrawingCache::flush()
 
 void DrawingCache::finalize()
 {
-	ESCAPE(users_ > 0, return);
+	YASLI_ESCAPE(users_ > 0, return);
 	--users_;
 	if(users_ == 0)
 	{
@@ -192,7 +192,7 @@ Gdiplus::Bitmap* DrawingCache::getBitmapForIcon(const Icon& icon)
 		return it->second.bitmap;
 
 	RGBAImage image;
-	ESCAPE(icon.getImage(&image), return 0);
+	YASLI_ESCAPE(icon.getImage(&image), return 0);
 
 	BitmapCache& cache = iconToBitmapMap_[icon];
 	cache.pixels.swap(image.pixels_);
@@ -342,7 +342,7 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 
 	if(checked){
 		/*
-		ASSERT(checkBitmap);
+		YASLI_ASSERT(checkBitmap);
 		HDC dc = gr->GetHDC();
 		DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.X + offsetX + 3, rect.Y + offsetY + 2, size - 5, size - 3, DST_BITMAP);
 		gr->ReleaseHDC(dc);
@@ -359,7 +359,7 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 void PropertyDrawContext::drawIcon(const Rect& rect, const Icon& icon) const
 {
 	Gdiplus::Bitmap* bitmap = DrawingCache::get()->getBitmapForIcon(icon);
-	ESCAPE(bitmap != 0, return);
+	YASLI_ESCAPE(bitmap != 0, return);
 	int x = rect.left() + (rect.width() - icon.width()) / 2;
 	int y = rect.top() + (rect.height() - icon.height()) / 2;
 	graphics->DrawImage(bitmap, x, y);

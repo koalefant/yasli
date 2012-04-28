@@ -14,7 +14,7 @@
 namespace ww{
 
 class ButtonImpl;
-class WW_API Button : public _WidgetWithWindow{
+class Button : public _WidgetWithWindow{
 public:
 	Button(const char* text = "Button", int border = 0);
 

@@ -29,7 +29,7 @@ struct TreeSelection : vector<TreePath>
 
 //////////////////////////////////////////////////////////////////////////
 
-class WW_API PropertyTreeModel : public PolyRefCounter, public has_slots
+class PropertyTreeModel : public PolyRefCounter, public has_slots
 {
 public:
     class LockedUpdate : public RefCounter{

@@ -22,7 +22,7 @@ enum PackMode{
 	PACK_END,
 };
 
-class WW_API Box: public Container{
+class Box : public Container{
 public:
 	Box(int spacing, int border);
 	~Box();

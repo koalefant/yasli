@@ -35,7 +35,7 @@ static HWND findOwner(Widget* widget){
 		return 0;
 	HWND parentWnd = 0;
 	Win32::Window32* window = _findWindow(widget);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	if(window)
 		return findOwner(window->handle());
 	else
@@ -54,7 +54,7 @@ FileDialog::FileDialog(ww::Widget* owner, bool save, const char** masks, const c
 	while(*p){
         masks_.push_back(*p);
 		++p;
-		ESCAPE(*p, return);
+		YASLI_ESCAPE(*p, return);
         masks_.push_back(*p);
 		++p;
 	}
@@ -76,7 +76,7 @@ bool FileDialog::showModal()
 	for(it = masks_.begin(); it != masks_.end(); ++it){
 		std::wstring mask(toWideChar(it->c_str()));
 		int len = int(wcslen(mask.c_str()));
-		ASSERT(p + len + 1< filterEnd);
+		YASLI_ASSERT(p + len + 1< filterEnd);
 		wcscpy_s(p, filterEnd - p - 1, mask.c_str());
 		p += len;
 		*p = L'\0';
@@ -133,10 +133,10 @@ bool FileDialog::showModal()
             switch(errorCode)
             {
             case FNERR_INVALIDFILENAME:
-                ASSERT_STR(0 && "Invalid file name!", fromWideChar(openFileName.lpstrFile).c_str());
+                YASLI_ASSERT_STR(0 && "Invalid file name!", fromWideChar(openFileName.lpstrFile).c_str());
                 break;
             default:
-			    ASSERT(errorCode == 0);
+			    YASLI_ASSERT(errorCode == 0);
                 break;
                 
             }

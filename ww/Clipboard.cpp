@@ -21,7 +21,7 @@
 #include "ww/Win32/Window.h"
 #include "ww/SafeCast.h"
 
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "yasli/Serializer.h"
 #include "yasli/BinaryIArchive.h"
 #include "yasli/BinaryOArchive.h"
@@ -73,7 +73,7 @@ Clipboard::Clipboard(Widget* owner, ConstStringList* constStrings, PropertyTreeM
 , filter_(filter)
 {
 	clipboardFormat_ = RegisterClipboardFormat(L"ww.Clipboard0");
-	ASSERT(clipboardFormat_ != 0);
+	YASLI_ASSERT(clipboardFormat_ != 0);
 }
 
 Clipboard::~Clipboard()
@@ -132,9 +132,9 @@ bool Clipboard::canBePastedOn(const char* destinationType)
 
 bool Clipboard::empty()
 {
-	ASSERT(widget_);
+	YASLI_ASSERT(widget_);
 	Win32::Window32* window = ww::_findWindow(widget_);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 
 	if(!::OpenClipboard(window->handle()))
 		return false;
@@ -194,7 +194,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 		if(model_){
 			PropertyRowContainer* container = static_cast<PropertyRowContainer*>(dest);
 			PropertyRow* elementRow = model_->defaultType(container->elementTypeName());
-			ESCAPE(elementRow, return false);
+			YASLI_ESCAPE(elementRow, return false);
 			if(strcmp(elementRow->typeName(), source->typeName()) == 0){
 				result = true;
 				if(!onlyCheck){
@@ -222,9 +222,9 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 bool Clipboard::copy(PropertyRow* row)
 {
 	PropertyRow::setConstStrings(constStrings_);
-	ASSERT(widget_);
+	YASLI_ASSERT(widget_);
 	Win32::Window32* window = ww::_findWindow(widget_);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 
     SharedPtr<PropertyRow> clonedRow(row->clone());
 	BinaryOArchive oa(true);
@@ -235,7 +235,7 @@ bool Clipboard::copy(PropertyRow* row)
 
 	if(::OpenClipboard(window->handle())){
 		HGLOBAL memoryHandle = GlobalAlloc(GPTR, oa.length());
-		ASSERT(memoryHandle);
+		YASLI_ASSERT(memoryHandle);
 		if(!memoryHandle){
 			PropertyRow::setConstStrings(0);
 			return false;
@@ -243,7 +243,7 @@ bool Clipboard::copy(PropertyRow* row)
 		
 		void* mem = GlobalLock(memoryHandle);
 		if(!mem){
-			ASSERT(0 && "GlobalLock failed!");
+			YASLI_ASSERT(0 && "GlobalLock failed!");
 			PropertyRow::setConstStrings(0);
 			return false;
 		}
@@ -261,9 +261,9 @@ bool Clipboard::copy(PropertyRow* row)
 
 bool Clipboard::pasteFunc(PasteFunc& func)
 {
-	ASSERT(widget_);
+	YASLI_ASSERT(widget_);
 	Win32::Window32* window = ww::_findWindow(widget_);
-	ASSERT(window);
+	YASLI_ASSERT(window);
 
 	if(!::OpenClipboard(window->handle()))
 		return false;
@@ -293,7 +293,7 @@ bool Clipboard::pasteFunc(PasteFunc& func)
 
 int Clipboard::smartPaste(Serializer& se)
 {
-	ASSERT(0 && "Not implemented");
+	YASLI_ASSERT(0 && "Not implemented");
 	return paste(se) ? 1 : 0;
 }
 

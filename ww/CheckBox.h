@@ -16,7 +16,7 @@ namespace ww{
 using std::string;
 
 class CheckBoxImpl;
-class WW_API CheckBox : public _WidgetWithWindow{
+class CheckBox : public _WidgetWithWindow{
 public:
 	CheckBox(const char* text = "CheckBox", int border = 0);
 

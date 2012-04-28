@@ -17,7 +17,7 @@
 namespace ww{
 
 class LabelImpl;
-class WW_API Label : public _WidgetWithWindow{
+class Label : public _WidgetWithWindow{
 public:
 	Label(const char* text = "Label", bool emphasis = false, int border = 0);
 

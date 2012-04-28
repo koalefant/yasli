@@ -21,7 +21,7 @@ namespace ww{
 
 using std::vector;
 
-class WW_API RadioButtonBox : public ww::Frame 
+class RadioButtonBox : public ww::Frame 
 {
 public:
 	RadioButtonBox(const char* text = "RadioButtonBox", int border = 0);

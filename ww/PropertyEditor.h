@@ -23,11 +23,11 @@ enum EditFlags{
 	EXPAND_ALL		  = 1 << 3
 };
 
-bool WW_API edit(const Serializer& ser, const char* stateFileName,
-				  int flags = IMMEDIATE_UPDATE | ONLY_TRANSLATED,
-				  Widget* parent = 0, const char* title = 0);
-bool WW_API edit(const Serializer& ser, const char* stateFileName,
-				  int flags, HWND parent, const char* title = 0);
+bool edit(const Serializer& ser, const char* stateFileName,
+		  int flags = IMMEDIATE_UPDATE | ONLY_TRANSLATED,
+		  Widget* parent = 0, const char* title = 0);
+bool edit(const Serializer& ser, const char* stateFileName,
+		  int flags, HWND parent, const char* title = 0);
 
 }
 

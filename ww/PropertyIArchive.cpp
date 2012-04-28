@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 
 #include "ww/Serialization.h"
-#include "yasli/EnumDescription.h"
+#include "yasli/Enum.h"
 #include "ww/PropertyTreeModel.h"
 #include "PropertyIArchive.h"
 #include "ww/_PropertyRowBuiltin.h"
@@ -25,11 +25,11 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model)
 {
 }
 
-bool PropertyIArchive::operator()(std::string& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_))
- 			row->assignTo(value);
+ 			value.set(fromWideChar(row->value().c_str()).c_str());
 		closeRow(name);
 		return true;
 	}
@@ -37,11 +37,12 @@ bool PropertyIArchive::operator()(std::string& value, const char* name, const ch
 		return false;
 }
 
-bool PropertyIArchive::operator()(std::wstring& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_))
-	 		row->assignTo(value);
+		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_)) {
+			value.set(row->value().c_str());
+		}
 		closeRow(name);
 		return true;
 	}
@@ -205,7 +206,7 @@ bool PropertyIArchive::operator()(double& value, const char* name, const char* l
 		return false;
 }
 
-bool PropertyIArchive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
+bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     const char* typeName = ser.type().name();
 	if(!openRow(name, label, typeName))
@@ -251,12 +252,12 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const
 }
 
 
-bool PropertyIArchive::operator()(const PointerSerializationInterface& ser, const char* name, const char* label)
+bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const char* label)
 {
     const char* baseName = ser.baseType().name();
 
 	if(openRow(name, label, baseName)){
-		ASSERT(currentNode_);
+		YASLI_ASSERT(currentNode_);
 		PropertyRowPointer* row = dynamic_cast<PropertyRowPointer*>(currentNode_);
         if(!row){
             closeRow(name);
@@ -297,11 +298,11 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	if(!currentNode_){
 		lastNode_ = currentNode_ = model_->root();
-		ASSERT(currentNode_);
+		YASLI_ASSERT(currentNode_);
 		return true;
 	}
 
-	ESCAPE(currentNode_, return false);
+	YASLI_ESCAPE(currentNode_, return false);
 	
 	if(currentNode_->empty())
 		return false;
@@ -340,7 +341,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 void PropertyIArchive::closeRow(const char* name)
 {
-	ESCAPE(currentNode_, return);
+	YASLI_ESCAPE(currentNode_, return);
 	currentNode_ = currentNode_->parent();
 }
 

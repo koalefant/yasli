@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/PropertyTreeModel.h"
 #include "ww/_PropertyRowBuiltin.h"
 

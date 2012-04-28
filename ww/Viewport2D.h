@@ -21,7 +21,7 @@ namespace ww{
 class Viewport2DImpl;
 struct KeyPress;
 
-class WW_API Viewport2D : public _WidgetWithWindow 
+class Viewport2D : public _WidgetWithWindow 
 {
 public:
 	enum TextAlign {

@@ -34,7 +34,7 @@ bool Icon::getImage(RGBAImage* image) const
 		return false;
 
 	if(lineCount_ != 1 + colorCount + height) {
-		ASSERT(0 && "Wrong line count");
+		YASLI_ASSERT(0 && "Wrong line count");
 		return false;
 	}
 
@@ -109,7 +109,7 @@ bool Icon::getImage(RGBAImage* image) const
 				++p;
 			}
 
-			for (size_t i = 0; i < colorCount; ++i)
+			for (size_t i = 0; i < size_t(colorCount); ++i)
 				if (colors[i].first == code)
 					pixels[pi] = colors[i].second;
 			++pi;

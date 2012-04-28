@@ -12,7 +12,7 @@
 #include "ww/_WidgetWindow.h"
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 
 namespace ww{

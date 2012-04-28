@@ -13,19 +13,6 @@
 #pragma warning(disable : 4275) // non dll-interface class '' used as base for dll-interface class ''
 #pragma warning(disable : 4512) // assignment operator could not be generated
 
-#if !defined(WW_DLL) && (defined(_AFXDLL) || defined(_DLL) || defined(_MTD))
-#define WW_DLL
-#endif
-
-#ifndef WW_DLL
-# define WW_API 
-#else
-# ifdef WW_EXPORTED
-#  define WW_API __declspec(dllexport)
-# else
-#  define WW_API __declspec(dllimport)
-# endif
-#endif
 
 namespace yasli{}
 

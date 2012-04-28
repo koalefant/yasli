@@ -18,7 +18,7 @@ using std::string;
 class RadioButtonImpl;
 class RadioButtonGroup;
 
-class WW_API RadioButton : public _WidgetWithWindow{
+class RadioButton : public _WidgetWithWindow{
 public:
 	RadioButton(RadioButton* groupWith = 0, const char* text = "RadioButton", int border = 0);
 

@@ -21,7 +21,7 @@ namespace ww{
 using std::string;
 using std::wstring;
 struct KeyPress;
-class WW_API EntrySelection{
+class EntrySelection{
 public:
 	EntrySelection(int start = 0, int end = 0)
 	: start_(start), end_(end)
@@ -37,7 +37,7 @@ protected:
 
 
 class EntryImpl;
-class WW_API Entry : public _WidgetWithWindow{
+class Entry : public _WidgetWithWindow{
 public:
 	explicit Entry(const wchar_t* text = L"", bool multline = false, int border = 0);
 	explicit Entry(const char* text, bool multline = false, int border = 0);

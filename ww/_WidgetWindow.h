@@ -17,7 +17,7 @@ class _WidgetWithWindow;
 class _ContainerWithWindow;
 
 
-class WW_API _WidgetWindow : public Win32::Window32{
+class _WidgetWindow : public Win32::Window32{
 public:
 	_WidgetWindow(_WidgetWithWindow* owner, HWND handle = 0);
 
@@ -31,7 +31,7 @@ protected:
 };
 
 
-class WW_API _ContainerWindow : public Win32::Window32{
+class _ContainerWindow : public Win32::Window32{
 public:
 	_ContainerWindow(_ContainerWithWindow* owner);
 

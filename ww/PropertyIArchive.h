@@ -25,8 +25,8 @@ public:
 	PropertyIArchive(PropertyTreeModel* model);
 
 protected:
-	bool operator()(std::string& value, const char* name, const char* label);
-	bool operator()(std::wstring& value, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label);
+	bool operator()(WStringInterface& value, const char* name, const char* label);
     bool operator()(bool& value, const char* name, const char* label);
     bool operator()(char& value, const char* name, const char* label);
     
@@ -47,8 +47,8 @@ protected:
     bool operator()(double& value, const char* name, const char* label);
 
     bool operator()(const Serializer& ser, const char* name, const char* label);
-    bool operator()(const PointerSerializationInterface& ser, const char* name, const char* label);
-    bool operator()(ContainerSerializationInterface& ser, const char* name, const char* label);
+    bool operator()(PointerInterface& ser, const char* name, const char* label);
+    bool operator()(ContainerInterface& ser, const char* name, const char* label);
 
 
 

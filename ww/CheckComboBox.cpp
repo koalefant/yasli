@@ -20,7 +20,8 @@
 #include "ww/Win32/Window.h"
 
 #include "ww/Serialization.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
+#include "yasli/StringList.h"
 
 namespace ww{
 YASLI_CLASS(Widget, CheckComboBox, "CheckComboBox")
@@ -111,7 +112,7 @@ CheckComboListBoxImpl::~CheckComboListBoxImpl()
 
 int CheckComboListBoxImpl::onMessageDestroy()
 {
-	ASSERT(::IsWindow(owner_->handle()));
+	YASLI_ASSERT(::IsWindow(owner_->handle()));
 	owner_->listBox_ = 0;
 	return 0;
 }
@@ -213,8 +214,8 @@ LRESULT CheckComboBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, L
 void CheckComboBoxImpl::setCheck(size_t index, bool flag)
 {
 	WW_VERIFY(::SendMessage(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
-	ASSERT(::SendMessage(handle_, CB_GETITEMDATA, index, 0) != -1);
-	ASSERT((flag ? TRUE : FALSE) == ::SendMessage(handle_, CB_GETITEMDATA, index, 0));
+	YASLI_ASSERT(::SendMessage(handle_, CB_GETITEMDATA, index, 0) != -1);
+	YASLI_ASSERT((flag ? TRUE : FALSE) == ::SendMessage(handle_, CB_GETITEMDATA, index, 0));
 
 	InvalidateRect(handle_, 0, FALSE);
 }
@@ -353,7 +354,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 		if(len > 0){
 			wchar_t* buffer = new wchar_t[len + 1];
 			memset((void*)buffer, 0, sizeof(wchar_t) * len + 1);
-			ASSERT(buffer);
+			YASLI_ASSERT(buffer);
 			WW_VERIFY(CallWindowProc(controlWindowProc_, handle_, CB_GETLBTEXT, (WPARAM)drawItemStruct->itemID, (LPARAM)buffer) != CB_ERR);
 			str = buffer;
 			delete[] buffer;
@@ -459,7 +460,7 @@ void CheckComboBox::_setPosition(const Rect& position)
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
 	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_ * 2, position.bottom() - border_ * 2 + _minimalSize().y * dropDownHeight_);

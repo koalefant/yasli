@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <memory>
 #include "ww/PropertyEditor.h"
 #include "ww/Dialog.h"
 
@@ -25,6 +26,7 @@ class EditorDialog : public ww::Dialog{
 public:
 	EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, ww::Widget*);
 	EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, HWND parent);
+	~EditorDialog();
 
 	void onResponse(int response);
 	
@@ -34,7 +36,7 @@ protected:
 	void onTreeChanged();
 
 	Serializer serializer_;
-	PolyPtr<BinaryOArchive> originalData_;
+	std::auto_ptr<BinaryOArchive> originalData_;
 	yasli::SharedPtr<PropertyTree> tree_;
 	std::string stateFileName_;
 };

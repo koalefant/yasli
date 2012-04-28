@@ -10,7 +10,9 @@
 #include "StdAfx.h"
 #include "ww/ConstStringList.h"
 #include <algorithm>
+#include "yasli/STL.h"
 #include "yasli/Archive.h"
+#include "yasli/STLImpl.h"
 
 namespace ww{
 
@@ -34,7 +36,7 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 : list_(list ? list : &globalConstStringList)
 , string_(string)
 {
-	ASSERT(string_);
+	YASLI_ASSERT(string_);
 }
 
 }
@@ -42,7 +44,7 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 bool serialize(yasli::Archive& ar, ww::ConstStringWrapper& val, const char* name, const char* label)
 {
 	if(ar.isOutput()){
-		ASSERT(val.string_);
+		YASLI_ASSERT(val.string_);
 		std::string out = val.string_;
 		return ar(out, name, label);
 	}

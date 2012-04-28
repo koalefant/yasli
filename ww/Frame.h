@@ -21,7 +21,7 @@ namespace ww{
 
 class FrameImpl;
 
-class WW_API Frame : public _ContainerWithWindow{
+class Frame : public _ContainerWithWindow{
 public:
 	Frame(const char* text = "Frame", bool emphasis = true, int border = 0);
 	~Frame();

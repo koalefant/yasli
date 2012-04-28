@@ -16,7 +16,7 @@
 namespace ww{
 
 class Win32ProxyImpl;
-class WW_API Win32Proxy : public _ContainerWithWindow{
+class Win32Proxy : public _ContainerWithWindow{
 public:
 	Win32Proxy(HWND parent, int border = 0);
 

@@ -17,7 +17,7 @@
 
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -62,7 +62,7 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
 							 0, 0, 42, 42, handle(), 0, (HINSTANCE)(GetWindowLong(handle(), GWLP_HINSTANCE)), 0);
 	
-	ASSERT(comboBoxHandle_);
+	YASLI_ASSERT(comboBoxHandle_);
 	SetWindowFont(comboBoxHandle_, Win32::defaultFont(), FALSE);
 }
 
@@ -142,7 +142,7 @@ BOOL ComboBoxImpl::onMessageEraseBkgnd(HDC dc)
 BOOL ComboBoxImpl::onMessageEnable(BOOL enabled)
 {
 	::EnableWindow(comboBoxHandle_, enabled);
-	ASSERT(::IsWindowEnabled(comboBoxHandle_) == enabled);
+	YASLI_ASSERT(::IsWindowEnabled(comboBoxHandle_) == enabled);
 	return FALSE;
 }
 
@@ -207,7 +207,7 @@ void ComboBox::_setPosition(const Rect& position)
 	Widget::_setPosition(position);
 
 	Win32::Window32* window = _findWindow(parent());
-	ASSERT(window);
+	YASLI_ASSERT(window);
 	Win32::Window32::PositionDeferer deferer = window->positionDeferer();
 	Rect pos(position.left() + border_, position.top() + border_,
 		      position.right() - border_ * 2, position.bottom() - border_ * 2);
@@ -297,7 +297,7 @@ int ComboBox::selectedIndex() const
 
 std::string ComboBox::selectedString() const
 {
-	ASSERT(selectedIndex_ >= 0 && selectedIndex_ < int(items_.size()));
+	YASLI_ASSERT(selectedIndex_ >= 0 && selectedIndex_ < int(items_.size()));
 	if(selectedIndex_ >= 0 && selectedIndex_ < int(items_.size())){
 		Items::const_iterator it = items_.begin();
 		std::advance(it, selectedIndex_);

@@ -15,7 +15,7 @@ class HLineImpl;
 
 namespace ww{
 
-	class WW_API HLine : public _WidgetWithWindow{
+	class HLine : public _WidgetWithWindow{
 	public:
 		HLine(int border = 0);
 	protected:

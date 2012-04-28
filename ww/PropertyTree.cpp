@@ -8,6 +8,9 @@
  */
 
 #include "StdAfx.h"
+#include "yasli/Pointers.h"
+#include "yasli/Archive.h"
+#include "yasli/PointersImpl.h"
 #include "ww/PropertyTree.h"
 #include "ww/PropertyDrawContext.h"
 #include "ww/Serialization.h"
@@ -16,7 +19,7 @@
 #include "ww/Window.h"
 #include "ww/Color.h"
 
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #include "ww/_PropertyRowBuiltin.h"
 #include "ww/Clipboard.h"
@@ -616,7 +619,7 @@ void PropertyTree::onRowMenuPaste(PropertyRow* row)
 	if(clipboard.paste(row))
 		model()->rowChanged(parent ? parent : model()->root());
 	else
-		ASSERT(0 && "Unable to paste element!"); // TODO: осмысленное сообщение
+		YASLI_ASSERT(0 && "Unable to paste element!"); // TODO: осмысленное сообщение
 }
 
 bool PropertyTree::canBePasted(PropertyRow* destination)
@@ -633,11 +636,23 @@ bool PropertyTree::canBePasted(const char* destinationType)
 	return clipboard.canBePastedOn(destinationType);
 }
 
+struct DecomposeProxy
+{
+	DecomposeProxy(SharedPtr<PropertyRow>& row) : row(row) {}
+
+	void serialize(Archive& ar)
+	{
+		ar(row, "row", "Row");
+	}
+
+	SharedPtr<PropertyRow>& row;
+};
+
 void PropertyTree::onRowMenuDecompose(PropertyRow* row)
 {
 	SharedPtr<PropertyRow> clonedRow = row->clone();
-	Serializer se(clonedRow);
-	edit(se, 0, IMMEDIATE_UPDATE, this);
+	DecomposeProxy proxy(clonedRow);
+	edit(Serializer(proxy), 0, IMMEDIATE_UPDATE, this);
 }
 
 void PropertyTree::onModelUpdated()
@@ -667,7 +682,7 @@ void PropertyTree::setWidget(PropertyRowWidget* widget)
 	widget_ = 0;
 	if(oldWidget){
 		oldWidget->commit();
-		ASSERT(oldWidget->actualWidget());
+		YASLI_ASSERT(oldWidget->actualWidget());
 		if(oldWidget->actualWidget())
 			oldWidget->actualWidget()->hide();
 		oldWidget->acquire();
@@ -676,7 +691,7 @@ void PropertyTree::setWidget(PropertyRowWidget* widget)
 	widget_ = widget;
 	model()->dismissUpdate();
 	if(widget){
-		ASSERT(widget_->actualWidget());
+		YASLI_ASSERT(widget_->actualWidget());
         if(widget_->actualWidget())
 			widget_->actualWidget()->_setParent(this);
 		_arrangeChildren();
@@ -726,7 +741,7 @@ void PropertyTree::_arrangeChildren()
 		PropertyRow* row = widget_->row();
 		if(row->visible(this)){
 			Widget* w = widget_->actualWidget();
-			ASSERT(w);
+			YASLI_ASSERT(w);
 			if(w){
                 Rect rect = row->widgetRect();
 				rect = Rect(rect.leftTop() - impl()->offset_ + impl()->area_.leftTop(), 
@@ -738,7 +753,7 @@ void PropertyTree::_arrangeChildren()
 				}
 			}
 			else{
-				//ASSERT(w);
+				//YASLI_ASSERT(w);
 			}
 		}
 		else{
@@ -936,7 +951,7 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 		tillEnd[i] = false;
 	}
 
-	ESCAPE(filter != 0, return);
+	YASLI_ESCAPE(filter != 0, return);
 
 	vector<wchar_t> filterBuf(filter, filter + wcslen(filter) + 1);
 	CharLowerW(&filterBuf[0]);
@@ -996,7 +1011,7 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 
 bool PropertyTree::RowFilter::match(const wchar_t* textOriginal, Type type, size_t* matchStart, size_t* matchEnd) const
 {
-	ESCAPE(textOriginal, return false);
+	YASLI_ESCAPE(textOriginal, return false);
 
 	wchar_t* text;
 	{

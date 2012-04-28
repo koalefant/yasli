@@ -165,7 +165,7 @@ bool convertToDFB(HBITMAP& hBitmap)
       // format of the display (to omit conversions
       // every time we draw it).
       HDC hScreen = GetDC(NULL);
-      ASSERT(hScreen);
+      YASLI_ASSERT(hScreen);
 
       HBITMAP hDfb = CreateCompatibleBitmap(hScreen, stBitmap.bmWidth, stBitmap.bmHeight);
       if(hDfb){

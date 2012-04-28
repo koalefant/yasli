@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include <string>
 #include "ww/sigslot.h
 #include "ww/MenuBar.h"

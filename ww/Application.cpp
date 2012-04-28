@@ -42,7 +42,7 @@ Application::~Application()
 
 int Application::run()
 {
-    ESCAPE(messageLoop_, return 0);
+    YASLI_ESCAPE(messageLoop_, return 0);
     return messageLoop_->run();
 }
 
@@ -53,7 +53,7 @@ void Application::quit()
 
 void Application::quit(int returnCode)
 {
-    ESCAPE(messageLoop_, return);
+    YASLI_ESCAPE(messageLoop_, return);
     messageLoop_->quit(returnCode);
 }
 

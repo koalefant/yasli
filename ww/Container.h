@@ -12,7 +12,7 @@
 
 namespace ww{
 
-class WW_API Container : public Widget{
+class Container : public Widget{
 public:
 	// virtuals:
 	bool isVisible() const;
