@@ -21,7 +21,6 @@
 
 #include "ww/Serialization.h"
 #include "yasli/ClassFactory.h"
-#include "ww/ImageStore.h"
 #include "ww/Unicode.h"
 #include "ww/Win32/Window.h"
 #define WIN32_LEAN_AND_MEAN

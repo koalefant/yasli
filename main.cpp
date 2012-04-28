@@ -8,7 +8,6 @@
 #include "ww/ScrolledWindow.h"
 #include "ww/Tabs.h"
 
-#include "ww/ImageStore.h"
 #include "ww/PropertyTree.h"
 
 #include "ww/Entry.h"
