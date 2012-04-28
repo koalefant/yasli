@@ -8,8 +8,8 @@
  */
 
 #include "StdAfx.h"
-#include "yasli/TextOArchive.h"
-#include "yasli/MemoryWriter.h"
+#include "TextOArchive.h"
+#include "MemoryWriter.h"
 #include <float.h>
 
 namespace yasli{

@@ -10,19 +10,19 @@
 #include "StdAfx.h"
 #include "yasli/Assert.h"
 
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #ifdef _MSC_VER
 # include <float.h>
 # define isnan _isnan
 #endif
 
-#include "yasli/MemoryWriter.h"
+#include "MemoryWriter.h"
 
 namespace yasli{
 
-MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
+MemoryWriter::MemoryWriter(size_t size, bool reallocate)
 : size_(size)
 , reallocate_(reallocate)
 , digits_(5)
@@ -33,20 +33,20 @@ MemoryWriter::MemoryWriter(std::size_t size, bool reallocate)
 MemoryWriter::~MemoryWriter()
 {
     position_ = 0;
-    std::free(memory_);
+    free(memory_);
 }
 
-void MemoryWriter::alloc(std::size_t initialSize)
+void MemoryWriter::alloc(size_t initialSize)
 {
-    memory_ = (char*)std::malloc(initialSize + 1);
+    memory_ = (char*)malloc(initialSize + 1);
     position_ = memory_;
 }
 
-void MemoryWriter::realloc(std::size_t newSize)
+void MemoryWriter::realloc(size_t newSize)
 {
     YASLI_ASSERT(newSize > size_);
-    std::size_t pos = position();
-    memory_ = (char*)std::realloc(memory_, newSize + 1);
+    size_t pos = position();
+    memory_ = (char*)::realloc(memory_, newSize + 1);
     YASLI_ASSERT(memory_ != 0);
     position_ = memory_ + pos;
     size_ = newSize;
@@ -201,7 +201,7 @@ MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
     return *this;
 }
 
-void MemoryWriter::setPosition(std::size_t pos)
+void MemoryWriter::setPosition(size_t pos)
 {
     YASLI_ASSERT(pos < size_);
     YASLI_ASSERT(memory_ + pos <= position_);
@@ -213,7 +213,7 @@ void MemoryWriter::write(const char* value)
     write((void*)value, strlen(value));
 }
 
-bool MemoryWriter::write(const void* data, std::size_t size)
+bool MemoryWriter::write(const void* data, size_t size)
 {
     YASLI_ASSERT(memory_ <= position_);
     YASLI_ASSERT(position() < this->size());

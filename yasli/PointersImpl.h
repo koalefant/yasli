@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "yasli/Pointers.h"
+#include "Pointers.h"
 #include "yasli/ClassFactoryBase.h"
-#include "yasli/ClassFactory.h"
+#include "ClassFactory.h"
 
 namespace yasli{
 
@@ -150,3 +150,4 @@ bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, con
 {
 	return ar(static_cast<yasli::PointerInterface&>(yasli::PolyPtrSerializer<T>(ptr)), name, label);
 }
+// vim:sw=4 ts=4:

@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include "yasli/StringList.h"
+#include "StringList.h"
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
 #include "yasli/STLImpl.h"

@@ -10,10 +10,12 @@
 #include "StdAfx.h"
 
 #include "yasli/STL.h"
-#include "yasli/ClassFactory.h"
+#include "ClassFactory.h"
 #include "yasli/Archive.h"
-#include "yasli/MemoryWriter.h"
 #include "yasli/STLImpl.h"
+#include "MemoryWriter.h"
+
+#include "yasli/Strings.h"
 
 namespace yasli{
 
@@ -106,7 +108,7 @@ const char* TypeID::label() const{
 
 bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label)
 {
-	std::string typeName;
+	yasli::string typeName;
 	if(ar.isOutput()){
 		typeName = typeID.name();
 		return ar(typeName, name);
@@ -130,4 +132,5 @@ bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, cons
 			return false;
 	}
 }
+
 

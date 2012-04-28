@@ -10,9 +10,9 @@
 #include "StdAfx.h"
 #include <cstdio>
 #include <algorithm>
-#include "yasli/TextIArchive.h"
-#include "yasli/MemoryReader.h"
-#include "yasli/MemoryWriter.h"
+#include "TextIArchive.h"
+#include "MemoryReader.h"
+#include "MemoryWriter.h"
 
 // #define DEBUG_TEXTIARCHIVE
 

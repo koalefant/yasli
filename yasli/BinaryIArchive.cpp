@@ -128,16 +128,16 @@ bool BinaryIArchive::readUnsafe(char *_data, int _size)
 bool BinaryIArchive::openStruct(const char *_name, Token* typeName)
 {
 	YASLI_ESCAPE(!blocks_.empty(), return false);
-	const char *start;
-	const char *end;
-	if(findNode (BINARY_NODE_STRUCT, Token(_name), &start, &end))
-	{
-		YASLI_ESCAPE(read(typeName), return false;);
-		blocks_.push_back(Block(start, pos_, end));
-		pullPosition_ = 0;
-		return true;
-	}  
-	return false;
+    const char *start;
+    const char *end;
+    if(findNode (BINARY_NODE_STRUCT, Token(_name), &start, &end))
+    {
+        YASLI_ESCAPE(read(typeName), return false;);
+        blocks_.push_back(Block(start, pos_, end));
+        pullPosition_ = 0;
+        return true;
+    }  
+    return false;
 }
 
 bool BinaryIArchive::openContainer(const char *_name, Token *_typeName, int *_size)

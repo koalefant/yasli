@@ -10,9 +10,9 @@
 #include "StdAfx.h"
 
 #include "yasli/STL.h"
-#include "yasli/Enum.h"
+#include "Enum.h"
 #include "yasli/Archive.h"
-#include "yasli/StringList.h"
+#include "StringList.h"
 #include "yasli/STLImpl.h"
 
 namespace yasli{
@@ -37,10 +37,7 @@ bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const
 		if(ar.isOutput()){
 			index =  indexByValue(value);
 			if(index == StringListStatic::npos){
-				std::string dummy("");
-				ar(dummy, name, label);
 				ar.warning("Unregistered Enum value!");
-				return false;
 			}
 		}
 

@@ -152,7 +152,6 @@ public:
         }
     }
 
-    void serialize(Archive& ar);
 protected:
     T* ptr_;
 };

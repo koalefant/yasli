@@ -10,8 +10,8 @@
 #pragma once
 
 #include "yasli/Archive.h"
-#include "yasli/Pointers.h"
-#include "yasli/Token.h"
+#include "Pointers.h"
+#include "Token.h"
 #include <memory>
 
 namespace yasli{

@@ -586,6 +586,10 @@
 				RelativePath=".\StringList.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Strings.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="archives"

@@ -12,7 +12,7 @@
 #include <vector>
 #include <map>
 
-#include "yasli/StringList.h"
+#include "StringList.h"
 #include "yasli/TypeID.h"
 
 namespace yasli{

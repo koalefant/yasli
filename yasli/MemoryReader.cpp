@@ -9,7 +9,7 @@
 
 #include "StdAfx.h"
 #include "yasli/Assert.h"
-#include "yasli/MemoryReader.h"
+#include "MemoryReader.h"
 #include <cstdlib>
 
 namespace yasli{
