@@ -453,7 +453,7 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 		else{
 			// row могла уже быть пересоздана	
 			row = rowByPoint(Vect2(x, y));
-			if(row && (!row->isSelectable() || row->pulledUp()))
+			while (row && (!row->isSelectable() || row->pulledUp() || row->pulledBefore()))
 				row = row->parent();
 			if(row && !row->userReadOnly() && !tree_->widget_){
 				POINT cursorPos;
@@ -496,12 +496,12 @@ void TreeImpl::onMessageMButtonDown(UINT button, int x, int y)
 	if(row){
 		switch(hitTest(row, point, row->rect())){
 		case TREE_HIT_PLUS:
-			break;
+		break;
 		case TREE_HIT_NONE:
 		default:
-			model()->setFocusedRow(row);
-			RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-			break;
+		model()->setFocusedRow(row);
+		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+		break;
 		}
 	}
 	__super::onMessageMButtonDown(button, x, y);
@@ -516,7 +516,7 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
 		GetCursorPos(&pos);
 		if(drag_.dragOn(pos) && GetCapture() != handle())
 			SetCapture(handle());
-        RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+		RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 	else{
 		Vect2 point(x, y);
@@ -524,21 +524,21 @@ void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
 		if(row){
 			switch(hitTest(row, point, row->rect())){
 			case TREE_HIT_ROW:
-				if(row != hoveredRow_){
-					hoveredRow_ = row;
-					//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-				}
-				break;
+			if(row != hoveredRow_){
+				hoveredRow_ = row;
+				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+			}
+			break;
 			case TREE_HIT_PLUS:
 			case TREE_HIT_TEXT:
-				if(hoveredRow_){
-					hoveredRow_ = 0;
-					//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-				}
-				break;
+			if(hoveredRow_){
+				hoveredRow_ = 0;
+				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+			}
+			break;
 			case TREE_HIT_NONE:
 			default:
-				break;
+			break;
 			}
 		}
 		if(capturedRow_){
@@ -606,23 +606,26 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 
 void TreeImpl::updateArea()
 {
-    Win32::Rect clientRect;
-    ::GetClientRect(handle_, &clientRect);
+	Win32::Rect clientRect;
+	::GetClientRect(handle_, &clientRect);
 
-    area_ = clientRect.recti();
-    area_.setLeft(area_.left() + 1);
-    area_.setRight(area_.right() - 1);
-    area_.setTop(area_.top() + 1);
-    area_.setBottom(area_.bottom() - 1);
+	area_ = clientRect.recti();
+	area_.setLeft(area_.left() + 1);
+	area_.setRight(area_.right() - 1);
+	area_.setTop(area_.top() + 1);
+	area_.setBottom(area_.bottom() - 1);
 
-    if (tree_->filterMode_)
-        area_.setTop(area_.top() + tree_->filterEntry_->_minimalSize().y + 2 + 2);
+	if (tree_->filterMode_)
+	{
+		int filterAreaHeight = tree_->filterEntry_ ? tree_->filterEntry_->_minimalSize().y : 0;
+		area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
+	}
 
-    tree_->_arrangeChildren();
-    updateScrollBar();
+	tree_->_arrangeChildren();
+	updateScrollBar();
 
-    if(area_.width() > 0)
-        tree_->needUpdate_ = true;
+	if(area_.width() > 0)
+		tree_->needUpdate_ = true;
 }
 
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
