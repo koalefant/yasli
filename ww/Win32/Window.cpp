@@ -74,7 +74,7 @@ struct DefaultWindowCreator
 	~DefaultWindowCreator()
 	{
 		defaultWindow.destroy();
-		WW_VERIFY(::UnregisterClass(defaultWindow.className(), _globalInstance()));
+		::UnregisterClass(defaultWindow.className(), _globalInstance());
 	}
 };
 
