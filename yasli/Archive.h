@@ -10,26 +10,27 @@
 #pragma once
 
 #include <string>
-#include <iostream>
+#include <map>
 
-#include "yasli/Pointers.h"
-#include "yasli/API.h"
-#include "yasli/TypeID.h"
 #include "yasli/Helpers.h"
 #include "yasli/Serializer.h"
-#include "yasli/StringList.h"
-#include "yasli/EnumDescription.h"
+#include "yasli/TypeID.h"
 
-#pragma warning (disable: 4100)
 
 namespace yasli{ class Archive; }
+
+// from "yasli/EnumDescription.h"
+struct EnumDescription;
+template <class Enum>
+const EnumDescription& getEnumDescription();
+bool serializeEnum(const EnumDescription& desc, yasli::Archive& ar, int& value, const char* name, const char* label);
 
 template<class T>
 bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label);
 
 namespace yasli{
 
-class YASLI_API Archive : public PolyRefCounter{
+class Archive{
 public:
 	template<class T>
 	class Context{
@@ -160,16 +161,6 @@ private:
 };
 
 namespace Helpers{
-template<class T>
-struct SerializeMethodForm{
-	struct YesType{ char dummy[100]; };
-	struct NoType{ char dummy[1]; };
-
-	static NoType  testFunc(void (T::*f)(Archive& ar));
-	static YesType testFunc(bool (T::*f)(Archive& ar, const char*));
-
-	enum { value = (sizeof(testFunc(&T::serialize)) == sizeof(YesType)) };
-};
 
 template<class T>
 struct SerializeStruct{
@@ -178,35 +169,11 @@ struct SerializeStruct{
 	};
 };
 
-template<class T>
-struct SerializeStructWithName{
-	static bool invoke(Archive& ar, T& value, const char* name, const char* label){
-		return value.serialize(ar, name, label);
-	};
-};
-
-template<class T>
-struct SerializeStructFast{
-	template<class TArchive>
-	static bool invoke(TArchive& ar, T& value, const char* name, const char* label){
-		return ar.serializeStruct(value, name, label);
-	};
-};
-
 template<class Enum>
 struct SerializeEnum{
 	static bool invoke(Archive& ar, Enum& value, const char* name, const char* label){
 		const EnumDescription& enumDescription = getEnumDescription<Enum>();
-		ASSERT(enumDescription.registered());
-		return enumDescription.serialize(ar, reinterpret_cast<int&>(value), name, label);
-	};
-};
-
-template<class Enum>
-struct SerializeEnumFast{
-	template<class TArchive>
-	static bool invoke(TArchive& ar, Enum& value, const char* name, const char* label){
-		return ar((int&)value, name, label); 
+		return serializeEnum(enumDescription, ar, reinterpret_cast<int&>(value), name, label);
 	};
 };
 

@@ -19,12 +19,12 @@ namespace yasli{
 void EnumDescription::add(int value, const char* name, const char *label)
 {
 	ESCAPE( name && label, return );
-    nameToValue_[name] = value;
-    labelToValue_[label] = value;
-    valueToName_[value] = name;
-    valueToLabel_[value] = label;
-    valueToIndex_[value] = int(names_.size());
-    names_.push_back(name);
+	nameToValue_[name] = value;
+	labelToValue_[label] = value;
+	valueToName_[value] = name;
+	valueToLabel_[value] = label;
+	valueToIndex_[value] = int(names_.size());
+	names_.push_back(name);
 	labels_.push_back(label);
 }
 
@@ -144,3 +144,4 @@ int EnumDescription::valueByLabel(const char* label) const
 }
 
 }
+// vim:ts=4 sw=4:

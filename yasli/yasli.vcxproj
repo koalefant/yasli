@@ -142,7 +142,6 @@
     <ClInclude Include="TextOArchive.h" />
     <ClInclude Include="STL.h" />
     <ClInclude Include="STLImpl.h" />
-    <ClInclude Include="API.h" />
     <ClInclude Include="Archive.h" />
     <ClInclude Include="EnumDescription.h" />
     <ClInclude Include="Helpers.h" />

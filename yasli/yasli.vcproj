@@ -676,10 +676,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\API.h"
-			>
-		</File>
-		<File
 			RelativePath=".\Archive.cpp"
 			>
 		</File>

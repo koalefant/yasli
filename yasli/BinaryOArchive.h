@@ -59,7 +59,7 @@ private:
   void write(const char *str);
 
   std::vector<unsigned int> blockSizeOffsets_;
-  SharedPtr<MemoryWriter> stream_;
+  std::auto_ptr<MemoryWriter> stream_;
 };
 
 }

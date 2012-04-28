@@ -10,7 +10,6 @@
 #include "StdAfx.h"
 #include "yasli/Assert.h"
 
-#include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <math.h>
@@ -48,7 +47,7 @@ void MemoryWriter::realloc(std::size_t newSize)
     ASSERT(newSize > size_);
     std::size_t pos = position();
     memory_ = (char*)std::realloc(memory_, newSize + 1);
-    ASSERT(memory_);
+    ASSERT(memory_ != 0);
     position_ = memory_ + pos;
     size_ = newSize;
 }

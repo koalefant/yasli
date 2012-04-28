@@ -12,7 +12,6 @@
 
 #include "yasli/Assert.h"
 #include "yasli/TypeID.h"
-#include "yasli/API.h"
 
 #ifdef _MSC_VER
 # pragma warning(disable : 4251)
@@ -22,7 +21,7 @@ namespace yasli{
 
 class Archive;
 
-class YASLI_API TypeDescription{
+class TypeDescription{
 public:
 	TypeDescription(TypeID typeID, const char* name, const char *label, std::size_t size)
 	: name_(name)
@@ -176,7 +175,7 @@ protected:
 };
 
 
-class YASLI_API TypeLibrary{
+class TypeLibrary{
 public:
 	static TypeLibrary& the();
 	const TypeDescription* findByName(const char*) const;

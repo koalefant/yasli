@@ -323,7 +323,7 @@ TextOArchive::TextOArchive(int textWidth, const char* header)
 , header_(header)
 , textWidth_(textWidth)
 {
-    buffer_ = new MemoryWriter(1024, true);
+    buffer_.reset(new MemoryWriter(1024, true));
     if(header_)
         (*buffer_) << header_;
 
@@ -340,7 +340,7 @@ bool TextOArchive::save(const char* fileName)
 {
     ESCAPE(fileName && strlen(fileName) > 0, return false);
     ESCAPE(stack_.size() == 1, return false);
-    ESCAPE(buffer_, return false);
+    ESCAPE(buffer_.get() != 0, return false);
     ESCAPE(buffer_->position() <= buffer_->size(), return false);
     stack_.pop_back();
     if(FILE* file = fopen(fileName, "wb")){
@@ -508,14 +508,6 @@ bool TextOArchive::operator()(char& value, const char* name, const char* label)
     placeIndent();
     placeName(name);
     (*buffer_) << value << "\r\n";
-    return true;
-}
-
-bool TextOArchive::operator()(StringListStaticValue& value, const char* name, const char* label)
-{
-    placeIndent();
-    placeName(name);
-    (*buffer_) << "\"" << value.c_str() << "\"\r\n";
     return true;
 }
 

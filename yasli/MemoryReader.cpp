@@ -11,7 +11,6 @@
 #include "yasli/Assert.h"
 #include "yasli/MemoryReader.h"
 #include <cstdlib>
-#include <iostream>
 
 namespace yasli{
 
@@ -26,7 +25,7 @@ MemoryReader::MemoryReader()
 MemoryReader::MemoryReader(const char* fileName)
 {
     FILE* file = fopen(fileName, "rb");
-    ASSERT(file);
+    ASSERT(file != 0);
     if(file){
         fseek(file, 0, SEEK_END);
         std::size_t len = ftell(file);

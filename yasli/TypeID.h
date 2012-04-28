@@ -11,7 +11,6 @@
 
 #include <typeinfo>
 #include "yasli/Assert.h"
-#include "yasli/API.h"
 #include <string>
 #include <string.h>
 
@@ -24,7 +23,7 @@ namespace yasli{
 class Archive;
 class TypeID;
 
-class YASLI_API TypeID{
+class TypeID{
 	friend class TypesFactory;
 public:
 	static TypeID ZERO;
@@ -98,4 +97,4 @@ T* createDerivedClass(TypeID typeID);
 
 }
 
-bool YASLI_API serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label);
+bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label);

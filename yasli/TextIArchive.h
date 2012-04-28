@@ -18,7 +18,7 @@ namespace yasli{
 
 class MemoryReader;
 
-class YASLI_API TextIArchive : public Archive{
+class TextIArchive : public Archive{
 public:
 	TextIArchive();
 	~TextIArchive();
@@ -44,8 +44,6 @@ public:
 
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
 	bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
-
-	bool operator()(StringListStaticValue& value, const char* name = "", const char* label = 0);
 
 	using Archive::operator();
 private:

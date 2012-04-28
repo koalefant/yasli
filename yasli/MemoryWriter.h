@@ -10,7 +10,6 @@
 #pragma once
 
 #include <cstddef>
-#include "API.h"
 #include "Pointers.h"
 
 #ifdef realloc
@@ -19,7 +18,7 @@
 
 namespace yasli{
 
-class YASLI_API MemoryWriter : public RefCounter{
+class MemoryWriter {
 public:
 	MemoryWriter(std::size_t size = 128, bool reallocate = true);
 	~MemoryWriter();
