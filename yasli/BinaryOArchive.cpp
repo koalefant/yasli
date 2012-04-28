@@ -33,13 +33,13 @@ void BinaryOArchive::clear()
 
 size_t BinaryOArchive::length() const
 { 
-    ESCAPE(stream_.get(), return 0);
+    ESCAPE(stream_.get() != 0, return 0);
     return stream_->position();
 }
 
 const char* BinaryOArchive::buffer()
 {
-    ESCAPE(stream_.get(), return 0);
+    ESCAPE(stream_.get() != 0, return 0);
     return stream_->buffer();
 }
 

@@ -100,7 +100,6 @@ public:
         ASSERT(creators_.find(key) == creators_.end());
         ASSERT(creator);
         creators_[key] = creator;
-        //std::cout << "creator with key " << key.c_str() << ", of type " << typeid(creator).name() << " registered" << std::endl;
     }
 
     _Product* create(const _Key& key, Constructor ctor = Constructor()) const{

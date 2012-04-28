@@ -13,8 +13,6 @@
 #include "yasli/Assert.h"
 #include "yasli/TypeID.h"
 
-#pragma warning (disable: 4100 4127)
-
 namespace yasli{
 
 class Archive;
@@ -91,6 +89,8 @@ private:
 	size_t size_;
 	SerializeStructFunc serializeFunc_;
 };/*}}}*/
+
+// ---------------------------------------------------------------------------
 
 class ContainerSerializationInterface{
 public:
@@ -178,3 +178,4 @@ public:
 typedef std::vector<Serializer> Serializers;
 
 }
+// vim:ts=4 sw=4:

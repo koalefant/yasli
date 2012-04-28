@@ -18,7 +18,7 @@
 
 namespace yasli{
 
-class MemoryWriter {
+	class MemoryWriter : public RefCounter {
 public:
 	MemoryWriter(std::size_t size = 128, bool reallocate = true);
 	~MemoryWriter();

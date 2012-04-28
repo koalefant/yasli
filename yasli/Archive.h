@@ -16,19 +16,17 @@
 #include "yasli/Serializer.h"
 #include "yasli/TypeID.h"
 
-
 namespace yasli{ class Archive; }
-
-// from "yasli/EnumDescription.h"
-struct EnumDescription;
-template <class Enum>
-const EnumDescription& getEnumDescription();
-bool serializeEnum(const EnumDescription& desc, yasli::Archive& ar, int& value, const char* name, const char* label);
 
 template<class T>
 bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label);
 
 namespace yasli{
+
+class EnumDescription;
+template <class Enum>
+EnumDescription& getEnumDescription();
+bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label);
 
 class Archive{
 public:
@@ -71,7 +69,7 @@ public:
 	bool caps(int caps) const { return (caps_ & caps) == caps; }
 	virtual void inPlacePointer(void** pointer, size_t offset) { ASSERT(0 && "Not implemented"); }
 
-	virtual void warning(const char* message);
+	virtual void warning(const char* message) {}
 	virtual void close() {}
 	virtual void clear() {};
 
@@ -113,7 +111,7 @@ public:
 	virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
 
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0);
+	virtual bool operator()(ContainerSerializationInterface& ser, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(const PointerSerializationInterface& ptr, const char* name = "", const char* label = 0);
 
 
@@ -134,7 +132,7 @@ public:
 	template<class T>
 	T* context()
 	{
-		ContextMap::iterator it = contextMap_.find(&typeid(T));
+		ContextMap::iterator it = contextMap_.find(TypeID::get<T>());
 		if(it == contextMap_.end())
 			return 0;
 		return reinterpret_cast<T*>(it->second);
@@ -142,12 +140,12 @@ public:
 	template<class T>
 	T* setContext(T* c)
 	{
-		void*& ptr = contextMap_[&typeid(T)];
+		void*& ptr = contextMap_[TypeID::get<T>()];
 		T* result = reinterpret_cast<T*>(ptr);
 		ptr = reinterpret_cast<void*>(c);
 		return result;
 	}
-	typedef std::map<const type_info*, void*> ContextMap;
+	typedef std::map<TypeID, void*> ContextMap;
 	void setContextMap(const ContextMap& contextMap){ contextMap_ = contextMap; }
 	const ContextMap& contextMap() const{ return contextMap_; }
 protected:
@@ -155,7 +153,7 @@ protected:
 	int caps_;
 
 private:
-	void notImplemented();
+	void notImplemented() { ASSERT(0 && "Not implemented!"); }
 
 	int filter_;
 };
@@ -187,11 +185,17 @@ struct SerializeArray<T[Size]>{
 		return ar(static_cast<ContainerSerializationInterface&>(ser), name, label);
 	}
 };
+
 }
 
 template<class T>
 bool Archive::operator()(const T& value, const char* name, const char* label){
     return ::serialize(*this, const_cast<T&>(value), name, label);
+}
+
+inline bool Archive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
+{
+	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name, label);
 }
 
 }
@@ -225,3 +229,5 @@ bool serialize(yasli::Archive& ar, T& object, const char* name, const char* labe
 				>
 		>::type::invoke(ar, object, name, label);
 }
+
+// vim: ts=4 sw=4:

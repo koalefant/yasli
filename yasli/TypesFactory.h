@@ -13,10 +13,6 @@
 #include "yasli/Assert.h"
 #include "yasli/TypeID.h"
 
-#ifdef _MSC_VER
-# pragma warning(disable : 4251)
-#endif
-
 namespace yasli{
 
 class Archive;

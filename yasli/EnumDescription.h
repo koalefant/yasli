@@ -70,7 +70,7 @@ EnumDescription& getEnumDescription(){
 	return EnumDescriptionImpl<Enum>::the();
 }
 
-bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label){
+inline bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label){
 	return desc.serialize(ar, value, name, label);
 }
 

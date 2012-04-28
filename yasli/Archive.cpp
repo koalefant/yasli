@@ -11,9 +11,7 @@
 #include "yasli/Archive.h"
 #include <string>
 
-#include "yasli/TypesFactory.h"
-
-namespace yasli{
+namespace yasli {
 
 static char* writeUtf16ToUtf8(char* s, unsigned int ch)
 {
@@ -170,12 +168,6 @@ static void utf8ToUtf16(std::wstring* out, const char* in)
 }
 
 // ---------------------------------------------------------------------------
-
-void Archive::warning(const char* message)
-{
-	// TODO: provide messaging-interface
-}
-
 bool Archive::operator()(std::wstring& value, const char* name, const char* label)
 {
   std::string str;
@@ -187,22 +179,6 @@ bool Archive::operator()(std::wstring& value, const char* name, const char* labe
     utf8ToUtf16(&value, str.c_str());
 	return true;
 }
-
-bool Archive::operator()(ContainerSerializationInterface& ser, const char* name, const char* label)
-{
-	return false;
-}
-
-bool Archive::operator()(const PointerSerializationInterface& ptr, const char* name, const char* label)
-{
-	return (*this)(Serializer(const_cast<PointerSerializationInterface&>(ptr)), name, label);
-}
-
-void Archive::notImplemented()
-{
-    ASSERT(0 && "Not implemented!");
-}
-// ---------------------------------------------------------------------------
 
 bool Serializer::operator()(Archive& ar) const{
 	ESCAPE(serializeFunc_ && object_, return false);
@@ -246,10 +222,8 @@ void PointerSerializationInterface::serialize(Archive& ar) const
             ar(serializer(), "");
         }
     }	
-}
 
 }
 
-namespace std{
-YASLI_TYPE_NAME(string, "string")
 }
+
