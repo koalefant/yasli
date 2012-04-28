@@ -107,13 +107,13 @@ inline void HSVtoRGB(float h,float s,float v,
 			r=v; g=m; b=n;
 			break;
 		default:
-			ASSERT(0);
+			YASLI_ASSERT(0);
 		}
 	}
 
-	ASSERT(r>=0 && r<=1);
-	ASSERT(g>=0 && g<=1);
-	ASSERT(b>=0 && b<=1);
+	YASLI_ASSERT(r>=0 && r<=1);
+	YASLI_ASSERT(g>=0 && g<=1);
+	YASLI_ASSERT(b>=0 && b<=1);
 }
 
 void Color4f::setHSV(float h,float s,float v, float alpha)

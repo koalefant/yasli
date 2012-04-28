@@ -14,7 +14,7 @@
 #include "yasli/BitVectorImpl.h"
 #include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 #include "ww/Decorators.h"
 #include "ww/SliderDecorator.h"
 #include "XMath/Colors.h"
@@ -259,7 +259,7 @@ struct TestData
 			TestBases::iterator it;
 			for(it = poly_vector.begin(); it != poly_vector.end(); ++it){
 				if(TestBase* base = *it){
-					ASSERT(base->refCount() == 1);
+					YASLI_ASSERT(base->refCount() == 1);
 				}
 			}
 

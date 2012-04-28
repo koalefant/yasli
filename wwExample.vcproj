@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="wwExample"
 	ProjectGUID="{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}"
+	RootNamespace="wwExample"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

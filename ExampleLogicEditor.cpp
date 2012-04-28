@@ -9,6 +9,7 @@
 #include "ww/FileSelector.h"
 #include "ww/Color.h"
 #include "ww/Unicode.h"
+#include "yasli/Enum.h"
 
 using yasli::Archive;
 using yasli::SharedPtr;

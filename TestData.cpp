@@ -1,8 +1,8 @@
 #include "TestData.h"
 #define _USE_MATH_DEFINES
 #include "yasli/Archive.h"
-#include "yasli/EnumDescription.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/Enum.h"
+#include "yasli/ClassFactory.h"
 
 YASLI_ENUM_BEGIN(SwitcherType, "SwitcherType")
 YASLI_ENUM_VALUE(SWITCHER_AND, "И")

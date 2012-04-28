@@ -38,7 +38,7 @@ public:
 	void unlock()
 	{
 		num_lock--;
-		ASSERT(num_lock>=0);
+		YASLI_ASSERT(num_lock>=0);
 		LeaveCriticalSection(&cs);
 	}
 
@@ -57,7 +57,7 @@ private:
 	void unlockInternal()
 	{
 		num_lock--;
-		ASSERT(num_lock>=0);
+		YASLI_ASSERT(num_lock>=0);
 		LeaveCriticalSection(&cs);
 	}
 

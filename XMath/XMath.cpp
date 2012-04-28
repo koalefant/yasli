@@ -1145,7 +1145,7 @@ void Mat2f::invert()
 {
 	Mat2f out;
 	float det=xx*yy-xy*yx;
-	ASSERT(fabs(det)>FLT_EPS);
+	YASLI_ASSERT(fabs(det)>FLT_EPS);
 	float inv_det=1/det;
 	out.xx=yy*inv_det;
 	out.xy=-xy*inv_det;
@@ -1256,22 +1256,22 @@ void QuatD::serialize(yasli::Archive& ar)
 
 void Se3f::serialize(yasli::Archive& ar) 
 {
-	ar.serialize(rot(), "rotation", "Ориентация");
-	ar.serialize(trans(), "position", "Позиция");
+	ar(rot(), "rotation", "Ориентация");
+	ar(trans(), "position", "Позиция");
 }
 
 void Se3d::serialize(yasli::Archive& ar) 
 {
-	ar.serialize(rot(), "rotation", "Ориентация");
-	ar.serialize(trans(), "position", "Позиция");
+	ar(rot(), "rotation", "Ориентация");
+	ar(trans(), "position", "Позиция");
 }
 
 void Vect4f::serialize(yasli::Archive& ar) 
 {
-	ar.serialize(x, "", "&x");
-	ar.serialize(y, "", "&y");
-	ar.serialize(z, "", "&z");
-	ar.serialize(w, "", "&w");
+	ar(x, "", "&x");
+	ar(y, "", "&y");
+	ar(z, "", "&z");
+	ar(w, "", "&w");
 }
 
 void Mat3f::makeRotationZ()
