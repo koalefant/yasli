@@ -27,6 +27,7 @@ public:
 	signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
 	signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
+	HWND hwnd();
 protected:
 	void _arrangeChildren();
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }

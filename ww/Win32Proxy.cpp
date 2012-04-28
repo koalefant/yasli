@@ -104,4 +104,7 @@ void Win32Proxy::serialize(Archive& ar)
 	}
 }
 
+HWND Win32Proxy::hwnd()
+{
+	return _window()->handle();
 }
