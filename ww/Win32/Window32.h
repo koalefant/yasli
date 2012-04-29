@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "ww/API.h"
 #include "ww/Win32/Types.h"
 #include "ww/Rect.h"

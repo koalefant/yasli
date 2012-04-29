@@ -14,7 +14,7 @@
 #include "gdiplus.h"
 #include "yasli/Assert.h"
 #include "Win32/Drawing.h"
-#include "Win32/Window.h"
+#include "Win32/Window32.h"
 #include "PropertyTree.h"
 #include "Color.h"
 #include "ww/Icon.h"
@@ -62,7 +62,7 @@ struct DynamicUxTheme
 
 	void loadLibrary()
 	{
-		module_ = LoadLibrary(L"uxtheme.dll");
+		module_ = LoadLibraryW(L"uxtheme.dll");
 		if (!module_)
 			return;
 

@@ -50,7 +50,7 @@ protected:
 	friend class ww::ComboBox;
 	static UINT WM_WW_FINISH;
 };
-UINT ComboBoxImpl::WM_WW_FINISH = RegisterWindowMessage(L"ww.Finish");
+UINT ComboBoxImpl::WM_WW_FINISH = RegisterWindowMessageW(L"ww.Finish");
 
 ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 : _WidgetWindow(owner)
@@ -58,7 +58,7 @@ ComboBoxImpl::ComboBoxImpl(ww::ComboBox* owner)
 , comboBoxHandle_(0)
 {
 	WW_VERIFY(create(L"", WS_CHILD, Rect(0, 0, 10, 10), Win32::getDefaultWindowHandle(), WS_EX_CONTROLPARENT));
-	comboBoxHandle_ = ::CreateWindowEx(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
+	comboBoxHandle_ = ::CreateWindowExW(WS_EX_CLIENTEDGE, L"COMBOBOX", L"",
 							   WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VISIBLE | WS_VSCROLL,
 							 0, 0, 42, 42, handle(), 0, (HINSTANCE)(GetWindowLong(handle(), GWLP_HINSTANCE)), 0);
 	

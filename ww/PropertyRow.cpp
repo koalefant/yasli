@@ -16,7 +16,7 @@
 #include "ww/_PropertyRowBuiltin.h"
 #include "ww/PropertyDrawContext.h"
 #include "yasli/ClassFactory.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Unicode.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Serialization.h"

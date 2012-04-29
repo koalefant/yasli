@@ -11,7 +11,7 @@
 #include "ww/_WidgetWithWindow.h"
 #include "ww/_WidgetWindow.h"
 #include "ww/Container.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 namespace ww{
 

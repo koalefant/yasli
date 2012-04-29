@@ -28,7 +28,7 @@
 #include "PropertyOArchive.h"
 #include "PropertyIArchive.h"
 #include "ww/PopupMenu.h"
-#include "ww/Win32/Window.h" 
+#include "ww/Win32/Window32.h" 
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Rectangle.h"
 #include <crtdbg.h>

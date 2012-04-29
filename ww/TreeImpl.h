@@ -11,7 +11,7 @@
 
 #include <vector>
 
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/PropertyTree.h"
 #include "ww/_WidgetWindow.h"
 

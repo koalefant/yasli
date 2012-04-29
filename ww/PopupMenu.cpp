@@ -13,7 +13,7 @@
 #include <map>
 #include "ww/Unicode.h"
 #include "ww/Widget.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include <windows.h>
 
 namespace ww{
@@ -116,13 +116,13 @@ static HMENU createNativeMenu(const PopupMenuItem& root, bool popupMenu)
 			YASLI_ASSERT(parentHandle != 0);
 
 			if(text == L"-")
-				AppendMenu(parentHandle, MF_SEPARATOR, id, L"");
+				AppendMenuW(parentHandle, MF_SEPARATOR, id, L"");
 			else{
 				if(current->hotkey() != KeyPress()){
 					text += L"\t";
 					text += toWideChar(current->hotkey().toString(true).c_str());
 				}
-				AppendMenu(parentHandle, 
+				AppendMenuW(parentHandle, 
 						   MF_STRING | (current->isChecked() ? MF_CHECKED : 0)
 						   | (current->isEnabled() ? 0 : MF_GRAYED)
 						   | (current->isDefault() ? MF_DEFAULT : 0),
@@ -134,7 +134,7 @@ static HMENU createNativeMenu(const PopupMenuItem& root, bool popupMenu)
 			submenuHandles[current] = handle;
 			HMENU parentHandle = find_in_map(submenuHandles, current->parent(), 0);
 			YASLI_ASSERT(parentHandle != 0);
-			BOOL result = ::InsertMenu(parentHandle, -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
+			BOOL result = ::InsertMenuW(parentHandle, -1, MF_BYPOSITION | MF_POPUP, UINT_PTR(handle), current->textW());
 			YASLI_ASSERT(result == TRUE);
 		}
 	}

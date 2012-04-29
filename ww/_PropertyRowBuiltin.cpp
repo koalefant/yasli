@@ -15,7 +15,7 @@
 #include "Unicode.h"
 #include "Serialization.h"
 #include "Win32/Rectangle.h"
-#include "Win32/Window.h"
+#include "Win32/Window32.h"
 #include "gdiplus.h"
 
 namespace ww{

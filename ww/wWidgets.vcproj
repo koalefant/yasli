@@ -1157,11 +1157,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Win32\Window.cpp"
+				RelativePath=".\Win32\Window32.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Win32\Window.h"
+				RelativePath=".\Win32\Window32.h"
 				>
 			</File>
 		</Filter>

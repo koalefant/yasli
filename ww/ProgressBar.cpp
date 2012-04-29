@@ -31,7 +31,7 @@ YASLI_CLASS(Widget, ProgressBar, "ProgressBar");
 class ProgressBarImpl: public _WidgetWindow{
 public:
 	ProgressBarImpl(ProgressBar* owner);
-	const wchar_t* className() const{ return PROGRESS_CLASS; }
+	const wchar_t* className() const{ return PROGRESS_CLASSW; }
 	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
 
 	void setProgressBarPosition(float pos);

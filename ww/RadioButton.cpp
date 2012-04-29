@@ -141,7 +141,7 @@ void RadioButtonImpl::setRadioButtonStatus(bool status)
 void RadioButtonImpl::setRadioButtonText(const wchar_t* text)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	WW_VERIFY(::SetWindowText(handle_, text));
+	WW_VERIFY(::SetWindowTextW(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
 	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);

@@ -9,8 +9,8 @@
 
 #include "StdAfx.h"
 
-#include "ww/Win32/Window.h"
-
+#include "ww/Win32/Window32.h"
+#include "ww/Macros.h"
 #include "ww/Unicode.h"
 #include "ww/Application.h"
 #include "ww/Rect.h"
@@ -74,7 +74,7 @@ struct DefaultWindowCreator
 	~DefaultWindowCreator()
 	{
 		defaultWindow.destroy();
-		::UnregisterClass(defaultWindow.className(), _globalInstance());
+		::UnregisterClassW(defaultWindow.className(), _globalInstance());
 	}
 };
 
@@ -143,7 +143,7 @@ ww::Vect2 calculateTextSize(HWND window, HFONT font, const wchar_t* text)
 	YASLI_ASSERT(dc);
 	SIZE size = { 0, 0 };
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
-	WW_VERIFY(::GetTextExtentPoint32(dc, text, (int)wcslen(text), &size));
+	WW_VERIFY(::GetTextExtentPoint32W(dc, text, (int)wcslen(text), &size));
 	WW_VERIFY(::SelectObject(dc, oldFont) == font);
 	WW_VERIFY(ReleaseDC(window, dc));
 	return ww::Vect2(size.cx, size.cy);
@@ -174,8 +174,8 @@ bool isKeyPressed(UINT keyCode)
 
 bool isClassRegistered(const wchar_t* className)
 {
-	WNDCLASS classInfo;
-	return GetClassInfo(globalApplicationInstance_, className, &classInfo) ? true : false;
+	WNDCLASSW classInfo;
+	return GetClassInfoW(globalApplicationInstance_, className, &classInfo) ? true : false;
 }
 
 int basicMessageLoop(HACCEL acceleratorTable)
@@ -198,7 +198,7 @@ int basicMessageLoop(HACCEL acceleratorTable)
 
 bool Window32::registerClass(const wchar_t* className)
 {
-	WNDCLASSEX windowClass;
+	WNDCLASSEXW windowClass;
 
 	windowClass.cbSize = sizeof(WNDCLASSEX); 
 	windowClass.style			= CS_DBLCLKS;
@@ -213,7 +213,7 @@ bool Window32::registerClass(const wchar_t* className)
 	windowClass.lpszClassName	= className;
 	windowClass.hIconSm		    = 0;
 	
-	if(::RegisterClassEx(&windowClass) != 0)
+	if(::RegisterClassExW(&windowClass) != 0)
 		return true;
 	else
 		return false;
@@ -277,7 +277,7 @@ bool Window32::create(const wchar_t* windowName, UINT style, const ww::Rect& pos
 	YASLI_ASSERT(isClassRegistered(className()));
 
 	YASLI_ASSERT(!parentWnd || parentWnd == HWND_MESSAGE || ::IsWindow(parentWnd));
-	handle_ = ::CreateWindowEx(exStyle, className(), windowName, style,
+	handle_ = ::CreateWindowExW(exStyle, className(), windowName, style,
 		position.left(), position.top(), position.width(), position.height(), parentWnd, 0, 0, (LPVOID)(this));	
 	
 	handleOwner_ = true;
@@ -708,7 +708,7 @@ LONG_PTR Window32::getUserDataLongPtr()
 
 void Window32::setWindowText(const wchar_t* windowText)
 {
-	WW_VERIFY(::SetWindowText(handle_, windowText));
+	WW_VERIFY(::SetWindowTextW(handle_, windowText));
 }
 
 

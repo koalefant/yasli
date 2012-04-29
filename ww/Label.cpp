@@ -114,7 +114,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			int oldBackMode = ::SetBkMode(dc, OPAQUE);
 			COLORREF oldBkColor = ::SetBkColor(dc, ::GetSysColor(COLOR_BTNFACE));
 			::FillRect(dc, &rect, ::GetSysColorBrush(COLOR_BTNFACE));
-			DrawText(dc, text.c_str(), int(wcslen(text.c_str())), &rect, flags);
+			DrawTextW(dc, text.c_str(), int(wcslen(text.c_str())), &rect, flags);
 			::SelectObject(dc, oldFont);
 			::SelectObject(dc, oldBrush);
 			::SetBkMode(dc, oldBackMode);

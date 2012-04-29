@@ -12,7 +12,7 @@
 #include "ww/SafeCast.h"
 #include "ww/Unicode.h"
 #include "ww/_WidgetWindow.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/MemoryDC.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"

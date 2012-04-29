@@ -14,7 +14,7 @@
 #include "ww/HBox.h"
 #include "ww/VBox.h"
 
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 #include "ww/Serialization.h"
 #include "yasli/Enum.h"

@@ -42,7 +42,7 @@ LRESULT _WidgetWindow::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 	if(message == WM_NOTIFY){
 		NMHDR* pNMHDR = (NMHDR*)lparam;
 		if(pNMHDR->code == TTN_GETDISPINFO && owner_->toolTip()){
-			LPNMTTDISPINFO pdi = (LPNMTTDISPINFO)lparam;
+			LPNMTTDISPINFOW pdi = (LPNMTTDISPINFOW)lparam;
 			::SendMessage(pdi->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, GetSystemMetrics(SM_CXSCREEN));
 			std::wstring tooltipText = toWideChar(owner_->toolTip()->text());
 			pdi->lpszText = (wchar_t*)tooltipText.c_str();

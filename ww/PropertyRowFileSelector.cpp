@@ -19,7 +19,7 @@
 #include "yasli/ClassFactory.h"
 #include "ww/FileSelector.h"
 #include "ww/Win32/Drawing.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Unicode.h"
 #include "gdiplus.h"
 

@@ -21,7 +21,7 @@
 
 #include "KeyPress.h"
 #include "ww/Win32/Drawing.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 namespace ww{
 

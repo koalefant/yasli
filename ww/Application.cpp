@@ -11,7 +11,7 @@
 #include "ww/Application.h"
 #include "ww/Win32/Types.h"
 #include "ww/Win32/MessageLoop.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 namespace ww{
 

@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "ww/FileDialog.h"
 #include "ww/Widget.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Unicode.h"
 #include "ww/Files.h"
 #define WIN32_LEAN_AND_MEAN
@@ -84,7 +84,7 @@ bool FileDialog::showModal()
 	}
 	p[0] = L'\0';
 
-	OPENFILENAME openFileName;
+	OPENFILENAMEW openFileName;
 	ZeroMemory(&openFileName, sizeof(openFileName));
 	openFileName.lStructSize = sizeof(openFileName);
 	openFileName.Flags = OFN_NOCHANGEDIR;
@@ -106,11 +106,11 @@ bool FileDialog::showModal()
 	std::wstring startDirectory(toWideChar(startDirectory_.c_str()));
 	openFileName.lpstrInitialDir = startDirectory.c_str();
 	if(save_){
-		if(!GetSaveFileName(&openFileName))
+		if(!GetSaveFileNameW(&openFileName))
 			return false;
 	}
 	else{
-		if(!GetOpenFileName(&openFileName))
+		if(!GetOpenFileNameW(&openFileName))
 		{
 			/* TODO: handle
 			CDERR_DIALOGFAILURE

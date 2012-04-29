@@ -18,7 +18,7 @@
 #include "ww/PropertyIArchive.h"
 #include "ww/PropertyEditor.h"
 #include "_PropertyRowBuiltin.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/SafeCast.h"
 
 #include "yasli/ClassFactory.h"
@@ -72,7 +72,7 @@ Clipboard::Clipboard(Widget* owner, ConstStringList* constStrings, PropertyTreeM
 , model_(model)
 , filter_(filter)
 {
-	clipboardFormat_ = RegisterClipboardFormat(L"ww.Clipboard0");
+	clipboardFormat_ = RegisterClipboardFormatW(L"ww.Clipboard0");
 	YASLI_ASSERT(clipboardFormat_ != 0);
 }
 

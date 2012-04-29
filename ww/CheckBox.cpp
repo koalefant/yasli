@@ -104,7 +104,7 @@ void CheckBoxImpl::updateStyle()
 void CheckBoxImpl::setCheckBoxText(const wchar_t* text)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	WW_VERIFY(::SetWindowText(handle_, text));
+	WW_VERIFY(::SetWindowTextW(handle_, text));
 
 	updateMinimalSize();
 	owner_->_queueRelayout();

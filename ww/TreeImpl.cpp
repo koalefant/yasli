@@ -22,7 +22,7 @@
 #include "ww/Serialization.h"
 #include "yasli/ClassFactory.h"
 #include "ww/Unicode.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <CommCtrl.h>

@@ -17,7 +17,7 @@
 
 #include "ww/_WidgetWindow.h"
 #include "ww/Unicode.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 #include "ww/Serialization.h"
 #include "yasli/ClassFactory.h"
@@ -237,7 +237,7 @@ void CheckComboBoxImpl::updateValue()
 		}
 		++index;
 	}
-	ComboBox_SetText(handle_, toWideChar(value.c_str()).c_str());
+	SetWindowTextW(handle_, toWideChar(value.c_str()).c_str());
 }
 
 bool CheckComboBoxImpl::getCheck(size_t index) const
@@ -397,7 +397,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 
 	// Erase and draw
 	ExtTextOut(dc, 0, 0, ETO_OPAQUE, &text, 0, 0, 0);
-	DrawText(dc, str.c_str(), int(str.length()), &text, DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
+	DrawTextW(dc, str.c_str(), int(str.length()), &text, DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
 
 	if((drawItemStruct->itemState & (ODS_FOCUS|ODS_SELECTED)) == (ODS_FOCUS|ODS_SELECTED))
 		DrawFocusRect(dc, &text);

@@ -8,11 +8,11 @@
  */
 
 #include "StdAfx.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Widget.h"
 #include "ww/Tooltip.h"
 #include <commctrl.h>
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 namespace ww{
 	

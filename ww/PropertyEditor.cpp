@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "ww/PropertyEditor.h"
 #include "ww/PropertyTree.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "EditorDialog.h"
 
 namespace ww{
@@ -29,9 +29,7 @@ bool edit(const Serializer& ser, const char* stateFileName, int flags, HWND pare
 {
 	bool result = false;
 	const char* typeName = ser.type().name();
-	EditorDialog dialog(ser, stateFileName, flags, parent);
-	if(title)
-		dialog.setTitle(title);
+	EditorDialog dialog(ser, title, stateFileName, flags, parent);
 	result = dialog.showModal() == ww::RESPONSE_OK;
 	return result;
 }

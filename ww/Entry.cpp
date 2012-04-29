@@ -111,7 +111,7 @@ void EntryImpl::updateOwnerText()
     {
         std::vector<wchar_t> buf;
         buf.resize(length);
-        GetWindowText(handle(), &buf[0], length);
+        GetWindowTextW(handle(), &buf[0], length);
 
         YASLI_ASSERT(owner_);
         text = &buf[0];
@@ -132,7 +132,7 @@ void EntryImpl::commit()
 void EntryImpl::setText(const wchar_t* text)
 {
 	setting_ = true;
-	WW_VERIFY(::SetWindowText(handle(), text));
+	WW_VERIFY(::SetWindowTextW(handle(), text));
 	setting_ = false;
 }
 

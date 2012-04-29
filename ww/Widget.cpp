@@ -13,7 +13,7 @@
 #include "ww/Container.h"
 #include "ww/Window.h"
 
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 #include "ww/Serialization.h"
 

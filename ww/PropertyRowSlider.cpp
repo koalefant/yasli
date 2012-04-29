@@ -18,7 +18,7 @@
 #include "ww/PropertyDrawContext.h"
 
 #include "ww/Win32/Drawing.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Serialization.h"
 #include "ww/KeyPress.h"
 #include "ww/SliderDecorator.h"

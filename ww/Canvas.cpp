@@ -11,7 +11,7 @@
 #include "Canvas.h"
 #include "ww/Unicode.h"
 #include "ww/Win32/Handle.h"
-#include "ww/Win32/Window.h" // for defaultFont
+#include "ww/Win32/Window32.h" // for defaultFont
 
 using Win32::AutoSelector;
 using Win32::DeletingSelector;

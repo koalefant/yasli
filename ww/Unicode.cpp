@@ -42,7 +42,7 @@ std::wstring toWideChar(const char* str)
 	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
     if(len > 1){ 
         MultiByteToWideChar(codepage, 0, str, -1, buf, len);
-		return std::wstring(buf, len - 1);
+		return std::wstring(buf, buf + len - 1);
     }
 	return std::wstring();
 }

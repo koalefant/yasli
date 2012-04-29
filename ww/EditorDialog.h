@@ -24,15 +24,15 @@ class PropertyTree;
 
 class EditorDialog : public ww::Dialog{
 public:
-	EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, ww::Widget*);
-	EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, HWND parent);
+	EditorDialog(const Serializer& serializer, const char* title, const char* stateFileName, int flags, ww::Widget*);
+	EditorDialog(const Serializer& serializer, const char* title, const char* stateFileName, int flags, HWND parent);
 	~EditorDialog();
 
 	void onResponse(int response);
 	
 	void serialize(Archive& ar);
 protected:
-	void init(const Serializer& ser, const char* treeStateFileName, int flags);
+	void init(const Serializer& ser, const char* title, const char* treeStateFileName, int flags);
 	void onTreeChanged();
 
 	Serializer serializer_;

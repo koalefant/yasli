@@ -11,8 +11,13 @@
 
 #include <rpc.h>
 #include <unknwn.h>
+#include "ww/Macros.h"
+using ww::min;
+using ww::max;
 #include <gdiplus.h>
 #include "Rect.h"
+
+#pragma comment(lib, "gdiplus.lib")
 
 inline Gdiplus::Color gdiplusSysColor(int index)
 {

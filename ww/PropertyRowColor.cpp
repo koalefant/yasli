@@ -19,10 +19,10 @@
 #include "ww/Serialization.h"
 
 #include "ww/Win32/Drawing.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Color.h"	
-#ifndef WW_DISABLE_XMATH
-#include "XMath/Colors.h"
+#ifdef WW_ENABLE_XMATH
+# include "XMath/Colors.h"
 #endif
 //#include "XMath/Streams.h"
 #include "gdiplus.h"
@@ -33,7 +33,7 @@ namespace ww{
 template<size_t Size>
 void formatColor(char (&str)[Size], const ww::Color& c) { sprintf_s(str, "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
 
-#ifndef WW_DISABLE_XMATH
+#ifdef WW_ENABLE_XMATH
 template<size_t Size>
 void formatColor(char (&str)[Size], const Color4c& c) { sprintf_s(str, sizeof(str), "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
 template<size_t Size>
@@ -50,7 +50,7 @@ unsigned int toARGB(Color color)
 	return color.argb();
 }
 
-#ifndef WW_DISABLE_XMATH
+#ifdef WW_ENABLE_XMATH
 unsigned int toARGB(Color4c color)
 {
 	return color.argb();
@@ -68,7 +68,7 @@ void fromColor(Color* out, Color color)
 	*out = color;
 }
 
-#ifndef WW_DISABLE_XMATH
+#ifdef WW_ENABLE_XMATH
 void fromColor(Color4c* out, Color color)
 {
 	out->set(color.r, color.g, color.b, color.a);
@@ -171,7 +171,7 @@ PropertyRowColor<ColorType>::PropertyRowColor()
 DECLARE_SEGMENT(PropertyRowColor)
 typedef PropertyRowColor<Color> PropertyRowWWColor;
 REGISTER_PROPERTY_ROW(Color, PropertyRowWWColor); 
-#ifndef WW_DISABLE_XMATH
+#ifdef WW_ENABLE_XMATH
 typedef PropertyRowColor<Color3c> PropertyRowColor3c;
 REGISTER_PROPERTY_ROW(Color3c, PropertyRowColor3c); 
 typedef PropertyRowColor<Color4c> PropertyRowColor4c;

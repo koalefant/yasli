@@ -12,7 +12,7 @@
 #include "ww/Widget.h"
 
 #include "ww/Application.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/MessageLoop.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
@@ -428,7 +428,7 @@ void Window::setShowTitleBar(bool showTitleBar)
 
 void Window::setIconFromResource(const char* resourceName)
 {
-	HICON icon = LoadIcon(Win32::_globalInstance(), toWideChar(resourceName).c_str());
+	HICON icon = LoadIconW(Win32::_globalInstance(), toWideChar(resourceName).c_str());
 	YASLI_ASSERT(icon);
 
 	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);
@@ -436,7 +436,7 @@ void Window::setIconFromResource(const char* resourceName)
 
 void Window::setIconFromFile(const char* resourceName)
 {
-	HANDLE icon = LoadImage(0, toWideChar(resourceName).c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+	HANDLE icon = LoadImageW(0, toWideChar(resourceName).c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 	YASLI_ASSERT(icon);
 
 	SetClassLongPtr(window_->handle(), GCLP_HICON, (LONG_PTR)icon);

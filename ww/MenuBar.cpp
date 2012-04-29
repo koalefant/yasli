@@ -12,7 +12,7 @@
 #include "ww/PopupMenu.h"
 #include "ww/_WidgetWindow.h"
 #include "ww/Win32/Rectangle.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Unicode.h"
 #include "ww/HotkeyContext.h"
@@ -160,12 +160,12 @@ void MenuBarImpl::redraw(HDC dc)
         if(activeItem_ == index){
             ::FillRect(dc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT));
             COLORREF oldTextColor = ::SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
-            ::DrawText(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
+            ::DrawTextW(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
             ::SetTextColor(dc, oldTextColor);
         }
         else{
             COLORREF oldTextColor = ::SetTextColor(dc, GetSysColor(COLOR_MENUTEXT));
-            ::DrawText(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
+            ::DrawTextW(dc, text.c_str(), (int)wcslen(text.c_str()), &rect, DT_VCENTER | DT_SINGLELINE | DT_CENTER);
             ::SetTextColor(dc, oldTextColor);
         }
         ::SetBkMode(dc, oldBkMode);

@@ -11,7 +11,7 @@
 
 #include "yasli/ClassFactory.h"
 #include <string>
-#include "ww/sigslot.h
+#include "ww/sigslot.h"
 #include "ww/MenuBar.h"
 #include "ww/VBox.h"
 #include "ww/SpaceHeader.h"

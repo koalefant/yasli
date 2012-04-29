@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 
+#include "ww/Macros.h"
 #include "yasli/Assert.h"
 #include "ww/Win32/MemoryDC.h"
 #include <windows.h>

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/Widget.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/Rectangle.h"
 
 struct ExcludeClipRectVisitor : public ww::WidgetVisitor{

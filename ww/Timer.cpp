@@ -9,7 +9,7 @@
 
 #include "StdAfx.h"
 #include "Timer.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Widget.h"
 
 namespace ww{

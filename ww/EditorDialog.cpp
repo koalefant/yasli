@@ -15,21 +15,21 @@
 #include "yasli/BinaryIArchive.h"
 #include "yasli/BinaryOArchive.h"
 #include "ww/PropertyTree.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 
 
 namespace ww{
 
-EditorDialog::EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, ww::Widget* parent)
+EditorDialog::EditorDialog(const Serializer& serializer, const char* title, const char* stateFileName, int flags, ww::Widget* parent)
 : ww::Dialog(parent)
 {
-	init(serializer, stateFileName, flags);
+	init(serializer, title, stateFileName, flags);
 }
 
-EditorDialog::EditorDialog(const Serializer& serializer, const char* stateFileName, int flags, HWND parent)
+EditorDialog::EditorDialog(const Serializer& serializer, const char* title, const char* stateFileName, int flags, HWND parent)
 : ww::Dialog(parent)
 {
-	init(serializer, stateFileName, flags);
+	init(serializer, title, stateFileName, flags);
 }
 
 EditorDialog::~EditorDialog()
@@ -37,16 +37,24 @@ EditorDialog::~EditorDialog()
 }
 
 
-void EditorDialog::init(const Serializer& serializer, const char* stateFileName, int flags)
+void EditorDialog::init(const Serializer& serializer, const char* title, const char* stateFileName, int flags)
 {
 	serializer_ = serializer;
 	stateFileName_ = stateFileName ? stateFileName : "";
-	std::string title = "Property Editor";
-	if(!stateFileName_.empty()){
-		title += ": ";
-		title += stateFileName_;
+	std::string windowTitle;
+	if (title && title[0] != '\0')
+	{
+		windowTitle = title;
 	}
-	setTitle(title.c_str());
+	else 
+	{
+		windowTitle = "Property Editor";
+		if(!stateFileName_.empty()){
+			windowTitle += ": ";
+			windowTitle += stateFileName_;
+		}
+	}
+	setTitle(windowTitle.c_str());
 	setDefaultSize(450, 500);
 	setDefaultPosition(ww::POSITION_CENTER);
 	
@@ -73,7 +81,8 @@ void EditorDialog::init(const Serializer& serializer, const char* stateFileName,
 	{
 		tree_->signalChanged().connect(this, &EditorDialog::onTreeChanged);
 		originalData_.reset(new BinaryOArchive(true));
-		serializer(*originalData_);
+		if (serializer)
+			serializer(*originalData_);
 	}
 
 	addButton("OK", ww::RESPONSE_OK);
@@ -103,7 +112,8 @@ void EditorDialog::onResponse(int response)
 	{
 		BinaryIArchive ia(true);
 		if(ia.open(originalData_->buffer(), originalData_->length()))
-			serializer_(ia);
+			if (serializer_)
+				serializer_(ia);
 	}
 
 	if(!stateFileName_.empty()){

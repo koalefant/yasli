@@ -15,7 +15,7 @@
 #include "ww/PropertyTree.h"
 #include "ww/PropertyDrawContext.h"
 #include "ww/PropertyTreeModel.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"

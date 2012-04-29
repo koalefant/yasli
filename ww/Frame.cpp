@@ -54,7 +54,7 @@ FrameImpl::FrameImpl(Frame* owner)
 void FrameImpl::setFrameText(const wchar_t* text)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	WW_VERIFY(::SetWindowText(handle_, text));
+	WW_VERIFY(::SetWindowTextW(handle_, text));
 
 	HFONT font = GetWindowFont(handle_);
 	Vect2 textSize = Win32::calculateTextSize(handle_, font, text);
@@ -107,7 +107,7 @@ LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 					rect.top(),
 					rect.right() - hspacing,
 					rect.bottom() - vspacing };
-				DrawText(dc, text.c_str(), int(wcslen(text.c_str())), &textRect, FS_CYRILLIC);
+				DrawTextW(dc, text.c_str(), int(wcslen(text.c_str())), &textRect, FS_CYRILLIC);
 				::SelectObject(dc, oldFont);
 				::SelectObject(dc, oldBrush);
 				::SetBkMode(dc, oldBackMode);

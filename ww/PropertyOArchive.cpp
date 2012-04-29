@@ -31,7 +31,7 @@
 #include "yasli/Enum.h"
 #include "ww/SafeCast.h"
 #include "ww/PopupMenu.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"
@@ -1013,7 +1013,8 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const
 		return true;
 	}
 
-    ser(*this);
+	if (ser)
+		ser(*this);
 
     closeStruct(name);
 	return true;

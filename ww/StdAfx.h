@@ -8,7 +8,9 @@
  */
 
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
+#ifndef _CRT_SECURE_NO_WARNINGS
+# define _CRT_SECURE_NO_WARNINGS
+#endif
 #define NOMINMAX
 
 #include <assert.h>
@@ -28,7 +30,7 @@
 #include "Macros.h"
 #include "yasli/Pointers.h"
 
-#ifndef WW_DISABLE_XMATH
+#ifdef WW_ENABLE_XMATH
 # include "XMath/Profiler.h"
 #endif
 
