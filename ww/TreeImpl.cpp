@@ -184,15 +184,17 @@ DragController::DragController(TreeImpl* treeImpl)
 , dragging_(false)
 , before_(false)
 , row_(0)
+, clickedRow_(0)
 , window_(treeImpl)
 , hoveredRow_(0)
 , destinationRow_(0)
 {
 }
 
-void DragController::beginDrag(PropertyRow* row, POINT pt)
+void DragController::beginDrag(PropertyRow* clickedRow, PropertyRow* draggedRow, POINT pt)
 {
-	row_ = row;
+	row_ = draggedRow;
+	clickedRow_ = clickedRow;
 	startPoint_ = pt;
 	lastPoint_ = pt;
 	captured_ = true;
@@ -201,7 +203,8 @@ void DragController::beginDrag(PropertyRow* row, POINT pt)
 
 bool DragController::dragOn(POINT screenPoint)
 {
-	window_.move(screenPoint.x - lastPoint_.x, screenPoint.y - lastPoint_.y);
+	if (dragging_)
+		window_.move(screenPoint.x - lastPoint_.x, screenPoint.y - lastPoint_.y);
 
 	bool needCapture = false;
 	if(!dragging_ && (Vect2(startPoint_.x, startPoint_.y) - Vect2(screenPoint.x, screenPoint.y)).length2() >= 25)
@@ -212,6 +215,7 @@ bool DragController::dragOn(POINT screenPoint)
                          rect.rightBottom() - treeImpl_->offset_);
             
 			window_.set(treeImpl_, row_, rect);
+			window_.move(screenPoint.x - startPoint_.x, screenPoint.y - startPoint_.y);
 			window_.show();
 			dragging_ = true;
 		}
@@ -317,6 +321,7 @@ void DragController::drop(POINT screenPoint)
 	PropertyTreeModel* model = treeImpl_->tree()->model();
 	if(row_ && hoveredRow_){
 		YASLI_ASSERT(destinationRow_);
+		clickedRow_->setSelected(false);
 		row_->dropInto(destinationRow_, destinationRow_ == hoveredRow_ ? 0 : hoveredRow_, treeImpl_->tree(), before_);
 	}
 
@@ -452,12 +457,14 @@ void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 		else{
 			// row могла уже быть пересоздана	
 			row = rowByPoint(Vect2(x, y));
-			while (row && (!row->isSelectable() || row->pulledUp() || row->pulledBefore()))
-				row = row->parent();
-			if(row && !row->userReadOnly() && !tree_->widget_){
-				POINT cursorPos;
-				GetCursorPos(&cursorPos);
-				drag_.beginDrag(row, cursorPos);
+			PropertyRow* draggedRow = row;
+			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
+				draggedRow = draggedRow->parent();
+			if(draggedRow && !draggedRow->userReadOnly() && !tree_->widget_){
+				POINT cursorPos = { x, y };
+				//GetCursorPos(&cursorPos);
+				ClientToScreen(handle(), &cursorPos);
+				drag_.beginDrag(row, draggedRow, cursorPos);
             }
 		}
 	}
@@ -793,7 +800,8 @@ void TreeImpl::redraw(HDC dc)
 		drag_.drawUnder(dc);
 
 	OffsetViewportOrgEx(dc, area_.left(), area_.top(), 0);
-	model()->root()->scanChildren(DrawVisitor(dc, area_, offset_.y), tree_);
+	if (model()->root())
+		model()->root()->scanChildren(DrawVisitor(dc, area_, offset_.y), tree_);
 	OffsetViewportOrgEx(dc, -area_.left(), -area_.top(), 0);
 	OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
@@ -834,7 +842,7 @@ void TreeImpl::redraw(HDC dc)
 		OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 	}
 	else{
-		if(model()->focusedRow()->isRoot() && tree_->hasFocus()){
+		if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && tree_->hasFocus()){
 			clientRect.left += 2; clientRect.top += 2;
 			clientRect.right -= 2; clientRect.bottom -= 2;
 			DrawFocusRect(dc, &clientRect);
@@ -865,9 +873,11 @@ Vect2 TreeImpl::pointToRootSpace(Vect2 point) const
 
 PropertyRow* TreeImpl::rowByPoint(Vect2 point)
 {
+	if (!model()->root())
+		return 0;
 	if (!area_.pointInside(point))
 		return 0;
-    return model()->root()->hit(tree_, pointToRootSpace(point));
+	return model()->root()->hit(tree_, pointToRootSpace(point));
 }
 
 bool TreeImpl::toggleRow(PropertyRow* row)

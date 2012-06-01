@@ -50,7 +50,7 @@ class DragController
 {
 public:
 	DragController(TreeImpl* treeImpl);
-	void beginDrag(PropertyRow* row, POINT startPoint);
+	void beginDrag(PropertyRow* clickedRow, PropertyRow* draggedRow, POINT startPoint);
 	bool dragOn(POINT screenPoint);
 	void drop(POINT screenPoint);
 
@@ -63,6 +63,7 @@ protected:
 	DragWindow window_;
 	TreeImpl* treeImpl_;
 	PropertyRow* row_;
+	PropertyRow* clickedRow_;
 	PropertyRow* hoveredRow_;
 	PropertyRow* destinationRow_;
 	POINT startPoint_;
