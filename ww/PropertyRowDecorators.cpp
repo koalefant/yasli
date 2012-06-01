@@ -35,7 +35,7 @@ public:
 	int floorHeight() const{ return 3; }
 	std::string valueAsString() const { return value_ ? value_.text : ""; }
 	int widgetSizeMin() const{ 
-		if (userWidgetSize())
+		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
 			return 60; 

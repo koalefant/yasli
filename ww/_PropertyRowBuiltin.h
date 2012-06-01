@@ -49,6 +49,7 @@ public:
 	}
 	void digestReset(const PropertyTree* tree);
 	bool isStatic() const{ return false; }
+	bool isSelectable() const{ return userWidgetSize() == 0 ? false : true; }
 
 	PropertyRow* defaultRow(PropertyTreeModel* model);
 	const PropertyRow* defaultRow(const PropertyTreeModel* model) const;
@@ -59,7 +60,7 @@ public:
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_AFTER_NAME; }
-	int widgetSizeMin() const{ return 36; }
+	int widgetSizeMin() const{ return userWidgetSize() >=0 ? userWidgetSize() : 36; }
 
 protected:
 	void generateMenu(PopupMenuItem& root, PropertyTree* tree);
@@ -85,7 +86,7 @@ public:
 
 	void serializeValue(Archive& ar);
 	std::string valueAsString() const;
-	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 40; }
+	int widgetSizeMin() const{ return userWidgetSize() >= 0 ? userWidgetSize() : 40; }
 protected:
 	int value_;
 	const EnumDescription* descriptor_;
@@ -179,7 +180,7 @@ public:
 		*reinterpret_cast<StringListValue*>(object) = value().c_str();
 		return true;
 	}
-	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin() const{ return userWidgetSize() >= 0 ? userWidgetSize() : 80; }
 };
 
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>{
@@ -195,7 +196,7 @@ public:
 		*reinterpret_cast<StringListStaticValue*>(object) = value().index();
 		return true;
 	}
-	int widgetSizeMin() const{ return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin() const{ return userWidgetSize() >= 0 ? userWidgetSize() : 80; }
 };
 
 // используется widget-ом редактриования
@@ -260,7 +261,7 @@ public:
 	}
 
 	virtual int widgetSizeMin() const{ 
-		if (userWidgetSize() != 0)
+		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
 			return 40;

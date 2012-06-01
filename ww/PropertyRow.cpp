@@ -59,6 +59,14 @@ PropertyRow::PropertyRow()
     init("", "", "");
 }
 
+PropertyRow::~PropertyRow()
+{
+	size_t count = children_.size();
+	for (size_t i = 0; i < count; ++i)
+		if (children_[i]->parent() == this)
+			children_[i]->setParent(0);
+}
+
 PropertyRow::PropertyRow(const char* name, const char* nameAlt, const char* typeName)
 {
 	init(name, nameAlt, typeName);
@@ -95,7 +103,7 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	widgetPos_ = 0;
 	digestPos_ = 0;
     widgetSize_ = 0;
-	userWidgetSize_ = 0;
+	userWidgetSize_ = -1;
 	freePulledChildren_ = 0;
 	
 	name_ = name[0] || !nameAlt ? name : nameAlt;
@@ -335,10 +343,10 @@ void PropertyRow::serialize(Archive& ar)
 {
 	serializeValue(ar);
 
-	ar.serialize(ConstStringWrapper(constStrings_, name_), "name", "&name");
-	ar.serialize(ConstStringWrapper(constStrings_, label_), "nameAlt", "nameAlt");
-	ar.serialize(ConstStringWrapper(constStrings_, typeName_), "type", "type");
-	ar.serialize(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
+	ar(ConstStringWrapper(constStrings_, name_), "name", "&name");
+	ar(ConstStringWrapper(constStrings_, label_), "nameAlt", "nameAlt");
+	ar(ConstStringWrapper(constStrings_, typeName_), "type", "type");
+	ar(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
 	if(ar.isInput()){
 		setLabelChanged();
 		PropertyRow::iterator it;
@@ -397,7 +405,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 	userReadOnly_ = false;
 	userReadOnlyRecurse_ = false;
 	userFixedWidget_ = false;
-	userWidgetSize_ = 0;
+	userWidgetSize_ = -1;
 
 	bool appendValueToDigest = false;
 	while(true){
@@ -1018,19 +1026,32 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, Prope
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();
 	if(parentRow->isContainer()){
-        tree->model()->push(tree->model()->root()); // FIXME: select optimal row
+		tree->model()->push(tree->model()->root()); // FIXME: select optimal row
+		setSelected(false);
 		PropertyRowContainer* container = safe_cast<PropertyRowContainer*>(parentRow);
 		PropertyRow* oldParent = parent();
+		TreePath oldParentPath = tree->model()->pathFromRow(oldParent);
 		oldParent->erase(this);
 		if(before)
 			parentRow->addBefore(this, cursorRow);
 		else
 			parentRow->add(this, cursorRow);
 		model->selectRow(this, true);
-        TreePath thisPath = tree->model()->pathFromRow(this);
-        model->rowChanged(tree->model()->root()); // after this call we can get invalid this
-        if(PropertyRow* newThis = tree->model()->rowFromPath(thisPath)) // we use path to obtain new row
-            tree->ensureVisible(newThis);
+		TreePath thisPath = tree->model()->pathFromRow(this);
+		TreePath parentRowPath = tree->model()->pathFromRow(parentRow);
+		if (oldParent = tree->model()->rowFromPath(oldParentPath))
+			model->rowChanged(oldParent); // after this call we can get invalid this
+		if(PropertyRow* newThis = tree->model()->rowFromPath(thisPath)) {
+			TreeSelection selection;
+			selection.push_back(thisPath);
+			model->setSelection(selection);
+
+			// we use path to obtain new row
+			tree->ensureVisible(newThis);
+			model->rowChanged(newThis); // after this call row pointers are invalidated
+		}
+		if (parentRow = tree->model()->rowFromPath(parentRowPath))
+			model->rowChanged(parentRow); // after this call row pointers are invalidated
 	}
 }
 
@@ -1073,7 +1094,7 @@ std::string PropertyRow::rowText(const PropertyTree* tree) const
 			return std::string();
 	}
 	else
-		return labelUndecorated();
+		return labelUndecorated() ? labelUndecorated() : string();
 }
 
 bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall) const
@@ -1085,11 +1106,11 @@ bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall
 	FOR_EACH(children_, it){
 		const PropertyRow* child = *it;
 		if(child->pulledUp()){
-            if(child->hasVisibleChildren(tree, true))
-                return true;
-        }
-        else if(child->visible(tree))
-                return true;
+			if(child->hasVisibleChildren(tree, true))
+				return true;
+		}
+		else if(child->visible(tree))
+			return true;
 	}
 	return false;
 }

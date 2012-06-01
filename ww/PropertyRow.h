@@ -25,6 +25,7 @@ namespace Gdiplus{
 }
 
 namespace ww{
+using std::vector;
 class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
@@ -82,7 +83,7 @@ public:
 	PropertyRow();
 	PropertyRow(const char* name, const char* nameAlt, const char* typeName);
 	PropertyRow(const char* name, const char* nameAlt, const Serializer& ser);
-	virtual ~PropertyRow() {}
+	virtual ~PropertyRow();
 
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
@@ -172,7 +173,7 @@ public:
 
 	int height() const{ return size_.y; }
 
-	virtual int widgetSizeMin() const { return userWidgetSize(); } 
+	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
     void calculateMinimalSize(const PropertyTree* tree);
@@ -201,6 +202,7 @@ public:
 	
 	virtual bool isContainer() const{ return false; }
 	virtual bool isPointer() const{ return false; }
+	virtual bool isObject() const{ return false; }
 
 	virtual bool isLeaf() const{ return false; }
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
@@ -312,6 +314,8 @@ protected:
 
 	static ConstStringList* constStrings_;
 };
+
+typedef vector<SharedPtr<PropertyRow> > PropertyRows;
 
 
 template<bool value>

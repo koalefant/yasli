@@ -21,7 +21,7 @@ public:
 
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	int widgetSizeMin() const{ 
-		if (userWidgetSize() != 0)
+		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
 			return 40;

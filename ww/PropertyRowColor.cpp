@@ -102,7 +102,7 @@ public:
 		return string(buf);
 	}
 	virtual int widgetSizeMin() const{ 
-		return userWidgetSize() ? userWidgetSize() : ICON_SIZE; 
+		return userWidgetSize() >= 0 ? userWidgetSize() : ICON_SIZE; 
 	}
 };
 
