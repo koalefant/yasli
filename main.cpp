@@ -26,7 +26,7 @@
 #include "ww/PropertyEditor.h"
 #include "ww/PopupMenu.h"
 #include "ww/Win32Proxy.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
 #include "yasli/BinaryOArchive.h"
@@ -331,10 +331,10 @@ void MainWindow::attach()
 		propertyTree_->attach(Serializer(testData));
 	else
 	{
-		Serializers serializers;
-		serializers.push_back(Serializer(testData));
-		serializers.push_back(Serializer(testData1));
-		propertyTree_->attach(serializers);
+		//Serializers serializers;
+		//serializers.push_back(Serializer(testData));
+		//serializers.push_back(Serializer(testData1));
+		propertyTree_->attach(Serializer(testData));
 	}
 }
 

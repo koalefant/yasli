@@ -64,7 +64,7 @@ struct Node
 		}
 
 		if (ar.filter(FILTER_PROPERTIES)) {
-			if (!ar.filter(FILTER_OUTLINE)) { // prevent duplication when bot filters enabled
+			if (!ar.filter(FILTER_OUTLINE)) { // prevent duplication when both filters enabled
 				ar(name_, "name", "^");
 			}
 			ar(color_, "color", "Color");
@@ -97,8 +97,8 @@ struct TwoTreesData
 		
 		static int index = 0;
 		for (int i = 0; i < 5; ++i) {
-			char name[32];
-			sprintf_s(name, sizeof(name), "Node %d", index);
+			char name[64];
+			sprintf_s(name, "Node %d", index);
 
 			Node node;
 			node.name_ = name;
@@ -153,8 +153,6 @@ public:
 
 ww::Widget* createTwoTrees()
 {
-	ww::HSplitter* splitter = new ww::HSplitter();
-
 	return new TwoTreesWidget();
 }
 

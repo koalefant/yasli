@@ -104,6 +104,8 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	using Gdiplus::Color;
 	using Gdiplus::Rect;
 	Rect widgetRect = gdiplusRect(context.widgetRect);
+	if (widgetRect.Width == 0)
+		return;
 	Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
 	Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
 	LinearGradientBrush brush(Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
@@ -220,20 +222,20 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 
 void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 {
-    tree->model()->push(this);
+	tree->model()->push(this);
 	PropertyRow* defaultType = defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
-	PropertyRow* clonedRow = defaultType->clone();
+	SharedPtr<PropertyRow> clonedRow = defaultType->clone();
 	// clonedRow->setFullRow(true); TODO
-    if(count() == 0)
-        tree->expandRow(this);
+	if(count() == 0)
+		tree->expandRow(this);
 	add(clonedRow);
 	setMultiValue(false);
 	if(expanded())
 		tree->model()->selectRow(clonedRow, true);
 	tree->expandRow(clonedRow);
 	PropertyTreeModel::Selection sel = tree->model()->selection();
-	tree->model()->rowChanged(clonedRow);
+	tree->model()->rowChanged(this);
 	tree->model()->setSelection(sel);
 	tree->update(); 
 	clonedRow = tree->selectedRow();
@@ -547,7 +549,8 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	std::wstring str = generateLabel();
 	const wchar_t* text = str.c_str();;
 	//context.drawValueText(false, text);
-	context.tree->_drawRowValue(context.graphics, text, propertyTreeDefaultBoldFont(), textRect, textColor, false, false);
+	Gdiplus::Font* font = derivedType_ == TypeID() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
+	context.tree->_drawRowValue(context.graphics, text, font, textRect, textColor, false, false);
 	//context.graphics->DrawString(text, (int)wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
 }
 
@@ -837,18 +840,18 @@ void setUpdatedRecurse(PropertyRow* row, bool updated)
 	}
 }
 
-PropertyOArchive::PropertyOArchive(PropertyTreeModel* model)
+PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 : Archive(OUTPUT | EDIT)
 , model_(model)
-, currentNode_(0)
+, currentNode_(root)
 , lastNode_(0)
 , updateMode_(false)
-, rootNode_(0)
+, rootNode_(root)
 {
 	YASLI_ASSERT(model != 0);
-	if(!rootNode()->empty()){
+	if(rootNode()){
 		updateMode_ = true;
-		setUpdatedRecurse(model->root(), false);
+		setUpdatedRecurse(rootNode(), false);
 	}
 }
 
@@ -891,7 +894,6 @@ PropertyRow* PropertyOArchive::rootNode()
 		return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
-		YASLI_ASSERT(model_->root());
 		return model_->root();
 	}
 }
@@ -932,14 +934,18 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 		if(updateMode_){
 			newRow->swapChildren(rootNode());
 			newRow->setParent(0);
-			model_->setRoot(newRow);
+			//YASLI_ASSERT(model_->root() == 0);
+			//if(model_->root() == 0)
+				model_->setRoot(newRow);
 			newRow->setUpdated(true);
 			newRow->setLabel(label);
 			result = newRow;
 		}
 		else{
-			if(typeName_.empty())
-				model_->setRoot(newRow);
+			if(typeName_.empty()) {
+				if(model_->root() == 0)
+					model_->setRoot(newRow);
+			}
 			else{
 				rootNode_ = newRow;
 			}
@@ -951,7 +957,7 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 		if(updateMode_ || block){
 			PropertyRow* row = currentNode_->find(newRow->name(), 0, newRow->typeName(), !block);
 
-			// нужно для сохранения порядка, при внезапном его изменении порядка
+			// we need this to preserve order
 			if(row && previousNode && previousNode->parent() == currentNode_){
 				if(currentNode_->childIndex(row) != currentNode_->childIndex(previousNode) + 1){
 					//newRow = row;
@@ -968,12 +974,12 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 				result->setLabel(label);
 			}
 			else{
-                if(model_->expandLevels() != 0){
-                    if(model_->expandLevels() == -1 ||
-                       model_->expandLevels() >= currentNode_->level())
-                        newRow->_setExpanded(true);
-                }
-                result = currentNode_->add(&*newRow, previousNode);
+				if(model_->expandLevels() != 0){
+					if(model_->expandLevels() == -1 ||
+						 model_->expandLevels() >= currentNode_->level())
+						newRow->_setExpanded(true);
+				}
+				result = currentNode_->add(&*newRow, previousNode);
 				result->setLabel(label);
 				newRow->setUpdated(true);
 			}
@@ -996,12 +1002,12 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const
     size_t size = ser.size();
 
 	PropertyRowFactory& factory = PropertyRowFactory::the();
-	PropertyRow* row = factory.create(typeName, PropertyRowArg(ser.pointer(), size, name, label, typeName));
+	SharedPtr<PropertyRow> row = factory.create(typeName, PropertyRowArg(ser.pointer(), size, name, label, typeName));
  	if(!row)
 		row = new PropertyRow(name, label, ser);
 	
 	if(!row->isLeaf() || currentNode_ == 0){
-		PropertyRow* previousRow = lastNode_;
+		SharedPtr<PropertyRow> previousRow = lastNode_;
 		lastNode_ = currentNode_;
 		enterNode(addRow(row, false, previousRow));
 
@@ -1188,6 +1194,19 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
 	closeStruct(name);
+	return true;
+}
+
+bool PropertyOArchive::operator()(Object& obj, const char *name, const char *label)
+{
+	const char* typeName = obj.type().name();
+
+	PropertyRowObject* row = 0;
+	if (typeName_.empty())
+		 row = new PropertyRowObject(name, label, obj, model_);
+	else
+		 row = new PropertyRowObject(name, label, Object(0, obj.type(), 0, 0, 0), model_);
+	lastNode_ = addRow(row);
 	return true;
 }
 

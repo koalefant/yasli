@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="wWidgets"
 	ProjectGUID="{18632F7A-290E-B902-7C03-72FB0C12DE45}"
 	RootNamespace="wWidgets"
@@ -985,6 +985,14 @@
 				</File>
 				<File
 					RelativePath=".\PropertyRowIcon.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyRowObject.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyRowObject.h"
 					>
 				</File>
 				<File

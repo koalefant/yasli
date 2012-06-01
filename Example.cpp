@@ -13,7 +13,7 @@
 
 #include "ww/Frame.h"
 #include "ww/Serialization.h"
-#include "ww/Win32/Window.h"
+#include "ww/Win32/Window32.h"
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
 
@@ -62,7 +62,10 @@ MainWindow::MainWindow(ww::Application& app)
 	ww::Widget* createTwoTrees();
 	pages->add("Two Trees", createTwoTrees());
 
-    add(pages);
+	ww::Widget* createObjectsSample();
+	pages->add("Objects", createObjectsSample());
+
+	add(pages);
 
 	TextIArchive sa;
 	sa.setFilter(ww::SERIALIZE_STATE);

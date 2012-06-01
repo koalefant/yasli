@@ -39,7 +39,7 @@ struct PasteSerializerFunc : PasteFunc
     {
         BinaryIArchive ia(true);
         if(ia.open(mem, memSize))
-            return ser_(ia, name_, label_);
+            return ia(ser_, name_, label_);
         return false;
     }
 
@@ -87,7 +87,7 @@ bool Clipboard::copy(Serializer& se)
 	PropertyTreeModel model;
 	PropertyOArchive oa(model_ ? model_ : &model);
     oa.setFilter(filter_);
-	se(oa, "row", "Row");
+	oa(se, "row", "Row");
 	bool result = copy(model.root());
 	PropertyRow::setConstStrings(0);
 	return result;

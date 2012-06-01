@@ -111,9 +111,9 @@ PropertyTree::PropertyTree(int border)
 
 	model_->signalUpdated().connect(this, &PropertyTree::onModelUpdated);
 
-    filterEntry_ = new FilterEntry(this);
-    filterEntry_->_setParent(this);
-    filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
+	filterEntry_ = new FilterEntry(this);
+	filterEntry_->_setParent(this);
+	filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
 
 	DrawingCache::get()->initialize();
 }
@@ -127,7 +127,7 @@ PropertyTree::~PropertyTree()
 void PropertyTree::update()
 {
 	needUpdate_ = true;
-    ::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 TreeImpl* PropertyTree::impl() const
@@ -200,7 +200,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
 			expandRow(parentRow, false);
-			model()->requestUpdate();
+			//model()->requestUpdate();
 			selectedRow = model()->focusedRow();
 		}
 		break;
@@ -208,7 +208,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
 			expandRow(parentRow, true);
-			model()->requestUpdate();
+			//model()->requestUpdate();
 			selectedRow = model()->focusedRow();
 		}
 		break;
@@ -382,6 +382,9 @@ void PropertyTree::interruptDrag()
 void PropertyTree::updateHeights()
 {
 	needUpdate_ = false;
+	if (!model()->root())
+		return;
+
 	model()->root()->calculateMinimalSize(this);
 	impl()->size_.y = 0;
 
@@ -414,7 +417,7 @@ void PropertyTree::serialize(Archive& ar)
 		ar(impl()->offset_, "offset", 0);		
 		model()->serialize(ar, this);
 
-		if(ar.isInput()){
+		if(ar.isInput() && model()->root()){
 			ensureVisible(model()->focusedRow());
 			updateAttachedPropertyTree();
 			if(focused)
@@ -453,14 +456,15 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 
 void PropertyTree::attach(Serializer serializer)
 {
-	attached_.clear();
-	attached_.push_back(serializer);
-	revert();
+	attach(Object(serializer));
 }
 
-void PropertyTree::attach(Serializers& serializers)
+void PropertyTree::attach(Object object)
 {
-	attached_ = serializers;
+	attached_.clear();
+	attached_.push_back(object);
+
+	model_->setRootObject(object);
 	revert();
 }
 
@@ -469,7 +473,66 @@ void PropertyTree::detach()
 	if(widget_)
 		widget_ = 0;
 	attached_.clear();
-	model()->root()->clear();
+	model()->clear();
+	update();
+}
+
+int PropertyTree::revertObjects(vector<void*> objectAddresses)
+{
+	int result = 0;
+	for (size_t i = 0; i < objectAddresses.size(); ++i) {
+		if (revertObject(objectAddresses[i]))
+			++result;
+	}
+	return result;
+}
+
+bool PropertyTree::revertObject(void* objectAddress)
+{
+	ModelObjectReferences& refs = model_->objectReferences();
+	ModelObjectReferences::iterator it = refs.find(objectAddress);
+	if (it == refs.end())
+		return false;
+	it->second.needUpdate = true;
+	revertChanged(false);
+	return true;
+}
+
+void PropertyTree::revertChanged(bool enforce)
+{
+	bool enforceNext = enforce;
+	vector<ModelObjectReference> objectsToUpdate;
+
+	while (true) {
+		ModelObjectReferences& refs = model_->objectReferences();
+		for (ModelObjectReferences::iterator it = refs.begin(); it != refs.end(); ++it) {
+			ModelObjectReference& ref = it->second;
+			if (enforceNext || ref.needUpdate) {
+				ref.needUpdate = false;
+				objectsToUpdate.push_back(ref);
+			}
+		}
+		enforceNext = false;
+
+		if (objectsToUpdate.empty())
+			break;
+
+		for (size_t i = 0; i < objectsToUpdate.size(); ++i) {
+			ModelObjectReference& ref = objectsToUpdate[i];
+			PropertyOArchive oa(model_, ref.row);
+			oa.setFilter(filter_);
+			Object obj = ref.row->object();
+			if (obj.isSet())
+				obj(oa);
+			else
+				ref.row->clear();
+			ref.row->setLabelChanged();
+		}
+		objectsToUpdate.clear();
+	}
+
+	if (model()->root())
+		model_->root()->updateLabel(this);		
 	update();
 }
 
@@ -478,27 +541,15 @@ void PropertyTree::revert()
 	interruptDrag();
 	widget_ = 0;
 
-	if(!attached_.empty()){
-		PropertyOArchive oa(model_);
-		oa.setFilter(filter_);
-
-		Serializers::iterator it = attached_.begin();
-		(*it)(oa, "", "");
-		while(++it != attached_.end()){
-			PropertyTreeModel model2;
-			PropertyOArchive oa2(&model2);
-			Archive::Context<ww::PropertyTree> treeContext(oa2, this);
-			oa2.setFilter(filter_);
-			(*it)(oa2, "", "");
-			model_->root()->intersect(model2.root());
-		}
+	if (!attached_.empty()) {
+		revertChanged(true);
 	}
 	else
 		model_->clear();
 
-	if (filterMode_)
-	{
-		model_->root()->updateLabel(this);		
+	if (filterMode_) {
+		if (model_->root())
+			model_->root()->updateLabel(this);		
 		onFilterChanged();
 	}
 
@@ -509,15 +560,28 @@ void PropertyTree::revert()
 
 void PropertyTree::apply()
 {
-	if(!attached_.empty()){
-		Serializers::iterator it;
-		FOR_EACH(attached_, it){
-			PropertyIArchive ia(model_);
-			Archive::Context<ww::PropertyTree> treeContext(ia, this);
-			ia.setFilter(filter_);
-			(*it)(ia, "", "");
-		}
+	applyChanged(true);
+}
+
+void PropertyTree::applyChanged(bool enforce)
+{
+	ModelObjectReferences& refs = model_->objectReferences();
+	ModelObjectReferences::iterator it;
+
+	for (it = refs.begin(); it != refs.end(); ++it) {
+		ModelObjectReference& ref = it->second;
+		if (!enforce && !ref.needApply)
+			continue;
+
+		Object obj = ref.row->object();
+		PropertyIArchive ia(model_, ref.row);
+		Archive::Context<ww::PropertyTree> treeContext(ia, this);
+		ia.setFilter(filter_);
+		obj(ia);
+		ref.needApply = false;
+		signalObjectChanged_.emit(obj);
 	}
+	signalChanged_.emit();
 }
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -542,13 +606,15 @@ bool PropertyTree::activateRow(PropertyRow* row)
 
 bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 {
+	SharedPtr<PropertyRow> r(row);
+
 	PropertyRow::iterator it;
-	for(it = row->begin(); it != row->end(); ++it){
+	for(it = row->begin(); it != r->end(); ++it){
 		PropertyRow* child = *it;
 		if(child->isContainer() && child->pulledUp())
 			child->onContextMenu(menu, this);
 	}
-	row->onContextMenu(menu, this);
+	r->onContextMenu(menu, this);
 	if(undoEnabled_){
 		if(!menu.empty())
 			menu.addSeparator();
@@ -559,37 +625,37 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	}
 	if(!menu.empty())
 		menu.addSeparator();
-	menu.add(TRANSLATE("Copy"), row)
+	menu.add(TRANSLATE("Copy"), r)
 		.connect(this, &PropertyTree::onRowMenuCopy)
 		.setHotkey(KeyPress(Key('C'), KEY_MOD_CONTROL));
-    if(!row->userReadOnly()){
-	    menu.add(TRANSLATE("Paste"), row)
+    if(!r->userReadOnly()){
+	    menu.add(TRANSLATE("Paste"), r)
 		    .connect(this, &PropertyTree::onRowMenuPaste)
-		    .enable(!row->userReadOnly())
+		    .enable(!r->userReadOnly())
 		    .setHotkey(KeyPress(Key('V'), KEY_MOD_CONTROL))
-		    .enable(canBePasted(row));
+		    .enable(canBePasted(r));
     }
 	menu.addSeparator();
 	PopupMenuItem& filter = menu.add("Filter by");
 	{
 		wstring nameFilter = L"\"";
-		nameFilter += toWideChar(row->labelUndecorated());
+		nameFilter += toWideChar(r->labelUndecorated());
 		nameFilter += L"\"";
 		filter.add((wstring(L"Name:\t") + nameFilter).c_str(), nameFilter).connect(this, &PropertyTree::startFilter);
 
 		wstring valueFilter = L"=\"";
-		valueFilter += row->valueAsWString();
+		valueFilter += r->valueAsWString();
 		valueFilter += L"\"";
 		filter.add((wstring(L"Value:\t") + valueFilter).c_str(), valueFilter).connect(this, &PropertyTree::startFilter);
 
 		wstring typeFilter = L":\"";
-		typeFilter += toWideChar(row->typeNameForFilter());
+		typeFilter += toWideChar(r->typeNameForFilter());
 		typeFilter += L"\"";
 		filter.add((wstring(L"Type:\t") + typeFilter).c_str(), typeFilter).connect(this, &PropertyTree::startFilter);
 	}
 #if 0
 	menu.addSeparator();
-	menu.add(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
+	menu.add(TRANSLATE("Decompose"), r).connect(this, &PropertyTree::onRowMenuDecompose);
 #endif
 	return true;
 }
@@ -604,13 +670,13 @@ void PropertyTree::onRowMenuUndo()
     model()->undo();
 }
 
-void PropertyTree::onRowMenuCopy(PropertyRow* row)
+void PropertyTree::onRowMenuCopy(SharedPtr<PropertyRow> row)
 {
 	Clipboard clipboard(this, &constStrings_, model());
     clipboard.copy(row);
 }
 
-void PropertyTree::onRowMenuPaste(PropertyRow* row)
+void PropertyTree::onRowMenuPaste(SharedPtr<PropertyRow> row)
 {
 	if(!canBePasted(row))
 		return;
@@ -621,7 +687,7 @@ void PropertyTree::onRowMenuPaste(PropertyRow* row)
 	if(clipboard.paste(row))
 		model()->rowChanged(parent ? parent : model()->root());
 	else
-		YASLI_ASSERT(0 && "Unable to paste element!"); // TODO: осмысленное сообщение
+		YASLI_ASSERT(0 && "Unable to paste element!"); 
 }
 
 bool PropertyTree::canBePasted(PropertyRow* destination)
@@ -657,25 +723,46 @@ void PropertyTree::onRowMenuDecompose(PropertyRow* row)
 	edit(Serializer(proxy), 0, IMMEDIATE_UPDATE, this);
 }
 
-void PropertyTree::onModelUpdated()
+void PropertyTree::onModelUpdated(const PropertyRows& rows)
 {
-	if(widget_)
+	if (widget_)
 		widget_ = 0;
 
-	if(immediateUpdate_){
-		apply();
-    	onSignalChanged();
-        if(autoRevert_)
-		    revert();
+	if (immediateUpdate_) {
+
+		ModelObjectReferences& refs = model_->objectReferences();
+
+		size_t count = rows.size();
+		for (size_t i = 0; i < count; ++i) {
+			void *objectAddress = 0;
+			PropertyRow* row = rows[i];
+			if (row->isObject())
+				objectAddress = static_cast<PropertyRowObject*>(row)->object().address();
+			else
+				objectAddress = row->serializer().pointer();
+			if (!objectAddress)
+				continue;
+			
+			ModelObjectReferences::iterator it = refs.find(objectAddress);
+			if (it != refs.end()) {
+				ModelObjectReference& ref = it->second;
+				ref.needUpdate = true;
+				ref.needApply = true;
+			}
+		}
+
+		applyChanged(false);
+		
+		if(autoRevert_)
+			revertChanged(false);
 	}
 
-    setFocus();
-
+	setFocus();
 	update();
 
 	updateAttachedPropertyTree();
-    if(!immediateUpdate_)
-	    onSignalChanged();
+	if(!immediateUpdate_)
+		signalChanged_.emit();
 }
 
 void PropertyTree::setWidget(PropertyRowWidget* widget)
@@ -791,6 +878,22 @@ PropertyRow* PropertyTree::selectedRow()
     return model()->rowFromPath(sel.front());
 }
 
+bool PropertyTree::getSelectedObject(Object* object)
+{
+    const PropertyTreeModel::Selection &sel = model()->selection();
+    if(sel.empty())
+        return 0;
+    PropertyRow* row = model()->rowFromPath(sel.front());
+		while (row && !row->isObject())
+			row = row->parent();
+		if (!row)
+			return false;
+
+		PropertyRowObject* obj = static_cast<PropertyRowObject*>(row);
+		*object = obj->object();
+		return true;
+}
+
 Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
     POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), 
@@ -858,11 +961,22 @@ void PropertyTree::getSelectionSerializers(Serializers* serializers)
 
 void PropertyTree::updateAttachedPropertyTree()
 {
+	/*
 	if(attachedPropertyTree_){
 		Serializers serializers;
 		getSelectionSerializers(&serializers);
 		attachedPropertyTree_->attach(serializers);
 	}
+	*/
+
+	if (!attachedPropertyTree_)
+		return;
+
+	Object obj;
+	if (getSelectedObject(&obj))
+		attachedPropertyTree_->attach(obj);
+	else
+		attachedPropertyTree_->detach();
 }
 
 struct FilterVisitor

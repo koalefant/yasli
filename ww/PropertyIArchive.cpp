@@ -17,12 +17,17 @@
 
 namespace ww{
 
-PropertyIArchive::PropertyIArchive(PropertyTreeModel* model)
+PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 : Archive(INPUT | EDIT)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)
+, root_(root)
 {
+	if (!root_)
+		root_ = model_->root();
+	else
+		currentNode_ = root;
 }
 
 bool PropertyIArchive::operator()(StringInterface& value, const char* name, const char* label)
@@ -237,17 +242,17 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const
 {
 	if(openRow(name, label, ser.type().name())){
 		if(currentNode_->isLeaf() && !currentNode_->isRoot()){
-            currentNode_->assignTo(ser.pointer(), ser.size());
-            closeRow(name);
-            return true;
+			currentNode_->assignTo(ser.pointer(), ser.size());
+			closeRow(name);
+			return true;
 		}
-    }
+	}
 	else
 		return false;
 
-    ser(*this);
+	ser(*this);
 
-    closeRow(name);
+	closeRow(name);
 	return true;
 }
 
@@ -275,6 +280,21 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
     return true;
 }
 
+bool PropertyIArchive::operator()(Object& obj, const char* name, const char* label)
+{
+	if(openRow(name, label, obj.type().name())){
+		bool result = false;
+		if (currentNode_->isObject()) {
+			PropertyRowObject* rowObj = static_cast<PropertyRowObject*>(currentNode_);
+			result = rowObj->assignTo(&obj);
+		}
+		closeRow(name);
+		return result;
+	}
+	else
+		return false;
+}
+
 bool PropertyIArchive::openBlock(const char* name, const char* label)
 {
 	if(openRow(label, label, "")){
@@ -297,7 +317,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 		name = label;
 
 	if(!currentNode_){
-		lastNode_ = currentNode_ = model_->root();
+		lastNode_ = currentNode_ = root_;
 		YASLI_ASSERT(currentNode_);
 		return true;
 	}
@@ -314,7 +334,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 		}
 		else{
 			PropertyRow* row = lastNode_;
-			while(row->parent() && currentNode_ != row->parent())
+			while(row != root_ && row->parent() && currentNode_ != row->parent())
 				row = row->parent();
 			
 			PropertyRow::iterator iter = std::find(currentNode_->begin(), currentNode_->end(), row);
@@ -342,7 +362,10 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 void PropertyIArchive::closeRow(const char* name)
 {
 	YASLI_ESCAPE(currentNode_, return);
-	currentNode_ = currentNode_->parent();
+	if (currentNode_ == root_)
+		currentNode_ = 0;
+	else
+		currentNode_ = currentNode_->parent();
 }
 
 };
