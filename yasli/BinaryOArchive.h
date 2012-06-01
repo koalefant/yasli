@@ -31,6 +31,7 @@ public:
 
   bool operator()(bool &value, const char *name, const char* label);
   bool operator()(StringInterface &value, const char *name, const char* label);
+  bool operator()(WStringInterface &value, const char *name, const char* label);
   bool operator()(float &value, const char *name, const char* label);
   bool operator()(double &value, const char *name, const char* label);
   bool operator()(int &value, const char *name, const char* label);

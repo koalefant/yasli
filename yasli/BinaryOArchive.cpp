@@ -132,6 +132,14 @@ bool BinaryOArchive::operator()(StringInterface &value, const char *_name, const
     return true;
 }
 
+bool BinaryOArchive::operator()(WStringInterface &value, const char *_name, const char* label)
+{
+	openNode(BINARY_NODE_WSTRING, _name);
+	stream_->write(value.get(), wcslen(value.get()));
+	closeNode();
+	return true;
+}
+
 bool BinaryOArchive::operator()(float &value, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_FLOAT, _name);
@@ -238,13 +246,8 @@ bool BinaryOArchive::operator()(ContainerInterface &ser, const char *_name, cons
     TypeID type = ser.type();
     openContainer(_name, size, type.name());
 
-    //TODO
-    //if (!CClassFactoryManager::The().HasDefaultElement(type))
-    //    CClassFactoryManager::The().AddDefaultElement(type, ser.CreateDefaultElementSerializer());
-
     if (size > 0)
-        do 
-        {
+        do {
             ser(*this, "", "");
         } while (ser.next());
 
@@ -258,7 +261,7 @@ bool BinaryOArchive::operator()(PointerInterface &_ptr, const char *_name, const
     openNode(BINARY_NODE_POINTER, _name);
     YASLI_ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());
     //YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().shortName()); TODO
-    YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().name());
+    //YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().name());
 
     TypeID baseType = _ptr.baseType();
     write(baseType.name());
