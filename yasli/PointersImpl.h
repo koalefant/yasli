@@ -12,6 +12,7 @@
 #include "Pointers.h"
 #include "yasli/ClassFactoryBase.h"
 #include "ClassFactory.h"
+#include "Object.h"
 
 namespace yasli{
 
@@ -89,6 +90,23 @@ protected:
 	mutable PolyPtr<T>& ptr_;
 };
 
+template<class T>
+AsObjectWrapper<SharedPtr<T> > asObject(SharedPtr<T>& ptr)
+{
+	return AsObjectWrapper<SharedPtr<T> >(ptr);
+}
+
+template<class T>
+int acquireByVoidPtr(void* ptr) { ((T*)ptr)->acquire(); return ((T*)ptr)->refCount(); }
+
+template<class T>
+int releaseByVoidPtr(void* ptr) {
+	T* obj = (T*)ptr;
+	int result = obj->release(); 
+	if (result == 0)
+		delete obj;
+	return result;
+}
 
 }
 
@@ -103,4 +121,22 @@ bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, con
 {
 	return ar(static_cast<yasli::PointerInterface&>(yasli::PolyPtrSerializer<T>(ptr)), name, label);
 }
+
+
+template<class T>
+bool serialize(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >& ptr, const char* name, const char* label)
+{
+	yasli::Object obj(ptr.ptr_.get(), yasli::TypeID::get<T>(),
+					  &yasli::acquireByVoidPtr<T>, 
+						&yasli::releaseByVoidPtr<T>,
+					  &yasli::Serializer::serializeRaw<T>);
+
+	if (!ar(obj, name, label))
+		return false;
+
+	if (ar.isInput())
+		ptr.ptr_ = (T*)obj.address();
+	return true;
+}
+
 // vim:sw=4 ts=4:

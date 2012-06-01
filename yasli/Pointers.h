@@ -136,11 +136,11 @@ public:
     }
     T* operator->() const{ return get(); }
     void release(){
-        if(ptr_){
-			if(!ptr_->release())
-                delete ptr_;
-            ptr_ = 0;
-        }
+			if(ptr_){
+				if(!ptr_->release())
+					delete ptr_;
+				ptr_ = 0;
+			}
     }
 	template<class _T>
     void set(_T* const ptr){
@@ -199,6 +199,18 @@ private:
 
 class Archive;
 
+
+template<class Ptr>
+struct AsObjectWrapper
+{
+	Ptr& ptr_;
+
+	AsObjectWrapper(Ptr& ptr)
+	: ptr_(ptr)
+	{
+	}
+};
+
 }
 
 template<class T>
@@ -206,3 +218,7 @@ bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, c
 
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label);
+
+
+template<class T>
+bool serialize(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >& ptr, const char* name, const char* label);

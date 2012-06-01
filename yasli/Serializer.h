@@ -67,12 +67,12 @@ public:
 		serializeFunc_ = &Serializer::serializeRaw<T>;
 	}
 
-	bool operator()(Archive& ar, const char* name, const char* label) const;
 	bool operator()(Archive& ar) const;
 	operator bool() const{ return object_ && serializeFunc_; }
 	void* pointer() const{ return object_; }
 	TypeID type() const{ return type_; }
 	size_t size() const{ return size_; }
+	SerializeStructFunc serializeFunc() const{ return serializeFunc_; }
 
 	template<class T>
 	static bool serializeRaw(void* rawPointer, Archive& ar){
@@ -190,6 +190,7 @@ public:
 	virtual const wchar_t* get() const = 0;
 	virtual const wchar_t** getInplacePointer() const{ return 0; }
 };
+
 
 }
 // vim:ts=4 sw=4:

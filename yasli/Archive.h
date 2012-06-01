@@ -22,6 +22,7 @@ bool serialize(yasli::Archive& ar, T& object, const char* name, const char* labe
 
 namespace yasli{
 
+class Object;
 class EnumDescription;
 template <class Enum>
 EnumDescription& getEnumDescription();
@@ -96,6 +97,7 @@ public:
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
+	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
 
   // there is no point to support long double since it is represented as double on MSVC
 	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }

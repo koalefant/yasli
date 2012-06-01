@@ -9,9 +9,6 @@ inline bool Serializer::operator()(Archive& ar) const{
 	return serializeFunc_(object_, ar);
 }
 
-inline bool Serializer::operator()(Archive& ar, const char* name, const char* label) const{
-	return ar(*this, name, label);
-}
 
 
 inline void PointerInterface::serialize(Archive& ar) const
