@@ -32,7 +32,7 @@ inline int round(double x)
 
 inline int round(float x)
 {
-	return _mm_cvtt_ss2si(_mm_load_ss(&x));
+	return _mm_cvtss_si32(_mm_load_ss(&x));//assume that current rounding mode is always correct (i.e. round to nearest)
 }
 #else
 inline int round(float x)
