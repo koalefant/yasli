@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "BugslayerUtil.h"
 
+typedef BOOL (WINAPI * MINIDUMPWRITEDUMP)(HANDLE, DWORD, HANDLE, MINIDUMP_TYPE, PMINIDUMP_EXCEPTION_INFORMATION, PMINIDUMP_USER_STREAM_INFORMATION, PMINIDUMP_CALLBACK_INFORMATION);
+
 class XErrorHandler
 {
 public:
@@ -12,9 +14,11 @@ public:
 	void	 WriteLog(const char* msg);
 };
 
-char exceptMSG[512] 	= "";
+char exceptMSG[512] = "";
+char miniDampName[512] = "";
 
 void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, 511); }
+void setMiniDampName(const char* name){ strncpy(miniDampName, name, 511); }
 
 #pragma warning (disable : 4073)
 #pragma init_seg(lib)
@@ -56,6 +60,18 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 
 	_clearfp();
 	SetUnhandledExceptionFilter(NULL);
+
+	if(strlen(miniDampName))
+		if(HMODULE hDll = LoadLibraryA("DBGHELP.DLL"))
+			if(MINIDUMPWRITEDUMP pfnDump = (MINIDUMPWRITEDUMP)GetProcAddress(hDll, "MiniDumpWriteDump")){
+				MINIDUMP_EXCEPTION_INFORMATION exInfo = { 0 };
+				exInfo.ThreadId = GetCurrentThreadId();
+				exInfo.ExceptionPointers = except_info;
+				exInfo.ClientPointers = 0;
+				HANDLE hFile = CreateFileA(miniDampName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				pfnDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &exInfo, NULL, NULL);
+				CloseHandle(hFile);
+			}
 
 	static char msg[100000];
 
