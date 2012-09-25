@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="XerrHand">
-      <UniqueIdentifier>{4a782039-efe5-4429-af42-09ae52c55b04}</UniqueIdentifier>
+      <UniqueIdentifier>{0f4dd070-f011-49f6-8d2a-dd912411d9ef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +34,7 @@
     <ClCompile Include="ComboListColor.cpp" />
     <ClCompile Include="Profiler.cpp" />
     <ClCompile Include="Range.cpp" />
+    <ClCompile Include="RangedWrapper.cpp" />
     <ClCompile Include="Rectf.cpp" />
     <ClCompile Include="Recti.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="Profiler.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Range.h" />
+    <ClInclude Include="RangedWrapper.h" />
     <ClInclude Include="Rectf.h" />
     <ClInclude Include="Recti.h" />
     <ClInclude Include="round.h" />
