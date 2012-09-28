@@ -126,19 +126,21 @@ bool BinOArchive::operator()(bool& value, const char* name, const char* label)
 
 bool BinOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-    openNode(name);
+	bool size8 = value.size() + 1 < SIZE16;
+    openNode(name, size8);
 	stream_ << value.get();
 	stream_.write(char(0));
-    closeNode(name);
+    closeNode(name, size8);
     return true;
 }
 
 bool BinOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
-	openNode(name);
+	bool size8 = (value.size() + 1)*2 < SIZE16;
+	openNode(name, size8);
 	stream_ << value.get();
 	stream_.write(short(0));
-	closeNode(name);
+	closeNode(name, size8);
 	return true;
 }
 
