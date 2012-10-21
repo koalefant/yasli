@@ -18,6 +18,7 @@
 #ifdef _MSC_VER
 #pragma warning(disable : 4073 ) // initializers put in library initialization area
 #pragma init_seg(lib)
+#endif
 
 #ifdef _WIN64
 char exceptMSG[512] 	= "EXCEPTION OCCURED";
