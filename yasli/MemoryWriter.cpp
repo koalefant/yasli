@@ -148,6 +148,11 @@ inline void cutRightZeros(const char* str)
 
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
+#ifdef ANDROID_NDK
+	char buf[64] = { 0 };
+	sprintf(buf, "%f", value);
+	operator<<(buf);
+#else
 	// YASLI_ASSERT(!isnan(value)); disabled, because physics data is not always initialized
 
 	int point = 0;
@@ -183,6 +188,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 		operator<<(buf + point);
     }
 	return *this;
+#endif
 }
 
 MemoryWriter& MemoryWriter::operator<<(const char* value)
@@ -195,10 +201,14 @@ MemoryWriter& MemoryWriter::operator<<(const char* value)
 
 MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
 {
+#ifdef ANDROID_NDK
+	return *this;
+#else
     write((void*)value, wcslen(value) * sizeof(wchar_t));
     YASLI_ASSERT(position() < size());
     *position_ = '\0';
     return *this;
+#endif
 }
 
 void MemoryWriter::setPosition(size_t pos)

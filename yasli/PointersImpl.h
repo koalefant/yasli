@@ -50,7 +50,7 @@ public:
 	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
 protected:
-	mutable SharedPtr<T>& ptr_;
+	SharedPtr<T>& ptr_;
 };
 
 template<class T>
@@ -87,7 +87,7 @@ public:
 	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
 protected:
-	mutable PolyPtr<T>& ptr_;
+	PolyPtr<T>& ptr_;
 };
 
 template<class T>
@@ -113,13 +113,15 @@ int releaseByVoidPtr(void* ptr) {
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
-	return ar(static_cast<yasli::PointerInterface&>(yasli::SharedPtrSerializer<T>(ptr)), name, label);
+	yasli::SharedPtrSerializer<T> serializer(ptr);
+	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
 }
 
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label)
 {
-	return ar(static_cast<yasli::PointerInterface&>(yasli::PolyPtrSerializer<T>(ptr)), name, label);
+	yasli::PolyPtrSerializer<T> serializer(ptr);
+	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
 }
 
 

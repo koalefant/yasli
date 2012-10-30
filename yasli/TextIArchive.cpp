@@ -8,7 +8,8 @@
  */
 
 #include "StdAfx.h"
-#include <cstdio>
+#include <stdio.h>
+#include <stdlib.h>
 #include <algorithm>
 #include "TextIArchive.h"
 #include "MemoryReader.h"
@@ -526,24 +527,24 @@ bool TextIArchive::open(const char* buffer, size_t length, bool free)
 
 bool TextIArchive::load(const char* filename)
 {
-	if(std::FILE* file = fopen(filename, "rb"))
+	if(FILE* file = fopen(filename, "rb"))
 	{
-		std::fseek(file, 0, SEEK_END);
-		long fileSize = std::ftell(file);
-		std::fseek(file, 0, SEEK_SET);
+		fseek(file, 0, SEEK_END);
+		long fileSize = ftell(file);
+		fseek(file, 0, SEEK_SET);
 
 		void* buffer = 0;
 		if(fileSize > 0){
 			buffer = std::malloc(fileSize + 1);
 			YASLI_ASSERT(buffer != 0);
 			memset(buffer, 0, fileSize + 1);
-			size_t elementsRead = std::fread(buffer, fileSize, 1, file);
+			size_t elementsRead = fread(buffer, fileSize, 1, file);
 			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
 				return false;
 			}
 		}
-		std::fclose(file);
+		fclose(file);
 
 		filename_ = filename;
 		if (fileSize > 0)
@@ -1035,7 +1036,7 @@ bool TextIArchive::operator()(float& value, const char* name, const char* label)
 #ifdef _MSC_VER
         value = float(std::atof(token_.str().c_str()));
 #else
-        value = std::strtof(token_.start, 0);
+        value = strtof(token_.start, 0);
 #endif
         return true;
     }

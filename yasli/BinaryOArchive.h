@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "Archive.h"
 #include "MemoryWriter.h" 
 #include "BinaryNode.h"
