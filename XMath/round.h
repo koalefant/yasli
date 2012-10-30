@@ -1,5 +1,7 @@
 #pragma once
-#include <emmintrin.h>
+#ifdef _WIN32
+# include <emmintrin.h>
+#endif
 
 #pragma warning (disable : 4244)
 
@@ -13,7 +15,7 @@ inline T clamp(const T& x, const T1& xmin, const T2& xmax)
   return x;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 inline int round(double x)
 {
 #ifdef _M_AMD64

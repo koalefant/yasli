@@ -20,7 +20,7 @@
 #pragma init_seg(lib)
 #endif
 
-#ifdef _WIN64
+#if defined(_WIN64) || !defined(_WIN32)
 char exceptMSG[512] 	= "EXCEPTION OCCURED";
 #endif
 
