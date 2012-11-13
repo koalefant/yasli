@@ -45,7 +45,7 @@ public:
             ptr_ = 0;
         }
     }
-    void set(PolyRefCounter* const ptr){
+    void reset(PolyRefCounter* const ptr = 0){
         if(ptr_ != ptr){
             release();
             ptr_ = ptr;
@@ -67,7 +67,7 @@ public:
 
     PolyPtr(PolyRefCounter* ptr)
     {
-        set(ptr);
+        reset(ptr);
     }
 
 	template<class U>
@@ -76,13 +76,13 @@ public:
 		// TODO: replace with static_assert
 		YASLI_ASSERT("PolyRefCounter must be a first base when used with multiple inheritance." && 
 			   static_cast<PolyRefCounter*>(ptr) == reinterpret_cast<PolyRefCounter*>(ptr));
-        set(static_cast<PolyRefCounter*>(ptr));
+        reset(static_cast<PolyRefCounter*>(ptr));
     }
 
     PolyPtr(const PolyPtr& ptr)
     : PolyPtrBase()
     {
-        set(ptr.ptr_);
+        reset(ptr.ptr_);
     }
     ~PolyPtr(){
         release();
@@ -93,7 +93,7 @@ public:
     operator bool() const{ return ptr_ != 0; }
 
 	PolyPtr& operator=(const PolyPtr& ptr){
-        set(ptr.ptr_);
+        reset(ptr.ptr_);
         return *this;
     }
     T* get() const{ return reinterpret_cast<T*>(ptr_); }
@@ -112,12 +112,12 @@ public:
     SharedPtr(T* const ptr)
     : ptr_(0)
     {
-        set(ptr);
+        reset(ptr);
     }
     SharedPtr(const SharedPtr& ptr)
     : ptr_(0)
     {
-        set(ptr.ptr_);
+        reset(ptr.ptr_);
     }
     ~SharedPtr(){
         release();
@@ -126,7 +126,7 @@ public:
     template<class U>
     operator SharedPtr<U>() const{ return SharedPtr<U>(get()); }
     SharedPtr& operator=(const SharedPtr& ptr){
-        set(ptr.ptr_);
+        reset(ptr.ptr_);
         return *this;
     }
     T* get(){ return ptr_; }
@@ -143,7 +143,7 @@ public:
 			}
     }
 	template<class _T>
-    void set(_T* const ptr){
+    void reset(_T* const ptr){
         if(ptr_ != ptr){
             release();
             ptr_ = ptr;

@@ -33,9 +33,9 @@ public:
 	void create(TypeID type) const{
 		YASLI_ASSERT(!ptr_ || ptr_->refCount() == 1);
 		if(type)
-			ptr_.set(ClassFactory<T>::the().create(type));
+			ptr_.reset(ClassFactory<T>::the().create(type));
 		else
-			ptr_.set((T*)0);
+			ptr_.reset((T*)0);
 	}
 	TypeID baseType() const{ return TypeID::get<T>(); }
 	virtual Serializer serializer() const{
