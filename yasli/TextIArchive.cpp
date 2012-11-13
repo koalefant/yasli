@@ -63,6 +63,7 @@ void unescapeString(string& buf, const char* begin, const char* end)
 			case '0':  *ptr = '\0'; ++ptr; break;
 			case 't':  *ptr = '\t'; ++ptr; break;
 			case 'n':  *ptr = '\n'; ++ptr; break;
+			case 'r':  *ptr = '\r'; ++ptr; break;
 			case '\\': *ptr = '\\'; ++ptr; break;
 			case '\"': *ptr = '\"'; ++ptr; break;
 			case '\'': *ptr = '\''; ++ptr; break;

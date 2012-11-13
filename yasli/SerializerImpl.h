@@ -40,7 +40,7 @@ inline void PointerInterface::serialize(Archive& ar) const
 		if(typeID){
 			if(!get())
 				create(typeID);
-			ar(serializer(), "");
+			serializer()(ar);
 		}
 	}	
 }
