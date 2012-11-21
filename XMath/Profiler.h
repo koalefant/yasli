@@ -127,6 +127,7 @@ private:
 
 	int frames;
 	bool quantEntered_;
+	std::string name_;
 
 	static bool started;
 	static int milliseconds;

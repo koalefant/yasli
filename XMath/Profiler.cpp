@@ -264,7 +264,8 @@ Profiler::Profiler()
 
 	QueryPerformanceFrequency((LARGE_INTEGER*)&frequency_);
 
-	profileFile_ < "profile";
+	profileFile_ = "profile";
+	name_ = (MemoryWriter() << "Thread" << profilers_.size()).c_str();
 
 	clear();
 
@@ -463,7 +464,8 @@ void Profiler::serializeAll(Archive& ar)
 	else if(profilers_.size() == 1)
 		profilers_.front()->serialize(ar);
 	else
-		ar.serialize(profilers_, "Threads", "Threads");
+		FOR_EACH(profilers_, i, Profilers::iterator)
+			ar.serialize(**i, (*i)->name_.c_str(), (*i)->name_.c_str());
 
 	ar.serialize(HLineDecorator(), "line2", "<");
 

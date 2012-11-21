@@ -3,8 +3,8 @@
 #ifdef FOR_EACH
 # undef FOR_EACH
 #endif
-#define FOR_EACH(container, it) \
-    for(it = (container).begin(); it != (container).end(); ++it)
+#define FOR_EACH(list, iterator, ...) \
+	for(__VA_ARGS__ iterator = (list).begin(); iterator != (list).end(); ++iterator)
 
 
 #ifdef ARRAY_LEN
