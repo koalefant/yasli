@@ -169,6 +169,8 @@ struct TestData
 		labels.push_back ("First String");
 		labels.push_back ("Second String");
 		labels.push_back ("Last One");
+		for(int i = 0; i < 200; ++i)
+			labels.push_back((MemoryWriter() << i).c_str());
 		single_child = 0;
 		comboList_ = StringListValue(labels, 0);
 		float_value = 5.0000001e-002f;

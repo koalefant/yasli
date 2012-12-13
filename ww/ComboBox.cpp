@@ -129,7 +129,7 @@ LRESULT ComboBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 BOOL ComboBoxImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 {
 	if(comboBoxHandle_)
-		::MoveWindow(comboBoxHandle_, 0, 0, width, 2000/*height*owner_->items_.size()*/, TRUE);
+		::MoveWindow(comboBoxHandle_, 0, 0, width, 800/*height*owner_->items_.size()*/, TRUE);
 	return TRUE;
 }
 
