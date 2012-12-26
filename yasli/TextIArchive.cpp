@@ -542,6 +542,7 @@ bool TextIArchive::load(const char* filename)
 			size_t elementsRead = fread(buffer, fileSize, 1, file);
 			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
+				std::free(buffer);
 				return false;
 			}
 		}
