@@ -55,9 +55,9 @@
       <Filter>archives\Text</Filter>
     </ClCompile>
     <ClCompile Include="Archive.cpp" />
-    <ClCompile Include="EnumDescription.cpp" />
     <ClCompile Include="StdAfx.cpp" />
-    <ClCompile Include="TypesFactory.cpp" />
+    <ClCompile Include="ClassFactory.cpp" />
+    <ClCompile Include="Enum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.h">
@@ -120,14 +120,18 @@
     <ClInclude Include="STLImpl.h">
       <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="API.h" />
     <ClInclude Include="Archive.h" />
-    <ClInclude Include="EnumDescription.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Serializer.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TypeID.h" />
-    <ClInclude Include="TypesFactory.h" />
+    <ClInclude Include="ClassFactory.h" />
+    <ClInclude Include="ClassFactoryBase.h" />
+    <ClInclude Include="Enum.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="SerializerImpl.h" />
+    <ClInclude Include="Strings.h" />
+    <ClInclude Include="Token.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt" />

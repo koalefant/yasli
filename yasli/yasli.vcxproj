@@ -264,6 +264,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Assert.cpp" />
+    <ClCompile Include="ClassFactory.cpp" />
+    <ClCompile Include="Enum.cpp" />
     <ClCompile Include="MemoryReader.cpp" />
     <ClCompile Include="MemoryWriter.cpp" />
     <ClCompile Include="StringList.cpp" />
@@ -275,7 +277,6 @@
     <ClCompile Include="TextIArchive.cpp" />
     <ClCompile Include="TextOArchive.cpp" />
     <ClCompile Include="Archive.cpp" />
-    <ClCompile Include="EnumDescription.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'">Create</PrecompiledHeader>
@@ -286,36 +287,40 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TypesFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.h" />
     <ClInclude Include="BitVector.h" />
     <ClInclude Include="BitVectorImpl.h" />
+    <ClInclude Include="ClassFactory.h" />
+    <ClInclude Include="ClassFactoryBase.h" />
     <ClInclude Include="ConstString.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="Enum.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="MemoryReader.h" />
     <ClInclude Include="MemoryWriter.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Pointers.h" />
     <ClInclude Include="PointersImpl.h" />
+    <ClInclude Include="SerializerImpl.h" />
     <ClInclude Include="StringList.h" />
     <ClInclude Include="InPlaceIArchive.h" />
     <ClInclude Include="InPlaceOArchive.h" />
     <ClInclude Include="BinArchive.h" />
     <ClInclude Include="BinaryIArchive.h" />
     <ClInclude Include="BinaryOArchive.h" />
+    <ClInclude Include="Strings.h" />
     <ClInclude Include="TextIArchive.h" />
     <ClInclude Include="TextOArchive.h" />
     <ClInclude Include="STL.h" />
     <ClInclude Include="STLImpl.h" />
     <ClInclude Include="Archive.h" />
-    <ClInclude Include="EnumDescription.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Serializer.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Token.h" />
     <ClInclude Include="TypeID.h" />
-    <ClInclude Include="TypesFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt" />
