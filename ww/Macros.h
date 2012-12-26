@@ -12,9 +12,10 @@
 #include "yasli/Assert.h"
 
 #ifdef _WIN64
-#define FOR_EACH(list, iterator, ...) for(__VA_ARGS__ iterator = (list).begin(); iterator != (list).end(); ++iterator)
 #include <emmintrin.h>
 #endif
+
+#define FOR_EACH(list, iterator, ...) for(__VA_ARGS__ iterator = (list).begin(); iterator != (list).end(); ++iterator)
 
 
 template<class T, size_t Len>
