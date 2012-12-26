@@ -315,7 +315,7 @@ protected:
 	static ConstStringList* constStrings_;
 };
 
-typedef vector<SharedPtr<PropertyRow> > PropertyRows;
+typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
 
 
 template<bool value>

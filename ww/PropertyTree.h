@@ -35,7 +35,7 @@ class PropertyTreeModel;
 class PopupMenuItem;
 class PropertyTreeModel;
 class PropertyRow;
-typedef vector<SharedPtr<PropertyRow> > PropertyRows;
+typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
 class PropertyRowObject;
 class PropertyRowWidget;
 class Entry;
@@ -186,8 +186,8 @@ protected:
 	void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Vect2 point);
 
 	void onRowMenuUndo();
-	void onRowMenuCopy(SharedPtr<PropertyRow> row);
-	void onRowMenuPaste(SharedPtr<PropertyRow> row);
+	void onRowMenuCopy(yasli::SharedPtr<PropertyRow> row);
+	void onRowMenuPaste(yasli::SharedPtr<PropertyRow> row);
 	void onRowMenuDecompose(PropertyRow* row);
 	void onFilterChanged();
 
