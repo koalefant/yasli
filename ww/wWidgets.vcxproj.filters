@@ -174,9 +174,6 @@
     <ClInclude Include="Win32\Types.h">
       <Filter>Win32</Filter>
     </ClInclude>
-    <ClInclude Include="Win32\Window.h">
-      <Filter>Win32</Filter>
-    </ClInclude>
     <ClInclude Include="API.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -202,9 +199,6 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Icon.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageStore.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="KeyPress.h">
@@ -292,6 +286,15 @@
       <Filter>Containers</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Win32\Window32.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Factory.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowObject.h">
+      <Filter>Widgets\PropertyTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
@@ -432,9 +435,6 @@
     <ClCompile Include="Win32\MessageLoop.cpp">
       <Filter>Win32</Filter>
     </ClCompile>
-    <ClCompile Include="Win32\Window.cpp">
-      <Filter>Win32</Filter>
-    </ClCompile>
     <ClCompile Include="Clipboard.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -451,9 +451,6 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="Icon.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageStore.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="KeyPress.cpp">
@@ -514,6 +511,12 @@
       <Filter>Containers</Filter>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="Win32\Window32.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowObject.cpp">
+      <Filter>Widgets\PropertyTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="labels.txt" />

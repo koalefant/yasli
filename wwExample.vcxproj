@@ -271,6 +271,7 @@
     <ClCompile Include="Example.cpp" />
     <ClCompile Include="ExampleDigest.cpp" />
     <ClCompile Include="ExampleLogicEditor.cpp" />
+    <ClCompile Include="ExampleObjects.cpp" />
     <ClCompile Include="ExampleTable.cpp" />
     <ClCompile Include="ExampleTwoTrees.cpp" />
   </ItemGroup>

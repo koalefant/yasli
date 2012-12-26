@@ -15,6 +15,7 @@
 #include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
 #include "yasli/ClassFactory.h"
+#include "yasli/MemoryWriter.h"
 #include "ww/Decorators.h"
 #include "ww/SliderDecorator.h"
 #include "XMath/Colors.h"
