@@ -70,7 +70,7 @@ public:
 #endif
 	}
 
-	// from ContainerSerializationInterface
+	// from ContainerInterface
 	size_t size() const{
 		YASLI_ESCAPE(container_ != 0, return 0);
 		return container_->size();

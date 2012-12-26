@@ -127,7 +127,7 @@ public:
 	{
 	}
 
-	// from ContainerSerializationInterface:
+	// from ContainerInterface:
 	size_t size() const{ return size_; }
 	size_t resize(size_t size){
 		index_ = 0;
@@ -193,4 +193,5 @@ public:
 
 
 }
+
 // vim:ts=4 sw=4:

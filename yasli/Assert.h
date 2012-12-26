@@ -62,3 +62,5 @@ int assertionDialog(const char* message, const char* str, const char* function, 
 #endif
 
 #define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; };
+
+#pragma warning(disable:4127)

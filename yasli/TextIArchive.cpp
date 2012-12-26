@@ -49,7 +49,6 @@ void unescapeString(string& buf, const char* begin, const char* end)
 	// TODO: use stack string
 	buf.resize(end-begin);
 	char* ptr = &buf[0];
-	}
 	while(begin != end){
 		if(*begin != '\\'){
 			*ptr = *begin;
@@ -1186,8 +1185,10 @@ bool TextIArchive::operator()(bool& value, const char* name, const char* label)
         checkValueToken();
         if(token_ == "true" || token_ == "True" || token_ == "TRUE")
             value = true;
-        else
+        else if(token_ == "false" || token_ == "False" || token_ == "FALSE")
             value = false;
+		else 
+			YASLI_ASSERT(0 && "Invalid boolead value");
         return true;
     }
     return false;
