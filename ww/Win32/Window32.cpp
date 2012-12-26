@@ -35,13 +35,11 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase; // mega-hint!
 struct TypeInfoNamesCleaner { 
 	~TypeInfoNamesCleaner()
 	{
-#if 0
 		for(__type_info_node *pNode = __type_info_root_node.next, *tmpNode=NULL; pNode!=NULL; pNode = tmpNode){
 			tmpNode = pNode->next;
 			free(pNode->memPtr);
 			free(pNode);
 		}
-#endif
 	}
 };
 TypeInfoNamesCleaner typeInfoNamesCleaner;
