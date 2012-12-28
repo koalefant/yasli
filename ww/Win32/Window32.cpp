@@ -28,23 +28,6 @@ namespace Win32{
 #ifdef _MSC_VER
 EXTERN_C IMAGE_DOS_HEADER __ImageBase; // mega-hint!
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
-
-#if _MSC_VER <= 1500
-// typeid().name() allocates memory to store undecoreated type name,
-// VC doesn't free it.
-struct TypeInfoNamesCleaner { 
-	~TypeInfoNamesCleaner()
-	{
-		for(__type_info_node *pNode = __type_info_root_node.next, *tmpNode=NULL; pNode!=NULL; pNode = tmpNode){
-			tmpNode = pNode->next;
-			free(pNode->memPtr);
-			free(pNode);
-		}
-	}
-};
-TypeInfoNamesCleaner typeInfoNamesCleaner;
-#endif
-
 #else
 # error Something broken horribly...
 #endif
