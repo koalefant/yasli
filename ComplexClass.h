@@ -218,7 +218,7 @@ public:
 		stringList_.push_back("Choice 7");
 		stringList_.push_back("Choice 8");
 
-		polyPtr_.set( new PolyDerivedA() );
+		polyPtr_.reset( new PolyDerivedA() );
 
 		polyVector_.push_back(new PolyDerivedB);
 		polyVector_.push_back(new PolyBase);
