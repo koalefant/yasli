@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include "_PropertyRowBuiltin.h"
+#include "PropertyRowBool.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
@@ -61,21 +61,5 @@ void PropertyRowBool::serializeValue(Archive& ar)
 {
     ar(value_, "value", "Value");
 }
-
-// ---------------------------------------------------------------------------
-
-int PropertyRowPointer::widgetSizeMin() const
-{
-    HDC dc = GetDC(Win32::getDefaultWindowHandle());
-    Gdiplus::Graphics gr(dc);
-    Gdiplus::Font* font = propertyTreeDefaultBoldFont();
-    wstring wstr(generateLabel());
-    Gdiplus::StringFormat format;
-    Gdiplus::RectF bound;
-    gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
-    ReleaseDC(Win32::getDefaultWindowHandle(), dc);
-    return bound.Width + 10;
-}
-
 
 }

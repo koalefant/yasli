@@ -21,7 +21,8 @@
 
 #include "yasli/ClassFactory.h"
 
-#include "ww/_PropertyRowBuiltin.h"
+#include "ww/PropertyRowContainer.h"
+#include "ww/PropertyRowPointer.h"
 #include "ww/Clipboard.h"
 #include "ww/Unicode.h"
 

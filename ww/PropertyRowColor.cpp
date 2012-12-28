@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "yasli/ClassFactory.h"
 #include "ww/PropertyTreeModel.h"
-#include "ww/_PropertyRowBuiltin.h"
+#include "ww/PropertyRowImpl.h"
 
 #include "ww/PropertyTree.h"
 #include "ww/PropertyDrawContext.h"

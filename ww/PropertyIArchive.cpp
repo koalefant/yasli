@@ -13,7 +13,10 @@
 #include "yasli/Enum.h"
 #include "ww/PropertyTreeModel.h"
 #include "PropertyIArchive.h"
-#include "ww/_PropertyRowBuiltin.h"
+#include "ww/PropertyRowContainer.h"
+#include "ww/PropertyRowPointer.h"
+#include "ww/PropertyRowString.h"
+#include "ww/PropertyRowBool.h"
 
 namespace ww{
 
@@ -33,7 +36,7 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 bool PropertyIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_))
+		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
  			value.set(fromWideChar(row->value().c_str()).c_str());
 		closeRow(name);
 		return true;

@@ -102,9 +102,6 @@
     <ClInclude Include="Workspace.h">
       <Filter>Widgets\Workspace</Filter>
     </ClInclude>
-    <ClInclude Include="_PropertyRowBuiltin.h">
-      <Filter>Widgets\PropertyTree</Filter>
-    </ClInclude>
     <ClInclude Include="PropertyDrawContext.h">
       <Filter>Widgets\PropertyTree</Filter>
     </ClInclude>
@@ -298,6 +295,24 @@
     <ClInclude Include="Strings.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyRowBool.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowContainer.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowNumeric.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowPointer.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowString.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowStringListValue.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
@@ -356,9 +371,6 @@
     </ClCompile>
     <ClCompile Include="Workspace.cpp">
       <Filter>Widgets\Workspace</Filter>
-    </ClCompile>
-    <ClCompile Include="_PropertyRowBuiltin.cpp">
-      <Filter>Widgets\PropertyTree</Filter>
     </ClCompile>
     <ClCompile Include="PropertyDrawContext.cpp">
       <Filter>Widgets\PropertyTree</Filter>
@@ -519,6 +531,24 @@
     </ClCompile>
     <ClCompile Include="PropertyRowObject.cpp">
       <Filter>Widgets\PropertyTree</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowBool.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowContainer.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowNumeric.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowPointer.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowString.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowStringListValue.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
