@@ -1,5 +1,8 @@
 #pragma once
 
+#include "yasli/Config.h"
+#include "ClassFactoryBase.h"
+
 // Archive.h is supposed to be pre-included
 
 namespace yasli {
@@ -15,10 +18,12 @@ inline void PointerInterface::serialize(Archive& ar) const
 {
 	TypeID baseTypeID = baseType();
 	TypeID oldTypeID = type();
+	ClassFactoryBase* factory = this->factory();
 
 	if(ar.isOutput()){
 		if(oldTypeID){
-			if(ar(oldTypeID, "")){
+			TypeIDWithFactory pair(oldTypeID, factory);
+			if(ar(pair, "")){
 				ar(serializer(), "");
 			}
 			else
@@ -26,22 +31,25 @@ inline void PointerInterface::serialize(Archive& ar) const
 		}
 	}
 	else{
-		TypeID typeID;
-		if(!ar(typeID, "")){
+		TypeIDWithFactory pair(TypeID(), factory);
+		if(!ar(pair, "")){
 			if(oldTypeID){
 				create(TypeID()); // 0
 			}
 			return;
 		}
 
-		if(oldTypeID && (!typeID || (typeID != oldTypeID)))
+		if(oldTypeID && (!pair.type || (pair.type != oldTypeID)))
 			create(TypeID()); // 0
 
-		if(typeID){
+		if(pair.type){
 			if(!get())
-				create(typeID);
-			//serializer()(ar); !!!
+				create(pair.type);
+#if YASLI_NO_EXTRA_BLOCK_FOR_POINTERS
+			serializer()(ar);
+#else
 			ar(serializer(), "");
+#endif
 		}
 	}	
 }

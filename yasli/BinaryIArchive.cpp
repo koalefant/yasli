@@ -449,11 +449,10 @@ bool BinaryIArchive::operator()(PointerInterface& ptr, const char* name, const c
         TypeID oldType = ptr.type();
         TypeID baseType;
         if(baseTypeName.length() > 0)
-            baseType = TypeID(baseTypeName.str().c_str());
+            baseType = ptr.factory()->findTypeByName(baseTypeName.str().c_str());
         TypeID type;
         if(typeName.length() > 0)
-            type = TypeID(typeName.str().c_str());
-            // type = TypeID(baseType, typeName.str().c_str()); TODO
+            type = ptr.factory()->findTypeByName(typeName.str().c_str());
 
         if(oldType && (!type || (type != oldType)))
             ptr.create(TypeID()); // 0

@@ -294,6 +294,7 @@
     <ClInclude Include="BitVectorImpl.h" />
     <ClInclude Include="ClassFactory.h" />
     <ClInclude Include="ClassFactoryBase.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="ConstString.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="Enum.h" />

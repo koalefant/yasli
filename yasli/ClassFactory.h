@@ -10,6 +10,7 @@
 #pragma once
 #include <map>
 
+#include "yasli/Config.h"
 #include "yasli/Assert.h"
 #include "yasli/ClassFactoryBase.h"
 #include "yasli/TypeID.h"
@@ -30,6 +31,11 @@ public:
 	, size_(size)
 	, typeID_(typeID)
 	{
+#if YASLI_NO_RTTI
+		const size_t bufLen = sizeof(typeID.typeInfo_->name);
+		strncpy(typeID.typeInfo_->name, name, bufLen - 1);
+		typeID.typeInfo_->name[bufLen] = '\0';
+#endif
 	}
 	const char* name() const{ return name_; }
 	const char* label() const{ return label_; }
@@ -79,15 +85,34 @@ public:
 		virtual ~CreatorBase() {}
 		virtual BaseType* create() const = 0;
 		const TypeDescription& description() const{ return *description_; }
+#if YASLI_NO_RTTI
+		void* vptr() const{ return vptr_; }
+#endif
 	protected:
 		const TypeDescription* description_;
+#if YASLI_NO_RTTI
+		void* vptr_;
+#endif
 	};
+
+#if YASLI_NO_RTTI
+	static void* extractVPtr(BaseType* ptr)
+	{
+		return *((void**)ptr);
+	}
+
+#endif
 
 	template<class Derived>
 	class Creator : public CreatorBase{
 	public:
 		Creator(const TypeDescription* description){
 			this->description_ = description;
+#if YASLI_NO_RTTI
+			// TODO: remove unnecessary static initialisation
+			Derived vptrProbe;
+			vptr_ = extractVPtr(&vptrProbe);
+#endif
 			ClassFactory::the().registerCreator(this);
 		}
 		BaseType* create() const{
@@ -110,6 +135,21 @@ public:
 			return it->second->create();
 		else
 			return 0;
+	}
+
+	TypeID getTypeID(BaseType* ptr) const
+	{
+#if YASLI_NO_RTTI
+		if (ptr == 0)
+			return TypeID();
+		void* vptr = extractVPtr(ptr);
+		VPtrToCreatorMap::const_iterator it = vptrToCreatorMap_.find(vptr);
+		if (it == vptrToCreatorMap_.end())
+			return TypeID();
+		return it->second->description().typeID();
+#else
+		return TypeID(typeid(*ptr));
+#endif
 	}
 
 	size_t sizeOf(TypeID derivedType) const
@@ -142,16 +182,42 @@ public:
 		return &creators_[index]->description();
 	}
 
+	const TypeDescription* descriptionByType(TypeID type) const{
+		const size_t numCreators = creators_.size();
+		for (size_t i = 0; i < numCreators; ++i) {
+			if (type == creators_[i]->description().typeID())
+				return &creators_[i]->description();
+		}
+		return 0;
+	}
+
+	TypeID findTypeByName(const char* name) const {
+		const size_t numCreators = creators_.size();
+		for (size_t i = 0; i < numCreators; ++i) {
+			const TypeID& typeID = creators_[i]->description().typeID();
+			if (strcmp(name, typeID.name()) == 0)
+				return typeID;
+		}
+		return TypeID();
+	}
 	// ^^^
 
 protected:
 	void registerCreator(CreatorBase* creator){
 		typeToCreatorMap_[creator->description().typeID()] = creator;
 		creators_.push_back(creator);
+#if YASLI_NO_RTTI
+		vptrToCreatorMap_[creator->vptr()] =  creator;
+#endif
 	}
 
 	TypeToCreatorMap typeToCreatorMap_;
 	std::vector<CreatorBase*> creators_;
+
+#if YASLI_NO_RTTI
+	typedef std::map<void*, CreatorBase*> VPtrToCreatorMap;
+	VPtrToCreatorMap vptrToCreatorMap_;
+#endif
 };
 
 

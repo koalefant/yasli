@@ -28,6 +28,8 @@ public:
 
 	virtual size_t size() const = 0;
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
+	virtual const TypeDescription* descriptionByType(TypeID type) const = 0;
+	virtual TypeID findTypeByName(const char* name) const = 0;	
 	virtual size_t sizeOf(TypeID typeID) const = 0;
 	virtual void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) = 0;
 
@@ -38,5 +40,21 @@ protected:
 	const char* nullLabel_;
 };
 
+
+struct TypeIDWithFactory
+{
+	TypeID type;
+	ClassFactoryBase* factory;
+
+	TypeIDWithFactory(TypeID type = TypeID(), ClassFactoryBase* factory = 0)
+	: type(type)
+	, factory(factory)
+	{
+	}
+};
+
+
 }
+
+bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* name, const char* label);
 // vim:ts=4 sw=4:

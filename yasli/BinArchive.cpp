@@ -641,7 +641,7 @@ bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char
 	read(typeName);
 	TypeID type;
 	if(!typeName.empty())
-		type = TypeID(typeName.c_str());
+		type = ptr.factory()->findTypeByName(typeName.c_str());
 	if(ptr.type() && (!type || (type != ptr.type())))
 		ptr.create(TypeID()); // 0
 

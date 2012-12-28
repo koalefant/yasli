@@ -132,6 +132,7 @@
     <ClInclude Include="SerializerImpl.h" />
     <ClInclude Include="Strings.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="Config.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt" />

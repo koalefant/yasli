@@ -60,31 +60,17 @@ const TypeDescription* TypeLibrary::registerType(const TypeDescription* descript
 
 // ----------------------------------------------------------------------------
 
-TypeID TypeID::ZERO;
-
-TypeID::TypeID(const char* name)
-: typeInfo_(0)
-{
-	const TypeDescription* description = TypeLibrary::the().findByName(name);
-	if(description)
-		*this = description->typeID();
-	else
-		name_ = name;
-}
-
 bool TypeID::registered() const{
     return TypeLibrary::the().find(*this) != 0;
 }
 
-std::size_t TypeID::sizeOf() const{
-    const TypeDescription* description = TypeLibrary::the().find(*this);
-    if(description)
-        return description->size();
-    else
-        return 0;
-}
-
 const char* TypeID::name() const{
+#if YASLI_NO_RTTI
+	if (typeInfo_)
+		return typeInfo_->name;
+	else
+		return "";
+#else
     const TypeDescription* description = TypeLibrary::the().find(*this);
     if(description)
         return description->name();
@@ -92,37 +78,43 @@ const char* TypeID::name() const{
         return typeInfo_->name();
 	else
 		return name_.c_str();
+#endif
 }
 
-const char* TypeID::label() const{
-	const TypeDescription* description = TypeLibrary::the().find(*this);
-	if(description)
-		return description->label();
-	else if(typeInfo_)
-		return typeInfo_->name();
+size_t TypeID::sizeOf() const{
+#if YASLI_NO_RTTI
+	if (typeInfo_)
+		return typeInfo_->size;
 	else
-		return name_.c_str();
+		return 0;
+#else
+    const TypeDescription* description = TypeLibrary::the().find(*this);
+    if(description)
+        return description->size();
+    else
+        return 0;
+#endif
 }
 
 }
 
-bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* name, const char* label)
 {
-	yasli::string typeName;
+	std::string typeName;
 	if(ar.isOutput()){
-		typeName = typeID.name();
+		typeName = value.type.name();
 		return ar(typeName, name);
 	}
 	else{
 		if(ar(typeName, name)){
 			if(!typeName.empty())
-				typeID = yasli::TypeID(typeName.c_str());
+				value.type = value.factory->findTypeByName(typeName.c_str());
 			else
-				typeID = yasli::TypeID();
-			if(!typeID){
-				yasli::MemoryWriter msg;
-				msg << "Unable to read TypeID, unregistered type name: \'" << typeName.c_str() << "'";
-				ar.warning(msg.c_str());
+				value.type = yasli::TypeID();
+			if(!value.type){
+				char msg[128];
+				_snprintf_s(msg, sizeof(msg), _TRUNCATE, "Unable to read TypeID: unregistered type name: \'%s\'", typeName.c_str());
+				ar.warning(msg);
 				return false;
 			}
 			else
@@ -132,5 +124,4 @@ bool serialize(yasli::Archive& ar, yasli::TypeID& typeID, const char* name, cons
 			return false;
 	}
 }
-
 

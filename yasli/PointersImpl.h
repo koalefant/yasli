@@ -26,7 +26,7 @@ public:
 
 	TypeID type() const{
 		if(ptr_)
-			return TypeID::get(ptr_.get());
+			return ClassFactory<T>::the().getTypeID(ptr_.get());
 		else
 			return TypeID();
 	}
