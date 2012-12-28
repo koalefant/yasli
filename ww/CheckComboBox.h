@@ -10,7 +10,7 @@
 #pragma once
 
 #include <vector>
-#include <string>
+#include "ww/Strings.h"
 #include "ww/_WidgetWithWindow.h"
 
 namespace yasli{
@@ -25,7 +25,7 @@ class CheckComboBox : public _WidgetWithWindow{
 public:
 	CheckComboBox(bool expandByContent = true, int border = 0);
 
-	typedef std::vector<std::string> Items;
+	typedef std::vector<string> Items;
 	typedef Items::iterator iterator;
 
 	void setExpandByContent(bool expand);
@@ -68,7 +68,7 @@ protected:
 
 	bool expandByContent_;
 	Items items_;
-	std::string value_;
+	string value_;
 	int dropDownHeight_;
 };
 

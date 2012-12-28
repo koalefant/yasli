@@ -24,7 +24,7 @@ public:
 	int flags() const { return flags_; }
 	void serializeValue(Archive& ar);
 	bool assignTo(void* object, size_t size);
-	std::string valueAsString() const{ return valueAlt_; }
+	string valueAsString() const{ return valueAlt_; }
 	//bool isStatic() const{ return false; }
 	const EnumDescription* description() { return description_; }
 	PropertyRowWidget* createWidget(PropertyTree* tree);
@@ -33,8 +33,8 @@ public:
 		return new PropertyRowBitVector(name_, label_, BitVectorWrapper(const_cast<int*>(&flags_), description_));
 	}
 protected:
-	std::string value_;
-	std::string valueAlt_;
+	string value_;
+	string valueAlt_;
 	int flags_;
 	const EnumDescription* description_;
 };

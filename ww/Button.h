@@ -9,7 +9,7 @@
 
 #pragma once
 #include "ww/_WidgetWithWindow.h"
-#include <string>
+#include "Strings.h"
 
 namespace ww{
 
@@ -33,7 +33,7 @@ protected:
 	ButtonImpl* window() const{ return reinterpret_cast<ButtonImpl*>(_window()); }
 
 	signal0 signalPressed_;
-	std::string text_;
+	string text_;
 	bool defaultBtn_;
 };
 

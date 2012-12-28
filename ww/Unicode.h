@@ -8,12 +8,10 @@
  */
 
 #pragma once
-#include <string>
+#include "ww/Strings.h"
 #include <stdio.h>
 
 namespace ww{
-	using std::string;
-	using std::wstring;
 
 	string fromWideChar(const wchar_t* wideCharString);
 	wstring toWideChar(const char* multiByteString);

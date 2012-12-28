@@ -22,10 +22,10 @@ void SliderDecoratorf::clip()
 
 void SliderDecoratorf::serialize(Archive& ar)
 {
-  ar.serialize(value_, "value", 0);
-  ar.serialize(minValue_, "min", 0);
-  ar.serialize(maxValue_, "max", 0);
-  ar.serialize(step_, "step", 0);
+  ar(value_, "value", 0);
+  ar(minValue_, "min", 0);
+  ar(maxValue_, "max", 0);
+  ar(step_, "step", 0);
 }
 
 
@@ -37,10 +37,10 @@ void SliderDecoratori::clip()
 
 void SliderDecoratori::serialize(Archive& ar)
 {
-  ar.serialize(value_, "value", 0);
-  ar.serialize(minValue_, "min", 0);
-  ar.serialize(maxValue_, "max", 0);
-  ar.serialize(step_, "step", 0);
+  ar(value_, "value", 0);
+  ar(minValue_, "min", 0);
+  ar(maxValue_, "max", 0);
+  ar(step_, "step", 0);
 }
 
 }

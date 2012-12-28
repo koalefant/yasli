@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/API.h"
-#include <string>
+#include "ww/Strings.h"
 
 namespace ww{
 
@@ -25,11 +25,11 @@ public:
 	void serialize(Archive& ar);
 protected:
 	HWND ownerWnd_;
-	std::string startDirectory_;
-	std::string startFileName_;
-	std::string fileName_;
-	std::vector<std::string> fileNames_;
-	std::vector<std::string> masks_;
+	string startDirectory_;
+	string startFileName_;
+	string fileName_;
+	std::vector<string> fileNames_;
+	std::vector<string> masks_;
 	bool save_;
 	bool multiselect_;
 };

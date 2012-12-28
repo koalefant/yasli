@@ -61,7 +61,7 @@ LRESULT CALLBACK buttonWindowProcedure(HWND handle, UINT message, WPARAM wparam,
 	}
 	if(message == WM_KEYDOWN)
 	{
-		SendMessage(::GetParent(handle), WM_KEYDOWN, wparam, lparam);
+		SendMessageW(::GetParent(handle), WM_KEYDOWN, wparam, lparam);
 		/*
 		UINT key = UINT(wparam);
 		if(key == VK_RETURN)
@@ -69,7 +69,7 @@ LRESULT CALLBACK buttonWindowProcedure(HWND handle, UINT message, WPARAM wparam,
 			*/
 	}
 
-	return ::CallWindowProc(buttonWindowProc_, handle, message, wparam, lparam);
+	return ::CallWindowProcW(buttonWindowProc_, handle, message, wparam, lparam);
 }
 
 ButtonImpl::ButtonImpl(ww::Button* owner)
@@ -81,9 +81,9 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 	WW_VERIFY(create(L"", WS_CHILD | WS_TABSTOP | WS_CLIPCHILDREN , Rect(0, 0, 42, 42), Win32::getDefaultWindowHandle()));
 	button_ = ::CreateWindowW( L"BUTTON", L"Unnamed", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_NOTIFY, 0, 0, 42, 42, handle(), 0, instance, 0);
 	YASLI_ASSERT(button_);
-	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(button_, GWLP_WNDPROC));
-	::SetWindowLongPtr(button_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&buttonWindowProcedure));
-	::SetWindowLongPtr(button_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+	buttonWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(button_, GWLP_WNDPROC));
+	::SetWindowLongPtrW(button_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&buttonWindowProcedure));
+	::SetWindowLongPtrW(button_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 	SetWindowFont(button_, Win32::defaultFont(), FALSE);
 }
 
@@ -92,9 +92,9 @@ ButtonImpl::ButtonImpl(ww::Button* owner)
 void ButtonImpl::setDefaultButton(bool defaultBtn)
 {
 	if(defaultBtn)
-		SendMessageA(button_, BM_SETSTYLE, BS_DEFPUSHBUTTON, TRUE); 
+		SendMessageW(button_, BM_SETSTYLE, BS_DEFPUSHBUTTON, TRUE); 
 	else
-		SendMessageA(button_, BM_SETSTYLE, BS_PUSHBUTTON, TRUE); 
+		SendMessageW(button_, BM_SETSTYLE, BS_PUSHBUTTON, TRUE); 
 }
 
 void ButtonImpl::setButtonText(const wchar_t* text)

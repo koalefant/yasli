@@ -30,6 +30,8 @@ bool edit(const Serializer& ser, const char* stateFileName, int flags, HWND pare
 	bool result = false;
 	const char* typeName = ser.type().name();
 	EditorDialog dialog(ser, title, stateFileName, flags, parent);
+	if(title)
+		dialog.setTitle(title);
 	result = dialog.showModal() == ww::RESPONSE_OK;
 	return result;
 }

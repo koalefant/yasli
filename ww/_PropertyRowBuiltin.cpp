@@ -16,7 +16,7 @@
 #include "Serialization.h"
 #include "Win32/Rectangle.h"
 #include "Win32/Window32.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 namespace ww{
 
@@ -37,16 +37,19 @@ bool PropertyRowBool::assignTo(void* object, size_t size)
 
 void PropertyRowBool::redraw(const PropertyDrawContext& context)
 {
-	const bool grayed = multiValue();
-	context.drawCheck(widgetRect(), grayed, value_);
+	context.drawCheck(widgetRect(), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
 bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
 {
-	tree->model()->push(this);
-	value_ = !value_;
-	tree->model()->rowChanged(this);
-	return true;
+	if (!this->userReadOnly()) {
+		tree->model()->push(this);
+		value_ = !value_;
+		tree->model()->rowChanged(this);
+		return true;
+	}
+	else
+	return false;
 }
 
 void PropertyRowBool::digestReset(const PropertyTree* tree)
@@ -66,7 +69,7 @@ int PropertyRowPointer::widgetSizeMin() const
     HDC dc = GetDC(Win32::getDefaultWindowHandle());
     Gdiplus::Graphics gr(dc);
     Gdiplus::Font* font = propertyTreeDefaultBoldFont();
-    std::wstring wstr(generateLabel());
+    wstring wstr(generateLabel());
     Gdiplus::StringFormat format;
     Gdiplus::RectF bound;
     gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);

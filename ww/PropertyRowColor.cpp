@@ -24,8 +24,7 @@
 #ifdef WW_ENABLE_XMATH
 # include "XMath/Colors.h"
 #endif
-//#include "XMath/Streams.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 namespace ww{
 
@@ -96,7 +95,7 @@ public:
 
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
-	std::string valueAsString() const { 
+	string valueAsString() const { 
 		char buf[64];
 		formatColor(buf, value_);
 		return string(buf);

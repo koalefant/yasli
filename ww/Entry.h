@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include <string>
+#include "ww/Strings.h"
+
 #include "ww/_WidgetWithWindow.h"
 #include "ww/_Enums.h"
 
@@ -18,8 +19,6 @@ namespace Win32{
 }
 
 namespace ww{
-using std::string;
-using std::wstring;
 struct KeyPress;
 class EntrySelection{
 public:

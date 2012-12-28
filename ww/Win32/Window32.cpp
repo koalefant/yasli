@@ -19,7 +19,7 @@
 #include <algorithm>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <commctrl.h>
+#include "ww/Win32/CommonControls.h"
 
 #pragma comment (lib, "comctl32.lib")
 
@@ -143,7 +143,7 @@ LRESULT CALLBACK universalWindowProcedure(HWND handle, UINT message, WPARAM wpar
 		window->attach(handle);
     
 	if(window == 0)
-		return ::DefWindowProc(handle, message, wparam, lparam);
+		return ::DefWindowProcW(handle, message, wparam, lparam);
 
 	return window->onMessage(message, wparam, lparam);
 }
@@ -181,7 +181,7 @@ bool Window32::registerClass(const wchar_t* className)
 {
 	WNDCLASSEXW windowClass;
 
-	windowClass.cbSize = sizeof(WNDCLASSEX); 
+	windowClass.cbSize = sizeof(WNDCLASSEXW); 
 	windowClass.style			= CS_DBLCLKS;
 	windowClass.lpfnWndProc	    = &universalWindowProcedure;
 	windowClass.cbClsExtra		= 0;
@@ -278,7 +278,7 @@ void Window32::destroy()
 
 LRESULT Window32::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return ::DefWindowProc(handle_, message, wparam, lparam);
+	return ::DefWindowProcW(handle_, message, wparam, lparam);
 }
 
 BOOL Window32::onMessageEraseBkgnd(HDC dc)
@@ -401,6 +401,11 @@ void Window32::onMessageRButtonUp(UINT button, int x, int y)
 	defaultWindowProcedure(WM_RBUTTONUP, WPARAM(button), MAKELPARAM(SHORT(x), SHORT(y)));
 }
 
+void Window32::onMessageClose()
+{
+	defaultWindowProcedure(WM_CLOSE, 0, 0);
+}
+
 int Window32::onMessageDestroy()
 {
 	while(!timers_.empty()){
@@ -442,6 +447,11 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		{
 			CREATESTRUCT* createStruct = (CREATESTRUCT*)lparam;
 			return TRUE;
+		}
+		case WM_CLOSE:
+		{
+			onMessageClose();
+			return 0;
 		}
 		case WM_DESTROY:
 		{
@@ -488,7 +498,7 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			HWND wnd = HWND(lparam);
 			// forward WM_COMMAND back
 			if(wnd != handle_)
-				::SendMessage(wnd, message, wparam, lparam);
+				::SendMessageW(wnd, message, wparam, lparam);
 			return onMessageCommand(command, id, wnd);
 		}
 		case WM_MEASUREITEM:
@@ -502,7 +512,7 @@ LRESULT Window32::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			UINT id = UINT(wparam);
 			::DRAWITEMSTRUCT* drawItemStruct = (::DRAWITEMSTRUCT*)(lparam);
 			//if(drawItemStruct->hwndItem != handle_)
-			//	::SendMessage(drawItemStruct->hwndItem, message, wparam, lparam);
+			//	::SendMessageW(drawItemStruct->hwndItem, message, wparam, lparam);
 			return onMessageDrawItem(id, drawItemStruct);
 		}
 		case WM_ERASEBKGND:

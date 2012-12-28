@@ -36,7 +36,7 @@
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"
 #include "ww/Color.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 #ifndef TRANSLATE
 # define TRANSLATE(x) x
@@ -173,7 +173,7 @@ void PropertyRowContainer::generateMenu(PopupMenuItem& root, PropertyTree* tree)
 		PropertyRow* row = defaultRow(tree->model());
 		if(row && row->isPointer()){
 			PropertyRowPointer* pointerRow = safe_cast<PropertyRowPointer*>(row);
-			ClassMenuItemAdderRowContainer(this, tree).generateMenu(createItem, tree->model()->typeStringList(pointerRow->typeName()));
+			ClassMenuItemAdderRowContainer(this, tree).generateMenu(createItem, tree->model()->typeStringList(pointerRow->baseType()));
 		}
 		createItem.enable(true);
 
@@ -306,11 +306,11 @@ void PropertyRowContainer::digestReset(const PropertyTree* tree)
 
 void PropertyRowContainer::serializeValue(Archive& ar)
 {
-	ar.serialize(ConstStringWrapper(constStrings_, elementTypeName_), "elementTypeName", "ElementTypeName");
-	ar.serialize(fixedSize_, "fixedSize", "fixedSize");
+	ar(ConstStringWrapper(constStrings_, elementTypeName_), "elementTypeName", "ElementTypeName");
+	ar(fixedSize_, "fixedSize", "fixedSize");
 }
 
-std::string PropertyRowContainer::valueAsString() const
+string PropertyRowContainer::valueAsString() const
 {
     return numericAsString(children_.size());
 }
@@ -401,10 +401,10 @@ void PropertyRowEnum::setValue(int value)
 
 void PropertyRowEnum::serializeValue(Archive& ar)
 {
-	ar.serialize(value_, "value", "Значение");
+	ar(value_, "value", "Значение");
 }
 
-std::string PropertyRowEnum::valueAsString() const{
+string PropertyRowEnum::valueAsString() const{
 	return descriptor_ ? descriptor_->label(value_) : "";
 }
 
@@ -425,7 +425,6 @@ PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, cons
 , factory_(ptr.factory())
 {
     serializer_ = ptr.serializer();
-	updateTitle();
 }
 
 PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, TypeID baseType, TypeID derivedType, ClassFactoryBase* factory)
@@ -446,27 +445,23 @@ bool PropertyRowPointer::assignTo(PointerInterface &ptr)
 }
 
 
-void PropertyRowPointer::updateTitle()
-{
-}
-
 void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, PropertyTree* tree)
 {
     tree->model()->push(this);
-	if(index < 0){ // пустое значение
+	if(index < 0){ // NULL value
 		derivedType_ = TypeID();
 	    clear();
 	}
 	else{
 		YASLI_ASSERT(typeName_);
-		PropertyRow* def = tree->model()->defaultType(typeName_, index);
-		if(def){
-			YASLI_ASSERT(def->refCount() == 1);
+		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(baseType_, index);
+		if (defaultValue && defaultValue->root) {
+			YASLI_ASSERT(defaultValue->root->refCount() == 1);
             if(useDefaultValue){
                 clear();
-			    cloneChildren(this, def);
+				cloneChildren(this, defaultValue->root);
             }
-            derivedType_ = TypeID(def->typeName()); //factory_->descriptionByIndex(index)->typeID();
+			derivedType_ = defaultValue->type;
 			tree->expandRow(this);
 		}
         else{
@@ -478,9 +473,14 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 }
 
 
-std::string PropertyRowPointer::valueAsString() const
+string PropertyRowPointer::valueAsString() const
 {
-    std::string result = derivedType_.label();
+    string result = derivedType_.name();
+		if (factory_) {
+			const TypeDescription* desc = factory_->descriptionByType(derivedType_);
+			if (desc)
+				result = desc->label();
+		}
     if(digest()[0] != L'\0'){
         result += " ( ";
         result += fromWideChar(digest());
@@ -489,14 +489,19 @@ std::string PropertyRowPointer::valueAsString() const
 	return result;
 }
 
-std::wstring PropertyRowPointer::generateLabel() const
+wstring PropertyRowPointer::generateLabel() const
 {
 	if(multiValue())
 		return L"...";
 
-    std::wstring str;
+    wstring str;
 	if(derivedType_){
-		const char* textStart = derivedType_.label();
+		const char* textStart = derivedType_.name();
+		if (factory_) {
+			const TypeDescription* desc = factory_->descriptionByType(derivedType_);
+			if (desc)
+				textStart = desc->label();
+		}
 		const char* p = textStart + strlen(textStart);
 		while(p > textStart){
 			if(*(p - 1) == '\\')
@@ -506,7 +511,7 @@ std::wstring PropertyRowPointer::generateLabel() const
 		str = toWideChar(p);
 		if(p != textStart){
 			str += L" (";
-			str += toWideChar(std::string(textStart, p - 1).c_str());
+			str += toWideChar(string(textStart, p - 1).c_str());
 			str += L")";
 		}
 	}
@@ -539,19 +544,11 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
     textColor.setGDI(userReadOnly() ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
 
 	ww::Rect textRect(widgetRect.X + 4, widgetRect.Y, widgetRect.GetRight() - 5, widgetRect.GetBottom());
-	/*
-	StringFormat format;
-	format.SetAlignment(StringAlignmentNear);
-	format.SetLineAlignment(StringAlignmentCenter);
-	format.SetFormatFlags(StringFormatFlagsNoWrap);
-	format.SetTrimming(StringTrimmingNone);
-	*/
-	std::wstring str = generateLabel();
+	wstring str = generateLabel();
 	const wchar_t* text = str.c_str();;
 	//context.drawValueText(false, text);
 	Gdiplus::Font* font = derivedType_ == TypeID() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
 	context.tree->_drawRowValue(context.graphics, text, font, textRect, textColor, false, false);
-	//context.graphics->DrawString(text, (int)wcslen(text), propertyTreeDefaultBoldFont(), textRect, &format, &textBrush);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
@@ -570,7 +567,7 @@ bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
     if(userReadOnly())
         return false;
     PopupMenu menu;
-    ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu.root(), tree->model()->typeStringList(typeName()));
+    ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu.root(), tree->model()->typeStringList(baseType()));
     menu.spawn(tree->_toScreen(Vect2(widgetPos_, pos_.y + ROW_DEFAULT_HEIGHT)), tree);
     return true;
 }
@@ -590,7 +587,7 @@ bool PropertyRowPointer::onContextMenu(PopupMenuItem &menu, PropertyTree* tree)
 		menu.addSeparator();
     if(!userReadOnly()){
 	    PopupMenuItem0& createItem = menu.add(TRANSLATE("Set"));
-	    ClassMenuItemAdderRowPointer(this, tree).generateMenu(createItem, tree->model()->typeStringList(typeName()));
+	    ClassMenuItemAdderRowPointer(this, tree).generateMenu(createItem, tree->model()->typeStringList(baseType()));
     }
 
 	return PropertyRow::onContextMenu(menu, tree);
@@ -598,7 +595,12 @@ bool PropertyRowPointer::onContextMenu(PopupMenuItem &menu, PropertyTree* tree)
 
 void PropertyRowPointer::serializeValue(Archive& ar)
 {
-	ar.serialize(derivedType_, "derivedType", "DerivedType");
+	if (factory_) {
+		TypeIDWithFactory pair(derivedType_, factory_);
+		ar(pair, "derivedType", "DerivedType");
+		if (ar.isInput())
+			derivedType_ = pair.type;
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -608,7 +610,7 @@ void PropertyRowPointer::serializeValue(Archive& ar)
 	typedef PropertyRowNumeric<TypeName> PropertyRow##postfix; \
 	YASLI_CLASS(PropertyRow, PropertyRow##postfix, #TypeName);
 
-using std::string;
+using ww::string;
 
 REGISTER_NUMERIC(float, Float)
 REGISTER_NUMERIC(double , Double)
@@ -700,35 +702,35 @@ public:
 protected:
     PropertyTree* tree_;
 	SharedPtr<Entry> entry_;
-    std::wstring initialValue_;
+    wstring initialValue_;
 };
 
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
 PropertyRowString::PropertyRowString(const char* name, const char* label, const wchar_t* value)
-: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, value, "string")
+: PropertyRowImpl<wstring, PropertyRowString>(name, label, value, "string")
 {
 }
 
 PropertyRowString::PropertyRowString(const char* name, const char* label, const char* value)
-: PropertyRowImpl<std::wstring, PropertyRowString>(name, label, toWideChar(value), "string")
+: PropertyRowImpl<wstring, PropertyRowString>(name, label, toWideChar(value), "string")
 {
 }
 
 PropertyRowString::PropertyRowString(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<std::wstring, PropertyRowString>(object, size, name, label, typeName)
+: PropertyRowImpl<wstring, PropertyRowString>(object, size, name, label, typeName)
 {
 
 }
 
-bool PropertyRowString::assignTo(std::string& str)
+bool PropertyRowString::assignTo(string& str)
 {
     str = fromWideChar(value_.c_str());
     return true;
 }
 
-bool PropertyRowString::assignTo(std::wstring& str)
+bool PropertyRowString::assignTo(wstring& str)
 {
     str = value_;
     return true;
@@ -739,7 +741,7 @@ PropertyRowWidget* PropertyRowString::createWidget(PropertyTree* tree)
 	return new PropertyRowWidgetString(this, tree);
 }
 
-std::string PropertyRowString::valueAsString() const
+string PropertyRowString::valueAsString() const
 {
 	return fromWideChar(value_.c_str());
 }
@@ -846,10 +848,11 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 , currentNode_(root)
 , lastNode_(0)
 , updateMode_(false)
+, defaultValueCreationMode_(false)
 , rootNode_(root)
 {
 	YASLI_ASSERT(model != 0);
-	if(rootNode()){
+	if(!rootNode()->empty()){
 		updateMode_ = true;
 		setUpdatedRecurse(rootNode(), false);
 	}
@@ -857,35 +860,19 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 
 
 
-PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt)
+PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType)
 : Archive(OUTPUT | EDIT)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)
 , updateMode_(false)
-, typeName_(typeName)
-, derivedTypeName_(derivedTypeName)
-, derivedTypeNameAlt_(derivedTypeNameAlt ? derivedTypeNameAlt : "")
+, defaultValueCreationMode_(forDefaultType)
 , rootNode_(0)
 {
-	YASLI_ASSERT(model != 0);
-	if(derivedTypeName)
-		model->addDefaultType(0, typeName, derivedTypeName, derivedTypeNameAlt);
-	else
-		model->addDefaultType(0, typeName);
 }
 
 PropertyOArchive::~PropertyOArchive()
 {
-	if(!typeName_.empty()){
-		YASLI_ESCAPE(rootNode_ != 0, return);
-		if(derivedTypeName_){
-			rootNode_->setTypeName(derivedTypeName_);
-			model_->addDefaultType(rootNode_, typeName_.c_str(), derivedTypeName_, derivedTypeNameAlt_.c_str());
-		}
-		else
-			model_->addDefaultType(rootNode_, typeName_.c_str());
-	}
 }
 
 PropertyRow* PropertyOArchive::rootNode()
@@ -894,6 +881,7 @@ PropertyRow* PropertyOArchive::rootNode()
 		return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
+		YASLI_ASSERT(model_->root());
 		return model_->root();
 	}
 }
@@ -934,21 +922,16 @@ PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block,
 		if(updateMode_){
 			newRow->swapChildren(rootNode());
 			newRow->setParent(0);
-			//YASLI_ASSERT(model_->root() == 0);
-			//if(model_->root() == 0)
 				model_->setRoot(newRow);
 			newRow->setUpdated(true);
 			newRow->setLabel(label);
 			result = newRow;
 		}
 		else{
-			if(typeName_.empty()) {
-				if(model_->root() == 0)
-					model_->setRoot(newRow);
-			}
-			else{
+			if(defaultValueCreationMode_)
 				rootNode_ = newRow;
-			}
+			else
+				model_->setRoot(newRow);
 			result = newRow;
 		}
 		return result;
@@ -1131,19 +1114,19 @@ bool PropertyOArchive::operator()(double& value, const char* name, const char* l
 
 bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, const char *label)
 {
-	const char* typeName = ser.type().name();
 	const char* elementTypeName = ser.type().name();
 	bool fixedSizeContainer = ser.isFixedSize();
-	PropertyRow* container = new PropertyRowContainer(name, label, typeName, elementTypeName, fixedSizeContainer);
+	PropertyRow* container = new PropertyRowContainer(name, label, ser.type().name(), elementTypeName, fixedSizeContainer);
 	lastNode_ = currentNode_;
 	enterNode(addRow(container, false));
 
-	// TODO: rewrite
-	std::auto_ptr<Archive> defaultArchive(openDefaultArchive( typeName, 0, 0 ));
-	if (defaultArchive.get() != 0)
-	{
-		defaultArchive->setFilter(getFilter());
-		ser.serializeNewElement( *defaultArchive, "default", "[+]" );
+	if (!model_->defaultTypeRegistered(elementTypeName)) {
+		PropertyOArchive ar(model_, true);
+		ar.setFilter(getFilter());
+		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
+		ser.serializeNewElement(ar, "default", "[+]");
+		if (ar.rootNode() != 0)
+			model_->addDefaultType(ar.rootNode(), ser.type().name());
 	}
 
 	if ( ser.size() > 0 )
@@ -1164,35 +1147,50 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 	PropertyRow* row = new PropertyRowPointer(name, label, ptr);
 	enterNode(addRow(row));
 
-	if(needDefaultArchive(ptr.baseType().name()))
 	{
-		const char* baseTypeName = ptr.baseType().name();
-		ClassFactoryBase* factory = ptr.factory();
+		TypeID baseType = ptr.baseType();
+		yasli::ClassFactoryBase* factory = ptr.factory();
 		size_t count = factory->size();		
-		if(factory->nullLabel() != 0){
-			if(factory->nullLabel()[0] != '\0')
-				model_->addDefaultType(0, baseTypeName, "", factory->nullLabel());
+
+		const char* nullLabel = factory->nullLabel();
+		if (!(nullLabel && nullLabel[0] == '\0'))
+		{
+			PropertyDefaultTypeValue nullValue;
+			nullValue.type = TypeID();
+			nullValue.factory = factory;
+			nullValue.factoryIndex = -1;
+			nullValue.label = nullLabel ? nullLabel : "[ null ]";
+			model_->addDefaultType(baseType, nullValue);
 		}
-		else
-			model_->addDefaultType(0, baseTypeName, "", "[ null ]");
 
 		for(size_t i = 0; i < count; ++i) {
 			const TypeDescription *desc = factory->descriptionByIndex((int)i);
+			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
+				PropertyOArchive ar(model_, true);
+				//ar.setInnerContext(getInnerContext());
+				ar.setContextMap(contextMap());
+				ar.setFilter(getFilter());
 
-			const char* name = desc->name();
-			const char* label = desc->label();
+				PropertyDefaultTypeValue defaultValue;
+				defaultValue.type = desc->typeID();
+				defaultValue.factory = factory;
+				defaultValue.factoryIndex = int(i);
+				defaultValue.label = desc->label();
 
-			std::auto_ptr<Archive> archive(openDefaultArchive(baseTypeName, name, label));
-			if(archive.get() != 0){
-				archive->setContextMap(contextMap_);
-				archive->setFilter(getFilter());
-				factory->serializeNewByIndex( *archive, (int)i, "name", "nameAlt" );
+				model_->addDefaultType(baseType, defaultValue);
+				factory->serializeNewByIndex(ar, (int)i, "name", "label");
+				if (ar.rootNode() != 0) {
+					ar.rootNode()->setTypeName(desc->name());
+					defaultValue.root = ar.rootNode();
+					model_->addDefaultType(baseType, defaultValue);
+				}
 			}
 		}
 	}
 
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
+	currentNode_->setLabelChanged();
 	closeStruct(name);
 	return true;
 }
@@ -1223,18 +1221,5 @@ void PropertyOArchive::closeBlock()
 	closeStruct("block");
 }
 
-
-Archive* PropertyOArchive::openDefaultArchive(const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt)
-{
-	if(derivedTypeName){
-		if(!model_->defaultTypeRegistered(typeName, derivedTypeName))
-			return new PropertyOArchive(model_, typeName, derivedTypeName, derivedTypeNameAlt);
-	}
-	else{
-		if(!model_->defaultTypeRegistered(typeName))
-			return new PropertyOArchive(model_, typeName, derivedTypeName, derivedTypeNameAlt);
-	}
-	return 0;
 }
-
-}
+// vim:ts=4 sw=4:

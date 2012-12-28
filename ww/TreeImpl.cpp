@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include <string>
+#include "ww/Strings.h"
 #include <algorithm>
 #include "ww/TreeImpl.h"
 #include "ww/Window.h"
@@ -25,8 +25,8 @@
 #include "ww/Win32/Window32.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <CommCtrl.h>
-#include "gdiplus.h"
+#include "Win32/CommonControls.h"
+#include "gdiplusUtils.h"
 #include "PropertyDrawContext.h"
 #include "PropertyRow.h"
 #include "PropertyTree.h"
@@ -685,11 +685,14 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
-	if (code >= 0x20 && code != VK_ESCAPE)
-	{
-        if (!(code == VK_BACK && !tree_->filterMode_))
-            tree_->setFilterMode(true);
-	   PostMessage(tree_->filterEntry_->_window()->handle(), WM_CHAR, code, MAKELPARAM(count, flags));
+	if (tree_->filterWhenType_) {
+		if (code >= 0x20 && code != VK_ESCAPE) {
+			if (!(code == VK_BACK && !tree_->filterMode_))
+				tree_->setFilterMode(true);
+		}
+	}
+	if (tree_->filterMode_) {
+		PostMessageW(tree_->filterEntry_->_window()->handle(), WM_CHAR, code, MAKELPARAM(count, flags));
 	}
 	return __super::onMessageChar(code, count, flags);
 }
@@ -976,4 +979,4 @@ void TreeImpl::updateScrollBar()
 
 }
 
-
+// vim:ts=4 sw=4:

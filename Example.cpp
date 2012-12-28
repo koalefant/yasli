@@ -21,7 +21,6 @@
 
 #include <string>
 #include <windows.h>
-using std::string;
 
 class MainWindow : public ww::Window{
 public:

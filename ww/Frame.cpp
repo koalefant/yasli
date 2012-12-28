@@ -95,7 +95,7 @@ LRESULT FrameImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				HBRUSH oldBrush = HBRUSH(::SelectObject(dc, (HGDIOBJ)(::GetStockObject(GRAY_BRUSH))));
 				int oldBackMode = ::SetBkMode(dc, OPAQUE);
 				COLORREF oldBkColor = ::SetBkColor(dc, ::GetSysColor(COLOR_BTNFACE));
-                std::wstring text = toWideChar(owner_->text());
+                wstring text = toWideChar(owner_->text());
 				HFONT fontInt = font();
 				Vect2 textSize = Win32::calculateTextSize(handle_, fontInt, text.c_str());
 				RECT fillRect = { rect.left() + hspacing*2 - 1,

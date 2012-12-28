@@ -106,7 +106,7 @@ void EntryImpl::updateStyle()
 void EntryImpl::updateOwnerText()
 {
     int length = GetWindowTextLength(handle()) + 1;
-	std::wstring text;
+		wstring text;
     if(length > 0)
     {
         std::vector<wchar_t> buf;
@@ -269,7 +269,7 @@ void Entry::setSelection(EntrySelection selection)
 
 EntrySelection Entry::selection() const
 {
-	DWORD range = SendMessage(impl()->handle(), EM_GETSEL, 0, 0);
+	DWORD range = SendMessageW(impl()->handle(), EM_GETSEL, 0, 0);
 	WORD start = LOWORD(range);
 	WORD end = HIWORD(range);
 	return EntrySelection(start, end);
@@ -278,7 +278,7 @@ EntrySelection Entry::selection() const
 void Entry::replace(EntrySelection selection, const char* text)
 {
 	setSelection(selection);
-	WW_VERIFY(SendMessage(impl()->handle(), EM_REPLACESEL, 0, (LPARAM)text));
+	WW_VERIFY(SendMessageW(impl()->handle(), EM_REPLACESEL, 0, (LPARAM)text));
 }
 
 void Entry::setText(const char* text)

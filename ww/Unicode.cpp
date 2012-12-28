@@ -14,7 +14,7 @@
 
 namespace ww{
 
-std::string fromWideChar(const wchar_t* wstr)
+string fromWideChar(const wchar_t* wstr)
 {
 #ifdef WW_DISABLE_UTF8
 	const unsigned int codepage = CP_ACP;
@@ -25,13 +25,13 @@ std::string fromWideChar(const wchar_t* wstr)
 	char* buf = (char*)alloca(len);
     if(len > 1){ 
         WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
-		return std::string(buf, len - 1);
+		return string(buf, len - 1);
     }
-	return std::string();
+	return string();
 
 }
 
-std::wstring toWideChar(const char* str)
+wstring toWideChar(const char* str)
 {
 #ifdef WW_DISABLE_UTF8
 	const unsigned int codepage = CP_ACP;
@@ -42,33 +42,33 @@ std::wstring toWideChar(const char* str)
 	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
     if(len > 1){ 
         MultiByteToWideChar(codepage, 0, str, -1, buf, len);
-		return std::wstring(buf, buf + len - 1);
+		return wstring(buf, len - 1);
     }
-	return std::wstring();
+	return wstring();
 }
 
-std::wstring fromANSIToWide(const char* str)
+wstring fromANSIToWide(const char* str)
 {
 	const unsigned int codepage = CP_ACP;
     int len = MultiByteToWideChar(codepage, 0, str, -1, NULL, 0);
 	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
     if(len > 1){ 
         MultiByteToWideChar(codepage, 0, str, -1, buf, len);
-		return std::wstring(buf, len - 1);
+		return wstring(buf, len - 1);
     }
-	return std::wstring();
+	return wstring();
 }
 
-std::string toANSIFromWide(const wchar_t* wstr)
+string toANSIFromWide(const wchar_t* wstr)
 {
 	const unsigned int codepage = CP_ACP;
 	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
 	char* buf = (char*)alloca(len);
     if(len > 1){ 
         WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
-		return std::string(buf, len - 1);
+		return string(buf, len - 1);
     }
-	return std::string();
+	return string();
 
 }
 

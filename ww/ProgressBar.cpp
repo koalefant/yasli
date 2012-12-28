@@ -12,7 +12,7 @@
 #include "ww/ProgressBar.h"
 #include "ww/_WidgetWindow.h"
 #include <windowsx.h>
-#include <CommCtrl.h>
+#include "Win32/CommonControls.h"
 
 #include "ww/Serialization.h"
 #include "yasli/ClassFactory.h"
@@ -54,20 +54,20 @@ ProgressBarImpl::ProgressBarImpl(ProgressBar* owner)
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle_, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
 	::SetWindowLongPtr(handle_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-	SendMessage(handle_, PBM_SETRANGE, 0, MAKELPARAM(0, MAX_RANGE)); 
+	SendMessageW(handle_, PBM_SETRANGE, 0, MAKELPARAM(0, MAX_RANGE)); 
 	SetWindowFont(handle_, Win32::defaultFont(), FALSE);
 }
 
 void ProgressBarImpl::setProgressBarPosition(float pos)
 {
-	SendMessage(handle_, PBM_SETPOS, (int)(pos * MAX_RANGE), 0); 	
+	SendMessageW(handle_, PBM_SETPOS, (int)(pos * MAX_RANGE), 0); 	
 }
 
 #pragma warning(pop)
 
 LRESULT ProgressBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+	return ::CallWindowProcW(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
 // --------------------------------------------------------------------------------------------

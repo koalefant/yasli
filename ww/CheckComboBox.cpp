@@ -119,7 +119,7 @@ int CheckComboListBoxImpl::onMessageDestroy()
 
 LRESULT CheckComboListBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+	return CallWindowProcW(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
 void CheckComboListBoxImpl::onMessageRButtonDown(UINT button, int x, int y)
@@ -132,7 +132,7 @@ void CheckComboListBoxImpl::onMessageRButtonDown(UINT button, int x, int y)
 			selectedCount++;
 	}
 	owner_->owner_->selectAll(count != selectedCount);
-	SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
+	SendMessageW(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
 	InvalidateRect(handle_, 0, FALSE);
 }
 
@@ -144,17 +144,17 @@ void CheckComboListBoxImpl::onMessageLButtonDown(UINT button, int x, int y)
 	POINT pt = { x, y };
 
 	if(PtInRect(&clientRect, pt)) {
-		INT nItemHeight = SendMessage(handle_, LB_GETITEMHEIGHT, 0, 0);
-		INT nTopIndex   = SendMessage(handle_, LB_GETTOPINDEX, 0, 0);
+		INT nItemHeight = SendMessageW(handle_, LB_GETITEMHEIGHT, 0, 0);
+		INT nTopIndex   = SendMessageW(handle_, LB_GETTOPINDEX, 0, 0);
 
 		INT nIndex = nItemHeight == 0 ? -1 : nTopIndex + pt.y / nItemHeight;
 
 		RECT rcItem;
-		SendMessage(handle_, LB_GETITEMRECT, nIndex, (LONG)(VOID *)&rcItem);
+		SendMessageW(handle_, LB_GETITEMRECT, nIndex, (LONG)(VOID *)&rcItem);
 
 		if(PtInRect(&rcItem, pt)) {
 			owner_->setCheck(nIndex, !owner_->getCheck(nIndex));
-			SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), (LPARAM)handle_);
+			SendMessageW(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), (LPARAM)handle_);
 			owner_->updateValue();
 			InvalidateRect(handle_, &rcItem, FALSE);
 		}
@@ -165,14 +165,14 @@ void CheckComboListBoxImpl::onMessageLButtonDown(UINT button, int x, int y)
 int CheckComboListBoxImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
 	if(code == VK_SPACE){
-		int index = ::CallWindowProc(controlWindowProc_, handle_, LB_GETCURSEL, WPARAM(code), MAKELPARAM(count, flags));
+		int index = ::CallWindowProcW(controlWindowProc_, handle_, LB_GETCURSEL, WPARAM(code), MAKELPARAM(count, flags));
 		RECT itemRect;
-		SendMessage(handle_, LB_GETITEMRECT, index, (LONG)(VOID*)&itemRect);
+		SendMessageW(handle_, LB_GETITEMRECT, index, (LONG)(VOID*)&itemRect);
 		InvalidateRect(handle_, &itemRect, FALSE);
 
 		owner_->setCheck(index, !owner_->getCheck(index));
 		owner_->updateValue();
-		SendMessage(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
+		SendMessageW(owner_->handle(), WM_COMMAND, MAKELONG(GetWindowLong(handle_, GWL_ID), CBN_SELCHANGE), LPARAM(handle_));
 	}
 	return 0;
 }
@@ -208,21 +208,21 @@ void CheckComboBoxImpl::onEdited()
 
 LRESULT CheckComboBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+	return ::CallWindowProcW(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
 void CheckComboBoxImpl::setCheck(size_t index, bool flag)
 {
-	WW_VERIFY(::SendMessage(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
-	YASLI_ASSERT(::SendMessage(handle_, CB_GETITEMDATA, index, 0) != -1);
-	YASLI_ASSERT((flag ? TRUE : FALSE) == ::SendMessage(handle_, CB_GETITEMDATA, index, 0));
+	WW_VERIFY(::SendMessageW(handle_, CB_SETITEMDATA, index, flag ? TRUE : FALSE) != -1);
+	YASLI_ASSERT(::SendMessageW(handle_, CB_GETITEMDATA, index, 0) != -1);
+	YASLI_ASSERT((flag ? TRUE : FALSE) == ::SendMessageW(handle_, CB_GETITEMDATA, index, 0));
 
 	InvalidateRect(handle_, 0, FALSE);
 }
 
 void CheckComboBoxImpl::updateValue()
 {
-	std::string& value = owner_->value_;
+	string& value = owner_->value_;
 	ww::CheckComboBox::Items& items = owner_->items_;
 	ww::CheckComboBox::Items::iterator it;
 	int index = 0;
@@ -242,7 +242,7 @@ void CheckComboBoxImpl::updateValue()
 
 bool CheckComboBoxImpl::getCheck(size_t index) const
 {
-	return bool(::SendMessage(handle_, CB_GETITEMDATA, index, 0) == FALSE ? false : true);
+	return bool(::SendMessageW(handle_, CB_GETITEMDATA, index, 0) == FALSE ? false : true);
 }
 
 
@@ -268,13 +268,13 @@ int CheckComboBoxImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
 	switch(command){
 		case CBN_SELCHANGE:
 		{
-			//owner_->selectedIndex_ = SendMessage(comboBox_, CB_GETCURSEL, wparam, lparam);
+			//owner_->selectedIndex_ = SendMessageW(comboBox_, CB_GETCURSEL, wparam, lparam);
 			//owner_->onSelectionChanged();
 			return 0;
 		}
 		case CBN_SELENDOK:
 		{
-			//owner_->selectedIndex_ = SendMessage(comboBox_, CB_GETCURSEL, wparam, lparam);
+			//owner_->selectedIndex_ = SendMessageW(comboBox_, CB_GETCURSEL, wparam, lparam);
 			onEdited();
 			return 0;
 		}
@@ -285,13 +285,13 @@ int CheckComboBoxImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
 		}
 		case CBN_SELENDCANCEL:
 		{
-			//PostMessage(comboBox_, WM_KEYDOWN, VK_ESCAPE, 1);
+			//PostMessageW(comboBox_, WM_KEYDOWN, VK_ESCAPE, 1);
 			onEdited();
 			return 0;
 		}
 		case CBN_KILLFOCUS:
 		{
-			// owner_->selectedIndex_ = SendMessage(comboBox_, CB_GETCURSEL, 0, 0);
+			// owner_->selectedIndex_ = SendMessageW(comboBox_, CB_GETCURSEL, 0, 0);
 			onEdited();
 			return 0;
 		}
@@ -324,7 +324,7 @@ BOOL CheckComboBoxImpl::onMessageMeasureItem(UINT id, MEASUREITEMSTRUCT* measure
 		if(!itemHeightSet_){
 			itemHeightSet_ = TRUE;
 			//SetItemHeight(-1, measureItemStruct->itemHeight);
-			SendMessage(handle_, LB_SETITEMHEIGHT, -1, measureItemStruct->itemHeight);
+			SendMessageW(handle_, LB_SETITEMHEIGHT, -1, measureItemStruct->itemHeight);
 		}
 		SelectObject(dc, oldFont);
 	}
@@ -342,7 +342,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 	// 0 - No check, 1 - Empty check, 2 - Checked
 	INT nCheck = 0;
 
-	std::wstring str ;
+	wstring str ;
 
 	if((LONG)(drawItemStruct->itemID) < 0){
 		updateValue();
@@ -350,17 +350,17 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 		nCheck = 0;
 	}
 	else{
-		int len = CallWindowProc(controlWindowProc_, handle_, CB_GETLBTEXTLEN, (WPARAM)drawItemStruct->itemID, 0);
+		int len = CallWindowProcW(controlWindowProc_, handle_, CB_GETLBTEXTLEN, (WPARAM)drawItemStruct->itemID, 0);
 		if(len > 0){
 			wchar_t* buffer = new wchar_t[len + 1];
 			memset((void*)buffer, 0, sizeof(wchar_t) * len + 1);
 			YASLI_ASSERT(buffer);
-			WW_VERIFY(CallWindowProc(controlWindowProc_, handle_, CB_GETLBTEXT, (WPARAM)drawItemStruct->itemID, (LPARAM)buffer) != CB_ERR);
+			WW_VERIFY(CallWindowProcW(controlWindowProc_, handle_, CB_GETLBTEXT, (WPARAM)drawItemStruct->itemID, (LPARAM)buffer) != CB_ERR);
 			str = buffer;
 			delete[] buffer;
 		}
 
-		nCheck = 1 + (CallWindowProc(controlWindowProc_, handle_, CB_GETITEMDATA, drawItemStruct->itemID, 0) != 0);
+		nCheck = 1 + (CallWindowProcW(controlWindowProc_, handle_, CB_GETITEMDATA, drawItemStruct->itemID, 0) != 0);
 
 		TEXTMETRIC metrics;
 		GetTextMetrics(dc, &metrics);
@@ -396,7 +396,7 @@ BOOL CheckComboBoxImpl::onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruc
 	}
 
 	// Erase and draw
-	ExtTextOut(dc, 0, 0, ETO_OPAQUE, &text, 0, 0, 0);
+	ExtTextOutW(dc, 0, 0, ETO_OPAQUE, &text, 0, 0, 0);
 	DrawTextW(dc, str.c_str(), int(str.length()), &text, DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
 
 	if((drawItemStruct->itemState & (ODS_FOCUS|ODS_SELECTED)) == (ODS_FOCUS|ODS_SELECTED))
@@ -507,7 +507,7 @@ void CheckComboBox::set(const StringList& stringList, const char *value)
 void CheckComboBox::clear()
 {
 	items_.clear();
-	::SendMessage(window()->comboBox(), CB_RESETCONTENT, 0, 0);
+	::SendMessageW(window()->comboBox(), CB_RESETCONTENT, 0, 0);
 	updateMinimalSize();
 	_queueRelayout();
 }
@@ -522,9 +522,9 @@ void CheckComboBox::insert(iterator before, const char* text)
 {
 	int index = before == items_.end() ? -1 : std::distance(items_.begin(), before);
 	items_.insert(before, text);
-	::SendMessage(window()->comboBox(), CB_INSERTSTRING, index, (LPARAM)toWideChar(text).c_str());
+	::SendMessageW(window()->comboBox(), CB_INSERTSTRING, index, (LPARAM)toWideChar(text).c_str());
 	if(items_.size() == 1)
-		::SendMessage(window()->comboBox(), CB_SETCURSEL, 0, 0);
+		::SendMessageW(window()->comboBox(), CB_SETCURSEL, 0, 0);
 	updateMinimalSize();
 	_queueRelayout();
 }

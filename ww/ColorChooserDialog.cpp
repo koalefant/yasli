@@ -15,7 +15,7 @@
 
 namespace ww{
 
-static std::string stateFileName = std::string(getenv("TEMP")) + "\\colorChooserDialog.tmp";
+static string stateFileName = string(getenv("TEMP")) + "\\colorChooserDialog.tmp";
 static const int DIALOG_BORDER = 12;
 
 	ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color& color, bool showColor, bool showAlpha)

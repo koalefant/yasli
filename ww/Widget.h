@@ -9,6 +9,8 @@
 
 #pragma once
 
+#pragma warning(disable: 4264) // warning C4264: '...' : no override available for virtual member function from base '...'; function is hidden
+
 #include "ww/API.h"
 #include "ww/MouseButton.h"
 #include "ww/sigslot.h"

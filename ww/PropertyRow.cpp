@@ -23,7 +23,7 @@
 #include "ww/Color.h"
 
 #include "ww/Win32/Drawing.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 namespace ww{
 
@@ -311,15 +311,15 @@ void PropertyRow::digestReset(const PropertyTree* tree)
 	digest_.clear();
 }
 
-std::wstring PropertyRow::valueAsWString() const
+wstring PropertyRow::valueAsWString() const
 {
     return toWideChar(valueAsString().c_str());
 }
 
-std::string PropertyRow::valueAsString() const
+string PropertyRow::valueAsString() const
 {
 	if(!digest_.empty())
-		return std::string("( ") + fromWideChar(digest_.c_str()) + " )";
+		return string("( ") + fromWideChar(digest_.c_str()) + " )";
 	else
 		return "";
 }
@@ -518,7 +518,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 		}
 	}
 
-	std::string text = rowText(tree);
+	string text = rowText(tree);
 	if(text.empty())
 		textSizeInitial_ = 0;
 	else{
@@ -529,7 +529,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree)
 			textHash_ = hash;
 			HDC dc = GetDC(Win32::getDefaultWindowHandle());
 			Gdiplus::Graphics gr(dc);
-			std::wstring wstr(toWideChar(text.c_str()));
+			wstring wstr(toWideChar(text.c_str()));
 			Gdiplus::StringFormat format;
 			Gdiplus::RectF bound;
 			gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
@@ -851,7 +851,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 	ww::Rect rowRect = rect();
 
     // drawing a horizontal line
-    std::wstring text = toWideChar(rowText(tree).c_str());
+    wstring text = toWideChar(rowText(tree).c_str());
 
     if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 	   !pulledUp() && !isFullRow(tree) && !hasPulled())
@@ -890,7 +890,7 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree)
 		if (tree->hasFocus())
 			brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
 		else
-			brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
+			brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
         SolidBrush brush(brushColor);
         Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
         fillRoundRectangle( &gr, &brush, selectionRect, borderColor, 6 );
@@ -1074,10 +1074,10 @@ void PropertyRow::intersect(const PropertyRow* row)
 	}
 }
 
-std::string PropertyRow::rowText(const PropertyTree* tree) const
+string PropertyRow::rowText(const PropertyTree* tree) const
 {
 	if(parent() && parent()->isContainer()){
-		std::string text;
+		string text;
 		int index = 0;
 		PropertyRow::const_iterator it = parent()->begin();
 		while(it != parent()->end() && &**it != this){
@@ -1092,7 +1092,7 @@ std::string PropertyRow::rowText(const PropertyTree* tree) const
 			return text;
 		}
 		else
-			return std::string();
+			return string();
 	}
 	else
 		return labelUndecorated() ? labelUndecorated() : string();

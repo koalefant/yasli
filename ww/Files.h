@@ -10,10 +10,10 @@
 #pragma once
 #include "yasli/Pointers.h"
 #include <time.h>
-#include <string>
+#include "ww/Strings.h"
 
 namespace Files{
-    using std::string;
+    using ww::string;
 #ifdef WIN32
 	static const char* PATH_SEPARATOR = "\\";
 	static const char* PATH_SEPARATOR2 = "/";

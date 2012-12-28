@@ -10,6 +10,7 @@
 #include "StdAfx.h"
 #include "ww/PropertyTreeModel.h"
 #include "ww/PropertyTree.h"
+#include "yasli/ClassFactory.h"
 #include "yasli/Archive.h"
 #include "yasli/STLImpl.h"
 
@@ -176,7 +177,7 @@ void PropertyTreeModel::requestUpdate(const PropertyRows& rows)
 	if(updateLock_)
 		updateLock_->requestUpdate(rows);
 	else {
-    signalUpdated().emit(rows);
+		signalUpdated().emit(rows);
 	}
 }
 
@@ -216,14 +217,14 @@ protected:
 void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 {
 	if(ar.filter(SERIALIZE_STATE)){
-		ar.serialize(focusedRow_, "focusedRow", 0);		
-		ar.serialize(selection_, "selection", 0);
+		ar(focusedRow_, "focusedRow", 0);		
+		ar(selection_, "selection", 0);
 
 		if (root()) {
 			std::vector<char> expanded;
 			if(ar.isOutput())
 				root()->scanChildren(RowObtainer(expanded));
-			ar.serialize(expanded, "expanded", 0);
+			ar(expanded, "expanded", 0);
 			if(ar.isInput()){
 				Selection sel = selection_;
 							setSelection(sel);
@@ -304,66 +305,51 @@ PropertyRow* PropertyTreeModel::defaultType(const char* typeName) const
 	return it->second;
 }
 
-void PropertyTreeModel::addDefaultType(PropertyRow* row, const char* baseName, const char* derivedTypeName, const char* derivedTypeNameAlt)
+void PropertyTreeModel::addDefaultType(const TypeID& type, const PropertyDefaultTypeValue& value)
 {
-	YASLI_ASSERT(baseName);
-	YASLI_ASSERT(derivedTypeName);
-	YASLI_ASSERT(derivedTypeNameAlt);
-	DefaultTypesPoly::iterator it = defaultTypesPoly_.find(baseName);
-	BaseClass& base = (it == defaultTypesPoly_.end()) ? defaultTypesPoly_[baseName] : it->second;
-	DerivedTypes::iterator dit = base.types.begin();
-	while(dit != base.types.end()){
-		if(dit->name == derivedTypeName){
-			DerivedClass& derived = *dit;
-			derived.name = derivedTypeName;
-			YASLI_ASSERT(derived.row == 0);
-			derived.row = row;
+	YASLI_ASSERT(type != TypeID());
+
+	BaseClass& base = defaultTypesPoly_[type];
+	for (DerivedTypes::iterator it = base.types.begin(); it != base.types.end(); ++it){
+		if (it->type == value.type) {
+			YASLI_ASSERT(it->root == 0);
+			*it = value;
 			return;
 		}
-		++dit;
 	}
-	base.types.push_back(DerivedClass());
-	DerivedClass& derived = base.types.back();
-	derived.name = derivedTypeName;
-	derived.row = row;
-	base.strings.push_back(derivedTypeNameAlt);
+
+	base.types.push_back(value);
+	base.strings.push_back(value.label);
 }
 
-PropertyRow* PropertyTreeModel::defaultType(const char* baseName, int derivedIndex) const
+const PropertyDefaultTypeValue* PropertyTreeModel::defaultType(const TypeID& baseType, int derivedIndex) const
 {
-	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseName);
-	YASLI_ASSERT(it != defaultTypesPoly_.end());
+	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseType);
+	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return 0);
 	const BaseClass& base = it->second;
-	YASLI_ASSERT(derivedIndex >= 0);
-	YASLI_ASSERT(derivedIndex < int(base.types.size()));
-	DerivedTypes::const_iterator tit = base.types.begin();
-	std::advance(tit, derivedIndex);
-	return tit->row;
+	YASLI_ESCAPE(size_t(derivedIndex) < base.types.size(), return 0);
+	return &base.types[derivedIndex];
 }
 
-bool PropertyTreeModel::defaultTypeRegistered(const char* baseName, const char* derivedName) const
+bool PropertyTreeModel::defaultTypeRegistered(const TypeID& baseType, const TypeID& derivedType) const
 {
-	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseName);
+	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseType);
 
-	if(it != defaultTypesPoly_.end()){
-		if(!derivedName)
-			return true;
-		const BaseClass& base = it->second;
+	if (it == defaultTypesPoly_.end())
+		return false;
 
+	const BaseClass& base = it->second;
 		DerivedTypes::const_iterator dit;
-		for(dit = base.types.begin(); dit != base.types.end(); ++dit){
-			if(dit->name == derivedName)
+	for (dit = base.types.begin(); dit != base.types.end(); ++dit){
+		if (dit->type == derivedType)
 				return true;
 		}
 		return false;
-	}
-	else
-		return false;
 }
 
-const StringList& PropertyTreeModel::typeStringList(const char* baseTypeName) const
+const StringList& PropertyTreeModel::typeStringList(const TypeID& baseType) const
 {
-	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseTypeName);
+	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseType);
 
 	static StringList empty;
 	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return empty);
@@ -429,7 +415,7 @@ void PropertyTreeModel::setRootObject(const Object& obj)
 
 void TreePathLeaf::serialize(Archive& ar)
 {
-	ar.serialize(index, "", 0);
+	ar(index, "", 0);
 }
 
 }

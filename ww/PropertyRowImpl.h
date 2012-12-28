@@ -23,7 +23,7 @@ public:
 	{
 	}
 	PropertyRowImpl(const char* name, const char* nameAlt, const Type& value, const char* typeName = 0)
-	: PropertyRowField(name, nameAlt, typeName ? typeName : typeid(Type).name())
+		: PropertyRowField(name, nameAlt, typeName ? typeName : TypeID::get<Type>().name())
 	, value_(value)
 	{
 	}

@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "PropertyRowField.h"
 #include "PropertyDrawContext.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 namespace ww{
 

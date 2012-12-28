@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include <string>
-
+#include "ww/Strings.h"
 #include "ww/_WidgetWithWindow.h"
 #include "ww/_Enums.h"
 
@@ -40,7 +39,7 @@ protected:
 	LabelImpl* impl() const{ return reinterpret_cast<LabelImpl*>(_window()); }
 	friend class LabelImpl;
 
-	std::string text_;
+	string text_;
 	Widget* mnemonicWidget_;
 	TextAlignHorizontal alignHorizontal_;
 	TextAlignVertical alignVertical_;

@@ -10,7 +10,7 @@
 #pragma once
 
 #include <vector>
-#include <string>
+#include "ww/Strings.h"
 
 #include "ww/_WidgetWithWindow.h"
 #include "yasli/StringList.h"

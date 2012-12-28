@@ -17,7 +17,6 @@
 namespace ww{
 
 using std::vector;
-using std::string;
 using std::map;
 using yasli::SharedPtr;
 
@@ -31,6 +30,22 @@ struct TreeSelection : vector<TreePath>
 				return false;
 	}
 };
+
+struct PropertyDefaultTypeValue
+{
+	TypeID type;
+	SharedPtr<PropertyRow> root;
+	yasli::ClassFactoryBase* factory;
+	int factoryIndex;
+	string label;
+
+	PropertyDefaultTypeValue()
+	: factoryIndex(-1)
+	, factory(0)
+	{
+	}
+};
+
 class PropertyRowObject;
 
 //////////////////////////////////////////////////////////////////////////
@@ -121,16 +136,16 @@ public:
 	typedef signal2<PropertyTreeOperator*, bool*> SignalPushUndo;
 	SignalPushUndo& signalPushUndo(){ return signalPushUndo_; }
 
-	// for "default archive"
-	const StringList& typeStringList(const char* baseTypeName) const;
+	// for defaultArchive
+	const StringList& typeStringList(const TypeID& baseType) const;
 
 	bool defaultTypeRegistered(const char* typeName) const;
 	void addDefaultType(PropertyRow* propertyRow, const char* typeName);
-	PropertyRow* defaultType(const char* baseName, int derivedIndex) const;
-
-	bool defaultTypeRegistered(const char* typeName, const char* derivedName) const;
-	void addDefaultType(PropertyRow* propertyRow, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
 	PropertyRow* defaultType(const char* typeName) const;
+
+	bool defaultTypeRegistered(const TypeID& baseType, const TypeID& derivedType) const;
+	void addDefaultType(const TypeID& baseType, const PropertyDefaultTypeValue& value);
+	const PropertyDefaultTypeValue* defaultType(const TypeID& baseType, int index) const;
 
 	// for Object rows:
 	void registerObjectRow(PropertyRowObject* row);
@@ -155,20 +170,17 @@ private:
 	typedef map<string, SharedPtr<PropertyRow> > DefaultTypes;
 	DefaultTypes defaultTypes_;
 
-	struct DerivedClass{
-		string name;
-		SharedPtr<PropertyRow> row;
-	};
-	typedef vector<DerivedClass> DerivedTypes;
 
+	typedef vector<PropertyDefaultTypeValue> DerivedTypes;
 	struct BaseClass{
-		std::string name;
+		TypeID type;
+		string name;
 		StringList strings;
 		DerivedTypes types;
 	};
-
-	typedef map<string, BaseClass> DefaultTypesPoly;
+	typedef map<TypeID, BaseClass> DefaultTypesPoly;
 	DefaultTypesPoly defaultTypesPoly_;
+
 	int expandLevels_;
 	bool undoEnabled_;
 	bool fullUndo_;

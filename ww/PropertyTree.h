@@ -13,7 +13,7 @@
 #include "ww/ConstStringList.h"
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
-#include <string>
+#include "ww/Strings.h"
 #include <vector>
 
 namespace Gdiplus {
@@ -26,18 +26,17 @@ namespace yasli {
 };
 
 namespace ww {
-using std::wstring;
 using std::vector;
-
 struct Color;
 class TreeImpl;
 class PropertyTreeModel;
 class PopupMenuItem;
 class PropertyTreeModel;
 class PropertyRow;
-typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
+typedef std::vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
 class PropertyRowObject;
 class PropertyRowWidget;
+class PropertyTreeOperator;
 class Entry;
 struct KeyPress;
 
@@ -58,6 +57,7 @@ public:
 	void setImmediateUpdate(bool immediateUpdate) { immediateUpdate_ = immediateUpdate; }
 	bool immediateUpdate() const{ return immediateUpdate_; }
 	void setFilter(int filter) { filter_ = filter; }
+	void setFilterWhenType(bool filterWhenType) {	filterWhenType_ = filterWhenType; }
 	void setExpandLevels(int levels) { expandLevels_ = levels; }
 	void setUndoEnabled(bool enabled, bool full = false) { undoEnabled_ = enabled; fullUndo_ = full; }
 	void setShowContainerIndices(bool showContainerIndices) { showContainerIndices_ = showContainerIndices; }
@@ -71,6 +71,7 @@ protected:
 	bool immediateUpdate_;
 	bool hideUntranslated_;
 	bool showContainerIndices_;
+	bool filterWhenType_;
 	float valueColumnWidth_;
 	int filter_;
 	int tabSize_;
@@ -88,7 +89,6 @@ public:
 
 	void attach(Serializer serializer);
 	void attach(Object object);
-	//void attach(Serializers& serializers);
 	void attachPropertyTree(PropertyTree* propertyTree);
 	void getSelectionSerializers(Serializers* serializers);
 	void detach();
@@ -114,13 +114,14 @@ public:
 	SignalObjectChanged& signalObjectChanged(){ return signalObjectChanged_; }
 	signal0& signalSelected(){ return signalSelected_; }
 	signal0& signalReverted(){ return signalReverted_; }
+	signal0& signalPushUndo(){ return signalPushUndo_; }
 
 	void onSignalChanged() { ; }
 
 	bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
 	PropertyRow* selectedRow();
 	bool getSelectedObject(Object* object);
-	void selectByAddress(void*);
+    bool selectByAddress(void*, bool keepSelectionIfChildSelected = false);
 	void ensureVisible(PropertyRow* row, bool update = true);
 	void expandParents(PropertyRow* row);
 	void expandRow(PropertyRow* row, bool expanded = true);
@@ -128,6 +129,7 @@ public:
 	void collapseAll(PropertyRow* root = 0);
 
 	void serialize(Archive& ar);
+	void onModelUpdated(const PropertyRows& rows);
 
 	PropertyTreeModel* model() { return model_; }
 	const PropertyTreeModel* model() const { return model_; }
@@ -191,7 +193,7 @@ protected:
 	void onRowMenuDecompose(PropertyRow* row);
 	void onFilterChanged();
 
-	void onModelUpdated(const PropertyRows& rows);
+	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
 	bool activateRow(PropertyRow* row);
 	bool canBePasted(PropertyRow* destination);
 	bool canBePasted(const char* destinationType);
@@ -212,6 +214,7 @@ protected:
 	SignalObjectChanged signalObjectChanged_;
 	signal0 signalReverted_;
 	signal0 signalSelected_;
+    signal0 signalPushUndo_;
 
 	PolyPtr<PropertyRowWidget> widget_; // in-place widget
 
@@ -232,7 +235,7 @@ protected:
 };
 
 
-std::wstring generateDigest(Serializer& ser);
+wstring generateDigest(Serializer& ser);
 
 }
 

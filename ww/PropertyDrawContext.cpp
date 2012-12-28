@@ -9,9 +9,10 @@
 
 #include "stdafx.h"
 #include "PropertyDrawContext.h"
+#include "Win32/CommonControls.h"
 #include <windows.h>
 #include <memory>
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 #include "yasli/Assert.h"
 #include "Win32/Drawing.h"
 #include "Win32/Window32.h"
@@ -324,7 +325,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
     gr->DrawString(text, (int)wcslen(text), font, gdiplusRectF(textRect), &format, &textBrush );
 }
 
-void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
+void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked, bool enabled)
 {
 	using Gdiplus::Color;
 	int size = 17;
@@ -333,20 +334,26 @@ void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked)
 	int offsetX = ((rect.Width) - size) / 2;
 
 	Color brushColor;
-	brushColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOW));
-	SolidBrush brush(brushColor);
 	Color penColor;
+	if (enabled) {
+		brushColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOW));
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
+	}
+	else {
+		ww::Color shadow, face, mix;
+		shadow.setGDI(GetSysColor(COLOR_3DSHADOW));
+		face.setGDI(GetSysColor(COLOR_BTNFACE));
+		mix = shadow.interpolate(face, 0.5f);
+		
+		penColor.SetFromCOLORREF(mix.rgba());
+		brushColor.SetFromCOLORREF(face.rgba());
+	}
+
+	SolidBrush brush(brushColor);
 	Gdiplus::Rect checkRect(rect.X + offsetX, rect.Y + offsetY, size, size);
 	fillRoundRectangle(gr, &brush, checkRect, penColor, 4);
 
 	if(checked){
-		/*
-		YASLI_ASSERT(checkBitmap);
-		HDC dc = gr->GetHDC();
-		DrawState(dc, 0, 0, (LPARAM)checkBitmap, 0, rect.X + offsetX + 3, rect.Y + offsetY + 2, size - 5, size - 3, DST_BITMAP);
-		gr->ReleaseHDC(dc);
-		*/
 		#include "Icons/check.xpm"
 		static Icon checkIcon(check_xpm);
 		Gdiplus::Bitmap* bitmap = drawingCache.getBitmapForIcon(checkIcon);
@@ -365,9 +372,9 @@ void PropertyDrawContext::drawIcon(const Rect& rect, const Icon& icon) const
 	graphics->DrawImage(bitmap, x, y);
 }
 
-void PropertyDrawContext::drawCheck(const Rect& rect, bool grayed, bool checked) const
+void PropertyDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checked) const
 {
-	if (grayed) {
+	if (checked == CHECK_IN_BETWEEN) {
 		HDC dc = graphics->GetHDC();
 
 		RECT rt = { rect.left(), rect.top(), rect.right(), rect.bottom() };
@@ -375,7 +382,7 @@ void PropertyDrawContext::drawCheck(const Rect& rect, bool grayed, bool checked)
 		graphics->ReleaseHDC(dc);
 	}
 	else {
-		ww::drawCheck(graphics, gdiplusRect(rect), checked);
+		ww::drawCheck(graphics, gdiplusRect(rect), checked == CHECK_SET, !disabled);
 	}
 }
 

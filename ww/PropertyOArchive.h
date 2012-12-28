@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ww/API.h"
+#include "ww/Strings.h"
 #include "yasli/Archive.h"
 
 namespace yasli{ class EnumDescription; }
@@ -53,27 +54,25 @@ public:
 	void closeBlock();
 
 protected:
-	PropertyOArchive(PropertyTreeModel* model, const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
+	PropertyOArchive(PropertyTreeModel* model, bool forDefaultType);
 
 private:
-	Archive* openDefaultArchive(const char* typeName, const char* derivedTypeName, const char* derivedTypeNameAlt);
-	bool needDefaultArchive(const char* baseName) const { return true; }
-
 	PropertyRow* addRow(SharedPtr<PropertyRow> newRow, bool block = false, PropertyRow* previousNode = 0);
 	void enterNode(PropertyRow* row); // sets currentNode
 	void closeStruct(const char* name);
 	PropertyRow* rootNode();
 
 	bool updateMode_;
+	bool defaultValueCreationMode_;
 	PropertyTreeModel* model_;
 	SharedPtr<PropertyRow> currentNode_;
 	SharedPtr<PropertyRow> lastNode_;
 
 	// для defaultArchive
 	SharedPtr<PropertyRow> rootNode_;
-	std::string typeName_;
+	string typeName_;
 	const char* derivedTypeName_;
-	std::string derivedTypeNameAlt_;
+	string derivedTypeNameAlt_;
 };
 
 }

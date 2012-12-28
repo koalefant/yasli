@@ -131,7 +131,7 @@ protected:
 	bool positioned_;
 	WindowPosition windowPosition_;
 	Vect2 defaultSize_;
-	std::string title_;
+	string title_;
 	int style_;
 
 	yasli::SharedPtr<Widget> child_;

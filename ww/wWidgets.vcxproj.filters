@@ -195,9 +195,6 @@
     <ClInclude Include="Files.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="gdiplus.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Icon.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -294,6 +291,12 @@
     </ClInclude>
     <ClInclude Include="PropertyRowObject.h">
       <Filter>Widgets\PropertyTree</Filter>
+    </ClInclude>
+    <ClInclude Include="gdiplusUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Strings.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

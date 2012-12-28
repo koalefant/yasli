@@ -57,7 +57,7 @@ bool PropertyIArchive::operator()(WStringInterface& value, const char* name, con
 
 bool PropertyIArchive::operator()(bool& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(bool).name())){
+	if(openRow(name, label, TypeID::get<bool>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -68,7 +68,7 @@ bool PropertyIArchive::operator()(bool& value, const char* name, const char* lab
 
 bool PropertyIArchive::operator()(char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(char).name())){
+	if(openRow(name, label, TypeID::get<char>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -80,7 +80,7 @@ bool PropertyIArchive::operator()(char& value, const char* name, const char* lab
 // Signed types
 bool PropertyIArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(signed char).name())){
+	if(openRow(name, label, TypeID::get<signed char>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -91,7 +91,7 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(signed short).name())){
+	if(openRow(name, label, TypeID::get<signed short>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -102,7 +102,7 @@ bool PropertyIArchive::operator()(signed short& value, const char* name, const c
 
 bool PropertyIArchive::operator()(signed int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(signed int).name())){
+	if(openRow(name, label, TypeID::get<signed int>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -113,7 +113,7 @@ bool PropertyIArchive::operator()(signed int& value, const char* name, const cha
 
 bool PropertyIArchive::operator()(signed long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(signed long).name())){
+	if(openRow(name, label, TypeID::get<signed long>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -124,7 +124,7 @@ bool PropertyIArchive::operator()(signed long& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(long long).name())){
+	if(openRow(name, label, TypeID::get<long long>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -136,7 +136,7 @@ bool PropertyIArchive::operator()(long long& value, const char* name, const char
 // Unsigned types
 bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(unsigned char).name())){
+	if(openRow(name, label, TypeID::get<unsigned char>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -147,7 +147,7 @@ bool PropertyIArchive::operator()(unsigned char& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(unsigned short).name())){
+	if(openRow(name, label, TypeID::get<unsigned short>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -158,7 +158,7 @@ bool PropertyIArchive::operator()(unsigned short& value, const char* name, const
 
 bool PropertyIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(unsigned int).name())){
+	if(openRow(name, label, TypeID::get<unsigned int>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -169,7 +169,7 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 
 bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(unsigned long).name())){
+	if(openRow(name, label, TypeID::get<unsigned long>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -180,7 +180,7 @@ bool PropertyIArchive::operator()(unsigned long& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(unsigned long long).name())){
+	if(openRow(name, label, TypeID::get<unsigned long long>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -191,7 +191,7 @@ bool PropertyIArchive::operator()(unsigned long long& value, const char* name, c
 
 bool PropertyIArchive::operator()(float& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(float).name())){
+	if(openRow(name, label, TypeID::get<float>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -202,7 +202,7 @@ bool PropertyIArchive::operator()(float& value, const char* name, const char* la
 
 bool PropertyIArchive::operator()(double& value, const char* name, const char* label)
 {
-	if(openRow(name, label, typeid(double).name())){
+	if(openRow(name, label, TypeID::get<double>().name())){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -317,7 +317,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 		name = label;
 
 	if(!currentNode_){
-		lastNode_ = currentNode_ = root_;
+		lastNode_ = currentNode_ = model_->root();
 		YASLI_ASSERT(currentNode_);
 		return true;
 	}
@@ -362,9 +362,6 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 void PropertyIArchive::closeRow(const char* name)
 {
 	YASLI_ESCAPE(currentNode_, return);
-	if (currentNode_ == root_)
-		currentNode_ = 0;
-	else
 		currentNode_ = currentNode_->parent();
 }
 

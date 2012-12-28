@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/_WidgetWithWindow.h"
-#include <string>
+#include "ww/Strings.h"
 
 
 namespace ww{

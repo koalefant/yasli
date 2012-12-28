@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <string>
+#include "ww/Strings.h"
 #include "ww/API.h"
 
 namespace yasli{
@@ -250,7 +250,7 @@ struct KeyPress
 	static const char* nameAlt() { return "Alt"; }
 	operator int() const{ return fullCode; }
 
-	std::string toString(bool compact) const;
+	string toString(bool compact) const;
     void serialize(Archive &ar);
 
     bool operator==( const KeyPress &_rhs ) const{ return fullCode == _rhs.fullCode; }

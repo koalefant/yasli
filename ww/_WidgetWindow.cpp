@@ -13,7 +13,7 @@
 #include "ww/_WidgetWithWindow.h"
 #include "ww/Tooltip.h"
 #include "ww/Unicode.h"
-#include <commctrl.h>
+#include "Win32/CommonControls.h"
 
 namespace ww{
 
@@ -43,8 +43,8 @@ LRESULT _WidgetWindow::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		NMHDR* pNMHDR = (NMHDR*)lparam;
 		if(pNMHDR->code == TTN_GETDISPINFO && owner_->toolTip()){
 			LPNMTTDISPINFOW pdi = (LPNMTTDISPINFOW)lparam;
-			::SendMessage(pdi->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, GetSystemMetrics(SM_CXSCREEN));
-			std::wstring tooltipText = toWideChar(owner_->toolTip()->text());
+			::SendMessageW(pdi->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, GetSystemMetrics(SM_CXSCREEN));
+			wstring tooltipText = toWideChar(owner_->toolTip()->text());
 			pdi->lpszText = (wchar_t*)tooltipText.c_str();
 			pdi->hinst = 0;
 		}

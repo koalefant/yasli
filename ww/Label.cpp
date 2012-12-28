@@ -77,7 +77,7 @@ LRESULT LabelImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			PAINTSTRUCT ps;
 			HDC dc = ::BeginPaint(handle(), &ps); 
 			YASLI_ASSERT(dc != 0);
-			std::wstring text = toWideChar(owner_->text_.c_str());
+			wstring text = toWideChar(owner_->text_.c_str());
 			
 			UINT flags = DT_SINGLELINE;
 			if(!owner_->expandByContent_)

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "ww/Strings.h"
+
 namespace ww{
 
 class Widget;
@@ -27,7 +29,7 @@ public:
 	void setOffset(const Vect2& offset) { offset_ = offset; }
 
 protected:
-	std::string text_;
+	string text_;
 	bool baloon_;
 	Widget* widget_;
 	HWND toolTipWindow_;

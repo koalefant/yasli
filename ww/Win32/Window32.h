@@ -67,7 +67,7 @@ protected:
 	Window32* window_;
 };
 
-/// инкапсул€ци€ интерфейса BeginDeferWindowPos, DeferWindowPos, EndDeferWindowPos
+/// encapsulates BeginDeferWindowPos, DeferWindowPos, EndDeferWindowPos
 class WindowPositionDeferer : public ww::RefCounter{
 public:
 	WindowPositionDeferer(Window32* parent, int numWindows = 1);
@@ -97,6 +97,7 @@ public:
 	virtual BOOL onMessageMeasureItem(UINT id, MEASUREITEMSTRUCT* drawItemStruct);
 	virtual BOOL onMessageDrawItem(UINT id, DRAWITEMSTRUCT* drawItemStruct);
 
+	virtual void onMessageClose();
 	virtual int onMessageDestroy();
 	virtual int onMessageChar(UINT code, USHORT count, USHORT flags);
 	virtual int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);

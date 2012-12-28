@@ -1,5 +1,4 @@
 #include <string>
-using std::string;
 #include <vector>
 using std::vector;
 
@@ -14,7 +13,7 @@ using namespace ww;
 
 struct DigestItem
 {
-	string name_;
+	std::string name_;
 	bool enabled_;
 	Color color_;
 	float weight_;

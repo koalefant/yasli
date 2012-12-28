@@ -17,9 +17,6 @@
 
 namespace ww{
 
-YASLI_CLASS(Widget, ScrolledWindow, "Layout\\Scrolled Window")
-YASLI_CLASS(Container, ScrolledWindow, "Scrolled Window")
-
 class ScrolledWindowImpl: public _ContainerWindow{
 public:
 	ScrolledWindowImpl(ScrolledWindow* owner);
@@ -268,10 +265,7 @@ bool ScrolledWindow::verticalScrollVisible() const
 
 void ScrolledWindow::serialize(Archive& ar)
 {
-    if(ar.filter(SERIALIZE_DESIGN)){
-        ar.serialize(child_, "widget", "Контрол");
-    }
-    else if(ar.filter(SERIALIZE_STATE)){
+    if(ar.filter(SERIALIZE_STATE)){
         ar(offset_, "offset", "Offset");
         if(child_)
             child_->serialize(ar);

@@ -19,7 +19,7 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 namespace ww{
 
@@ -33,7 +33,7 @@ public:
 	void onMouseUp(PropertyTree* tree, Vect2 point);
 	bool onActivate(PropertyTree* tree, bool force);
 	int floorHeight() const{ return 3; }
-	std::string valueAsString() const { return value_ ? value_.text : ""; }
+	string valueAsString() const { return value_ ? value_.text : ""; }
 	int widgetSizeMin() const{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
@@ -67,7 +67,7 @@ void PropertyRowButton::redraw(const PropertyDrawContext& context)
 	buttonRect.setRight(buttonRect.right() + 1);
 	buttonRect.setBottom(buttonRect.bottom() + 2);
 
-	std::wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
+	wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
 	bool pressed = underMouse_ && value();
 	context.drawButton(buttonRect, text.c_str(), pressed, selected() && context.tree->hasFocus());
 }
@@ -155,7 +155,7 @@ public:
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	std::string valueAsString() const { return value_ ? label() : ""; }
+	string valueAsString() const { return value_ ? label() : ""; }
 	virtual int widgetSizeMin() const{ return ICON_SIZE; }
 };
 
@@ -192,7 +192,7 @@ public:
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	std::string valueAsString() const { return value() ? label() : ""; }
+	string valueAsString() const { return value() ? label() : ""; }
 	int widgetSizeMin() const{ return ICON_SIZE; }
 };
 

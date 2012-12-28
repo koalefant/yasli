@@ -1,5 +1,4 @@
 #include <string>
-using std::string;
 #include <vector>
 using std::vector;
 
@@ -23,7 +22,7 @@ enum Filter
 
 struct Node
 {
-	string name_;
+	std::string name_;
 	bool enabled_;
 	bool favourite_;
 	Color color_;

@@ -22,7 +22,7 @@ namespace Gdiplus{
 }
 
 namespace Win32{
-	using namespace yasli;
+	using yasli::Archive;
 
 	COLORREF toColorRef(const Color4f& color);
 	Color4c toColor4c(COLORREF c);

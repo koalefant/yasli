@@ -337,7 +337,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Factory.h" />
+    <ClInclude Include="gdiplusUtils.h" />
     <ClInclude Include="PropertyRowObject.h" />
+    <ClInclude Include="Strings.h" />
     <ClInclude Include="Win32\Window32.h" />
     <ClInclude Include="_Enums.h" />
     <ClInclude Include="Button.h" />
@@ -393,7 +395,6 @@
     <ClInclude Include="ExcludeClipRectVisitor.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="Files.h" />
-    <ClInclude Include="gdiplus.h" />
     <ClInclude Include="Icon.h" />
     <ClInclude Include="KeyPress.h" />
     <ClInclude Include="Rect.h" />

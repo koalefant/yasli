@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <string>
+#include "ww/Strings.h"
 #include <vector>
 #include "ww/API.h"
 #include "ww/sigslot.h"
@@ -23,8 +23,6 @@ struct HMENU__;
 typedef HMENU__* HMENU;
 
 namespace ww{
-using std::wstring;
-using std::string;
 using std::vector;
 
 class Widget;

@@ -14,7 +14,6 @@
 
 
 namespace ww {
-YASLI_CLASS(Widget, RadioButtonBox, "Radio Group");
 
 	RadioButtonBox::RadioButtonBox(const char* text, int border)
 	{
@@ -49,8 +48,7 @@ YASLI_CLASS(Widget, RadioButtonBox, "Radio Group");
 
 	void RadioButtonBox::serialize(Archive& ar)
 	{
-		//ar.serialize(radioButtons_, "radioButtons", "Кнопки");
-		ar.serialize(text_, "text", "Заголовок");
+		__super::serialize(ar);
 	}
 
 	void RadioButtonBox::addRadioButton(const char * name)

@@ -63,7 +63,7 @@ void PopupMenu::assignIDs()
 				--nextId_;
 			}
 			else {
-				YASLI_ASSERT(0 && "Out of Menu IDs")
+				YASLI_ASSERT(0 && "Out of Menu IDs");
 			}
 		}
         else

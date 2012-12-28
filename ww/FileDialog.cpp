@@ -14,6 +14,7 @@
 #include "ww/Unicode.h"
 #include "ww/Files.h"
 #define WIN32_LEAN_AND_MEAN
+#include "Win32/CommonControls.h"
 #include <windows.h>
 #include <commdlg.h>
 #include <cderr.h>
@@ -72,9 +73,9 @@ bool FileDialog::showModal()
 	wchar_t* p = filter;
 	const wchar_t* filterEnd = filter + ARRAY_LEN(filter) - 2;
 
-	std::vector<std::string>::iterator it;
+	std::vector<string>::iterator it;
 	for(it = masks_.begin(); it != masks_.end(); ++it){
-		std::wstring mask(toWideChar(it->c_str()));
+		wstring mask(toWideChar(it->c_str()));
 		int len = int(wcslen(mask.c_str()));
 		YASLI_ASSERT(p + len + 1< filterEnd);
 		wcscpy_s(p, filterEnd - p - 1, mask.c_str());
@@ -103,7 +104,7 @@ bool FileDialog::showModal()
 	openFileName.nMaxCustFilter = ARRAY_LEN(filter) - 1;
 	openFileName.lpstrFile = fileName;
 	openFileName.nMaxFile = ARRAY_LEN(fileName) - 1;
-	std::wstring startDirectory(toWideChar(startDirectory_.c_str()));
+	wstring startDirectory(toWideChar(startDirectory_.c_str()));
 	openFileName.lpstrInitialDir = startDirectory.c_str();
 	if(save_){
 		if(!GetSaveFileNameW(&openFileName))

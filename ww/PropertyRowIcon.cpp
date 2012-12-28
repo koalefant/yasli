@@ -19,8 +19,7 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Color.h"	
 #include "ww/Icon.h"
-#include "gdiplus.h"
-using std::wstring;
+#include "gdiplusUtils.h"
 
 namespace ww{
 

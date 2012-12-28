@@ -21,9 +21,7 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Unicode.h"
-#include "gdiplus.h"
-
-using std::string;
+#include "gdiplusUtils.h"
 
 namespace ww{
 
@@ -48,11 +46,11 @@ public:
 	}
 
 
-	std::string valueAsString() const{ return value().c_str(); }
+	string valueAsString() const{ return value().c_str(); }
 
 	void serializeValue(yasli::Archive& ar){
 		string fileName = value_.c_str();
-		ar.serialize(fileName, "value", "Value");
+		ar(fileName, "value", "Value");
 		if(ar.isInput())
 			value_ = fileName.c_str();
 	}
@@ -72,7 +70,7 @@ bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 
 	FileSelector& selector = value();
 	const FileSelector::Options* options = selector.options();
-	string title = std::string("(") + options->filter + ")";
+	string title = string("(") + options->filter + ")";
 	const char* masks[] = { title.c_str(), selector.options()->filter.c_str(), 0 };
 
 	string root = Files::fixSlashes(options->rootDirectory.c_str());

@@ -32,7 +32,7 @@ MenuItem& MenuItem::add(const char* text)
         ++p;
     }
 
-    std::string name(text, p);
+    string name(text, p);
     MenuItem* subItem = findSubItem(name.c_str());
     if(!subItem || name == "-"){
         subItems_.push_back(new MenuItem(name.c_str()));
@@ -146,7 +146,7 @@ void MenuBarImpl::redraw(HDC dc)
 {
     RECT rect;
     GetClientRect(handle(), &rect);
-    FillRect(dc, &rect, GetSysColorBrush(COLOR_MENU));
+    FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 
     MenuBarItems::iterator it;
     int index = 0;
@@ -156,7 +156,7 @@ void MenuBarImpl::redraw(HDC dc)
         HFONT oldFont = (HFONT)::SelectObject(dc, font);
         int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
         Win32::Rect rect(item.rect());
-        std::wstring text = toWideChar(item.item()->text());
+        wstring text = toWideChar(item.item()->text());
         if(activeItem_ == index){
             ::FillRect(dc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT));
             COLORREF oldTextColor = ::SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
@@ -190,7 +190,7 @@ LRESULT MenuBarImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
             if(updateActiveItem()){
                 RedrawWindow(this->handle(), 0, 0, RDW_UPDATENOW | RDW_INVALIDATE);
                 inMenu_ = true;
-                SendMessage(this->handle(), WM_CANCELMODE, 0, 0);
+                SendMessageW(this->handle(), WM_CANCELMODE, 0, 0);
             }
             return 0;
         }
@@ -239,13 +239,14 @@ void MenuBarImpl::generateMenu(PopupMenuItem* root, MenuItem& rootItem)
             continue;
         }
 
-		std::string label = item.text_;
+		string label = item.text_;
 		if(item.hotkey_ != KeyPress()){
 			label += "\t";
 			label += item.hotkey().toString(true);
 		}
         item.signalUpdate().emit(&item);
 		PopupMenuItem1<MenuItem*>& popupItem = root->add(label.c_str(), &item);
+		popupItem.enable(item.isEnabled());
         popupItem.connect(this, &MenuBarImpl::onItemActivate);
 		generateMenu(&popupItem, item);
 	}
@@ -281,6 +282,11 @@ void MenuBarImpl::onMessageRButtonDown(UINT button, int x, int y)
 void MenuBarImpl::onItemActivate(MenuItem* item)
 {
     YASLI_ESCAPE(item, return);
+
+	// get rid of highlighted menu item
+	activeItem_ = -1;
+	InvalidateRect(handle(), 0, FALSE);
+
     item->signalActivate().emit();
 }
 
@@ -295,7 +301,7 @@ void MenuBarImpl::updateRootItems()
     int offset = 0;
     for(it = root_.subItems_.begin(); it != root_.subItems_.end(); ++it){
         MenuItem& item = *it->get();
-        const std::wstring text = toWideChar(item.text_.c_str());
+        const wstring text = toWideChar(item.text_.c_str());
         Vect2 textSize = Win32::calculateTextSize(Win32::getDefaultWindowHandle(), Win32::defaultFont(), text.c_str());
         textSize.x += 10;
         Rect rect(offset, (pos.height() - height) / 2, offset + textSize.x, (pos.height() - height) / 2 + height);
@@ -384,3 +390,4 @@ MenuBarImpl* MenuBar::impl()
 }
 
 };
+// vim:ts=4 sw=4:

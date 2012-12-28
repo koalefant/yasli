@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <string>
+#include "ww/Strings.h"
 
 namespace yasli{
 	class Archive;
@@ -34,8 +34,8 @@ public:
         , rootDirectory(_rootDirectory)
 		{
 		}
-		std::string filter;
-		std::string rootDirectory;
+		string filter;
+		string rootDirectory;
 		bool save;
 	};
 
@@ -52,7 +52,7 @@ public:
 	{
 	}
 
-	FileSelector(std::string& fileName, const Options& options)
+	FileSelector(string& fileName, const Options& options)
 	: fileNamePtr_(&fileName)
 	, fileName_(fileName)
 	, options_(&options)
@@ -77,8 +77,8 @@ public:
 
 	void serialize(yasli::Archive& ar);
 protected:
-	std::string* fileNamePtr_;
-	std::string fileName_;
+	string* fileNamePtr_;
+	string fileName_;
 	const Options* options_;
 	friend bool ::serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name, const char* label);
 };

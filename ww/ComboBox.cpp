@@ -83,20 +83,20 @@ LRESULT ComboBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 			switch(HIWORD(wparam)){
 				case CBN_SELCHANGE:
 					{
-					owner_->selectedIndex_ = SendMessage(comboBoxHandle_, CB_GETCURSEL, wparam, lparam);
+					owner_->selectedIndex_ = SendMessageW(comboBoxHandle_, CB_GETCURSEL, wparam, lparam);
 					owner_->onSelectionChanged();
 					break;
 					}
 				case CBN_SELENDOK:
 				{
-					owner_->selectedIndex_ = SendMessage(comboBoxHandle_, CB_GETCURSEL, wparam, lparam);
-					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
+					owner_->selectedIndex_ = SendMessageW(comboBoxHandle_, CB_GETCURSEL, wparam, lparam);
+					PostMessageW(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
 				case CBN_CLOSEUP:
 				{
-					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
+					PostMessageW(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
@@ -106,8 +106,8 @@ LRESULT ComboBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 				}
 				case CBN_KILLFOCUS:
 				{
-					owner_->selectedIndex_ = SendMessage(comboBoxHandle_, CB_GETCURSEL, 0, 0);
-					PostMessage(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
+					owner_->selectedIndex_ = SendMessageW(comboBoxHandle_, CB_GETCURSEL, 0, 0);
+					PostMessageW(handle(), WM_WW_FINISH, WPARAM(handle()), 0);
 					return 0;
 					break;
 				}
@@ -268,7 +268,7 @@ void ComboBox::set(const StringListValue& value, bool onlyVisible)
 
 void ComboBox::get(StringListValue& value)
 {
-	std::string str;
+	string str;
     if(size_t(selectedIndex_) < items_.size())
       value = StringListValue( items_, items_[selectedIndex_].c_str() );
     else
@@ -277,7 +277,7 @@ void ComboBox::get(StringListValue& value)
 
 void ComboBox::get(StringListStaticValue& value)
 {
-	std::string str;
+	string str;
     if(size_t(selectedIndex_) < items_.size())
         value = selectedIndex_;
     else
@@ -287,7 +287,7 @@ void ComboBox::get(StringListStaticValue& value)
 void ComboBox::setSelectedIndex(int selectedIndex)
 {
 	selectedIndex_ = selectedIndex;
-	::SendMessage(impl()->comboBox(), CB_SETCURSEL, selectedIndex, 0);
+	::SendMessageW(impl()->comboBox(), CB_SETCURSEL, selectedIndex, 0);
 }
 
 int ComboBox::selectedIndex() const
@@ -295,7 +295,7 @@ int ComboBox::selectedIndex() const
     return selectedIndex_;
 }
 
-std::string ComboBox::selectedString() const
+string ComboBox::selectedString() const
 {
 	YASLI_ASSERT(selectedIndex_ >= 0 && selectedIndex_ < int(items_.size()));
 	if(selectedIndex_ >= 0 && selectedIndex_ < int(items_.size())){
@@ -309,7 +309,7 @@ std::string ComboBox::selectedString() const
 void ComboBox::clear()
 {
 	items_.clear();
-	::SendMessage(impl()->comboBox(), CB_RESETCONTENT, 0, 0);
+	::SendMessageW(impl()->comboBox(), CB_RESETCONTENT, 0, 0);
 	updateMinimalSize();
 	_queueRelayout();
 }
@@ -329,9 +329,9 @@ void ComboBox::insert(iterator before, const char* text)
 {
 	int index = before == items_.end() ? -1 : std::distance(items_.begin(), before);
 	items_.insert(before, text);
-	::SendMessage(impl()->comboBox(), CB_INSERTSTRING, index, (LPARAM)toWideChar(text).c_str());
+	::SendMessageW(impl()->comboBox(), CB_INSERTSTRING, index, (LPARAM)toWideChar(text).c_str());
 	if(items_.size() == 1)
-		::SendMessage(impl()->comboBox(), CB_SETCURSEL, 0, 0);
+		::SendMessageW(impl()->comboBox(), CB_SETCURSEL, 0, 0);
 	updateMinimalSize();
 	_queueRelayout();
 }

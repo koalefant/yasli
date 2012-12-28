@@ -11,8 +11,7 @@
 #include "ww/Win32/Window32.h"
 #include "ww/Widget.h"
 #include "ww/Tooltip.h"
-#include <commctrl.h>
-#include "ww/Win32/Window32.h"
+#include "Win32/CommonControls.h"
 
 namespace ww{
 	
@@ -65,8 +64,8 @@ void Tooltip::attach(Widget* widget)
 	ti.rect.left = ti.rect.top = ti.rect.bottom = ti.rect.right = 0; 
 
 	YASLI_ASSERT(::IsWindow(toolTipWindow_));
-	WW_VERIFY(SendMessage(toolTipWindow_, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti));
-	WW_VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)TRUE, (LPARAM)&ti));
+	WW_VERIFY(SendMessageW(toolTipWindow_, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti));
+	WW_VERIFY(SendMessageW(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)TRUE, (LPARAM)&ti));
 }
 
 void Tooltip::setText(const char* text)
@@ -95,7 +94,7 @@ void Tooltip::show()
 	POINT point;
 	GetCursorPos(&point);
 
-	SendMessage(toolTipWindow_, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(point.x + offset_.x, point.y + offset_.y));
+	SendMessageW(toolTipWindow_, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(point.x + offset_.x, point.y + offset_.y));
 }
 
 void Tooltip::hide()
@@ -113,7 +112,7 @@ void Tooltip::hide()
 	ti.lpszText  = LPSTR_TEXTCALLBACK;
 	ti.rect.left = ti.rect.top = ti.rect.bottom = ti.rect.right = 0; 
 
-	WW_VERIFY(SendMessage(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)FALSE, (LPARAM)&ti));
+	WW_VERIFY(SendMessageW(toolTipWindow_, TTM_TRACKACTIVATE,(WPARAM)FALSE, (LPARAM)&ti));
 }
 
 

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/_WidgetWithWindow.h"
-#include <string>
+#include "ww/Strings.h"
 
 namespace Win32{
 	class Window;
@@ -44,7 +44,7 @@ public:
 protected:
 
 	SharedPtr<Widget> child_;
-	std::string text_;
+	string text_;
 	int space_;
 	bool emphasis_;
 };

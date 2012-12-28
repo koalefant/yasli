@@ -9,11 +9,9 @@
 
 #pragma once
 #include "ww/_WidgetWithWindow.h"
-#include <string>
-
+#include "ww/Strings.h"
 
 namespace ww{
-using std::string;
 
 class CheckBoxImpl;
 class CheckBox : public _WidgetWithWindow{

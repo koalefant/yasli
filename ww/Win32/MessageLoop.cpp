@@ -61,7 +61,7 @@ int MessageLoop::runDialogLoop(HWND dialog)
 
 		if(msg.message == WM_QUIT){
 			// repost QUIT-message, so main window can get it
-			PostQuitMessage(msg.wParam);
+			PostQuitMessage(int(msg.wParam));
 			return int(msg.wParam);
 		}
 
@@ -81,7 +81,7 @@ int MessageLoop::runDialogLoop(HWND dialog)
 void MessageLoop::interruptDialogLoop()
 {
 	dialogLoopInterrupted_ = true;
-	::PostMessage(dialog_, WM_NULL, 0, 0);
+	::PostMessageW(dialog_, WM_NULL, 0, 0);
 }
 
 void MessageLoop::quit()

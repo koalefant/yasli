@@ -13,7 +13,7 @@
 #include "ww/Frame.h"
 #include "ww/VBox.h"
 #include "ww/RadioButton.h"
-#include <string>
+#include "ww/Strings.h"
 #include <vector>
 
 

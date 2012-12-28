@@ -30,9 +30,10 @@
 #include <string>
 #include "Unicode.h"
 
-using std::string;
-
 namespace Files{
+
+using ww::string;
+using ww::wstring;
 
 time_t getModifyTime(const char* path)
 {
@@ -164,7 +165,7 @@ string relativePath(const char* path, const char* toDirectory)
         wchar_t* start = fullPath + wcslen(fullPathDir);
         if(*start == L'\\')
             ++start;
-        return ww::fromWideChar(std::wstring(start, fullPath + wcslen(fullPath)).c_str());
+        return ww::fromWideChar(wstring(start, fullPath + wcslen(fullPath)).c_str());
     }
 	else
 		return string();

@@ -65,13 +65,13 @@ CheckBoxImpl::CheckBoxImpl(ww::CheckBox* owner)
 
 LRESULT CheckBoxImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+	return ::CallWindowProcW(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
 void CheckBoxImpl::setCheckBoxStatus(bool status)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	::SendMessage(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
+	::SendMessageW(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
 }
 
 void CheckBoxImpl::updateMinimalSize()

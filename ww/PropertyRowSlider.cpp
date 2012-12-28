@@ -22,7 +22,7 @@
 #include "ww/Serialization.h"
 #include "ww/KeyPress.h"
 #include "ww/SliderDecorator.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 #include <math.h>
 
 namespace ww{

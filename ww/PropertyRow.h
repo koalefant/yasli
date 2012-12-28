@@ -168,8 +168,8 @@ public:
 		return assignTo(reinterpret_cast<void*>(&object), sizeof(T));
 	}
 	virtual bool assignTo(void* object, size_t size) { return false; }
-	virtual std::string valueAsString() const;
-	virtual std::wstring valueAsWString() const;
+	virtual string valueAsString() const;
+	virtual wstring valueAsWString() const;
 
 	int height() const{ return size_.y; }
 
@@ -256,7 +256,7 @@ public:
 	}
 
 	const wchar_t* digest() const{ return digest_.c_str(); }
-	virtual std::wstring digestValue() const{ return valueAsWString(); }
+	virtual wstring digestValue() const{ return valueAsWString(); }
 	virtual void digestReset(const PropertyTree* tree);
 	void digestAppend(const wchar_t* text);
 
@@ -274,7 +274,7 @@ protected:
 	const char* labelUndecorated_;
 	const char* typeName_;
     Serializer serializer_;
-	std::wstring digest_;
+	wstring digest_;
 	PropertyRow* parent_;
 	Rows children_;
 
@@ -370,7 +370,7 @@ protected:
 	static const char* typeName_;
 };
 
-typedef Factory<std::string, PropertyRow, PropertyRowArg> PropertyRowFactory;
+typedef Factory<string, PropertyRow, PropertyRowArg> PropertyRowFactory;
 
 template<class Op>
 bool PropertyRow::scanChildren(Op& op)
@@ -443,7 +443,7 @@ bool PropertyRow::scanChildrenBottomUp(Op& op, PropertyTree* tree)
 }
 
 #define REGISTER_PROPERTY_ROW(DataType, RowType) \
-	REGISTER_IN_FACTORY(PropertyRowFactory, typeid(DataType).name(), RowType); \
+	REGISTER_IN_FACTORY(PropertyRowFactory, TypeID::get<DataType>().name(), RowType); \
 	YASLI_CLASS(PropertyRow, RowType, #DataType);
 
 

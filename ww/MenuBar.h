@@ -24,6 +24,7 @@ public:
     MenuItem(const char* text)
     : text_(text)
     , commandIndex_(0)
+	, enabled_(true)
     {
     }
 
@@ -34,6 +35,8 @@ public:
     const char* text() const{ return text_.c_str(); }
     void setHotkey(const KeyPress &hotkey){ hotkey_ = hotkey; }
     const KeyPress& hotkey() const{ return hotkey_; }
+	void enable(bool enabled) { enabled_ = enabled; }
+	bool isEnabled() const{ return enabled_; }
 
     typedef signal0 SignalActivate;
     SignalActivate& signalActivate(){ return signalActivate_; }
@@ -47,10 +50,11 @@ public:
 private:
     MenuItem* findSubItem(const char* name);
 
-    std::string text_;
+    string text_;
     SignalActivate signalActivate_;
     SignalUpdate signalUpdate_;
     KeyPress hotkey_;
+	bool enabled_;
 
     int commandIndex_;
     typedef std::vector<SharedPtr<MenuItem> > Items;

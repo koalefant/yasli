@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ww/API.h"
+#include "ww/Strings.h"
 
 namespace ww{
 	class ConstStringWrapper;
@@ -23,7 +24,7 @@ class ConstStringList{
 public:
 	const char* findOrAdd(const char* string);
 protected:
-	typedef std::list<std::string> Strings;
+	typedef std::list<string> Strings;
 	Strings strings_;
 };
 

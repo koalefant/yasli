@@ -13,8 +13,6 @@
 #include "yasli/Archive.h"
 #include "yasli/BitVectorImpl.h"
 
-using std::string;
-
 namespace ww{
 
 const char* toHex(unsigned char byte)

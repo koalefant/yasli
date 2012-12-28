@@ -136,7 +136,7 @@ void RadioButtonImpl::setRadioButtonStatus(bool status)
 				(*it)->setStatus(false);
 	}
 	YASLI_ASSERT(::IsWindow(handle_));
-	::SendMessage(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
+	::SendMessageW(handle_, BM_SETCHECK, status ? BST_CHECKED : BST_UNCHECKED, 0);
 }
 void RadioButtonImpl::setRadioButtonText(const wchar_t* text)
 {
@@ -171,7 +171,7 @@ int RadioButtonImpl::onMessageSysKeyDown(UINT keyCode, USHORT count, USHORT flag
 
 LRESULT RadioButtonImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
-	return ::CallWindowProc(controlWindowProc_, handle_, message, wparam, lparam);
+	return ::CallWindowProcW(controlWindowProc_, handle_, message, wparam, lparam);
 }
 
 int RadioButtonImpl::onMessageSetFocus(HWND lastFocusedWindow)

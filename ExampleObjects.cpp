@@ -1,5 +1,4 @@
 #include <string>
-using std::string;
 #include <vector>
 using std::vector;
 
@@ -60,7 +59,7 @@ YASLI_CLASS(Geometry, GeometrySphere, "Sphere")
 
 struct ObjectNode : RefCounter
 {
-	string name_;
+	std::string name_;
 	bool enabled_;
 	bool favourite_;
 	Color color_;

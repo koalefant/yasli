@@ -66,7 +66,6 @@ private:
 };
 
 // ---------------------------------------------------------------------------
-YASLI_CLASS(Container, Window, "Application Window")
 
 class WindowImpl : public Win32::Window32{
 public:
@@ -559,7 +558,7 @@ void Window::visitChildren(WidgetVisitor& visitor) const
 void Window::_arrangeChildren()
 {
 	if(child_){
-		RECT rect;
+		RECT rect = { 0, 0, 1, 1 };
 		WW_VERIFY(::GetClientRect(window_->handle(), &rect));
 		WW_VERIFY(::InflateRect(&rect, -border_, -border_));
 		child_->_setPosition(Rect(rect.left, rect.top, rect.right, rect.bottom));
@@ -621,8 +620,8 @@ void Window::serialize(Archive& ar)
 		Rect position = restoredPosition();
 		bool maximized = this->maximized();
 
-		ar.serialize(position, "restoredPosition", "Restored Position");
-		ar.serialize(maximized, "maximized", "Maximized");
+		ar(position, "restoredPosition", "Restored Position");
+		ar(maximized, "maximized", "Maximized");
 
 		if(ar.isInput()){
 			setRestoredPosition(position);

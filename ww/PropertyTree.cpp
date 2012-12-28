@@ -34,7 +34,7 @@
 #include <crtdbg.h>
 
 #include "ww/PropertyEditor.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 
 
 namespace ww{
@@ -58,7 +58,7 @@ protected:
 			key.key == KEY_RETURN)
 		{
 			SetFocus(tree_->impl()->handle());
-			PostMessage(tree_->impl()->handle(), WM_KEYDOWN, key.key, 0);
+			PostMessageW(tree_->impl()->handle(), WM_KEYDOWN, key.key, 0);
 			return true;
 		}
 		if (key.key == KEY_BACK && text()[0] == '\0')
@@ -73,8 +73,6 @@ private:
 
 // ---------------------------------------------------------------------------
 
-YASLI_CLASS(Widget, PropertyTree, "PropertyTree")
-
 TreeConfig TreeConfig::defaultConfig;
 
 TreeConfig::TreeConfig()
@@ -85,6 +83,7 @@ TreeConfig::TreeConfig()
 , compact_(false)
 , fullRowMode_(false)
 , showContainerIndices_(true)
+, filterWhenType_(true)
 , tabSize_(PropertyRow::ROW_DEFAULT_HEIGHT)
 {
 }
@@ -110,6 +109,7 @@ PropertyTree::PropertyTree(int border)
 	model_->setFullUndo(fullUndo_);
 
 	model_->signalUpdated().connect(this, &PropertyTree::onModelUpdated);
+	model_->signalPushUndo().connect(this, &PropertyTree::onModelPushUndo);
 
 	filterEntry_ = new FilterEntry(this);
 	filterEntry_->_setParent(this);
@@ -127,7 +127,7 @@ PropertyTree::~PropertyTree()
 void PropertyTree::update()
 {
 	needUpdate_ = true;
-	::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	::InvalidateRect(impl()->handle(), 0, FALSE);
 }
 
 TreeImpl* PropertyTree::impl() const
@@ -228,6 +228,9 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 	case KEY_END:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		break;
+	case KEY_SPACE:
+		if (filterWhenType_)
+			break;
 	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
@@ -382,9 +385,6 @@ void PropertyTree::interruptDrag()
 void PropertyTree::updateHeights()
 {
 	needUpdate_ = false;
-	if (!model()->root())
-		return;
-
 	model()->root()->calculateMinimalSize(this);
 	impl()->size_.y = 0;
 
@@ -435,7 +435,7 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 
 void PropertyTree::redraw()
 {
-	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
+	::InvalidateRect(impl()->handle(), 0, FALSE);
 }
 
 void PropertyTree::_setFocus()
@@ -765,6 +765,11 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows)
 		signalChanged_.emit();
 }
 
+void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
+{
+	signalPushUndo_.emit();
+}
+
 void PropertyTree::setWidget(PropertyRowWidget* widget)
 {
 	PolyPtr<PropertyRowWidget> oldWidget = widget_;
@@ -806,7 +811,7 @@ void PropertyTree::setFilterMode(bool inFilterMode)
         onFilterChanged();
         impl()->updateArea();
         needUpdate_ = true;
-        RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
+		::InvalidateRect(impl()->handle(), 0, FALSE);
     }
 }
 
@@ -902,18 +907,43 @@ Vect2 PropertyTree::_toScreen(Vect2 point) const
     return Vect2(pt.x, pt.y);
 }
 
-void PropertyTree::selectByAddress(void* addr)
+bool PropertyTree::selectByAddress(void* addr, bool keepSelectionIfChildSelected)
 {
-    if(model()->root()){
+	if (model()->root()) {
         PropertyRow* row = model()->root()->findByAddress(addr);
+
+		bool keepSelection = false;
+		if (keepSelectionIfChildSelected && row && !model()->selection().empty()) {
+			keepSelection = true;
+			TreeSelection::const_iterator it;
+			for(it = model()->selection().begin(); it != model()->selection().end(); ++it){
+				PropertyRow* selectedRow = model()->rowFromPath(*it);
+				if (!selectedRow)
+					continue;
+				if (!selectedRow->isChildOf(row)){
+					keepSelection = false;
+					break;
+				}
+			}
+		}
+
+		if (!keepSelection) {
         TreeSelection sel;
         if(row)
             sel.push_back(model()->pathFromRow(row));
+			if (model()->selection() != sel) {
         model()->setSelection(sel);
+				if (row)
+					ensureVisible(row);
+				::InvalidateRect(impl()->handle(), 0, FALSE);
+				return true;
+			}
     }
+	}
+	return false;
 }
 
-std::wstring generateDigest(Serializer& ser)
+wstring generateDigest(Serializer& ser)
 {
     PropertyTreeModel model;
     PropertyOArchive oa(&model);
@@ -961,14 +991,6 @@ void PropertyTree::getSelectionSerializers(Serializers* serializers)
 
 void PropertyTree::updateAttachedPropertyTree()
 {
-	/*
-	if(attachedPropertyTree_){
-		Serializers serializers;
-		getSelectionSerializers(&serializers);
-		attachedPropertyTree_->attach(serializers);
-	}
-	*/
-
 	if (!attachedPropertyTree_)
 		return;
 
@@ -1059,7 +1081,7 @@ struct FilterVisitor
 	}
 
 protected:
-	std::string labelStart_;
+	string labelStart_;
 };
 
 
@@ -1198,7 +1220,7 @@ void PropertyTree::onFilterChanged()
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
 	needUpdate_ = true;
-    ::RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	::InvalidateRect(impl()->handle(), 0, FALSE);
 }
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
@@ -1268,3 +1290,4 @@ void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdi
 }
 
 }
+// vim:ts=4 sw=4:

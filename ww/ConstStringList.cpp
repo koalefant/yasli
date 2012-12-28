@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 #include "ww/ConstStringList.h"
+#include "ww/Strings.h"
 #include <algorithm>
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
@@ -43,13 +44,14 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 
 bool serialize(yasli::Archive& ar, ww::ConstStringWrapper& val, const char* name, const char* label)
 {
+	using ww::string;
 	if(ar.isOutput()){
 		YASLI_ASSERT(val.string_);
-		std::string out = val.string_;
+		string out = val.string_;
 		return ar(out, name, label);
 	}
 	else{
-		std::string in;
+		string in;
 		bool result = ar(in, name, label);
 
 		val.string_ = val.list_->findOrAdd(in.c_str());

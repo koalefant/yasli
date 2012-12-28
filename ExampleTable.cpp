@@ -1,5 +1,4 @@
 #include <string>
-using std::string;
 #include <vector>
 using std::vector;
 
@@ -20,7 +19,7 @@ static Icon iconFavouriteDisabled(favouritesDisabled_xpm);
 struct TableItem
 {
 	bool favourite_;
-	string name_;
+	std::string name_;
 	bool enabled_;
 	Color color_;
 	float weight_;

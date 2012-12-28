@@ -14,6 +14,8 @@
 #include "ww/Macros.h"
 using ww::min;
 using ww::max;
+#pragma warning(push)
+#pragma warning(disable: 4264) // warning C4264: '...' : no override available for virtual member function from base '...'; function is hidden
 #include <gdiplus.h>
 #include "Rect.h"
 
@@ -51,3 +53,4 @@ inline Gdiplus::RectF gdiplusRectF(const Gdiplus::Rect& rect)
 	return Gdiplus::RectF(Gdiplus::REAL(rect.X), Gdiplus::REAL(rect.Y), Gdiplus::REAL(rect.Width), Gdiplus::REAL(rect.Height));
 }
 
+#pragma warning(pop)

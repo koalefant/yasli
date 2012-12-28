@@ -28,12 +28,6 @@
 
 namespace ww{
 
-YASLI_CLASS(Widget, HSplitter, "Layout\\Splitter (Horizontal)")
-YASLI_CLASS(Widget, VSplitter, "Layout\\Splitter (Vertical)")
-YASLI_CLASS(Container, HSplitter, "Splitter (Horizontal)")
-YASLI_CLASS(Container, VSplitter, "Splitter (Vertical)")
-
-
 SplitterImpl::SplitterImpl(ww::Splitter* owner)
 : owner_(owner)
 , grabbedSplitter_(-1)
@@ -506,22 +500,11 @@ void Splitter::setPanePosition(int index, int positionInPixels)
 void Splitter::Element::serialize(Archive& ar)
 {
 	ar(position, "position", "&Position");
-    if(ar.filter(SERIALIZE_DESIGN))
-        ar(widget, "widget", "&Widget");
 }
 
 void Splitter::serialize(Archive& ar)
 {
-	if(ar.filter(SERIALIZE_DESIGN)){
-		Container::serialize(ar);
-		ar(elements_, "elements", "Elements");
-		if(ar.isInput()){
-			Elements::iterator it;
-			FOR_EACH(elements_, it)
-				_ensureChildren(this, it->widget);
-		}
-	}
-	else if(ar.filter(SERIALIZE_STATE)){
+	if(ar.filter(SERIALIZE_STATE)){
 		Elements::iterator i;
 		FOR_EACH(elements_, i){
 			ar(*i->widget, "widget", "Widget");

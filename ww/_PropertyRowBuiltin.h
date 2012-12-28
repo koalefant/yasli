@@ -22,8 +22,6 @@ class EnumDescription;
 }
 
 namespace ww{
-using std::string;
-using std::wstring;
 
 class PropertyTreeModel;
 
@@ -85,7 +83,7 @@ public:
 	PropertyRow* clone() const{ return new PropertyRowEnum(name_, label_, value_, descriptor_);	}
 
 	void serializeValue(Archive& ar);
-	std::string valueAsString() const;
+	string valueAsString() const;
 	int widgetSizeMin() const{ return userWidgetSize() >= 0 ? userWidgetSize() : 40; }
 protected:
 	int value_;
@@ -111,8 +109,8 @@ public:
 	bool isStatic() const{ return false; }
 	bool isPointer() const{ return true; }
     int widgetSizeMin() const;
-    std::wstring generateLabel() const;
-	std::string valueAsString() const;
+    wstring generateLabel() const;
+	string valueAsString() const;
 	PropertyRow* clone() const{
 		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, derivedType_, factory_), this);
 	}
@@ -120,13 +118,11 @@ public:
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	void serializeValue(Archive& ar);
 protected:
-	void updateTitle();
-
     TypeID baseType_;
     TypeID derivedType_;
     ClassFactoryBase* factory_;
 
-	std::string title_;
+	string title_;
 };
 
 
@@ -154,17 +150,17 @@ protected:
     bool value_;
 };
 
-class PropertyRowString : public PropertyRowImpl<std::wstring, PropertyRowString>{
+class PropertyRowString : public PropertyRowImpl<wstring, PropertyRowString>{
 public:
 	enum { Custom = false };
 	PropertyRowString(const char* name = "", const char* nameAlt = "", const wchar_t* value = L"");
 	PropertyRowString(const char* name, const char* nameAlt, const char* value);
 	PropertyRowString(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
-	bool assignTo(std::string& str);
-	bool assignTo(std::wstring& str);
+	bool assignTo(string& str);
+	bool assignTo(wstring& str);
 	PropertyRowWidget* createWidget(PropertyTree* tree);
-	std::string valueAsString() const;
-	std::wstring valueAsWString() const { return value_; }
+	string valueAsString() const;
+	wstring valueAsWString() const { return value_; }
 };
 
 class PropertyRowStringListValue : public PropertyRowImpl<StringListValue, PropertyRowStringListValue>{
@@ -175,7 +171,7 @@ public:
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);
-	std::string valueAsString() const { return value_.c_str(); }
+	string valueAsString() const { return value_.c_str(); }
 	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<StringListValue*>(object) = value().c_str();
 		return true;
@@ -191,7 +187,7 @@ public:
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);
-	std::string valueAsString() const { return value_.c_str(); }
+	string valueAsString() const { return value_.c_str(); }
 	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<StringListStaticValue*>(object) = value().index();
 		return true;
@@ -203,7 +199,7 @@ public:
 class PropertyRowNumericInterface{
 public:
 	virtual bool setValueFromString(const char* str) = 0;
-	virtual std::string valueAsString() const = 0;
+	virtual string valueAsString() const = 0;
 };
 
 
@@ -224,7 +220,7 @@ protected:
 
 
 template<class T>
-std::string numericAsString(T value)
+string numericAsString(T value)
 {
 	MemoryWriter buf;
 	buf << value;
@@ -249,7 +245,7 @@ public:
 	enum { Custom = false };
 	typedef typename SelectNumericDerived<_Derived, PropertyRowNumeric>::Type Derived;
 	PropertyRowNumeric(const char* name = "", const char* nameAlt = "", Type value = Type())
-	: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, typeid(Type).name())
+	: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, TypeID::get<Type>().name())
 	{
 	}
 	PropertyRowNumeric(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
@@ -272,7 +268,7 @@ public:
 		value_ = Type(atof(str));
 		return value_ != value;
 	}
-	std::string valueAsString() const{ 
+	string valueAsString() const{ 
 		return numericAsString(Type(value_)); 
 	}
 };

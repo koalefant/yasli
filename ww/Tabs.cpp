@@ -17,15 +17,14 @@
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
-#include "ww/gdiplus.h"
-#include "gdiplus.h"
+#include "gdiplusUtils.h"
 #include "PropertyDrawContext.h" // rename
 #include "yasli/Archive.h"
 
 namespace ww{
 
 struct TabsItem{
-	std::string text;
+	string text;
 	Win32::Rect rect;
 };
 
@@ -224,7 +223,7 @@ void TabsImpl::redraw(HDC dc)
 			lineStart = Point(item.rect.right - 1, item.rect.bottom - 1);
 		}		
 
-		std::wstring text(toWideChar(item.text.c_str()));
+		wstring text(toWideChar(item.text.c_str()));
 
 		Win32::Rect textRect = item.rect;
 		textRect.left += 3;
@@ -238,7 +237,7 @@ void TabsImpl::redraw(HDC dc)
 		StringFormat format;
 		format.SetAlignment(Gdiplus::StringAlignmentCenter);
 		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-		format.SetTrimming(Gdiplus::StringTrimmingEllipsisCharacter);
+		format.SetTrimming(Gdiplus::StringTrimmingNone);
 		format.SetFormatFlags(Gdiplus::StringFormatFlagsNoWrap);
 		gr.DrawString(text.c_str(), int(wcslen(text.c_str())), font, gdiplusRectF(textRect), &format, &SolidBrush(gdiplusSysColor(COLOR_WINDOWTEXT)));
 

@@ -12,7 +12,7 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Win32/Handle.h"
-#include "ww/gdiplus.h"
+#include "ww/gdiplusUtils.h"
 #include "ww/PropertyDrawContext.h" // FIXME привести в порядок
 #include "ww/Color.h"
 
