@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="wWidgets"
 	ProjectGUID="{18632F7A-290E-B902-7C03-72FB0C12DE45}"
 	RootNamespace="wWidgets"
@@ -940,14 +940,6 @@
 				Name="PropertyTree"
 				>
 				<File
-					RelativePath=".\_PropertyRowBuiltin.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\_PropertyRowBuiltin.h"
-					>
-				</File>
-				<File
 					RelativePath=".\PropertyDrawContext.cpp"
 					>
 				</File>
@@ -1043,7 +1035,23 @@
 						>
 					</File>
 					<File
+						RelativePath=".\PropertyRowBool.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowBool.h"
+						>
+					</File>
+					<File
 						RelativePath=".\PropertyRowColor.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowContainer.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowContainer.h"
 						>
 					</File>
 					<File
@@ -1059,7 +1067,43 @@
 						>
 					</File>
 					<File
+						RelativePath=".\PropertyRowImpl.h"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowNumeric.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowNumeric.h"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowPointer.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowPointer.h"
+						>
+					</File>
+					<File
 						RelativePath=".\PropertyRowSlider.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowString.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowString.h"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowStringListValue.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\PropertyRowStringListValue.h"
 						>
 					</File>
 				</Filter>
@@ -1128,6 +1172,10 @@
 		<Filter
 			Name="Win32"
 			>
+			<File
+				RelativePath=".\Win32\CommonControls.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Win32\Drawing.cpp"
 				>
@@ -1262,6 +1310,10 @@
 			</File>
 			<File
 				RelativePath=".\Serialization.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Strings.h"
 				>
 			</File>
 			<File
