@@ -285,17 +285,7 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
 
 bool PropertyIArchive::operator()(Object& obj, const char* name, const char* label)
 {
-	if(openRow(name, label, obj.type().name())){
-		bool result = false;
-		if (currentNode_->isObject()) {
-			PropertyRowObject* rowObj = static_cast<PropertyRowObject*>(currentNode_);
-			result = rowObj->assignTo(&obj);
-		}
-		closeRow(name);
-		return result;
-	}
-	else
-		return false;
+	return false;
 }
 
 bool PropertyIArchive::openBlock(const char* name, const char* label)

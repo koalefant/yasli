@@ -113,5 +113,7 @@ string PropertyRowString::valueAsString() const
 	return fromWideChar(value_.c_str());
 }
 
+DECLARE_SEGMENT(PropertyRowString)
 }
+
 // vim:ts=4 sw=4:

@@ -341,7 +341,6 @@
     <ClInclude Include="PropertyRowBool.h" />
     <ClInclude Include="PropertyRowContainer.h" />
     <ClInclude Include="PropertyRowNumeric.h" />
-    <ClInclude Include="PropertyRowObject.h" />
     <ClInclude Include="PropertyRowPointer.h" />
     <ClInclude Include="PropertyRowString.h" />
     <ClInclude Include="PropertyRowStringListValue.h" />
@@ -456,7 +455,6 @@
     <ClCompile Include="PropertyRowBool.cpp" />
     <ClCompile Include="PropertyRowContainer.cpp" />
     <ClCompile Include="PropertyRowNumeric.cpp" />
-    <ClCompile Include="PropertyRowObject.cpp" />
     <ClCompile Include="PropertyRowPointer.cpp" />
     <ClCompile Include="PropertyRowString.cpp" />
     <ClCompile Include="PropertyRowStringListValue.cpp" />

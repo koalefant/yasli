@@ -12,7 +12,6 @@
 #include <map>
 #include "PropertyRow.h"
 #include "PropertyTreeOperator.h"
-#include "PropertyRowObject.h"
 
 namespace ww{
 
@@ -46,23 +45,7 @@ struct PropertyDefaultTypeValue
 	}
 };
 
-class PropertyRowObject;
-
 //////////////////////////////////////////////////////////////////////////
-
-struct ModelObjectReference
-{
-	SharedPtr<PropertyRowObject> row;
-	bool needUpdate;
-	bool needApply;
-
-	ModelObjectReference()
-	: needApply(false)
-	, needUpdate(true)
-	{
-	}
-};
-typedef map<void*, ModelObjectReference> ModelObjectReferences;
 
 class PropertyTreeModel : public PolyRefCounter, public has_slots
 {
@@ -147,12 +130,6 @@ public:
 	void addDefaultType(const TypeID& baseType, const PropertyDefaultTypeValue& value);
 	const PropertyDefaultTypeValue* defaultType(const TypeID& baseType, int index) const;
 
-	// for Object rows:
-	void registerObjectRow(PropertyRowObject* row);
-	void unregisterObjectRow(PropertyRowObject* row);
-	void setRootObject(const Object& obj);
-	ModelObjectReferences& objectReferences() { return objectReferences_; }
-
 private:
 	void pushUndo(const PropertyTreeOperator& op);
 	void clearObjectReferences();
@@ -163,9 +140,7 @@ private:
 	SignalPushUndo signalPushUndo_;
 
 	SharedPtr<PropertyRow> root_;
-	Object rootObject_;
 	UpdateLock updateLock_;
-	ModelObjectReferences objectReferences_;
 
 	typedef map<string, SharedPtr<PropertyRow> > DefaultTypes;
 	DefaultTypes defaultTypes_;

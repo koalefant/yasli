@@ -26,21 +26,7 @@ PropertyTreeModel::PropertyTreeModel()
 
 PropertyTreeModel::~PropertyTreeModel()
 {
-	clearObjectReferences();
-	rootObject_ = Object();
-	root_ = 0;
-	defaultTypes_.clear();
-	defaultTypesPoly_.clear();
 }
-
-void PropertyTreeModel::clearObjectReferences()
-{
-	ModelObjectReferences::iterator it = objectReferences_.begin();
-	for (; it != objectReferences_.end(); ++it) 
-		it->second.row->setModel(0);
-	objectReferences_.clear();
-}
-
 
 TreePath PropertyTreeModel::pathFromRow(PropertyRow* row)
 {
@@ -123,7 +109,7 @@ void PropertyTreeModel::clear()
 	if(root_)
 		root_->clear();
 	root_ = 0;
-	//setRoot(new PropertyRow("", "root", ""));
+	setRoot(new PropertyRow("", "root", ""));
 	selection_.clear();
 }
 
@@ -355,60 +341,6 @@ const StringList& PropertyTreeModel::typeStringList(const TypeID& baseType) cons
 	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return empty);
 	const BaseClass& base = it->second;
 	return base.strings;
-}
-
-void PropertyTreeModel::registerObjectRow(PropertyRowObject* row)
-{
-	ModelObjectReferences::iterator it;
-	void* address = row->object().address();
-	YASLI_ESCAPE(address != 0, return);
-	it = objectReferences_.find(address);
-	if (it == objectReferences_.end())
-	{
-		ModelObjectReference ref;
-		ref.row = row;
-		ref.needUpdate = true;
-		objectReferences_.insert(std::make_pair(row->object().address(), ref));
-	}
-	else
-		it->second.row = row;
-}
-
-void PropertyTreeModel::unregisterObjectRow(PropertyRowObject* row)
-{
-	ModelObjectReferences::iterator it;
-	it = objectReferences_.find(row->object().address());
-	if(it == objectReferences_.end())
-		return;
-	if (it->second.row != row)
-		return;
-	row->setModel(0);
-	objectReferences_.erase(it);
-}
-
-void PropertyTreeModel::setRootObject(const Object& obj)
-{
-	if (rootObject_.address() != obj.address()) {
-		rootObject_ = obj;
-		root_ = 0;
-
-		clearObjectReferences();
-
-		PropertyRowObject* root = new PropertyRowObject("", "", obj, this);
-
-		ModelObjectReference ref;
-		root_ = root;
-		ref.row = root;
-		ref.needUpdate = true;
-		objectReferences_[obj.address()] = ref;
-	}
-	else {
-		ModelObjectReferences::iterator it = objectReferences_.find(obj.address());
-		if (it != objectReferences_.end())
-			it->second.needUpdate = true;
-	}
-
-	rootObject_ = obj;
 }
 
 // ----------------------------------------------------------------------------------

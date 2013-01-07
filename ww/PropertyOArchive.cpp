@@ -48,7 +48,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 , rootNode_(root)
 {
 	YASLI_ASSERT(model != 0);
-	if(!rootNode()->empty()){
+	if(rootNode()){
 		updateMode_ = true;
 		setUpdatedRecurse(rootNode(), false);
 	}
@@ -77,7 +77,6 @@ PropertyRow* PropertyOArchive::rootNode()
 		return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
-		YASLI_ASSERT(model_->root());
 		return model_->root();
 	}
 }
@@ -393,15 +392,7 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 
 bool PropertyOArchive::operator()(Object& obj, const char *name, const char *label)
 {
-	const char* typeName = obj.type().name();
-
-	PropertyRowObject* row = 0;
-	if (typeName_.empty())
-		 row = new PropertyRowObject(name, label, obj, model_);
-	else
-		 row = new PropertyRowObject(name, label, Object(0, obj.type(), 0, 0, 0), model_);
-	lastNode_ = addRow(row);
-	return true;
+	return false;
 }
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)

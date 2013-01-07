@@ -34,7 +34,6 @@ class PopupMenuItem;
 class PropertyTreeModel;
 class PropertyRow;
 typedef std::vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
-class PropertyRowObject;
 class PropertyRowWidget;
 class PropertyTreeOperator;
 class Entry;
@@ -87,8 +86,8 @@ public:
 	PropertyTree(int border = 0);
 	~PropertyTree();
 
-	void attach(Serializer serializer);
-	void attach(Object object);
+	void attach(const Serializer& serializer);
+	void attach(const Serializers& serializer);
 	void attachPropertyTree(PropertyTree* propertyTree);
 	void getSelectionSerializers(Serializers* serializers);
 	void detach();
@@ -96,8 +95,6 @@ public:
 
 	void apply();
 	void revert();
-	int revertObjects(vector<void*> objectAddresses);
-	bool revertObject(void* objectAddress);
 
 
 	void setCompact(bool compact) { compact_ = compact; update(); }
@@ -219,7 +216,7 @@ protected:
 	PolyPtr<PropertyRowWidget> widget_; // in-place widget
 
 	ConstStringList constStrings_;
-	vector<Object> attached_;
+	Serializers attached_;
 	PropertyTree* attachedPropertyTree_;
 
 	bool filterMode_;

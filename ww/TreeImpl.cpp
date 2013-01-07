@@ -488,7 +488,8 @@ void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 	else{
 		Win32::Rect rect;
 		GetClientRect(handle(), &rect);
-		tree_->onRowRMBDown(model()->root(), rect.recti(), pointToRootSpace(point));
+		if (model()->root())
+			tree_->onRowRMBDown(model()->root(), rect.recti(), pointToRootSpace(point));
 	}
 	__super::onMessageRButtonDown(button, x, y);
 }

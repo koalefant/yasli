@@ -455,17 +455,22 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 	signalSelected_.emit();
 }
 
-void PropertyTree::attach(Serializer serializer)
-{
-	attach(Object(serializer));
-}
-
-void PropertyTree::attach(Object object)
+void PropertyTree::attach(const Serializer& serializer)
 {
 	attached_.clear();
-	attached_.push_back(object);
+	attached_.push_back(serializer);
+	revert();
+}
 
-	model_->setRootObject(object);
+void PropertyTree::attach(const Serializers& serializers)
+{
+
+	// We can't perform plain copying here, as it was before:
+	//   attached_ = serializers;
+	// ...as move forwarder calls copying constructor with non-const argument
+	// which invokes second templated constructor of Serializer, which is not what we need.
+	attached_.assign(serializers.begin(), serializers.end());
+
 	revert();
 }
 
@@ -478,63 +483,21 @@ void PropertyTree::detach()
 	update();
 }
 
-int PropertyTree::revertObjects(vector<void*> objectAddresses)
-{
-	int result = 0;
-	for (size_t i = 0; i < objectAddresses.size(); ++i) {
-		if (revertObject(objectAddresses[i]))
-			++result;
-	}
-	return result;
-}
-
-bool PropertyTree::revertObject(void* objectAddress)
-{
-	ModelObjectReferences& refs = model_->objectReferences();
-	ModelObjectReferences::iterator it = refs.find(objectAddress);
-	if (it == refs.end())
-		return false;
-	it->second.needUpdate = true;
-	revertChanged(false);
-	return true;
-}
-
 void PropertyTree::revertChanged(bool enforce)
 {
-	bool enforceNext = enforce;
-	vector<ModelObjectReference> objectsToUpdate;
+	PropertyOArchive oa(model_);
+	oa.setFilter(filter_);
 
-	while (true) {
-		ModelObjectReferences& refs = model_->objectReferences();
-		for (ModelObjectReferences::iterator it = refs.begin(); it != refs.end(); ++it) {
-			ModelObjectReference& ref = it->second;
-			if (enforceNext || ref.needUpdate) {
-				ref.needUpdate = false;
-				objectsToUpdate.push_back(ref);
-			}
-		}
-		enforceNext = false;
-
-		if (objectsToUpdate.empty())
-			break;
-
-		for (size_t i = 0; i < objectsToUpdate.size(); ++i) {
-			ModelObjectReference& ref = objectsToUpdate[i];
-			PropertyOArchive oa(model_, ref.row);
-			oa.setFilter(filter_);
-			Object obj = ref.row->object();
-			if (obj.isSet())
-				obj(oa);
-			else
-				ref.row->clear();
-			ref.row->setLabelChanged();
-		}
-		objectsToUpdate.clear();
+	Serializers::iterator it = attached_.begin();
+	oa(*it, "", "");
+	while(++it != attached_.end()){
+		PropertyTreeModel model2;
+		PropertyOArchive oa2(&model2);
+		Archive::Context<ww::PropertyTree> treeContext(oa2, this);
+		oa2.setFilter(filter_);
+		oa2(*it, "", "");
+		model_->root()->intersect(model2.root());
 	}
-
-	if (model()->root())
-		model_->root()->updateLabel(this);		
-	update();
 }
 
 void PropertyTree::revert()
@@ -566,23 +529,15 @@ void PropertyTree::apply()
 
 void PropertyTree::applyChanged(bool enforce)
 {
-	ModelObjectReferences& refs = model_->objectReferences();
-	ModelObjectReferences::iterator it;
-
-	for (it = refs.begin(); it != refs.end(); ++it) {
-		ModelObjectReference& ref = it->second;
-		if (!enforce && !ref.needApply)
-			continue;
-
-		Object obj = ref.row->object();
-		PropertyIArchive ia(model_, ref.row);
-		Archive::Context<ww::PropertyTree> treeContext(ia, this);
-		ia.setFilter(filter_);
-		obj(ia);
-		ref.needApply = false;
-		signalObjectChanged_.emit(obj);
+	if (!attached_.empty()) {
+		Serializers::iterator it;
+		FOR_EACH(attached_, it) {
+			PropertyIArchive ia(model_);
+ 			Archive::Context<ww::PropertyTree> treeContext(ia, this);
+ 			ia.setFilter(filter_);
+			ia(*it, "", "");
+		}
 	}
-	signalChanged_.emit();
 }
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -730,32 +685,10 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows)
 		widget_ = 0;
 
 	if (immediateUpdate_) {
-
-		ModelObjectReferences& refs = model_->objectReferences();
-
-		size_t count = rows.size();
-		for (size_t i = 0; i < count; ++i) {
-			void *objectAddress = 0;
-			PropertyRow* row = rows[i];
-			if (row->isObject())
-				objectAddress = static_cast<PropertyRowObject*>(row)->object().address();
-			else
-				objectAddress = row->serializer().pointer();
-			if (!objectAddress)
-				continue;
-			
-			ModelObjectReferences::iterator it = refs.find(objectAddress);
-			if (it != refs.end()) {
-				ModelObjectReference& ref = it->second;
-				ref.needUpdate = true;
-				ref.needApply = true;
-			}
-		}
-
-		applyChanged(false);
-		
-		if(autoRevert_)
-			revertChanged(false);
+		applyChanged(true);
+		signalChanged_.emit();
+		if (autoRevert_)
+			revert();
 	}
 
 	setFocus();
@@ -884,22 +817,6 @@ PropertyRow* PropertyTree::selectedRow()
     return model()->rowFromPath(sel.front());
 }
 
-bool PropertyTree::getSelectedObject(Object* object)
-{
-    const PropertyTreeModel::Selection &sel = model()->selection();
-    if(sel.empty())
-        return 0;
-    PropertyRow* row = model()->rowFromPath(sel.front());
-		while (row && !row->isObject())
-			row = row->parent();
-		if (!row)
-			return false;
-
-		PropertyRowObject* obj = static_cast<PropertyRowObject*>(row);
-		*object = obj->object();
-		return true;
-}
-
 Vect2 PropertyTree::_toScreen(Vect2 point) const
 {
     POINT pt = { point.x - impl()->offset_.x + impl()->area_.left(), 
@@ -992,14 +909,11 @@ void PropertyTree::getSelectionSerializers(Serializers* serializers)
 
 void PropertyTree::updateAttachedPropertyTree()
 {
-	if (!attachedPropertyTree_)
-		return;
-
-	Object obj;
-	if (getSelectedObject(&obj))
-		attachedPropertyTree_->attach(obj);
-	else
-		attachedPropertyTree_->detach();
+	if(attachedPropertyTree_) {
+ 		Serializers serializers;
+ 		getSelectionSerializers(&serializers);
+ 		attachedPropertyTree_->attach(serializers);
+ 	}
 }
 
 struct FilterVisitor

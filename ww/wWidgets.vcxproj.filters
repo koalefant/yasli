@@ -286,9 +286,6 @@
     <ClInclude Include="Factory.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="PropertyRowObject.h">
-      <Filter>Widgets\PropertyTree</Filter>
-    </ClInclude>
     <ClInclude Include="gdiplusUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -528,9 +525,6 @@
     <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="Win32\Window32.cpp">
       <Filter>Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyRowObject.cpp">
-      <Filter>Widgets\PropertyTree</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowBool.cpp">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>

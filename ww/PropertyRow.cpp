@@ -1301,5 +1301,7 @@ FORCE_SEGMENT(PropertyRowStringListValue)
 FORCE_SEGMENT(PropertyRowHotkey)
 FORCE_SEGMENT(PropertyRowSlider)
 FORCE_SEGMENT(PropertyRowIcon)
+FORCE_SEGMENT(PropertyRowString)
+FORCE_SEGMENT(PropertyRowStringListValue)
 
 }
