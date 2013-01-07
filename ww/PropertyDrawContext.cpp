@@ -327,38 +327,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 
 void drawCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked, bool enabled)
 {
-	using Gdiplus::Color;
-	int size = 17;
 
-	int offsetY = ((rect.Height) - size) / 2;
-	int offsetX = ((rect.Width) - size) / 2;
-
-	Color brushColor;
-	Color penColor;
-	if (enabled) {
-		brushColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOW));
-	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-	}
-	else {
-		ww::Color shadow, face, mix;
-		shadow.setGDI(GetSysColor(COLOR_3DSHADOW));
-		face.setGDI(GetSysColor(COLOR_BTNFACE));
-		mix = shadow.interpolate(face, 0.5f);
-		
-		penColor.SetFromCOLORREF(mix.rgba());
-		brushColor.SetFromCOLORREF(face.rgba());
-	}
-
-	SolidBrush brush(brushColor);
-	Gdiplus::Rect checkRect(rect.X + offsetX, rect.Y + offsetY, size, size);
-	fillRoundRectangle(gr, &brush, checkRect, penColor, 4);
-
-	if(checked){
-		#include "Icons/check.xpm"
-		static Icon checkIcon(check_xpm);
-		Gdiplus::Bitmap* bitmap = drawingCache.getBitmapForIcon(checkIcon);
-		gr->DrawImage(bitmap, checkRect);
-	}
 }
 
 // ---------------------------------------------------------------------------
@@ -374,15 +343,45 @@ void PropertyDrawContext::drawIcon(const Rect& rect, const Icon& icon) const
 
 void PropertyDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checked) const
 {
-	if (checked == CHECK_IN_BETWEEN) {
-		HDC dc = graphics->GetHDC();
+	bool enabled = !disabled;
+	using Gdiplus::Color;
+	int size = 17;
 
-		RECT rt = { rect.left(), rect.top(), rect.right(), rect.bottom() };
-		Win32::drawGrayedCheck(dc, rt);
-		graphics->ReleaseHDC(dc);
+	int offsetY = ((rect.width()) - size) / 2;
+	int offsetX = ((rect.height()) - size) / 2;
+
+	Color brushColor;
+	Color penColor;
+	if (enabled) {
+		brushColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOW));
+		penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
 	}
 	else {
-		ww::drawCheck(graphics, gdiplusRect(rect), checked == CHECK_SET, !disabled);
+		ww::Color shadow, face, mix;
+		shadow.setGDI(GetSysColor(COLOR_3DSHADOW));
+		face.setGDI(GetSysColor(COLOR_BTNFACE));
+		mix = shadow.interpolate(face, 0.5f);
+		
+		penColor.SetFromCOLORREF(mix.rgba());
+		brushColor.SetFromCOLORREF(face.rgba());
+	}
+
+	SolidBrush brush(brushColor);
+	Gdiplus::Rect checkRect(rect.left() + offsetX, rect.top() + offsetY, size, size);
+	fillRoundRectangle(graphics, &brush, checkRect, penColor, 4);
+
+	if(checked == CHECK_SET){
+		#include "Icons/check.xpm"
+		static Icon checkIcon(check_xpm);
+		Gdiplus::Bitmap* bitmap = drawingCache.getBitmapForIcon(checkIcon);
+		graphics->DrawImage(bitmap, checkRect);
+	}
+	else if (checked == CHECK_IN_BETWEEN)
+	{
+		#include "Icons/check_tristate.xpm"
+		static Icon checkIcon(check_tristate_xpm);
+		Gdiplus::Bitmap* bitmap = drawingCache.getBitmapForIcon(checkIcon);
+		graphics->DrawImage(bitmap, checkRect);
 	}
 }
 

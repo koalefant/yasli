@@ -36,6 +36,7 @@ public:
 	bool onActivate(PropertyTree* tree, bool force);
 	void digestReset(const PropertyTree* tree);
 	wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
+	string valueAsString() const{ return value_ ? "true" : "false"; }
 	wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{

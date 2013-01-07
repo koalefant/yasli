@@ -87,6 +87,8 @@ bool Icon::getImage(RGBAImage* image) const
 				colors[colorIndex].second = Color(0, 0, 0, 0);
 			else if (_stricmp(p, "Black") == 0)
 				colors[colorIndex].second.setGDI(GetSysColor(COLOR_BTNTEXT));
+			else if (_stricmp(p, "DarkGray") == 0)
+				colors[colorIndex].second.setGDI(GetSysColor(COLOR_3DSHADOW));
 			else {
 				// unknown color
 				colors[colorIndex].second = Color(255, 0, 0, 255);
