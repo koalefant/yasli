@@ -11,6 +11,7 @@ using std::min;
 using std::max;
 #include "Colors.h"
 #include "yasli/Archive.h"
+#include "ww/Color.h"	
 using namespace yasli;
 
 
@@ -43,28 +44,60 @@ Color4c& Color4c::setGDI(unsigned long color)
 	return *this;
 }
 
-
-void Color4c::serialize(Archive& ar) 
+bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label) 
 {
-	ar(r, "", "&r");
-	ar(g, "", "&g");
-	ar(b, "", "&b");
-	ar(a, "", "&a");
+	if(ar.isEdit()){
+		ww::Color wc(c.r, c.g, c.b, c.a);
+		bool result = ar(wc, name, label);
+		c.set(wc.r, wc.g, wc.b, wc.a);
+		return result;
+	}
+	struct S : Color4c {
+		void serialize(yasli::Archive& ar) {
+			ar(r, "", "&r");
+			ar(g, "", "&g");
+			ar(b, "", "&b");
+			ar(a, "", "&a");
+		}
+	};
+	return ar((S&)c, name, label);
 }
 
-void Color4f::serialize(Archive& ar) 
+bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* label) 
 {
-	ar(r, "", "&r");
-	ar(g, "", "&g");
-	ar(b, "", "&b");
-	ar(a, "", "&a");
+	if(ar.isEdit()){
+		ww::Color wc(c.GetR(), c.GetG(), c.GetB(), c.GetA());
+		bool result = ar(wc, name, label);
+		c = Color4f(Color4c(wc.r, wc.g, wc.b, wc.a));
+		return result;
+	}
+	struct S : Color4f {
+		void serialize(yasli::Archive& ar) {
+			ar(r, "", "&r");
+			ar(g, "", "&g");
+			ar(b, "", "&b");
+			ar(a, "", "&a");
+		}
+	};
+	return ar((S&)c, name, label);
 }
 
-void Color3c::serialize(Archive& ar) 
+bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label) 
 {
-	ar(r, "", "&r");
-	ar(g, "", "&g");
-	ar(b, "", "&b");
+	if(ar.isEdit()){
+		ww::Color wc(c.r, c.g, c.b);
+		bool result = ar(wc, name, label);
+		c.set(wc.r, wc.g, wc.b);
+		return result;
+	}
+	struct S : Color3c {
+		void serialize(yasli::Archive& ar) {
+			ar(r, "", "&r");
+			ar(g, "", "&g");
+			ar(b, "", "&b");
+		}
+	};
+	return ar((S&)c, name, label);
 }
 
 

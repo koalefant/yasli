@@ -191,6 +191,9 @@ struct TestData
 	BitVector<USELESS_FLAGS> flags;
     float fvalue;
 	Color4c colors[4];
+	Color4c color4c;
+	Color4c color4f;
+	Color4c color3c;
 	std::string filename;
 	S1 s1;
 	S0 s0;
@@ -231,6 +234,9 @@ struct TestData
 			static FileSelector::Options options("*.ta", false, "");
 			bool order = mega_boolean;
 			ar(FileSelector(filename, options), "filename", "<");
+			ar(color4c, "color4c", "Color4c");
+			ar(color4f, "color4f", "Color4f");
+			ar(color3c, "color3c", "Color3c");
 			ar(colors, "colors", "Colors");
             ar(comboList_, "comboList", "^StringListValue");
 			ar.closeBlock();

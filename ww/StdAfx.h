@@ -30,9 +30,5 @@
 #include "Macros.h"
 #include "yasli/Pointers.h"
 
-#ifdef WW_ENABLE_XMATH
-# include "XMath/Profiler.h"
-#endif
-
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 

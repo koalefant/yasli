@@ -21,9 +21,6 @@
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Color.h"	
-#ifdef WW_ENABLE_XMATH
-# include "XMath/Colors.h"
-#endif
 #include "gdiplusUtils.h"
 
 namespace ww{
@@ -32,58 +29,15 @@ namespace ww{
 template<size_t Size>
 void formatColor(char (&str)[Size], const ww::Color& c) { sprintf_s(str, "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
 
-#ifdef WW_ENABLE_XMATH
-template<size_t Size>
-void formatColor(char (&str)[Size], const Color4c& c) { sprintf_s(str, sizeof(str), "(%i %i %i %i)", c.r, c.g, c.b, c.a); }
-template<size_t Size>
-void formatColor(char (&str)[Size], const Color3c& c) { sprintf_s(str, sizeof(str), "(%i %i %i)", c.r, c.g, c.b); }
-template<size_t Size>
-void formatColor(char (&str)[Size], const Color4f& c) { sprintf_s(str, sizeof(str), "(%g %g %g %g)", c.r, c.g, c.b, c.a); }
-
-#endif
-
-
-
 unsigned int toARGB(Color color)
 {
 	return color.argb();
 }
 
-#ifdef WW_ENABLE_XMATH
-unsigned int toARGB(Color4c color)
-{
-	return color.argb();
-}
-
-unsigned int toARGB(const Color4f& color)
-{
-	return Color4c(color).argb();
-}
-
-#endif
-
 void fromColor(Color* out, Color color)
 {
 	*out = color;
 }
-
-#ifdef WW_ENABLE_XMATH
-void fromColor(Color4c* out, Color color)
-{
-	out->set(color.r, color.g, color.b, color.a);
-}
-
-void fromColor(Color4f* out, Color color)
-{
-	*out = Color4f(Color4c(color.r, color.g, color.b, color.a));
-}
-
-
-void fromColor(Color3c* out, Color color)
-{
-	out->set(color.r, color.g, color.b);
-}
-#endif
 
 template<class ColorType>
 class PropertyRowColor : public PropertyRowImpl<ColorType, PropertyRowColor<ColorType> >{
@@ -170,12 +124,4 @@ PropertyRowColor<ColorType>::PropertyRowColor()
 DECLARE_SEGMENT(PropertyRowColor)
 typedef PropertyRowColor<Color> PropertyRowWWColor;
 REGISTER_PROPERTY_ROW(Color, PropertyRowWWColor); 
-#ifdef WW_ENABLE_XMATH
-typedef PropertyRowColor<Color3c> PropertyRowColor3c;
-REGISTER_PROPERTY_ROW(Color3c, PropertyRowColor3c); 
-typedef PropertyRowColor<Color4c> PropertyRowColor4c;
-REGISTER_PROPERTY_ROW(Color4c, PropertyRowColor4c); 
-typedef PropertyRowColor<Color4f> PropertyRowColor4f;
-REGISTER_PROPERTY_ROW(Color4f, PropertyRowColor4f); 
-#endif
 }

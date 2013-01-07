@@ -39,7 +39,7 @@ struct Color4f
 	bool operator == (const Color4f &color) const { return fabs(r - color.r) < FLT_EPS && fabs(g - color.g) < FLT_EPS && fabs(b - color.b) < FLT_EPS && fabs(a - color.a) < FLT_EPS; }
 	bool operator != (const Color4f &color) const { return !(*this == color); }
 
-	void serialize(yasli::Archive& ar);
+	friend bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* label);
 
 	operator const Vect4f& () const { return *((Vect4f*)this); }
 
@@ -91,7 +91,8 @@ struct Color4c
 	void hsv(float& h,float& s,float& v);
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
 	void interpolate(const Color4c &u,const Color4c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); a=round(u.a+(v.a-u.a)*f); }
-	void serialize(yasli::Archive& ar);
+	
+	friend bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label);
 
 	static const Color4c WHITE;
 	static const Color4c BLACK;
@@ -126,7 +127,7 @@ struct Color3c
 	void interpolate(const Color3c &u,const Color3c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); }
 	unsigned long argb() const 						{ return (0xff000000 | (r << 16) | g << 8 | b); }
 
-	void serialize(yasli::Archive& ar);
+	friend bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label);
 };
 
 
