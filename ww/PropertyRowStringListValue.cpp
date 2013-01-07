@@ -41,6 +41,7 @@ public:
 };
 
 // ---------------------------------------------------------------------------
+DECLARE_SEGMENT(PropertyRowStringListValue)
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
 class PropertyRowWidgetStringListValue : public PropertyRowWidget, public has_slots{
