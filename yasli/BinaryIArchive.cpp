@@ -283,7 +283,7 @@ bool BinaryIArchive::operator()(WStringInterface& value, const char* name, const
 	if(findNode(BINARY_NODE_WSTRING, Token(name), &start, &end))
 	{
 		// TODO: use stack string
-		std::wstring temp(pos_, end);
+		std::wstring temp((wchar_t*)pos_, (wchar_t*)end);
 		value.set(temp.c_str());
 		pos_ = end;
 		return true;

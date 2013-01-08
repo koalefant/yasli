@@ -135,7 +135,7 @@ bool BinaryOArchive::operator()(StringInterface &value, const char *_name, const
 bool BinaryOArchive::operator()(WStringInterface &value, const char *_name, const char* label)
 {
 	openNode(BINARY_NODE_WSTRING, _name);
-	stream_->write(value.get(), wcslen(value.get()));
+	stream_->write(value.get(), sizeof(wchar_t) * wcslen(value.get()));
 	closeNode();
 	return true;
 }
