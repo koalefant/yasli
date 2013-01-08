@@ -122,7 +122,6 @@ PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* 
 	return new PropertyRowWidgetStringListValue(this, tree->model());
 }
 
-DECLARE_SEGMENT(PropertyRowStringListValue)
 }
 
 // vim:ts=4 sw=4:

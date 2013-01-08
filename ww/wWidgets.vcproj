@@ -980,14 +980,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PropertyRowObject.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyRowObject.h"
-					>
-				</File>
-				<File
 					RelativePath=".\PropertyTree.cpp"
 					>
 				</File>

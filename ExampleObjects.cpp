@@ -214,7 +214,7 @@ public:
 
 	void onPropertyChanged(const yasli::Object& object)
 	{
-		outlineTree_->revertObject(object.address());
+		//outlineTree_->revertObject(object.address());
 	}
 };
 
