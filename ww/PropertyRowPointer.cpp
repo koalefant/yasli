@@ -18,15 +18,10 @@
 
 #include "ww/ConstStringList.h"
 #include "ww/PopupMenu.h"
-#include "ww/Entry.h"
 #include "ClassMenu.h"
 
-#include "yasli/BitVector.h"
-#include "yasli/Archive.h"
-#include "yasli/BitVectorImpl.h"
+#include "Serialization.h"
 #include "yasli/ClassFactory.h"
-#include "yasli/Enum.h"
-#include "ww/SafeCast.h"
 #include "ww/PopupMenu.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Win32/Drawing.h"
@@ -70,29 +65,53 @@ PropertyRowPointer::PropertyRowPointer()
 {
 }
 
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const PointerInterface &ptr)
+PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const yasli::PointerInterface &ptr)
 : PropertyRow(name, label, ptr.baseType().name())
 , baseType_(ptr.baseType())
-, derivedType_(ptr.type())
 , factory_(ptr.factory())
 {
     serializer_ = ptr.serializer();
+		const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
+		if (desc)
+			derivedTypeName_ = desc->name();
 }
 
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, TypeID baseType, TypeID derivedType, ClassFactoryBase* factory)
+PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, TypeID baseType, yasli::ClassFactoryBase* factory, const char* derivedTypeName)
 : PropertyRow(name, label, baseType.name())
 , baseType_(baseType)
-, derivedType_(derivedType)
 , factory_(factory)
+, derivedTypeName_(derivedTypeName)
 {
 }
 
-bool PropertyRowPointer::assignTo(PointerInterface &ptr)
+void PropertyRowPointer::setDerivedType(const TypeID& typeID, yasli::ClassFactoryBase* factory)
 {
-	if ( ptr.type() != derivedType_ )
-	{
-		ptr.create(derivedType_);
+	if (!factory) {
+		derivedTypeName_.clear();
+		return;
 	}
+	const yasli::TypeDescription* desc = factory->descriptionByType(typeID);
+	if (!desc) {
+		derivedTypeName_.clear();
+		return;
+	}
+	derivedTypeName_ = desc->name();
+}
+
+TypeID PropertyRowPointer::getDerivedType(yasli::ClassFactoryBase* factory) const
+{
+	if (!factory)
+		return TypeID();
+	return factory->findTypeByName(derivedTypeName_.c_str());
+}
+
+bool PropertyRowPointer::assignTo(yasli::PointerInterface &ptr)
+{
+	TypeID derivedType = getDerivedType(ptr.factory());
+	if ( ptr.type() != derivedType ) {
+		ptr.create(derivedType);
+	}
+
     return true;
 }
 
@@ -101,7 +120,7 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 {
     tree->model()->push(this);
 	if(index < 0){ // NULL value
-		derivedType_ = TypeID();
+		setDerivedType(TypeID(), 0);
 	    clear();
 	}
 	else{
@@ -113,11 +132,11 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
                 clear();
 				cloneChildren(this, defaultValue->root);
             }
-			derivedType_ = defaultValue->type;
+			setDerivedType(defaultValue->type, factory());
 			tree->expandRow(this);
 		}
         else{
-            derivedType_ = TypeID();
+            setDerivedType(TypeID(), 0);
             clear();
         }
 	}
@@ -125,14 +144,17 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 }
 
 
-string PropertyRowPointer::valueAsString() const
+yasli::string PropertyRowPointer::valueAsString() const
 {
-    string result = derivedType_.name();
-		if (factory_) {
-			const TypeDescription* desc = factory_->descriptionByType(derivedType_);
+	yasli::string result;
+	const yasli::TypeDescription* desc = 0;
+	if (factory_)
+		desc = factory_->descriptionByType(getDerivedType(factory_));
 			if (desc)
 				result = desc->label();
-		}
+	else
+		result = derivedTypeName_;
+
     if(digest()[0] != L'\0'){
         result += " ( ";
         result += fromWideChar(digest());
@@ -141,16 +163,16 @@ string PropertyRowPointer::valueAsString() const
 	return result;
 }
 
-wstring PropertyRowPointer::generateLabel() const
+yasli::wstring PropertyRowPointer::generateLabel() const
 {
 	if(multiValue())
 		return L"...";
 
-    wstring str;
-	if(derivedType_){
-		const char* textStart = derivedType_.name();
-		if (factory_) {
-			const TypeDescription* desc = factory_->descriptionByType(derivedType_);
+		yasli::wstring str;
+		if(!derivedTypeName_.empty()){
+			const char* textStart = derivedTypeName_.c_str();
+			if (factory_) {
+				const yasli::TypeDescription* desc = factory_->descriptionByType(getDerivedType(factory_));
 			if (desc)
 				textStart = desc->label();
 		}
@@ -163,7 +185,7 @@ wstring PropertyRowPointer::generateLabel() const
 		str = toWideChar(p);
 		if(p != textStart){
 			str += L" (";
-			str += toWideChar(string(textStart, p - 1).c_str());
+				str += toWideChar(yasli::string(textStart, p - 1).c_str());
 			str += L")";
 		}
 	}
@@ -199,7 +221,7 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	wstring str = generateLabel();
 	const wchar_t* text = str.c_str();;
 	//context.drawValueText(false, text);
-	Gdiplus::Font* font = derivedType_ == TypeID() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
+	Gdiplus::Font* font = derivedTypeName_.empty() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
 	context.tree->_drawRowValue(context.graphics, text, font, textRect, textColor, false, false);
 }
 
@@ -241,18 +263,12 @@ bool PropertyRowPointer::onContextMenu(PopupMenuItem &menu, PropertyTree* tree)
 	    PopupMenuItem0& createItem = menu.add("Set");
 	    ClassMenuItemAdderRowPointer(this, tree).generateMenu(createItem, tree->model()->typeStringList(baseType()));
     }
-
 	return PropertyRow::onContextMenu(menu, tree);
 }
 
 void PropertyRowPointer::serializeValue(Archive& ar)
 {
-	if (factory_) {
-		TypeIDWithFactory pair(derivedType_, factory_);
-		ar(pair, "derivedType", "DerivedType");
-		if (ar.isInput())
-			derivedType_ = pair.type;
-	}
+	ar(derivedTypeName_, "derivedTypeName", "Derived Type Name");
 }
 
 int PropertyRowPointer::widgetSizeMin() const

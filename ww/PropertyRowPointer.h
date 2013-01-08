@@ -13,10 +13,6 @@
 #include "ww/API.h"
 #include "ww/PropertyRow.h"
 
-namespace yasli{
-class EnumDescription;
-}
-
 namespace ww{
 
 class PropertyTreeModel;
@@ -25,14 +21,17 @@ class PropertyRowPointer : public PropertyRow, public has_slots{
 public:
 	enum { Custom = false };
 	PropertyRowPointer();
-	PropertyRowPointer(const char* name, const char* label, const PointerInterface &ptr);
-	PropertyRowPointer(const char* name, const char* label, TypeID baseType, TypeID derivedType, ClassFactoryBase* factory);
+	PropertyRowPointer(const char* name, const char* label, const yasli::PointerInterface &ptr);
+	PropertyRowPointer(const char* name, const char* label, yasli::TypeID baseType, yasli::ClassFactoryBase* factory, const char* derivedTypeName);
 
-	bool assignTo(PointerInterface &ptr);
+	bool assignTo(yasli::PointerInterface &ptr);
+	using PropertyRow::assignTo;
 
-	TypeID baseType() const{ return baseType_; }
-	TypeID derivedType() const{ return derivedType_; }
-	ClassFactoryBase* factory() const{ return factory_; }
+	yasli::TypeID baseType() const{ return baseType_; }
+	const char* derivedTypeName() const{ return derivedTypeName_.c_str(); }
+	yasli::TypeID getDerivedType(yasli::ClassFactoryBase* factory) const;
+	void setDerivedType(const yasli::TypeID& typeID, yasli::ClassFactoryBase* factory);
+	yasli::ClassFactoryBase* factory() const{ return factory_; }
     bool onActivate( PropertyTree* tree, bool force);
     bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
 	bool onContextMenu(PopupMenuItem &root, PropertyTree* tree);
@@ -43,17 +42,19 @@ public:
     wstring generateLabel() const;
 	string valueAsString() const;
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, derivedType_, factory_), this);
+		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, factory_, derivedTypeName_.c_str()), this);
 	}
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	void serializeValue(Archive& ar);
 protected:
-    TypeID baseType_;
-    TypeID derivedType_;
-    ClassFactoryBase* factory_;
 
-	string title_;
+	yasli::TypeID baseType_;
+	yasli::string derivedTypeName_;
+	yasli::string derivedLabel_;
+
+	// this member is available for instances deserialized from clipboard:
+	yasli::ClassFactoryBase* factory_;
 };
 
 }

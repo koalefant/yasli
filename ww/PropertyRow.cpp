@@ -1059,7 +1059,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, Prope
 
 void PropertyRow::intersect(const PropertyRow* row)
 {
-	setMultiValue(valueAsString() != row->valueAsString());
+	setMultiValue(multiValue() || row->multiValue() || valueAsString() != row->valueAsString());
 
 	iterator it = begin();
 	const_iterator it2 = row->begin();

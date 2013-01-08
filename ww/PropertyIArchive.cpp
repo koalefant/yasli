@@ -36,8 +36,8 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 bool PropertyIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
- 			value.set(fromWideChar(row->value().c_str()).c_str());
+		PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_);
+ 		value.set(fromWideChar(row->value().c_str()).c_str());
 		closeRow(name);
 		return true;
 	}
@@ -48,9 +48,8 @@ bool PropertyIArchive::operator()(StringInterface& value, const char* name, cons
 bool PropertyIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		if(PropertyRowString* row = safe_cast<PropertyRowString*>(currentNode_)) {
-			value.set(row->value().c_str());
-		}
+		PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_);
+		value.set(row->value().c_str());
 		closeRow(name);
 		return true;
 	}
