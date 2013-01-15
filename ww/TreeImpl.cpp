@@ -942,7 +942,7 @@ void TreeImpl::ensureVisible(PropertyRow* row, bool update)
 
 	Rect rect = row->rect();
 	if(rect.top() < area_.top() + offset_.y){
-		offset_.y =  rect.top() - area_.top();
+		offset_.y =  max(rect.top() - area_.top(), 0);
 	}
 	else if(rect.bottom() > area_.bottom() + offset_.y){
 		offset_.y = rect.bottom() - area_.bottom();

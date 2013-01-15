@@ -1019,7 +1019,11 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 	Type type = NAME;
 	while (true)
 	{
+#ifdef WW_STRICT_FILTER
 		bool fromStart = true;
+#else
+		bool fromStart = false;
+#endif
 		while (*str == L' ' || *str == L'*') {
 			fromStart = false;
 			++str;
