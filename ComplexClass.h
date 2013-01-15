@@ -230,7 +230,7 @@ public:
 	{
 		name_ = "Slightly changed name";
 		index_ = 2;
-		polyPtr_.set( new PolyDerivedB() );
+		polyPtr_.reset( new PolyDerivedB() );
 		polyPtr_->change();
 
 		for (size_t i = 0; i < members_.size(); ++i)
