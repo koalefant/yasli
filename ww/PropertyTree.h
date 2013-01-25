@@ -96,7 +96,6 @@ public:
 	void apply();
 	void revert();
 
-
 	void setCompact(bool compact) { compact_ = compact; update(); }
 	void setFullRowMode(bool fullRowMode) { fullRowMode_ = fullRowMode; update(); }
 	void setExpandLevels(int levels);
@@ -104,6 +103,8 @@ public:
 	void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
 
 	Vect2 treeSize() const;
+	int leftBorder() const { return leftBorder_; }
+	int rightBorder() const { return rightBorder_; }
 	bool multiSelectable() const { return attachedPropertyTree_ != 0; }
 
 	signal0& signalChanged(){ return signalChanged_; }
@@ -225,6 +226,8 @@ protected:
 
 	bool autoRevert_;
 	bool needUpdate_;
+	int leftBorder_;
+	int rightBorder_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

@@ -48,8 +48,8 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 , rootNode_(root)
 {
 	YASLI_ASSERT(model != 0);
-	if(rootNode()){
-		updateMode_ = true;
+	if(!rootNode()->empty()){ 
+		updateMode_ = true; // hit performance
 		setUpdatedRecurse(rootNode(), false);
 	}
 }

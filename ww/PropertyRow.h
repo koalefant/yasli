@@ -176,21 +176,21 @@ public:
 	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-    void calculateMinimalSize(const PropertyTree* tree);
+    void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize = 0);
 	void setTextSize(float multiplier);
-	void calculateTotalSizes(int* minTextSize);
-    void adjustRect(const PropertyTree* tree, const Rect& rect, Vect2 pos, int& totalHeight, int& extraSize);
+	void calcPulledRows(int& minTextSize, int& freePulledChildren, int& minimalWidth);
+    void adjustRect(const PropertyTree* tree, int& totalHeight);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
+	const Vect2& pos() const { return pos_; }
 	const Rect rect() const{ return Rect(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
 	const Rect textRect() const{ return Rect(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
     const Rect widgetRect() const{ return Rect(widgetPos_, pos_.y, widgetPos_ + widgetSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
     const Rect plusRect() const{ return Rect(pos_.x, pos_.y, pos_.x + plusSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
 	const Rect floorRect() const { return Rect(textPos_, pos_.y + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, pos_.y + size_.y); }
-	void adjustHoveredRect(Rect& hoveredRect);
 	Gdiplus::Font* rowFont(const PropertyTree* tree) const;
 	
 	void drawRow(HDC dc, const PropertyTree* tree);
@@ -202,7 +202,7 @@ public:
 	
 	virtual bool isContainer() const{ return false; }
 	virtual bool isPointer() const{ return false; }
-	virtual bool isObject() const{ return false; }
+	virtual bool isObject() const{ return isObject_; }
 
 	virtual bool isLeaf() const{ return false; }
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
@@ -293,13 +293,11 @@ protected:
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
-	// number of pulled childrens
-	char freePulledChildren_;
+	bool isObject_ : 1;
 
 	// do we really need Vect2s here? 
 	Vect2 pos_;
 	Vect2 size_;
-	short int minimalWidth_;
     short int plusSize_;
 	short int textPos_;
 	short int textSizeInitial_;

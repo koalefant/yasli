@@ -98,6 +98,8 @@ PropertyTree::PropertyTree(int border)
 , attachedPropertyTree_(0)
 , autoRevert_(true)
 , needUpdate_(true)
+, leftBorder_(0)
+, rightBorder_(0)
 , filterMode_(false)
 {
 	(TreeConfig&)*this = defaultConfig;
@@ -386,15 +388,16 @@ void PropertyTree::interruptDrag()
 void PropertyTree::updateHeights()
 {
 	needUpdate_ = false;
-	model()->root()->calculateMinimalSize(this);
+
+	int lb = compact_ ? 0 : 4;
+	int rb = impl()->area_.size().x - lb*2;
+	bool force = lb != leftBorder() || rb != rightBorder();
+	leftBorder_ = lb;
+	rightBorder_ = rb;
+	model()->root()->calculateMinimalSize(this, leftBorder(), force);
+
 	impl()->size_.y = 0;
-
-    int padding = compact_ ? 0 : 4;
-
-    Rect rect(Vect2(padding, padding), impl()->area_.size() - Vect2(padding, padding) * 2);
-
-	int extraSize = 0;
-	model()->root()->adjustRect(this, rect, rect.leftTop(), impl()->size_.y, extraSize);
+	model()->root()->adjustRect(this, impl()->size_.y);
 	impl()->updateScrollBar();
 }
 
@@ -641,7 +644,7 @@ void PropertyTree::onRowMenuPaste(SharedPtr<PropertyRow> row)
     model()->push(row);
 	Clipboard clipboard(this, &constStrings_, model());
 	if(clipboard.paste(row))
-		model()->rowChanged(parent ? parent : model()->root());
+		model()->rowChanged(row/*parent ? parent : model()->root()*/);
 	else
 		YASLI_ASSERT(0 && "Unable to paste element!"); 
 }
@@ -685,9 +688,17 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows)
 		widget_ = 0;
 
 	if (immediateUpdate_) {
-		applyChanged(true);
+		if(rows.empty())
+			applyChanged(true);
+		else{
+			PropertyIArchive ia(model_, rows.front());
+			Archive::Context<ww::PropertyTree> treeContext(ia, this);
+			ia.setFilter(filter_);
+			rows.front()->serializer()(ia);
+			rows.front()->calculateMinimalSize(this, rows.front()->pos().x, true); 
+		}
 		signalChanged_.emit();
-		if (autoRevert_)
+		if (autoRevert_ && rows.empty())
 			revert();
 	}
 

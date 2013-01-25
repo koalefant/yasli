@@ -162,21 +162,56 @@ struct S1 {
 	}
 };
 
+struct Cell {
+	bool b;
+	char c;
+	unsigned char uc;
+	short s;
+	unsigned short us;
+	int i;
+	unsigned int ui;
+	float f;
+	double d;
+	long long ll;
+	unsigned long long ull;
+	string str;
+	wstring wstr;
+
+	Cell(){ 
+		b = false;
+		c = 0;
+		uc = 0;
+		s = 0;
+		us = 0;
+		i = 0;
+		ui = 0;
+		f = 0;
+		d = 0;
+		ll = 0;
+		ull = 0;
+	}
+	
+	void serialize(Archive& ar){
+		ar(b, "b", "b");
+		ar(c, "c", "c");
+		ar(uc, "uc", "uc");
+		ar(s, "s", "s");
+		ar(us, "us", "us");
+		ar(i, "i", "i");
+		ar(ui, "ui", "ui");
+		ar(f, "f", "f");
+		ar(d, "d", "d");
+		ar(ll, "ll", "ll");
+		ar(ull, "ull", "ull");
+		ar(str, "str", "str");
+		ar(wstr, "wstr", "wstr");
+	}
+};
+
+typedef std::vector<Cell> Cells;
+
 struct TestData
 {
-	TestData () {
-		enableSerialization_ = true;
-		type = ENUM_FLOATS;
-		labels.push_back ("First String");
-		labels.push_back ("Second String");
-		labels.push_back ("Last One");
-		for(int i = 0; i < 200; ++i)
-			labels.push_back((MemoryWriter() << i).c_str());
-		single_child = 0;
-		comboList_ = StringListValue(labels, 0);
-		float_value = 5.0000001e-002f;
-	}
-
 	StringListValue comboList_;
 	bool mega_boolean;
 	std::vector< SharedPtr<TestBase> > child;
@@ -188,6 +223,7 @@ struct TestData
     std::wstring description;
 	Vect2i position;
 	Vect2i size;
+	Vect4f v4;
 	BitVector<USELESS_FLAGS> flags;
     float fvalue;
 	Color4c colors[4];
@@ -197,6 +233,7 @@ struct TestData
 	std::string filename;
 	S1 s1;
 	S0 s0;
+	Cells cells;
 
 	std::list<TestData> childs;
 	std::list<TestBase> childsBase;
@@ -217,6 +254,19 @@ struct TestData
 	std::vector<Color4c> Colors;
 	std::vector<int> ints;
 
+	TestData () : cells(5000, Cell()) {
+		enableSerialization_ = true;
+		type = ENUM_FLOATS;
+		labels.push_back ("First String");
+		labels.push_back ("Second String");
+		labels.push_back ("Last One");
+		for(int i = 0; i < 200; ++i)
+			labels.push_back((MemoryWriter() << i).c_str());
+		single_child = 0;
+		comboList_ = StringListValue(labels, 0);
+		float_value = 5.0000001e-002f;
+	}
+
 	void serialize_(Archive& ar) {
 		//ar(Colors, "colors", "Colors");
 		//ar(ints, "ints", "Ints");
@@ -224,8 +274,12 @@ struct TestData
 		//ar(double_value, "double_value", "С плавающей запятой, двойной точности");
 		//ar(Vect2f(0,0), "vect2", "Vect2");
 		//ar(single_child, "single_child", "Condition");
+// 		if(ar.openBlock("customEditors", "Custom Editors")){
+// 			ar(size, "size", "size");
+// 			ar.closeBlock();
+// 		}
+//		ar(vects, "vects", "[<[^>100>]]Vects");
 		ar(s1, "s1", "s1");
-		ar(s0, "s0", "s0");
 	}
 
 	void serialize(Archive& ar) {
@@ -238,12 +292,15 @@ struct TestData
 			ar(color4f, "color4f", "Color4f");
 			ar(color3c, "color3c", "Color3c");
 			ar(colors, "colors", "Colors");
-            ar(comboList_, "comboList", "^StringListValue");
+			ar(vects, "vects", "^Vects");
+			ar(comboList_, "comboList", "^StringListValue");
+			//ar(vects, "vects", "[<[^>100>]]Vects");
 			ar.closeBlock();
 		}
 
+		ar(cells, "cells", "[#]cells");
+
 		ar(HLineDecorator(), "hline1", 0);
-		ar(vects, "vects", "[<[^>100>]]Vects");
 		ar(single_child, "single_child", ">100>Condition");
 		ar(HLineDecorator(), "hline2", "<");
 		ButtonDecorator button("Open in PropertyEditor");
