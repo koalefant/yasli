@@ -258,17 +258,18 @@ void PropertyTreeModel::rowChanged(PropertyRow* row)
 {
 	YASLI_ESCAPE(row, return);
 
-	row->setMultiValue(false);
+	PropertyRow* parentObj = row;
+	while (parentObj->parent() && !parentObj->isObject())
+		parentObj = parentObj->parent();
 
-	PropertyRows rows;
-	for(; row; row = row->parent()){
+	row->setMultiValue(false);
+	while (row->parent()) {
 		row->setLabelChanged();
-		if(row->isObject()){
-			rows.push_back(row);
-			break;
-		}
+		row = row->parent();
 	}
 
+	PropertyRows rows;
+	rows.push_back(parentObj);
 	requestUpdate(rows);
 }
 

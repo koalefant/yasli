@@ -22,9 +22,9 @@ using namespace std;
 //#pragma warning (disable: 4073) // initializers put in library initialization area
 //#pragma init_seg(lib)
 
-// YASLI_CLASS(TimerData, TimerData, "TimerData")
-// YASLI_CLASS(StatisticalData, StatisticalData, "StatisticalData")
-// YASLI_CLASS(Profiler, Profiler, "Profiler")
+YASLI_CLASS(TimerData, TimerData, "TimerData")
+YASLI_CLASS(StatisticalData, StatisticalData, "StatisticalData")
+YASLI_CLASS(Profiler, Profiler, "Profiler")
 
 struct SerializeAll{
 	SerializeAll(Profiler* profiler)

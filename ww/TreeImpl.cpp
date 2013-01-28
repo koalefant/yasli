@@ -771,14 +771,8 @@ protected:
 
 void TreeImpl::redraw(HDC dc)
 {
-	if(tree_->needUpdate_){
-		int sy = size_.y;
+	if(tree_->needUpdate_)
 		tree_->updateHeights();
-		if(!sy && size_.y > area_.height()){ // Не очень красивый фикс: появляющийся в первый раз скроллбар налезает на дерево. 
-			updateArea();
-			tree_->updateHeights();
-		}
-	}
 
 	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
     ::GetClientRect(handle_, &clientRect);
