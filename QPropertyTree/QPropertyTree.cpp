@@ -198,39 +198,38 @@ void PropertyTreeMenuHandler::onMenuPaste()
 	tree->model()->rowChanged(parent ? parent : tree->model()->root());
 }
 
-/*
-class FilterEntry : public Entry
+class FilterEntry : public QLineEdit
 {
 public:
 	FilterEntry(QPropertyTree* tree)
-	: tree_(tree)
+    : QLineEdit(tree)
+    , tree_(tree)
 	{
-		setSwallowArrows(true);
-		setSwallowReturn(true);
-		setSwallowEscape(true);
+        //setSwallowArrows(true);
+        //setSwallowReturn(true);
+        //setSwallowEscape(true);
 	}
 protected:
-	bool onKeyPress(const KeyPress& key)
-	{
-		if (key.key == KEY_UP ||
-			key.key == KEY_DOWN ||
-			key.key == KEY_ESCAPE ||
-			key.key == KEY_RETURN)
-		{
-			SetFocus(tree_->impl()->handle());
-			PostMessageW(tree_->impl()->handle(), WM_KEYDOWN, key.key, 0);
-			return true;
-		}
-		if (key.key == KEY_BACK && text()[0] == '\0')
-		{
-			tree_->setFilterMode(false);
-		}
-		return false;
-	}
+
+    void keyPressEvent(QKeyEvent * ev)
+    {
+        if (ev->key() == Qt::Key_Escape || ev->key() == Qt::Key_Return)
+        {
+            ev->accept();
+            tree_->setFocus();
+            tree_->keyPressEvent(ev);
+        }
+
+        if (ev->key() == Qt::Key_Backspace && text()[0] == '\0')
+        {
+            tree_->setFilterMode(false);
+        }
+        QLineEdit::keyPressEvent(ev);
+    }
 private:
 	QPropertyTree* tree_;
 };
-*/
+
 
 // ---------------------------------------------------------------------------
 
@@ -275,9 +274,9 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	connect(model_.data(), SIGNAL(signalPushUndo(PropertyTreeOperator*, bool*)), this, SLOT(onModelPushUndo(PropertyTreeOperator*, bool*)));
 	//model_->signalPushUndo().connect(this, &QPropertyTree::onModelPushUndo);
 
-  // filterEntry_ = new FilterEntry(this);
-  //  filterEntry_->_setParent(this);
-  //  filterEntry_->signalChanged().connect(this, &QPropertyTree::onFilterChanged);
+    filterEntry_.reset(new FilterEntry(this));
+    QObject::connect(filterEntry_.data(), SIGNAL(textChanged(const QString&)), this, SLOT(onFilterChanged(const QString&)));
+    filterEntry_->hide();
 
 	DrawingCache::get()->initialize();
 }
@@ -781,7 +780,7 @@ void QPropertyTree::revert()
 	if (filterMode_) {
 		if (model_->root())
 		model_->root()->updateLabel(this);		
-		onFilterChanged();
+        onFilterChanged(QString());
 	}
 
 	update();
@@ -1039,7 +1038,6 @@ bool QPropertyTree::hasFocusOrInplaceHasFocus() const
 
 void QPropertyTree::setFilterMode(bool inFilterMode)
 {
-	/*
     bool changed = filterMode_ != inFilterMode;
     filterMode_ = inFilterMode;
     
@@ -1047,27 +1045,24 @@ void QPropertyTree::setFilterMode(bool inFilterMode)
 	{
         filterEntry_->show();
 		filterEntry_->setFocus();
-		filterEntry_->setSelection(ww::EntrySelection(0, -1));
+        filterEntry_->selectAll();
 	}
     else
         filterEntry_->hide();
 
     if (changed)
     {
-        onFilterChanged();
-        impl()->updateArea();
-		::InvalidateRect(impl()->handle(), 0, FALSE);
+        onFilterChanged(QString());
+        updateArea();
     }
-		*/
 }
 
 void QPropertyTree::startFilter(const char* filter)
 {
 	setFilterMode(true);
 	filterEntry_->setText(filter);
-	onFilterChanged();
+    onFilterChanged(filter);
 }
-
 
 
 void QPropertyTree::_arrangeChildren()
@@ -1100,7 +1095,7 @@ void QPropertyTree::_arrangeChildren()
 	if (filterEntry_) {
 		QSize size = rect().size();
 		const int padding = 2;
-		QRect pos(60, padding, size.width() - padding - 8, filterEntry_->height() + padding);
+        QRect pos(padding, padding, size.width() - padding * 2, filterEntry_->height());
 		filterEntry_->move(pos.topLeft());
 		filterEntry_->resize(pos.size());
 	}
@@ -1452,7 +1447,7 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 	return true;
 }
 
-void QPropertyTree::onFilterChanged()
+void QPropertyTree::onFilterChanged(const QString& text)
 {
 	QByteArray arr = filterEntry_->text().toLocal8Bit();
 	const char* filterStr = filterMode_ ? arr.data() : "";
@@ -1466,52 +1461,59 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 {
 	int textLen = (int)wcslen(text);
 
-	// Gdiplus::StringFormat format;
-	// format.SetAlignment(center ? Gdiplus::StringAlignmentCenter : Gdiplus::StringAlignmentNear);
-	// format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-	// format.SetTrimming(pathEllipsis ? Gdiplus::StringTrimmingEllipsisPath : Gdiplus::StringTrimmingEllipsisCharacter);
-	// format.SetFormatFlags(Gdiplus::StringFormatFlagsNoWrap);
+    if (textLen == 0)
+        return;
 
 	QRect textRect = rect;
 	if (filterMode_) {
-	// 	size_t hiStart = 0;
-	// 	size_t hiEnd = 0;
-	// 	if (rowFilter_.match(text, type, &hiStart, &hiEnd)) {
-	// 		Gdiplus::RectF boxFull;
-	// 		Gdiplus::RectF boxStart;
-	// 		Gdiplus::RectF boxEnd;
-	// 		
-	// 		gr->MeasureString(text, textLen, font, textRect, &format, &boxFull, 0, 0);
-	// 		
-	// 		if (hiStart > 0)
-	// 			gr->MeasureString(text, (int)hiStart, font, textRect, &format, &boxStart, 0, 0);
-	// 		else {
-	// 			gr->MeasureString(text, textLen, font, textRect, &format, &boxStart, 0, 0);
-	// 			boxStart.Width = 0.0;
-	// 		}
-	// 		gr->MeasureString(text, (int)hiEnd, font, textRect, &format, &boxEnd, 0, 0);
+        size_t hiStart = 0;
+        size_t hiEnd = 0;
+        yasli::string textStr(fromWideChar(text));
+        if (rowFilter_.match(textStr.c_str(), type, &hiStart, &hiEnd) && hiStart != hiEnd) {
+            QRectF boxFull;
+            QRectF boxStart;
+            QRectF boxEnd;
 
-	// 		ww::Color highlightColor, highlightBorderColor;
-	// 		{
-	// 			highlightColor.setGDI(GetSysColor(COLOR_HIGHLIGHT));
-	// 			float h, s, v;
-	// 			highlightColor.toHSV(h, s, v);
-	// 			h -= 175.0f;
-	// 			if (h < 0.0f)
-	// 				h += 360.0f;
-	// 			highlightColor.setHSV(h, min(1.0f, s * 1.33f), 1.0f, 255);
-	// 			highlightBorderColor.setHSV(h, s * 0.5f, 1.0f, 255);
-	// 		}
+            QString str(textStr.c_str());
+            QFontMetrics fm(*font);
+            boxFull = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str);
+
+            if (hiStart > 0)
+                boxStart = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str.left(hiStart));
+            else {
+                boxStart = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str);
+                boxStart.setWidth(0.0f);
+            }
+            boxEnd = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str.left(hiEnd));
+
+            QColor highlightColor, highlightBorderColor;
+            {
+                highlightColor = palette().color(QPalette::Highlight);
+                int h, s, v;
+                highlightColor.getHsv(&h, &s, &v);
+                h -= 175;
+                if (h < 0)
+                    h += 360;
+                highlightColor.setHsv(h, min(255, int(s * 1.33f)), v, 255);
+                highlightBorderColor.setHsv(h, s * 0.5f, v, 255);
+            }
 
 	// 		Gdiplus::SolidBrush br(Gdiplus::Color(highlightColor.argb()));
-	// 		int left = int(boxFull.X + boxStart.Width) - 1;
-	// 		int top = int(boxFull.Y);
-	// 		int right = int(boxFull.X + boxEnd.Width);
-	// 		int bottom = int(boxFull.Y + boxEnd.Height);
-	// 		Gdiplus::Rect highlightRect(left, top, right - left, bottom - top);
+            int left = int(boxFull.left() + boxStart.width()) - 1;
+            int top = int(boxFull.top());
+            int right = int(boxFull.left() + boxEnd.width());
+            int bottom = int(boxFull.top() + boxEnd.height());
+            QRect highlightRect(left, top, right - left, bottom - top);
+            QBrush br(highlightColor);
+            p.setBrush(br);
+            p.setPen(highlightBorderColor);
+            bool oldAntialiasing = p.renderHints().testFlag(QPainter::Antialiasing);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.drawRoundedRect(highlightRect, 4.0, 4.0);
+            p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
 
 	// 		fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(highlightBorderColor.argb()) /*Gdiplus::Color(255, 255, 128)*/, 1);
-	// 	}
+        }
 	}
 	
 	QBrush textBrush(textColor);

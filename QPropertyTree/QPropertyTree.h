@@ -142,6 +142,7 @@ signals:
 public slots:
 	void expandAll(PropertyRow* root = 0);
 	void collapseAll(PropertyRow* root = 0);
+    void onFilterChanged(const QString& str);
 protected slots:
 	void onScroll(int pos);
 	void onModelUpdated(const PropertyRows& rows);
@@ -214,7 +215,6 @@ protected:
 	void onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point);
 	void onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoint point);
 
-	void onFilterChanged();
 
 	bool activateRow(PropertyRow* row);
 	bool canBePasted(PropertyRow* destination);
