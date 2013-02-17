@@ -191,7 +191,10 @@ public:
 	virtual const wchar_t** getInplacePointer() const{ return 0; }
 };
 
+struct TypeIDWithFactory;
 
 }
+
+bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* name, const char* label);
 
 // vim:ts=4 sw=4:

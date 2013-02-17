@@ -8,11 +8,21 @@
  */
 
 #include "Unicode.h"
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+
+#ifdef _WIN32
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+#else
+# include <vector>
+# include <QtCore/QString>
+#endif
 
 yasli::string fromWideChar(const wchar_t* wstr)
 {
+  // We have different implementation for windows as Qt for windows 
+  // is built with wchar_t of diferent size (4 bytes, as on linux).
+  // Therefore we avoid calling any wchar_t functions in Qt.
+#ifdef _WIN32
 	const unsigned int codepage = CP_ACP;
 	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
 	char* buf = (char*)alloca(len);
@@ -21,11 +31,14 @@ yasli::string fromWideChar(const wchar_t* wstr)
 		return yasli::string(buf, len - 1);
     }
 	return yasli::string();
-
+#else
+    return QString::fromWCharArray(wstr).toUtf8().data();
+#endif
 }
 
 yasli::wstring toWideChar(const char* str)
 {
+#ifdef _WIN32
 	const unsigned int codepage = CP_ACP;
     int len = MultiByteToWideChar(codepage, 0, str, -1, NULL, 0);
 	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
@@ -34,30 +47,12 @@ yasli::wstring toWideChar(const char* str)
 		return yasli::wstring(buf, len - 1);
     }
 	return yasli::wstring();
-}
+#else
+    QString s = QString::fromUtf8(str);
 
-yasli::wstring fromANSIToWide(const char* str)
-{
-	const unsigned int codepage = CP_ACP;
-    int len = MultiByteToWideChar(codepage, 0, str, -1, NULL, 0);
-	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
-    if(len > 1){ 
-        MultiByteToWideChar(codepage, 0, str, -1, buf, len);
-		return yasli::wstring(buf, len - 1);
-    }
-	return yasli::wstring();
-}
-
-yasli::string toANSIFromWide(const wchar_t* wstr)
-{
-	const unsigned int codepage = CP_ACP;
-	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
-	char* buf = (char*)alloca(len);
-    if(len > 1){ 
-        WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
-		return yasli::string(buf, len - 1);
-    }
-	return yasli::string();
-
+    std::vector<wchar_t> result(s.size()+1);
+    s.toWCharArray(&result[0]);
+    return &result[0];
+#endif
 }
 

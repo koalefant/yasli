@@ -159,7 +159,7 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	gradient.setColorAt(1.0f, context.tree->palette().color(QPalette::Shadow));
 	QBrush brush(gradient);
 
-	wchar_t* text = multiValue() ? L"..." : buttonLabel_; 
+    const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
 	context.drawButton(rt, text, false, false);
 }
 
@@ -246,9 +246,9 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 
 void PropertyRowContainer::digestReset(const QPropertyTree* tree)
 {
-	swprintf_s(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
+    swprintf(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
 
-	__super::digestReset(tree);
+    PropertyRow::digestReset(tree);
 }
 
 void PropertyRowContainer::serializeValue(yasli::Archive& ar)
@@ -260,7 +260,7 @@ void PropertyRowContainer::serializeValue(yasli::Archive& ar)
 yasli::string PropertyRowContainer::valueAsString() const
 {
 	char buf[32] = { 0 };
-	sprintf_s(buf, "%i", children_.size());
+    sprintf(buf, "%i", children_.size());
 	return yasli::string(buf);
 }
 
@@ -276,5 +276,5 @@ bool PropertyRowContainer::onKeyDown(QPropertyTree* tree, const QKeyEvent* ev)
 		handler.onMenuAppendElement();
 		return true;
 	}
-	return __super::onKeyDown(tree, ev);
+    return PropertyRow::onKeyDown(tree, ev);
 }

@@ -11,6 +11,7 @@
 #include <memory>
 #include "QPropertyTree.h"
 #include "Icon.h"
+#include "Unicode.h"
 #include <QtGui/QApplication>
 #include <QtGui/QStyleOption>
 #include <QtGui/QPainter>
@@ -145,7 +146,7 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused) const
 {
 		QStyleOptionButton option;
-		option.text = QString::fromUtf16((ushort*)text);
+        option.text = QString(fromWideChar(text).c_str());
 		option.state |= QStyle::State_Enabled;
 		if (pressed)
 			option.state |= QStyle::State_On;
@@ -185,7 +186,7 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
 		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
 		painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
-		painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString::fromUtf16((ushort*)text), 0);
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
 	}
 }
 

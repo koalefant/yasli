@@ -24,8 +24,12 @@ inline void PointerInterface::serialize(Archive& ar) const
 		if(oldTypeID){
 			TypeIDWithFactory pair(oldTypeID, factory);
 			if(ar(pair, "")){
-				ar(serializer(), "");
-			}
+#if YASLI_NO_EXTRA_BLOCK_FOR_POINTERS
+                serializer()(ar);
+#else
+                ar(serializer(), "");
+#endif
+            }
 			else
 				ar.warning("Unable to write typeID!");
 		}

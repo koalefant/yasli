@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "QPropertyTree.h"
 #include "PropertyRowImpl.h"
 #include "yasli/MemoryWriter.h"
 
@@ -71,6 +72,7 @@ class PropertyRowNumeric : public PropertyRowImpl<Type, typename SelectNumericDe
 public:
 	enum { Custom = false };
 	typedef typename SelectNumericDerived<_Derived, PropertyRowNumeric>::Type Derived;
+    typedef PropertyRowImpl<Type, typename SelectNumericDerived<_Derived, PropertyRowNumeric<Type, _Derived> >::Type> Base;
 	PropertyRowNumeric(const char* name = "", const char* nameAlt = "", Type value = Type())
 		: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, TypeID::get<Type>().name())
 	{
@@ -84,18 +86,18 @@ public:
 	}
 
 	int widgetSizeMin() const{ 
-		if (userWidgetSize() >= 0)
-			return userWidgetSize();
+        if (PropertyRow::userWidgetSize() >= 0)
+            return PropertyRow::userWidgetSize();
 		else
 			return 40;
 	}
 
 	bool setValueFromString(const char* str){
-		Type value = value_;
-		value_ = Type(atof(str));
-		return value_ != value;
+        Type value = Base::value_;
+        Base::value_ = Type(atof(str));
+        return Base::value_ != value;
 	}
 	yasli::string valueAsString() const{ 
-		return numericAsString(Type(value_)); 
+        return numericAsString(Type(Base::value_));
 	}
 };

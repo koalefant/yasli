@@ -222,13 +222,16 @@ void PropertyTreeModel::serialize(Archive& ar, QPropertyTree* tree)
 
 		if (root()) {
 		std::vector<char> expanded;
-			if(ar.isOutput())
-			root()->scanChildren(RowObtainer(expanded));
+        if(ar.isOutput()) {
+            RowObtainer op(expanded);
+            root()->scanChildren(op);
+        }
 		ar(expanded, "expanded", 0);
 			if(ar.isInput()){
 			Selection sel = selection_;
             setSelection(sel);
-			root()->scanChildren(RowExpander(expanded), tree);
+            RowExpander op(expanded);
+            root()->scanChildren(op, tree);
 		}
 	}
 	}

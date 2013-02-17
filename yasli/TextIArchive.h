@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "yasli/Archive.h"
 #include "Pointers.h"
+#include "yasli/Archive.h"
 #include "Token.h"
 #include <memory>
 

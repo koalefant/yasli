@@ -7,10 +7,10 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "PropertyRowNumeric.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
+#include "PropertyRowNumeric.h"
 
 #define REGISTER_NUMERIC(TypeName, postfix) \
 	typedef PropertyRowNumeric<TypeName> PropertyRow##postfix; \
@@ -52,7 +52,7 @@ PropertyRowWidgetNumeric::PropertyRowWidgetNumeric(PropertyRow* row, PropertyTre
 void PropertyRowWidgetNumeric::onEditingFinished()
 {
  tree_->model()->push(row());
- string str = entry_->text().toLocal8Bit();
+ string str = entry_->text().toLocal8Bit().data();
 	if(numeric_->setValueFromString(str.c_str()) || row_->multiValue())
 		tree_->model()->rowChanged(row());
 	else

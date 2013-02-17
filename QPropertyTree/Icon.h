@@ -2,6 +2,11 @@
 
 #include "Color.h"
 #include <vector>
+#include "yasli/Assert.h"
+
+#ifdef __GNUC__
+using std::size_t;
+#endif
 
 struct RGBAImage
 {
@@ -24,7 +29,7 @@ public:
 	, height_(0)
 	{
 	}
-	template<size_t Size>
+    template<size_t Size>
 	explicit Icon(char* (&xpm)[Size])
 	: width_(0)
 	, height_(0)

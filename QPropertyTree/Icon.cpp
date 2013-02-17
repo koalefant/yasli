@@ -1,6 +1,10 @@
 #include "Icon.h"
 #include "yasli/Archive.h"
 
+#ifndef _MSC_VER
+# define _stricmp strcasecmp
+#endif
+
 void IconToggle::serialize(yasli::Archive& ar)
 {
 	ar(value_, "value", "Value");
@@ -23,7 +27,7 @@ bool Icon::getImage(RGBAImage* image) const
 	int hotSpotX = -1;
 	int hotSpotY = -1;
 
-	int scanResult = sscanf_s(source_[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, hotSpotX, hotSpotY);
+    int scanResult = sscanf(source_[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, &hotSpotX, &hotSpotY);
 	if (scanResult != 4 && scanResult != 6)
 		return false;
 
@@ -70,7 +74,7 @@ bool Icon::getImage(RGBAImage* image) const
 			++p;
 			if (strlen(p) == 6) {
 				int colorCode;
-				if(sscanf_s(p, "%x", &colorCode) != 1)
+                if(sscanf(p, "%x", &colorCode) != 1)
 					return false;
 				Color color((colorCode & 0xff0000) >> 16,
 							(colorCode & 0xff00) >> 8,

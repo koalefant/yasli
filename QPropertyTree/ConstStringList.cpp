@@ -37,19 +37,19 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 }
 
 
-bool serialize(yasli::Archive& ar, ConstStringWrapper& val, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, ConstStringWrapper& value, const char* name, const char* label)
 {
 	using yasli::string;
 	if(ar.isOutput()){
-		YASLI_ASSERT(val.string_);
-		string out = val.string_;
+        YASLI_ASSERT(value.string_);
+        string out = value.string_;
 		return ar(out, name, label);
 	}
 	else{
 		string in;
 		bool result = ar(in, name, label);
 
-		val.string_ = val.list_->findOrAdd(in.c_str());
+        value.string_ = value.list_->findOrAdd(in.c_str());
 		return result;
 	}
 }

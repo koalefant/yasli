@@ -8,11 +8,11 @@
  */
 
 #include "StdAfx.h"
+#include "yasli/ClassFactory.h"
 #include "BinaryOArchive.h"
 //#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
-#include "yasli/ClassFactory.h"
 
 namespace yasli{
 

@@ -150,22 +150,24 @@ void PropertyRow::_setExpanded(bool expanded)
 			(*i)->_setExpanded(expanded);
 }
 
+struct SetExpandedOp {
+    bool expanded_;
+    SetExpandedOp(bool expanded) : expanded_(expanded) {}
+    ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+    {
+        if(row->canBeToggled(tree))
+            row->_setExpanded(expanded_);
+        return SCAN_CHILDREN_SIBLINGS;
+    }
+};
+
 void PropertyRow::setExpandedRecursive(QPropertyTree* tree, bool expanded)
 {
 	if(canBeToggled(tree))
 		_setExpanded(expanded);
 	
-	struct Op {
-		bool expanded_;
-		Op(bool expanded) : expanded_(expanded) {}
-		ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
-		{
-			if(row->canBeToggled(tree))
-				row->_setExpanded(expanded_);
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-	};
-	scanChildren(Op(expanded), tree);
+    SetExpandedOp op(expanded);
+    scanChildren(op, tree);
 }
 
 int PropertyRow::childIndex(PropertyRow* row)
@@ -399,6 +401,14 @@ void PropertyRow::updateLabel(const QPropertyTree* tree)
 		pulledContainer()->_setExpanded(expanded());
 }
 
+struct ResetSerializerOp{
+    ScanResult operator()(PropertyRow* row)
+    {
+        row->setSerializer(Serializer());
+        return SCAN_CHILDREN_SIBLINGS;
+    }
+};
+
 void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 {
 	userFullRow_ = false;
@@ -441,8 +451,8 @@ void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 		else if(*ptr == '&')
 			appendValueToDigest = true;
 		else if(*ptr == '~'){
-			struct Op{ ScanResult operator()(PropertyRow* row) { row->serializer_ = Serializer(); return SCAN_CHILDREN_SIBLINGS; } };
-			scanChildren(Op());
+            ResetSerializerOp op;
+            scanChildren(op);
 		}
 		else if(*ptr == '!'){
 			if(userReadOnly_)
@@ -930,7 +940,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree)
 
 		if(width > 0){
 			QRect digestRect(digestPos, pos_.y(), width, ROW_DEFAULT_HEIGHT);
-			painter.drawText(digestRect, 0, QString::fromUtf16((ushort*)digest_.c_str()), 0);
+            painter.drawText(digestRect, 0, QString(fromWideChar(digest_.c_str()).c_str()), 0);
 		}
 	}
 
@@ -1068,7 +1078,7 @@ yasli::string PropertyRow::rowText(const QPropertyTree* tree) const
 		if (tree->showContainerIndices())
 		{
 			char buffer[15];
-			sprintf_s(buffer, " %i.", index);
+            sprintf(buffer, " %i.", index);
 			text = buffer;
 			return text;
 		}
@@ -1137,78 +1147,81 @@ PropertyRow* PropertyRow::findByAddress(void* addr)
     return 0;
 }
 
+struct GetVerticalIndexOp{
+    int index_;
+    const PropertyRow* row_;
+
+    GetVerticalIndexOp(const PropertyRow* row) : row_(row), index_(0) {}
+
+    ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+    {
+        if(row == row_)
+            return SCAN_FINISHED;
+        if(row->visible(tree) && row->isSelectable() && !row->pulledUp())
+            ++index_;
+        return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
+    }
+};
+
 int PropertyRow::verticalIndex(QPropertyTree* tree, PropertyRow* row)
 {
-	struct Op{
-		int index_;
-		const PropertyRow* row_;
-
-		Op(const PropertyRow* row) : row_(row), index_(0) {}
-
-		ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
-		{
-			if(row == row_)
-				return SCAN_FINISHED;
-			if(row->visible(tree) && row->isSelectable() && !row->pulledUp())
-				++index_;
-			return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
-		}
-	};
-
-	Op op(row);
+    GetVerticalIndexOp op(row);
 	scanChildren(op, tree);
 	return op.index_;
 }
 
+
+struct RowByVerticalIndexOp{
+    int index_;
+    PropertyRow* row_;
+
+    RowByVerticalIndexOp(int index) : row_(0), index_(index) {}
+
+    ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+    {
+        if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
+            row_ = row;
+            if(index_-- <= 0)
+                return SCAN_FINISHED;
+        }
+        return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
+    }
+};
+
 PropertyRow* PropertyRow::rowByVerticalIndex(QPropertyTree* tree, int index)
 {
-	struct Op{
-		int index_;
-		PropertyRow* row_;
-
-		Op(int index) : row_(0), index_(index) {}
-
-		ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
-		{
-			if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
-				row_ = row;
-				if(index_-- <= 0)
-					return SCAN_FINISHED;
-			}
-			return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
-		}
-	};
-
-	Op op(index);
+    RowByVerticalIndexOp op(index);
 	scanChildren(op, tree);
 	return op.row_;
 }
 
+struct HorizontalIndexOp{
+    int index_;
+    PropertyRow* row_;
+    bool pulledBefore_;
+
+    HorizontalIndexOp(PropertyRow* row) : row_(row), index_(0), pulledBefore_(row->pulledBefore()) {}
+
+    ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+    {
+        if(!row->pulledUp())
+            return SCAN_SIBLINGS;
+        if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
+            index_ += pulledBefore_ ? -1 : 1;
+            if(row == row_)
+                return SCAN_FINISHED;
+        }
+        return SCAN_CHILDREN_SIBLINGS;
+    }
+};
+
 int PropertyRow::horizontalIndex(QPropertyTree* tree, PropertyRow* row)
 {
-	struct Op{
-		int index_;
-		PropertyRow* row_;
-		bool pulledBefore_;
 
-		Op(PropertyRow* row) : row_(row), index_(0), pulledBefore_(row->pulledBefore()) {}
-
-		ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
-		{
-			if(!row->pulledUp())
-				return SCAN_SIBLINGS;
-			if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
-				index_ += pulledBefore_ ? -1 : 1;
-				if(row == row_)
-					return SCAN_FINISHED;
-			}
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-	};
 
 	if(row == this)
 		return 0;
-	Op op(row);
+    HorizontalIndexOp op(row);
 	if(row->pulledBefore())
 		scanChildrenReverse(op, tree);
 	else
@@ -1216,31 +1229,33 @@ int PropertyRow::horizontalIndex(QPropertyTree* tree, PropertyRow* row)
 	return op.index_;
 }
 
+struct RowByHorizontalIndexOp{
+    int index_;
+    PropertyRow* row_;
+    bool pulledBefore_;
+
+    RowByHorizontalIndexOp(int index) : row_(0), index_(index), pulledBefore_(index < 0) {}
+
+    ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+    {
+        if(!row->pulledUp())
+            return SCAN_SIBLINGS;
+        if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
+            row_ = row;
+            if(pulledBefore_ ? ++index_ >= 0 : --index_ <= 0)
+                return SCAN_FINISHED;
+        }
+        return SCAN_CHILDREN_SIBLINGS;
+    }
+};
+
 PropertyRow* PropertyRow::rowByHorizontalIndex(QPropertyTree* tree, int index)
 {
-	struct Op{
-		int index_;
-		PropertyRow* row_;
-		bool pulledBefore_;
 
-		Op(int index) : row_(0), index_(index), pulledBefore_(index < 0) {}
-
-		ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
-		{
-			if(!row->pulledUp())
-				return SCAN_SIBLINGS;
-			if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
-				row_ = row;
-				if(pulledBefore_ ? ++index_ >= 0 : --index_ <= 0)
-					return SCAN_FINISHED;
-			}
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-	};
 
 	if(!index)
 		return this;
-	Op op(index);
+    RowByHorizontalIndexOp op(index);
 	if(index < 0)
 		scanChildrenReverse(op, tree);
 	else
@@ -1255,7 +1270,7 @@ void PropertyRow::redraw(const PropertyDrawContext& context)
 
 bool PropertyRow::isFullRow(const QPropertyTree* tree) const
 {
-	if (tree->fullRowMode())
+    if (tree->fullRowMode())
 		return true;
 	if (parent() && parent()->isContainer())
 		return true;

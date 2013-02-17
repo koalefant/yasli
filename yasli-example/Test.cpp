@@ -9,7 +9,7 @@ YASLI_CLASS(PolyBase, PolyDerivedB, "Derived B")
 int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
-	yasli::setTestMode(true);
+//	yasli::setTestMode(true);
 #endif
 	return UnitTest::RunAllTests();
 }

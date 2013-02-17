@@ -33,6 +33,6 @@ PropertyRowObject::~PropertyRowObject()
 
 void PropertyRowObject::serialize(Archive& ar)
 {
-	__super::serialize(ar);
+    PropertyRow::serialize(ar);
 }
 

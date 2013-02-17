@@ -6,15 +6,18 @@
 #include <time.h>
 
 #include "yasli/STL.h"
+#include "yasli/Pointers.h"
+#include "yasli/StringList.h"
 #include "yasli/Archive.h"
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
-#include "yasli/TypesFactory.h"
+#include "yasli/ClassFactory.h"
 
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
 #include "yasli/InPlaceOArchive.h"
 #include "yasli/InPlaceIArchive.h"
+#include "yasli/Enum.h"
 
 using namespace yasli;
 
@@ -105,7 +108,7 @@ public:
 		stringList_.push_back("Choice 7");
 		stringList_.push_back("Choice 8");
 
-		polyPtr_.set( new PolyDerivedA() );
+        polyPtr_.reset( new PolyDerivedA() );
 
 		members_.push_back(Member("Item A", 0.1f, MEMBER_MODE_A));
 		members_.push_back(Member("Item B", 0.3f, MEMBER_MODE_B));
@@ -252,7 +255,7 @@ void testInplace()
 	{
 		std::auto_ptr<MyDataClass> test(new MyDataClass());
 		InPlaceOArchive oa(false);
-		ESCAPE(oa(*test, "test"), return);
+        YASLI_ESCAPE(oa(*test, "test"), return);
 		oa.save(inplaceFilename);
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "yasli/Assert.h"
+#include "yasli/StringList.h"
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
@@ -8,7 +9,6 @@
 #include "yasli/STLImpl.h"
 #include "yasli/TextOArchive.h"
 
-#include "yasli/StringList.h" 
 using namespace yasli;
 
 #define YCHECK(x) YASLI_ASSERT(x); CHECK(x)
@@ -83,7 +83,7 @@ public:
 	void checkEquality(const PolyBase* copyBase) const
 	{
 		const PolyDerivedA* copy = dynamic_cast<const PolyDerivedA*>(copyBase);
-		YCHECK(copy != 0);
+        YCHECK(copy != 0);
 		YCHECK(derivedMember_ == copy->derivedMember_);
 
 		PolyBase::checkEquality(copyBase);

@@ -21,7 +21,9 @@
 
 #include "PropertyOArchive.h"
 #include "PropertyIArchive.h"
+#include "Unicode.h"
 
+#include <QtCore/QRect>
 #include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QScrollBar>
@@ -562,7 +564,8 @@ void QPropertyTree::updateHeights()
 
 	int extraSize = 0;
 	int totalHeight = 0;
-  QRect rect(QPoint(padding, padding), rect().size() - QSize(padding, padding) * 2);
+    QSize rectSize = rect().size() - QSize(padding, padding) * 2;
+    QRect rect(padding, padding, rectSize.width(), rectSize.height());
 	model()->root()->adjustRect(this, rect, rect.topLeft(), totalHeight, extraSize);
 	size_.setY(totalHeight);
 
@@ -1394,7 +1397,7 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 	char* text;
 	{
 		size_t textLen = strlen(textOriginal);
-		text = (char*)_malloca((textLen + 1));
+        text = (char*)alloca((textLen + 1));
 		memcpy(text, textOriginal, (textLen + 1));
 		for (char* p = text; *p; ++p)
 			*p = tolower(*p);
@@ -1423,7 +1426,7 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 		*matchEnd = 0;
 	if (!start.empty()) {
 		if (strncmp(text, start.c_str(), start.size()) != 0){
-			_freea(text);
+            //_freea(text);
 			return false;
 		}
 		if (matchEnd)
@@ -1435,7 +1438,7 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 	for (size_t i = 0; i < numSubstrings; ++i) {
 		const char* substr = strstr(startPos, substrings[i].c_str());
 		if (!substr){
-			_freea(text);
+            //_freea(text);
 			return false;
 		}
 		startPos += substrings[i].size();
@@ -1445,7 +1448,7 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 		if (matchEnd)
 			*matchEnd = substr - text + substrings[i].size();
 	}
-	_freea(text);
+    //_freea(text);
 	return true;
 }
 
@@ -1516,7 +1519,7 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 	p.setPen(textColor);
 	QFont previousFont = p.font();
 	p.setFont(*font);
-	p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString::fromUtf16((ushort*)text), 0);
+    p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
 	p.setFont(previousFont);
 }
 
@@ -1597,8 +1600,10 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 	painter.translate(area_.left(), area_.top());
 
-	if (model()->root())
-		model()->root()->scanChildren(DrawVisitor(painter, area_, offset_.y()), this);
+    if (model()->root()) {
+        DrawVisitor op(painter, area_, offset_.y());
+        model()->root()->scanChildren(op, this);
+    }
 
 	painter.translate(-area_.left(), -area_.top());
 	painter.translate(offset_.x(), offset_.y());

@@ -21,9 +21,9 @@ struct Color
 	void set(int rc,int gc,int bc,int ac = 255) { r=rc; g=gc; b=bc; a=ac; }
 	
 	Color& setGDI(unsigned long color) { 
-		b = unsigned char(color >> 16);
-		g = unsigned char(color >> 8);
-		r = unsigned char(color);
+        b = (unsigned char)(color >> 16);
+        g = (unsigned char)(color >> 8);
+        r = (unsigned char)(color);
 		a = 255;
 		return *this;
 	}

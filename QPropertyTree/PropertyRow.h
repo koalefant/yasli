@@ -9,6 +9,11 @@
 
 #pragma once
 
+#if __GNUC__ < 4 || __GNUC_MINOR__ < 7
+// GCC got support for override keyword in 4.8
+# define override
+#endif
+
 #include <typeinfo>
 #include <algorithm>
 #include "yasli/Serializer.h"
@@ -270,6 +275,7 @@ public:
 	void digestAppend(const wchar_t* text);
 
 	yasli::Serializer serializer() const{ return serializer_; }
+    void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual void serializeValue(yasli::Archive& ar) {}
 	void serialize(yasli::Archive& ar);
 

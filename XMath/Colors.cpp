@@ -44,6 +44,14 @@ Color4c& Color4c::setGDI(unsigned long color)
 	return *this;
 }
 
+struct SerializeableColor4c : Color4c {
+    void serialize(yasli::Archive& ar) {
+        ar(r, "", "&r");
+        ar(g, "", "&g");
+        ar(b, "", "&b");
+        ar(a, "", "&a");
+    }
+};
 bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label) 
 {
 	if(ar.isEdit()){
@@ -52,18 +60,19 @@ bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* lab
 		c.set(wc.r, wc.g, wc.b, wc.a);
 		return result;
 	}
-	struct S : Color4c {
-		void serialize(yasli::Archive& ar) {
-			ar(r, "", "&r");
-			ar(g, "", "&g");
-			ar(b, "", "&b");
-			ar(a, "", "&a");
-		}
-	};
-	return ar((S&)c, name, label);
+
+    return ar((SerializeableColor4c&)c, name, label);
 }
 
-bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* label) 
+struct SerializeableColor4f : Color4f {
+    void serialize(yasli::Archive& ar) {
+        ar(r, "", "&r");
+        ar(g, "", "&g");
+        ar(b, "", "&b");
+        ar(a, "", "&a");
+    }
+};
+bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* label)
 {
 	if(ar.isEdit()){
 		ww::Color wc(c.GetR(), c.GetG(), c.GetB(), c.GetA());
@@ -71,18 +80,17 @@ bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* lab
 		c = Color4f(Color4c(wc.r, wc.g, wc.b, wc.a));
 		return result;
 	}
-	struct S : Color4f {
-		void serialize(yasli::Archive& ar) {
-			ar(r, "", "&r");
-			ar(g, "", "&g");
-			ar(b, "", "&b");
-			ar(a, "", "&a");
-		}
-	};
-	return ar((S&)c, name, label);
+    return ar((SerializeableColor4f&)c, name, label);
 }
 
-bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label) 
+struct SerializeableColor3c : Color3c {
+    void serialize(yasli::Archive& ar) {
+        ar(r, "", "&r");
+        ar(g, "", "&g");
+        ar(b, "", "&b");
+    }
+};
+bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label)
 {
 	if(ar.isEdit()){
 		ww::Color wc(c.r, c.g, c.b);
@@ -90,14 +98,7 @@ bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* lab
 		c.set(wc.r, wc.g, wc.b);
 		return result;
 	}
-	struct S : Color3c {
-		void serialize(yasli::Archive& ar) {
-			ar(r, "", "&r");
-			ar(g, "", "&g");
-			ar(b, "", "&b");
-		}
-	};
-	return ar((S&)c, name, label);
+    return ar((SerializeableColor3c&)c, name, label);
 }
 
 

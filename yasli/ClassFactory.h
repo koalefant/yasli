@@ -111,7 +111,7 @@ public:
 #if YASLI_NO_RTTI
 			// TODO: remove unnecessary static initialisation
 			Derived vptrProbe;
-			vptr_ = extractVPtr(&vptrProbe);
+            CreatorBase::vptr_ = extractVPtr(&vptrProbe);
 #endif
 			ClassFactory::the().registerCreator(this);
 		}
@@ -143,7 +143,7 @@ public:
 		if (ptr == 0)
 			return TypeID();
 		void* vptr = extractVPtr(ptr);
-		VPtrToCreatorMap::const_iterator it = vptrToCreatorMap_.find(vptr);
+        typename VPtrToCreatorMap::const_iterator it = vptrToCreatorMap_.find(vptr);
 		if (it == vptrToCreatorMap_.end())
 			return TypeID();
 		return it->second->description().typeID();

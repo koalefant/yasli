@@ -16,6 +16,8 @@
 #ifdef _MSC_VER
 # include <float.h>
 # define isnan _isnan
+#else
+# include <wchar.h>
 #endif
 
 #include "MemoryWriter.h"

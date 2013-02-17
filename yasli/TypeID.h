@@ -58,19 +58,7 @@ public:
 	}
 
 	template<class T>
-	static TypeID get(){
-#if YASLI_NO_RTTI
-# ifdef _MSC_VER
-		static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
-# else
-		static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
-# endif
-		return typeInfo.id;
-#else
-		static TypeID result(typeid(T));
-		return result;
-#endif
-	}
+	static TypeID get();
 	std::size_t sizeOf() const;
 	const char* name() const;
 	bool registered() const;
@@ -115,12 +103,13 @@ private:
 #if YASLI_NO_RTTI 
 	unsigned int runtimeID_;
 	TypeInfo* typeInfo_;
-	friend TypeInfo;
+    friend class bTypeInfo;
 #else
 	const type_info* typeInfo_;
 	string name_;
 #endif
 	friend class TypeDescription;
+    friend struct TypeInfo;
 };
 
 #if YASLI_NO_RTTI
@@ -133,8 +122,17 @@ struct TypeInfo
 	template<size_t nameLen>
 	static void extractTypeName(char (&name)[nameLen], const char* funcName)
 	{
-		const char* s = strchr(funcName, '<');
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+        // static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
+        const char* s = strstr(funcName, "[with T = ");
+        if (s)
+            s += 9;
+        const char* send = strrchr(funcName, ']');
+#else
+        // static yasli::TypeID yasli::TypeID::get<ActualTypeName>()
+        const char* s = strchr(funcName, '<');
 		const char* send = strrchr(funcName, '>');
+#endif
 		YASLI_ASSERT(s != 0  && send != 0);
 		if (s != send)
 			++s;
@@ -152,6 +150,7 @@ struct TypeInfo
 			++d;
 		}
 		*d = '\0';
+        fprintf(stderr, "%s\n", name);
 		YASLI_ASSERT(s == send && "Type name doesn't fit into the buffer");
 	}
 
@@ -170,6 +169,22 @@ struct TypeInfo
 	}
 };
 #endif
+
+template<class T>
+TypeID TypeID::get()
+{
+#if YASLI_NO_RTTI
+# ifdef _MSC_VER
+  static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
+# else
+  static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
+# endif
+  return typeInfo.id;
+#else
+  static TypeID result(typeid(T));
+  return result;
+#endif
+}
 
 template<class T>
 T* createDerivedClass(TypeID typeID);

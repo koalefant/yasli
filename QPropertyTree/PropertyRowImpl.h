@@ -14,6 +14,9 @@
 
 struct Unspecified_Derived_Argument {};
 
+template<class Type, class Derived>
+class PropertyRowImpl;
+
 template<class Type, class Derived = PropertyRowImpl<Type, Unspecified_Derived_Argument> >
 class PropertyRowImpl : public PropertyRowField{
 public:

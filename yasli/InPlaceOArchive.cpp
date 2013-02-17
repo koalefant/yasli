@@ -7,6 +7,10 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
+#ifndef _MSV_VER
+# include <limits.h>
+#endif
+
 #include "StdAfx.h"
 #include "InPlaceOArchive.h"
 #include "ClassFactory.h"
