@@ -274,12 +274,6 @@
     <ClInclude Include="xmath.h" />
     <ClInclude Include="XMathLib.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\yasli\yasli\yasli.vcxproj">
-      <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

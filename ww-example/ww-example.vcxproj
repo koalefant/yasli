@@ -290,10 +290,6 @@
     <ProjectReference Include="..\yasli\yasli.vcxproj">
       <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
     </ProjectReference>
-    <ProjectReference Include="Test.vcxproj">
-      <Project>{9421e499-3ab1-47a0-b42a-a94fc5ff1c75}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
