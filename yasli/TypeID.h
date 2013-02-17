@@ -150,15 +150,16 @@ struct TypeInfo
 			++d;
 		}
 		*d = '\0';
-        fprintf(stderr, "%s\n", name);
 		YASLI_ASSERT(s == send && "Type name doesn't fit into the buffer");
 	}
 
 	static unsigned int generateTypeID()
 	{
-		static unsigned int counter = 0;
-		return ++counter;
-	}
+        // on gcc 4.6.3: if we start this counter from the zero
+        // then the first two calls of this function returns same value
+        static unsigned int counter = 1;
+        return counter++;
+    }
 
 	TypeInfo(size_t size, const char* templatedFunctionName)
 	: size(size)
