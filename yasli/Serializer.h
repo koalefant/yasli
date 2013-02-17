@@ -53,6 +53,7 @@ public:
 
 	template<class T>
 	explicit Serializer(T& object){
+		YASLI_ASSERT(TypeID::get<T>() != TypeID::get<Serializer>());
 		type_=  TypeID::get<T>();
 		object_ = (void*)(&object);
 		size_ = sizeof(T);

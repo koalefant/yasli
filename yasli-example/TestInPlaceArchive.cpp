@@ -25,7 +25,7 @@ SUITE(InPlaceArchive)
 			obj->change();
 
 			InPlaceOArchive oa(false);
-			ESCAPE(oa(*obj, "obj"), return);
+			YASLI_ESCAPE(oa(*obj, "obj"), return);
 			oa.save(inplaceFilename);
 		}
 

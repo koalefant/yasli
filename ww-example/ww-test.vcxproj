@@ -27,8 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}</ProjectGuid>
+    <ProjectGuid>{10639A91-28AE-4DEA-B2BA-7A6BC537F4CC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>ww-test</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'" Label="Configuration">
@@ -119,9 +120,9 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)wwExample.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)ww-test.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
@@ -147,9 +148,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)wwExample.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)ww-test.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
@@ -171,7 +172,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -199,7 +200,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -226,10 +227,9 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
-      <IgnoreSpecificDefaultLibraries>stlport_vc71_static.lib;kdWidgetsDbg.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)wwExample.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)ww-test.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
@@ -256,10 +256,10 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)wwExample.exe</OutputFile>
-      <IgnoreSpecificDefaultLibraries>stlport_vc71_static.lib;kdWidgetsDbg.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <OutputFile>$(OutDir)ww-test.exe</OutputFile>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)wwExample.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)ww-test.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
@@ -268,41 +268,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Example.cpp" />
-    <ClCompile Include="ExampleDigest.cpp" />
-    <ClCompile Include="ExampleLogicEditor.cpp" />
-    <ClCompile Include="ExampleTable.cpp" />
-    <ClCompile Include="ExampleTwoTrees.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="TestData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="TestData.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="wwExample.exe.manifest" />
+    <Manifest Include="ww-test.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wwTest.rc" />
+    <ResourceCompile Include="ww-test.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\yasli\yasli\yasli.vcxproj">
-      <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="Test.vcxproj">
-      <Project>{9421e499-3ab1-47a0-b42a-a94fc5ff1c75}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="wwTest.vcxproj">
-      <Project>{10639a91-28ae-4dea-b2ba-7a6bc537f4cc}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="ww\wWidgets.vcxproj">
+    <ProjectReference Include="..\ww\wWidgets.vcxproj">
       <Project>{18632f7a-290e-b902-7c03-72fb0c12de45}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="XMath\XMath.vcxproj">
+    <ProjectReference Include="..\XMath\XMath.vcxproj">
       <Project>{2a528448-dc07-42a7-bf07-e12cb130145c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\yasli\yasli.vcxproj">
+      <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

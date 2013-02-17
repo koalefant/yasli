@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="wwTest"
+	Name="ww-test"
 	ProjectGUID="{10639A91-28AE-4DEA-B2BA-7A6BC537F4CC}"
+	RootNamespace="ww-test"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -66,10 +67,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-test.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -146,10 +147,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-test.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -224,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -304,7 +305,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -385,11 +386,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="stlport_vc71_static.lib;kdWidgetsDbg.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-test.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -467,11 +468,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwTest.exe"
+				OutputFile="$(OutDir)/ww-test.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="stlport_vc71_static.lib;kdWidgetsDbg.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwTest.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-test.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -524,11 +525,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\wwTest.exe.manifest"
+			RelativePath=".\ww-test.exe.manifest"
 			>
 		</File>
 		<File
-			RelativePath=".\wwTest.rc"
+			RelativePath=".\ww-test.rc"
 			>
 		</File>
 	</Files>

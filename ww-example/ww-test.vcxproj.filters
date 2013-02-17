@@ -28,8 +28,11 @@
     <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wwTest.rc">
+    <ResourceCompile Include="ww-test.rc">
       <Filter>resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="ww-test.exe.manifest" />
   </ItemGroup>
 </Project>

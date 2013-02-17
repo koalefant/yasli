@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
-	Name="wwExample"
+	Version="9,00"
+	Name="ww-example"
 	ProjectGUID="{28C57AC2-4BF2-4A28-9637-EC52E2282CEB}"
-	RootNamespace="wwExample"
+	RootNamespace="ww-example"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -67,10 +67,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-example.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -147,10 +147,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-example.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -305,7 +305,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -386,11 +386,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="stlport_vc71_static.lib;kdWidgetsDbg.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-example.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -468,11 +468,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/wwExample.exe"
+				OutputFile="$(OutDir)/ww-example.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="stlport_vc71_static.lib;kdWidgetsDbg.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/wwExample.pdb"
+				ProgramDatabaseFile="$(OutDir)/ww-example.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -533,11 +533,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\wwExample.exe.manifest"
+			RelativePath=".\ww-example.exe.manifest"
 			>
 		</File>
 		<File
-			RelativePath=".\wwTest.rc"
+			RelativePath=".\ww-test.rc"
 			>
 		</File>
 	</Files>
