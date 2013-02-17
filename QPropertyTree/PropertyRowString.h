@@ -12,6 +12,7 @@
 #include "PropertyRowImpl.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
+#include "Unicode.h"
 
 #include <QtGui/QLineEdit>
 
@@ -39,7 +40,7 @@ public:
 	, entry_(new QLineEdit())
 	, tree_(tree)
 	{
-		initialValue_ = QString::fromUtf16((ushort*)row->value().c_str());
+        initialValue_ = QString(fromWideChar(row->value().c_str()).c_str());
 		entry_->setText(initialValue_);
 		entry_->selectAll();
 		connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));

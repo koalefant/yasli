@@ -281,7 +281,7 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 int PropertyRowPointer::widgetSizeMin() const
 {
 	QFontMetrics fm(*propertyTreeDefaultBoldFont());
-	QString str(QString::fromUtf16((ushort*)generateLabel().c_str()));
+    QString str(fromWideChar(generateLabel().c_str()).c_str());
 	return fm.width(str) + 10;
 }
 
