@@ -297,6 +297,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="ConstString.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="MemoryReader.h" />

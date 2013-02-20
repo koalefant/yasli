@@ -696,6 +696,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Config.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Enum.cpp"
 			>
 		</File>
