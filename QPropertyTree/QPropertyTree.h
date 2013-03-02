@@ -16,6 +16,7 @@
 #include "yasli/Pointers.h"
 #include "PropertyRow.h"
 #include <QtGui/QWidget>
+#include <QtGui/QPainter>
 #include <vector>
 
 class QMenu;
@@ -77,6 +78,31 @@ protected:
 
 struct PropertyRowMenuHandler;
 
+class DragWindow : public QWidget
+{
+	Q_OBJECT
+public:
+	DragWindow(QPropertyTree* tree);
+
+	void set(QPropertyTree* tree, PropertyRow* row, const QRect& rowRect);
+	void setWindowPos(bool visible);
+	void show();
+	void move(int deltaX, int deltaY);
+	void hide();
+
+	void drawRow(QPainter& p);
+	void paintEvent(QPaintEvent* ev);
+
+protected:
+	bool useLayeredWindows_;
+	PropertyRow* row_;
+	QRect rect_;
+	QPropertyTree* tree_;
+	QPoint offset_;
+	//HBITMAP bitmap_;
+	//COLORREF* bitmapBits_;
+};
+
 class QPropertyTree : public QWidget, public TreeConfig
 {
 	Q_OBJECT
@@ -130,6 +156,7 @@ public:
 	void _drawRowLabel(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color) const;
 	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 	QRect _visibleRect() const;
+	bool _isDragged(const PropertyRow* row) const;
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void startFilter(const char* filter);
@@ -153,6 +180,7 @@ private:
 	QPropertyTree(const QPropertyTree&);
 	QPropertyTree& operator=(const QPropertyTree&);
 protected:
+	class DragController;
 	enum HitTest{
 		TREE_HIT_PLUS,
 		TREE_HIT_TEXT,
@@ -171,6 +199,7 @@ protected:
 	void mousePressEvent(QMouseEvent* ev) override;
 	void mouseReleaseEvent(QMouseEvent* ev) override;
 	void mouseDoubleClickEvent(QMouseEvent* ev) override;
+	void mouseMoveEvent(QMouseEvent* ev) override;
 	void wheelEvent(QWheelEvent* ev) override;
 	void keyPressEvent(QKeyEvent* ev) override;
 
@@ -250,6 +279,7 @@ protected:
 	QPoint size_;
 	QPoint offset_;
 	QSize sizeHint_;
+	DragController* dragController_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

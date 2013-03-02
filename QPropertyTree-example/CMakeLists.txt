@@ -18,14 +18,14 @@ set(SOURCES main.cpp
   )
 source_group("" FILES ${SOURCES})
 
-add_executable(qpropertytree-example WIN32 ${SOURCES})
+add_executable(qpropertytree-example ${SOURCES})
 
 target_link_libraries(qpropertytree-example yasli xmath qpropertytree)
 set_target_properties(qpropertytree-example PROPERTIES DEBUG_POSTFIX "-debug")
 
 if (MSVC_IDE)
-    set_target_properties(may PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR})
-    set_target_properties(may PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR})
-    set_target_properties(may PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR})
-    set_target_properties(may PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${PROJECT_SOURCE_DIR})
+    set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR})
+    set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR})
+    set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR})
+    set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${PROJECT_SOURCE_DIR})
 endif (MSVC_IDE)

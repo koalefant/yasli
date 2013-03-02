@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project("yasli")
 
+if (MSVC)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif (MSVC)
+
 set(CMAKE_BUILD_TYPE "Debug")
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 mark_as_advanced(QT_QMAKE_EXECUTABLE)
@@ -21,8 +25,8 @@ add_subdirectory(XMath)
 add_subdirectory(QPropertyTree)
 add_subdirectory(QPropertyTree-example)
 
-if (MSVC)
-  add_subdirectory(ww)
-  add_subdirectory(ww-example)
-endif (MSVC)
+# if (MSVC)
+#   add_subdirectory(ww)
+#   add_subdirectory(ww-example)
+# endif (MSVC)
 

@@ -840,9 +840,6 @@ const QFont* PropertyRow::rowFont(const QPropertyTree* tree) const
 
 void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree)
 {
-	if(!visible(tree))
-		return;
-
 	PropertyDrawContext context;
 	context.tree = tree;
 	context.widgetRect = widgetRect();
@@ -966,6 +963,8 @@ void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& 
 
 bool PropertyRow::visible(const QPropertyTree* tree) const
 {
+	if (tree->_isDragged(this))
+		return false;
 	return ((visible_ || !tree->hideUntranslated()) && (matchFilter_ || belongsToFilteredRow_));
 }
 
