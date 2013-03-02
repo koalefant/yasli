@@ -763,6 +763,9 @@ void QPropertyTree::revertChanged(bool enforce)
 
 	if (model()->root())
 		model_->root()->updateLabel(this);		
+	if (filterMode_)
+		onFilterChanged(QString());
+
 	update();
 }
 
@@ -779,7 +782,7 @@ void QPropertyTree::revert()
 
 	if (filterMode_) {
 		if (model_->root())
-		model_->root()->updateLabel(this);		
+			model_->root()->updateLabel(this);		
         onFilterChanged(QString());
 	}
 

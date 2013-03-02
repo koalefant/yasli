@@ -12,6 +12,7 @@
 #include "ConstStringList.h"
 #include <string>
 #include "yasli/Serializer.h"
+#include "yasli/Object.h"
 #include "yasli/Pointers.h"
 #include "PropertyRow.h"
 #include <QtGui/QWidget>
