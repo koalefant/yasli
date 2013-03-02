@@ -1126,7 +1126,7 @@ PropertyRow* PropertyRow::hit(const QPropertyTree* tree, QPoint point)
             if(PropertyRow* result = child->hit(tree, point))
                 return result;
     }
-	if (QRect(pulledUp() ? pos_.x() : 0, pos_.y(), size_.x(), size_.y()).contains(point))
+	if (QRect(pos_.x(), pos_.y(), size_.x(), size_.y()).contains(point))
         return this;
     return 0;
 }
