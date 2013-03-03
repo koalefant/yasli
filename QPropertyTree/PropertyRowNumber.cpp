@@ -37,30 +37,3 @@ REGISTER_NUMBER_ROW(unsigned long long, UnsignedLongLong)
 #undef REGISTER_NUMBER_ROW
 
 // ---------------------------------------------------------------------------
-PropertyRowWidgetNumeric::PropertyRowWidgetNumeric(PropertyRow* row, PropertyTreeModel* model, PropertyRowNumericInterface* numeric, QPropertyTree* tree)
-: PropertyRowWidget(row, tree)
-, numeric_(numeric)
-, entry_(new QLineEdit())
-, tree_(tree)
-{
-	entry_->setText(numeric_->valueAsString().c_str());
-	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
-
-	entry_->selectAll();
-}
-
-void PropertyRowWidgetNumeric::onEditingFinished()
-{
- tree_->model()->push(row());
- string str = entry_->text().toLocal8Bit().data();
-	if(numeric_->setValueFromString(str.c_str()) || row_->multiValue())
-		tree_->model()->rowChanged(row());
-	else
-		tree_->_cancelWidget();
-}
-
-void PropertyRowWidgetNumeric::commit()
-{
-	//if(entry_)
-	//	entry_->commit();
-}
