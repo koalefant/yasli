@@ -56,6 +56,14 @@ public:
 
 };
 
+struct PropertyDragEvent
+{
+	QPropertyTree* tree;
+	QPoint pos;
+	QPoint start;
+	QPoint lastDelta;
+};
+
 class PropertyRowWidget : public QObject
 {
 	Q_OBJECT
@@ -229,9 +237,10 @@ public:
 	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QPropertyTree* tree, bool before);
 
 	virtual bool onActivate(QPropertyTree* tree, bool force);
+	virtual bool onActivateRelease(QPropertyTree* tree) { return false; }
 	virtual bool onKeyDown(QPropertyTree* tree, const QKeyEvent* ev);
 	virtual bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) { return false; }
-	virtual void onMouseMove(QPropertyTree* tree, QPoint point) {}
+	virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseUp(QPropertyTree* tree, QPoint point) {}
 	virtual bool onContextMenu(QMenu &menu, QPropertyTree* tree);
 

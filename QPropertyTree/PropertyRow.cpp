@@ -845,6 +845,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree)
 	context.widgetRect = widgetRect();
 	context.lineRect = floorRect();
 	context.painter = &painter;
+	context.captured = tree->_isCapturedRow(this);
 
 	QColor textColor = tree->palette().buttonText().color();
 

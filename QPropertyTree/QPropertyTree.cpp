@@ -520,6 +520,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , filterMode_(false)
 , sizeHint_(180, 180)
 , dragController_(new DragController(this))
+, capturedRow_(0)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -680,6 +681,7 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 
 bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point)
 {
+	pressPoint_ = point;
 	row = model()->root()->hit(this, point);
 	if(row){
 		if(!row->isRoot() && row->plusRect().contains(point) && toggleRow(row))
@@ -715,6 +717,10 @@ void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint po
 	row->onMouseUp(this, point);
 	//if(GetCapture() == _window()->handle())
 	//	ReleaseCapture();
+
+	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect().contains(point)) {
+		row->onActivateRelease(this);
+	}
 }
 
 void QPropertyTree::onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point)
@@ -1183,7 +1189,12 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 
 void QPropertyTree::onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoint point)
 {
-	row->onMouseMove(this, point);
+	PropertyDragEvent e;
+	e.tree = this;
+	e.pos = point;
+	e.start = pressPoint_;
+	row->onMouseDrag(e);
+	update();
 }
 
 
@@ -1958,7 +1969,7 @@ void QPropertyTree::resizeEvent(QResizeEvent* ev)
 void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 {
 	//QWidget::mousePressEvent(ev);
-  setFocus(Qt::MouseFocusReason);
+	setFocus(Qt::MouseFocusReason);
 
 	if (ev->button() == Qt::LeftButton)
 	{
@@ -1971,7 +1982,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			row = row->parent();
 		if(row){
 			if(onRowLMBDown(row, row->rect(), pointToRootSpace(ev->pos())))
-				; //capturedRow_ = row;
+				capturedRow_ = row;
 			else{
 				row = rowByPoint(ev->pos());
 				PropertyRow* draggedRow = row;
@@ -2038,11 +2049,12 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			//	update();
 			}			
 		}
-		//if(capturedRow_){
-		//	Rect rowRecti = capturedRow_->rect();
-		//	tree_->onRowLMBUp(capturedRow_, rowRecti, pointToRootSpace(Vect2(x, y)));
-		//	capturedRow_ = 0;
-		//}
+		if(capturedRow_){
+			QRect rowRect = capturedRow_->rect();
+			onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));
+			capturedRow_ = 0;
+			update();
+		}
 	}
 	else if (ev->button() == Qt::RightButton)
 	{
@@ -2082,11 +2094,14 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		if(row->widgetRect().contains(pointToRootSpace(point))){
-			if(!row->onActivate(this, true))
+			if(!row->onActivate(this, true) &&
+				!row->onActivateRelease(this))
 				toggleRow(row);	
 		}
-		else if(!toggleRow(row))
+		else if(!toggleRow(row)) {
 			row->onActivate(this, false);
+			row->onActivateRelease(this);
+		}
 	}
 }
 
@@ -2124,11 +2139,11 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 			break;
 			}
 		}
-		//if(capturedRow_){
-		//	QRect rect;
-		//	getRowRect(capturedRow_, rect);
-		//	tree_->onRowMouseMove(capturedRow_, rect, point);
-		//}
+		if(capturedRow_){
+			QRect rect;
+			//getRowRect(capturedRow_, rect);
+			onRowMouseMove(capturedRow_, QRect(), point);
+		}
 	}
 }
 
@@ -2162,6 +2177,12 @@ bool QPropertyTree::_isDragged(const PropertyRow* row) const
 		return true;
 	return false;
 }
+
+bool QPropertyTree::_isCapturedRow(const PropertyRow* row) const
+{
+	return capturedRow_ == row;
+}
+
 
 
 QPropertyTree::QPropertyTree(const QPropertyTree&)

@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPropertyTree* tree = new QPropertyTree(this);
     tree->attach(yasli::Serializer(globalTestData));
     setCentralWidget(tree);
+	tree->setUndoEnabled(true);
 }
 
 MainWindow::~MainWindow()

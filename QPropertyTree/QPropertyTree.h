@@ -157,6 +157,7 @@ public:
 	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 	QRect _visibleRect() const;
 	bool _isDragged(const PropertyRow* row) const;
+	bool _isCapturedRow(const PropertyRow* row) const;
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void startFilter(const char* filter);
@@ -280,6 +281,8 @@ protected:
 	QPoint offset_;
 	QSize sizeHint_;
 	DragController* dragController_;
+	QPoint pressPoint_;
+	PropertyRow* capturedRow_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

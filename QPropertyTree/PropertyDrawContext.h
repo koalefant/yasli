@@ -64,6 +64,7 @@ struct PropertyDrawContext {
 	QPainter* painter;
 	QRect widgetRect;
 	QRect lineRect;
+	bool captured;
 
 	void drawIcon(const QRect& rect, const Icon& icon) const;
 	void drawCheck(const QRect& rect, bool disabled, CheckState checked) const;
@@ -74,6 +75,7 @@ struct PropertyDrawContext {
 	PropertyDrawContext()
 	: tree(0)
 	, painter(0)
+	, captured(false)
 	{
 	}
 };

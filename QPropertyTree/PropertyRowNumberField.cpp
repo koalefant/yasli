@@ -12,6 +12,8 @@
 #include "PropertyRowNumberField.h"
 #include "PropertyDrawContext.h"
 #include <QtGui/QStyleOption>
+#include <QtGui/QDesktopWidget>
+#include <QtGui/QApplication>
 
 PropertyRowNumberField::PropertyRowNumberField()
 {
@@ -46,22 +48,64 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		rt.adjust(0, 0, 0, -1);
 
 		QStyleOption option;
-		option.state = QStyle::State_Sunken | QStyle::State_Editing;
-		if (!userReadOnly())
+		option.state = QStyle::State_Sunken/* | QStyle::State_Editing*/;
+		if (context.captured) {
+			painter->fillRect(rt, tree->palette().highlight());
+			option.state |= QStyle::State_HasFocus;
+			option.state |= QStyle::State_Active;
+			option.state |= QStyle::State_MouseOver;
+		}
+		else if (!userReadOnly()) {
+			painter->fillRect(rt, tree->palette().base());
 			option.state |= QStyle::State_Enabled;
+		}
 		option.rect = rt; // option.rect is the rectangle to be drawn on.
-		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
-		if (!textRect.isValid())
-		{
+		QRect textRect = tree->style()->subElementRect(QStyle::SE_FrameContents, &option, 0);
+		if (!textRect.isValid()) {
 			textRect = rt;
 			textRect.adjust(3, 1, -3, -2);
 		}
-		painter->fillRect(rt, tree->palette().base());
-		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
-		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
-		painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
-		painter->drawText(textRect, Qt::AlignCenter | Qt::AlignVCenter, QString(valueAsString().c_str()), 0);
+		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
+		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, 0);
+		painter->setPen(QPen(context.captured ? tree->palette().color(QPalette::HighlightedText) : tree->palette().color(QPalette::WindowText)));
+		painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(valueAsString().c_str()), 0);
 	}
+}
+
+bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed)
+{
+	changed = false;
+	if (widgetRect().contains(point)) {
+		startIncrement();
+		QCursor cur;
+		cur.setShape(Qt::SizeHorCursor);
+		tree->setCursor(cur);
+		return true;
+	}
+	return false;
+}
+
+void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e) override
+{
+	QSize screenSize = QApplication::desktop()->screenGeometry(e.tree).size();
+	float relativeDelta = float((e.pos - e.start).x()) / screenSize.width();
+	incrementLog(relativeDelta);
+}
+
+void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, QPoint point) 
+{
+	tree->unsetCursor();
+	endIncrement(tree);
+}
+
+bool PropertyRowNumberField::onActivate(QPropertyTree* tree, bool force) override
+{
+	return false;
+}
+
+bool PropertyRowNumberField::onActivateRelease(QPropertyTree* tree) override
+{
+	return tree->spawnWidget(this, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +116,7 @@ PropertyRowWidgetNumber::PropertyRowWidgetNumber(PropertyTreeModel* model, Prope
 , entry_(new QLineEdit())
 , tree_(tree)
 {
-	entry_->setAlignment(Qt::AlignCenter);
+	//entry_->setAlignment(Qt::AlignCenter);
 	entry_->setText(row_->valueAsString().c_str());
 	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
 

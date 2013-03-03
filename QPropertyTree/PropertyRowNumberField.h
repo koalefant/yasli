@@ -55,8 +55,15 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	void redraw(const PropertyDrawContext& context) override;
+	bool onActivate(QPropertyTree* tree, bool force) override;
+	bool onActivateRelease(QPropertyTree* tree) override;
+	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;
+	void onMouseUp(QPropertyTree* tree, QPoint point) override;
+	void onMouseDrag(const PropertyDragEvent& e) override;
 
-	virtual void incrementLog(float screenFraction) {}
+	virtual void startIncrement() = 0;
+	virtual void endIncrement(QPropertyTree* tree) = 0;
+	virtual void incrementLog(float screenFraction) = 0;
 	virtual bool setValueFromString(const char* str) = 0;
 };
 
