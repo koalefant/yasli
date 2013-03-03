@@ -77,9 +77,6 @@ bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool
 	changed = false;
 	if (widgetRect().contains(point)) {
 		startIncrement();
-		QCursor cur;
-		cur.setShape(Qt::SizeHorCursor);
-		tree->setCursor(cur);
 		return true;
 	}
 	return false;
@@ -87,6 +84,10 @@ bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool
 
 void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e) override
 {
+	QCursor cur;
+	cur.setShape(Qt::SizeHorCursor);
+	e.tree->setCursor(cur);
+
 	QSize screenSize = QApplication::desktop()->screenGeometry(e.tree).size();
 	float relativeDelta = float((e.pos - e.start).x()) / screenSize.width();
 	incrementLog(relativeDelta);

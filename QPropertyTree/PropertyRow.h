@@ -173,7 +173,7 @@ public:
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
-	yasli::string rowText(const QPropertyTree* tree) const;
+	yasli::string rowText(const QPropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false);
@@ -198,7 +198,7 @@ public:
 	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calculateMinimalSize(const QPropertyTree* tree);
+	void calculateMinimalSize(const QPropertyTree* tree, int rowIndex);
 	void setTextSize(float multiplier);
 	void calculateTotalSizes(int* minTextSize);
 	void adjustRect(const QPropertyTree* tree, const QRect& rect, QPoint pos, int& totalHeight, int& extraSize);
@@ -215,7 +215,7 @@ public:
 	void adjustHoveredRect(QRect& hoveredRect);
 	const QFont* rowFont(const QPropertyTree* tree) const;
 
-	void drawRow(QPainter& painter, const QPropertyTree* tree);
+	void drawRow(QPainter& painter, const QPropertyTree* tree, int rowIndex);
 	void drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const;
 	void drawStaticText(QPainter& p, const QRect& widgetRect);
 
@@ -399,6 +399,7 @@ template<class Op>
 bool PropertyRow::scanChildren(Op& op)
 {
 	Rows::iterator it;
+
 	for(it = children_.begin(); it != children_.end(); ++it){
 		ScanResult result = op(*it);
 		if(result == SCAN_FINISHED)
@@ -417,8 +418,9 @@ template<class Op>
 bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
 {
 	Rows::iterator it;
-	for(it = children_.begin(); it != children_.end(); ++it){
-		ScanResult result = op(*it, tree);
+	int index = 0;
+	for(it = children_.begin(); it != children_.end(); ++it, ++index){
+		ScanResult result = op(*it, tree, index);
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
@@ -434,8 +436,9 @@ bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
 template<class Op>
 bool PropertyRow::scanChildrenReverse(Op& op, QPropertyTree* tree)
 {
-	for(Rows::reverse_iterator it = children_.rbegin(); it != children_.rend(); ++it){
-		ScanResult result = op(*it, tree);
+	int index = children_.size() - 1;
+	for(Rows::reverse_iterator it = children_.rbegin(); it != children_.rend(); ++it, --index){
+		ScanResult result = op(*it, tree, index);
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){

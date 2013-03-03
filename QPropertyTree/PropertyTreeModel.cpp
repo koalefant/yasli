@@ -194,7 +194,7 @@ protected:
 
 struct RowExpander {
 	RowExpander(const std::vector<char>& states) : states_(states), index_(0) {}
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
 		if(size_t(index_) >= states_.size())
 			return SCAN_FINISHED;

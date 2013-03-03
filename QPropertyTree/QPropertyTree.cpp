@@ -297,10 +297,10 @@ struct DrawRowVisitor
 {
 	DrawRowVisitor(QPainter& painter) : painter_(painter) {}
 
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
 		if(row->pulledUp() && row->visible(tree))
-			row->drawRow(painter_, tree);
+			row->drawRow(painter_, tree, index);
 
 		return SCAN_CHILDREN_SIBLINGS;
 	}
@@ -321,7 +321,10 @@ void DragWindow::drawRow(QPainter& p)
 	int offsetX = -leftTop.x() - tree_->tabSize() + 2;
 	int offsetY = -leftTop.y() + 1;
 	p.translate(offsetX, offsetY);
-	row_->drawRow(p, tree_);
+	int rowIndex = 0;
+	if (row_->parent())
+		rowIndex = row_->childIndex(row_);
+	row_->drawRow(p, tree_, 0);
 	DrawRowVisitor visitor(p);
 	row_->scanChildren(visitor, tree_);
 	p.translate(-offsetX, -offsetY);
@@ -824,7 +827,7 @@ void QPropertyTree::interruptDrag()
 
 void QPropertyTree::updateHeights()
 {
-	model()->root()->calculateMinimalSize(this);
+	model()->root()->calculateMinimalSize(this, 0);
 
   int padding = compact_ ? 4 : 6;
 
@@ -1821,14 +1824,14 @@ struct DrawVisitor
 		, lastParent_(0)
 	{}
 
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
 		if(row->visible(tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
 			if(row->rect().bottom() > scrollOffset_)
-				row->drawRow(painter_, tree);
+				row->drawRow(painter_, tree, index);
 
 			return SCAN_CHILDREN_SIBLINGS;
 		}

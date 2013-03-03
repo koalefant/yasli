@@ -81,6 +81,7 @@ struct TestData
 MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
+	globalTestData.elements.resize(5000);
     QPropertyTree* tree = new QPropertyTree(this);
     tree->attach(yasli::Serializer(globalTestData));
     setCentralWidget(tree);
