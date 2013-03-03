@@ -13,7 +13,7 @@
 #include "PropertyIArchive.h"
 #include "PropertyRowBool.h"
 #include "PropertyRowString.h"
-#include "PropertyRowNumeric.h"
+#include "PropertyRowNumber.h"
 #include "PropertyRowPointer.h"
 #include "PropertyRowObject.h"
 #include "Unicode.h"

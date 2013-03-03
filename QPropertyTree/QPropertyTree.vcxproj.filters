@@ -34,10 +34,10 @@
     <ClCompile Include="GeneratedFiles\Release\moc_PropertyRowContainer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_PropertyRowNumeric.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_PropertyRowNumber.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_PropertyRowNumeric.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_PropertyRowNumber.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PropertyRowPointer.cpp">
@@ -86,7 +86,7 @@
     <ClCompile Include="PropertyRowBool.cpp" />
     <ClCompile Include="PropertyRowContainer.cpp" />
     <ClCompile Include="PropertyRowField.cpp" />
-    <ClCompile Include="PropertyRowNumeric.cpp" />
+    <ClCompile Include="PropertyRowNumber.cpp" />
     <ClCompile Include="PropertyRowObject.cpp" />
     <ClCompile Include="PropertyRowPointer.cpp" />
     <ClCompile Include="PropertyRowString.cpp" />
@@ -116,7 +116,7 @@
   <ItemGroup>
     <CustomBuild Include="PropertyRow.h" />
     <CustomBuild Include="PropertyRowContainer.h" />
-    <CustomBuild Include="PropertyRowNumeric.h" />
+    <CustomBuild Include="PropertyRowNumber.h" />
     <CustomBuild Include="PropertyRowPointer.h" />
     <CustomBuild Include="PropertyRowString.h" />
     <CustomBuild Include="PropertyRowStringListValue.h" />

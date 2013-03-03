@@ -10,31 +10,31 @@
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
-#include "PropertyRowNumeric.h"
+#include "PropertyRowNumber.h"
 
-#define REGISTER_NUMERIC(TypeName, postfix) \
-	typedef PropertyRowNumeric<TypeName> PropertyRow##postfix; \
+#define REGISTER_NUMBER_ROW(TypeName, postfix) \
+	typedef PropertyRowNumber<TypeName> PropertyRow##postfix; \
 	YASLI_CLASS(PropertyRow, PropertyRow##postfix, #TypeName);
 
 using yasli::string;
 
-REGISTER_NUMERIC(float, Float)
-REGISTER_NUMERIC(double , Double)
+REGISTER_NUMBER_ROW(float, Float)
+REGISTER_NUMBER_ROW(double , Double)
 
-REGISTER_NUMERIC(char, Char)
-REGISTER_NUMERIC(signed char, SignedChar)
-REGISTER_NUMERIC(unsigned char, UnsignedChar)
+REGISTER_NUMBER_ROW(char, Char)
+REGISTER_NUMBER_ROW(signed char, SignedChar)
+REGISTER_NUMBER_ROW(unsigned char, UnsignedChar)
 
-REGISTER_NUMERIC(short, Short)
-REGISTER_NUMERIC(int, Int)
-REGISTER_NUMERIC(long, Long)
-REGISTER_NUMERIC(long long, LongLong)
-REGISTER_NUMERIC(unsigned short, UnsignedShort)
-REGISTER_NUMERIC(unsigned int, UnsignedInt)
-REGISTER_NUMERIC(unsigned long, UnsignedLong)
-REGISTER_NUMERIC(unsigned long long, UnsignedLongLong)
+REGISTER_NUMBER_ROW(short, Short)
+REGISTER_NUMBER_ROW(int, Int)
+REGISTER_NUMBER_ROW(long, Long)
+REGISTER_NUMBER_ROW(long long, LongLong)
+REGISTER_NUMBER_ROW(unsigned short, UnsignedShort)
+REGISTER_NUMBER_ROW(unsigned int, UnsignedInt)
+REGISTER_NUMBER_ROW(unsigned long, UnsignedLong)
+REGISTER_NUMBER_ROW(unsigned long long, UnsignedLongLong)
 
-#undef REGISTER_NUMERIC
+#undef REGISTER_NUMBER_ROW
 
 // ---------------------------------------------------------------------------
 PropertyRowWidgetNumeric::PropertyRowWidgetNumeric(PropertyRow* row, PropertyTreeModel* model, PropertyRowNumericInterface* numeric, QPropertyTree* tree)

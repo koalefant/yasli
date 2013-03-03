@@ -17,7 +17,7 @@
 #include "PropertyRowContainer.h"
 #include "PropertyRowBool.h"
 #include "PropertyRowString.h"
-#include "PropertyRowNumeric.h"
+#include "PropertyRowNumber.h"
 #include "PropertyRowPointer.h"
 #include "PropertyRowObject.h"
 #include "ConstStringList.h"
@@ -227,7 +227,7 @@ bool PropertyOArchive::operator()(bool& value, const char* name, const char* lab
 
 bool PropertyOArchive::operator()(char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<char>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<char>(name, label, value));
 	return true;
 }
 
@@ -235,31 +235,31 @@ bool PropertyOArchive::operator()(char& value, const char* name, const char* lab
 
 bool PropertyOArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed char>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<signed char>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed short>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<signed short>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed int& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed int>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<signed int>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed long>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<signed long>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(long long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<long long>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<long long>(name, label, value));
 	return true;
 }
 
@@ -267,31 +267,31 @@ bool PropertyOArchive::operator()(long long& value, const char* name, const char
 
 bool PropertyOArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned char>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<unsigned char>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned short>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<unsigned short>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned int>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<unsigned int>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned long>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<unsigned long>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned long long>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<unsigned long long>(name, label, value));
 	return true;
 }
 
@@ -299,13 +299,13 @@ bool PropertyOArchive::operator()(unsigned long long& value, const char* name, c
 
 bool PropertyOArchive::operator()(float& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<float>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<float>(name, label, value));
 	return true;
 }
 
 bool PropertyOArchive::operator()(double& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<double>(name, label, value));
+	lastNode_ = addRow(new PropertyRowNumber<double>(name, label, value));
 	return true;
 }
 

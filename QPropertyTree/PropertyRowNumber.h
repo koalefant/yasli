@@ -55,32 +55,20 @@ yasli::string numericAsString(T value)
 	return buf.c_str();
 }
 
-
-
-template<class Derived, class Default>
-struct SelectNumericDerived{
-	typedef Derived Type;
-};
-
-template<class Default>
-struct SelectNumericDerived<Unspecified_Derived_Argument, Default>{
-	typedef Default Type;
-};
-
-template<class Type, class _Derived = Unspecified_Derived_Argument >
-class PropertyRowNumeric : public PropertyRowImpl<Type, typename SelectNumericDerived<_Derived, PropertyRowNumeric<Type, _Derived> >::Type>, public PropertyRowNumericInterface{
+template<class Type>
+class PropertyRowNumber : public PropertyRowField, public PropertyRowNumericInterface{
 public:
 	enum { Custom = false };
-	typedef typename SelectNumericDerived<_Derived, PropertyRowNumeric>::Type Derived;
-    typedef PropertyRowImpl<Type, typename SelectNumericDerived<_Derived, PropertyRowNumeric<Type, _Derived> >::Type> Base;
-	PropertyRowNumeric(const char* name = "", const char* nameAlt = "", Type value = Type())
-		: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, TypeID::get<Type>().name())
+	PropertyRowNumber()
+		: PropertyRowField("", "", TypeID::get<Type>().name())
 	{
 	}
-	PropertyRowNumeric(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-	: PropertyRowImpl<Type, Derived>(object, size, name, nameAlt, typeName)
+	PropertyRowNumber(const char* name, const char* nameAlt, Type value)
+	: PropertyRowField(name, nameAlt, TypeID::get<Type>().name())
+	, value_(value)
 	{
 	}
+
 	PropertyRowWidget* createWidget(QPropertyTree* tree){
 		return new PropertyRowWidgetNumeric(this, tree->model(), this, tree);
 	}
@@ -92,12 +80,29 @@ public:
 			return 40;
 	}
 
-	bool setValueFromString(const char* str){
-        Type value = Base::value_;
-        Base::value_ = Type(atof(str));
-        return Base::value_ != value;
+	bool setValueFromString(const char* str) override{
+        Type value = value_;
+        value_ = Type(atof(str));
+        return value_ != value;
 	}
-	yasli::string valueAsString() const{ 
-        return numericAsString(Type(Base::value_));
+	yasli::string valueAsString() const override{ 
+        return numericAsString(Type(value_));
 	}
+
+	bool assignTo(void* object, size_t size){
+		*reinterpret_cast<Type*>(object) = value_;
+		return true;
+	}
+	bool isLeaf() const{ return true; }
+	bool isStatic() const{ return false; }
+
+	void serializeValue(yasli::Archive& ar){
+		ar(value_, "value", "Value");
+	}
+	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
+	PropertyRow* clone() const{
+		return cloneChildren(new PropertyRowNumber(name_, label_, value_), this);
+	}
+protected:
+	Type value_; 
 };
