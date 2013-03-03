@@ -11,6 +11,7 @@
 #include "PropertyTreeModel.h"
 #include "PropertyRowNumberField.h"
 #include "PropertyDrawContext.h"
+#include <QtGui/QStyleOption>
 
 PropertyRowNumberField::PropertyRowNumberField()
 {
@@ -36,10 +37,31 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 {
     if(multiValue())
 		context.drawEntry(L" ... ", false, true);
-    else if(userReadOnly())
-		context.drawValueText(pulledSelected(), valueAsWString().c_str());
-    else
-        context.drawEntry(valueAsWString().c_str(), false, false);
+    else 
+	{
+		QPainter* painter = context.painter;
+		const QPropertyTree* tree = context.tree;
+
+		QRect rt = context.widgetRect;
+		rt.adjust(0, 0, 0, -1);
+
+		QStyleOption option;
+		option.state = QStyle::State_Sunken | QStyle::State_Editing;
+		if (!userReadOnly())
+			option.state |= QStyle::State_Enabled;
+		option.rect = rt; // option.rect is the rectangle to be drawn on.
+		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
+		if (!textRect.isValid())
+		{
+			textRect = rt;
+			textRect.adjust(3, 1, -3, -2);
+		}
+		painter->fillRect(rt, tree->palette().base());
+		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
+		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
+		painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
+		painter->drawText(textRect, Qt::AlignCenter | Qt::AlignVCenter, QString(valueAsString().c_str()), 0);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -50,6 +72,7 @@ PropertyRowWidgetNumber::PropertyRowWidgetNumber(PropertyTreeModel* model, Prope
 , entry_(new QLineEdit())
 , tree_(tree)
 {
+	entry_->setAlignment(Qt::AlignCenter);
 	entry_->setText(row_->valueAsString().c_str());
 	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
 

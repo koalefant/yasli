@@ -167,27 +167,25 @@ void PropertyDrawContext::drawValueText(bool highlighted, const wchar_t* text) c
 
 void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const
 {
-	{
-		QRect rt = widgetRect;
-		rt.adjust(0, 0, 0, -1);
+	QRect rt = widgetRect;
+	rt.adjust(0, 0, 0, -1);
 
-		QStyleOption option;
-		option.state = QStyle::State_Sunken | QStyle::State_Editing;
-		if (!grayBackground)
-			option.state |= QStyle::State_Enabled;
-		option.rect = rt; // option.rect is the rectangle to be drawn on.
-		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
-		if (!textRect.isValid())
-		{
-			textRect = rt;
-			textRect.adjust(3, 1, -3, -2);
-		}
-		painter->fillRect(rt, tree->palette().base());
-		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
-		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
-		painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
+	QStyleOption option;
+	option.state = QStyle::State_Sunken | QStyle::State_Editing;
+	if (!grayBackground)
+		option.state |= QStyle::State_Enabled;
+	option.rect = rt; // option.rect is the rectangle to be drawn on.
+	QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
+	if (!textRect.isValid())
+	{
+		textRect = rt;
+		textRect.adjust(3, 1, -3, -2);
 	}
+	painter->fillRect(rt, tree->palette().base());
+	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
+	tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
+	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
+	painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
 }
 
 

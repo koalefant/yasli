@@ -8,13 +8,24 @@
 using yasli::Archive;
 #include "yasli/STLImpl.h"
 
+struct Vec3
+{
+	float x, y, z;
+
+	Vec3() : x(0), y(0), z(0) {}
+
+	void serialize(Archive& ar)
+	{
+		ar(x, "x", "^");
+		ar(y, "y", "^");
+		ar(z, "z", "^");
+	}
+};
+
 struct Element
 {
     Element()
 	: enabled(false)
-	, x(0.0f)
-	, y(0.0f)
-	, z(0.0f)
 	, char_(255)
 	, signedChar_(127)
 	, unsignedChar_(255)
@@ -28,9 +39,7 @@ struct Element
     void serialize(Archive& ar)
 	{
 		ar(enabled, "enabled", "Enabled");
-		ar(x, "x", "&X element");
-		ar(y, "y", "&Y element");
-		ar(z, "z", "&Z element");
+		ar(vec, "vec", "Vec3");
 		ar(integer_, "integer_", "integer_");
 		ar(char_, "char", "char");
 		ar(signedChar_, "signedChar", "signedChar");
@@ -45,6 +54,7 @@ struct Element
 	}
 
     bool enabled;
+	Vec3 vec;
     float x, y, z;
 	int integer_;
 	char char_;
