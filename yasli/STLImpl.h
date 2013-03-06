@@ -171,6 +171,21 @@ inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, 
 	return ar(static_cast<yasli::StringInterface&>(str), name, label);
 }
 
+
+// ---------------------------------------------------------------------------
+
+template<class K, class V, class C, class Alloc>
+bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label)
+{
+	std::vector<std::pair<K, V> > temp(container.begin(), container.end());
+	if (!ar(temp, name, label))
+		return false;
+	
+	container.clear();
+	container.insert(temp.begin(), temp.end());
+	return true;
+}
+
 // ---------------------------------------------------------------------------
 
 namespace yasli {
@@ -192,4 +207,32 @@ inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name,
 {
 	yasli::WStringSTL str(value);
 	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
+}
+
+// ---------------------------------------------------------------------------
+
+template<class V>
+struct StdPair : yasli::KeyValueInterface
+{
+	const char* getKey() { return pair_.first.c_str(); }
+	void setKey(const char* key) { pair_.first.assign(key); }
+	bool serializeValue(yasli::Archive& ar) 
+	{
+		return ar(pair_.second, "", 0);
+	}
+
+	StdPair(std::pair<std::string, V>& pair)
+	: pair_(pair)
+	{
+	}
+
+
+	std::pair<std::string, V>& pair_;
+};
+
+template<class V>
+bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
+{
+	StdPair<V> keyValue(pair);
+	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
 }

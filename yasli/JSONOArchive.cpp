@@ -10,6 +10,8 @@
 #include "StdAfx.h"
 #include "JsonOArchive.h"
 #include "MemoryWriter.h"
+#include "yasli/KeyValue.h"
+#include "yasli/ClassFactory.h"
 #include <float.h>
 
 namespace yasli{
@@ -388,8 +390,10 @@ void JSONOArchive::closeContainerBracket()
 
 void JSONOArchive::placeName(const char* name)
 {
+	if (stack_.back().isKeyValue)
+		return;
     //if(name[0] != '\0')
-	if (!stack_.back().isContainer && stack_.size() > 1)
+	if ((name[0] != '\0' || !stack_.back().isContainer) && stack_.size() > 1)
 	{
         *buffer_ << "\"";
         *buffer_ << name;
@@ -400,16 +404,18 @@ void JSONOArchive::placeName(const char* name)
 
 void JSONOArchive::placeIndent(bool putComma)
 {
+	if (stack_.back().isKeyValue)
+		return;
 	if (putComma && stack_.back().elementIndex > 0)
 		*buffer_ << ",";		
 	if (buffer_->position() > 0)
-	*buffer_ << "\n";
-  int count = int(stack_.size() - 1);
+		*buffer_ << "\n";
+	int count = int(stack_.size() - 1);
 	stack_.back().indentCount += count;
 	stack_.back().elementIndex += 1;
-  for(int i = 0; i < count; ++i)
-	*buffer_ << "\t";
-  compactOffset_ = 0;
+	for(int i = 0; i < count; ++i)
+		*buffer_ << "\t";
+	compactOffset_ = 0;
 }
 
 void JSONOArchive::placeIndentCompact(bool putComma)
@@ -627,30 +633,69 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
     return true;
 }
 
+bool JSONOArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
+{
+    placeIndent();
+    placeName(keyValue.getKey());
+	stack_.back().isKeyValue = true;
+	keyValue.serializeValue(*this);
+	stack_.back().isKeyValue = false;
+	if (stack_.back().isContainer)
+		stack_.back().isDictionary = true;
+    return true;
+}
+
+bool JSONOArchive::operator()(PointerInterface& ser, const char* name, const char* label)
+{
+	placeIndent();
+	placeName(name);
+	openBracket();
+	TypeID derived = ser.type();
+	if (derived)
+	{
+		if (const TypeDescription* description = ser.factory()->descriptionByType(derived)) {
+			*buffer_ << " ";
+			placeName(description->name());
+			stack_.back().isKeyValue = true;
+			operator()(ser.serializer(), "");
+			stack_.back().isKeyValue = false;
+			*buffer_ << " ";
+		}
+	}
+	closeBracket();
+	return true;
+}
 
 bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
-    placeIndent();
-    placeName(name);
-    std::size_t position = buffer_->position();
-    openContainerBracket();
-    stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
+	placeIndent();
+	placeName(name);
+	std::size_t position = buffer_->position();
+	openContainerBracket();
+	stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
 
-    std::size_t size = ser.size();
-    if(size > 0){
-        do{
-            ser(*this, "", "");
-        }while(ser.next());
-    }
+	std::size_t size = ser.size();
+	if(size > 0){
+		do{
+			ser(*this, "", "");
+		}while(ser.next());
+	}
 
-    bool joined = joinLinesIfPossible();
-    stack_.pop_back();
-    if(!joined)
-        placeIndent(false);
-		else
-			*buffer_ << " ";
+	bool joined = joinLinesIfPossible();
+	bool isDictionary = stack_.back().isDictionary;
+	if (isDictionary)
+		buffer_->buffer()[stack_.back().startPosition] = '{';
+	stack_.pop_back();
+	if(!joined)
+		placeIndent(false);
+	else
+		*buffer_ << " ";
+
+	if (isDictionary)
+		closeBracket();
+	else
 		closeContainerBracket();
-    return true;
+	return true;
 }
 
 static char* joinLines(char* start, char* end)

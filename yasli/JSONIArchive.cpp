@@ -11,7 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include "yasli/STL.h"
 #include "JSONIArchive.h"
+#include "yasli/STLImpl.h"
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
 
@@ -627,14 +629,18 @@ void JSONIArchive::skipBlock()
 #endif
 }
 
-bool JSONIArchive::findName(const char* name)
+bool JSONIArchive::findName(const char* name, Token* outName)
 {
-
 #ifdef DEBUG_TEXTIARCHIVE
     std::cout << " * finding name '" << name << "'" << std::endl;
     std::cout << "   started at byte " << int(token_.start - reader_->start) << std::endl;
 #endif
-    YASLI_ASSERT(!stack_.empty());
+    if(stack_.empty()) {
+		// TODO: diagnose
+		return false;
+	}
+	if (stack_.back().isKeyValue)
+		return true;
     const char* start = 0;
     const char* blockBegin = stack_.back().start;
 	if(*blockBegin == '\0')
@@ -649,8 +655,9 @@ bool JSONIArchive::findName(const char* name)
 		readToken();
 	}
 
-    if(stack_.size() == 1 || stack_.back().isContainer){
+    if(stack_.size() == 1 || stack_.back().isContainer || outName != 0){
         if(isName(token_)){
+			*outName = token_;
 #ifdef DEBUG_TEXTIARCHIVE
             std::cout << "Token: '" << token_.str() << "'" << std::endl;
 #endif
@@ -658,7 +665,7 @@ bool JSONIArchive::findName(const char* name)
             start = token_.start;
             readToken();
             expect(':');
-            skipBlock();
+			return true;
         }
         else{
 			if(token_ == ']' || token_ == '}'){
@@ -865,10 +872,62 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
     return false;
 }
 
+bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
+{
+	Token nextName;
+    if(findName("", &nextName)){
+		string key;
+		unescapeString(key, nextName.start + 1, nextName.end - 1);
+		keyValue.setKey(key.c_str());
+		stack_.push_back(Level());
+		stack_.back().isKeyValue = true;
+
+		bool result = keyValue.serializeValue(*this);
+		if(stack_.empty()) {
+			// TODO: diagnose
+			return false;
+		}
+        stack_.pop_back();
+        return result;
+    }
+	return false;
+}
+
+
+bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const char* label)
+{
+	if (findName(name)) {
+		  if(openBracket()){
+            stack_.push_back(Level());
+            stack_.back().start = token_.end;
+			stack_.back().isKeyValue = true;
+
+			string typeName;
+			if (!operator()(typeName, "")) {
+				ser.create(TypeID());				
+			}
+			else {
+				TypeID type = ser.factory()->findTypeByName(typeName.c_str());
+				if (ser.type() != type)
+					ser.create(type);
+			}
+			bool result = operator()(ser.serializer(), "", 0);
+			stack_.pop_back();
+			return result;
+		}
+	}
+	return false;
+}
+
+
 bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     if(findName(name)){
-        if(openContainerBracket()){
+		bool containerBracket = openContainerBracket();
+		bool dictionaryBracket = false;
+		if (!containerBracket)
+			dictionaryBracket = openBracket();
+        if(containerBracket || dictionaryBracket){
             stack_.push_back(Level());
 			stack_.back().isContainer = true;
             stack_.back().start = token_.end;
@@ -880,8 +939,9 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
                 readToken();
 				if(token_ == '}')
 				{
-				    YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
-					return false;
+					break;
+				    //YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
+				//	return false;
 				}
                 if(token_ == ']')
                     break;

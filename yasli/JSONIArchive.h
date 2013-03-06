@@ -45,10 +45,12 @@ public:
 
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
 	bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0);
+	bool operator()(KeyValueInterface& ser, const char* name = "", const char* label = 0);
+	bool operator()(PointerInterface& ser, const char* name = "", const char* label = 0);
 
 	using Archive::operator();
 private:
-	bool findName(const char* name);
+	bool findName(const char* name, Token* outName = 0);
 	bool openBracket();
 	bool closeBracket();
 
@@ -69,7 +71,8 @@ private:
 		const char* start;
 		const char* firstToken;
 		bool isContainer;
-		Level() : isContainer(false) {}
+		bool isKeyValue;
+		Level() : isContainer(false), isKeyValue(false) {}
 	};
 	typedef std::vector<Level> Stack;
 	Stack stack_;
