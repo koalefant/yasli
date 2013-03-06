@@ -9,7 +9,36 @@
 
 project("yasli")
 
-file(GLOB SOURCES *.h *.cpp)
+set(SOURCES
+	Archive.cpp Archive.h
+	Assert.cpp Assert.h
+	BinArchive.cpp BinArchive.h
+	BinaryIArchive.cpp BinaryIArchive.h
+	BinaryNode.h
+	BinaryOArchive.cpp BinaryOArchive.h
+	BitVector.h BitVectorImpl.h
+	ClassFactory.cpp ClassFactory.h ClassFactoryBase.h
+	Config.h
+	Enum.cpp Enum.h
+	Helpers.h
+	InPlaceIArchive.cpp InPlaceIArchive.h
+	InPlaceOArchive.cpp InPlaceOArchive.h
+	JSONIArchive.cpp JSONIArchive.h
+	JSONOArchive.cpp JSONOArchive.h
+	MemoryReader.cpp MemoryReader.h
+	MemoryWriter.cpp MemoryWriter.h
+	Object.h
+	Pointers.h PointersImpl.h
+	Serializer.h SerializerImpl.h
+	StdAfx.cpp StdAfx.h
+	STL.h STLImpl.h
+	StringList.cpp StringList.h
+	Strings.h
+	TextIArchive.cpp TextIArchive.h
+	TextOArchive.cpp TextOArchive.h
+	Token.h
+	TypeID.h
+	)
 source_group("" FILES ${SOURCES})
 
 if(WIN32)

@@ -19,6 +19,7 @@ include_directories(UnitTest++/src)
 include_directories(.)
 add_subdirectory(yasli)
 add_subdirectory(yasli-example)
+add_subdirectory(yasli-test)
 
 add_subdirectory(XMath)
 

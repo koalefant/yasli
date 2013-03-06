@@ -155,7 +155,8 @@ namespace Helpers{
 template<class T>
 struct SerializeStruct{
 	static bool invoke(Archive& ar, T& value, const char* name, const char* label){
-		return ar(Serializer(value), name, label);
+		Serializer serializer(value);
+		return ar(serializer, name, label);
 	};
 };
 
