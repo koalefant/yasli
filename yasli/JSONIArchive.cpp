@@ -657,15 +657,22 @@ bool JSONIArchive::findName(const char* name, Token* outName)
 
     if(stack_.size() == 1 || stack_.back().isContainer || outName != 0){
         if(isName(token_)){
-			*outName = token_;
+			if (outName) {
+				*outName = token_;
 #ifdef DEBUG_TEXTIARCHIVE
             std::cout << "Token: '" << token_.str() << "'" << std::endl;
 #endif
 
-            start = token_.start;
-            readToken();
-            expect(':');
-			return true;
+				start = token_.start;
+				readToken();
+				expect(':');
+				return true;
+			}
+			else {
+				start = token_.start;
+				readToken();
+				expect(':');
+			}
         }
         else{
 			if(token_ == ']' || token_ == '}'){
@@ -902,18 +909,34 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
             stack_.back().start = token_.end;
 			stack_.back().isKeyValue = true;
 
-			string typeName;
-			if (!operator()(typeName, "")) {
-				ser.create(TypeID());				
+			readToken();
+			if (isName(token_)) {
+				if(checkStringValueToken()){
+					string typeName;
+					unescapeString(typeName, token_.start + 1, token_.end - 1);
+
+					TypeID type = ser.factory()->findTypeByName(typeName.c_str());
+					if (ser.type() != type)
+						ser.create(type);
+					readToken();
+					expect(':');
+					operator()(ser.serializer(), "", 0);
+				}
 			}
 			else {
-				TypeID type = ser.factory()->findTypeByName(typeName.c_str());
-				if (ser.type() != type)
-					ser.create(type);
+				putToken();
+
+				ser.create(TypeID());				
 			}
-			bool result = operator()(ser.serializer(), "", 0);
+			closeBracket();
 			stack_.pop_back();
-			return result;
+			/*
+			if (!closeBracket()) {
+				// TODO diagnose
+				return false;
+			}
+			*/
+			return true;
 		}
 	}
 	return false;
