@@ -17,7 +17,13 @@
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
 
-// #define DEBUG_TEXTIARCHIVE
+#if 0
+# define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+# define DEBUG_TRACE_TOKENIZER(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+#else
+# define DEBUG_TRACE(x)
+# define DEBUG_TRACE_TOKENIZER(x)
+#endif
 
 namespace yasli{
 
@@ -424,16 +430,12 @@ Token JSONTokenizer::operator()(const char* ptr) const
 	Token cur(ptr, ptr);
 	while(!cur && *ptr != '\0'){
 		while(isComment(*cur.end)){
-#ifdef DEBUG_TOKENIZER
 			const char* commentStart = ptr;
-#endif
 			while(*cur.end && *cur.end != '\n')
 				++cur.end;
 			while(isSpace(*cur.end))
 				++cur.end;
-#ifdef DEBUG_TOKENIZER
-			std::cout << "Got comment: '" << std::string(commentStart, cur.end) << "'" << std::endl;
-#endif
+			DEBUG_TRACE_TOKENIZER("Got comment: '%s'", string(commentStart, cur.end).c_str());
 			cur.start = cur.end;
 		}
 		YASLI_ASSERT(!isSpace(*cur.end));
@@ -454,9 +456,7 @@ Token JSONTokenizer::operator()(const char* ptr) const
 				}
 				if(isQuote(*cur.end)){
 					++cur.end;
-#ifdef DEBUG_TOKENIZER
-					std::cout << "Tokenizer result: " << cur.str() << std::endl;
-#endif
+					DEBUG_TRACE_TOKENIZER("Tokenizer result: '%s'", cur.str().c_str());
 					return cur;
 				}
 				else
@@ -468,10 +468,7 @@ Token JSONTokenizer::operator()(const char* ptr) const
 			if(!*cur.end)
 				return cur;
 
-#ifdef DEBUG_TOKENIZER
-			char twoChars[] = { *cur.end, '\0' };
-			std::cout << twoChars << std::endl;
-#endif
+			DEBUG_TRACE_TOKENIZER("%c", *cur.end);
 			if(isWordPart(*cur.end))
 			{
 				do{
@@ -483,15 +480,11 @@ Token JSONTokenizer::operator()(const char* ptr) const
 				++cur.end;
 				return cur;
 			}
-#ifdef DEBUG_TOKENIZER
-			std::cout << "Tokenizer result: " << cur.str() << std::endl;
-#endif
+			DEBUG_TRACE_TOKENIZER("Tokenizer result: '%s'", cur.str().c_str());
 			return cur;
 		}
 	}
-#ifdef DEBUG_TOKENIZER
-	std::cout << "Tokenizer result: " << cur.str() << std::endl;
-#endif
+	DEBUG_TRACE_TOKENIZER("Tokenizer result: '%s'", cur.str().c_str());
 	return cur;
 }
 
@@ -565,20 +558,12 @@ void JSONIArchive::readToken()
 {
 	JSONTokenizer tokenizer;
 	token_ = tokenizer(token_.end);
-#ifdef DEBUG_TEXTIARCHIVE
-	std::cout << " ~ read token '" << token_.str() << "' at " << token_.start - reader_->begin() << std::endl ;
-	if(token_){
-		YASLI_ASSERT(token_.start < reader_->end());
-		YASLI_ASSERT(token_.start[0] != '\001');
-	}
-#endif
+	DEBUG_TRACE(" ~ read token '%s' at %i", token_.str().c_str(), token_.start - reader_->begin());
 }
 
 void JSONIArchive::putToken()
 {
-#ifdef DEBUG_TEXTIARCHIVE
-    std::cout << " putToken: \'" << token_.str() << "\'" << std::endl;
-#endif
+	DEBUG_TRACE(" putToken: '%s'", token_.str().c_str());
     token_ = Token(token_.start, token_.start);
 }
 
@@ -614,9 +599,7 @@ void JSONIArchive::expect(char token)
 
 void JSONIArchive::skipBlock()
 {
-#ifdef DEBUG_TEXTIARCHIVE
-    std::cout << "Skipping block from " << token_.end - reader_->start << " ..." << std::endl;
-#endif
+	DEBUG_TRACE("Skipping block from %i ...", token_.end - reader_->begin());
     if(openBracket() || openContainerBracket())
         closeBracket(); // Skipping entire block
     else
@@ -624,17 +607,13 @@ void JSONIArchive::skipBlock()
 	readToken();
 	if (token_ != ',')
 		putToken();
-#ifdef DEBUG_TEXTIARCHIVE
-    std::cout << "...till " << token_.end - reader_->start << std::endl;
-#endif
+	DEBUG_TRACE(" ...till %i", token_.end - reader_->begin());
 }
 
 bool JSONIArchive::findName(const char* name, Token* outName)
 {
-#ifdef DEBUG_TEXTIARCHIVE
-    std::cout << " * finding name '" << name << "'" << std::endl;
-    std::cout << "   started at byte " << int(token_.start - reader_->start) << std::endl;
-#endif
+    DEBUG_TRACE(" * finding name '%s'", name);
+    DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
     if(stack_.empty()) {
 		// TODO: diagnose
 		return false;
@@ -659,9 +638,7 @@ bool JSONIArchive::findName(const char* name, Token* outName)
         if(isName(token_)){
 			if (outName) {
 				*outName = token_;
-#ifdef DEBUG_TEXTIARCHIVE
-            std::cout << "Token: '" << token_.str() << "'" << std::endl;
-#endif
+				DEBUG_TRACE("Token: '%s'", token_.str().c_str());
 
 				start = token_.start;
 				readToken();
@@ -676,16 +653,12 @@ bool JSONIArchive::findName(const char* name, Token* outName)
         }
         else{
 			if(token_ == ']' || token_ == '}'){
-#ifdef DEBUG_TEXTIARCHIVE
-                std::cout << "Got close bracket..." << std::endl;
-#endif
+				DEBUG_TRACE("Got close bracket...");
                 putToken();
                 return false;
             }
             else{
-#ifdef DEBUG_TEXTIARCHIVE
-                std::cout << "Got unnamed value: '" << token_.str() << "'" << std::endl;
-#endif
+				DEBUG_TRACE("Got unnamed value: '%s'", token_.str().c_str());
                 putToken();
                 return true;
             }
@@ -693,16 +666,12 @@ bool JSONIArchive::findName(const char* name, Token* outName)
     }
     else{
         if(isName(token_)){
-#ifdef DEBUG_TEXTIARCHIVE
-            std::cout << "Seems to be a name '" << token_.str() << "'" << std::endl ;
-#endif
+			DEBUG_TRACE("Seems to be a name '%s'", token_.str().c_str());
 			Token nameContent(token_.start+1, token_.end-1);
             if(nameContent == name){
                 readToken();
 				expect(':');
-#ifdef DEBUG_TEXTIARCHIVE
-                std::cout << "Got one" << std::endl;
-#endif
+				DEBUG_TRACE("Got one");
                 return true;
             }
             else{
@@ -731,27 +700,19 @@ bool JSONIArchive::findName(const char* name, Token* outName)
 			continue;
 		}
             //return false; // Reached end of file while searching for name
-#ifdef DEBUG_TEXTIARCHIVE
-        std::cout << "'" << token_.str() << "'" << std::endl;
-        std::cout << "Checking for loop: " << token_.start - reader_->start << " and " << start - reader_->begin() << std::endl;
-#endif
-				YASLI_ASSERT(start != 0);
+		DEBUG_TRACE("'%s'", token_.str().c_str());
+		DEBUG_TRACE("Checking for loop: %i and %i", token_.start - reader_->begin(), start - reader_->begin());
+		YASLI_ASSERT(start != 0);
         if(token_.start == start){
             putToken();
-#ifdef DEBUG_TEXTIARCHIVE
-            std::cout << "unable to find..." << std::endl;
-#endif
+			DEBUG_TRACE("unable to find...");
             return false; // Reached a full circle: unable to find name
         }
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
-#ifdef DEBUG_TEXTIARCHIVE
-            std::cout << "Going to begin of block, from " << token_.start - reader_->begin();
-#endif
+			DEBUG_TRACE("Going to begin of block, from %i", token_.start - reader_->begin());
             token_ = Token(blockBegin, blockBegin);
-#ifdef DEBUG_TEXTIARCHIVE
-            std::cout << " to " << token_.start - reader_->begin() << std::endl;
-#endif
+			DEBUG_TRACE(" to %i", token_.start - reader_->begin());
             continue; // Reached '}' or ']' while searching for name, continue from begin of block
         }
 
@@ -840,15 +801,11 @@ bool JSONIArchive::closeContainerBracket()
 {
     readToken();
     if(token_ == ']'){
-#ifdef DEBUG_TEXTIARCHIVE
-        std::cout << "closeContainerBracket(): ok" << std::endl;
-#endif
+		DEBUG_TRACE("closeContainerBracket(): ok");
         return true;
     }
     else{
-#ifdef DEBUG_TEXTIARCHIVE
-        std::cout << "closeContainerBracket(): failed ('" << token_.str() << "')" << std::endl;
-#endif
+		DEBUG_TRACE("closeContainerBracket(): failed ('%s')", token_.str().c_str());
         putToken();
         return false;
     }
