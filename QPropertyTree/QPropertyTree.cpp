@@ -323,7 +323,7 @@ void DragWindow::drawRow(QPainter& p)
 	p.translate(offsetX, offsetY);
 	int rowIndex = 0;
 	if (row_->parent())
-		rowIndex = row_->childIndex(row_);
+		rowIndex = row_->parent()->childIndex(row_);
 	row_->drawRow(p, tree_, 0);
 	DrawRowVisitor visitor(p);
 	row_->scanChildren(visitor, tree_);
