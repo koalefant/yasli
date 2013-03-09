@@ -158,6 +158,8 @@ public:
 	QRect _visibleRect() const;
 	bool _isDragged(const PropertyRow* row) const;
 	bool _isCapturedRow(const PropertyRow* row) const;
+	int _applyTime() const{ return applyTime_; }
+	int _revertTime() const{ return revertTime_; }
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void startFilter(const char* filter);
@@ -283,6 +285,9 @@ protected:
 	DragController* dragController_;
 	QPoint pressPoint_;
 	PropertyRow* capturedRow_;
+
+	int applyTime_;
+	int revertTime_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

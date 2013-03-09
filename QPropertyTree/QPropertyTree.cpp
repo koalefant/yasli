@@ -29,6 +29,7 @@
 #include <QtGui/QScrollBar>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPainter>
+#include <QtCore/QElapsedTimer>
 #include "PropertyTreeMenuHandler.h"
 
 // only for clipboard:
@@ -524,6 +525,8 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , sizeHint_(180, 180)
 , dragController_(new DragController(this))
 , capturedRow_(0)
+, applyTime_(0)
+, revertTime_(0)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -1000,7 +1003,10 @@ bool QPropertyTree::revertObject(void* objectAddress)
 }
 
 void QPropertyTree::revertChanged(bool enforce)
-{
+{	
+	QElapsedTimer timer;
+	timer.start();
+
 	bool enforceNext = enforce;
 	vector<ModelObjectReference> objectsToUpdate;
 
@@ -1037,11 +1043,13 @@ void QPropertyTree::revertChanged(bool enforce)
 	if (filterMode_)
 		onFilterChanged(QString());
 
+	revertTime_ = timer.elapsed();
 	update();
 }
 
 void QPropertyTree::revert()
 {
+
 	interruptDrag();
 	widget_.reset();
 
@@ -1057,8 +1065,10 @@ void QPropertyTree::revert()
         onFilterChanged(QString());
 	}
 
+
 	update();
 	updateAttachedPropertyTree();
+
 	signalReverted();
 }
 
@@ -1069,6 +1079,8 @@ void QPropertyTree::apply()
 
 void QPropertyTree::applyChanged(bool enforce)
 {
+	QElapsedTimer timer;
+	timer.start();
 	ModelObjectReferences& refs = model_->objectReferences();
 	ModelObjectReferences::iterator it;
 
@@ -1086,6 +1098,7 @@ void QPropertyTree::applyChanged(bool enforce)
 		signalObjectChanged(obj);
 	}
 	signalChanged();
+	applyTime_ = timer.elapsed();
 }
 
 bool QPropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)

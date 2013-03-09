@@ -36,6 +36,7 @@ struct Element
 	, float_(FLT_MAX)
 	, double_(DBL_MAX)
 	{}
+
     void serialize(Archive& ar)
 	{
 		ar(enabled, "enabled", "Enabled");
@@ -81,11 +82,19 @@ struct TestData
 MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
-	globalTestData.elements.resize(5000);
-    QPropertyTree* tree = new QPropertyTree(this);
-    tree->attach(yasli::Serializer(globalTestData));
-    setCentralWidget(tree);
-	tree->setUndoEnabled(true);
+	globalTestData.elements.resize(2000);
+    tree_ = new QPropertyTree(this);
+    tree_->attach(yasli::Serializer(globalTestData));
+    setCentralWidget(tree_);
+	tree_->setUndoEnabled(true);
+
+	connect(tree_, SIGNAL(signalChanged()), this, SLOT(onPropertyChanged()));
+}
+
+void MainWindow::onPropertyChanged()
+{
+	QString title = QString("Test: %1+%2 = %3").arg(tree_->_applyTime()).arg(tree_->_revertTime()).arg(tree_->_applyTime() + tree_->_revertTime());
+	QMainWindow::setWindowTitle(title);
 }
 
 MainWindow::~MainWindow()
