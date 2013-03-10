@@ -443,6 +443,7 @@ void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 		if(hash != textHash_){
 			QFontMetrics fm(*font);
 			textSizeInitial_ = fm.width(text.c_str()) + 3;
+			textHash_ = hash;
 		}
 	}
 }
