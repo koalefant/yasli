@@ -860,8 +860,11 @@ void QPropertyTree::updateHeights()
 
 	model()->root()->updateLabel(this, 0);
 
+	QRect widgetRect = this->rect();
+
+	int scrollBarW = 16;
 	int lb = compact_ ? 0 : 4;
-	int rb = area_.width() - lb*2;
+	int rb = widgetRect.right() - lb - scrollBarW;
 	bool force = lb != leftBorder_ || rb != rightBorder_;
 	leftBorder_ = lb;
 	rightBorder_ = rb;
@@ -871,19 +874,15 @@ void QPropertyTree::updateHeights()
 
 	int extraSize = 0;
 	int totalHeight = 0;
-	int scrollBarW = scrollBar_->width();
-    QSize rectSize = rect().size() - QSize(padding, padding) * 2;
-    QRect rect(QPoint(padding, padding), this->rect().size() - QSize(padding, padding) * 2 - QSize(scrollBarW, 0));
 	model()->root()->adjustVerticalPosition(this, totalHeight);
 	size_.setY(totalHeight);
 
 	bool hasScrollBar = updateScrollBar();
 
-	area_ = this->rect();
-	area_.setLeft(area_.left() + 2);
-	area_.setRight(area_.right() - 2 - scrollBarW);
-	area_.setTop(area_.top() + 2);
-	area_.setBottom(area_.bottom() - 2);
+	area_.setLeft(widgetRect.left() + 2);
+	area_.setRight(widgetRect.right() - 2 - scrollBarW);
+	area_.setTop(widgetRect.top() + 2);
+	area_.setBottom(widgetRect.bottom() - 2);
 	size_.setX(area_.width());
 
 	if (filterMode_)
@@ -1001,6 +1000,8 @@ void QPropertyTree::attach(const yasli::Object& object)
 
 	model_->setRootObject(object);
 	revert();
+
+	updateHeights();
 }
 
 void QPropertyTree::detach()
