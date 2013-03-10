@@ -21,6 +21,15 @@
 #include <QtCore/QObject>
 #include "MathUtils.h"
 
+#if 0
+# define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+# define DEBUG_TRACE_ROW(fmt, ...) for(PropertyRow* zzzz = this; zzzz; zzzz = zzzz->parent()) printf(" "); printf(fmt "\n", __VA_ARGS__)
+#else
+# define DEBUG_TRACE
+# define DEBUG_TRACE_ROW
+#endif
+	
+
 const char* PropertyRowArg::name_(0);
 const char* PropertyRowArg::label_(0);
 const char* PropertyRowArg::typeName_(0);
@@ -102,7 +111,8 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
     belongsToFilteredRow_ = false;
     matchFilter_ = true;
 	
-	pos_ = size_ = QPoint(0, 0);
+	pos_ =  QPoint(0, 0);
+	size_ = QPoint(-1, -1);
 	plusSize_ = 0;
 	textPos_ = 0;
 	textSizeInitial_ = 0;
@@ -219,20 +229,14 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
 	selected_ = row.selected_;
     if(recurse){
 
-        Rows::iterator it;
-        for(it = children_.begin(); it != children_.end(); ++it){
-            PropertyRow* child = it->get();
+		int numChildren = children_.size();
+		for (int i = 0; i < numChildren; ++i) {
+            PropertyRow* child = children_[i].get();
             YASLI_ESCAPE(child, continue);
-            if(child->name()[0] != '\0'){
-                const PropertyRow* rhsChild = row.find(child->name(), child->label(), child->typeName());
-                if(rhsChild)
-                    child->assignRowState(*rhsChild, true);
-            }
-            else{
-                int index = std::distance(children_.begin(), it);
-                if(size_t(index) < row.count())
-                    child->assignRowState(*row.childByIndex(index), true);
-            }
+			int unusedIndex;
+            const PropertyRow* rhsChild = row.findFromIndex(&unusedIndex, child->name(), child->typeName(), i);
+            if(rhsChild)
+                child->assignRowState(*rhsChild, true);
         }
     }
 }
@@ -386,6 +390,17 @@ void PropertyRow::setLabelChanged()
 		row->labelChanged_ = true;
 }
 
+void PropertyRow::setLabelChangedToChildren()
+{
+	labelChanged_ = true;
+
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		children_[i]->setLabelChangedToChildren();
+	}
+}
+
+
 void PropertyRow::setLabel(const char* label) 
 {
 	if (!label)
@@ -398,11 +413,12 @@ void PropertyRow::setLabel(const char* label)
 
 void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 {
+	DEBUG_TRACE_ROW("updateLabel: %s", label());
 	digestReset(tree);
 
 	PropertyRow::iterator it;
 	int numChildren = children_.size();
-	if (expanded_ || hasPulled_) {
+	/*if (expanded_ || hasPulled_)*/ {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = children_[i];
 			if (row->labelChanged_) {
@@ -561,9 +577,11 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 		if(!visible(tree) && !(isContainer() && pulledUp())){
 			size_ = QPoint(0, 0);
+			DEBUG_TRACE_ROW("row '%s' got zero size", label());
 			return;
 		}
 	}
+
 
 	widgetSize_ = widgetSizeMin();
 	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
@@ -677,7 +695,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			if(!row->pulledBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 				posX += row->size_.x();
-        }
+	        }
 			size_.setX(size_.x() + row->size_.x());
 			size_.setY(max(size_.y(), row->size_.y()));
         }
@@ -690,9 +708,10 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	if(!pulledUp())
 		size_.setX(tree->rightBorder() - pos_.x());
 	labelChanged_ = false;
+	DEBUG_TRACE_ROW("calculateMinimalSize: '%s' %i %i (%s)", label(), size_.x(), size_.y(), isRoot() ? "root" : "non-root");
 }
 
-void PropertyRow::adjustRect(const QPropertyTree* tree, int& totalHeight)
+void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight)
 {
 	pos_.setY(totalHeight);
 	if(!pulledUp())
@@ -702,11 +721,17 @@ void PropertyRow::adjustRect(const QPropertyTree* tree, int& totalHeight)
 		expanded_ = parent()->expanded();
 	}
 	PropertyRow* nonPulled = nonPulledParent();
+
+	DEBUG_TRACE_ROW("adjustRect: %s %i %i %i %i, totalHeight: %i %s", label(), pos_.x(), pos_.y(), size_.x(), size_.y(), totalHeight, pulledUp() ? "pulled" : "");
+
 	if (true /*expanded_ || hasPulled_*/) {
 		for(PropertyRows::iterator it = children_.begin(); it != children_.end(); ++it){
 			PropertyRow* row = *it;
 			if(row->visible(tree) && (row->pulledUp() || nonPulled->expanded()))
-				row->adjustRect(tree, totalHeight);
+				row->adjustVerticalPosition(tree, totalHeight);
+			else {
+				//DEBUG_TRACE_ROW("skip adjust rect for ''", row->label());
+			}
 		}
 	}
 }
@@ -759,7 +784,7 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 	return 0;
 }
 
-PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex)
+PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
 {
 	int numChildren = children_.size();
 

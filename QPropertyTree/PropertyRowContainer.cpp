@@ -33,7 +33,7 @@ void ContainerMenuHandler::onMenuAppendElement()
 	PropertyRow* defaultType = container->defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
 	PropertyRow* clonedRow = defaultType->clone();
-	// clonedRow->setFullRow(true); TODO
+	clonedRow->setLabelChangedToChildren();
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
@@ -89,7 +89,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	if(!defaultType)
 		return;
 	PropertyRow* clonedRow = defaultType->clone();
-	// clonedRow->setFullRow(true); TODO
+	element->setSelected(false);
 	container->addBefore(clonedRow, element);
 	container->setMultiValue(false);
 	tree->model()->selectRow(clonedRow, true);

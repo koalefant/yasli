@@ -259,14 +259,16 @@ bool BinaryOArchive::operator()(ContainerInterface &ser, const char *_name, cons
 bool BinaryOArchive::operator()(PointerInterface &_ptr, const char *_name, const char* label)
 {
     openNode(BINARY_NODE_POINTER, _name);
-    YASLI_ASSERT_STR(_ptr.baseType().registered() && "Writing type with unregistered base", _ptr.baseType().name());
-    //YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().shortName()); TODO
-    //YASLI_ASSERT_STR(!_ptr.get() || _ptr.type().registered() && "Writing unregistered type", _ptr.type().name());
+	TypeID derived = _ptr.type();
+	const TypeDescription* desc = 0;
+	if (derived) {
+		desc = _ptr.factory()->descriptionByType(derived);
+		YASLI_ASSERT(desc != 0 && "Writing unregistered class. Use YASLI_CLASS macro for registration.");
+	}
 
     TypeID baseType = _ptr.baseType();
     write(baseType.name());
-    write(_ptr.type().name());
-    //write(_ptr.Type().ShortName(baseType)); TODO
+	write(desc ? desc->name() : "");
 
 	if(_ptr.get())
 		_ptr.serializer()(*this);

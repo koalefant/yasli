@@ -580,7 +580,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	}
 
 	Rows::iterator it;
-	FOR_EACH(children_, it){
+	for(it = children_.begin(); it != children_.end(); ++it)
 		PropertyRow* row = *it;
 		if(row->visible(tree) && row->pulledBefore()){
 			row->calculateMinimalSize(tree, posX, force, &extraSize);
@@ -637,7 +637,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	size_.x = textSize_ + widgetSize_;
 
 	PropertyRow* nonPulled = nonPulledParent();
-	FOR_EACH(children_, it){
+	for(it = children_.begin(); it != children_.end(); ++it){
 		PropertyRow* row = *it;
 		if(!row->visible(tree))
 			continue;
@@ -692,6 +692,7 @@ void PropertyRow::calcPulledRows(int& minTextSize, int& freePulledChildren, int&
 	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
 		++freePulledChildren;
 	minimalWidth += textSizeInitial_ + widgetSizeMin();
+
 	FOR_EACH(children_, it, Rows::const_iterator)
 		if((*it)->pulledUp())
 			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth);

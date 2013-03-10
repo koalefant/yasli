@@ -481,13 +481,15 @@ public:
 		}
 	}
 
-	void drop(QPoint screenPoint)
+	bool drop(QPoint screenPoint)
 	{
+		bool rowLayoutChanged = false;
 		PropertyTreeModel* model = tree_->model();
 		if(row_ && hoveredRow_){
 			YASLI_ASSERT(destinationRow_);
 			clickedRow_->setSelected(false);
 			row_->dropInto(destinationRow_, destinationRow_ == hoveredRow_ ? 0 : hoveredRow_, tree_, before_);
+			rowLayoutChanged = true;
 		}
 
 		captured_ = false;
@@ -496,6 +498,7 @@ public:
 		window_.hide();
 		hoveredRow_ = 0;
 		destinationRow_ = 0;
+		return rowLayoutChanged;
 	}
 
 	bool captured() const{ return captured_; }
@@ -761,6 +764,7 @@ void QPropertyTree::onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 
 void QPropertyTree::expandParents(PropertyRow* row)
 {
+	bool hasChanges = false;
 	typedef std::vector<PropertyRow*> Parents;
 	Parents parents;
 	PropertyRow* p = row->nonPulledParent()->parent();
@@ -771,9 +775,13 @@ void QPropertyTree::expandParents(PropertyRow* row)
 	Parents::iterator it;
 	for(it = parents.begin(); it != parents.end(); ++it) {
 		PropertyRow* row = *it;
-		row->_setExpanded(true);
+		if (!row->expanded()) {
+			row->_setExpanded(true);
+			hasChanges = true;
+		}
 	}
-	updateHeights();
+	if (hasChanges)
+		updateHeights();
 }
 
 void QPropertyTree::expandAll(PropertyRow* root)
@@ -859,21 +867,15 @@ void QPropertyTree::updateHeights()
 
 	int padding = compact_ ? 4 : 6;
 
-
 	int extraSize = 0;
 	int totalHeight = 0;
+	int scrollBarW = scrollBar_->width();
     QSize rectSize = rect().size() - QSize(padding, padding) * 2;
-    QRect rect(padding, padding, rectSize.width(), rectSize.height());
-	model()->root()->adjustRect(this, totalHeight);
+    QRect rect(QPoint(padding, padding), this->rect().size() - QSize(padding, padding) * 2 - QSize(scrollBarW, 0));
+	model()->root()->adjustVerticalPosition(this, totalHeight);
 	size_.setY(totalHeight);
 
 	bool hasScrollBar = updateScrollBar();
-
-	totalHeight = 0;
-	int scrollBarW = hasScrollBar ? scrollBar_->width() : 0;
-	rect = QRect(QPoint(padding, padding), this->rect().size() - QSize(padding, padding) * 2 - QSize(scrollBarW, 0));
-	model()->root()->adjustRect(this, totalHeight);
-	size_.setY(totalHeight);
 
 	area_ = this->rect();
 	area_.setLeft(area_.left() + 2);
@@ -1031,6 +1033,7 @@ bool QPropertyTree::revertObject(void* objectAddress)
 
 void QPropertyTree::revertChanged(bool enforce)
 {	
+	printf("revertChanges()\n");
 	QElapsedTimer timer;
 	timer.start();
 
@@ -1071,7 +1074,7 @@ void QPropertyTree::revertChanged(bool enforce)
 		onFilterChanged(QString());
 
 	revertTime_ = timer.elapsed();
-	update();
+	updateHeights();
 }
 
 void QPropertyTree::revert()
@@ -1106,6 +1109,7 @@ void QPropertyTree::apply()
 
 void QPropertyTree::applyChanged(bool enforce)
 {
+	printf("applyChanges()\n");
 	QElapsedTimer timer;
 	timer.start();
 	ModelObjectReferences& refs = model_->objectReferences();
@@ -2084,8 +2088,10 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 	if (ev->button() == Qt::LeftButton)
 	{
 		 if(dragController_->captured()){
-		 	dragController_->drop(QCursor::pos());
-			updateHeights();
+		 	if (dragController_->drop(QCursor::pos()))
+				updateHeights();
+			else
+				update();
 		}
 		QPoint point = ev->pos();
 		PropertyRow* row = rowByPoint(point);

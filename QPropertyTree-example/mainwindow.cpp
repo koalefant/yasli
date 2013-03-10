@@ -16,9 +16,9 @@ struct Vec3
 
 	void serialize(Archive& ar)
 	{
-		ar(x, "x", "^");
-		ar(y, "y", "^");
-		ar(z, "z", "^");
+		ar(x, "", "^");
+		ar(y, "", "^");
+		ar(z, "", "^");
 	}
 };
 
@@ -39,9 +39,9 @@ struct Element
 
     void serialize(Archive& ar)
 	{
-		ar(enabled, "enabled", "Enabled");
-		ar(vec, "vec", "Vec3");
-		ar(integer_, "integer_", "integer_");
+		ar(enabled, "enabled", "&Enabled");
+		ar(vec, "vec", "&Vec3");
+		ar(integer_, "integer_", "&integer_");
 		ar(char_, "char", "char");
 		ar(signedChar_, "signedChar", "signedChar");
 		ar(unsignedChar_, "unsignedChar", "unsignedChar");
@@ -73,8 +73,10 @@ struct Element
 struct TestData
 {
     vector<Element> elements;
+	Vec3 vec3;
     void serialize(Archive& ar)
     {
+		//ar(vec3, "vec3", "Vec3");
         ar(elements, "elements", "Elements");
     }
 } globalTestData;
@@ -82,7 +84,11 @@ struct TestData
 MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
-	globalTestData.elements.resize(2000);
+#ifdef NDEBUG
+	globalTestData.elements.resize(50000);
+#else
+	globalTestData.elements.resize(2500);
+#endif
     tree_ = new QPropertyTree(this);
     tree_->attach(yasli::Serializer(globalTestData));
     setCentralWidget(tree_);
@@ -93,7 +99,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::onPropertyChanged()
 {
-	QString title = QString("Test: %1+%2 = %3").arg(tree_->_applyTime()).arg(tree_->_revertTime()).arg(tree_->_applyTime() + tree_->_revertTime());
+	QString title = QString("Test: %1(a)+%2(r)+%3(h)+%4(p)")
+		.arg(tree_->_applyTime())
+		.arg(tree_->_revertTime())
+		.arg(tree_->_updateHeightsTime())
+		.arg(tree_->_paintTime());
 	QMainWindow::setWindowTitle(title);
 }
 

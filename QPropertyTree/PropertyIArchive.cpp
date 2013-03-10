@@ -62,7 +62,7 @@ bool PropertyIArchive::operator()(yasli::WStringInterface& value, const char* na
 
 bool PropertyIArchive::operator()(bool& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<bool>().name())){
+	if(openRow(name, label, "bool")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -73,7 +73,7 @@ bool PropertyIArchive::operator()(bool& value, const char* name, const char* lab
 
 bool PropertyIArchive::operator()(char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<char>().name())){
+	if(openRow(name, label, "char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -85,7 +85,7 @@ bool PropertyIArchive::operator()(char& value, const char* name, const char* lab
 // Signed types
 bool PropertyIArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed char>().name())){
+	if(openRow(name, label, "signed char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -96,7 +96,7 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "signed short")){
+	if(openRow(name, label, "short")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -129,7 +129,7 @@ bool PropertyIArchive::operator()(signed long& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<long long>().name())){
+	if(openRow(name, label, "long long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;

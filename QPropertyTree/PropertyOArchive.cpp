@@ -155,6 +155,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			stack_.back().rowIndex = rowIndex + 1;
 		}
 		else{
+			//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
 			PropertyRowFactory& factory = PropertyRowFactory::the();
 			newRow = static_cast<RowType*>(factory.create(typeName, PropertyRowArg(name, label, typeName)));
 			if(!newRow)
@@ -188,6 +189,7 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		stack_.back().rowIndex = rowIndex + 1;
 	}
 	else{
+		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
 		newRow = new RowType(name, label, typeName);
 		if(model_->expandLevels() != 0){
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
@@ -341,7 +343,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 		PropertyOArchive ar(model_, true);
 		ar.setFilter(getFilter());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
-		ser.serializeNewElement(ar, "default", "0");
+		ser.serializeNewElement(ar, "", "0");
 		if (ar.rootNode() != 0)
 			model_->addDefaultType(ar.rootNode(), ser.type().name());
 	}

@@ -145,7 +145,7 @@ public:
 
 	bool empty() const{ return children_.empty(); }
 	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
-	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex);
+	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
 	PropertyRow* findByAddress(void* addr);
 	iterator begin() { return children_.begin(); }
 	iterator end() { return children_.end(); }
@@ -169,6 +169,7 @@ public:
 	const char* labelUndecorated() const { return labelUndecorated_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
+	void setLabelChangedToChildren();
 	void updateLabel(const QPropertyTree* tree, int index);
 	void parseControlCodes(const char* label, bool updateLabel);
 	const char* typeName() const{ return typeName_; }
@@ -204,7 +205,7 @@ public:
 	void calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index);
 	void setTextSize(float multiplier);
 	void calculateTotalSizes(int* minTextSize);
-	void adjustRect(const QPropertyTree* tree, int& totalHeight);
+	void adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
 
