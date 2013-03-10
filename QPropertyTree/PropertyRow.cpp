@@ -1350,6 +1350,7 @@ PropertyRowWidget::~PropertyRowWidget()
 }
 
 FORCE_SEGMENT(PropertyRowNumber)
+FORCE_SEGMENT(PropertyRowStringList)
 /*
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)

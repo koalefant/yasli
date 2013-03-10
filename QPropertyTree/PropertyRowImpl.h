@@ -39,7 +39,7 @@ public:
 	const Type& value() const{ return value_; }
 
 	void setValue(const Serializer& ser) override {
-		YASLI_ESCAPE(ser.size() != sizeof(Type), return);
+		YASLI_ESCAPE(ser.size() == sizeof(Type), return);
 		value_ = *(Type*)(ser.pointer());
 	}
 

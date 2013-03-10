@@ -14,8 +14,8 @@ PropertyRowField::PropertyRowField()
 {
 }
 
-PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const char* typeName)
-: PropertyRow(name, nameAlt, typeName)
+PropertyRowField::PropertyRowField(const char* name, const char* label, const char* typeName)
+: PropertyRow(name, label, typeName)
 {
 }
 

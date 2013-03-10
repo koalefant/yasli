@@ -61,4 +61,6 @@ PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(QPropertyTree*
 	return new PropertyRowWidgetStringListValue(this, tree);
 }
 
+DECLARE_SEGMENT(PropertyRowStringList)
+
 // vim:ts=4 sw=4:

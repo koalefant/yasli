@@ -364,7 +364,7 @@ public:
 	template<class Derived>
 	static Derived* createRow()
 	{
-		Derived* result = new Derived();
+		Derived* result = new Derived(name_, label_, typeName_);
 		return result;
 	}
 
