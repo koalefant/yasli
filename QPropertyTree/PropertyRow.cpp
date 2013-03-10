@@ -423,7 +423,7 @@ void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 		row->updateLabel(tree, i);
 	}
 
-	parseControlCodes(label_, false);
+	parseControlCodes(label_, true);
 	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
 
 	if(pulledContainer())
