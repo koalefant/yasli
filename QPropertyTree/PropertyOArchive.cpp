@@ -141,6 +141,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 				rootNode_ = newRow;
 			else
 				model_->setRoot(newRow);
+			newRow->setValue(value);
 			return newRow;
 		}
 	}
@@ -362,7 +363,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name, const char *label)
 {
 	lastNode_ = currentNode_;
-	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.type().name(), ptr);
+	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
 	enterNode(row);
 	{
 		TypeID baseType = ptr.baseType();
