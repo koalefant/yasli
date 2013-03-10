@@ -19,11 +19,6 @@ PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const 
 {
 }
 
-PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const yasli::Serializer& ser)
-: PropertyRow(name, nameAlt, ser)
-{
-}
-
 
 void PropertyRowField::redraw(const PropertyDrawContext& context)
 {

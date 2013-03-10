@@ -21,10 +21,8 @@
 #include <QtCore/QObject>
 #include "MathUtils.h"
 
-void* PropertyRowArg::object_(0);
-size_t PropertyRowArg::size_(0);
 const char* PropertyRowArg::name_(0);
-const char* PropertyRowArg::nameAlt_(0);
+const char* PropertyRowArg::label_(0);
 const char* PropertyRowArg::typeName_(0);
 
 static QColor interpolate(const QColor& a, const QColor& b, float k)
@@ -55,11 +53,21 @@ inline unsigned calcHash(const T& t, unsigned hash = 5381)
 
 // ---------------------------------------------------------------------------
 
+static int propertyRowsCreated;
+static int propertyRowsDeleted;
+
+void printPropertyRowsNumber()
+{
+	//printf("deleted %i/%i\n", propertyRowsDeleted, propertyRowsCreated);
+}
+
 ConstStringList* PropertyRow::constStrings_ = 0;
 
 PropertyRow::PropertyRow()
 {
     init("", "", "");
+	++propertyRowsCreated;
+	//printPropertyRowsNumber();
 }
 
 PropertyRow::~PropertyRow()
@@ -68,20 +76,18 @@ PropertyRow::~PropertyRow()
 	for (size_t i = 0; i < count; ++i)
 		if (children_[i]->parent() == this)
 			children_[i]->setParent(0);
+	++propertyRowsDeleted;
+	printPropertyRowsNumber();
 }
 
-PropertyRow::PropertyRow(const char* name, const char* nameAlt, const char* typeName)
+PropertyRow::PropertyRow(const char* name, const char* label, const char* typeName)
 {
-	init(name, nameAlt, typeName);
+	init(name, label, typeName);
+	++propertyRowsCreated;
+	//printPropertyRowsNumber();
 }
 
-PropertyRow::PropertyRow(const char* name, const char* nameAlt, const Serializer &ser)
-: serializer_(ser)
-{
-	init(name, nameAlt, ser.type().name());
-}
-
-void PropertyRow::init(const char* name, const char* nameAlt, const char* typeName)
+void PropertyRow::init(const char* name, const char* label, const char* typeName)
 {
 	YASLI_ASSERT(name != 0);
 	YASLI_ASSERT(typeName);
@@ -96,7 +102,6 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
     belongsToFilteredRow_ = false;
     matchFilter_ = true;
 	
-	minimalWidth_ = 0;
 	pos_ = size_ = QPoint(0, 0);
 	plusSize_ = 0;
 	textPos_ = 0;
@@ -107,12 +112,10 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	digestPos_ = 0;
     widgetSize_ = 0;
 	userWidgetSize_ = -1;
-	freePulledChildren_ = 0;
 	
-	name_ = name[0] || !nameAlt ? name : nameAlt;
+	name_ = name;
 	typeName_ = typeName;
 	
-	updated_ = false;
 	pulledUp_ = false;
 	pulledBefore_ = false;
 	hasPulled_ = false;
@@ -121,7 +124,8 @@ void PropertyRow::init(const char* name, const char* nameAlt, const char* typeNa
 	userFullRow_ = false;
 	multiValue_ = false;
 	
-	setLabel(nameAlt ? nameAlt : 0);
+	label_ = label ? label : "";
+	labelChanged_ = true;
 }
 
 
@@ -189,22 +193,24 @@ bool PropertyRow::isChildOf(const PropertyRow* row) const
 	return false;
 }
 
-PropertyRow* PropertyRow::add(PropertyRow* row, PropertyRow* after)
+void PropertyRow::add(PropertyRow* row)
 {
-	if(after == 0 || after == this)
-		children_.push_back(row);
-	else{
-		iterator it = std::find(children_.begin(), children_.end(), after);
-		if(it != children_.end()){
-			++it;
-			children_.insert(it, row);
-		}
-		else{
-			children_.push_back(row);
-		}
-	}
+	children_.push_back(row);
 	row->setParent(this);
-	return row;
+}
+
+void PropertyRow::addAfter(PropertyRow* row, PropertyRow* after)
+{
+	iterator it = std::find(children_.begin(), children_.end(), after);
+	if(it != children_.end()){
+		++it;
+		children_.insert(it, row);
+	}
+	else{
+		children_.push_back(row);
+	}
+
+	row->setParent(this);
 }
 
 void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
@@ -251,7 +257,6 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	widgetPos_ = row->widgetPos_;
 	widgetSize_ = row->widgetSize_;
 	userWidgetSize_ = row->userWidgetSize_;
-	freePulledChildren_ = row->freePulledChildren_;
 
     assignRowState(*row, false);
 }
@@ -262,6 +267,7 @@ void PropertyRow::replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newR
 	YASLI_ASSERT(it != children_.end());
 	if(it != children_.end()){
 		newRow->assignRowProperties(*it);
+		newRow->labelChanged_ = true;
 		if(preserveChildren)
 			(*it)->swapChildren(newRow);
 		*it = newRow;
@@ -287,7 +293,7 @@ void PropertyRow::swapChildren(PropertyRow* row)
 		(**it).setParent(row);
 }
 
-PropertyRow* PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
+void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 {
 	if(before == 0)
 		children_.push_back(row);
@@ -299,7 +305,6 @@ PropertyRow* PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 			children_.push_back(row);
 	}
 	row->setParent(this);
-	return row;
 }
 
 void PropertyRow::digestAppend(const wchar_t* text)
@@ -353,7 +358,7 @@ void PropertyRow::serialize(Archive& ar)
 	ar(ConstStringWrapper(constStrings_, typeName_), "type", "type");
 	ar(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
 	if(ar.isInput()){
-		setLabelChanged();
+		labelChanged_ = true;
 		PropertyRow::iterator it;
 		for(it = begin(); it != end(); ){
 			PropertyRow* row = *it;
@@ -362,6 +367,7 @@ void PropertyRow::serialize(Archive& ar)
 				++it;
 			}
 			else{
+				YASLI_ASSERT("Missing property row");
 				it = erase(it);
 			}
 		}
@@ -380,25 +386,49 @@ void PropertyRow::setLabelChanged()
 		row->labelChanged_ = true;
 }
 
-void PropertyRow::updateLabel(const QPropertyTree* tree)
+void PropertyRow::setLabel(const char* label) 
 {
-	if(!labelChanged_)
-		return;
-	labelChanged_ = false;
+	if (!label)
+		label = "";
+	if (label_ != label) {
+		label_ = label;
+		setLabelChanged(); 
+	}
+}
 
+void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
+{
 	digestReset(tree);
 
 	PropertyRow::iterator it;
-    for(it = children_.begin(); it != children_.end(); ++it)
-		(*it)->updateLabel(tree);
+	int numChildren = children_.size();
+	if (expanded_ || hasPulled_) {
+		for (int i = 0; i < numChildren; ++i) {
+			PropertyRow* row = children_[i];
+			if (row->labelChanged_) {
+				row->updateLabel(tree, i);
+			}
+		}
+	}
 
 	parseControlCodes(label_, true);
 	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
-	if(!*label_)
-		labelUndecorated_ = name();
 
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());
+
+	yasli::string text = rowText(tree, index);
+	if(text.empty())
+		textSizeInitial_ = 0;
+	else{
+		unsigned hash = calcHash(text.c_str());
+		const QFont* font = rowFont(tree);
+		hash = calcHash(font, hash);
+		if(hash != textHash_){
+			QFontMetrics fm(*font);
+			textSizeInitial_ = fm.width(text.c_str()) + 3;
+		}
+	}
 }
 
 struct ResetSerializerOp{
@@ -509,9 +539,13 @@ const char* PropertyRow::typeNameForFilter() const
 }
 
 
-void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int index)
+void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
-	updateLabel(tree);
+	if(labelChanged_){
+		updateLabel(tree, index);
+	}
+	else if(!force)
+		return;
 
 	plusSize_ = 0;
     if(isRoot())
@@ -531,65 +565,25 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int index)
 		}
 	}
 
-	yasli::string text = rowText(tree, index);
-	if(text.empty())
-		textSizeInitial_ = 0;
-	else{
-		unsigned hash = calcHash(text.c_str());
-		const QFont* font = rowFont(tree);
-		hash = calcHash(font, hash);
-		if(hash != textHash_){
-			textHash_ = hash;
-
-			QFontMetrics fm(*font);
-			textSizeInitial_ = fm.width(text.c_str()) + 3;
-		}
-    }
-
-	if(pulledUp() && isContainer())
-	{
-		//textSize_ = widgetSize_ = plusSize_ = 0;
-		plusSize_ = 0;
-	}
-
-	int widgetSizeMin = this->widgetSizeMin();
-	minimalWidth_ = textSizeInitial_ + widgetSizeMin;
-	size_ = QPoint(minimalWidth_, ROW_DEFAULT_HEIGHT + floorHeight());
-	freePulledChildren_ = widgetPlacement() == WIDGET_VALUE && !isWidgetFixed() ? 1 : 0;
-    Rows::iterator it;
-	int childIndex = 0;
-    for(it = children_.begin(); it != children_.end(); ++it, ++childIndex){
-		PropertyRow* row = *it;
-		if(!row->visible(tree))
-			continue;
-        row->calculateMinimalSize(tree, childIndex);
-		if(row->pulledUp()){
-			size_.setX(size_.x() + row->size_.x());
-			size_.setY(max(size_.y(), row->size_.y()));
-			minimalWidth_ += row->minimalWidth_;
-			freePulledChildren_ += row->freePulledChildren_;
-		}
-    }
-}
-
-void PropertyRow::adjustRect(const QPropertyTree* tree, const QRect& rect, QPoint pos, int& totalHeight, int& _extraSize)
-{
-	pos_ = pos;
-	pos.setX(pos.x() + plusSize_);
 	widgetSize_ = widgetSizeMin();
+	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
 
+	pos_.setX(posX);
+	posX += plusSize_;
+
+	int freePulledChildren = 0;
 	int extraSizeStorage = 0;
-	int& extraSize = !pulledUp() ? extraSizeStorage : _extraSize;
+	int& extraSize = !pulledUp() || !_extraSize ? extraSizeStorage : *_extraSize;
 	if(!pulledUp()){
-		extraSize = rect.width() - minimalWidth_ - pos.x();
+		int minTextSize = 0;
+		int minimalWidth = 0;
+		calcPulledRows(minTextSize, freePulledChildren, minimalWidth);
+		size_.setX(minimalWidth);
+		extraSize = (tree->rightBorder() - tree->leftBorder()) - minimalWidth - posX;
 
 		float textScale = 1.0f;
 		bool hideOwnText = false;
-		if (extraSize < 0)
-		{
-			int minTextSize = 0;
-			calculateTotalSizes(&minTextSize);
-
+		if(extraSize < 0){
 			// hide container item text first
 			if (parent() && parent()->isContainer()){
 				extraSize += textSizeInitial_;
@@ -606,63 +600,68 @@ void PropertyRow::adjustRect(const QPropertyTree* tree, const QRect& rect, QPoin
 	}
 
 	WidgetPlacement widgetPlace = widgetPlacement();
-	
+
 	if(widgetPlace == WIDGET_ICON){
-		widgetPos_ = widgetSize_ ? pos.x() : -1000;
-		pos += QPoint(widgetSize_, 0);
-		textPos_ = pos.x();
-		pos += QPoint(textSize_, 0);
+		widgetPos_ = widgetSize_ ? posX : -1000;
+		posX += widgetSize_;
+		textPos_ = posX;
+		posX += textSize_;
 	}
 
-	Rows::iterator it;
-	for(it = children_.begin(); it != children_.end(); ++it)
-		if((*it)->pulledBefore()){
-			(*it)->adjustRect(tree, rect, pos, totalHeight, _extraSize);
-			pos += QPoint((*it)->size_.x(), 0);
+	int numChildren = children_.size();
+	if (expanded_ || hasPulled()) {
+		for (int i = 0; i < numChildren; ++i) {
+			PropertyRow* row = children_[i];
+			if(row->visible(tree) && row->pulledBefore()){
+				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				posX += row->size_.x();
+			}
 		}
+	}
 
 	if(widgetPlace != WIDGET_ICON){
-		textPos_ = pos.x();
-		pos += QPoint(textSize_, 0);
+		textPos_ = posX;
+		posX += textSize_;
 	}
 
 	if(widgetPlace == WIDGET_AFTER_NAME){
-		widgetPos_ = pos.x();
-		pos += QPoint(widgetSize_, 0);
+		widgetPos_ = posX;
+		posX += widgetSize_;
 	}
 
-	if(widgetPlace == WIDGET_VALUE || freePulledChildren_ > 0){
+	if(widgetPlace == WIDGET_VALUE || freePulledChildren > 0){
 		if(!pulledUp() && extraSize > 0){
 			// align widget value to value column
 			if(!isFullRow(tree))
 			{
-				int oldX = pos.x();
-				int newX = max(rect.left() + round(rect.width()* (1.f - tree->valueColumnWidth())), pos.x());
+				int oldX = posX;
+				int newX = max(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth())), posX);
+				//int newX = max(rect.left() + round(rect.width()* (1.f - tree->valueColumnWidth())), pos.x());
 				int xDelta = newX - oldX;
 				if (xDelta <= extraSize)
 				{
 					extraSize -= xDelta;
-					pos.setX(newX);
+					posX = newX;
 				}
 				else
 				{
-					pos += QPoint(extraSize, 0);
+					posX += extraSize;
 					extraSize = 0;
 				}
 			}
 		}
 	}
-	if (freePulledChildren_ > 0)
-		extraSize = extraSize / freePulledChildren_;
+	if (freePulledChildren > 0)
+		extraSize = extraSize / freePulledChildren;
 
 	if (widgetPlace == WIDGET_VALUE)
 	{
 		if(widgetSize_ && !isWidgetFixed() && extraSize > 0)
 			widgetSize_ += extraSize;
 
-		widgetPos_ = pos.x();
-		pos += QPoint(widgetSize_, 0);
-		int delta = rect.right() - pos.x();
+		widgetPos_ = posX;
+		posX += widgetSize_;
+		int delta = tree->rightBorder() - posX;
 		if(delta > 0 && delta < 4)
 			widgetSize_ += delta;
 	}
@@ -670,28 +669,46 @@ void PropertyRow::adjustRect(const QPropertyTree* tree, const QRect& rect, QPoin
 	size_.setX(textSize_ + widgetSize_);
 
 	PropertyRow* nonPulled = nonPulledParent();
-	bool hasChildrenPulledAfter = false;
-	for(it = children_.begin(); it != children_.end(); ++it){
-        PropertyRow* row = *it;
+	for (int i = 0; i < numChildren; ++i) {
+        PropertyRow* row = children_[i];
+		if(!row->visible(tree))
+			continue;
         if(row->pulledUp()){
-			if(row->pulledBefore())
-				continue;
-			row->adjustRect(tree, rect, pos, totalHeight, extraSize);
-			pos += QPoint(row->size_.x(), 0);
-			size_ += QPoint(row->size_.x(), 0);
-			hasChildrenPulledAfter = true;
+			if(!row->pulledBefore()){
+				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				posX += row->size_.x();
         }
-		else if(row->visible(tree) && nonPulled->expanded()){
-			QPoint rowPos(nonPulled->plusRect().right(), totalHeight);
-			totalHeight += row->size_.y();
-			row->adjustRect(tree, rect, rowPos, totalHeight, extraSize);
+			size_.setX(size_.x() + row->size_.x());
+			size_.setY(max(size_.y(), row->size_.y()));
         }
+		else /*if(nonPulled->expanded())*/
+			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
     }
 
-	digestPos_ = pos.x();
+	digestPos_ = posX;
 
 	if(!pulledUp())
-		size_.setX(rect.right() - pos_.x());
+		size_.setX(tree->rightBorder() - pos_.x());
+	labelChanged_ = false;
+}
+
+void PropertyRow::adjustRect(const QPropertyTree* tree, int& totalHeight)
+{
+	pos_.setY(totalHeight);
+	if(!pulledUp())
+		totalHeight += size_.y();
+	else{
+		pos_.setY(parent()->pos_.y());
+		expanded_ = parent()->expanded();
+	}
+	PropertyRow* nonPulled = nonPulledParent();
+	if (true /*expanded_ || hasPulled_*/) {
+		for(PropertyRows::iterator it = children_.begin(); it != children_.end(); ++it){
+			PropertyRow* row = *it;
+			if(row->visible(tree) && (row->pulledUp() || nonPulled->expanded()))
+				row->adjustRect(tree, totalHeight);
+		}
+	}
 }
 
 void PropertyRow::setTextSize(float mult)
@@ -704,16 +721,17 @@ void PropertyRow::setTextSize(float mult)
 			(*i)->setTextSize(mult);
 }
 
-void PropertyRow::calculateTotalSizes(int* minTextSize)
+void PropertyRow::calcPulledRows(int& minTextSize, int& freePulledChildren, int& minimalWidth) 
 {
-	*minTextSize += textSizeInitial_;
+	minTextSize += textSizeInitial_;
+	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
+		++freePulledChildren;
+	minimalWidth += textSizeInitial_ + widgetSizeMin();
 
-	Rows::iterator it;
-	for(it = children_.begin(); it != children_.end(); ++it)
+	for(Rows::const_iterator it = children_.begin(); it != children_.end(); ++it)
 		if((*it)->pulledUp())
-			(*it)->calculateTotalSizes(minTextSize);
+			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth);
 }
-
 
 PropertyRow* PropertyRow::findSelected()
 {
@@ -728,24 +746,50 @@ PropertyRow* PropertyRow::findSelected()
     return 0;
 }
 
-PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated)
+PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName)
 {
 	iterator it;
 	for(it = children_.begin(); it != children_.end(); ++it){
 		PropertyRow* row = *it;
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   ((nameAlt == 0) || (row->label() != 0 && strcmp(row->label(), nameAlt) == 0)) &&
-		   ((typeName == 0) || (row->typeName() != 0 && strcmp(row->typeName(), typeName) == 0)) &&
-		   (!skipUpdated || !row->updated()))
+		   ((typeName == 0) || (row->typeName() != 0 && strcmp(row->typeName(), typeName) == 0)))
 			return row;
 	}
 	return 0;
 }
 
-const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated) const
+PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex)
 {
-	return const_cast<PropertyRow* const>(this)->find(name, nameAlt, typeName, skipUpdated);
+	int numChildren = children_.size();
+
+	for (int i = startIndex; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
+			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+			*outIndex = i;
+			return row;
+		}
+	}
+
+	for (int i = 0; i < startIndex; ++i) {
+		PropertyRow* row = children_[i];
+		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
+			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+			*outIndex = i;
+			return row;
+		}
+	}
+
+	*outIndex = -1;
+	return 0;
 }
+
+const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName) const
+{
+	return const_cast<PropertyRow* const>(this)->find(name, nameAlt, typeName);
+}
+
 
 bool PropertyRow::onKeyDown(QPropertyTree* tree, const QKeyEvent* ev)
 {
@@ -1028,7 +1072,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 		if(before)
 			parentRow->addBefore(this, cursorRow);
 		else
-			parentRow->add(this, cursorRow);
+			parentRow->addAfter(this, cursorRow);
 		model->selectRow(this, true);
         TreePath thisPath = tree->model()->pathFromRow(this);
 		TreePath parentRowPath = tree->model()->pathFromRow(parentRow);
@@ -1050,7 +1094,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 
 void PropertyRow::intersect(const PropertyRow* row)
 {
-	setMultiValue(valueAsString() != row->valueAsString());
+	setMultiValue(multiValue() || row->multiValue() || valueAsString() != row->valueAsString());
 
 	iterator it = begin();
 	const_iterator it2 = row->begin();
@@ -1245,8 +1289,6 @@ struct RowByHorizontalIndexOp{
 
 PropertyRow* PropertyRow::rowByHorizontalIndex(QPropertyTree* tree, int index)
 {
-
-
 	if(!index)
 		return this;
     RowByHorizontalIndexOp op(index);
@@ -1290,6 +1332,7 @@ PropertyRowWidget::~PropertyRowWidget()
 	tree_->setFocus();
 }
 
+FORCE_SEGMENT(PropertyRowNumber)
 /*
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)

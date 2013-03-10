@@ -36,7 +36,8 @@ class PropertyRowContainer : public PropertyRow
 {
 public:
 	enum { Custom = false };
-	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool fixedSizeContainer);
+	PropertyRowContainer();
+	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName);
 	bool isContainer() const{ return true; }
 	bool onActivate( QPropertyTree* tree, bool force);
 	bool onContextMenu(QMenu& item, QPropertyTree* tree);
@@ -44,8 +45,12 @@ public:
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
 
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowContainer(name_, label_, typeName_, elementTypeName_, userReadOnly_), this);
+		PropertyRowContainer* result = new PropertyRowContainer(name_, label_, typeName_);
+		result->fixedSize_ = fixedSize_;
+		result->elementTypeName_ = elementTypeName_;
+		return cloneChildren(result, this);
 	}
+
 	void digestReset(const QPropertyTree* tree);
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return userWidgetSize() == 0 ? false : true; }
@@ -55,6 +60,10 @@ public:
 	void serializeValue(yasli::Archive& ar);
 
 	const char* elementTypeName() const{ return elementTypeName_; }
+	void setValue(const yasli::ContainerInterface& value) {
+		fixedSize_ = value.isFixedSize();
+		elementTypeName_ = value.type().name();
+	}
 	yasli::string valueAsString() const;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }

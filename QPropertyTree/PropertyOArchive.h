@@ -54,7 +54,19 @@ protected:
 	PropertyOArchive(PropertyTreeModel* model, bool forDefaultType);
 
 private:
-	PropertyRow* addRow(SharedPtr<PropertyRow> newRow, bool block = false, PropertyRow* previousNode = 0);
+	struct Level {
+		std::vector<SharedPtr<PropertyRow> > oldRows;
+		int rowIndex;
+		Level() : rowIndex(0) {}
+	};
+	std::vector<Level> stack_;
+
+	template<class RowType, class ValueType>
+	PropertyRow* updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value);
+
+	template<class RowType, class ValueType>
+	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value);
+
 	void enterNode(PropertyRow* row); // sets currentNode
 	void closeStruct(const char* name);
 	PropertyRow* rootNode();

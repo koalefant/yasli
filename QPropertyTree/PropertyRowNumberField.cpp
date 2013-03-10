@@ -24,11 +24,6 @@ PropertyRowNumberField::PropertyRowNumberField(const char* name, const char* nam
 {
 }
 
-PropertyRowNumberField::PropertyRowNumberField(const char* name, const char* nameAlt, const yasli::Serializer& ser)
-: PropertyRow(name, nameAlt, ser)
-{
-}
-
 PropertyRowWidget* PropertyRowNumberField::createWidget(QPropertyTree* tree)
 {
 	return new PropertyRowWidgetNumber(tree->model(), this, tree);

@@ -37,6 +37,7 @@ void ContainerMenuHandler::onMenuAppendElement()
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
+	clonedRow->setLabelChanged();
 	container->setMultiValue(false);
 	if(container->expanded())
 		tree->model()->selectRow(clonedRow, true);
@@ -112,12 +113,20 @@ void ContainerMenuHandler::onMenuChildRemove()
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowContainer, "Container");
 
-PropertyRowContainer::PropertyRowContainer(const char* name = "", const char* label = "", const char* typeName = "", const char* elementTypeName = "", bool readOnly = false)
-: PropertyRow(name, label, typeName)
-, fixedSize_(readOnly)
-, elementTypeName_(elementTypeName)
+PropertyRowContainer::PropertyRowContainer()
+: fixedSize_(false)
+, elementTypeName_("")
 {
-	buttonLabel_[0] = 0;
+	buttonLabel_[0] = '\0';
+
+}
+
+PropertyRowContainer::PropertyRowContainer(const char* name, const char* label, const char* typeName)
+: PropertyRow(name, label, typeName)
+, fixedSize_(false)
+, elementTypeName_("")
+{
+	buttonLabel_[0] = '\0';
 
 	if(pulledUp())
 		_setExpanded(true);		

@@ -1,13 +1,10 @@
 #include "PropertyRowObject.h"
 #include "PropertyTreeModel.h"
 
-PropertyRowObject::PropertyRowObject(const char* name, const char* label, const Object& object, PropertyTreeModel* model)
-: PropertyRow(name, label, object.type().name())
-, object_(object)
-, model_(model)
+PropertyRowObject::PropertyRowObject(const char* name, const char* label, const char* typeName)
+: PropertyRow(name, label, typeName)
+, model_(0)
 {
-	if (object.address())
-		model_->registerObjectRow(this);
 }
 
 bool PropertyRowObject::assignTo(Object* obj)
@@ -21,7 +18,9 @@ bool PropertyRowObject::assignTo(Object* obj)
 
 PropertyRow* PropertyRowObject::clone() const
 {
-	return new PropertyRowObject(name_, label_, Object(0, object_.type(), 0, 0, 0), model_);
+	PropertyRowObject* result =  new PropertyRowObject(name_, label_, typeName_);
+	result->setModel(model_);
+	return result;
 }
 
 PropertyRowObject::~PropertyRowObject()

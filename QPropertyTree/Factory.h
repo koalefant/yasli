@@ -69,7 +69,7 @@ protected:
     _Arg3 arg3_;
 };
 
-template<class _Key, class _Product, class _Constructor = Constructor0<_Product> >
+template<class _Key, class _Product, class _Constructor = Constructor0<_Product>, class _KeyPred = std::less<_Key> >
 class Factory{
 public:
     typedef _Constructor Constructor;
@@ -77,7 +77,7 @@ public:
         virtual ~CreatorBase() {}
         virtual _Product* create(Constructor ctor) const = 0;
     };
-    typedef std::map<_Key, CreatorBase*> Creators;
+    typedef std::map<_Key, CreatorBase*, _KeyPred> Creators;
 
     template<class _Derived>
     struct Creator : CreatorBase{

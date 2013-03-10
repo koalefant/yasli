@@ -41,10 +41,10 @@ class PropertyRowPointer : public PropertyRow
 public:
 	enum { Custom = false };
 	PropertyRowPointer();
-	PropertyRowPointer(const char* name, const char* label, const yasli::PointerInterface &ptr);
-	PropertyRowPointer(const char* name, const char* label, yasli::TypeID baseType, yasli::ClassFactoryBase* factory, const char* derivedTypeName);
+	PropertyRowPointer(const char* name, const char* label, const char* typeName);
 
 	bool assignTo(yasli::PointerInterface &ptr);
+	void setValue(const yasli::PointerInterface& ptr);
 	using PropertyRow::assignTo;
 
 	yasli::TypeID baseType() const{ return baseType_; }
@@ -61,7 +61,12 @@ public:
 	yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const;
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowPointer(name_, label_, baseType_, factory_, derivedTypeName_.c_str()), this);
+		PropertyRowPointer* result = new PropertyRowPointer(name_, label_, typeName_);
+		result->baseType_ = baseType_;
+		result->factory_ = factory_;
+		result->derivedTypeName_ = derivedTypeName_;
+		result->derivedLabel_ = derivedLabel_;
+		return cloneChildren(result, this);
 	}
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }

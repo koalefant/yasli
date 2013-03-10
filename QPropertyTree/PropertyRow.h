@@ -103,8 +103,7 @@ public:
 	typedef Rows::const_iterator const_iterator;
 
 	PropertyRow();
-	PropertyRow(const char* name, const char* nameAlt, const char* typeName);
-	PropertyRow(const char* name, const char* nameAlt, const yasli::Serializer& ser);
+	PropertyRow(const char* name, const char* label, const char* typeName);
 	virtual ~PropertyRow();
 
 	bool selected() const{ return selected_; }
@@ -130,8 +129,9 @@ public:
 	bool isRoot() const { return !parent_; }
 	int level() const;
 
-	PropertyRow* add(PropertyRow* row, PropertyRow* after = 0);
-	PropertyRow* addBefore(PropertyRow* row, PropertyRow* before);
+	void add(PropertyRow* row);
+	void addAfter(PropertyRow* row, PropertyRow* after);
+	void addBefore(PropertyRow* row, PropertyRow* before);
 
 	template<class Op> bool scanChildren(Op& op);
 	template<class Op> bool scanChildren(Op& op, QPropertyTree* tree);
@@ -145,6 +145,7 @@ public:
 
 	bool empty() const{ return children_.empty(); }
 	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
+	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex);
 	PropertyRow* findByAddress(void* addr);
 	iterator begin() { return children_.begin(); }
 	iterator end() { return children_.end(); }
@@ -166,9 +167,9 @@ public:
 	void setName(const char* name) { name_ = name; }
 	const char* label() const { return label_; }
 	const char* labelUndecorated() const { return labelUndecorated_; }
-	void setLabel(const char* label) { label_ = label ? label : ""; setLabelChanged(); }
+	void setLabel(const char* label);
 	void setLabelChanged();
-	void updateLabel(const QPropertyTree* tree);
+	void updateLabel(const QPropertyTree* tree, int index);
 	void parseControlCodes(const char* label, bool updateLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
@@ -176,8 +177,8 @@ public:
 	yasli::string rowText(const QPropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
-	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false);
-	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName, bool skipUpdated = false) const;
+	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
+	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName) const;
 	void intersect(const PropertyRow* row);
 
 	int verticalIndex(QPropertyTree* tree, PropertyRow* row);
@@ -190,6 +191,7 @@ public:
 		return assignTo(reinterpret_cast<void*>(&object), sizeof(T));
 	}
 	virtual bool assignTo(void* object, size_t size) { return false; }
+	virtual void setValue(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
 
@@ -198,10 +200,11 @@ public:
 	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calculateMinimalSize(const QPropertyTree* tree, int rowIndex);
+	void calcPulledRows(int& minTextSize, int& freePulledChildren, int& minimalWidth);
+	void calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index);
 	void setTextSize(float multiplier);
 	void calculateTotalSizes(int* minTextSize);
-	void adjustRect(const QPropertyTree* tree, const QRect& rect, QPoint pos, int& totalHeight, int& extraSize);
+	void adjustRect(const QPropertyTree* tree, int& totalHeight);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
 
@@ -255,9 +258,6 @@ public:
 	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
 	int userWidgetSize() const{ return userWidgetSize_; }
 
-	void setUpdated(bool updated) { updated_ = updated; }
-	bool updated() const { return updated_; }
-
 	// multiValue is used to edit properties of multiple objects simulateneously
 	bool multiValue() const { return multiValue_; }
 	void setMultiValue(bool multiValue) { multiValue_ = multiValue; }
@@ -275,7 +275,9 @@ public:
 
 	PropertyRow* cloneChildren(PropertyRow* result, const PropertyRow* source) const;
 	virtual PropertyRow* clone() const {
-		return cloneChildren(serializer_ ? new PropertyRow(name_, label_, serializer_) : new PropertyRow(name_, label_, typeName_), this);
+		PropertyRow* result = new PropertyRow(name_, label_, typeName_);
+		result->setValue(serializer_);
+		return cloneChildren(result, this);
 	}
 
 	const wchar_t* digest() const{ return digest_.c_str(); }
@@ -307,7 +309,6 @@ protected:
 	bool belongsToFilteredRow_ : 1;
 	bool expanded_ : 1;
 	bool selected_ : 1;
-	bool updated_ : 1;
 	bool labelChanged_ : 1;
 	bool userReadOnly_ : 1;
 	bool userReadOnlyRecurse_ : 1;
@@ -317,13 +318,10 @@ protected:
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
-	// number of pulled childrens
-	char freePulledChildren_;
 
 	// do we really need QPoint here? 
 	QPoint pos_;
 	QPoint size_;
-	short int minimalWidth_;
 	short int plusSize_;
 	short int textPos_;
 	short int textSizeInitial_;
@@ -337,6 +335,8 @@ protected:
 	yasli::SharedPtr<PropertyRow> pulledContainer_;
 
 	static ConstStringList* constStrings_;
+	friend class PropertyOArchive;
+	friend class PropertyIArchive;
 };
 
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
@@ -348,52 +348,44 @@ struct StaticBool{
 
 class PropertyRowArg{
 public:
-	PropertyRowArg(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName){
-		object_ = object;
-		size_ = size;
+	PropertyRowArg(const char* name, const char* label, const char* typeName){
 		name_ = name;
-		nameAlt_ = nameAlt;
+		label_ = label;
 		typeName_ = typeName;
 	}
 
 	template<class T>
 	void construct(T** row)
 	{
-		*row = (T*)createRow<T>(StaticBool<true>());
+		*row = createRow<T>();
 	}
 
 	template<class Derived>
-	static PropertyRow* createRow(StaticBool<true> custom)
+	static Derived* createRow()
 	{
-		PropertyRow* result;
-		if(object_)
-			result = new Derived(object_, size_, name_, nameAlt_, typeName_);
-		else
-			result = new Derived();
-		return result;
-	}
-
-	template<class Derived>
-	static PropertyRow* createRow(StaticBool<false> custom)
-	{
-		PropertyRow* result = new Derived();
+		Derived* result = new Derived();
 		return result;
 	}
 
 	template<class Derived>
 	static PropertyRow* createArg(){ 
-		return createRow<Derived>(StaticBool<Derived::Custom>());
+		return createRow<Derived>();
 	}
 
 protected:
-	static void* object_;
-	static size_t size_;
 	static const char* name_;
-	static const char* nameAlt_;
+	static const char* label_;
 	static const char* typeName_;
 };
 
-typedef Factory<yasli::string, PropertyRow, PropertyRowArg> PropertyRowFactory;
+struct LessStrCmp
+{
+	bool operator()(const char* a, const char* b) const {
+		return strcmp(a, b) < 0;
+	}
+};
+
+typedef Factory<const char*, PropertyRow, PropertyRowArg, LessStrCmp> PropertyRowFactory;
 
 template<class Op>
 bool PropertyRow::scanChildren(Op& op)

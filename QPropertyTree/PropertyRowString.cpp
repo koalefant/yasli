@@ -22,18 +22,13 @@
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
-PropertyRowString::PropertyRowString(const char* name, const char* label, const wchar_t* value)
-: PropertyRowImpl<yasli::wstring, PropertyRowString>(name, label, value, "string")
+PropertyRowString::PropertyRowString()
+: PropertyRowImpl<yasli::wstring, PropertyRowString>()
 {
 }
 
-PropertyRowString::PropertyRowString(const char* name, const char* label, const char* value)
-: PropertyRowImpl<yasli::wstring, PropertyRowString>(name, label, toWideChar(value), "string")
-{
-}
-
-PropertyRowString::PropertyRowString(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<yasli::wstring, PropertyRowString>(object, size, name, label, typeName)
+PropertyRowString::PropertyRowString(const char* name, const char* label, const char* typeName)
+: PropertyRowImpl<yasli::wstring, PropertyRowString>(name, label, typeName)
 {
 
 }
@@ -59,4 +54,15 @@ yasli::string PropertyRowString::valueAsString() const
 {
 	return fromWideChar(value_.c_str());
 }
+
+void PropertyRowString::setValue(const wchar_t* str)
+{
+	value_ = str;
+}
+
+void PropertyRowString::setValue(const char* str)
+{
+	value_ = toWideChar(str);
+}
+
 // vim:ts=4 sw=4:

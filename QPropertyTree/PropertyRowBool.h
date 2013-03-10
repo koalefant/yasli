@@ -17,8 +17,10 @@ class PropertyRowBool : public PropertyRow
 {
 public:
 	enum { Custom = false };
-	PropertyRowBool(const char* name = "", const char* nameAlt = "", bool value = false);
+	PropertyRowBool();
+	PropertyRowBool(const char* name, const char* nameAlt, const char* typeName);
 	bool assignTo(void* val, size_t size);
+	void setValue(bool value) { value_ = value; }
 
 	void redraw(const PropertyDrawContext& context);
 	bool isLeaf() const{ return true; }
@@ -31,7 +33,9 @@ public:
     yasli::wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : yasli::wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowBool(name_, label_, value_), this);
+		PropertyRowBool* result = new PropertyRowBool(name_, label_, typeName_);
+		result->value_ = value_;
+		return cloneChildren(result, this);
 	}
     void serializeValue(yasli::Archive& ar);
 	int widgetSizeMin() const{ return ICON_SIZE; }

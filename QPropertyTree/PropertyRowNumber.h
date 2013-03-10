@@ -133,15 +133,17 @@ class PropertyRowNumber : public PropertyRowNumberField{
 public:
 	enum { Custom = false };
 	PropertyRowNumber()
-	: PropertyRowNumberField("", "", TypeID::get<Type>().name())
+	: PropertyRowNumberField()
 	{
 	}
-	PropertyRowNumber(const char* name, const char* nameAlt, Type value)
-	: PropertyRowNumberField(name, nameAlt, TypeID::get<Type>().name())
-	, value_(value)
+	PropertyRowNumber(const char* name, const char* label, const char* typeName)
+	: PropertyRowNumberField(name, label, typeName)
 	{
 	}
-
+	void setValue(Type value)
+	{
+		value_ = value;
+	}
 	bool setValueFromString(const char* str) override{
         Type value = value_;
 		clampedNumberFromString(&value_, str);
@@ -160,7 +162,9 @@ public:
 		ar(value_, "value", "Value");
 	}
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowNumber(name_, label_, value_), this);
+		PropertyRowNumber* result = new PropertyRowNumber(name_, label_, typeName_);
+		result->value_ = value_;
+		return cloneChildren(result, this);
 	}
 
 	void startIncrement() override

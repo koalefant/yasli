@@ -103,7 +103,8 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 
 				const char* derivedName = d->typeName();
 				const char* derivedNameAlt = d->typeName();
-				PropertyRowPointer* newSourceRoot = new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+				PropertyRowPointer* newSourceRoot = static_cast<PropertyRowPointer*>(d->clone());
+					// new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
 				source->swapChildren(newSourceRoot);
 				source = newSourceRoot;
 			}
@@ -117,6 +118,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 				dest->clear();
 				dest->swapChildren(source);
 			}
+			source->setLabelChanged();
 		}
 	}
 	else if(dest->isContainer()){
@@ -133,7 +135,8 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
-						PropertyRowPointer* newSourceRoot = new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+						PropertyRowPointer* newSourceRoot = static_cast<PropertyRowPointer*>(d->clone());
+						//new PropertyRowPointer(d->name(), d->label(), d->typeName(), d->factory(), d->derivedTypeName()
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
 					}
@@ -141,6 +144,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 					container->add(source.get());
 				}
 			}
+			container->setLabelChanged();
 		}
 	}
 	
@@ -527,6 +531,10 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , capturedRow_(0)
 , applyTime_(0)
 , revertTime_(0)
+, updateHeightsTime_(0)
+, paintTime_(0)
+, leftBorder_(0)
+, rightBorder_(0)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -761,8 +769,11 @@ void QPropertyTree::expandParents(PropertyRow* row)
 		p = p->parent();
 	}
 	Parents::iterator it;
-	for(it = parents.begin(); it != parents.end(); ++it)
-		expandRow(*it, true);
+	for(it = parents.begin(); it != parents.end(); ++it) {
+		PropertyRow* row = *it;
+		row->_setExpanded(true);
+	}
+	updateHeights();
 }
 
 void QPropertyTree::expandAll(PropertyRow* root)
@@ -777,7 +788,7 @@ void QPropertyTree::expandAll(PropertyRow* root)
 	}
 	else
 		root->setExpandedRecursive(this, true);
-	update();
+	updateHeights();
 }
 
 void QPropertyTree::collapseAll(PropertyRow* root)
@@ -808,7 +819,11 @@ void QPropertyTree::collapseAll(PropertyRow* root)
 
 void QPropertyTree::expandRow(PropertyRow* row, bool expanded)
 {
-	row->_setExpanded(expanded);
+	bool hasChanges = false;
+	if (row->expanded() != expanded) {
+		row->_setExpanded(expanded);
+		hasChanges = true;
+	}
 
     if(!row->expanded()){
 		PropertyRow* f = model()->focusedRow();
@@ -820,7 +835,9 @@ void QPropertyTree::expandRow(PropertyRow* row, bool expanded)
 			f = f->parent();
 		}
 	}
-	updateHeights();
+
+	if (hasChanges)
+		updateHeights();
 }
 
 void QPropertyTree::interruptDrag()
@@ -830,24 +847,32 @@ void QPropertyTree::interruptDrag()
 
 void QPropertyTree::updateHeights()
 {
-	model()->root()->calculateMinimalSize(this, 0);
+	QElapsedTimer timer;
+	timer.start();
 
-  int padding = compact_ ? 4 : 6;
+	int lb = compact_ ? 0 : 4;
+	int rb = area_.width() - lb*2;
+	bool force = lb != leftBorder_ || rb != rightBorder_;
+	leftBorder_ = lb;
+	rightBorder_ = rb;
+	model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
+
+	int padding = compact_ ? 4 : 6;
 
 
 	int extraSize = 0;
 	int totalHeight = 0;
     QSize rectSize = rect().size() - QSize(padding, padding) * 2;
     QRect rect(padding, padding, rectSize.width(), rectSize.height());
-	model()->root()->adjustRect(this, rect, rect.topLeft(), totalHeight, extraSize);
+	model()->root()->adjustRect(this, totalHeight);
 	size_.setY(totalHeight);
 
 	bool hasScrollBar = updateScrollBar();
 
 	totalHeight = 0;
 	int scrollBarW = hasScrollBar ? scrollBar_->width() : 0;
-  rect = QRect(QPoint(padding, padding), this->rect().size() - QSize(padding, padding) * 2 - QSize(scrollBarW, 0));
-	model()->root()->adjustRect(this, rect, rect.topLeft(), totalHeight, extraSize);
+	rect = QRect(QPoint(padding, padding), this->rect().size() - QSize(padding, padding) * 2 - QSize(scrollBarW, 0));
+	model()->root()->adjustRect(this, totalHeight);
 	size_.setY(totalHeight);
 
 	area_ = this->rect();
@@ -864,7 +889,9 @@ void QPropertyTree::updateHeights()
 	}
 
 	_arrangeChildren();
+
 	update();
+	updateHeightsTime_ = timer.elapsed();
 }
 
 bool QPropertyTree::updateScrollBar()
@@ -1039,7 +1066,7 @@ void QPropertyTree::revertChanged(bool enforce)
 	}
 
 	if (model()->root())
-		model_->root()->updateLabel(this);		
+		model_->root()->updateLabel(this, 0);
 	if (filterMode_)
 		onFilterChanged(QString());
 
@@ -1061,7 +1088,7 @@ void QPropertyTree::revert()
 
 	if (filterMode_) {
 		if (model_->root())
-			model_->root()->updateLabel(this);		
+			model_->root()->updateLabel(this, 0);
         onFilterChanged(QString());
 	}
 
@@ -1099,6 +1126,8 @@ void QPropertyTree::applyChanged(bool enforce)
 	}
 	signalChanged();
 	applyTime_ = timer.elapsed();
+
+	updateHeights();
 }
 
 bool QPropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -1867,6 +1896,8 @@ QSize QPropertyTree::sizeHint() const
 
 void QPropertyTree::paintEvent(QPaintEvent* ev)
 {
+	QElapsedTimer timer;
+	timer.start();
 	QPainter painter(this);
 	QRect clientRect = this->rect();
 
@@ -1937,6 +1968,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	// 		DrawFocusRect(dc, &clientRect);
 	// 	}
 	}
+	paintTime_ = timer.elapsed();
 }
 
 QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const QPoint& pointInWindowSpace, const QRect& rowRect)
@@ -2053,7 +2085,7 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 	{
 		 if(dragController_->captured()){
 		 	dragController_->drop(QCursor::pos());
-			update();
+			updateHeights();
 		}
 		QPoint point = ev->pos();
 		PropertyRow* row = rowByPoint(point);

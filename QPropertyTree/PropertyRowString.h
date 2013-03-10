@@ -20,11 +20,12 @@ class PropertyRowString : public PropertyRowImpl<yasli::wstring, PropertyRowStri
 {
 public:
 	enum { Custom = false };
-	PropertyRowString(const char* name = "", const char* nameAlt = "", const wchar_t* value = L"");
-	PropertyRowString(const char* name, const char* nameAlt, const char* value);
-	PropertyRowString(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowString();
+	PropertyRowString(const char* name, const char* label, const char* typeName);
 	bool assignTo(yasli::string& str);
 	bool assignTo(yasli::wstring& str);
+	void setValue(const char* str);
+	void setValue(const wchar_t* str);
 	using PropertyRowImpl<yasli::wstring, PropertyRowString>::assignTo;
 	PropertyRowWidget* createWidget(QPropertyTree* tree);
 	yasli::string valueAsString() const;

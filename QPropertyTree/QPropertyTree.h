@@ -151,6 +151,8 @@ public:
 
 	// internal methods:
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
+	int leftBorder() const{ return leftBorder_; }
+	int rightBorder() const{ return rightBorder_; }
 	QPoint _toScreen(QPoint point) const;
 	void _cancelWidget(){ widget_.reset(); }
 	void _drawRowLabel(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color) const;
@@ -160,6 +162,8 @@ public:
 	bool _isCapturedRow(const PropertyRow* row) const;
 	int _applyTime() const{ return applyTime_; }
 	int _revertTime() const{ return revertTime_; }
+	int _updateHeightsTime() const{ return updateHeightsTime_; }
+	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void startFilter(const char* filter);
@@ -279,6 +283,8 @@ protected:
 
 	QScrollBar* scrollBar_;
 	QRect area_;
+	int leftBorder_;
+	int rightBorder_;
 	QPoint size_;
 	QPoint offset_;
 	QSize sizeHint_;
@@ -288,6 +294,8 @@ protected:
 
 	int applyTime_;
 	int revertTime_;
+	int updateHeightsTime_;
+	int paintTime_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

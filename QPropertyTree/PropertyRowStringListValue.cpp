@@ -27,13 +27,13 @@ using yasli::StringListValue;
 
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
-PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const char* label, const StringListValue& value)
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(name, label, value)
+PropertyRowStringListValue::PropertyRowStringListValue()
+: PropertyRowImpl<StringListValue, PropertyRowStringListValue>()
 {
 }
 
-PropertyRowStringListValue::PropertyRowStringListValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(object, size, name, label, typeName)
+PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const char* label, const char* typeName)
+: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(name, label, typeName)
 {
 }
 
@@ -45,13 +45,14 @@ PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* name, const char* label, const StringListStaticValue& value)
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(name, label, value)
+
+PropertyRowStringListStaticValue::PropertyRowStringListStaticValue()
+: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>()
 {
 }
 
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(object, size, name, label, typeName)
+PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* name, const char* label, const char* typeName)
+: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(name, label, typeName)
 {
 }
 

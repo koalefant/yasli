@@ -45,7 +45,7 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 
 static QAction* findAction(const QList<QAction*>& actions, const char* withText)
 {
-	for (size_t i = 0; i < actions.size(); ++i)
+	for (size_t i = 0; i < size_t(actions.size()); ++i)
 	{
 		if (actions[i]->text() == withText)
 			return actions[i];
@@ -95,29 +95,17 @@ QMenu* ClassMenuItemAdder::addMenu(QMenu& menu, const char* text)
 YASLI_CLASS(PropertyRow, PropertyRowPointer, "SharedPtr");
 
 PropertyRowPointer::PropertyRowPointer()
-: PropertyRow("", "", "")
+: factory_(0)
+{
+}
+
+PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const char* typeName)
+: PropertyRow(name, label, typeName)
 , factory_(0)
 {
+
 }
 
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const yasli::PointerInterface &ptr)
-: PropertyRow(name, label, ptr.baseType().name())
-, baseType_(ptr.baseType())
-, factory_(ptr.factory())
-{
-		serializer_ = ptr.serializer();
-		const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
-		if (desc)
-			derivedTypeName_ = desc->name();
-}
-
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, TypeID baseType, yasli::ClassFactoryBase* factory, const char* derivedTypeName)
-: PropertyRow(name, label, baseType.name())
-, baseType_(baseType)
-, factory_(factory)
-, derivedTypeName_(derivedTypeName)
-{
-}
 
 void PropertyRowPointer::setDerivedType(const TypeID& typeID, yasli::ClassFactoryBase* factory)
 {
@@ -283,6 +271,16 @@ int PropertyRowPointer::widgetSizeMin() const
 	QFontMetrics fm(*propertyTreeDefaultBoldFont());
     QString str(fromWideChar(generateLabel().c_str()).c_str());
 	return fm.width(str) + 10;
+}
+
+void PropertyRowPointer::setValue(const yasli::PointerInterface& ptr)
+{
+	baseType_ = ptr.baseType();
+	factory_ = ptr.factory();
+	serializer_ = ptr.serializer();
+	const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
+	if (desc)
+		derivedTypeName_ = desc->name();
 }
 
 // vim:ts=4 sw=4:

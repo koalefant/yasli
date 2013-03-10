@@ -27,6 +27,8 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 , lastNode_(0)
 , root_(root)
 {
+	stack_.push_back(Level());
+
 	if (!root_)
 		root_ = model_->root();
 	else
@@ -94,7 +96,7 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed short>().name())){
+	if(openRow(name, label, "signed short")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -105,7 +107,7 @@ bool PropertyIArchive::operator()(signed short& value, const char* name, const c
 
 bool PropertyIArchive::operator()(signed int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed int>().name())){
+	if(openRow(name, label, "int")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -116,7 +118,7 @@ bool PropertyIArchive::operator()(signed int& value, const char* name, const cha
 
 bool PropertyIArchive::operator()(signed long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed long>().name())){
+	if(openRow(name, label, "long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -139,7 +141,7 @@ bool PropertyIArchive::operator()(long long& value, const char* name, const char
 // Unsigned types
 bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned char>().name())){
+	if(openRow(name, label, "unsigned char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -150,7 +152,7 @@ bool PropertyIArchive::operator()(unsigned char& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned short>().name())){
+	if(openRow(name, label, "unsigned short")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -161,7 +163,7 @@ bool PropertyIArchive::operator()(unsigned short& value, const char* name, const
 
 bool PropertyIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned int>().name())){
+	if(openRow(name, label, "unsigned int")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -172,7 +174,7 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 
 bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned long>().name())){
+	if(openRow(name, label, "unsigned long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -183,7 +185,7 @@ bool PropertyIArchive::operator()(unsigned long& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned long long>().name())){
+	if(openRow(name, label, "unsigned long long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -194,7 +196,7 @@ bool PropertyIArchive::operator()(unsigned long long& value, const char* name, c
 
 bool PropertyIArchive::operator()(float& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<float>().name())){
+	if(openRow(name, label, "float")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -205,7 +207,7 @@ bool PropertyIArchive::operator()(float& value, const char* name, const char* la
 
 bool PropertyIArchive::operator()(double& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<double>().name())){
+	if(openRow(name, label, "double")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -220,6 +222,7 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 	if(!openRow(name, label, typeName))
         return false;
 
+
     size_t size = 0;
 	if(currentNode_->multiValue())
 		size = ser.size();
@@ -227,6 +230,8 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 		size = currentNode_->count();
 		size = ser.resize(size);
 	}
+
+	stack_.push_back(Level());
 
 	size_t index = 0;
     if(ser.size() > 0)
@@ -236,6 +241,8 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
             ser.next();
 			++index;
         }
+
+	stack_.pop_back();
 
     closeRow(name);
 	return true;
@@ -253,7 +260,11 @@ bool PropertyIArchive::operator()(const yasli::Serializer& ser, const char* name
 	else
 		return false;
 
+	stack_.push_back(Level());
+
     ser(*this);
+
+	stack_.pop_back();
 
     closeRow(name);
 	return true;
@@ -281,8 +292,12 @@ bool PropertyIArchive::operator()(yasli::PointerInterface& ser, const char* name
 	else
 		return false;
 
+	stack_.push_back(Level());
+
 	if(ser.get() != 0)
 		ser.serializer()( *this );
+
+	stack_.pop_back();
 
 	closeRow(name);
 	return true;
@@ -321,8 +336,6 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 {
 	if(!name)
 		return false;
-	if(name[0] == '\0' && label && label[0] != '\0')
-		name = label;
 
 	if(!currentNode_){
 		lastNode_ = currentNode_ = model_->root();
@@ -337,25 +350,14 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if(lastNode_ == currentNode_){
-			node = static_cast<PropertyRow*>(currentNode_->front());
-		}
-		else{
-			PropertyRow* row = lastNode_;
-			while(row != root_ && row->parent() && currentNode_ != row->parent())
-				row = row->parent();
-			
-			PropertyRow::iterator iter = std::find(currentNode_->begin(), currentNode_->end(), row);
-			if(iter != currentNode_->end()){
-				++iter;
-
-				if(iter != currentNode_->end())
-					node = static_cast<PropertyRow*>(&**iter);
-			}
-		}
+		if (stack_.back().rowIndex < currentNode_->children_.size())
+			node = currentNode_->children_[stack_.back().rowIndex];
+		++stack_.back().rowIndex;
 	}
-	else
-		node = currentNode_->find(name, 0, typeName);
+	else {
+		node = currentNode_->findFromIndex(&stack_.back().rowIndex, name, typeName, stack_.back().rowIndex); // TODO: perform look-up in a proper order
+		++stack_.back().rowIndex;
+	}
 
 	if(node){
 		lastNode_ = node;

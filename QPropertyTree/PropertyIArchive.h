@@ -57,6 +57,13 @@ private:
 	bool openRow(const char* name, const char* label, const char* typeName);
 	void closeRow(const char* name);
 
+	struct Level {
+		int rowIndex;
+		Level() : rowIndex(0) {}
+	};
+
+	vector<Level> stack_;
+
 	PropertyTreeModel* model_;
 	PropertyRow* currentNode_;
 	PropertyRow* lastNode_;

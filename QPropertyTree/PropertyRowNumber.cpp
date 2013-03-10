@@ -36,4 +36,6 @@ REGISTER_NUMBER_ROW(unsigned long long, UnsignedLongLong)
 
 #undef REGISTER_NUMBER_ROW
 
+DECLARE_SEGMENT(PropertyRowNumber)
+
 // ---------------------------------------------------------------------------

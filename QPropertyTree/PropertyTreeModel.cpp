@@ -274,16 +274,13 @@ void PropertyTreeModel::push(PropertyRow* row)
 void PropertyTreeModel::rowChanged(PropertyRow* row)
 {
 	YASLI_ESCAPE(row, return);
+	row->setLabelChanged();
 
 	PropertyRow* parentObj = row;
 	while (parentObj->parent() && !parentObj->isObject())
 		parentObj = parentObj->parent();
 
 	row->setMultiValue(false);
-	while (row->parent()) {
-		row->setLabelChanged();
-		row = row->parent();
-	}
 
 	PropertyRows rows;
 	rows.push_back(parentObj);
@@ -397,7 +394,11 @@ void PropertyTreeModel::setRootObject(const Object& obj)
 
 		clearObjectReferences();
 
-		PropertyRowObject* root = new PropertyRowObject("", "", obj, this);
+		PropertyRowObject* root = new PropertyRowObject("", "", obj.type().name());
+		root->setModel(this);
+		root->setValue(obj);
+		if (obj.address())
+			registerObjectRow(root);
 
 		ModelObjectReference ref;
 		root_ = root;

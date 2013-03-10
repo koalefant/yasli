@@ -13,8 +13,8 @@ class PropertyRowStringListValue : public PropertyRowImpl<StringListValue, Prope
 {
 public:
 	enum { Custom = true };
-	PropertyRowStringListValue(const char* name = "", const char* nameAlt = "", const StringListValue& value = StringListValue());
-	PropertyRowStringListValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowStringListValue();
+	PropertyRowStringListValue(const char* name, const char* label, const char* typeName);
 
 	// virtuals:
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
@@ -48,8 +48,8 @@ using yasli::StringListStaticValue;
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>{
 public:
 	enum { Custom = false };
-	PropertyRowStringListStaticValue(const char* name = "", const char* nameAlt = "", const StringListStaticValue& value = StringListStaticValue());
-	PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
+	PropertyRowStringListStaticValue();
+	PropertyRowStringListStaticValue(const char* name, const char* nameAlt, const char* typeName);
 
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
 	yasli::string valueAsString() const  override{ return value_.c_str(); }
