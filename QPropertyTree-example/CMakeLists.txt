@@ -13,8 +13,10 @@ if (MSVC)
 endif (MSVC)
 
 #file(GLOB SOURCES *.h *.cpp)
-set(SOURCES main.cpp
-  mainwindow.cpp mainwindow.h
+set(SOURCES 
+	main.cpp
+	mainwindow.cpp mainwindow.h
+	LogicEditor.cpp LogicEditor.h
   )
 source_group("" FILES ${SOURCES})
 

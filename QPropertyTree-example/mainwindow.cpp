@@ -2,6 +2,7 @@
 #include "QPropertyTree/QPropertyTree.h"
 #include <limits.h>
 #include <float.h>
+#include "LogicEditor.h"
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
@@ -78,6 +79,7 @@ struct TestData
     {
 		//ar(vec3, "vec3", "Vec3");
         ar(elements, "elements", "Elements");
+		ar(globalLogicEditor, "logicEditor", "Logic Editor");
     }
 } globalTestData;
 
@@ -85,9 +87,9 @@ MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
 #ifdef NDEBUG
-	globalTestData.elements.resize(50000);
+	globalTestData.elements.resize(10000);
 #else
-	globalTestData.elements.resize(2500);
+	globalTestData.elements.resize(5000);
 #endif
     tree_ = new QPropertyTree(this);
     tree_->attach(yasli::Serializer(globalTestData));

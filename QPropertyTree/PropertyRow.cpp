@@ -413,21 +413,17 @@ void PropertyRow::setLabel(const char* label)
 
 void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 {
-	DEBUG_TRACE_ROW("updateLabel: %s", label());
 	digestReset(tree);
 
-	PropertyRow::iterator it;
+	hasPulled_ = false;
+
 	int numChildren = children_.size();
-	/*if (expanded_ || hasPulled_)*/ {
-		for (int i = 0; i < numChildren; ++i) {
-			PropertyRow* row = children_[i];
-			if (row->labelChanged_) {
-				row->updateLabel(tree, i);
-			}
-		}
+	for (int i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		row->updateLabel(tree, i);
 	}
 
-	parseControlCodes(label_, true);
+	parseControlCodes(label_, false);
 	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
 
 	if(pulledContainer())
@@ -456,12 +452,11 @@ struct ResetSerializerOp{
     }
 };
 
-void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
+void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 {
 	userFullRow_ = false;
 	pulledUp_ = false;
 	pulledBefore_ = false;
-	hasPulled_ = false;
 	userReadOnly_ = false;
 	userReadOnlyRecurse_ = false;
 	userFixedWidget_ = false;
@@ -526,7 +521,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool updateLabel)
 		++ptr;
 	}
 
-	if (updateLabel)
+	if (changeLabel)
 		labelUndecorated_ = ptr;
 
 	if (appendValueToDigest)
@@ -558,15 +553,12 @@ const char* PropertyRow::typeNameForFilter() const
 
 void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
-	if(labelChanged_){
-		updateLabel(tree, index);
-	}
-	else if(!force)
-		return;
+	//if(!labelChanged_ && !force)
+	//	return;
 
 	plusSize_ = 0;
-    if(isRoot())
-        expanded_ = true;
+	if(isRoot())
+		expanded_ = true;
 	else{
 		if(nonPulledParent()->isRoot() || tree->compact() && nonPulledParent()->parent()->isRoot())
 			_setExpanded(true);
@@ -582,7 +574,6 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			return;
 		}
 	}
-
 
 	widgetSize_ = widgetSizeMin();
 	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
@@ -628,7 +619,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	}
 
 	int numChildren = children_.size();
-	if (expanded_ || hasPulled()) {
+	if (hasPulled_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = children_[i];
 			if(row->visible(tree) && row->pulledBefore()){
@@ -689,20 +680,20 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 	PropertyRow* nonPulled = nonPulledParent();
 	for (int i = 0; i < numChildren; ++i) {
-        PropertyRow* row = children_[i];
+		PropertyRow* row = children_[i];
 		if(!row->visible(tree))
 			continue;
-        if(row->pulledUp()){
+		if(row->pulledUp()){
 			if(!row->pulledBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 				posX += row->size_.x();
-	        }
+			}
 			size_.setX(size_.x() + row->size_.x());
 			size_.setY(max(size_.y(), row->size_.y()));
-        }
-		else /*if(nonPulled->expanded())*/
+		}
+		else if(nonPulled->expanded())
 			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
-    }
+	}
 
 	digestPos_ = posX;
 
@@ -725,10 +716,10 @@ void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHe
 
 	DEBUG_TRACE_ROW("adjustRect: %s %i %i %i %i, totalHeight: %i %s", label(), pos_.x(), pos_.y(), size_.x(), size_.y(), totalHeight, pulledUp() ? "pulled" : "");
 
-	if (true /*expanded_ || hasPulled_*/) {
+	if (expanded_ || hasPulled_) {
 		for(PropertyRows::iterator it = children_.begin(); it != children_.end(); ++it){
 			PropertyRow* row = *it;
-			if(row->visible(tree) && (row->pulledUp() || nonPulled->expanded()))
+			if(row->visible(tree) && (nonPulled->expanded() || row->pulledUp()))
 				row->adjustVerticalPosition(tree, totalHeight);
 			else {
 				//DEBUG_TRACE_ROW("skip adjust rect for ''", row->label());

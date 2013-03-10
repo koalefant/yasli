@@ -171,7 +171,7 @@ public:
 	void setLabelChanged();
 	void setLabelChangedToChildren();
 	void updateLabel(const QPropertyTree* tree, int index);
-	void parseControlCodes(const char* label, bool updateLabel);
+	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }

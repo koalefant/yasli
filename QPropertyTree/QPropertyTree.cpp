@@ -858,6 +858,8 @@ void QPropertyTree::updateHeights()
 	QElapsedTimer timer;
 	timer.start();
 
+	model()->root()->updateLabel(this, 0);
+
 	int lb = compact_ ? 0 : 4;
 	int rb = area_.width() - lb*2;
 	bool force = lb != leftBorder_ || rb != rightBorder_;

@@ -20,6 +20,7 @@ include_directories(.)
 add_subdirectory(yasli)
 add_subdirectory(yasli-example)
 add_subdirectory(yasli-test)
+add_subdirectory(yasli-sandbox)
 
 add_subdirectory(XMath)
 
