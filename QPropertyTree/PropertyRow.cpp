@@ -99,7 +99,7 @@ PropertyRow::PropertyRow(const char* name, const char* label, const char* typeNa
 void PropertyRow::init(const char* name, const char* label, const char* typeName)
 {
 	YASLI_ASSERT(name != 0);
-	YASLI_ASSERT(typeName);
+	YASLI_ASSERT(typeName != 0);
 
 	parent_ = 0;
 
@@ -107,7 +107,6 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
 	selected_ = false;
 	visible_ = true;
 	labelUndecorated_ = 0;
-	labelChanged_ = true;
     belongsToFilteredRow_ = false;
     matchFilter_ = true;
 	
@@ -119,7 +118,6 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
 	textHash_ = 0;
 	textSize_ = 0;
 	widgetPos_ = 0;
-	digestPos_ = 0;
     widgetSize_ = 0;
 	userWidgetSize_ = -1;
 	
@@ -136,6 +134,7 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
 	
 	label_ = label ? label : "";
 	labelChanged_ = true;
+	layoutChanged_ = true;
 }
 
 
@@ -158,10 +157,16 @@ const PropertyRow* PropertyRow::childByIndex(int index) const
 void PropertyRow::_setExpanded(bool expanded)
 {
     expanded_ = expanded;
-	Rows::iterator i;
-	for(i = children_.begin(); i != children_.end(); ++i)
-		if((*i)->pulledUp())
-			(*i)->_setExpanded(expanded);
+	int numChildren = children_.size();
+
+	for (int i = 0; i < numChildren; ++i) {
+		PropertyRow* child = children_[i];
+		child->layoutChanged_ = true;
+		if(child->pulledUp())
+			child->_setExpanded(expanded);
+	}
+
+	
 }
 
 struct SetExpandedOp {
@@ -311,20 +316,6 @@ void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 	row->setParent(this);
 }
 
-void PropertyRow::digestAppend(const wchar_t* text)
-{
-	if(text[0] != L'\0'){
-		if(!digest_.empty())
-			digest_ += L", ";
-		digest_ += text;
-	}
-}
-
-void PropertyRow::digestReset(const QPropertyTree* tree)
-{
-	digest_.clear();
-}
-
 yasli::wstring PropertyRow::valueAsWString() const
 {
     return toWideChar(valueAsString().c_str());
@@ -332,10 +323,7 @@ yasli::wstring PropertyRow::valueAsWString() const
 
 yasli::string PropertyRow::valueAsString() const
 {
-	if(!digest_.empty())
-		return yasli::string("( ") + fromWideChar(digest_.c_str()) + " )";
-	else
-		return "";
+	return yasli::string();
 }
 
 PropertyRow* PropertyRow::cloneChildren(PropertyRow* result, const PropertyRow* source) const
@@ -363,6 +351,7 @@ void PropertyRow::serialize(Archive& ar)
 	ar(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
 	if(ar.isInput()){
 		labelChanged_ = true;
+		layoutChanged_ = true;
 		PropertyRow::iterator it;
 		for(it = begin(); it != end(); ){
 			PropertyRow* row = *it;
@@ -385,21 +374,23 @@ bool PropertyRow::onActivate( QPropertyTree* tree, bool force)
 
 void PropertyRow::setLabelChanged() 
 { 
-	labelChanged_ = true;  
-	for(PropertyRow* row = parent(); row; row = row->parent())
+	for(PropertyRow* row = this; row != 0; row = row->parent())
 		row->labelChanged_ = true;
+}
+
+void PropertyRow::setLayoutChanged()
+{
+	layoutChanged_ = true;
 }
 
 void PropertyRow::setLabelChangedToChildren()
 {
-	labelChanged_ = true;
-
 	size_t numChildren = children_.size();
 	for (size_t i = 0; i < numChildren; ++i) {
+		children_[i]->labelChanged_ = true;
 		children_[i]->setLabelChangedToChildren();
 	}
 }
-
 
 void PropertyRow::setLabel(const char* label) 
 {
@@ -413,7 +404,11 @@ void PropertyRow::setLabel(const char* label)
 
 void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 {
-	digestReset(tree);
+	if (!labelChanged_) {
+		if (pulledUp_)
+		parent()->hasPulled_ = true;
+		return;
+	}
 
 	hasPulled_ = false;
 
@@ -429,19 +424,8 @@ void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());
 
-	yasli::string text = rowText(tree, index);
-	if(text.empty())
-		textSizeInitial_ = 0;
-	else{
-		unsigned hash = calcHash(text.c_str());
-		const QFont* font = rowFont(tree);
-		hash = calcHash(font, hash);
-		if(hash != textHash_){
-			QFontMetrics fm(*font);
-			textSizeInitial_ = fm.width(text.c_str()) + 3;
-			textHash_ = hash;
-		}
-	}
+	layoutChanged_ = true;
+	labelChanged_ = false;
 }
 
 struct ResetSerializerOp{
@@ -462,7 +446,6 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	userFixedWidget_ = false;
 	userWidgetSize_ = -1;
 
-	bool appendValueToDigest = false;
 	while(true){
 		if(*ptr == '^'){
 			if(parent() && !parent()->isRoot()){
@@ -490,8 +473,6 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 			}
 			continue;
 		}
-		else if(*ptr == '&')
-			appendValueToDigest = true;
 		else if(*ptr == '~'){
             ResetSerializerOp op;
             scanChildren(op);
@@ -524,8 +505,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	if (changeLabel)
 		labelUndecorated_ = ptr;
 
-	if (appendValueToDigest)
-		parent()->digestAppend(digestValue().c_str());
+	labelChanged();
 }
 
 const char* PropertyRow::typeNameForFilter() const
@@ -553,8 +533,9 @@ const char* PropertyRow::typeNameForFilter() const
 
 void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
-	//if(!labelChanged_ && !force)
-	//	return;
+	if (!layoutChanged_ && !force)
+		return;
+	layoutChanged_ = false;
 
 	plusSize_ = 0;
 	if(isRoot())
@@ -576,6 +557,22 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	}
 
 	widgetSize_ = widgetSizeMin();
+
+
+	yasli::string text = rowText(tree, index);
+	if(text.empty())
+		textSizeInitial_ = 0;
+	else{
+		unsigned hash = calcHash(text.c_str());
+		const QFont* font = rowFont(tree);
+		hash = calcHash(font, hash);
+		if(hash != textHash_){
+			QFontMetrics fm(*font);
+			textSizeInitial_ = fm.width(text.c_str()) + 3;
+			textHash_ = hash;
+		}
+	}
+
 	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
 
 	pos_.setX(posX);
@@ -694,8 +691,6 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		else if(nonPulled->expanded())
 			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
 	}
-
-	digestPos_ = posX;
 
 	if(!pulledUp())
 		size_.setX(tree->rightBorder() - pos_.x());
@@ -988,22 +983,6 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 		const QFont* font = rowFont(tree);
 		tree->_drawRowLabel(painter, text.c_str(), font, textRect(), textColor);
 	}
-
-	// drawing digest
-	if(!digest_.empty()){
-		int digestPos = digestPos_;
-		int width = 0;
-		if(widgetPlacement() != WIDGET_VALUE)
-			width = rowRect.right() - digestPos;
-		else
-			width = max(0, widgetPos_ - digestPos);
-
-		if(width > 0){
-			QRect digestRect(digestPos, pos_.y(), width, ROW_DEFAULT_HEIGHT);
-            painter.drawText(digestRect, 0, QString(fromWideChar(digest_.c_str()).c_str()), 0);
-		}
-	}
-
 }
 
 void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const

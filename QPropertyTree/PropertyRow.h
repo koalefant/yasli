@@ -169,8 +169,10 @@ public:
 	const char* labelUndecorated() const { return labelUndecorated_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
+	void setLayoutChanged();
 	void setLabelChangedToChildren();
 	void updateLabel(const QPropertyTree* tree, int index);
+	virtual void labelChanged() {}
 	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
@@ -281,11 +283,6 @@ public:
 		return cloneChildren(result, this);
 	}
 
-	const wchar_t* digest() const{ return digest_.c_str(); }
-	virtual yasli::wstring digestValue() const{ return valueAsWString(); }
-	virtual void digestReset(const QPropertyTree* tree);
-	void digestAppend(const wchar_t* text);
-
 	yasli::Serializer serializer() const{ return serializer_; }
     void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual void serializeValue(yasli::Archive& ar) {}
@@ -301,7 +298,6 @@ protected:
 	const char* labelUndecorated_;
 	const char* typeName_;
 	yasli::Serializer serializer_;
-	yasli::wstring digest_;
 	PropertyRow* parent_;
 	Rows children_;
 
@@ -311,6 +307,7 @@ protected:
 	bool expanded_ : 1;
 	bool selected_ : 1;
 	bool labelChanged_ : 1;
+	bool layoutChanged_ : 1;
 	bool userReadOnly_ : 1;
 	bool userReadOnlyRecurse_ : 1;
 	bool userFixedWidget_ : 1;
@@ -327,7 +324,6 @@ protected:
 	short int textPos_;
 	short int textSizeInitial_;
 	short int textSize_;
-	short int digestPos_;
 	short int widgetPos_; // widget == icon!
 	short int widgetSize_;
 	short int userWidgetSize_;

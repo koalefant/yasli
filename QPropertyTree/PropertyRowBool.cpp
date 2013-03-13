@@ -50,11 +50,6 @@ bool PropertyRowBool::onActivate(QPropertyTree* tree, bool force)
 		return false;
 }
 
-void PropertyRowBool::digestReset(const QPropertyTree* tree)
-{
-	digest_ = value_ ? toWideChar(labelUndecorated()) : L"";
-}
-
 void PropertyRowBool::serializeValue(yasli::Archive& ar)
 {
     ar(value_, "value", "Value");

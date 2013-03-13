@@ -833,6 +833,9 @@ void QPropertyTree::expandRow(PropertyRow* row, bool expanded)
 		hasChanges = true;
 	}
 
+	for (PropertyRow* r = row; r != 0; r = r->parent())
+		r->setLayoutChanged();
+
     if(!row->expanded()){
 		PropertyRow* f = model()->focusedRow();
 		while(f){
@@ -1172,6 +1175,20 @@ void QPropertyTree::clearMenuHandlers()
 	menuHandlers_.clear();
 }
 
+static yasli::string quoteIfNeeded(const char* str)
+{
+	if (strchr(str, ' ') != 0) {
+		yasli::string result;
+		result = "\"";
+		result += str;
+		result += "\"";
+		return result;
+	}
+	else {
+		return yasli::string(str);
+	}
+}
+
 bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 {
 	SharedPtr<PropertyRow> row(r);
@@ -1213,21 +1230,17 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 
 	QMenu* filter = menu.addMenu("Filter by");
 	{
-		yasli::string nameFilter = "\"";
-		nameFilter += row->labelUndecorated();
-		nameFilter += "\"";
+		yasli::string nameFilter = quoteIfNeeded(row->labelUndecorated());
 		handler->filterName = nameFilter;
 		connect(filter->addAction((yasli::string("Name:\t") + nameFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByName()));
 
-		yasli::string valueFilter = "=\"";
-		valueFilter += row->valueAsString();
-		valueFilter += "\"";
+		yasli::string valueFilter = "=";
+		valueFilter += quoteIfNeeded(row->valueAsString().c_str());
 		handler->filterValue = valueFilter;
 		connect(filter->addAction((yasli::string("Value:\t") + valueFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByValue()));
 
-		yasli::string typeFilter = ":\"";
-		typeFilter += row->typeNameForFilter();
-		typeFilter += "\"";
+		yasli::string typeFilter = ":";
+		typeFilter += quoteIfNeeded(row->typeNameForFilter());
 		handler->filterType = typeFilter;
 		connect(filter->addAction((yasli::string("Type:\t") + typeFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByType()));
 	}
@@ -1501,14 +1514,6 @@ bool QPropertyTree::selectByAddress(void* addr, bool keepSelectionIfChildSelecte
 		}
 	}
 	return false;
-}
-
-yasli::wstring generateDigest(Serializer& ser)
-{
-    PropertyTreeModel model;
-    PropertyOArchive oa(&model);
-    ser(oa);
-    return model.root()->digest();
 }
 
 void QPropertyTree::setUndoEnabled(bool enabled, bool full)

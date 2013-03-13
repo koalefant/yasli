@@ -33,11 +33,11 @@ void ContainerMenuHandler::onMenuAppendElement()
 	PropertyRow* defaultType = container->defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
 	PropertyRow* clonedRow = defaultType->clone();
-	clonedRow->setLabelChangedToChildren();
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
 	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
 	container->setMultiValue(false);
 	if(container->expanded())
 		tree->model()->selectRow(clonedRow, true);
@@ -59,6 +59,8 @@ void ContainerMenuHandler::onMenuAppendPointerByIndex()
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
+	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
 	container->setMultiValue(false);
 	PropertyRowPointer* pointer = static_cast<PropertyRowPointer*>(clonedRow);
 	if(container->expanded())
@@ -253,11 +255,9 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 	return defaultType;
 }
 
-void PropertyRowContainer::digestReset(const QPropertyTree* tree)
+void PropertyRowContainer::labelChanged()
 {
     swprintf(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
-
-    PropertyRow::digestReset(tree);
 }
 
 void PropertyRowContainer::serializeValue(yasli::Archive& ar)

@@ -99,8 +99,8 @@ void PropertyOArchive::closeStruct(const char* name)
 
 static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, const char* typeName, int startIndex)
 {
-	size_t count = rows.size();
-	for(size_t i = startIndex; i < count; ++i){
+	int count = int(rows.size());
+	for(int i = startIndex; i < count; ++i){
 		PropertyRow* row = rows[i];
 		if (!row)
 			continue;
@@ -110,7 +110,7 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 			return row;
 		}
 	}
-	for(size_t i = 0; i < startIndex; ++i){
+	for(int i = 0; i < startIndex; ++i){
 		PropertyRow* row = rows[i];
 		if (!row)
 			continue;
@@ -165,10 +165,15 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			if(model_->expandLevels() != 0 && (model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level()))
 				newRow->_setExpanded(true);
 		}
+		currentNode_->add(newRow);
 		if (newRow->label() != label)
 			newRow->setLabel(label);
+		else if (!oldRow) {
+			// for new rows we should mark all parents with labelChanged_
+			newRow->setLabelChanged();
+			newRow->setLabelChangedToChildren();
+		}
 		newRow->setValue(value);
-		currentNode_->add(newRow);
 		return newRow;
 	}
 }
@@ -197,11 +202,14 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 				newRow->_setExpanded(true);
 		}
 	}
+	currentNode_->add(newRow);
 	if (newRow->label() != label)
 		newRow->setLabel(label);
-	newRow->setValue(value);
-	currentNode_->add(newRow);
+	else if (!oldRow)
+		// for new rows we should mark all parents with labelChanged_
+		newRow->setLabelChanged();
 
+	newRow->setValue(value);
 	return newRow;
 }
 

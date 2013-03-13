@@ -31,6 +31,8 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 				row->cloneChildren(row, defaultValue->root);
 			}
 			row->setDerivedType(defaultValue->type, row->factory());
+			row->setLabelChanged();
+			row->setLabelChangedToChildren();
 			tree->expandRow(row);
 		}
 		else{
@@ -152,11 +154,6 @@ yasli::string PropertyRowPointer::valueAsString() const
 	else
 		result = derivedTypeName_;
 
-	if(digest()[0] != L'\0'){
-		result += " ( ";
-		result += fromWideChar(digest());
-		result += " )";
-	}
 	return result;
 }
 

@@ -27,7 +27,6 @@ public:
 	bool isStatic() const{ return false; }
 
 	bool onActivate(QPropertyTree* tree, bool force);
-	void digestReset(const QPropertyTree* tree);
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
     yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
     yasli::wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : yasli::wstring(); }

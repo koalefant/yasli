@@ -51,7 +51,7 @@ public:
 		return cloneChildren(result, this);
 	}
 
-	void digestReset(const QPropertyTree* tree);
+	void labelChanged() override;
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return userWidgetSize() == 0 ? false : true; }
 
