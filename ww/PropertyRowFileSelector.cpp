@@ -28,6 +28,7 @@ namespace ww{
 class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public has_slots{
 	bool locked_;
 public:
+	PropertyRowFileSelector() : locked_(false) {}
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);

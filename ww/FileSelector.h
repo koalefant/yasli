@@ -44,12 +44,13 @@ public:
 	, options_(0)
 	{
 	}
-	
-	FileSelector(const FileSelector& _original)
-	: fileNamePtr_(0)
-	, fileName_(_original.fileName_)
-	, options_(_original.options_)
+
+	FileSelector& operator=(const FileSelector& _original)
 	{
+		if (_original.fileNamePtr_)
+			options_ = _original.options_;
+		fileName_ = _original.fileName_;
+		return *this;
 	}
 
 	FileSelector(string& fileName, const Options& options)
@@ -64,10 +65,6 @@ public:
 			*fileNamePtr_ = fileName_;
 	}
 
-	FileSelector& operator=(const FileSelector& rhs){
-		fileName_ = rhs.fileName_;
-		return *this;
-	}
 	FileSelector& operator=(const char* rhs){
 		fileName_ = rhs;
 		return *this;

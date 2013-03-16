@@ -39,11 +39,6 @@ struct RadioDecorator{
 	, valuePtr_(0)
 	{
 	}
-	RadioDecorator(const RadioDecorator& original)
-	: value_(original.value_)
-	, valuePtr_(0)
-	{
-	}
 	RadioDecorator(bool& value)
 	: value_(value)
 	, valuePtr_(&value)

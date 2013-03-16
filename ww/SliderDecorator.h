@@ -30,15 +30,6 @@ public:
 	, step_(1.0f)
 	{}
 
-	SliderDecoratorf(const SliderDecoratorf& original)
-	: value_(original.value_)
-	, valuePointer_(0)
-	, minValue_(original.minValue_)
-	, maxValue_(original.maxValue_)
-	, step_(original.step_)
-	{
-	}
-
 	SliderDecoratorf(float& value, float _range_min, float _range_max, float _step = 0.f)
 	: value_(value)
 	, valuePointer_(&value)
@@ -56,6 +47,11 @@ public:
 	}
 	SliderDecoratorf& operator=(const SliderDecoratorf& rhs){
 		value_ = rhs.value_;
+		if (rhs.valuePointer_) {
+			minValue_ = rhs.minValue_;
+			maxValue_ = rhs.maxValue_;
+			step_ = rhs.step_;
+		}
 		return *this;
 	}
 	SliderDecoratorf& operator=(float value){
