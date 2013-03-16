@@ -24,8 +24,6 @@ class PropertyTreeModel;
 class PropertyRowStringListValue : public PropertyRowImpl<StringListValue, PropertyRowStringListValue>{
 public:
 	enum { Custom = true };
-	PropertyRowStringListValue(const char* name = "", const char* nameAlt = "", const StringListValue& value = StringListValue());
-	PropertyRowStringListValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);
@@ -40,8 +38,6 @@ public:
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>{
 public:
 	enum { Custom = false };
-	PropertyRowStringListStaticValue(const char* name = "", const char* nameAlt = "", const StringListStaticValue& value = StringListStaticValue());
-	PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 
 	// virtuals:
 	PropertyRowWidget* createWidget(PropertyTree* tree);

@@ -98,6 +98,7 @@ PropertyTree::PropertyTree(int border)
 , attachedPropertyTree_(0)
 , autoRevert_(true)
 , needUpdate_(true)
+, capturedRow_(0)
 , leftBorder_(0)
 , rightBorder_(0)
 , filterMode_(false)
@@ -129,7 +130,6 @@ PropertyTree::~PropertyTree()
 
 void PropertyTree::update()
 {
-	needUpdate_ = true;
 	::InvalidateRect(impl()->handle(), 0, FALSE);
 }
 
@@ -215,21 +215,21 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 			selectedRow = model()->focusedRow();
 		}
 		break;
+	case KEY_HOME:
+		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
+		break;
 	case KEY_HOME | KEY_MOD_CONTROL:
 		selectedRow = model()->root()->rowByVerticalIndex(this, 0);
 		if (selectedRow)
 			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
+	case KEY_END:
+		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
+		break;
 	case KEY_END | KEY_MOD_CONTROL:
 		selectedRow = model()->root()->rowByVerticalIndex(this, INT_MAX);
 		if (selectedRow)
 			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-		break;
-	case KEY_HOME:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
-		break;
-	case KEY_END:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		break;
 	case KEY_SPACE:
 		if (filterWhenType_)
@@ -250,6 +250,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, KeyPress key)
 
 bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
+	pressPoint_ = point;
 	row = model()->root()->hit(this, point);
 	if(row){
 		if(!row->isRoot() && row->plusRect().pointInside(point) && impl()->toggleRow(row))
@@ -283,8 +284,13 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Vect2 point)
 {
 	row->onMouseUp(this, point);
+
 	if(GetCapture() == _window()->handle())
 		ReleaseCapture();
+
+	if ((pressPoint_ - point).length() < 1 && row->widgetRect().pointInside(point)) {
+		row->onActivateRelease(this);
+	}
 }
 
 void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 point)
@@ -310,6 +316,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Vect2 poi
 
 void PropertyTree::expandParents(PropertyRow* row)
 {
+	bool hasChanges = false;
 	typedef std::vector<PropertyRow*> Parents;
 	Parents parents;
 	PropertyRow* p = row->nonPulledParent()->parent();
@@ -318,8 +325,15 @@ void PropertyTree::expandParents(PropertyRow* row)
 		p = p->parent();
 	}
 	Parents::iterator it;
-	for(it = parents.begin(); it != parents.end(); ++it)
-		expandRow(*it, true);
+	for(it = parents.begin(); it != parents.end(); ++it) {
+		PropertyRow* row = *it;
+		if (!row->expanded()) {
+			row->_setExpanded(true);
+			hasChanges = true;
+		}
+	}
+	if (hasChanges)
+		updateHeights();
 }
 
 void PropertyTree::expandAll(PropertyRow* root)
@@ -327,14 +341,14 @@ void PropertyTree::expandAll(PropertyRow* root)
 	if(!root){
 		root = model()->root();
 		PropertyRow::iterator it;
-		FOR_EACH(*root, it){
+		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
 			PropertyRow* row = *it;
 			row->setExpandedRecursive(this, true);
 		}
 	}
 	else
 		root->setExpandedRecursive(this, true);
-	update();
+	updateHeights();
 }
 
 void PropertyTree::collapseAll(PropertyRow* root)
@@ -342,7 +356,7 @@ void PropertyTree::collapseAll(PropertyRow* root)
 	if(!root){
 		root = model()->root();
 		PropertyRow::iterator it;
-		FOR_EACH(*root, it){
+		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
 			PropertyRow* row = *it;
 			row->setExpandedRecursive(this, false);
 		}
@@ -363,9 +377,16 @@ void PropertyTree::collapseAll(PropertyRow* root)
 }
 
 
-void PropertyTree::expandRow(PropertyRow* row, bool expanded)
+void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
 {
+	bool hasChanges = false;
+	if (row->expanded() != expanded) {
 	row->_setExpanded(expanded);
+		hasChanges = true;
+	}
+
+	for (PropertyRow* r = row; r != 0; r = r->parent())
+		r->setLayoutChanged();
 
     if(!row->expanded()){
 		PropertyRow* f = model()->focusedRow();
@@ -377,7 +398,9 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded)
 			f = f->parent();
 		}
 	}
-	needUpdate_ = true;
+
+	if (hasChanges && updateHeights)
+		this->updateHeights();
 }
 
 void PropertyTree::interruptDrag()
@@ -387,18 +410,18 @@ void PropertyTree::interruptDrag()
 
 void PropertyTree::updateHeights()
 {
-	needUpdate_ = false;
-
+	model()->root()->updateLabel(this, 0);
 	int lb = compact_ ? 0 : 4;
 	int rb = impl()->area_.size().x - lb*2;
 	bool force = lb != leftBorder() || rb != rightBorder();
 	leftBorder_ = lb;
 	rightBorder_ = rb;
-	model()->root()->calculateMinimalSize(this, leftBorder(), force);
+	model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
 
 	impl()->size_.y = 0;
-	model()->root()->adjustRect(this, impl()->size_.y);
+	model()->root()->adjustVerticalPosition(this, impl()->size_.y);
 	impl()->updateScrollBar();
+	update();
 }
 
 Vect2 PropertyTree::treeSize() const
@@ -409,12 +432,6 @@ Vect2 PropertyTree::treeSize() const
 void PropertyTree::serialize(Archive& ar)
 {
 	__super::serialize(ar);
-
-	if(ar.filter(SERIALIZE_DESIGN)){
-		//ar(model_, "model", "Model");
-		if(ar.isInput())
-			update();
-	}
 	if(ar.filter(SERIALIZE_STATE)){
 		bool focused = hasFocus();
 		ar(focused, "focused", 0);
@@ -458,13 +475,6 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 	signalSelected_.emit();
 }
 
-void PropertyTree::attach(const Serializer& serializer)
-{
-	attached_.clear();
-	attached_.push_back(serializer);
-	revert();
-}
-
 void PropertyTree::attach(const Serializers& serializers)
 {
 
@@ -477,6 +487,14 @@ void PropertyTree::attach(const Serializers& serializers)
 	revert();
 }
 
+void PropertyTree::attach(const Serializer& serializer)
+{
+	attached_.clear();
+	attached_.push_back(serializer);
+	revert();
+}
+
+
 void PropertyTree::detach()
 {
 	if(widget_)
@@ -488,19 +506,21 @@ void PropertyTree::detach()
 
 void PropertyTree::revertChanged(bool enforce)
 {
-	PropertyOArchive oa(model_);
+	PropertyOArchive oa(model_, model_->root());
 	oa.setFilter(filter_);
 
 	Serializers::iterator it = attached_.begin();
-	oa(*it, "", "");
+	(*it)(oa);
 	while(++it != attached_.end()){
 		PropertyTreeModel model2;
-		PropertyOArchive oa2(&model2);
+		PropertyOArchive oa2(&model2, model_->root());
 		Archive::Context<ww::PropertyTree> treeContext(oa2, this);
 		oa2.setFilter(filter_);
-		oa2(*it, "", "");
+		(*it)(oa2);
 		model_->root()->intersect(model2.root());
 	}
+
+	updateHeights();
 }
 
 void PropertyTree::revert()
@@ -516,7 +536,7 @@ void PropertyTree::revert()
 
 	if (filterMode_) {
 		if (model_->root())
-			model_->root()->updateLabel(this);		
+			model_->root()->updateLabel(this, 0);
 		onFilterChanged();
 	}
 
@@ -535,12 +555,14 @@ void PropertyTree::applyChanged(bool enforce)
 	if (!attached_.empty()) {
 		Serializers::iterator it;
 		FOR_EACH(attached_, it) {
-			PropertyIArchive ia(model_);
+			PropertyIArchive ia(model_, model_->root());
  			Archive::Context<ww::PropertyTree> treeContext(ia, this);
  			ia.setFilter(filter_);
-			ia(*it, "", "");
+			(*it)(ia);
 		}
 	}
+
+	updateHeights();
 }
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -561,6 +583,22 @@ bool PropertyTree::activateRow(PropertyRow* row)
 {
 	interruptDrag();
 	return row->onActivate(this, false);
+}
+
+
+
+static wstring quoteIfNeeded(const wchar_t* str)
+{
+	if (wcschr(str, L' ') != 0) {
+		wstring result;
+		result = L"\"";
+		result += str;
+		result += L"\"";
+		return result;
+	}
+	else {
+		return wstring(str);
+	}
 }
 
 bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
@@ -597,19 +635,15 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	menu.addSeparator();
 	PopupMenuItem& filter = menu.add("Filter by");
 	{
-		wstring nameFilter = L"\"";
-		nameFilter += toWideChar(r->labelUndecorated());
-		nameFilter += L"\"";
+		wstring nameFilter = quoteIfNeeded(toWideChar(row->labelUndecorated()).c_str());
 		filter.add((wstring(L"Name:\t") + nameFilter).c_str(), nameFilter).connect(this, &PropertyTree::startFilter);
 
-		wstring valueFilter = L"=\"";
-		valueFilter += r->valueAsWString();
-		valueFilter += L"\"";
+		wstring valueFilter = L"=";
+		valueFilter += quoteIfNeeded(toWideChar(row->valueAsString().c_str()).c_str());
 		filter.add((wstring(L"Value:\t") + valueFilter).c_str(), valueFilter).connect(this, &PropertyTree::startFilter);
 
-		wstring typeFilter = L":\"";
-		typeFilter += toWideChar(r->typeNameForFilter());
-		typeFilter += L"\"";
+		wstring typeFilter = L":";
+		typeFilter += quoteIfNeeded(toWideChar(row->typeNameForFilter()).c_str());
 		filter.add((wstring(L"Type:\t") + typeFilter).c_str(), typeFilter).connect(this, &PropertyTree::startFilter);
 	}
 #if 0
@@ -689,14 +723,14 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows)
 
 	if (immediateUpdate_) {
 		applyChanged(true);
-			rows.front()->calculateMinimalSize(this, rows.front()->pos().x, true); 
+			rows.front()->calculateMinimalSize(this, rows.front()->pos().x, true, 0, 0); 
 		signalChanged_.emit();
 		if (autoRevert_)
 			revert();
 	}
 
 	setFocus();
-	update();
+	updateHeights();
 
 	updateAttachedPropertyTree();
 	if(!immediateUpdate_)
@@ -729,6 +763,7 @@ void PropertyTree::setWidget(PropertyRowWidget* widget)
 		_arrangeChildren();
 	}
 }
+
 
 void PropertyTree::setFilterMode(bool inFilterMode)
 {
@@ -865,14 +900,6 @@ bool PropertyTree::selectByAddress(void* addr, bool keepSelectionIfChildSelected
 	return false;
 }
 
-wstring generateDigest(Serializer& ser)
-{
-    PropertyTreeModel model;
-    PropertyOArchive oa(&model);
-    ser(oa);
-    return model.root()->digest();
-}
-
 void PropertyTree::setUndoEnabled(bool enabled, bool full)
 {
 	undoEnabled_ = enabled; fullUndo_ = full;
@@ -892,7 +919,7 @@ void PropertyTree::attachPropertyTree(PropertyTree* propertyTree)
 void PropertyTree::getSelectionSerializers(Serializers* serializers)
 {
 		TreeSelection::const_iterator i;
-		FOR_EACH(model()->selection(), i){
+		for(i = model()->selection().begin(); i != model()->selection().end(); ++i){
 			PropertyRow* row = model()->rowFromPath(*i);
 			if (!row)
 				continue;
@@ -978,21 +1005,25 @@ struct FilterVisitor
 			else {
 				markChildrenAsBelonging(row, true);
 				row->setBelongsToFilteredRow(false);
+				row->setLayoutChanged();
+				row->setLabelChanged();
 			}
 		}
 		else {
 			bool belongs = hasMatchingChildren(row);
 			row->setBelongsToFilteredRow(belongs);
 			if (belongs) {
-				tree->expandRow(row);
+				tree->expandRow(row, true, false);
 				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
 					if (child->pulledUp())
 						child->setBelongsToFilteredRow(true);
 				}
 			}
-			else 
+			else {
 				row->_setExpanded(false);
+				row->setLayoutChanged();
+			}
 		}
 
 		row->setMatchFilter(matchFilter);
@@ -1142,8 +1173,7 @@ void PropertyTree::onFilterChanged()
 	rowFilter_.parse(filterStr);
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
-	needUpdate_ = true;
-	::InvalidateRect(impl()->handle(), 0, FALSE);
+	updateHeights();
 }
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
@@ -1212,5 +1242,18 @@ void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdi
 	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }
 
+bool PropertyTree::_isDragged(const PropertyRow* row) const
+{
+	if (!impl()->drag_.isDragging())
+		return false;
+	if (impl()->drag_.draggedRow() == row)
+		return true;
+	return false;
+}
+
+bool PropertyTree::_isCapturedRow(const PropertyRow* row) const
+{
+	return capturedRow_ == row;
+}
 }
 // vim:ts=4 sw=4:

@@ -55,14 +55,18 @@ protected:
 
 //YASLI_CLASS(PropertyRow, PropertyRowBitVector, "BitVector");
 
-PropertyRowBitVector::PropertyRowBitVector(const char* name, const char* label, const BitVectorWrapper& wrapper)
-: PropertyRowImpl(name, label, wrapper)
-, description_(wrapper.description)
-, flags_(wrapper.value)
+PropertyRowBitVector::PropertyRowBitVector()
+: description_(0)
+, flags_(0)
+{
+	
+}
+
+void PropertyRowBitVector::setValue(const BitVectorWrapper& wrapper)
 {
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);
-		joinStringList(&value_, values, '|');
+		joinStringList(&valueText_, values, '|');
 		StringListStatic labels = description_->labelCombination(flags_);
 		joinStringList(&valueAlt_, labels, '|');
 	}
@@ -73,29 +77,6 @@ PropertyRowBitVector::PropertyRowBitVector(const char* name, const char* label, 
 	}
 }
 
-PropertyRowBitVector::PropertyRowBitVector(void* object, size_t _size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<BitVectorWrapper, PropertyRowBitVector>(object, _size, name, label, typeName)
-, description_(0)
-, flags_(0)
-{
-	YASLI_ESCAPE(_size == sizeof(BitVectorWrapper), return);
-	BitVectorWrapper* wrapper = reinterpret_cast<BitVectorWrapper*>(object);
-	YASLI_ESCAPE(wrapper != 0, return);
-	description_ = wrapper->description;
-	YASLI_ESCAPE(description_ != 0, return);
-	flags_ = wrapper->value;
-	if(description_){
-		StringListStatic values = description_->nameCombination(flags_);
-		joinStringList(&value_, values, '|');
-		StringListStatic labels = description_->labelCombination(flags_);
-		joinStringList(&valueAlt_, labels, '|');
-	}
-	else{
-		typeName_ = "";
-		//value_ = "";
-		valueAlt_ = "";
-	}
-}
 
 bool PropertyRowBitVector::assignTo(void* object, size_t size)
 {

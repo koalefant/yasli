@@ -22,21 +22,12 @@
 #include "ww/PropertyRowNumeric.h"
 #include "ww/PropertyRowString.h"
 #include "ww/PropertyRowStringListValue.h"
+#include "ww/PropertyRowObject.h"
 
 #include "yasli/ClassFactory.h"
 #include "gdiplusUtils.h"
 
 namespace ww{
-
-void setUpdatedRecurse(PropertyRow* row, bool updated)
-{
-	row->setUpdated(updated);
-	PropertyRow::iterator it;
-	FOR_EACH(*row, it){
-		PropertyRow* row = static_cast<PropertyRow*>(&**it);
-		setUpdatedRecurse(row, updated);
-	}
-}
 
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 : Archive(OUTPUT | EDIT)
@@ -47,10 +38,11 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 , defaultValueCreationMode_(false)
 , rootNode_(root)
 {
+	stack_.push_back(Level());
 	YASLI_ASSERT(model != 0);
 	if(!rootNode()->empty()){ 
-		updateMode_ = true; // hit performance
-		setUpdatedRecurse(rootNode(), false);
+		updateMode_ = true;
+		stack_.back().oldRows.swap(rootNode()->children_);
 	}
 }
 
@@ -65,6 +57,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 , defaultValueCreationMode_(forDefaultType)
 , rootNode_(0)
 {
+	stack_.push_back(Level());
 }
 
 PropertyOArchive::~PropertyOArchive()
@@ -77,6 +70,7 @@ PropertyRow* PropertyOArchive::rootNode()
 		return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
+		YASLI_ASSERT(model_->root());
 		return model_->root();
 	}
 }
@@ -84,94 +78,136 @@ PropertyRow* PropertyOArchive::rootNode()
 void PropertyOArchive::enterNode(PropertyRow* row)
 {
 	currentNode_ = row;
+
+	stack_.push_back(Level());
+	stack_.back().oldRows.swap(row->children_);
+	row->children_.reserve(stack_.back().oldRows.size());	
 }
 
 void PropertyOArchive::closeStruct(const char* name)
 {
+	stack_.pop_back();
+
 	if(currentNode_){
 		lastNode_ = currentNode_;
 		currentNode_ = currentNode_->parent();
-		if(lastNode_ && updateMode_){
-			PropertyRow::iterator it;
-			for(it = lastNode_->begin(); it != lastNode_->end();){
-				PropertyRow* row = static_cast<PropertyRow*>(&**it);
-				if(!row->updated())
-					it = lastNode_->erase(it);
-				else
-					++it;
-			}
-		}
-		lastNode_->setLabelChanged();
 	}
 }
 
-PropertyRow* PropertyOArchive::addRow(SharedPtr<PropertyRow> newRow, bool block, PropertyRow* previousNode)
+static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, const char* typeName, int startIndex)
 {
-    YASLI_ESCAPE(newRow, return 0);
-	const char* label = newRow->label();
-	if(!previousNode) // FIXME перенести в место вызова
-		previousNode = lastNode_;
+	int count = int(rows.size());
+	for(int i = startIndex; i < count; ++i){
+		PropertyRow* row = rows[i];
+		if (!row)
+			continue;
+		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
+		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
+		    *index = (int)i;
+			return row;
+		}
+			}
+	for(int i = 0; i < startIndex; ++i){
+		PropertyRow* row = rows[i];
+		if (!row)
+			continue;
+		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
+		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
+		    *index = (int)i;
+			return row;
+		}
+	}
+	return 0;
+}
 
-	PropertyRow* result = 0;
+template<class RowType, class ValueType>
+RowType* PropertyOArchive::updateRow(const char* name, const char* label, const char* typeName, const ValueType& value)
+{
+	SharedPtr<RowType> newRow;
 	if(currentNode_ == 0){
+		if (rootNode_)
+			newRow = static_cast<RowType*>(rootNode_.get());
+		else		
+			newRow.reset(new RowType());
+		newRow->setNames(name, label, typeName);
 		if(updateMode_){
-			newRow->swapChildren(rootNode());
-			newRow->setParent(0);
-				model_->setRoot(newRow);
-			newRow->setUpdated(true);
-			newRow->setLabel(label);
-			result = newRow;
+			model_->setRoot(newRow);
+			return newRow;
 		}
 		else{
 			if(defaultValueCreationMode_)
 				rootNode_ = newRow;
 			else
 				model_->setRoot(newRow);
-			result = newRow;
+			newRow->setValue(value);
+			return newRow;
 		}
-		return result;
 	}
 	else{
-		if(updateMode_ || block){
-			PropertyRow* row = currentNode_->find(newRow->name(), 0, newRow->typeName(), !block);
 
-			// we need this to preserve order
-			if(row && previousNode && previousNode->parent() == currentNode_){
-				if(currentNode_->childIndex(row) != currentNode_->childIndex(previousNode) + 1){
-					//newRow = row;
-					currentNode_->erase(row);
-					row = 0;
-				}
-			}
+		int rowIndex;
+		PropertyRow* oldRow = findRow(&rowIndex, stack_.back().oldRows, name, typeName, stack_.back().rowIndex);
 
-			if(row){
-				currentNode_->replaceAndPreserveState(row, newRow);
-				newRow->setUpdated(true);
-				YASLI_ASSERT(newRow->parent() == currentNode_);
-				result = newRow;
-				result->setLabel(label);
-			}
-			else{
-				if(model_->expandLevels() != 0){
-					if(model_->expandLevels() == -1 ||
-						 model_->expandLevels() >= currentNode_->level())
-						newRow->_setExpanded(true);
-				}
-				result = currentNode_->add(&*newRow, previousNode);
-				result->setLabel(label);
-				newRow->setUpdated(true);
-			}
+		if(oldRow){
+			newRow = static_cast<RowType*>(oldRow);
+			stack_.back().oldRows[rowIndex] = 0;
+			stack_.back().rowIndex = rowIndex + 1;
 		}
 		else{
-            if(model_->expandLevels() != 0){
-                if(model_->expandLevels() == -1 ||
-                   model_->expandLevels() >= currentNode_->level())
-                    newRow->_setExpanded(true);
-            }
-			result = currentNode_->add(&*newRow);
+			//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
+			PropertyRowFactory& factory = PropertyRowFactory::the();
+			newRow = static_cast<RowType*>(factory.create(typeName));
+			if(!newRow)
+				newRow.reset(new RowType());
+
+			if(model_->expandLevels() != 0 && (model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level()))
+				newRow->_setExpanded(true);
 		}
-		return result;
+		newRow->setNames(name, label, typeName);
+		currentNode_->add(newRow);
+		if (!oldRow) {
+			// for new rows we should mark all parents with labelChanged_
+			newRow->setLabelChanged();
+			newRow->setLabelChangedToChildren();
+		}
+		newRow->setValue(value);
+		return newRow;
 	}
+}
+
+template<class RowType, class ValueType>
+PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value)
+{
+	SharedPtr<RowType> newRow;
+
+	if(currentNode_ == 0)
+		return 0;
+
+	int rowIndex;
+	PropertyRow* oldRow = findRow(&rowIndex, stack_.back().oldRows, name, typeName, stack_.back().rowIndex);
+
+	if(oldRow){
+		newRow.reset(static_cast<RowType*>(oldRow));
+		stack_.back().oldRows[rowIndex] = 0;
+		stack_.back().rowIndex = rowIndex + 1;
+	}
+	else{
+		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
+		newRow = new RowType();
+		newRow->setNames(name, label, typeName);
+		if(model_->expandLevels() != 0){
+			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
+				newRow->_setExpanded(true);
+		}
+	}
+	newRow->setNames(name, label, typeName);
+	currentNode_->add(newRow);
+	if (!oldRow)
+		// for new rows we should mark all parents with labelChanged_
+		newRow->setLabelChanged();
+
+	newRow->setValue(value);
+	return newRow;
 }
 
 bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const char* label)
@@ -179,21 +215,16 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const
     const char* typeName = ser.type().name();
     size_t size = ser.size();
 
-	PropertyRowFactory& factory = PropertyRowFactory::the();
-	SharedPtr<PropertyRow> row = factory.create(typeName, PropertyRowArg(ser.pointer(), size, name, label, typeName));
- 	if(!row)
-		row = new PropertyRow(name, label, ser);
-	
+	lastNode_ = currentNode_;
+	PropertyRow* row = updateRow<PropertyRow>(name, label, typeName, ser);
 	if(!row->isLeaf() || currentNode_ == 0){
-		SharedPtr<PropertyRow> previousRow = lastNode_;
-		lastNode_ = currentNode_;
-		enterNode(addRow(row, false, previousRow));
+		enterNode(row);
 
 		if(currentNode_->isLeaf())
 			return false;
 	}
 	else{
-		lastNode_ = addRow(row);
+		lastNode_ = row;
 		return true;
 	}
 
@@ -206,25 +237,25 @@ bool PropertyOArchive::operator()(const Serializer& ser, const char* name, const
 
 bool PropertyOArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowString(name, label, value.get()));
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get());
 	return true;
 }
 
 bool PropertyOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowString(name, label, value.get()));
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get());
 	return true;
 }
 
 bool PropertyOArchive::operator()(bool& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowBool(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowBool>(name, label, "bool", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<char>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<char> >(name, label, "char", value);
 	return true;
 }
 
@@ -232,31 +263,31 @@ bool PropertyOArchive::operator()(char& value, const char* name, const char* lab
 
 bool PropertyOArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed char>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<signed char> >(name, label, "signed char", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed short>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<signed short> >(name, label, "short", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed int& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed int>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<signed int> >(name, label, "int", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(signed long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<signed long>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<signed long> >(name, label, "long", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(long long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<long long>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<long long> >(name, label, "long long", value);
 	return true;
 }
 
@@ -264,31 +295,31 @@ bool PropertyOArchive::operator()(long long& value, const char* name, const char
 
 bool PropertyOArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned char>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<unsigned char> >(name, label, "unsigned char", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned short>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<unsigned short> >(name, label, "unsigned short", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned int>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<unsigned int> >(name, label, "unsigned int", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned long>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<unsigned long> >(name, label, "unsigned long", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<unsigned long long>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<unsigned long long> >(name, label, "unsigned long long", value);
 	return true;
 }
 
@@ -296,13 +327,13 @@ bool PropertyOArchive::operator()(unsigned long long& value, const char* name, c
 
 bool PropertyOArchive::operator()(float& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<float>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<float> >(name, label, "float", value);
 	return true;
 }
 
 bool PropertyOArchive::operator()(double& value, const char* name, const char* label)
 {
-	lastNode_ = addRow(new PropertyRowNumeric<double>(name, label, value));
+	lastNode_ = updateRowPrimitive<PropertyRowNumeric<double> >(name, label, "double", value);
 	return true;
 }
 
@@ -311,22 +342,20 @@ bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, con
 {
 	const char* elementTypeName = ser.type().name();
 	bool fixedSizeContainer = ser.isFixedSize();
-	PropertyRow* container = new PropertyRowContainer(name, label, ser.type().name(), elementTypeName, fixedSizeContainer);
 	lastNode_ = currentNode_;
-	enterNode(addRow(container, false));
+	enterNode(updateRow<PropertyRowContainer>(name, label, ser.type().name(), ser));
 
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
 		ar.setFilter(getFilter());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
-		ser.serializeNewElement(ar, "default", "[+]");
+		ser.serializeNewElement(ar, "", "0");
 		if (ar.rootNode() != 0)
 			model_->addDefaultType(ar.rootNode(), ser.type().name());
 	}
 
 	if ( ser.size() > 0 )
-		while( true )
-		{
+		while( true ) {
 			ser(*this, "", "<");
 			if ( !ser.next() )
 				break;
@@ -339,12 +368,11 @@ bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, con
 bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const char *label)
 {
 	lastNode_ = currentNode_;
-	PropertyRow* row = new PropertyRowPointer(name, label, ptr);
-	enterNode(addRow(row));
-
+	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
+	enterNode(row);
 	{
 		TypeID baseType = ptr.baseType();
-		yasli::ClassFactoryBase* factory = ptr.factory();
+		ClassFactoryBase* factory = ptr.factory();
 		size_t count = factory->size();		
 
 		const char* nullLabel = factory->nullLabel();
@@ -385,21 +413,28 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
-	currentNode_->setLabelChanged();
 	closeStruct(name);
 	return true;
 }
 
 bool PropertyOArchive::operator()(Object& obj, const char *name, const char *label)
 {
-	return false;
+	const char* typeName = obj.type().name();
+
+	PropertyRowObject* row = 0;
+	if (typeName_.empty())
+		 row = updateRow<PropertyRowObject>(name, label, obj.type().name(), obj);
+	else
+		 row = updateRow<PropertyRowObject>(name, label, obj.type().name(), obj);
+	lastNode_ = row;
+	return true;
 }
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
-	PropertyRow* row = new PropertyRow(label, label, "");
+	PropertyRow* row = updateRow<PropertyRow>(label, label, "block", Serializer());
 	lastNode_ = currentNode_;
-	enterNode(addRow(row, true));
+	enterNode(row);
 	return true;
 }
 

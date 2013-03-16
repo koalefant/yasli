@@ -89,16 +89,6 @@ protected:
 	SharedPtr<ComboBox> comboBox_;
 };
 
-PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const char* label, const StringListValue& value)
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(name, label, value)
-{
-}
-
-PropertyRowStringListValue::PropertyRowStringListValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(object, size, name, label, typeName)
-{
-}
-
 PropertyRowWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
 {
 	return new PropertyRowWidgetStringListValue(this, tree->model());
@@ -106,16 +96,6 @@ PropertyRowWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
 
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
-
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* name, const char* label, const StringListStaticValue& value)
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(name, label, value)
-{
-}
-
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(object, size, name, label, typeName)
-{
-}
 
 PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
 {

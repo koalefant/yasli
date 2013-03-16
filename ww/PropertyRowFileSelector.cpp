@@ -28,8 +28,6 @@ namespace ww{
 class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public has_slots{
 	bool locked_;
 public:
-	PropertyRowFileSelector(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
-	PropertyRowFileSelector() {}
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);
@@ -55,12 +53,6 @@ public:
 			value_ = fileName.c_str();
 	}
 };
-
-
-PropertyRowFileSelector::PropertyRowFileSelector(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<FileSelector, PropertyRowFileSelector>(object, size, name, nameAlt, typeName), locked_(false)
-{
-}
 
 bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 {

@@ -17,6 +17,7 @@
 #include "ww/PropertyRowPointer.h"
 #include "ww/PropertyRowString.h"
 #include "ww/PropertyRowBool.h"
+#include "ww/PropertyRowObject.h"
 
 namespace ww{
 
@@ -27,6 +28,8 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 , lastNode_(0)
 , root_(root)
 {
+	stack_.push_back(Level());
+
 	if (!root_)
 		root_ = model_->root();
 	else
@@ -36,7 +39,7 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 bool PropertyIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_);
+		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
  		value.set(fromWideChar(row->value().c_str()).c_str());
 		closeRow(name);
 		return true;
@@ -48,8 +51,9 @@ bool PropertyIArchive::operator()(StringInterface& value, const char* name, cons
 bool PropertyIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
-		PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_);
+		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_)) {
 		value.set(row->value().c_str());
+		}
 		closeRow(name);
 		return true;
 	}
@@ -59,7 +63,7 @@ bool PropertyIArchive::operator()(WStringInterface& value, const char* name, con
 
 bool PropertyIArchive::operator()(bool& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<bool>().name())){
+	if(openRow(name, label, "bool")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -70,7 +74,7 @@ bool PropertyIArchive::operator()(bool& value, const char* name, const char* lab
 
 bool PropertyIArchive::operator()(char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<char>().name())){
+	if(openRow(name, label, "char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -82,7 +86,7 @@ bool PropertyIArchive::operator()(char& value, const char* name, const char* lab
 // Signed types
 bool PropertyIArchive::operator()(signed char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed char>().name())){
+	if(openRow(name, label, "signed char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -93,7 +97,7 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed short>().name())){
+	if(openRow(name, label, "short")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -104,7 +108,7 @@ bool PropertyIArchive::operator()(signed short& value, const char* name, const c
 
 bool PropertyIArchive::operator()(signed int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed int>().name())){
+	if(openRow(name, label, "int")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -115,7 +119,7 @@ bool PropertyIArchive::operator()(signed int& value, const char* name, const cha
 
 bool PropertyIArchive::operator()(signed long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<signed long>().name())){
+	if(openRow(name, label, "long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -126,7 +130,7 @@ bool PropertyIArchive::operator()(signed long& value, const char* name, const ch
 
 bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<long long>().name())){
+	if(openRow(name, label, "long long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -138,7 +142,7 @@ bool PropertyIArchive::operator()(long long& value, const char* name, const char
 // Unsigned types
 bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned char>().name())){
+	if(openRow(name, label, "unsigned char")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -149,7 +153,7 @@ bool PropertyIArchive::operator()(unsigned char& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned short>().name())){
+	if(openRow(name, label, "unsigned short")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -160,7 +164,7 @@ bool PropertyIArchive::operator()(unsigned short& value, const char* name, const
 
 bool PropertyIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned int>().name())){
+	if(openRow(name, label, "unsigned int")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -171,7 +175,7 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 
 bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned long>().name())){
+	if(openRow(name, label, "unsigned long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -182,7 +186,7 @@ bool PropertyIArchive::operator()(unsigned long& value, const char* name, const 
 
 bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<unsigned long long>().name())){
+	if(openRow(name, label, "unsigned long long")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -193,7 +197,7 @@ bool PropertyIArchive::operator()(unsigned long long& value, const char* name, c
 
 bool PropertyIArchive::operator()(float& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<float>().name())){
+	if(openRow(name, label, "float")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -204,7 +208,7 @@ bool PropertyIArchive::operator()(float& value, const char* name, const char* la
 
 bool PropertyIArchive::operator()(double& value, const char* name, const char* label)
 {
-	if(openRow(name, label, TypeID::get<double>().name())){
+	if(openRow(name, label, "double")){
 		currentNode_->assignTo(value);
 		closeRow(name);
 		return true;
@@ -227,6 +231,8 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
 		size = ser.resize(size);
 	}
 
+	stack_.push_back(Level());
+
 	size_t index = 0;
     if(ser.size() > 0)
         while(index < size)
@@ -235,6 +241,8 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
             ser.next();
 			++index;
         }
+
+	stack_.pop_back();
 
     closeRow(name);
 	return true;
@@ -252,7 +260,11 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const
 	else
 		return false;
 
+	stack_.push_back(Level());
+
 	ser(*this);
+
+	stack_.pop_back();
 
 	closeRow(name);
 	return true;
@@ -264,8 +276,13 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
     const char* baseName = ser.baseType().name();
 
 	if(openRow(name, label, baseName)){
+		if (!currentNode_->isPointer()) {
+			closeRow(name);
+			return false;
+		}
+
 		YASLI_ASSERT(currentNode_);
-		PropertyRowPointer* row = dynamic_cast<PropertyRowPointer*>(currentNode_);
+		PropertyRowPointer* row = static_cast<PropertyRowPointer*>(currentNode_);
         if(!row){
             closeRow(name);
 			return false;
@@ -275,8 +292,12 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
     else
         return false;
 
+	stack_.push_back(Level());
+
     if(ser.get() != 0)
         ser.serializer()( *this );
+
+	stack_.pop_back();
 
 	closeRow(name);
     return true;
@@ -284,6 +305,16 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
 
 bool PropertyIArchive::operator()(Object& obj, const char* name, const char* label)
 {
+	if(openRow(name, label, obj.type().name())){
+		bool result = false;
+		if (currentNode_->isObject()) {
+			PropertyRowObject* rowObj = static_cast<PropertyRowObject*>(currentNode_);
+			result = rowObj->assignTo(&obj);
+		}
+		closeRow(name);
+		return result;
+	}
+	else
 	return false;
 }
 
@@ -305,8 +336,6 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 {
 	if(!name)
 		return false;
-	if(name[0] == '\0' && label && label[0] != '\0')
-		name = label;
 
 	if(!currentNode_){
 		lastNode_ = currentNode_ = model_->root();
@@ -321,25 +350,14 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if(lastNode_ == currentNode_){
-			node = static_cast<PropertyRow*>(currentNode_->front());
-		}
-		else{
-			PropertyRow* row = lastNode_;
-			while(row != root_ && row->parent() && currentNode_ != row->parent())
-				row = row->parent();
-			
-			PropertyRow::iterator iter = std::find(currentNode_->begin(), currentNode_->end(), row);
-			if(iter != currentNode_->end()){
-				++iter;
-
-				if(iter != currentNode_->end())
-					node = static_cast<PropertyRow*>(&**iter);
-			}
-		}
+		if (stack_.back().rowIndex < int(currentNode_->children_.size()))
+			node = currentNode_->children_[stack_.back().rowIndex];
+		++stack_.back().rowIndex;
 	}
-	else
-		node = currentNode_->find(name, 0, typeName);
+	else {
+		node = currentNode_->findFromIndex(&stack_.back().rowIndex, name, typeName, stack_.back().rowIndex); // TODO: perform look-up in a proper order
+		++stack_.back().rowIndex;
+		}
 
 	if(node){
 		lastNode_ = node;

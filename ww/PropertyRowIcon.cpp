@@ -28,17 +28,6 @@ class PropertyRowIcon : public PropertyRow{
 public:
 	static const bool Custom = true;
 
-	PropertyRowIcon()
-	{
-	}
-
-	PropertyRowIcon(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-	: PropertyRow(name, nameAlt, typeName)
-	{
-		YASLI_ESCAPE(size == sizeof(Icon), return);
-		icon_ = *(Icon*)(object);
-	}
-
 	bool assignTo(void* val, size_t size)
 	{
 		return false;
@@ -59,12 +48,17 @@ public:
 
 		return false;
 	}
-	void digestReset() {}
+	void setValue(const Serializer& ser) override {
+		YASLI_ESCAPE(ser.size() == sizeof(Icon), return);
+		icon_ = *(Icon*)(ser.pointer());
+	}
 	wstring valueAsWString() const{ return L""; }
-	wstring digestValue() const { return wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowIcon((void*)&icon_, sizeof(icon_), name_, label_, typeid(Icon).name()), this);
+		PropertyRowIcon* result = new PropertyRowIcon();
+		result->setNames(name_, label_, typeName_);
+		result->icon_ = icon_;
+		return cloneChildren(result, this);
 	}
 	void serializeValue(Archive& ar) {}
 	int widgetSizeMin() const{ return icon_.width() + 2; }
@@ -77,15 +71,6 @@ class PropertyRowIconToggle : public PropertyRowImpl<IconToggle, PropertyRowIcon
 public:
 	static const bool Custom = true;
 
-	PropertyRowIconToggle()
-	{
-	}
-
-	PropertyRowIconToggle(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-	: PropertyRowImpl<IconToggle, PropertyRowIconToggle>(object, size, name, nameAlt, typeName)
-	{
-	}
-
 	void redraw(const PropertyDrawContext& context)
 	{
 		Icon& icon = value().value_ ? value().iconTrue_ : value().iconFalse_;
@@ -95,7 +80,6 @@ public:
 	bool isLeaf() const{ return true; }
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return true; }
-
 	bool onActivate(PropertyTree* tree, bool force)
 	{
 		tree->model()->push(this);
@@ -103,9 +87,7 @@ public:
 		tree->model()->rowChanged(this);
 		return true;
 	}
-	void digestReset(const PropertyTree* tree) {}
 	wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
-	wstring digestValue() const { return wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
 	int widgetSizeMin() const{ return value().iconFalse_.width() + 1; }

@@ -15,10 +15,6 @@ namespace ww{
 class PropertyRowField : public PropertyRow
 {
 public:
-    PropertyRowField();
-    PropertyRowField(const char* name, const char* nameAlt, const char* typeName);
-    PropertyRowField(const char* name, const char* nameAlt, const Serializer& ser);
-
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	int widgetSizeMin() const{ 
 		if (userWidgetSize() >= 0)

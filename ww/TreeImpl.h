@@ -59,6 +59,8 @@ public:
 	void interrupt();
 	void trackRow(POINT point);
 	bool captured() const{ return captured_; }
+	bool isDragging() const{ return dragging_; }
+	PropertyRow* draggedRow() const{ return row_; }
 protected:
 	DragWindow window_;
 	TreeImpl* treeImpl_;

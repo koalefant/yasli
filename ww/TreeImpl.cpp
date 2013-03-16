@@ -104,10 +104,10 @@ struct DrawRowVisitor
 {
 	DrawRowVisitor(HDC dc) : dc_(dc) {}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(row->pulledUp())
-			row->drawRow(dc_, tree);
+			row->drawRow(dc_, tree, index);
 
 		return SCAN_CHILDREN_SIBLINGS;
 	}
@@ -128,7 +128,10 @@ void DragWindow::drawRow(HDC dc)
 
 	Vect2 leftTop = row_->rect().leftTop();
 	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
-	row_->drawRow(dc, treeImpl_->tree());
+	int index = 0;
+	if (row_->parent())
+		index = row_->parent()->childIndex(row_);
+	row_->drawRow(dc, treeImpl_->tree(), index);
 	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
 	SetViewportOrgEx(dc, 0, 0, 0);
 }
@@ -286,11 +289,6 @@ void DragController::drawOver(HDC dc)
 		return;
 	
 	Rect rowRect = row_->rect();
-	{
-		Win32::StockSelector brush(dc, GetSysColorBrush(COLOR_BTNFACE));
-		Win32::StockSelector pen(dc, GetStockObject(NULL_PEN));
-		Rectangle(dc, rowRect.left() - 1, rowRect.top() - 1, rowRect.right() + 3, rowRect.bottom() + 2);
-	}
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
 		const int tickSize = 4;
@@ -746,14 +744,14 @@ struct DrawVisitor
 		, lastParent_(0)
 	{}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(row->visible(tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
 			if(row->rect().bottom() > scrollOffset_)
-				row->drawRow(dc_, tree);
+				row->drawRow(dc_, tree, index);
 
 			return SCAN_CHILDREN_SIBLINGS;
 		}
@@ -908,7 +906,7 @@ struct RowRectObtainer
 	, row_(row)
 	{}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(row == row_)
 			return SCAN_FINISHED;

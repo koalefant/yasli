@@ -109,7 +109,8 @@ void PropertyTreeModel::clear()
 	if(root_)
 		root_->clear();
 	root_ = 0;
-	setRoot(new PropertyRow("", "root", ""));
+	setRoot(new PropertyRow());
+	root_->setNames("", "root", "");
 	selection_.clear();
 }
 
@@ -180,7 +181,7 @@ protected:
 
 struct RowExpander {
 	RowExpander(const std::vector<char>& states) : states_(states), index_(0) {}
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(size_t(index_) >= states_.size())
 			return SCAN_FINISHED;
@@ -257,16 +258,14 @@ void PropertyTreeModel::push(PropertyRow* row)
 void PropertyTreeModel::rowChanged(PropertyRow* row)
 {
 	YASLI_ESCAPE(row, return);
+	row->setLabelChanged();
+	row->setLayoutChanged();
 
 	PropertyRow* parentObj = row;
 	while (parentObj->parent() && !parentObj->isObject())
 		parentObj = parentObj->parent();
 
 	row->setMultiValue(false);
-	while (row->parent()) {
-		row->setLabelChanged();
-		row = row->parent();
-	}
 
 	PropertyRows rows;
 	rows.push_back(parentObj);

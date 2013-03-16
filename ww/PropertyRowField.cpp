@@ -14,20 +14,6 @@
 
 namespace ww{
 
-PropertyRowField::PropertyRowField()
-{
-}
-
-PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const char* typeName)
-: PropertyRow(name, nameAlt, typeName)
-{
-}
-
-PropertyRowField::PropertyRowField(const char* name, const char* nameAlt, const Serializer& ser)
-: PropertyRow(name, nameAlt, ser)
-{
-}
-
 
 void PropertyRowField::redraw(const PropertyDrawContext& context)
 {

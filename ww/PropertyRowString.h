@@ -24,11 +24,10 @@ class PropertyTreeModel;
 class PropertyRowString : public PropertyRowImpl<wstring, PropertyRowString>{
 public:
 	enum { Custom = false };
-	PropertyRowString(const char* name = "", const char* nameAlt = "", const wchar_t* value = L"");
-	PropertyRowString(const char* name, const char* nameAlt, const char* value);
-	PropertyRowString(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName); // понадобился из за PropertyRowImpl
 	bool assignTo(string& str);
 	bool assignTo(wstring& str);
+	void setValue(const char* str);
+	void setValue(const wchar_t* str);
 	PropertyRowWidget* createWidget(PropertyTree* tree);
 	string valueAsString() const;
 	wstring valueAsWString() const { return value_; }

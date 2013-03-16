@@ -81,21 +81,19 @@ struct IconToggle
 	{
 	}
 
-	IconToggle(const IconToggle& orig)
-	: variable_(0)
-	, value_(orig.value_)
-	, iconTrue_(orig.iconTrue_)
-	, iconFalse_(orig.iconFalse_)
+	IconToggle& operator=(const IconToggle& orig)
 	{
+		value_ = orig.value_;
+		if (!variable_) {
+			iconTrue_ = orig.iconTrue_;
+			iconFalse_ = orig.iconFalse_;
+		}
+		return *this;
 	}
 
 	IconToggle()
 	: variable_(0)
 	{
-	}
-	IconToggle& operator=(const IconToggle& rhs){
-		value_ = rhs.value_;
-		return *this;
 	}
 	~IconToggle()
 	{

@@ -75,22 +75,6 @@ protected:
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
-PropertyRowString::PropertyRowString(const char* name, const char* label, const wchar_t* value)
-: PropertyRowImpl<wstring, PropertyRowString>(name, label, value, "string")
-{
-}
-
-PropertyRowString::PropertyRowString(const char* name, const char* label, const char* value)
-: PropertyRowImpl<wstring, PropertyRowString>(name, label, toWideChar(value), "string")
-{
-}
-
-PropertyRowString::PropertyRowString(void* object, size_t size, const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<wstring, PropertyRowString>(object, size, name, label, typeName)
-{
-
-}
-
 bool PropertyRowString::assignTo(string& str)
 {
     str = fromWideChar(value_.c_str());
@@ -111,6 +95,16 @@ PropertyRowWidget* PropertyRowString::createWidget(PropertyTree* tree)
 string PropertyRowString::valueAsString() const
 {
 	return fromWideChar(value_.c_str());
+}
+
+void PropertyRowString::setValue(const wchar_t* str)
+{
+	value_ = str;
+}
+
+void PropertyRowString::setValue(const char* str)
+{
+	value_ = toWideChar(str);
 }
 
 DECLARE_SEGMENT(PropertyRowString)

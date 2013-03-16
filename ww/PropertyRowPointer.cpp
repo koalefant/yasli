@@ -60,27 +60,7 @@ void ClassMenuItemAdder::generateMenu(PopupMenuItem& createItem, const StringLis
 YASLI_CLASS(PropertyRow, PropertyRowPointer, "SharedPtr");
 
 PropertyRowPointer::PropertyRowPointer()
-: PropertyRow("", "", "")
-, factory_(0)
-{
-}
-
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const yasli::PointerInterface &ptr)
-: PropertyRow(name, label, ptr.baseType().name())
-, baseType_(ptr.baseType())
-, factory_(ptr.factory())
-{
-    serializer_ = ptr.serializer();
-		const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
-		if (desc)
-			derivedTypeName_ = desc->name();
-}
-
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, TypeID baseType, yasli::ClassFactoryBase* factory, const char* derivedTypeName)
-: PropertyRow(name, label, baseType.name())
-, baseType_(baseType)
-, factory_(factory)
-, derivedTypeName_(derivedTypeName)
+: factory_(0)
 {
 }
 
@@ -124,7 +104,6 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 	    clear();
 	}
 	else{
-		YASLI_ASSERT(typeName_);
 		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(baseType_, index);
 		if (defaultValue && defaultValue->root) {
 			YASLI_ASSERT(defaultValue->root->refCount() == 1);
@@ -133,6 +112,8 @@ void PropertyRowPointer::onMenuCreateByIndex(int index, bool useDefaultValue, Pr
 				cloneChildren(this, defaultValue->root);
             }
 			setDerivedType(defaultValue->type, factory());
+			setLabelChanged();
+			setLabelChangedToChildren();
 			tree->expandRow(this);
 		}
         else{
@@ -155,11 +136,6 @@ yasli::string PropertyRowPointer::valueAsString() const
 	else
 		result = derivedTypeName_;
 
-    if(digest()[0] != L'\0'){
-        result += " ( ";
-        result += fromWideChar(digest());
-        result += " )";
-    }
 	return result;
 }
 
@@ -282,6 +258,16 @@ int PropertyRowPointer::widgetSizeMin() const
     gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
     ReleaseDC(Win32::getDefaultWindowHandle(), dc);
     return bound.Width + 10;
+}
+
+void PropertyRowPointer::setValue(const yasli::PointerInterface& ptr)
+{
+	baseType_ = ptr.baseType();
+	factory_ = ptr.factory();
+	serializer_ = ptr.serializer();
+	const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
+	if (desc)
+		derivedTypeName_ = desc->name();
 }
 
 }

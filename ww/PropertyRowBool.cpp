@@ -22,9 +22,8 @@ namespace ww{
 
 YASLI_CLASS(PropertyRow, PropertyRowBool, "bool");
 
-PropertyRowBool::PropertyRowBool(const char* name, const char* label, bool value)
-: PropertyRow(name, label, "bool")
-, value_(value)
+PropertyRowBool::PropertyRowBool()
+: value_(false)
 {
 }
 
@@ -50,11 +49,6 @@ bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
 	}
 	else
 	return false;
-}
-
-void PropertyRowBool::digestReset(const PropertyTree* tree)
-{
-	digest_ = value_ ? toWideChar(labelUndecorated()) : L"";
 }
 
 void PropertyRowBool::serializeValue(Archive& ar)

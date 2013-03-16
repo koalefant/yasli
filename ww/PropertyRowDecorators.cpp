@@ -26,7 +26,6 @@ namespace ww{
 class PropertyRowButton : public PropertyRowImpl<ButtonDecorator, PropertyRowButton>{
 public:
 	PropertyRowButton();
-	PropertyRowButton(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(const PropertyDrawContext& context);
 	bool onMouseDown(PropertyTree* tree, Vect2 point, bool& changed);
 	void onMouseMove(PropertyTree* tree, Vect2 point);
@@ -44,12 +43,6 @@ protected:
 	bool underMouse_;
 	bool locked_;
 };
-
-PropertyRowButton::PropertyRowButton(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<ButtonDecorator, PropertyRowButton>(object, size, name, nameAlt, typeName)
-, underMouse_(false), locked_(false)
-{
-}
 
 PropertyRowButton::PropertyRowButton()
 : underMouse_(false), locked_(false)
@@ -119,20 +112,9 @@ REGISTER_PROPERTY_ROW(ButtonDecorator, PropertyRowButton);
 
 class PropertyRowHLine : public PropertyRowImpl<HLineDecorator, PropertyRowHLine>{
 public:
-	PropertyRowHLine();
-	PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	void redraw(const PropertyDrawContext& context);
 	bool isSelectable() const{ return false; }
 };
-
-PropertyRowHLine::PropertyRowHLine(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<HLineDecorator, PropertyRowHLine>(object, size, name, nameAlt, typeName)
-{
-}
-
-PropertyRowHLine::PropertyRowHLine()
-{
-}
 
 void PropertyRowHLine::redraw(const PropertyDrawContext& context)
 {
@@ -150,8 +132,6 @@ REGISTER_PROPERTY_ROW(HLineDecorator, PropertyRowHLine);
 
 class PropertyRowNot : public PropertyRowImpl<NotDecorator, PropertyRowNot>{
 public:
-	PropertyRowNot();
-	PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
@@ -159,15 +139,6 @@ public:
 	virtual int widgetSizeMin() const{ return ICON_SIZE; }
 };
 
-PropertyRowNot::PropertyRowNot(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<NotDecorator, PropertyRowNot>(object, size, name, nameAlt, typeName)
-{
-}
-
-PropertyRowNot::PropertyRowNot()
-{
-}
-	
 bool PropertyRowNot::onActivate(PropertyTree* tree, bool force)
 {
     tree->model()->push(this);
@@ -187,8 +158,6 @@ REGISTER_PROPERTY_ROW(NotDecorator, PropertyRowNot);
 //
 class PropertyRowRadio : public PropertyRowImpl<RadioDecorator, PropertyRowRadio>{
 public:
-	PropertyRowRadio();
-	PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
 	bool onActivate(PropertyTree* tree, bool force);
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
@@ -196,15 +165,6 @@ public:
 	int widgetSizeMin() const{ return ICON_SIZE; }
 };
 
-PropertyRowRadio::PropertyRowRadio(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowImpl<RadioDecorator, PropertyRowRadio>(object, size, name, nameAlt, typeName)
-{
-}
-
-PropertyRowRadio::PropertyRowRadio()
-{
-}
-	
 bool PropertyRowRadio::onActivate(PropertyTree* tree, bool force)
 {
     tree->model()->push(this);

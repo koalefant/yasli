@@ -27,7 +27,7 @@ class PropertyTreeModel;
 class PropertyRowContainer : public PropertyRow, public has_slots{
 public:
 	enum { Custom = false };
-	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName, const char* elementTypeName, bool fixedSizeContainer);
+	PropertyRowContainer();
 	bool isContainer() const{ return true; }
 	bool onActivate( PropertyTree* tree, bool force);
 	bool onContextMenu(PopupMenuItem& item, PropertyTree* tree);
@@ -42,9 +42,14 @@ public:
 	void onMenuChildRemove(PropertyRow* child, PropertyTreeModel* model);
 
 	PropertyRow* clone() const{
-		return cloneChildren(new PropertyRowContainer(name_, label_, typeName_, elementTypeName_, userReadOnly_), this);
+		PropertyRowContainer* result = new PropertyRowContainer();
+		result->setNames(name_, label_, typeName_);
+		result->fixedSize_ = fixedSize_;
+		result->elementTypeName_ = elementTypeName_;
+		return cloneChildren(result, this);
 	}
-	void digestReset(const PropertyTree* tree);
+
+	void labelChanged() override;
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return userWidgetSize() == 0 ? false : true; }
 
@@ -53,6 +58,10 @@ public:
 	void serializeValue(Archive& ar);
 
 	const char* elementTypeName() const{ return elementTypeName_; }
+	void setValue(const yasli::ContainerInterface& value) {
+		fixedSize_ = value.isFixedSize();
+		elementTypeName_ = value.type().name();
+	}
     std::string valueAsString() const;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }

@@ -72,14 +72,6 @@ class PropertyRowNumeric : public PropertyRowImpl<Type, typename SelectNumericDe
 public:
 	enum { Custom = false };
 	typedef typename SelectNumericDerived<_Derived, PropertyRowNumeric>::Type Derived;
-	PropertyRowNumeric(const char* name = "", const char* nameAlt = "", Type value = Type())
-	: PropertyRowImpl<Type, Derived>((void*)(&value), sizeof(Type), name, nameAlt, TypeID::get<Type>().name())
-	{
-	}
-	PropertyRowNumeric(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-	: PropertyRowImpl<Type, Derived>(object, size, name, nameAlt, typeName)
-	{
-	}
 	PropertyRowWidget* createWidget(PropertyTree* tree){
 		return new PropertyRowWidgetNumeric(this, tree->model(), this, tree);
 	}
@@ -90,7 +82,6 @@ public:
 		else
 			return 40;
 	}
-
 	bool setValueFromString(const char* str){
 		Type value = value_;
 		value_ = Type(atof(str));

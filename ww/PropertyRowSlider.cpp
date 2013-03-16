@@ -31,8 +31,6 @@ template<class WrapperType, class ScalarType>
 class PropertyRowSlider : public PropertyRowNumeric<WrapperType, PropertyRowSlider<WrapperType, ScalarType> >{
 public:
 	static const bool Custom = true;
-	PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName);
-	PropertyRowSlider();
 	int floorHeight() const{ return 12; }
 	void redraw(const PropertyDrawContext& context);
 
@@ -105,12 +103,6 @@ void PropertyRowSlider<WrapperType, ScalarType>::onMouseUp(PropertyTree* tree, V
 }
 
 template<class WrapperType, class ScalarType>
-PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider(void* object, size_t size, const char* name, const char* nameAlt, const char* typeName)
-: PropertyRowNumeric<WrapperType, PropertyRowSlider>(object, size, name, nameAlt, typeName)
-{
-}
-
-template<class WrapperType, class ScalarType>
 void PropertyRowSlider<WrapperType, ScalarType>::redraw(const PropertyDrawContext& context)
 {
 	__super::redraw(context);
@@ -121,11 +113,6 @@ void PropertyRowSlider<WrapperType, ScalarType>::redraw(const PropertyDrawContex
     HDC dc = context.graphics->GetHDC();
 	Win32::drawSlider(dc, rt, float(val - value().minValue()) / (value().maxValue() - value().minValue()), false/*state == FOCUSED*/);
     context.graphics->ReleaseHDC(dc);
-}
-
-template<class WrapperType, class ScalarType>
-PropertyRowSlider<WrapperType, ScalarType>::PropertyRowSlider()
-{
 }
 
 typedef PropertyRowSlider<SliderDecoratorf, float> PropertyRowSliderf;

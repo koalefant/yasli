@@ -174,7 +174,8 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 
 				const char* derivedName = d->typeName();
 				const char* derivedNameAlt = d->typeName();
-				PropertyRowPointer* newSourceRoot = new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+				PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone();
+					// new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
 				source->swapChildren(newSourceRoot);
 				source = newSourceRoot;
 			}
@@ -204,7 +205,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
-						PropertyRowPointer* newSourceRoot = new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+						PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone(); //new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
 					}

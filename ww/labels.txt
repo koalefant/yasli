@@ -3,9 +3,7 @@ through PropertyTree (using PropertyI/OArchive-s). Label of the serialized value
 should start with sequence of such characters. 
 
 List of characters:
- "&" - Put value to the "digest" of parent element.
-	   Digest shown as gray text following the name of the parent. Useful to
-	   show content of the structure without need to open it.
+ "&" - [REMOVED] Put value to the "digest" of parent element.
  
  "!" - Read only field. Prevents user from changing value of the field. 
 	   Doesn't affect nested members.

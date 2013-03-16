@@ -106,14 +106,6 @@ public:
 	int leftBorder() const { return leftBorder_; }
 	int rightBorder() const { return rightBorder_; }
 	bool multiSelectable() const { return attachedPropertyTree_ != 0; }
-
-	signal0& signalChanged(){ return signalChanged_; }
-	typedef signal1<const yasli::Object&> SignalObjectChanged;
-	SignalObjectChanged& signalObjectChanged(){ return signalObjectChanged_; }
-	signal0& signalSelected(){ return signalSelected_; }
-	signal0& signalReverted(){ return signalReverted_; }
-	signal0& signalPushUndo(){ return signalPushUndo_; }
-
 	void onSignalChanged() { ; }
 
 	bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
@@ -122,23 +114,22 @@ public:
     bool selectByAddress(void*, bool keepSelectionIfChildSelected = false);
 	void ensureVisible(PropertyRow* row, bool update = true);
 	void expandParents(PropertyRow* row);
-	void expandRow(PropertyRow* row, bool expanded = true);
+	void expandRow(PropertyRow* row, bool expanded = true, bool updateHeights = true);
 	void expandAll(PropertyRow* root = 0);
 	void collapseAll(PropertyRow* root = 0);
 
 	void serialize(Archive& ar);
-	void onModelUpdated(const PropertyRows& rows);
 
 	PropertyTreeModel* model() { return model_; }
 	const PropertyTreeModel* model() const { return model_; }
+	void onModelUpdated(const PropertyRows& rows);
 
-	void update(); // нужно вызывать после изменения модели
+	void update(); // needs to be called after model change
 	void redraw();
 
 	bool hasFocus() const;
 
 	// internal methods:
-	TreeImpl* impl() const;
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 	Vect2 _toScreen(Vect2 point) const;
 	void _setFocus();
@@ -146,6 +137,24 @@ public:
 	void _drawRowLabel(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 	void _drawRowValue(Gdiplus::Graphics* gr, const wchar_t* text, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 	Rect _visibleRect() const;
+	bool _isDragged(const PropertyRow* row) const;
+	bool _isCapturedRow(const PropertyRow* row) const;
+	TreeImpl* impl() const;
+
+
+
+
+
+
+
+
+	signal0& signalChanged(){ return signalChanged_; }
+	typedef signal1<const yasli::Object&> SignalObjectChanged;
+	SignalObjectChanged& signalObjectChanged(){ return signalObjectChanged_; }
+	signal0& signalSelected(){ return signalSelected_; }
+	signal0& signalReverted(){ return signalReverted_; }
+	signal0& signalPushUndo(){ return signalPushUndo_; }
+
 protected:
 	void applyChanged(bool enforceAll);
 	void revertChanged(bool enforceAll);
@@ -219,6 +228,8 @@ protected:
 	ConstStringList constStrings_;
 	Serializers attached_;
 	PropertyTree* attachedPropertyTree_;
+	PropertyRow* capturedRow_;
+	Vect2 pressPoint_;
 
 	bool filterMode_;
 	RowFilter rowFilter_;

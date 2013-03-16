@@ -47,15 +47,12 @@ namespace ww{
 
 YASLI_CLASS(PropertyRow, PropertyRowContainer, "Container");
 
-PropertyRowContainer::PropertyRowContainer(const char* name = "", const char* label = "", const char* typeName = "", const char* elementTypeName = "", bool readOnly = false)
-: PropertyRow(name, label, typeName)
-, fixedSize_(readOnly)
-, elementTypeName_(elementTypeName)
+PropertyRowContainer::PropertyRowContainer()
+: fixedSize_(false)
+, elementTypeName_("")
 {
-	buttonLabel_[0] = 0;
+	buttonLabel_[0] = '\0';
 
-	if(pulledUp())
-		_setExpanded(true);		
 }
 
 struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder{
@@ -105,18 +102,6 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	context.graphics->DrawString(text, (int)wcslen(text), propertyTreeDefaultFont(), textRect, &format, &textBrush);
 }
 
-bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
-{
-	if(key == KeyPress(KEY_DELETE, KEY_MOD_SHIFT)){
-		onMenuClear(tree->model());
-		return true;
-	}
-	if(key == KeyPress(KEY_INSERT)){
-		onMenuAppendElement(tree);
-		return true;
-	}
-	return __super::onKeyDown(tree, key);
-}
 
 bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
@@ -206,6 +191,8 @@ void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 	if(count() == 0)
 		tree->expandRow(this);
 	add(clonedRow);
+	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
 	setMultiValue(false);
 	if(expanded())
 		tree->model()->selectRow(clonedRow, true);
@@ -227,6 +214,8 @@ void PropertyRowContainer::onMenuAppendPointerByIndex(int index, PropertyTree* t
     if(count() == 0)
         tree->expandRow(this);
     add(clonedRow);
+	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
 	setMultiValue(false);
 	PropertyRowPointer* pointer = safe_cast<PropertyRowPointer*>(clonedRow);
 	if(expanded())
@@ -245,7 +234,7 @@ void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyT
 	if(!defaultType)
 		return;
 	PropertyRow* clonedRow = defaultType->clone();
-	// clonedRow->setFullRow(true); TODO
+	clonedRow->setSelected(false);
 	addBefore(clonedRow, child);
 	setMultiValue(false);
 	tree->model()->selectRow(clonedRow, true);
@@ -266,18 +255,9 @@ void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeMod
 	model->rowChanged(this);
 }
 
-void PropertyRowContainer::digestReset(const PropertyTree* tree)
+void PropertyRowContainer::labelChanged()
 {
-	swprintf_s(buttonLabel_, ARRAY_LEN(buttonLabel_), L"%i", count());
-
-	/*
-	wchar_t buffer[14];
-	if(multiValue())
-		swprintf_s(buffer, L"[...]");
-	else
-		swprintf_s(buffer, L"[ %i ]", int(count()));*/
-	__super::digestReset(tree);
-	//digestAppend(buffer);
+    swprintf(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
 }
 
 void PropertyRowContainer::serializeValue(Archive& ar)
@@ -288,8 +268,23 @@ void PropertyRowContainer::serializeValue(Archive& ar)
 
 string PropertyRowContainer::valueAsString() const
 {
-    return numericAsString(children_.size());
+	char buf[32] = { 0 };
+    sprintf(buf, "%i", children_.size());
+	return yasli::string(buf);
 }
 
+bool PropertyRowContainer::onKeyDown(PropertyTree* tree, KeyPress key)
+{
+	if(key == KeyPress(KEY_DELETE, KEY_MOD_SHIFT)){
+		onMenuClear(tree->model());
+		return true;
+	}
+	if(key == KeyPress(KEY_INSERT)){
+		onMenuAppendElement(tree);
+		return true;
+	}
+	return __super::onKeyDown(tree, key);
 }
+}
+
 // vim:ts=4 sw=4:
