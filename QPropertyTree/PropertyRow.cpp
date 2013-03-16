@@ -109,7 +109,7 @@ PropertyRow::~PropertyRow()
 void PropertyRow::setNames(const char* name, const char* label, const char* typeName)
 {
 	name_ = name;
-	label_ = label;
+	label_ = label ? label : "";
 	typeName_ = typeName;
 }
 
@@ -320,8 +320,8 @@ void PropertyRow::serialize(Archive& ar)
 {
 	serializeValue(ar);
 
-	ar(ConstStringWrapper(constStrings_, name_), "name", "&name");
-	ar(ConstStringWrapper(constStrings_, label_), "nameAlt", "nameAlt");
+	ar(ConstStringWrapper(constStrings_, name_), "name", "name");
+	ar(ConstStringWrapper(constStrings_, label_), "label", "label");
 	ar(ConstStringWrapper(constStrings_, typeName_), "type", "type");
 	ar(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
 	if(ar.isInput()){
