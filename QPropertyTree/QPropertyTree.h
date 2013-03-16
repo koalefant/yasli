@@ -142,7 +142,7 @@ public:
 	bool selectByAddress(void*, bool keepSelectionIfChildSelected = false);
 	void ensureVisible(PropertyRow* row, bool update = true);
 	void expandParents(PropertyRow* row);
-	void expandRow(PropertyRow* row, bool expanded = true);
+	void expandRow(PropertyRow* row, bool expanded = true, bool updateHeights = true);
 
 	void serialize(yasli::Archive& ar);
 

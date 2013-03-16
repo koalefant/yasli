@@ -445,11 +445,13 @@ bool PropertyRow::scanChildrenReverse(Op& op, QPropertyTree* tree)
 template<class Op>
 bool PropertyRow::scanChildrenBottomUp(Op& op, QPropertyTree* tree)
 {
-	for(Rows::iterator it = children_.begin(); it != children_.end(); ++it)
+	size_t numChildren = children_.size();
+	for(size_t i = 0; i < numChildren; ++i)
 	{
-		if(!(*it)->scanChildrenBottomUp(op, tree))
+		PropertyRow* child = children_[i];
+		if(!child->scanChildrenBottomUp(op, tree))
 			return false;
-		ScanResult result = op(*it, tree);
+		ScanResult result = op(child, tree);
 		if(result == SCAN_FINISHED)
 			return false;
 	}

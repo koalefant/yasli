@@ -825,7 +825,7 @@ void QPropertyTree::collapseAll(PropertyRow* root)
 }
 
 
-void QPropertyTree::expandRow(PropertyRow* row, bool expanded)
+void QPropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
 {
 	bool hasChanges = false;
 	if (row->expanded() != expanded) {
@@ -847,8 +847,8 @@ void QPropertyTree::expandRow(PropertyRow* row, bool expanded)
 		}
 	}
 
-	if (hasChanges)
-		updateHeights();
+	if (hasChanges && updateHeights)
+		this->updateHeights();
 }
 
 void QPropertyTree::interruptDrag()
@@ -1438,7 +1438,7 @@ void QPropertyTree::_arrangeChildren()
 		const int padding = 2;
         QRect pos(padding, padding, size.width() - padding * 2, filterEntry_->height());
 		filterEntry_->move(pos.topLeft());
-		filterEntry_->resize(pos.size());
+		filterEntry_->resize(pos.size() - QSize(scrollBar_ ? scrollBar_->width() : 0, 0));
 	}
 }
 
@@ -1605,8 +1605,8 @@ struct FilterVisitor
 
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
 	{
-		yasli::string label = row->labelUndecorated();
-		bool matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
+		const char* label = row->labelUndecorated();
+		bool matchFilter = filter_.match(label, filter_.NAME, 0, 0);
 		if (matchFilter)
 			matchFilter = filter_.match(row->valueAsString().c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
@@ -1624,21 +1624,25 @@ struct FilterVisitor
 			else {
 				markChildrenAsBelonging(row, true);
 				row->setBelongsToFilteredRow(false);
+				row->setLayoutChanged();
+				row->setLabelChanged();
 			}
 		}
 		else {
 			bool belongs = hasMatchingChildren(row);
 			row->setBelongsToFilteredRow(belongs);
 			if (belongs) {
-				tree->expandRow(row);
+				tree->expandRow(row, true, false);
 				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
 					if (child->pulledUp())
 						child->setBelongsToFilteredRow(true);
 				}
 			}
-			else 
+			else {
 				row->_setExpanded(false);
+				row->setLayoutChanged();
+			}
 		}
 
 		row->setMatchFilter(matchFilter);
