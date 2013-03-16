@@ -1,4 +1,6 @@
-#include <windows.h>
+#ifdef WIN32
+# include <windows.h>
+#endif
 #undef ERROR
 
 #include "QPropertyTree/Color.h"
@@ -52,7 +54,7 @@ public:
 
 	virtual void serialize(Archive& ar)
 	{
-		__super::serialize(ar);
+        ConditionBase::serialize(ar);
 		ar(mode_, "mode", "Mode");
 		ar(children_, "children", "^Subconditions");
 	}
@@ -78,7 +80,7 @@ public:
 
 	virtual void serialize(Archive& ar)
 	{
-		__super::serialize(ar);
+        ConditionBase::serialize(ar);
 		//static ww::FileSelector::Options options("*.*", false);
 		//ar(ww::FileSelector(filename_, options), "filename", "<Filename");
 		ar(isDirectory_, "isDirectory", "Directory");
@@ -106,10 +108,10 @@ class ActionMessageBox : public ActionBase
 public:
 	enum Icon{
 		NO_ICON = 0,
-		INFORMATION = MB_ICONINFORMATION,
-		QUESTION = MB_ICONQUESTION,
-		EXCLAMATION = MB_ICONEXCLAMATION,
-		ERROR = MB_ICONERROR
+        INFORMATION,
+        QUESTION,
+        EXCLAMATION,
+        ERROR
 	};
 
 	ActionMessageBox()

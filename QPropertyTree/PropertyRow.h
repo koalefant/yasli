@@ -249,7 +249,7 @@ public:
 	virtual bool onActivateRelease(QPropertyTree* tree) { return false; }
 	virtual bool onKeyDown(QPropertyTree* tree, const QKeyEvent* ev);
 	virtual bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) { return false; }
-	virtual void onMouseDrag(const PropertyDragEvent& e) {}
+    virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseUp(QPropertyTree* tree, QPoint point) {}
 	virtual bool onContextMenu(QMenu &menu, QPropertyTree* tree);
 

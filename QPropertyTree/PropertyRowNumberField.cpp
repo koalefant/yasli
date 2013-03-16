@@ -36,13 +36,13 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		QStyleOption option;
 		option.state = QStyle::State_Sunken/* | QStyle::State_Editing*/;
 		if (context.captured) {
-			painter->fillRect(rt, tree->palette().highlight());
+            // painter->fillRect(rt, tree->palette().highlight()); TODO: this doesn't work well on Ubuntu style
 			option.state |= QStyle::State_HasFocus;
 			option.state |= QStyle::State_Active;
 			option.state |= QStyle::State_MouseOver;
 		}
 		else if (!userReadOnly()) {
-			painter->fillRect(rt, tree->palette().base());
+            painter->fillRect(rt, tree->palette().base()); // TODO: remove this fill, doesn't work in other styles
 			option.state |= QStyle::State_Enabled;
 		}
 		option.rect = rt; // option.rect is the rectangle to be drawn on.
@@ -53,7 +53,7 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		}
 		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
 		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, 0);
-		painter->setPen(QPen(context.captured ? tree->palette().color(QPalette::HighlightedText) : tree->palette().color(QPalette::WindowText)));
+        painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
 		painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(valueAsString().c_str()), 0);
 	}
 }
@@ -68,7 +68,7 @@ bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool
 	return false;
 }
 
-void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e) override
+void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 {
 	QCursor cur;
 	cur.setShape(Qt::SizeHorCursor);
@@ -85,12 +85,12 @@ void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, QPoint point)
 	endIncrement(tree);
 }
 
-bool PropertyRowNumberField::onActivate(QPropertyTree* tree, bool force) override
+bool PropertyRowNumberField::onActivate(QPropertyTree* tree, bool force)
 {
 	return false;
 }
 
-bool PropertyRowNumberField::onActivateRelease(QPropertyTree* tree) override
+bool PropertyRowNumberField::onActivateRelease(QPropertyTree* tree)
 {
 	return tree->spawnWidget(this, false);
 }

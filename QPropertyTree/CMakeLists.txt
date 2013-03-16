@@ -1,6 +1,10 @@
 project(QPropertyTree)
 set(CMAKE_AUTOMOC TRUE)
 
+if (CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif (CMAKE_COMPILER_IS_GNUCC)
+
 find_package(Qt4 REQUIRED)
 #file(GLOB SOURCES *.h *.cpp)
 set(SOURCES

@@ -10,6 +10,8 @@
 #include <math.h>
 #include <memory>
 
+#include "yasli/BitVector.h"
+#include "yasli/STL.h"
 #include "PropertyOArchive.h"
 #include "PropertyTreeModel.h"
 #include "QPropertyTree.h"
@@ -22,7 +24,6 @@
 #include "PropertyRowObject.h"
 #include "ConstStringList.h"
 
-#include "yasli/BitVector.h"
 #include "yasli/Archive.h"
 #include "yasli/BitVectorImpl.h"
 #include "yasli/ClassFactory.h"

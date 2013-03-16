@@ -8,7 +8,7 @@
  */
 
 #include "StdAfx.h"
-#include "JsonOArchive.h"
+#include "JSONOArchive.h"
 #include "MemoryWriter.h"
 #include "yasli/KeyValue.h"
 #include "yasli/ClassFactory.h"

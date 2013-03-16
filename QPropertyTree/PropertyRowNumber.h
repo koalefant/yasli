@@ -31,8 +31,8 @@ inline long long stringToSignedInteger(const char* str)
 #ifdef _MSC_VER
 	value = _atoi64(str);
 #else
-	char** endptr = str;
-	value = strtoll(str, &str, 10);
+    char* endptr = (char*)str;
+    value = strtoll(str, &endptr, 10);
 #endif
 	return value;
 }
@@ -48,7 +48,7 @@ inline unsigned long long stringToUnsignedInteger(const char* str)
 		char* endptr = (char*)str;
 		value = _strtoui64(str, &endptr, 10);
 #else
-		char* endptr = str;
+        char* endptr = (char*)str;
 		value = strtoull(str, &endptr, 10);
 #endif
 	}
@@ -80,26 +80,6 @@ template<class T> void clampToType(unsigned long long* out, T value) { *out = cl
 
 template<class T> void clampToType(float* out, T value) { *out = clamp(value, -FLT_MAX, FLT_MAX); }
 template<class T> void clampToType(double* out, T value) { *out = clamp(value, -DBL_MAX, DBL_MAX); }
-
-template<class T>
-void stringToSignedInteger(T* out, const char* str, T min, T max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
-	*out = value;
-}
-
-template<class T>
-void stringToUnsignedInteger(T* out, const char* str, T min, T max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
-	*out = value;
-}
 
 inline void clampedNumberFromString(char* value, const char* str)        { clampToType(value, stringToSignedInteger(str)); }
 inline void clampedNumberFromString(signed char* value, const char* str) { clampToType(value, stringToSignedInteger(str)); }
@@ -188,7 +168,11 @@ public:
 				newValue = double(incrementStartValue_) + delta;
 			else
 				newValue = double(incrementStartValue_) - delta;
-			if (_isnan(newValue)) {
+#ifdef _MSC_VER
+            if (_isnan(newValue)) {
+#else
+            if (isnan(newValue)) {
+#endif
 				if (screenFraction > 0.0f)
 					newValue = DBL_MAX;
 				else
@@ -206,7 +190,11 @@ public:
 				newValue = double(incrementStartValue_) + delta;
 			else
 				newValue = double(incrementStartValue_) - delta;
+#ifdef _MSC_VER
 			if (_isnan(newValue)) {
+#else
+            if (isnan(newValue)) {
+#endif
 				if (screenFraction > 0.0f)
 					newValue = DBL_MAX;
 				else

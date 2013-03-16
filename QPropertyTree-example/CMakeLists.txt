@@ -12,6 +12,10 @@ if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif (MSVC)
 
+if (CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif (CMAKE_COMPILER_IS_GNUCC)
+
 #file(GLOB SOURCES *.h *.cpp)
 set(SOURCES 
 	main.cpp
@@ -24,6 +28,7 @@ add_executable(qpropertytree-example ${SOURCES})
 
 target_link_libraries(qpropertytree-example yasli xmath qpropertytree)
 set_target_properties(qpropertytree-example PROPERTIES DEBUG_POSTFIX "-debug")
+set_target_properties(qpropertytree-example PROPERTIES RELWITHDEBINFO_POSTFIX "-relwithdebinfo")
 
 if (MSVC_IDE)
     set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR})

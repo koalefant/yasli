@@ -86,11 +86,11 @@ struct TestData
 MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
-#ifdef NDEBUG
+//#ifdef NDEBUG
 	globalTestData.elements.resize(50000);
-#else
-	globalTestData.elements.resize(5000);
-#endif
+//#else
+//	globalTestData.elements.resize(5000);
+//#endif
     tree_ = new QPropertyTree(this);
     tree_->attach(yasli::Serializer(globalTestData));
     setCentralWidget(tree_);
