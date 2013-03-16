@@ -18,7 +18,7 @@ using yasli::MemoryWriter;
 class PropertyRowObject : public PropertyRow {
 public:
 	enum { Custom = false };
-	PropertyRowObject(const char* name, const char* label, const char* typeName);
+	PropertyRowObject();
 	~PropertyRowObject();
 	void setValue(const Object& obj) { object_ = obj; }
 	void setModel(PropertyTreeModel* model) { model_ = model; }

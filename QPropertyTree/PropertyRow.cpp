@@ -30,10 +30,6 @@
 #endif
 	
 
-const char* PropertyRowArg::name_(0);
-const char* PropertyRowArg::label_(0);
-const char* PropertyRowArg::typeName_(0);
-
 static QColor interpolate(const QColor& a, const QColor& b, float k)
 {
 	float mk = 1.0f - k;
@@ -66,27 +62,6 @@ ConstStringList* PropertyRow::constStrings_ = 0;
 
 PropertyRow::PropertyRow()
 {
-    init("", "", "");
-}
-
-PropertyRow::~PropertyRow()
-{
-	size_t count = children_.size();
-	for (size_t i = 0; i < count; ++i)
-		if (children_[i]->parent() == this)
-			children_[i]->setParent(0);
-}
-
-PropertyRow::PropertyRow(const char* name, const char* label, const char* typeName)
-{
-	init(name, label, typeName);
-}
-
-void PropertyRow::init(const char* name, const char* label, const char* typeName)
-{
-	YASLI_ASSERT(name != 0);
-	YASLI_ASSERT(typeName != 0);
-
 	parent_ = 0;
 
 	expanded_ = false;
@@ -107,8 +82,8 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
     widgetSize_ = 0;
 	userWidgetSize_ = -1;
 	
-	name_ = name;
-	typeName_ = typeName;
+	name_ = "";
+	typeName_ = "";
 	
 	pulledUp_ = false;
 	pulledBefore_ = false;
@@ -118,11 +93,25 @@ void PropertyRow::init(const char* name, const char* label, const char* typeName
 	userFullRow_ = false;
 	multiValue_ = false;
 	
-	label_ = label ? label : "";
+	label_ = "";
 	labelChanged_ = true;
 	layoutChanged_ = true;
 }
 
+PropertyRow::~PropertyRow()
+{
+	size_t count = children_.size();
+	for (size_t i = 0; i < count; ++i)
+		if (children_[i]->parent() == this)
+			children_[i]->setParent(0);
+}
+
+void PropertyRow::setNames(const char* name, const char* label, const char* typeName)
+{
+	name_ = name;
+	label_ = label;
+	typeName_ = typeName;
+}
 
 PropertyRow* PropertyRow::childByIndex(int index)
 {
@@ -414,7 +403,7 @@ void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 	}
 
 	parseControlCodes(label_, true);
-	visible_ = *labelUndecorated_ || userFullRow_ || pulledUp_ || isRoot();
+	visible_ = *labelUndecorated_ != '\0' || userFullRow_ || pulledUp_ || isRoot();
 
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());

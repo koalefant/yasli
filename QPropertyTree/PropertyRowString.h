@@ -20,8 +20,6 @@ class PropertyRowString : public PropertyRowImpl<yasli::wstring, PropertyRowStri
 {
 public:
 	enum { Custom = false };
-	PropertyRowString();
-	PropertyRowString(const char* name, const char* label, const char* typeName);
 	bool assignTo(yasli::string& str);
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);

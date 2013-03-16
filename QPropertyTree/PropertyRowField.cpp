@@ -10,16 +10,6 @@
 #include "PropertyRowField.h"
 #include "PropertyDrawContext.h"
 
-PropertyRowField::PropertyRowField()
-{
-}
-
-PropertyRowField::PropertyRowField(const char* name, const char* label, const char* typeName)
-: PropertyRow(name, label, typeName)
-{
-}
-
-
 void PropertyRowField::redraw(const PropertyDrawContext& context)
 {
     if(multiValue())

@@ -18,7 +18,6 @@ class PropertyRowBool : public PropertyRow
 public:
 	enum { Custom = false };
 	PropertyRowBool();
-	PropertyRowBool(const char* name, const char* nameAlt, const char* typeName);
 	bool assignTo(void* val, size_t size);
 	void setValue(bool value) { value_ = value; }
 
@@ -31,7 +30,8 @@ public:
     yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
-		PropertyRowBool* result = new PropertyRowBool(name_, label_, typeName_);
+		PropertyRowBool* result = new PropertyRowBool();
+		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
 		return cloneChildren(result, this);
 	}

@@ -40,17 +40,6 @@ PropertyRowContainer::PropertyRowContainer()
 
 }
 
-PropertyRowContainer::PropertyRowContainer(const char* name, const char* label, const char* typeName)
-: PropertyRow(name, label, typeName)
-, fixedSize_(false)
-, elementTypeName_("")
-{
-	buttonLabel_[0] = '\0';
-
-	if(pulledUp())
-		_setExpanded(true);		
-}
-
 struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder
 {
 	ClassMenuItemAdderRowContainer(PropertyRowContainer* row, QPropertyTree* tree, bool insert = false) 

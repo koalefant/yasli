@@ -119,7 +119,8 @@ void PropertyTreeModel::clear()
 	if(root_)
 		root_->clear();
 	root_ = 0;
-	setRoot(new PropertyRow("", "root", ""));
+	setRoot(new PropertyRow());
+	root_->setNames("", "root", "");
 	selection_.clear();
 }
 
@@ -394,7 +395,8 @@ void PropertyTreeModel::setRootObject(const Object& obj)
 
 		clearObjectReferences();
 
-		PropertyRowObject* root = new PropertyRowObject("", "", obj.type().name());
+		PropertyRowObject* root = new PropertyRowObject();
+		root->setNames("", "", obj.type().name());
 		root->setModel(this);
 		root->setValue(obj);
 		if (obj.address())

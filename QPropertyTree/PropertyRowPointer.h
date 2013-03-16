@@ -41,7 +41,6 @@ class PropertyRowPointer : public PropertyRow
 public:
 	enum { Custom = false };
 	PropertyRowPointer();
-	PropertyRowPointer(const char* name, const char* label, const char* typeName);
 
 	bool assignTo(yasli::PointerInterface &ptr);
 	void setValue(const yasli::PointerInterface& ptr);
@@ -61,7 +60,8 @@ public:
 	yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const;
 	PropertyRow* clone() const{
-		PropertyRowPointer* result = new PropertyRowPointer(name_, label_, typeName_);
+		PropertyRowPointer* result = new PropertyRowPointer();
+		result->setNames(name_, label_, typeName_);
 		result->baseType_ = baseType_;
 		result->factory_ = factory_;
 		result->derivedTypeName_ = derivedTypeName_;

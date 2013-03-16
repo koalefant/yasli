@@ -74,14 +74,6 @@ PropertyRowPointer::PropertyRowPointer()
 {
 }
 
-PropertyRowPointer::PropertyRowPointer(const char* name, const char* label, const char* typeName)
-: PropertyRow(name, label, typeName)
-, factory_(0)
-{
-
-}
-
-
 void PropertyRowPointer::setDerivedType(const TypeID& typeID, yasli::ClassFactoryBase* factory)
 {
 	if (!factory) {

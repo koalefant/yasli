@@ -26,15 +26,6 @@ using yasli::StringListValue;
 
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
-PropertyRowStringListValue::PropertyRowStringListValue()
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>()
-{
-}
-
-PropertyRowStringListValue::PropertyRowStringListValue(const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListValue, PropertyRowStringListValue>(name, label, typeName)
-{
-}
 
 PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
 {
@@ -43,16 +34,6 @@ PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
 
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
-
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue()
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>()
-{
-}
-
-PropertyRowStringListStaticValue::PropertyRowStringListStaticValue(const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>(name, label, typeName)
-{
-}
 
 PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(QPropertyTree* tree)
 {

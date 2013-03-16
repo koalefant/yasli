@@ -37,7 +37,6 @@ class PropertyRowContainer : public PropertyRow
 public:
 	enum { Custom = false };
 	PropertyRowContainer();
-	PropertyRowContainer(const char* name, const char* nameAlt, const char* typeName);
 	bool isContainer() const{ return true; }
 	bool onActivate( QPropertyTree* tree, bool force);
 	bool onContextMenu(QMenu& item, QPropertyTree* tree);
@@ -45,7 +44,8 @@ public:
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
 
 	PropertyRow* clone() const{
-		PropertyRowContainer* result = new PropertyRowContainer(name_, label_, typeName_);
+		PropertyRowContainer* result = new PropertyRowContainer();
+		result->setNames(name_, label_, typeName_);
 		result->fixedSize_ = fixedSize_;
 		result->elementTypeName_ = elementTypeName_;
 		return cloneChildren(result, this);

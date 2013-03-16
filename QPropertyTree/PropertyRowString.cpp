@@ -22,17 +22,6 @@
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
-PropertyRowString::PropertyRowString()
-: PropertyRowImpl<yasli::wstring, PropertyRowString>()
-{
-}
-
-PropertyRowString::PropertyRowString(const char* name, const char* label, const char* typeName)
-: PropertyRowImpl<yasli::wstring, PropertyRowString>(name, label, typeName)
-{
-
-}
-
 bool PropertyRowString::assignTo(yasli::string& str)
 {
     str = fromWideChar(value_.c_str());

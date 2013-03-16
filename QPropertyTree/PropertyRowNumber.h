@@ -132,14 +132,6 @@ template<class Type>
 class PropertyRowNumber : public PropertyRowNumberField{
 public:
 	enum { Custom = false };
-	PropertyRowNumber()
-	: PropertyRowNumberField()
-	{
-	}
-	PropertyRowNumber(const char* name, const char* label, const char* typeName)
-	: PropertyRowNumberField(name, label, typeName)
-	{
-	}
 	void setValue(Type value)
 	{
 		value_ = value;
@@ -162,7 +154,8 @@ public:
 		ar(value_, "value", "Value");
 	}
 	PropertyRow* clone() const{
-		PropertyRowNumber* result = new PropertyRowNumber(name_, label_, typeName_);
+		PropertyRowNumber* result = new PropertyRowNumber();
+		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
 		return cloneChildren(result, this);
 	}

@@ -103,8 +103,9 @@ public:
 	typedef Rows::const_iterator const_iterator;
 
 	PropertyRow();
-	PropertyRow(const char* name, const char* label, const char* typeName);
 	virtual ~PropertyRow();
+
+	void setNames(const char* name, const char* label, const char* typeName);
 
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
@@ -280,7 +281,8 @@ public:
 
 	PropertyRow* cloneChildren(PropertyRow* result, const PropertyRow* source) const;
 	virtual PropertyRow* clone() const {
-		PropertyRow* result = new PropertyRow(name_, label_, typeName_);
+		PropertyRow* result = new PropertyRow();
+		result->setNames(name_, label_, typeName_);
 		result->setValue(serializer_);
 		return cloneChildren(result, this);
 	}
@@ -345,38 +347,6 @@ struct StaticBool{
 	enum { Value = value };
 };
 
-class PropertyRowArg{
-public:
-	PropertyRowArg(const char* name, const char* label, const char* typeName){
-		name_ = name;
-		label_ = label;
-		typeName_ = typeName;
-	}
-
-	template<class T>
-	void construct(T** row)
-	{
-		*row = createRow<T>();
-	}
-
-	template<class Derived>
-	static Derived* createRow()
-	{
-		Derived* result = new Derived(name_, label_, typeName_);
-		return result;
-	}
-
-	template<class Derived>
-	static PropertyRow* createArg(){ 
-		return createRow<Derived>();
-	}
-
-protected:
-	static const char* name_;
-	static const char* label_;
-	static const char* typeName_;
-};
-
 struct LessStrCmp
 {
 	bool operator()(const char* a, const char* b) const {
@@ -384,7 +354,7 @@ struct LessStrCmp
 	}
 };
 
-typedef Factory<const char*, PropertyRow, PropertyRowArg, LessStrCmp> PropertyRowFactory;
+typedef Factory<const char*, PropertyRow, Constructor0<PropertyRow>, LessStrCmp> PropertyRowFactory;
 
 template<class Op>
 bool PropertyRow::scanChildren(Op& op)

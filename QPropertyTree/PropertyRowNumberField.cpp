@@ -15,15 +15,6 @@
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QApplication>
 
-PropertyRowNumberField::PropertyRowNumberField()
-{
-}
-
-PropertyRowNumberField::PropertyRowNumberField(const char* name, const char* nameAlt, const char* typeName)
-: PropertyRow(name, nameAlt, typeName)
-{
-}
-
 PropertyRowWidget* PropertyRowNumberField::createWidget(QPropertyTree* tree)
 {
 	return new PropertyRowWidgetNumber(tree->model(), this, tree);

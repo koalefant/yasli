@@ -20,14 +20,6 @@ class PropertyRowImpl;
 template<class Type, class Derived = PropertyRowImpl<Type, Unspecified_Derived_Argument> >
 class PropertyRowImpl : public PropertyRowField{
 public:
-	PropertyRowImpl()
-	: PropertyRowField()
-	{
-	}
-	PropertyRowImpl(const char* name, const char* label, const char* typeName)
-	: PropertyRowField(name, label, typeName)
-	{
-	}	
 	bool assignTo(void* object, size_t size){
 		*reinterpret_cast<Type*>(object) = value();
 		return true;
@@ -48,7 +40,8 @@ public:
 	}
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	PropertyRow* clone() const{
-		Derived* result = new Derived(name_, label_, typeName_);
+		Derived* result = new Derived();
+		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
 		return cloneChildren(result, static_cast<const Derived* const>(this));
 	}

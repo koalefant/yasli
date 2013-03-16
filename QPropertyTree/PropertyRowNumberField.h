@@ -39,10 +39,6 @@ protected:
 class PropertyRowNumberField : public PropertyRow
 {
 public:
-	PropertyRowNumberField();
-	PropertyRowNumberField(const char* name, const char* nameAlt, const char* typeName);
-	PropertyRowNumberField(const char* name, const char* nameAlt, const yasli::Serializer& ser);
-
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	int widgetSizeMin() const{ 
 		if (userWidgetSize() >= 0)

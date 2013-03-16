@@ -16,13 +16,8 @@
 
 YASLI_CLASS(PropertyRow, PropertyRowBool, "bool");
 
-PropertyRowBool::PropertyRowBool(const char* name, const char* label, const char* typeName)
-: PropertyRow(name, label, typeName)
-, value_(false)
-{
-}
-
 PropertyRowBool::PropertyRowBool()
+: value_(false)
 {
 }
 

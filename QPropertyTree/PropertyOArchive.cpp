@@ -130,7 +130,8 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		if (rootNode_)
 			newRow = static_cast<RowType*>(rootNode_.get());
 		else		
-			newRow.reset(new RowType(name, label, typeName));
+			newRow.reset(new RowType());
+		newRow->setNames(name, label, typeName);
 		if(updateMode_){
 			model_->setRoot(newRow);
 			return newRow;
@@ -157,17 +158,16 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		else{
 			//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
 			PropertyRowFactory& factory = PropertyRowFactory::the();
-			newRow = static_cast<RowType*>(factory.create(typeName, PropertyRowArg(name, label, typeName)));
+			newRow = static_cast<RowType*>(factory.create(typeName));
 			if(!newRow)
-				newRow.reset(new RowType(name, label, typeName));
+				newRow.reset(new RowType());
 
 			if(model_->expandLevels() != 0 && (model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level()))
 				newRow->_setExpanded(true);
 		}
+		newRow->setNames(name, label, typeName);
 		currentNode_->add(newRow);
-		if (newRow->label() != label)
-			newRow->setLabel(label);
-		else if (!oldRow) {
+		if (!oldRow) {
 			// for new rows we should mark all parents with labelChanged_
 			newRow->setLabelChanged();
 			newRow->setLabelChangedToChildren();
@@ -195,16 +195,16 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 	}
 	else{
 		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
-		newRow = new RowType(name, label, typeName);
+		newRow = new RowType();
+		newRow->setNames(name, label, typeName);
 		if(model_->expandLevels() != 0){
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
 				newRow->_setExpanded(true);
 		}
 	}
+	newRow->setNames(name, label, typeName);
 	currentNode_->add(newRow);
-	if (newRow->label() != label)
-		newRow->setLabel(label);
-	else if (!oldRow)
+	if (!oldRow)
 		// for new rows we should mark all parents with labelChanged_
 		newRow->setLabelChanged();
 
