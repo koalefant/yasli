@@ -161,11 +161,12 @@ void PropertyRow::_setExpanded(bool expanded)
 
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* child = children_[i];
-		child->layoutChanged_ = true;
 		if(child->pulledUp())
 			child->_setExpanded(expanded);
 	}
 
+	layoutChanged_ = true;
+	setLayoutChangedToChildren();
 	
 }
 
@@ -392,6 +393,15 @@ void PropertyRow::setLabelChangedToChildren()
 	}
 }
 
+void PropertyRow::setLayoutChangedToChildren()
+{
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		children_[i]->layoutChanged_ = true;
+		children_[i]->setLayoutChangedToChildren();
+	}
+}
+
 void PropertyRow::setLabel(const char* label) 
 {
 	if (!label)
@@ -530,12 +540,31 @@ const char* PropertyRow::typeNameForFilter() const
 	return typeName;
 }
 
+void PropertyRow::updateTextSizeInitial(const QPropertyTree* tree, int index)
+{
+	char containerLabel[16] = "";
+	const char* text = rowText(containerLabel, tree, index);
+	if(text[0] == '\0')
+		textSizeInitial_ = 0;
+	else{
+		unsigned hash = calcHash(text);
+		const QFont* font = rowFont(tree);
+		hash = calcHash(font, hash);
+		if(hash != textHash_){
+			QFontMetrics fm(*font);
+			textSizeInitial_ = fm.width(text) + 3;
+			textHash_ = hash;
+		}
+	}
+}
 
 void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
-	if (!layoutChanged_ && !force)
+	PropertyRow* nonPulled = nonPulledParent();
+	if (!layoutChanged_ && !force && !nonPulled->layoutChanged_) {
+		DEBUG_TRACE_ROW("... skipping size for %s", label());
 		return;
-	layoutChanged_ = false;
+	}
 
 	plusSize_ = 0;
 	if(isRoot())
@@ -552,26 +581,14 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		if(!visible(tree) && !(isContainer() && pulledUp())){
 			size_ = QPoint(0, 0);
 			DEBUG_TRACE_ROW("row '%s' got zero size", label());
+			layoutChanged_ = false;
 			return;
 		}
 	}
 
 	widgetSize_ = widgetSizeMin();
 
-
-	yasli::string text = rowText(tree, index);
-	if(text.empty())
-		textSizeInitial_ = 0;
-	else{
-		unsigned hash = calcHash(text.c_str());
-		const QFont* font = rowFont(tree);
-		hash = calcHash(font, hash);
-		if(hash != textHash_){
-			QFontMetrics fm(*font);
-			textSizeInitial_ = fm.width(text.c_str()) + 3;
-			textHash_ = hash;
-		}
-	}
+	updateTextSizeInitial(tree, index);
 
 	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
 
@@ -584,9 +601,11 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	if(!pulledUp()){
 		int minTextSize = 0;
 		int minimalWidth = 0;
-		calcPulledRows(minTextSize, freePulledChildren, minimalWidth);
+		calcPulledRows(&minTextSize, &freePulledChildren, &minimalWidth, tree, index);
+		DEBUG_TRACE_ROW("%s minTextSize: %i, minimalWidth: %i", label(), minTextSize, minimalWidth);
 		size_.setX(minimalWidth);
 		extraSize = (tree->rightBorder() - tree->leftBorder()) - minimalWidth - posX;
+		DEBUG_TRACE_ROW("%s extraSize 0: %i", label(), extraSize);
 
 		float textScale = 1.0f;
 		bool hideOwnText = false;
@@ -600,11 +619,15 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 			textScale = clamp(1.0f - float(-extraSize) / minTextSize, 0.0f, 1.0f);
 		}
-		setTextSize(textScale);
+		setTextSize(tree, index, textScale);
 
-		if (hideOwnText)
+		if (hideOwnText) {
 			textSize_ = 0;
+			DEBUG_TRACE_ROW("%s hideOwnText", label());
+		}
 	}
+
+	DEBUG_TRACE_ROW("%s extraSize 1: %i", label(), extraSize);
 
 	WidgetPlacement widgetPlace = widgetPlacement();
 
@@ -661,12 +684,13 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	if (freePulledChildren > 0)
 		extraSize = extraSize / freePulledChildren;
 
-	if (widgetPlace == WIDGET_VALUE)
-	{
+	if (widgetPlace == WIDGET_VALUE) {
 		if(widgetSize_ && !isWidgetFixed() && extraSize > 0)
+			DEBUG_TRACE_ROW("%s widget extraSize: %i", label(), extraSize);
 			widgetSize_ += extraSize;
 
 		widgetPos_ = posX;
+		DEBUG_TRACE_ROW("textSize: %i widgetPos: %i", int(textSize_), int(widgetPos_));
 		posX += widgetSize_;
 		int delta = tree->rightBorder() - posX;
 		if(delta > 0 && delta < 4)
@@ -675,11 +699,13 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 	size_.setX(textSize_ + widgetSize_);
 
-	PropertyRow* nonPulled = nonPulledParent();
+	//PropertyRow* nonPulled = nonPulledParent();
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
-		if(!row->visible(tree))
+		if(!row->visible(tree)) {
+			DEBUG_TRACE_ROW("skipping invisible child: %s", row->label());
 			continue;
+		}
 		if(row->pulledUp()){
 			if(!row->pulledBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
@@ -688,14 +714,14 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			size_.setX(size_.x() + row->size_.x());
 			size_.setY(max(size_.y(), row->size_.y()));
 		}
-		else if(nonPulled->expanded())
+		else if(expanded())
 			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
 	}
 
 	if(!pulledUp())
 		size_.setX(tree->rightBorder() - pos_.x());
-	labelChanged_ = false;
 	DEBUG_TRACE_ROW("calculateMinimalSize: '%s' %i %i (%s)", label(), size_.x(), size_.y(), isRoot() ? "root" : "non-root");
+	layoutChanged_ = false;
 }
 
 void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight)
@@ -723,26 +749,30 @@ void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHe
 	}
 }
 
-void PropertyRow::setTextSize(float mult)
+void PropertyRow::setTextSize(const QPropertyTree* tree, int index, float mult)
 {
+	updateTextSizeInitial(tree, index);
+
 	textSize_ = round(textSizeInitial_ * mult);
 
 	Rows::iterator i;
 	for(i = children_.begin(); i != children_.end(); ++i)
 		if((*i)->pulledUp())
-			(*i)->setTextSize(mult);
+			(*i)->setTextSize(tree, index, mult);
 }
 
-void PropertyRow::calcPulledRows(int& minTextSize, int& freePulledChildren, int& minimalWidth) 
+void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree *tree, int index) 
 {
-	minTextSize += textSizeInitial_;
+	updateTextSizeInitial(tree, index);
+
+	*minTextSize += textSizeInitial_;
 	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
-		++freePulledChildren;
-	minimalWidth += textSizeInitial_ + widgetSizeMin();
+		*freePulledChildren += 1;
+	*minimalWidth += textSizeInitial_ + widgetSizeMin();
 
 	for(Rows::const_iterator it = children_.begin(); it != children_.end(); ++it)
 		if((*it)->pulledUp())
-			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth);
+			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
 }
 
 PropertyRow* PropertyRow::findSelected()
@@ -909,7 +939,8 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 	QRect rowRect = rect();
 
 	// drawing a horizontal line
-	yasli::wstring text = toWideChar(rowText(tree, index).c_str());
+	char containerLabel[16] = "";
+	yasli::wstring text = toWideChar(rowText(containerLabel, tree, index));
 
 	if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 		 !pulledUp() && !isFullRow(tree) && !hasPulled())
@@ -1106,21 +1137,18 @@ void PropertyRow::intersect(const PropertyRow* row)
 	}
 }
 
-yasli::string PropertyRow::rowText(const QPropertyTree* tree, int index) const
+const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const QPropertyTree* tree, int index) const
 {
 	if(parent() && parent()->isContainer()){
-		yasli::string text;
 		if (tree->showContainerIndices()) {
-			char buffer[15];
-            sprintf(buffer, " %i.", index);
-			text = buffer;
-			return text;
+            sprintf(containerLabelBuffer, " %i.", index);
+			return containerLabelBuffer;
 		}
 		else
-			return yasli::string();
+			return "";
 	}
 	else
-		return labelUndecorated() ? labelUndecorated() : yasli::string();
+		return labelUndecorated() ? labelUndecorated() : "";
 }
 
 bool PropertyRow::hasVisibleChildren(const QPropertyTree* tree, bool internalCall) const

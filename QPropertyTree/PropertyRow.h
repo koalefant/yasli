@@ -171,13 +171,15 @@ public:
 	void setLabelChanged();
 	void setLayoutChanged();
 	void setLabelChangedToChildren();
+	void setLayoutChangedToChildren();
 	void updateLabel(const QPropertyTree* tree, int index);
+	void updateTextSizeInitial(const QPropertyTree* tree, int index);
 	virtual void labelChanged() {}
 	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
-	yasli::string rowText(const QPropertyTree* tree, int rowIndex) const;
+	const char* rowText(char (&containerLabelBuffer)[16], const QPropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
@@ -203,9 +205,9 @@ public:
 	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calcPulledRows(int& minTextSize, int& freePulledChildren, int& minimalWidth);
+	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree* tree, int index);
 	void calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index);
-	void setTextSize(float multiplier);
+	void setTextSize(const QPropertyTree* tree, int rowIndex, float multiplier);
 	void calculateTotalSizes(int* minTextSize);
 	void adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight);
 

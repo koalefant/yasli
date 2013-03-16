@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
 : QMainWindow(parent)
 {
 #ifdef NDEBUG
-	globalTestData.elements.resize(10000);
+	globalTestData.elements.resize(50000);
 #else
 	globalTestData.elements.resize(5000);
 #endif
