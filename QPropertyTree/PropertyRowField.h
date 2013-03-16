@@ -15,7 +15,6 @@ class PropertyRowField : public PropertyRow
 public:
 	PropertyRowField();
 	PropertyRowField(const char* name, const char* nameAlt, const char* typeName);
-    PropertyRowField(const char* name, const char* nameAlt, const yasli::Serializer& ser);
 
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	int widgetSizeMin() const{ 

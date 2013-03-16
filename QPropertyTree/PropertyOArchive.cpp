@@ -93,7 +93,6 @@ void PropertyOArchive::closeStruct(const char* name)
 	if(currentNode_){
 		lastNode_ = currentNode_;
 		currentNode_ = currentNode_->parent();
-//		lastNode_->setLabelChanged();
 	}
 }
 
@@ -393,6 +392,7 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 			const yasli::TypeDescription *desc = factory->descriptionByIndex((int)i);
 			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
 				PropertyOArchive ar(model_, true);
+				//ar.setInnerContext(getInnerContext());
 				ar.setContextMap(contextMap());
 				ar.setFilter(getFilter());
 
@@ -415,7 +415,6 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
-//	currentNode_->setLabelChanged();
 	closeStruct(name);
 	return true;
 }

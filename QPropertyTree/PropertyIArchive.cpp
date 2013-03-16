@@ -222,7 +222,6 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 	if(!openRow(name, label, typeName))
         return false;
 
-
     size_t size = 0;
 	if(currentNode_->multiValue())
 		size = ser.size();
@@ -350,7 +349,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if (stack_.back().rowIndex < currentNode_->children_.size())
+		if (stack_.back().rowIndex < int(currentNode_->children_.size()))
 			node = currentNode_->children_[stack_.back().rowIndex];
 		++stack_.back().rowIndex;
 	}

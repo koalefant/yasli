@@ -15,7 +15,6 @@
 #include "PropertyDrawContext.h"
 #include "QPropertyTree.h"
 #include "ConstStringList.h"
-//#include "ClassMenu.h"
 
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
@@ -44,7 +43,6 @@ PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
 
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
-
 
 PropertyRowStringListStaticValue::PropertyRowStringListStaticValue()
 : PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>()

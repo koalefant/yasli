@@ -29,7 +29,6 @@ public:
 	bool onActivate(QPropertyTree* tree, bool force);
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
     yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
-    yasli::wstring digestValue() const { return value_ ? toWideChar(labelUndecorated()) : yasli::wstring(); }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
 		PropertyRowBool* result = new PropertyRowBool(name_, label_, typeName_);

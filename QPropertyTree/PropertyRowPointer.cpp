@@ -15,33 +15,6 @@
 #include "Unicode.h"
 #include <QtGui/QMenu>
 
-void CreatePointerMenuHandler::onMenuCreateByIndex()
-{
-	tree->model()->push(row);
-	if(index < 0){ // NULL value
-		row->setDerivedType(TypeID(), 0);
-		row->clear();
-	}
-	else{
-		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(row->baseType(), index);
-		if (defaultValue && defaultValue->root) {
-			YASLI_ASSERT(defaultValue->root->refCount() == 1);
-			if(useDefaultValue){
-				row->clear();
-				row->cloneChildren(row, defaultValue->root);
-			}
-			row->setDerivedType(defaultValue->type, row->factory());
-			row->setLabelChanged();
-			row->setLabelChangedToChildren();
-			tree->expandRow(row);
-		}
-		else{
-			row->setDerivedType(TypeID(), 0);
-			row->clear();
-		}
-	}
-	tree->model()->rowChanged(row);
-}
 
 // ---------------------------------------------------------------------------
 
@@ -141,6 +114,33 @@ bool PropertyRowPointer::assignTo(yasli::PointerInterface &ptr)
 }
 
 
+void CreatePointerMenuHandler::onMenuCreateByIndex()
+{
+	tree->model()->push(row);
+	if(index < 0){ // NULL value
+		row->setDerivedType(TypeID(), 0);
+		row->clear();
+	}
+	else{
+		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(row->baseType(), index);
+		if (defaultValue && defaultValue->root) {
+			YASLI_ASSERT(defaultValue->root->refCount() == 1);
+			if(useDefaultValue){
+				row->clear();
+				row->cloneChildren(row, defaultValue->root);
+			}
+			row->setDerivedType(defaultValue->type, row->factory());
+			row->setLabelChanged();
+			row->setLabelChangedToChildren();
+			tree->expandRow(row);
+		}
+		else{
+			row->setDerivedType(TypeID(), 0);
+			row->clear();
+		}
+	}
+	tree->model()->rowChanged(row);
+}
 
 
 yasli::string PropertyRowPointer::valueAsString() const

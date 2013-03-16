@@ -62,21 +62,11 @@ inline unsigned calcHash(const T& t, unsigned hash = 5381)
 
 // ---------------------------------------------------------------------------
 
-static int propertyRowsCreated;
-static int propertyRowsDeleted;
-
-void printPropertyRowsNumber()
-{
-	//printf("deleted %i/%i\n", propertyRowsDeleted, propertyRowsCreated);
-}
-
 ConstStringList* PropertyRow::constStrings_ = 0;
 
 PropertyRow::PropertyRow()
 {
     init("", "", "");
-	++propertyRowsCreated;
-	//printPropertyRowsNumber();
 }
 
 PropertyRow::~PropertyRow()
@@ -85,15 +75,11 @@ PropertyRow::~PropertyRow()
 	for (size_t i = 0; i < count; ++i)
 		if (children_[i]->parent() == this)
 			children_[i]->setParent(0);
-	++propertyRowsDeleted;
-	printPropertyRowsNumber();
 }
 
 PropertyRow::PropertyRow(const char* name, const char* label, const char* typeName)
 {
 	init(name, label, typeName);
-	++propertyRowsCreated;
-	//printPropertyRowsNumber();
 }
 
 void PropertyRow::init(const char* name, const char* label, const char* typeName)
@@ -234,7 +220,6 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
 	expanded_ = row.expanded_;
 	selected_ = row.selected_;
     if(recurse){
-
 		int numChildren = children_.size();
 		for (int i = 0; i < numChildren; ++i) {
             PropertyRow* child = children_[i].get();
@@ -368,7 +353,7 @@ void PropertyRow::serialize(Archive& ar)
 	}
 }
 
-bool PropertyRow::onActivate( QPropertyTree* tree, bool force)
+bool PropertyRow::onActivate(QPropertyTree* tree, bool force)
 {
     return tree->spawnWidget(this, force);
 }
@@ -611,7 +596,6 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		bool hideOwnText = false;
 		if(extraSize < 0){
 			// hide container item text first
-			
 			if (parent() && parent()->isContainer()){
 				extraSize += textSizeInitial_;
 				minTextSize -= textSizeInitial_;
@@ -667,7 +651,6 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			{
 				int oldX = posX;
 				int newX = max(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth())), posX);
-				//int newX = max(rect.left() + round(rect.width()* (1.f - tree->valueColumnWidth())), pos.x());
 				int xDelta = newX - oldX;
 				if (xDelta <= extraSize)
 				{
@@ -760,7 +743,7 @@ void PropertyRow::setTextSize(const QPropertyTree* tree, int index, float mult)
 	Rows::iterator i;
 	for(i = children_.begin(); i != children_.end(); ++i)
 		if((*i)->pulledUp())
-			(*i)->setTextSize(tree, index, mult);
+			(*i)->setTextSize(tree, 0, mult);
 }
 
 void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree *tree, int index) 
@@ -1017,6 +1000,9 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 		tree->_drawRowLabel(painter, text.c_str(), font, textRect(), textColor);
 	}
 }
+
+
+
 
 void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const
 {	
@@ -1281,8 +1267,6 @@ struct HorizontalIndexOp{
 
 int PropertyRow::horizontalIndex(QPropertyTree* tree, PropertyRow* row)
 {
-
-
 	if(row == this)
 		return 0;
     HorizontalIndexOp op(row);

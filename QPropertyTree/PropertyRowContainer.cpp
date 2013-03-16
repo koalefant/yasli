@@ -27,90 +27,7 @@ ContainerMenuHandler::ContainerMenuHandler(QPropertyTree* tree, PropertyRowConta
 {
 }
 
-void ContainerMenuHandler::onMenuAppendElement()
-{
-	tree->model()->push(container);
-	PropertyRow* defaultType = container->defaultRow(tree->model());
-	YASLI_ESCAPE(defaultType != 0, return);
-	PropertyRow* clonedRow = defaultType->clone();
-	if(container->count() == 0)
-		tree->expandRow(container);
-	container->add(clonedRow);
-	clonedRow->setLabelChanged();
-	clonedRow->setLabelChangedToChildren();
-	container->setMultiValue(false);
-	if(container->expanded())
-		tree->model()->selectRow(clonedRow, true);
-	tree->expandRow(clonedRow);
-	PropertyTreeModel::Selection sel = tree->model()->selection();
-	tree->model()->rowChanged(clonedRow);
-	tree->model()->setSelection(sel);
-	tree->update(); 
-	clonedRow = tree->selectedRow();
-	if(clonedRow->activateOnAdd())
-		clonedRow->onActivate(tree, false);
-}
 
-void ContainerMenuHandler::onMenuAppendPointerByIndex()
-{
-	PropertyRow* defaultType = container->defaultRow(tree->model());
-	PropertyRow* clonedRow = defaultType->clone();
-	// clonedRow->setFullRow(true); TODO
-	if(container->count() == 0)
-		tree->expandRow(container);
-	container->add(clonedRow);
-	clonedRow->setLabelChanged();
-	clonedRow->setLabelChangedToChildren();
-	container->setMultiValue(false);
-	PropertyRowPointer* pointer = static_cast<PropertyRowPointer*>(clonedRow);
-	if(container->expanded())
-		tree->model()->selectRow(clonedRow, true);
-	tree->expandRow(pointer);
-	PropertyTreeModel::Selection sel = tree->model()->selection();
-
-	CreatePointerMenuHandler handler;
-	handler.tree = tree;
-	handler.row = pointer;
-	handler.index = pointerIndex;
-	handler.onMenuCreateByIndex();
-	tree->model()->setSelection(sel);
-	tree->update(); 
-}
-
-void ContainerMenuHandler::onMenuRemoveAll()
-{
-	tree->model()->push(container);
-	container->clear();
-	tree->model()->rowChanged(container);
-}
-
-void ContainerMenuHandler::onMenuChildInsertBefore()
-{
-	tree->model()->push(container);
-	PropertyRow* defaultType = tree->model()->defaultType(container->elementTypeName());
-	if(!defaultType)
-		return;
-	PropertyRow* clonedRow = defaultType->clone();
-	element->setSelected(false);
-	container->addBefore(clonedRow, element);
-	container->setMultiValue(false);
-	tree->model()->selectRow(clonedRow, true);
-	PropertyTreeModel::Selection sel = tree->model()->selection();
-	tree->model()->rowChanged(clonedRow);
-	tree->model()->setSelection(sel);
-	tree->update(); 
-	clonedRow = tree->selectedRow();
-	if(clonedRow->activateOnAdd())
-		clonedRow->onActivate(tree, false);
-}
-
-void ContainerMenuHandler::onMenuChildRemove()
-{
-	tree->model()->push(container);
-	container->erase(element);
-	container->setMultiValue(false);
-	tree->model()->rowChanged(container);
-}
 
 // ---------------------------------------------------------------------------
 YASLI_CLASS(PropertyRow, PropertyRowContainer, "Container");
@@ -241,6 +158,13 @@ bool PropertyRowContainer::onContextMenu(QMenu& menu, QPropertyTree* tree)
 }
 
 
+void ContainerMenuHandler::onMenuRemoveAll()
+{
+	tree->model()->push(container);
+	container->clear();
+	tree->model()->rowChanged(container);
+}
+
 PropertyRow* PropertyRowContainer::defaultRow(PropertyTreeModel* model)
 {
 	PropertyRow* defaultType = model->defaultType(elementTypeName_);
@@ -254,6 +178,85 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 	const PropertyRow* defaultType = model->defaultType(elementTypeName_);
 	return defaultType;
 }
+
+void ContainerMenuHandler::onMenuAppendElement()
+{
+	tree->model()->push(container);
+	PropertyRow* defaultType = container->defaultRow(tree->model());
+	YASLI_ESCAPE(defaultType != 0, return);
+	PropertyRow* clonedRow = defaultType->clone();
+	if(container->count() == 0)
+		tree->expandRow(container);
+	container->add(clonedRow);
+	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
+	container->setMultiValue(false);
+	if(container->expanded())
+		tree->model()->selectRow(clonedRow, true);
+	tree->expandRow(clonedRow);
+	PropertyTreeModel::Selection sel = tree->model()->selection();
+	tree->model()->rowChanged(clonedRow);
+	tree->model()->setSelection(sel);
+	tree->update(); 
+	clonedRow = tree->selectedRow();
+	if(clonedRow->activateOnAdd())
+		clonedRow->onActivate(tree, false);
+}
+
+void ContainerMenuHandler::onMenuAppendPointerByIndex()
+{
+	PropertyRow* defaultType = container->defaultRow(tree->model());
+	PropertyRow* clonedRow = defaultType->clone();
+	// clonedRow->setFullRow(true); TODO
+	if(container->count() == 0)
+		tree->expandRow(container);
+	container->add(clonedRow);
+	clonedRow->setLabelChanged();
+	clonedRow->setLabelChangedToChildren();
+	container->setMultiValue(false);
+	PropertyRowPointer* pointer = static_cast<PropertyRowPointer*>(clonedRow);
+	if(container->expanded())
+		tree->model()->selectRow(clonedRow, true);
+	tree->expandRow(pointer);
+	PropertyTreeModel::Selection sel = tree->model()->selection();
+
+	CreatePointerMenuHandler handler;
+	handler.tree = tree;
+	handler.row = pointer;
+	handler.index = pointerIndex;
+	handler.onMenuCreateByIndex();
+	tree->model()->setSelection(sel);
+	tree->update(); 
+}
+
+void ContainerMenuHandler::onMenuChildInsertBefore()
+{
+	tree->model()->push(container);
+	PropertyRow* defaultType = tree->model()->defaultType(container->elementTypeName());
+	if(!defaultType)
+		return;
+	PropertyRow* clonedRow = defaultType->clone();
+	element->setSelected(false);
+	container->addBefore(clonedRow, element);
+	container->setMultiValue(false);
+	tree->model()->selectRow(clonedRow, true);
+	PropertyTreeModel::Selection sel = tree->model()->selection();
+	tree->model()->rowChanged(clonedRow);
+	tree->model()->setSelection(sel);
+	tree->update(); 
+	clonedRow = tree->selectedRow();
+	if(clonedRow->activateOnAdd())
+		clonedRow->onActivate(tree, false);
+}
+
+void ContainerMenuHandler::onMenuChildRemove()
+{
+	tree->model()->push(container);
+	container->erase(element);
+	container->setMultiValue(false);
+	tree->model()->rowChanged(container);
+}
+
 
 void PropertyRowContainer::labelChanged()
 {

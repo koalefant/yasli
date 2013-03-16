@@ -408,14 +408,14 @@ bool PropertyRow::scanChildren(Op& op)
 template<class Op>
 bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
 {
-	Rows::iterator it;
-	int index = 0;
-	for(it = children_.begin(); it != children_.end(); ++it, ++index){
-		ScanResult result = op(*it, tree, index);
+	int numChildren = children_.size();
+	for(int index = 0; index < numChildren; ++index){
+		PropertyRow* child = children_[index];
+		ScanResult result = op(child, tree, index);
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
-			if(!(*it)->scanChildren(op, tree))
+			if(!child->scanChildren(op, tree))
 				return false;
 			if(result == SCAN_CHILDREN)
 				return false;
@@ -427,13 +427,14 @@ bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
 template<class Op>
 bool PropertyRow::scanChildrenReverse(Op& op, QPropertyTree* tree)
 {
-	int index = children_.size() - 1;
-	for(Rows::reverse_iterator it = children_.rbegin(); it != children_.rend(); ++it, --index){
-		ScanResult result = op(*it, tree, index);
+	int numChildren = children_.size();
+	for(int index = numChildren - 1; index >= 0; --index){
+		PropertyRow* child = children_[index];
+		ScanResult result = op(child, tree, index);
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
-			if(!(*it)->scanChildrenReverse(op, tree))
+			if(!child->scanChildrenReverse(op, tree))
 				return false;
 			if(result == SCAN_CHILDREN)
 				return false;

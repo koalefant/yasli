@@ -132,6 +132,8 @@ public:
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
 
 	QPoint treeSize() const;
+	int leftBorder() const { return leftBorder_; }
+	int rightBorder() const { return rightBorder_; }
 	bool multiSelectable() const { return attachedPropertyTree_ != 0; }
 	
 	void onSignalChanged() { signalChanged(); }
@@ -143,6 +145,10 @@ public:
 	void ensureVisible(PropertyRow* row, bool update = true);
 	void expandParents(PropertyRow* row);
 	void expandRow(PropertyRow* row, bool expanded = true, bool updateHeights = true);
+public slots:
+	void expandAll(PropertyRow* root = 0);
+	void collapseAll(PropertyRow* root = 0);
+public:
 
 	void serialize(yasli::Archive& ar);
 
@@ -151,8 +157,6 @@ public:
 
 	// internal methods:
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
-	int leftBorder() const{ return leftBorder_; }
-	int rightBorder() const{ return rightBorder_; }
 	QPoint _toScreen(QPoint point) const;
 	void _cancelWidget(){ widget_.reset(); }
 	void _drawRowLabel(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color) const;
@@ -166,8 +170,8 @@ public:
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
-	void startFilter(const char* filter);
 	ConstStringList* constStrings() { return &constStrings_; }
+
 signals:
 	void signalChanged();
 	void signalObjectChanged(const yasli::Object& obj);
@@ -175,8 +179,6 @@ signals:
 	void signalReverted();
 	void signalPushUndo();
 public slots:
-	void expandAll(PropertyRow* root = 0);
-	void collapseAll(PropertyRow* root = 0);
     void onFilterChanged(const QString& str);
 protected slots:
 	void onScroll(int pos);
@@ -198,6 +200,7 @@ protected:
 	void revertChanged(bool enforceAll);
 	PropertyRow* rowByPoint(const QPoint& point);
 	HitTest hitTest(PropertyRow* row, const QPoint& pointInWindowSpace, const QRect& rowRect);
+	void onRowMenuDecompose(PropertyRow* row);
 
 	QSize sizeHint() const override;
 	void paintEvent(QPaintEvent* ev) override;
@@ -247,7 +250,7 @@ protected:
 	void clearMenuHandlers();
 	bool onRowKeyDown(PropertyRow* row, const QKeyEvent* ev);
 	// points here are specified in root-row space
-	bool onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point);
+	bool onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point, bool controlPressed);
 	void onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint point);
 	void onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point);
 	void onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoint point);
@@ -258,6 +261,7 @@ protected:
 	bool canBePasted(const char* destinationType);
 
 	void setFilterMode(bool inFilterMode);
+	void startFilter(const char* filter);
 	void setWidget(PropertyRowWidget* widget);
 	void _arrangeChildren();
 

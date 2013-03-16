@@ -244,7 +244,7 @@ TreeConfig::TreeConfig()
 : immediateUpdate_(true)
 , hideUntranslated_(true)
 , valueColumnWidth_(.5f)
-, filter_(0)
+, filter_(YASLI_DEFAULT_FILTER)
 , compact_(false)
 , fullRowMode_(false)
 , showContainerIndices_(true)
@@ -524,20 +524,21 @@ protected:
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 QPropertyTree::QPropertyTree(QWidget* parent)
 : QWidget(parent)
+, sizeHint_(180, 180)
 , model_(0)
 , cursorX_(0)
 , attachedPropertyTree_(0)
 , autoRevert_(true)
-, filterMode_(false)
-, sizeHint_(180, 180)
 , dragController_(new DragController(this))
 , capturedRow_(0)
+, leftBorder_(0)
+, rightBorder_(0)
+, filterMode_(false)
+
 , applyTime_(0)
 , revertTime_(0)
 , updateHeightsTime_(0)
 , paintTime_(0)
-, leftBorder_(0)
-, rightBorder_(0)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -696,7 +697,7 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 	return false;
 }
 
-bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point)
+bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point, bool controlPressed)
 {
 	pressPoint_ = point;
 	row = model()->root()->hit(this, point);
@@ -707,7 +708,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 		while (rowToSelect && !rowToSelect->isSelectable())
 			rowToSelect = rowToSelect->parent();
 		if (rowToSelect)
-			onRowSelected(rowToSelect, false, true);	
+			onRowSelected(rowToSelect, multiSelectable() && controlPressed, true);	
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
@@ -732,8 +733,6 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint point)
 {
 	row->onMouseUp(this, point);
-	//if(GetCapture() == _window()->handle())
-	//	ReleaseCapture();
 
 	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect().contains(point)) {
 		row->onActivateRelease(this);
@@ -742,7 +741,7 @@ void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint po
 
 void QPropertyTree::onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point)
 {
-  SharedPtr<PropertyRow> handle = row;
+	SharedPtr<PropertyRow> handle = row;
 	PropertyRow* menuRow = 0;
 
 	if (row->isSelectable()){
@@ -875,7 +874,6 @@ void QPropertyTree::updateHeights()
 
 	int padding = compact_ ? 4 : 6;
 
-	int extraSize = 0;
 	int totalHeight = 0;
 	model()->root()->adjustVerticalPosition(this, totalHeight);
 	size_.setY(totalHeight);
@@ -938,7 +936,6 @@ void QPropertyTree::onScroll(int pos)
 void QPropertyTree::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_STATE)){
-		//ar(offset_, "offset", 0);		
 		model()->serialize(ar, this);
 
 		if(ar.isInput()){
@@ -952,7 +949,7 @@ void QPropertyTree::serialize(Archive& ar)
 
 void QPropertyTree::ensureVisible(PropertyRow* row, bool update)
 {
-  if (row == 0)
+	if (row == 0)
 		return;
 	if(row->isRoot())
 		return;
@@ -1115,7 +1112,7 @@ void QPropertyTree::apply()
 
 void QPropertyTree::applyChanged(bool enforce)
 {
-	printf("applyChanges()\n");
+	//printf("applyChanges()\n");
 	QElapsedTimer timer;
 	timer.start();
 	ModelObjectReferences& refs = model_->objectReferences();
@@ -1296,12 +1293,12 @@ struct DecomposeProxy
 	SharedPtr<PropertyRow>& row;
 };
 
-//void QPropertyTree::onRowMenuDecompose(PropertyRow* row)
-//{
-	// SharedPtr<PropertyRow> clonedRow = row->clone();
-	// DecomposeProxy proxy(clonedRow);
-	// edit(SStruct(proxy), 0, IMMEDIATE_UPDATE, this);
-//}
+void QPropertyTree::onRowMenuDecompose(PropertyRow* row)
+{
+  // SharedPtr<PropertyRow> clonedRow = row->clone();
+  // DecomposeProxy proxy(clonedRow);
+  // edit(SStruct(proxy), 0, IMMEDIATE_UPDATE, this);
+}
 
 void QPropertyTree::onModelUpdated(const PropertyRows& rows)
 {
@@ -1406,6 +1403,8 @@ void QPropertyTree::startFilter(const char* filter)
 }
 
 
+
+
 void QPropertyTree::_arrangeChildren()
 {
 	if(widget_){
@@ -1441,6 +1440,8 @@ void QPropertyTree::_arrangeChildren()
 		filterEntry_->resize(pos.size() - QSize(scrollBar_ ? scrollBar_->width() : 0, 0));
 	}
 }
+
+
 
 void QPropertyTree::setExpandLevels(int levels)
 {
@@ -1525,11 +1526,11 @@ void QPropertyTree::setUndoEnabled(bool enabled, bool full)
 
 void QPropertyTree::attachPropertyTree(QPropertyTree* propertyTree) 
 { 
-	//if(attachedPropertyTree_)
+	// if(attachedPropertyTree_)
 	//	attachedPropertyTree_->signalChanged().disconnect(this);
-//	attachedPropertyTree_ = propertyTree; 
-//	attachedPropertyTree_->signalChanged().connect(this, &QPropertyTree::revert);
-//	updateAttachedPropertyTree(); 
+	//	attachedPropertyTree_ = propertyTree; 
+	//	attachedPropertyTree_->signalChanged().connect(this, &QPropertyTree::revert);
+	//	updateAttachedPropertyTree(); 
 }
 
 void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
@@ -1835,7 +1836,6 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
                 highlightBorderColor.setHsv(h, s * 0.5f, v, 255);
             }
 
-	// 		Gdiplus::SolidBrush br(Gdiplus::Color(highlightColor.argb()));
             int left = int(boxFull.left() + boxStart.width()) - 1;
             int top = int(boxFull.top());
             int right = int(boxFull.left() + boxEnd.width());
@@ -1848,8 +1848,6 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
             p.setRenderHint(QPainter::Antialiasing, true);
             p.drawRoundedRect(highlightRect, 4.0, 4.0);
             p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
-
-	// 		fillRoundRectangle(gr, &br, highlightRect, Gdiplus::Color(highlightBorderColor.argb()) /*Gdiplus::Color(255, 255, 128)*/, 1);
         }
 	}
 	
@@ -2045,7 +2043,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 		if(row && !row->isSelectable())
 			row = row->parent();
 		if(row){
-			if(onRowLMBDown(row, row->rect(), pointToRootSpace(ev->pos())))
+			if(onRowLMBDown(row, row->rect(), pointToRootSpace(ev->pos()), ev->modifiers().testFlag(Qt::ControlModifier)))
 				capturedRow_ = row;
 			else{
 				row = rowByPoint(ev->pos());

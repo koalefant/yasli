@@ -26,7 +26,6 @@ public:
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);
 	void setValue(const wchar_t* str);
-	using PropertyRowImpl<yasli::wstring, PropertyRowString>::assignTo;
 	PropertyRowWidget* createWidget(QPropertyTree* tree);
 	yasli::string valueAsString() const;
 	yasli::wstring valueAsWString() const { return value_; }
