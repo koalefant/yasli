@@ -19,8 +19,8 @@
 # define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 # define DEBUG_TRACE_TOKENIZER(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 #else
-# define DEBUG_TRACE(x)
-# define DEBUG_TRACE_TOKENIZER(x)
+# define DEBUG_TRACE(...)
+# define DEBUG_TRACE_TOKENIZER(...)
 #endif
 
 namespace yasli{

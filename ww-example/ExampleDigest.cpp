@@ -22,10 +22,10 @@ struct DigestItem
 	void serialize(Archive& ar)
 	{
 		// & character makes item appear in a digest of parent row
-		ar(name_, "name", "&Name");
-		ar(enabled_, "enabled", "&Enabled");
-		ar(color_, "color", "&Color");
-		ar(weight_, "weight", "&Weight");
+		ar(name_, "name", "^Name");
+		ar(enabled_, "enabled", "Enabled");
+		ar(color_, "color", "Color");
+		ar(weight_, "weight", "Weight");
 	}
 
 	DigestItem()

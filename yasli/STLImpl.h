@@ -10,6 +10,7 @@
 #pragma once
 
 #include "yasli/Serializer.h"
+#include "yasli/KeyValue.h"
 
 namespace yasli {
 
