@@ -611,6 +611,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		bool hideOwnText = false;
 		if(extraSize < 0){
 			// hide container item text first
+			
 			if (parent() && parent()->isContainer()){
 				extraSize += textSizeInitial_;
 				minTextSize -= textSizeInitial_;
@@ -685,9 +686,10 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		extraSize = extraSize / freePulledChildren;
 
 	if (widgetPlace == WIDGET_VALUE) {
-		if(widgetSize_ && !isWidgetFixed() && extraSize > 0)
+		if(widgetSize_ && !isWidgetFixed() && extraSize > 0) {
 			DEBUG_TRACE_ROW("%s widget extraSize: %i", label(), extraSize);
 			widgetSize_ += extraSize;
+		}
 
 		widgetPos_ = posX;
 		DEBUG_TRACE_ROW("textSize: %i widgetPos: %i", int(textSize_), int(widgetPos_));

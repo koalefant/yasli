@@ -215,11 +215,11 @@ public:
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
-	const QRect rect() const{ return QRect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
-	const QRect textRect() const{ return QRect(textPos_, pos_.y(), textSize_, ROW_DEFAULT_HEIGHT); }
-	const QRect widgetRect() const{ return QRect(widgetPos_, pos_.y(), widgetSize_, ROW_DEFAULT_HEIGHT); }
-	const QRect plusRect() const{ return QRect(pos_.x(), pos_.y(), plusSize_, ROW_DEFAULT_HEIGHT); }
-	const QRect floorRect() const { return QRect(textPos_, pos_.y() + ROW_DEFAULT_HEIGHT, size_.x(), size_.y() - ROW_DEFAULT_HEIGHT); }
+	QRect rect() const{ return QRect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
+	QRect textRect() const{ return QRect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, ROW_DEFAULT_HEIGHT); }
+	QRect widgetRect() const{ return QRect(widgetPos_, pos_.y(), widgetSize_, ROW_DEFAULT_HEIGHT); }
+	QRect plusRect() const{ return QRect(pos_.x(), pos_.y(), plusSize_, ROW_DEFAULT_HEIGHT); }
+	QRect floorRect() const { return QRect(textPos_, pos_.y() + ROW_DEFAULT_HEIGHT, size_.x(), size_.y() - ROW_DEFAULT_HEIGHT); }
 	void adjustHoveredRect(QRect& hoveredRect);
 	const QFont* rowFont(const QPropertyTree* tree) const;
 

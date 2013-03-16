@@ -25,6 +25,11 @@ inline float max(float a, float b)
 	return a > b ? a : b;
 }
 
+inline float clamp(float value, float min, float max)
+{
+	return ::min(::max(min, value), max);
+}
+
 inline int clamp(int value, int min, int max)
 {
 	return ::min(::max(min, value), max);
