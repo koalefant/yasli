@@ -54,6 +54,8 @@ static void unescapeString(string& buf, const char* begin, const char* end)
 {
 	// TODO: use stack string
 	buf.resize(end-begin);
+	if(begin == end)
+		return;
 	char* ptr = &buf[0];
 	while(begin != end){
 		if(*begin != '\\'){
