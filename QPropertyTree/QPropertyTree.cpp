@@ -601,8 +601,10 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 		break;
 	case Qt::Key_F2:
 		if (ev->modifiers() == Qt::NoModifier) {
-			if(selectedRow())
+			if(selectedRow()) {
 				selectedRow()->onActivate(this, true);
+				selectedRow()->onActivateRelease(this);
+			}
 		}
 		break;
 	case Qt::Key_Menu:
@@ -691,8 +693,10 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 	case Qt::Key_Return:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
-		else
+		else {
 			focusedRow->onActivate(this, false);
+			focusedRow->onActivateRelease(this);
+		}
 		break;
 	}
 	if(selectedRow){
@@ -2135,14 +2139,14 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 {
 	if (ev->key() == Qt::Key_F && ev->modifiers() == Qt::CTRL) {
-      setFilterMode(true);
-  }
+		setFilterMode(true);
+	}
 
-  if (filterMode_) {
-      if (ev->key() == Qt::Key_Escape && ev->modifiers() == Qt::NoModifier) {
-          setFilterMode(false);
-      }
-  }
+	if (filterMode_) {
+		if (ev->key() == Qt::Key_Escape && ev->modifiers() == Qt::NoModifier) {
+			setFilterMode(false);
+		}
+	}
 
 	bool result = false;
 	if (!widget_) {
