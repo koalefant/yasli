@@ -560,7 +560,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
     QObject::connect(filterEntry_.data(), SIGNAL(textChanged(const QString&)), this, SLOT(onFilterChanged(const QString&)));
     filterEntry_->hide();
 
-	mouseStillTimer_ = new QTimer();
+	mouseStillTimer_ = new QTimer(this);
 	mouseStillTimer_->setSingleShot(true);
 	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStill()));
 
@@ -1433,7 +1433,7 @@ void QPropertyTree::_arrangeChildren()
 			if(w){
 				QRect rect = row->widgetRect();
 				rect = QRect(rect.topLeft() - offset_ + area_.topLeft(), 
-										 rect.bottomRight() - offset_ + area_.topLeft());
+							 rect.bottomRight() - offset_ + area_.topLeft());
 				w->move(rect.topLeft());
 				w->resize(rect.size());
 				if(!w->isVisible()){
@@ -1693,9 +1693,9 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 	Type type = NAME;
 	while (true)
 	{
-		bool fromStart = true;
-		while (*str == ' ' || *str == '*') {
-			fromStart = false;
+		bool fromStart = false;
+		while (*str == '^') {
+			fromStart = true;
 			++str;
 		}
 

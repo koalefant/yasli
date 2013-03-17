@@ -817,7 +817,7 @@ void PropertyTree::_arrangeChildren()
 			Widget* w = widget_->actualWidget();
 			YASLI_ASSERT(w);
 			if(w){
-                Rect rect = row->widgetRect();
+				Rect rect = row->widgetRect();
 				rect = Rect(rect.leftTop() - impl()->offset_ + impl()->area_.leftTop(), 
 							rect.rightBottom() - impl()->offset_ + impl()->area_.leftTop());
 				w->_setPosition(rect);
@@ -1061,13 +1061,9 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 	Type type = NAME;
 	while (true)
 	{
-#ifdef WW_STRICT_FILTER
-		bool fromStart = true;
-#else
 		bool fromStart = false;
-#endif
-		while (*str == L' ' || *str == L'*') {
-			fromStart = false;
+		while (*str == L'^') {
+			fromStart = true;
 			++str;
 		}
 
