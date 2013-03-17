@@ -56,6 +56,7 @@ public:
 	void setExpandLevels(int levels) { expandLevels_ = levels; }
 	void setUndoEnabled(bool enabled, bool full = false) { undoEnabled_ = enabled; fullUndo_ = full; }
 	void setShowContainerIndices(bool showContainerIndices) { showContainerIndices_ = showContainerIndices; }
+	void setSliderUpdateDelay(int delayMS) { sliderUpdateDelay_ = delayMS; }
 	bool showContainerIndices() const{ return showContainerIndices_; }
 
 	static TreeConfig defaultConfig;
@@ -70,6 +71,7 @@ protected:
 	float valueColumnWidth_;
 	int filter_;
 	int tabSize_;
+	int sliderUpdateDelay_;
 
 	int expandLevels_;
 	bool undoEnabled_;
@@ -184,6 +186,7 @@ protected slots:
 	void onScroll(int pos);
 	void onModelUpdated(const PropertyRows& rows);
 	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
+	void onMouseStill();
 
 private:
 	QPropertyTree(const QPropertyTree&);
@@ -281,7 +284,7 @@ protected:
 	bool filterMode_;
 	RowFilter rowFilter_;
 	QScopedPointer<QLineEdit> filterEntry_; 
-
+	
 	bool autoRevert_;
 	bool needUpdate_;
 
@@ -295,6 +298,7 @@ protected:
 	DragController* dragController_;
 	QPoint pressPoint_;
 	PropertyRow* capturedRow_;
+	QTimer* mouseStillTimer_;
 
 	int applyTime_;
 	int revertTime_;

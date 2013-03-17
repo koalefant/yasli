@@ -24,6 +24,7 @@
 #include "Unicode.h"
 
 #include <QtCore/QRect>
+#include <QtCore/QTimer>
 #include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QScrollBar>
@@ -250,6 +251,7 @@ TreeConfig::TreeConfig()
 , showContainerIndices_(true)
 , filterWhenType_(true)
 , tabSize_(PropertyRow::ROW_DEFAULT_HEIGHT)
+, sliderUpdateDelay_(25)
 {
 }
 
@@ -543,7 +545,6 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
 
-
 	(TreeConfig&)*this = defaultConfig;
 
 	model_.reset(new PropertyTreeModel());
@@ -558,6 +559,10 @@ QPropertyTree::QPropertyTree(QWidget* parent)
     filterEntry_.reset(new FilterEntry(this));
     QObject::connect(filterEntry_.data(), SIGNAL(textChanged(const QString&)), this, SLOT(onFilterChanged(const QString&)));
     filterEntry_->hide();
+
+	mouseStillTimer_ = new QTimer();
+	mouseStillTimer_->setSingleShot(true);
+	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStill()));
 
 	DrawingCache::get()->initialize();
 }
@@ -2116,6 +2121,7 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 		if(capturedRow_){
 			QRect rowRect = capturedRow_->rect();
 			onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));
+			mouseStillTimer_->stop();
 			capturedRow_ = 0;
 			update();
 		}
@@ -2169,6 +2175,18 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	}
 }
 
+void QPropertyTree::onMouseStill()
+{
+	if (capturedRow_) {
+		PropertyDragEvent e;
+		e.tree = this;
+		e.pos = mapFromGlobal(QCursor::pos());
+		e.start = pressPoint_;
+	
+		capturedRow_->onMouseStill(e);
+	}
+}
+
 void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 {
 	if(dragController_->captured() && !ev->buttons().testFlag(Qt::LeftButton))
@@ -2204,9 +2222,8 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 			}
 		}
 		if(capturedRow_){
-			QRect rect;
-			//getRowRect(capturedRow_, rect);
 			onRowMouseMove(capturedRow_, QRect(), point);
+			mouseStillTimer_->start(sliderUpdateDelay_);
 		}
 	}
 }

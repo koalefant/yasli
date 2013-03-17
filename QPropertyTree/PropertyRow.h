@@ -153,8 +153,6 @@ public:
 	const_iterator begin() const{ return children_.begin(); }
 	const_iterator end() const{ return children_.end(); }
 	std::size_t count() const{ return children_.size(); }
-	PropertyRow* front() { return children_.front(); }
-	PropertyRow* back() { return children_.back(); }
 	iterator erase(iterator it){ return children_.erase(it); }
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
@@ -250,6 +248,7 @@ public:
 	virtual bool onKeyDown(QPropertyTree* tree, const QKeyEvent* ev);
 	virtual bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) { return false; }
     virtual void onMouseDrag(const PropertyDragEvent& e) {}
+	virtual void onMouseStill(const PropertyDragEvent& e) {}
 	virtual void onMouseUp(QPropertyTree* tree, QPoint point) {}
 	virtual bool onContextMenu(QMenu &menu, QPropertyTree* tree);
 

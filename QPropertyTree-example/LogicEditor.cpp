@@ -218,6 +218,9 @@ public:
 		//ar(ww::SliderDecoratorf(howWide_, 0.0f, 1.0f), "howWide", "How Wide?");
 		ar(howWide_, "howWide", "How Wide?");
 		ar(withTeeth_, "withTeeth", "With Teeth");
+		if (ar.isInput()) {
+			printf("How wide: %.2f\n", howWide_);
+		}
 	}
 
 	void act()

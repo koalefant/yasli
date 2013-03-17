@@ -79,6 +79,11 @@ void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 	incrementLog(relativeDelta);
 }
 
+void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
+{
+	e.tree->apply();
+}
+
 void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, QPoint point) 
 {
 	tree->unsetCursor();

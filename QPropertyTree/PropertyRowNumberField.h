@@ -56,6 +56,7 @@ public:
 	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;
 	void onMouseUp(QPropertyTree* tree, QPoint point) override;
 	void onMouseDrag(const PropertyDragEvent& e) override;
+	void onMouseStill(const PropertyDragEvent& e) override;
 
 	virtual void startIncrement() = 0;
 	virtual void endIncrement(QPropertyTree* tree) = 0;
