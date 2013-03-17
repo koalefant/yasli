@@ -25,8 +25,8 @@
 # define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 # define DEBUG_TRACE_ROW(fmt, ...) for(PropertyRow* zzzz = this; zzzz; zzzz = zzzz->parent()) printf(" "); printf(fmt "\n", __VA_ARGS__)
 #else
-# define DEBUG_TRACE
-# define DEBUG_TRACE_ROW
+# define DEBUG_TRACE(...)
+# define DEBUG_TRACE_ROW(...)
 #endif
 	
 
@@ -716,9 +716,6 @@ void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHe
 			PropertyRow* row = *it;
 			if(row->visible(tree) && (nonPulled->expanded() || row->pulledUp()))
 				row->adjustVerticalPosition(tree, totalHeight);
-			else {
-				//DEBUG_TRACE_ROW("skip adjust rect for ''", row->label());
-			}
 		}
 	}
 }

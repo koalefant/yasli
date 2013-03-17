@@ -348,6 +348,10 @@ void PropertyTree::expandAll(PropertyRow* root)
 	}
 	else
 		root->setExpandedRecursive(this, true);
+
+	for (PropertyRow* r = root; r != 0; r = r->parent())
+		r->setLayoutChanged();
+
 	updateHeights();
 }
 
@@ -373,7 +377,10 @@ void PropertyTree::collapseAll(PropertyRow* root)
 		}
 	}
 
-	update();
+	for (PropertyRow* r = root; r != 0; r = r->parent())
+		r->setLayoutChanged();
+
+	updateHeights();
 }
 
 

@@ -794,6 +794,7 @@ void QPropertyTree::expandParents(PropertyRow* row)
 
 void QPropertyTree::expandAll(PropertyRow* root)
 {
+
 	if(!root){
 		root = model()->root();
 		PropertyRow::iterator it;
@@ -804,6 +805,10 @@ void QPropertyTree::expandAll(PropertyRow* root)
 	}
 	else
 		root->setExpandedRecursive(this, true);
+
+	for (PropertyRow* r = root; r != 0; r = r->parent())
+		r->setLayoutChanged();
+
 	updateHeights();
 }
 
@@ -811,6 +816,7 @@ void QPropertyTree::collapseAll(PropertyRow* root)
 {
 	if(!root){
 		root = model()->root();
+
 		PropertyRow::iterator it;
 		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
 			PropertyRow* row = *it;
@@ -829,7 +835,10 @@ void QPropertyTree::collapseAll(PropertyRow* root)
 		}
 	}
 
-	update();
+	for (PropertyRow* r = root; r != 0; r = r->parent())
+		r->setLayoutChanged();
+
+	updateHeights();
 }
 
 
@@ -2227,7 +2236,8 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 		}
 		if(capturedRow_){
 			onRowMouseMove(capturedRow_, QRect(), point);
-			mouseStillTimer_->start(sliderUpdateDelay_);
+			if (sliderUpdateDelay_ >= 0)
+				mouseStillTimer_->start(sliderUpdateDelay_);
 		}
 	}
 }
