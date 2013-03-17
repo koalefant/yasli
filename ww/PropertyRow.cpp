@@ -1047,6 +1047,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, Prope
 	SharedPtr<PropertyRow> ref(this);
 
 	PropertyTreeModel* model = tree->model();
+	PropertyTreeModel::UpdateLock lock = model->lockUpdate();
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();
 	if(parentRow->isContainer()){
