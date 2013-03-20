@@ -584,7 +584,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 				hideOwnText = true;
 			}
 
-			textScale = clamp(1.0f - float(-extraSize) / minTextSize, 0.0f, 1.0f);
+			textScale = minTextSize ? clamp(1.0f - float(-extraSize)/minTextSize, 0.0f, 1.0f) : 0;
 		}
 		setTextSize(tree, index, textScale);
 
