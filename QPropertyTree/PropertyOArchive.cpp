@@ -190,6 +190,7 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 	PropertyRow* oldRow = findRow(&rowIndex, stack_.back().oldRows, name, typeName, stack_.back().rowIndex);
 
 	if(oldRow){
+		oldRow->setMultiValue(false);
 		newRow.reset(static_cast<RowType*>(oldRow));
 		stack_.back().oldRows[rowIndex] = 0;
 		stack_.back().rowIndex = rowIndex + 1;

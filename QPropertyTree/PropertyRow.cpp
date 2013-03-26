@@ -1098,16 +1098,19 @@ void PropertyRow::intersect(const PropertyRow* row)
 {
 	setMultiValue(multiValue() || row->multiValue() || valueAsString() != row->valueAsString());
 
-	iterator it = begin();
-	const_iterator it2 = row->begin();
-	for(; it != end();){
-		if(it2 == row->end() || strcmp((*it)->typeName(), (*it2)->typeName()) != 0)
-			it = children_.erase(it);
-		else{
-			(*it)->intersect(*it2);
-			++it;
-			if(it2 != row->end())
-				++it2;
+
+	int indexSource = 0;
+	for(int i = 0; i < int(children_.size()); ++i)
+	{
+		PropertyRow* testRow = children_[i];
+		PropertyRow* matchingRow = row->findFromIndex(&indexSource, testRow->name_, testRow->typeName_, indexSource);
+		++indexSource;
+		if (matchingRow == 0) {
+			children_.erase(children_.begin() + i);
+			--i;
+		}	
+		else {
+			children_[i]->intersect(matchingRow);
 		}
 	}
 }

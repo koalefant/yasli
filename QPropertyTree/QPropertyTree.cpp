@@ -1068,7 +1068,7 @@ void QPropertyTree::revert()
 		
 		PropertyTreeModel model2;
 		while(++it != attached_.end()){
-			PropertyOArchive oa2(&model2, (PropertyRow*)0);
+			PropertyOArchive oa2(&model2, model2.root());
 			Archive::Context<QPropertyTree> treeContext(oa2, this);
 			oa2.setFilter(filter_);
 			(*it)(oa2);

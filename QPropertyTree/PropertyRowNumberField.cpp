@@ -77,6 +77,7 @@ void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 	QSize screenSize = QApplication::desktop()->screenGeometry(e.tree).size();
 	float relativeDelta = float((e.pos - e.start).x()) / screenSize.width();
 	incrementLog(relativeDelta);
+	setMultiValue(false);
 }
 
 void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
