@@ -11,7 +11,6 @@
 
 #include <map>
 #include "PropertyRow.h"
-#include "PropertyRowObject.h"
 #include "PropertyTreeOperator.h"
 #include "yasli/Pointers.h"
 
@@ -45,19 +44,6 @@ struct PropertyDefaultTypeValue
 };
 
 // ---------------------------------------------------------------------------
-struct ModelObjectReference
-{
-	yasli::SharedPtr<PropertyRowObject> row;
-	bool needUpdate;
-	bool needApply;
-
-	ModelObjectReference()
-	: needApply(false)
-	, needUpdate(true)
-	{
-	}
-};
-typedef map<void*, ModelObjectReference> ModelObjectReferences;
 
 class PropertyTreeModel : public QObject
 {
@@ -67,23 +53,27 @@ public:
 	public:
 		LockedUpdate(PropertyTreeModel* model)
 		: model_(model)
+		, apply_(false)
 		{}
-		void requestUpdate(const PropertyRows& rows) {			
+		void requestUpdate(const PropertyRows& rows, bool apply) {
 			for (size_t i = 0; i < rows.size(); ++i) {
 				PropertyRow* row = rows[i];
 				if (std::find(rows_.begin(), rows_.end(), row) == rows_.end())
 					rows_.push_back(row);
 			}
+			if (apply)
+				apply_ = true;
 		}
 		void dismissUpdate(){ rows_.clear(); }
 		~LockedUpdate(){
 			model_->updateLock_ = 0;
 			if(!rows_.empty())
-				model_->signalUpdated(rows_);
+				model_->signalUpdated(rows_, apply_);
 		}
 	protected:
 		PropertyTreeModel* model_;
 		PropertyRows rows_;
+		bool apply_;
 	};
 	typedef yasli::SharedPtr<LockedUpdate> UpdateLock;
 
@@ -111,21 +101,21 @@ public:
 	void serialize(yasli::Archive& ar, QPropertyTree* tree);
 
 	UpdateLock lockUpdate();
-	void requestUpdate(const PropertyRows& rows);
+	void requestUpdate(const PropertyRows& rows, bool needApply);
 	void dismissUpdate();
 
 	void selectRow(PropertyRow* row, bool selected, bool exclusive = true);
 	void deselectAll();
 
 	void push(PropertyRow* row);
-	void rowChanged(PropertyRow* row); // be careful: it can destroy 'row'
+	void rowChanged(PropertyRow* row, bool apply = true); // be careful: it can destroy 'row'
 
 	void setUndoEnabled(bool enabled) { undoEnabled_ = enabled; }
 	void setFullUndo(bool fullUndo) { fullUndo_ = fullUndo; }
 	void setExpandLevels(int levels) { expandLevels_ = levels; }
 	int expandLevels() const{ return expandLevels_; }
 
-	void onUpdated(const PropertyRows& rows);
+	void onUpdated(const PropertyRows& rows, bool needApply);
 
 	void applyOperator(PropertyTreeOperator* op, bool createRedo);
 
@@ -139,14 +129,9 @@ public:
 	bool defaultTypeRegistered(const yasli::TypeID& baseType, const yasli::TypeID& derivedType) const;
 	void addDefaultType(const yasli::TypeID& baseType, const PropertyDefaultTypeValue& value);
 	const PropertyDefaultTypeValue* defaultType(const yasli::TypeID& baseType, int index) const;
-	
-	// for Object rows:
-	void registerObjectRow(PropertyRowObject* row);
-	void unregisterObjectRow(PropertyRowObject* row);
-	void setRootObject(const yasli::Object& obj);
-	ModelObjectReferences& objectReferences() { return objectReferences_; }
+
 signals:
-	void signalUpdated(const PropertyRows& rows);
+	void signalUpdated(const PropertyRows& rows, bool needApply);
 	void signalPushUndo(PropertyTreeOperator* op, bool* result);
 private:
 	void pushUndo(const PropertyTreeOperator& op);
@@ -156,9 +141,7 @@ private:
 	Selection selection_;
 
 	yasli::SharedPtr<PropertyRow> root_;
-	yasli::Object rootObject_;
 	UpdateLock updateLock_;
-	ModelObjectReferences objectReferences_;
 
 	typedef std::map<yasli::string, yasli::SharedPtr<PropertyRow> > DefaultTypes;
 	DefaultTypes defaultTypes_;

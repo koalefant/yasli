@@ -70,7 +70,7 @@ PropertyOArchive::~PropertyOArchive()
 PropertyRow* PropertyOArchive::rootNode()
 {
 	if(rootNode_)
-		return rootNode_;
+	return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
 		YASLI_ASSERT(model_->root());
@@ -134,7 +134,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
 		if(updateMode_){
-			model_->setRoot(newRow);
+				model_->setRoot(newRow);
 			return newRow;
 		}
 		else{
@@ -200,8 +200,8 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		newRow->setNames(name, label, typeName);
 		if(model_->expandLevels() != 0){
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
-				newRow->_setExpanded(true);
-		}
+			newRow->_setExpanded(true);
+	}
 	}
 	newRow->setNames(name, label, typeName);
 	currentNode_->add(newRow);

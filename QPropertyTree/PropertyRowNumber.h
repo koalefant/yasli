@@ -152,7 +152,7 @@ public:
 			value_ = incrementStartValue_;
 			tree->model()->push(this);
 			value_ = value;
-			tree->model()->rowChanged(this);
+			tree->model()->rowChanged(this, false);
 		}
 	}
 

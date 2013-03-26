@@ -33,22 +33,15 @@
 #include <QtCore/QElapsedTimer>
 #include "PropertyTreeMenuHandler.h"
 
+#include "MathUtils.h"
+
 // only for clipboard:
 #include <QtGui/QClipboard>
 #include <QtGui/QApplication>
 #include "PropertyRowPointer.h"
 #include "PropertyRowContainer.h"
 // ^^^
-
-static int min(int a, int b)
-{
-	return a < b ? a : b;
-}
-
-static int max(int a, int b)
-{
-	return a > b ? a : b;
-}
+#include "PropertyRowObject.h"
 
 using yasli::Serializers;
 
@@ -541,6 +534,8 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , revertTime_(0)
 , updateHeightsTime_(0)
 , paintTime_(0)
+, pressPoint_(-1, -1)
+, lastStillPosition_(-1, -1)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -552,7 +547,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	model_->setUndoEnabled(undoEnabled_);
 	model_->setFullUndo(fullUndo_);
 
-	connect(model_.data(), SIGNAL(signalUpdated(const PropertyRows&)), this, SLOT(onModelUpdated(const PropertyRows&)));
+	connect(model_.data(), SIGNAL(signalUpdated(const PropertyRows&, bool)), this, SLOT(onModelUpdated(const PropertyRows&, bool)));
 	connect(model_.data(), SIGNAL(signalPushUndo(PropertyTreeOperator*, bool*)), this, SLOT(onModelPushUndo(PropertyTreeOperator*, bool*)));
 	//model_->signalPushUndo().connect(this, &QPropertyTree::onModelPushUndo);
 
@@ -741,6 +736,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 
 void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint point)
 {
+	onMouseStill();
 	row->onMouseUp(this, point);
 
 	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect().contains(point)) {
@@ -791,6 +787,7 @@ void QPropertyTree::expandParents(PropertyRow* row)
 	if (hasChanges)
 		updateHeights();
 }
+
 
 void QPropertyTree::expandAll(PropertyRow* root)
 {
@@ -998,17 +995,21 @@ void QPropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adju
 
 void QPropertyTree::attach(const yasli::Serializers& serializers)
 {
-	attached_.clear();
-	for (size_t i = 0; i < serializers.size(); ++i)
-		attached_.push_back(yasli::Object(serializers[i]));
 
-	model_->setRootObject(attached_.empty() ? Object() : attached_[0]);
+	// We can't perform plain copying here, as it was before:
+	//   attached_ = serializers;
+	// ...as move forwarder calls copying constructor with non-const argument
+	// which invokes second templated constructor of Serializer, which is not what we need.
+	attached_.assign(serializers.begin(), serializers.end());
+
 	revert();
 }
 
 void QPropertyTree::attach(const yasli::Serializer& serializer)
 {
-	attach(yasli::Object(serializer));
+	attached_.clear();
+	attached_.push_back(yasli::Object(serializer));
+	revert();
 }
 
 void QPropertyTree::attach(const yasli::Object& object)
@@ -1016,10 +1017,7 @@ void QPropertyTree::attach(const yasli::Object& object)
 	attached_.clear();
 	attached_.push_back(object);
 
-	model_->setRootObject(object);
 	revert();
-
-	updateHeights();
 }
 
 void QPropertyTree::detach()
@@ -1043,69 +1041,41 @@ int QPropertyTree::revertObjects(vector<void*> objectAddresses)
 
 bool QPropertyTree::revertObject(void* objectAddress)
 {
-	ModelObjectReferences& refs = model_->objectReferences();
-	ModelObjectReferences::iterator it = refs.find(objectAddress);
-	if (it == refs.end())
-		return false;
-	it->second.needUpdate = true;
-	revertChanged(false);
-	return true;
-}
-
-void QPropertyTree::revertChanged(bool enforce)
-{	
-	printf("revertChanges()\n");
-	QElapsedTimer timer;
-	timer.start();
-
-	bool enforceNext = enforce;
-	vector<ModelObjectReference> objectsToUpdate;
-
-	while (true) {
-		ModelObjectReferences& refs = model_->objectReferences();
-		for (ModelObjectReferences::iterator it = refs.begin(); it != refs.end(); ++it) {
-			ModelObjectReference& ref = it->second;
-			if (enforceNext || ref.needUpdate) {
-				ref.needUpdate = false;
-				objectsToUpdate.push_back(ref);
-			}
-		}
-		enforceNext = false;
-
-		if (objectsToUpdate.empty())
-			break;
-
-		for (size_t i = 0; i < objectsToUpdate.size(); ++i) {
-			ModelObjectReference& ref = objectsToUpdate[i];
-			PropertyOArchive oa(model_.data(), ref.row);
-			oa.setFilter(filter_);
-			Object obj = ref.row->object();
-			if (obj.isSet())
-				obj(oa);
-			else
-				ref.row->clear();
-			ref.row->setLabelChanged();
-		}
-		objectsToUpdate.clear();
+	PropertyRow* row = model()->root()->findByAddress(objectAddress);
+	if (row && row->isObject()) {
+		// TODO:
+		// revertObjectRow(row);
+		return true;
 	}
-
-	if (model()->root())
-		model_->root()->updateLabel(this, 0);
-	if (filterMode_)
-		onFilterChanged(QString());
-
-	revertTime_ = timer.elapsed();
-	updateHeights();
+	return false;
 }
+
 
 void QPropertyTree::revert()
 {
-
 	interruptDrag();
 	widget_.reset();
 
 	if (!attached_.empty()) {
-		revertChanged(true);
+		QElapsedTimer timer;
+		timer.start();
+
+		PropertyOArchive oa(model_.data(), model_->root());
+		oa.setFilter(filter_);
+
+		Objects::iterator it = attached_.begin();
+		(*it)(oa);
+		
+		PropertyTreeModel model2;
+		while(++it != attached_.end()){
+			PropertyOArchive oa2(&model2, (PropertyRow*)0);
+			Archive::Context<QPropertyTree> treeContext(oa2, this);
+			oa2.setFilter(filter_);
+			(*it)(oa2);
+			model_->root()->intersect(model2.root());
+		}
+
+		updateHeights();
 	}
 	else
 		model_->clear();
@@ -1123,32 +1093,22 @@ void QPropertyTree::revert()
 	signalReverted();
 }
 
+
 void QPropertyTree::apply()
 {
-	applyChanged(true);
-}
-
-void QPropertyTree::applyChanged(bool enforce)
-{
-	//printf("applyChanges()\n");
 	QElapsedTimer timer;
 	timer.start();
-	ModelObjectReferences& refs = model_->objectReferences();
-	ModelObjectReferences::iterator it;
 
-	for (it = refs.begin(); it != refs.end(); ++it) {
-		ModelObjectReference& ref = it->second;
-		if (!enforce && !ref.needApply)
-			continue;
-
-		Object obj = ref.row->object();
-		PropertyIArchive ia(model_.data(), ref.row);
-		Archive::Context<QPropertyTree> treeContext(ia, this);
-		ia.setFilter(filter_);
-		obj(ia);
-		ref.needApply = false;
-		signalObjectChanged(obj);
+	if (!attached_.empty()) {
+		Objects::iterator it;
+		for(it = attached_.begin(); it != attached_.end(); ++it) {
+			PropertyIArchive ia(model_.data(), model_->root());
+ 			Archive::Context<QPropertyTree> treeContext(ia, this);
+ 			ia.setFilter(filter_);
+			(*it)(ia);
+		}
 	}
+
 	signalChanged();
 	applyTime_ = timer.elapsed();
 
@@ -1318,47 +1278,27 @@ void QPropertyTree::onRowMenuDecompose(PropertyRow* row)
   // edit(SStruct(proxy), 0, IMMEDIATE_UPDATE, this);
 }
 
-void QPropertyTree::onModelUpdated(const PropertyRows& rows)
+void QPropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 {
 	if(widget_)
 		widget_.reset();
 
 	if(immediateUpdate_){
-
-		ModelObjectReferences& refs = model_->objectReferences();
-
-		size_t count = rows.size();
-		for (size_t i = 0; i < count; ++i) {
-			void *objectAddress = 0;
-			PropertyRow* row = rows[i];
-			if (row->isObject())
-				objectAddress = static_cast<PropertyRowObject*>(row)->object().address();
-			else
-				objectAddress = row->serializer().pointer();
-			if (!objectAddress)
-				continue;
-
-			ModelObjectReferences::iterator it = refs.find(objectAddress);
-			if (it != refs.end()) {
-				ModelObjectReference& ref = it->second;
-				ref.needUpdate = true;
-				ref.needApply = true;
-			}
-		}
-
-		applyChanged(false);
+		if (needApply)
+			apply();
 
 		if(autoRevert_)
-			revertChanged(false);
+			revert();
+		else {
+			updateHeights();
+			updateAttachedPropertyTree();
+			if(!immediateUpdate_)
+				onSignalChanged();
+		}
 	}
-
-	setFocus();
-
-	updateHeights();
-
-	updateAttachedPropertyTree();
-	if(!immediateUpdate_)
-		onSignalChanged();
+	else {
+		update();
+	}
 }
 
 void QPropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
@@ -1475,7 +1415,7 @@ PropertyRow* QPropertyTree::selectedRow()
     return model()->rowFromPath(sel.front());
 }
 
-bool QPropertyTree::getSelectedObject(Object* object)
+bool QPropertyTree::getSelectedObject(yasli::Object* object)
 {
 	const PropertyTreeModel::Selection &sel = model()->selection();
 	if(sel.empty())
@@ -1486,9 +1426,13 @@ bool QPropertyTree::getSelectedObject(Object* object)
 	if (!row)
 		return false;
 
-	PropertyRowObject* obj = static_cast<PropertyRowObject*>(row);
-	*object = obj->object();
-	return true;
+	if (PropertyRowObject* obj = dynamic_cast<PropertyRowObject*>(row)) {
+		*object = obj->object();
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 QPoint QPropertyTree::_toScreen(QPoint point) const
@@ -1544,45 +1488,42 @@ void QPropertyTree::setUndoEnabled(bool enabled, bool full)
 
 void QPropertyTree::attachPropertyTree(QPropertyTree* propertyTree) 
 { 
-	// if(attachedPropertyTree_)
-	//	attachedPropertyTree_->signalChanged().disconnect(this);
-	//	attachedPropertyTree_ = propertyTree; 
-	//	attachedPropertyTree_->signalChanged().connect(this, &QPropertyTree::revert);
-	//	updateAttachedPropertyTree(); 
+	if(attachedPropertyTree_)
+		disconnect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
+	attachedPropertyTree_ = propertyTree; 
+	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
+	updateAttachedPropertyTree(); 
 }
 
 void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 {
-		TreeSelection::const_iterator i;
-		for(i = model()->selection().begin(); i != model()->selection().end(); ++i){
-			PropertyRow* row = model()->rowFromPath(*i);
-			if (!row)
-				continue;
+	TreeSelection::const_iterator i;
+	for(i = model()->selection().begin(); i != model()->selection().end(); ++i){
+		PropertyRow* row = model()->rowFromPath(*i);
+		if (!row)
+			continue;
 
-			Serializer ser = row->serializer();
+		Serializer ser = row->serializer();
 
-			if (!ser) {
-				while(row && (row->pulledUp() || row->pulledBefore())) {
-					row = row->parent();
-				}
-				ser = row->serializer();
+		if (!ser) {
+			while(row && (row->pulledUp() || row->pulledBefore())) {
+				row = row->parent();
 			}
-			
-			if (ser)
-				serializers->push_back(ser);
+			ser = row->serializer();
 		}
+
+		if (ser)
+			serializers->push_back(ser);
+	}
 }
 
 void QPropertyTree::updateAttachedPropertyTree()
 {
-	if (!attachedPropertyTree_)
-		return;
-
-	Object obj;
-	if (getSelectedObject(&obj))
-		attachedPropertyTree_->attach(obj);
-	else
-		attachedPropertyTree_->detach();
+	if(attachedPropertyTree_) {
+ 		Serializers serializers;
+ 		getSelectionSerializers(&serializers);
+ 		attachedPropertyTree_->attach(serializers);
+ 	}
 }
 
 struct FilterVisitor
@@ -2195,8 +2136,11 @@ void QPropertyTree::onMouseStill()
 		e.tree = this;
 		e.pos = mapFromGlobal(QCursor::pos());
 		e.start = pressPoint_;
-	
-		capturedRow_->onMouseStill(e);
+
+		if (e.pos != lastStillPosition_) {
+			capturedRow_->onMouseStill(e);
+			lastStillPosition_ = e.pos;
+		}
 	}
 }
 
@@ -2288,6 +2232,11 @@ QPropertyTree::QPropertyTree(const QPropertyTree&)
 QPropertyTree& QPropertyTree::operator=(const QPropertyTree&)
 {
 	return *this;
+}
+
+void QPropertyTree::onAttachedTreeChanged()
+{
+	revert();
 }
 
 // vim:ts=4 sw=4:

@@ -36,13 +36,13 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		QStyleOption option;
 		option.state = QStyle::State_Sunken/* | QStyle::State_Editing*/;
 		if (context.captured) {
-            // painter->fillRect(rt, tree->palette().highlight()); TODO: this doesn't work well on Ubuntu style
+             painter->fillRect(rt, tree->palette().base()); // TODO: this doesn't work well on Ubuntu style
 			option.state |= QStyle::State_HasFocus;
 			option.state |= QStyle::State_Active;
 			option.state |= QStyle::State_MouseOver;
 		}
 		else if (!userReadOnly()) {
-            painter->fillRect(rt, tree->palette().base()); // TODO: remove this fill, doesn't work in other styles
+             painter->fillRect(rt, tree->palette().base()); // TODO: remove this fill, doesn't work in other styles
 			option.state |= QStyle::State_Enabled;
 		}
 		option.rect = rt; // option.rect is the rectangle to be drawn on.

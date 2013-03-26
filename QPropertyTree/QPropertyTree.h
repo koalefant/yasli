@@ -101,8 +101,6 @@ protected:
 	QRect rect_;
 	QPropertyTree* tree_;
 	QPoint offset_;
-	//HBITMAP bitmap_;
-	//COLORREF* bitmapBits_;
 };
 
 class QPropertyTree : public QWidget, public TreeConfig
@@ -150,6 +148,7 @@ public:
 public slots:
 	void expandAll(PropertyRow* root = 0);
 	void collapseAll(PropertyRow* root = 0);
+	void onAttachedTreeChanged();
 public:
 
 	void serialize(yasli::Archive& ar);
@@ -184,7 +183,7 @@ public slots:
     void onFilterChanged(const QString& str);
 protected slots:
 	void onScroll(int pos);
-	void onModelUpdated(const PropertyRows& rows);
+	void onModelUpdated(const PropertyRows& rows, bool needApply);
 	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
 	void onMouseStill();
 
@@ -199,8 +198,6 @@ protected:
 		TREE_HIT_ROW,
 		TREE_HIT_NONE
 	};
-	void applyChanged(bool enforceAll);
-	void revertChanged(bool enforceAll);
 	PropertyRow* rowByPoint(const QPoint& point);
 	HitTest hitTest(PropertyRow* row, const QPoint& pointInWindowSpace, const QRect& rowRect);
 	void onRowMenuDecompose(PropertyRow* row);
@@ -278,7 +275,8 @@ protected:
 	vector<PropertyRowMenuHandler*> menuHandlers_;
 
 	ConstStringList constStrings_;
-	vector<yasli::Object> attached_;
+	typedef vector<yasli::Object> Objects;
+	Objects attached_;
 	QPropertyTree* attachedPropertyTree_;
 
 	bool filterMode_;
@@ -297,6 +295,7 @@ protected:
 	QSize sizeHint_;
 	DragController* dragController_;
 	QPoint pressPoint_;
+	QPoint lastStillPosition_;
 	PropertyRow* capturedRow_;
 	QTimer* mouseStillTimer_;
 

@@ -25,8 +25,6 @@ PropertyRow* PropertyRowObject::clone() const
 
 PropertyRowObject::~PropertyRowObject()
 {
-	if (model_)
-		model_->unregisterObjectRow(this);
 	object_ = Object();
 }
 

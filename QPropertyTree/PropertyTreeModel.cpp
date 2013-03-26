@@ -22,21 +22,10 @@ PropertyTreeModel::PropertyTreeModel()
 
 PropertyTreeModel::~PropertyTreeModel()
 {
-	clearObjectReferences();
-	rootObject_ = Object();
 	root_ = 0;
 	defaultTypes_.clear();
 	defaultTypesPoly_.clear();
 }
-
-void PropertyTreeModel::clearObjectReferences()
-{
-	ModelObjectReferences::iterator it = objectReferences_.begin();
-	for (; it != objectReferences_.end(); ++it) 
-		it->second.row->setModel(0);
-	objectReferences_.clear();
-}
-
 
 TreePath PropertyTreeModel::pathFromRow(PropertyRow* row)
 {
@@ -124,9 +113,9 @@ void PropertyTreeModel::clear()
 	selection_.clear();
 }
 
-void PropertyTreeModel::onUpdated(const PropertyRows& rows)
+void PropertyTreeModel::onUpdated(const PropertyRows& rows, bool needApply)
 {
-    signalUpdated(rows);
+    signalUpdated(rows, needApply);
 }
 
 void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
@@ -174,12 +163,12 @@ void PropertyTreeModel::dismissUpdate()
 		updateLock_->dismissUpdate();
 }
 
-void PropertyTreeModel::requestUpdate(const PropertyRows& rows)
+void PropertyTreeModel::requestUpdate(const PropertyRows& rows, bool apply)
 {
 	if(updateLock_)
-		updateLock_->requestUpdate(rows);
+		updateLock_->requestUpdate(rows, apply);
 	else
-		onUpdated(rows);
+		onUpdated(rows, apply);
 }
 
 struct RowObtainer {
@@ -272,10 +261,11 @@ void PropertyTreeModel::push(PropertyRow* row)
     }
 }
 
-void PropertyTreeModel::rowChanged(PropertyRow* row)
+void PropertyTreeModel::rowChanged(PropertyRow* row, bool apply)
 {
 	YASLI_ESCAPE(row, return);
 	row->setLabelChanged();
+	row->setLayoutChanged();
 
 	PropertyRow* parentObj = row;
 	while (parentObj->parent() && !parentObj->isObject())
@@ -285,7 +275,7 @@ void PropertyTreeModel::rowChanged(PropertyRow* row)
 
 	PropertyRows rows;
 	rows.push_back(parentObj);
-	requestUpdate(rows);
+	requestUpdate(rows, apply);
 }
 
 bool PropertyTreeModel::defaultTypeRegistered(const char* typeName) const
@@ -356,65 +346,6 @@ const yasli::StringList& PropertyTreeModel::typeStringList(const yasli::TypeID& 
 	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return empty);
 	const BaseClass& base = it->second;
 	return base.strings;
-}
-
-void PropertyTreeModel::registerObjectRow(PropertyRowObject* row)
-{
-	ModelObjectReferences::iterator it;
-	void* address = row->object().address();
-	YASLI_ESCAPE(address != 0, return);
-	it = objectReferences_.find(address);
-	if (it == objectReferences_.end())
-	{
-		ModelObjectReference ref;
-		ref.row = row;
-		ref.needUpdate = true;
-		objectReferences_.insert(std::make_pair(row->object().address(), ref));
-	}
-	else
-		it->second.row = row;
-}
-
-void PropertyTreeModel::unregisterObjectRow(PropertyRowObject* row)
-{
-	ModelObjectReferences::iterator it;
-	it = objectReferences_.find(row->object().address());
-	if(it == objectReferences_.end())
-		return;
-	if (it->second.row != row)
-		return;
-	row->setModel(0);
-	objectReferences_.erase(it);
-}
-
-void PropertyTreeModel::setRootObject(const Object& obj)
-{
-	if (rootObject_.address() != obj.address()) {
-		rootObject_ = obj;
-		root_ = 0;
-
-		clearObjectReferences();
-
-		PropertyRowObject* root = new PropertyRowObject();
-		root->setNames("", "", obj.type().name());
-		root->setModel(this);
-		root->setValue(obj);
-		if (obj.address())
-			registerObjectRow(root);
-
-		ModelObjectReference ref;
-		root_ = root;
-		ref.row = root;
-		ref.needUpdate = true;
-		objectReferences_[obj.address()] = ref;
-	}
-	else {
-		ModelObjectReferences::iterator it = objectReferences_.find(obj.address());
-		if (it != objectReferences_.end())
-			it->second.needUpdate = true;
-	}
-
-	rootObject_ = obj;
 }
 
 // ----------------------------------------------------------------------------------
