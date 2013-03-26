@@ -187,7 +187,6 @@ void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 	PropertyRow* defaultType = defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
 	SharedPtr<PropertyRow> clonedRow = defaultType->clone();
-	// clonedRow->setFullRow(true); TODO
 	if(count() == 0)
 		tree->expandRow(this);
 	add(clonedRow);

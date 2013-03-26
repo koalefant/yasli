@@ -1,5 +1,7 @@
 #include "mainwindow.h"
+#include <QtGui/QBoxLayout>
 #include "QPropertyTree/QPropertyTree.h"
+
 #include <limits.h>
 #include <float.h>
 #include "LogicEditor.h"
@@ -40,9 +42,9 @@ struct Element
 
     void serialize(Archive& ar)
 	{
-		ar(enabled, "enabled", "&Enabled");
-		ar(vec, "vec", "&Vec3");
-		ar(integer_, "integer_", "&integer_");
+		ar(enabled, "enabled", "^Enabled");
+		ar(vec, "vec", "^Vec3");
+		ar(integer_, "integer_", "integer_");
 		ar(char_, "char", "char");
 		ar(signedChar_, "signedChar", "signedChar");
 		ar(unsignedChar_, "unsignedChar", "unsignedChar");
@@ -91,11 +93,25 @@ MainWindow::MainWindow(QWidget *parent)
 #else
 	globalTestData.elements.resize(5000);
 #endif
+
+
+	QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
+
     tree_ = new QPropertyTree(this);
 	tree_->setSliderUpdateDelay(5);
     tree_->attach(yasli::Serializer(globalTestData));
-    setCentralWidget(tree_);
 	tree_->setUndoEnabled(true);
+	layout->addWidget(tree_, 1);
+
+    attachedTree_ = new QPropertyTree(this);
+	attachedTree_->setSliderUpdateDelay(5);
+    tree_->attachPropertyTree(attachedTree_);
+	attachedTree_->setUndoEnabled(true);
+	layout->addWidget(attachedTree_, 1);
+	
+	QWidget* centralWidget = new QWidget();
+	setCentralWidget(centralWidget);
+	centralWidget->setLayout(layout);
 
 	connect(tree_, SIGNAL(signalChanged()), this, SLOT(onPropertyChanged()));
 }

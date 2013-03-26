@@ -17,5 +17,6 @@ public slots:
     
 private:
 	QPropertyTree* tree_;
+	QPropertyTree* attachedTree_;
 };
 

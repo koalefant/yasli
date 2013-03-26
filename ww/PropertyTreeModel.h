@@ -131,13 +131,14 @@ public:
 	const PropertyDefaultTypeValue* defaultType(const TypeID& baseType, int index) const;
 
 private:
+	SignalUpdated signalUpdated_;
+	SignalPushUndo signalPushUndo_;
+private:
 	void pushUndo(const PropertyTreeOperator& op);
 	void clearObjectReferences();
 
 	TreePath focusedRow_;
 	Selection selection_;
-	SignalUpdated signalUpdated_;
-	SignalPushUndo signalPushUndo_;
 
 	SharedPtr<PropertyRow> root_;
 	UpdateLock updateLock_;

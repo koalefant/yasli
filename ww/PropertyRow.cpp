@@ -510,8 +510,10 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
-	if(text[0] == '\0')
+	if(text[0] == '\0') {
 		textSizeInitial_ = 0;
+		textHash_ = 0;
+	}
 	else{
 		unsigned hash = calcHash(text);
 		Gdiplus::Font* font = rowFont(tree);
@@ -525,6 +527,7 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 			gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
 			ReleaseDC(Win32::getDefaultWindowHandle(), dc);
 			textSizeInitial_ = bound.Width + 3;
+			textHash_ = hash;
 		}
 	}
 }
@@ -672,7 +675,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 			size_.y = max(size_.y, row->size_.y);
 		}
 		else if(expanded())
-			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, index);
+			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
 	}
 
 	if(!pulledUp())
@@ -1084,16 +1087,19 @@ void PropertyRow::intersect(const PropertyRow* row)
 {
 	setMultiValue(multiValue() || row->multiValue() || valueAsString() != row->valueAsString());
 
-	iterator it = begin();
-	const_iterator it2 = row->begin();
-	for(; it != end();){
-		if(it2 == row->end() || strcmp((*it)->typeName(), (*it2)->typeName()) != 0)
-			it = children_.erase(it);
-		else{
-			(*it)->intersect(*it2);
-			++it;
-			if(it2 != row->end())
-				++it2;
+
+	int indexSource = 0;
+	for(int i = 0; i < int(children_.size()); ++i)
+	{
+		PropertyRow* testRow = children_[i];
+		PropertyRow* matchingRow = row->findFromIndex(&indexSource, testRow->name_, testRow->typeName_, indexSource);
+		++indexSource;
+		if (matchingRow == 0) {
+			children_.erase(children_.begin() + i);
+			--i;
+		}	
+		else {
+			children_[i]->intersect(matchingRow);
 		}
 	}
 }
