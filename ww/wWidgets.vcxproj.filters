@@ -4,9 +4,6 @@
     <Filter Include="Widgets">
       <UniqueIdentifier>{3cc316b5-4bce-42a7-9099-c43d797973dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Widgets\Workspace">
-      <UniqueIdentifier>{f7cdd3b8-c2cc-4034-bb8e-ca3699b63e64}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Widgets\PropertyTree">
       <UniqueIdentifier>{1e5b3958-7889-44d2-87ea-c79aa6b21ef1}</UniqueIdentifier>
     </Filter>
@@ -92,15 +89,6 @@
     </ClInclude>
     <ClInclude Include="Viewport2D.h">
       <Filter>Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="Space.h">
-      <Filter>Widgets\Workspace</Filter>
-    </ClInclude>
-    <ClInclude Include="SpaceHeader.h">
-      <Filter>Widgets\Workspace</Filter>
-    </ClInclude>
-    <ClInclude Include="Workspace.h">
-      <Filter>Widgets\Workspace</Filter>
     </ClInclude>
     <ClInclude Include="PropertyDrawContext.h">
       <Filter>Widgets\PropertyTree</Filter>
@@ -298,9 +286,6 @@
     <ClInclude Include="PropertyRowContainer.h">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClInclude>
-    <ClInclude Include="PropertyRowNumeric.h">
-      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
-    </ClInclude>
     <ClInclude Include="PropertyRowPointer.h">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClInclude>
@@ -308,6 +293,12 @@
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClInclude>
     <ClInclude Include="PropertyRowStringListValue.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowNumeric.h">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyRowObject.h">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClInclude>
   </ItemGroup>
@@ -365,9 +356,6 @@
     </ClCompile>
     <ClCompile Include="Viewport2D.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="Workspace.cpp">
-      <Filter>Widgets\Workspace</Filter>
     </ClCompile>
     <ClCompile Include="PropertyDrawContext.cpp">
       <Filter>Widgets\PropertyTree</Filter>
@@ -532,9 +520,6 @@
     <ClCompile Include="PropertyRowContainer.cpp">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClCompile>
-    <ClCompile Include="PropertyRowNumeric.cpp">
-      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
-    </ClCompile>
     <ClCompile Include="PropertyRowPointer.cpp">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClCompile>
@@ -542,6 +527,12 @@
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyRowStringListValue.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowNumeric.cpp">
+      <Filter>Widgets\PropertyTree\PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyRowObject.cpp">
       <Filter>Widgets\PropertyTree\PropertyRows</Filter>
     </ClCompile>
   </ItemGroup>

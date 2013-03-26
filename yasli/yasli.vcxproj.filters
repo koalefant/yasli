@@ -24,9 +24,6 @@
     <ClCompile Include="Assert.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryReader.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="MemoryWriter.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -58,6 +55,9 @@
     <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="ClassFactory.cpp" />
     <ClCompile Include="Enum.cpp" />
+    <ClCompile Include="MemoryReader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.h">
@@ -67,15 +67,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="BitVectorImpl.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstString.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Context.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Factory.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="MemoryReader.h">

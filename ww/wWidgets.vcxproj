@@ -416,6 +416,7 @@
     <ClInclude Include="PropertyRowBool.h" />
     <ClInclude Include="PropertyRowContainer.h" />
     <ClInclude Include="PropertyRowNumeric.h" />
+    <ClInclude Include="PropertyRowObject.h" />
     <ClInclude Include="PropertyRowPointer.h" />
     <ClInclude Include="PropertyRowString.h" />
     <ClInclude Include="PropertyRowStringListValue.h" />
@@ -441,9 +442,6 @@
     <ClInclude Include="Tabs.h" />
     <ClInclude Include="Tooltip.h" />
     <ClInclude Include="Viewport2D.h" />
-    <ClInclude Include="Space.h" />
-    <ClInclude Include="SpaceHeader.h" />
-    <ClInclude Include="Workspace.h" />
     <ClInclude Include="PropertyDrawContext.h" />
     <ClInclude Include="PropertyIArchive.h" />
     <ClInclude Include="PropertyOArchive.h" />
@@ -532,6 +530,7 @@
     <ClCompile Include="PropertyRowBool.cpp" />
     <ClCompile Include="PropertyRowContainer.cpp" />
     <ClCompile Include="PropertyRowNumeric.cpp" />
+    <ClCompile Include="PropertyRowObject.cpp" />
     <ClCompile Include="PropertyRowPointer.cpp" />
     <ClCompile Include="PropertyRowString.cpp" />
     <ClCompile Include="PropertyRowStringListValue.cpp" />
@@ -542,18 +541,6 @@
     <ClCompile Include="Tooltip.cpp" />
     <ClCompile Include="Viewport2D.cpp" />
     <ClCompile Include="Win32\Window32.cpp" />
-    <ClCompile Include="Workspace.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLDebug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLRelease|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="PropertyDrawContext.cpp" />
     <ClCompile Include="PropertyIArchive.cpp" />
     <ClCompile Include="PropertyOArchive.cpp" />
