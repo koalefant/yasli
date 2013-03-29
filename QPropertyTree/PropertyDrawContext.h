@@ -65,10 +65,11 @@ struct PropertyDrawContext {
 	QRect widgetRect;
 	QRect lineRect;
 	bool captured;
+	bool pressed;
 
 	void drawIcon(const QRect& rect, const Icon& icon) const;
 	void drawCheck(const QRect& rect, bool disabled, CheckState checked) const;
-	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled) const;
+	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, const QFont* font) const;
 	void drawValueText(bool highlighted, const wchar_t* text) const;
 	void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const;
 
@@ -76,6 +77,7 @@ struct PropertyDrawContext {
 	: tree(0)
 	, painter(0)
 	, captured(false)
+	, pressed(false)
 	{
 	}
 };

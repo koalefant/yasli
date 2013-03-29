@@ -77,7 +77,7 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	QBrush brush(gradient);
 
     const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
-	context.drawButton(rt, text, false, false, !userReadOnly());
+	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, &context.tree->font());
 }
 
 
@@ -87,7 +87,9 @@ bool PropertyRowContainer::onActivate( QPropertyTree* tree, bool force)
         return false;
 		QMenu menu;
     generateMenu(menu, tree);
+	tree->_setPressedRow(this);
     menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
+	tree->_setPressedRow(0);
     return true;
 }
 

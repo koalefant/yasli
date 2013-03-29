@@ -165,6 +165,8 @@ public:
 	QRect _visibleRect() const;
 	bool _isDragged(const PropertyRow* row) const;
 	bool _isCapturedRow(const PropertyRow* row) const;
+	PropertyRow* _pressedRow() const { return pressedRow_; }
+	void _setPressedRow(PropertyRow* row) { pressedRow_ = row; }
 	int _applyTime() const{ return applyTime_; }
 	int _revertTime() const{ return revertTime_; }
 	int _updateHeightsTime() const{ return updateHeightsTime_; }
@@ -298,6 +300,7 @@ protected:
 	QPoint pressPoint_;
 	QPoint lastStillPosition_;
 	PropertyRow* capturedRow_;
+	PropertyRow* pressedRow_;
 	QTimer* mouseStillTimer_;
 
 	int applyTime_;

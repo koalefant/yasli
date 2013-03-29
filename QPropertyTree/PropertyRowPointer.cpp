@@ -188,15 +188,9 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	QRect widgetRect = context.widgetRect;
 	QRect rt = widgetRect;
 	rt.adjust(-1, 0, 0, 1);
-	context.drawButton(rt, L"", false, false, !userReadOnly());
-
-	const QPalette& pal = context.tree->palette();
-	QColor textColor = userReadOnly() ? pal.shadow().color() : pal.windowText().color();
-	QRect textRect = widgetRect;
-	textRect.adjust(4, 0, -5, 0);
 	yasli::wstring str = generateLabel();
 	QFont* font = derivedTypeName_.empty() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
-	context.tree->_drawRowValue(*context.painter, str.c_str(), font, textRect, textColor, false, false);
+	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, font);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
@@ -222,12 +216,14 @@ protected:
 
 bool PropertyRowPointer::onActivate( QPropertyTree* tree, bool force)
 {
-		if(userReadOnly())
-				return false;
-		QMenu menu;
-		ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu, tree->model()->typeStringList(baseType()));
-		menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
-		return true;
+	if(userReadOnly())
+			return false;
+	QMenu menu;
+	ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu, tree->model()->typeStringList(baseType()));
+	tree->_setPressedRow(this);
+	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
+	tree->_setPressedRow(0);
+	return true;
 }
 
 bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) 

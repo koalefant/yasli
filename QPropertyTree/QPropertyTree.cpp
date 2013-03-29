@@ -525,7 +525,6 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , attachedPropertyTree_(0)
 , autoRevert_(true)
 , dragController_(new DragController(this))
-, capturedRow_(0)
 , leftBorder_(0)
 , rightBorder_(0)
 , filterMode_(false)
@@ -536,6 +535,8 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , paintTime_(0)
 , pressPoint_(-1, -1)
 , lastStillPosition_(-1, -1)
+, pressedRow_(0)
+, capturedRow_(0)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
