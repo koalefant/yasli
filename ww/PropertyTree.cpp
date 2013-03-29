@@ -1095,6 +1095,8 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 					substrings[type].push_back(wstring(tokenStart, str));
 			}
 		}
+		while (*str == ' ')
+			++str;
 
 		if (*str == L'=') {
 			type = VALUE;
