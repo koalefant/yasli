@@ -14,6 +14,7 @@
 
 #include "yasli/Helpers.h"
 #include "yasli/Serializer.h"
+#include "yasli/KeyValue.h"
 #include "yasli/TypeID.h"
 
 namespace yasli{ class Archive; }
@@ -100,7 +101,7 @@ public:
 	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
 	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
-	virtual bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) { return false; }
+	virtual bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) { return operator()(Serializer(keyValue), name, label); }
 
   // there is no point to support long double since it is represented as double on MSVC
 	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }

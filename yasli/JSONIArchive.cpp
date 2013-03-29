@@ -842,11 +842,11 @@ bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, con
     if(findName("", &nextName)){
 		string key;
 		unescapeString(key, nextName.start + 1, nextName.end - 1);
-		keyValue.setKey(key.c_str());
+		keyValue.set(key.c_str());
 		stack_.push_back(Level());
 		stack_.back().isKeyValue = true;
 
-		bool result = keyValue.serializeValue(*this);
+		bool result = keyValue.serializeValue(*this, "", 0);
 		if(stack_.empty()) {
 			// TODO: diagnose
 			return false;

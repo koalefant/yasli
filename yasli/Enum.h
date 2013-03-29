@@ -107,6 +107,9 @@ inline bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, 
 #define YASLI_ENUM_VALUE(value, label)                                              \
 		description.add(int(value), #value, label);                                      
 
+#define YASLI_ENUM(value, name, label)                                              \
+		description.add(int(value), name, label);                                      
+
 #define YASLI_ENUM_VALUE_NESTED(Class, value, label)                                       \
 	description.add(int(Class::value), #value, label);                                      
 

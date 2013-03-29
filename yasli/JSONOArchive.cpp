@@ -392,7 +392,6 @@ void JSONOArchive::placeName(const char* name)
 {
 	if (stack_.back().isKeyValue)
 		return;
-    //if(name[0] != '\0')
 	if ((name[0] != '\0' || !stack_.back().isContainer) && stack_.size() > 1)
 	{
         *buffer_ << "\"";
@@ -636,9 +635,9 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
 bool JSONOArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
 {
     placeIndent();
-    placeName(keyValue.getKey());
+    placeName(keyValue.get());
 	stack_.back().isKeyValue = true;
-	keyValue.serializeValue(*this);
+	keyValue.serializeValue(*this, "", 0);
 	stack_.back().isKeyValue = false;
 	if (stack_.back().isContainer)
 		stack_.back().isDictionary = true;

@@ -215,11 +215,11 @@ inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name,
 template<class V>
 struct StdPair : yasli::KeyValueInterface
 {
-	const char* getKey() { return pair_.first.c_str(); }
-	void setKey(const char* key) { pair_.first.assign(key); }
-	bool serializeValue(yasli::Archive& ar) 
+	const char* get() const { return pair_.first.c_str(); }
+	void set(const char* key) { pair_.first.assign(key); }
+	bool serializeValue(yasli::Archive& ar, const char* name, const char* label) 
 	{
-		return ar(pair_.second, "", 0);
+		return ar(pair_.second, name, label);
 	}
 
 	StdPair(std::pair<std::string, V>& pair)
