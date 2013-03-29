@@ -1668,7 +1668,8 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 					substrings[type].push_back(yasli::string(tokenStart, str));
 			}
 		}
-
+		while (*str == ' ')
+			++str;
 		if (*str == '=') {
 			type = VALUE;
 			++str;
