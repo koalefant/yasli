@@ -120,9 +120,12 @@ private:
 
 		  void read(void *data, int size)
 		  {
-			  YASLI_ASSERT(curr_ + size <= end_);
-			  memcpy(data, curr_, size);
-			  curr_ += size;	
+			  if(curr_ + size <= end_){
+				memcpy(data, curr_, size);
+				curr_ += size;	
+			  }
+			  else
+				  YASLI_ASSERT(0);
 		  }
 
 		  template<class T>
@@ -130,15 +133,21 @@ private:
 
 		  void read(std::string& s)
 		  {
-			  YASLI_ASSERT(curr_ + strlen(curr_) < end_);
-			  s = curr_;
-			  curr_ += strlen(curr_) + 1;
+			  if(curr_ + strlen(curr_) < end_){
+				s = curr_;
+				curr_ += strlen(curr_) + 1;
+			  }
+			  else
+				  YASLI_ASSERT(0);
 		  }
 		  void read(std::wstring& s)
 		  {
-			  YASLI_ASSERT(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_);
-			  s = (wchar_t*)curr_;
-			  curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
+			  if(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_){
+				s = (wchar_t*)curr_;
+				curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
+			  }
+			  else
+				  YASLI_ASSERT(0);
 		  }
 
 		  unsigned int readPackedSize();
