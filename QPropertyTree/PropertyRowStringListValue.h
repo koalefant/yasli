@@ -32,12 +32,15 @@ public:
 		else
 		{
 			QStyleOptionComboBox option;
-			option.currentText = QString::fromUtf16((ushort*)valueAsWString().c_str());
+			option.currentText = QString(valueAsString().c_str());
 			option.state |= QStyle::State_Enabled;
 			option.rect = context.widgetRect;
 			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
 			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
-			context.tree->style()->drawControl(QStyle::CE_ComboBoxLabel, &option, context.painter);
+			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
+			textRect.adjust(1, 0, -1, 0);
+			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
+
 		}
 	}
 };
@@ -64,12 +67,14 @@ public:
 		else
 		{
 			QStyleOptionComboBox option;
-			option.currentText = QString::fromUtf16((ushort*)valueAsWString().c_str());
+			option.currentText = QString(valueAsString().c_str());
 			option.state |= QStyle::State_Enabled;
 			option.rect = context.widgetRect;
 			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
 			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
-			context.tree->style()->drawControl(QStyle::CE_ComboBoxLabel, &option, context.painter);
+			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
+			textRect.adjust(1, 0, -1, 0);
+			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
 		}
 	}
 };

@@ -1566,9 +1566,13 @@ struct FilterVisitor
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
 	{
 		const char* label = row->labelUndecorated();
-		bool matchFilter = filter_.match(label, filter_.NAME, 0, 0);
-		if (matchFilter)
-			matchFilter = filter_.match(row->valueAsString().c_str(), filter_.VALUE, 0, 0);
+		yasli::string value = row->valueAsString();
+
+		bool matchFilter = filter_.match(label, filter_.NAME_VALUE, 0, 0) || filter_.match(value.c_str(), filter_.NAME_VALUE, 0, 0);
+		if (matchFilter && filter_.typeRelevant(filter_.NAME))
+			filter_.match(label, filter_.NAME, 0, 0);
+		if (matchFilter && filter_.typeRelevant(filter_.VALUE))
+			matchFilter = filter_.match(value.c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
 			matchFilter = filter_.match(row->typeNameForFilter(), filter_.TYPE, 0, 0);						   
 		
@@ -1631,7 +1635,7 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 
 	const char* str = &filterBuf[0];
 
-	Type type = NAME;
+	Type type = NAME_VALUE;
 	while (true)
 	{
 		bool fromStart = false;
@@ -1651,7 +1655,7 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 		}
 		else
 		{
-			while (*str != '\0' && *str != ' ' && *str != '*' && *str != '=' && *str != ':')
+			while (*str != '\0' && *str != ' ' && *str != '*' && *str != '=' && *str != ':' && *str != '#')
 					++str;
 		}
 		if (str != tokenStart) {
@@ -1670,7 +1674,11 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 		}
 		while (*str == ' ')
 			++str;
-		if (*str == '=') {
+		if (*str == '#') {
+			type = NAME;
+			++str;
+		}
+		else if (*str == '=') {
 			type = VALUE;
 			++str;
 		}
@@ -1762,27 +1770,31 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
     if (textLen == 0)
         return;
 
+	int alignment =  (center ? Qt::AlignHCenter : Qt::AlignLeft) | Qt::AlignVCenter;
 	QRect textRect = rect;
 	if (filterMode_) {
         size_t hiStart = 0;
         size_t hiEnd = 0;
         yasli::string textStr(fromWideChar(text));
-        if (rowFilter_.match(textStr.c_str(), type, &hiStart, &hiEnd) && hiStart != hiEnd) {
+		bool matched = rowFilter_.match(textStr.c_str(), type, &hiStart, &hiEnd) && hiStart != hiEnd;
+		if (!matched && (type == RowFilter::NAME || type == RowFilter::VALUE))
+			matched = rowFilter_.match(textStr.c_str(), RowFilter::NAME_VALUE, &hiStart, &hiEnd);
+        if (matched && hiStart != hiEnd) {
             QRectF boxFull;
             QRectF boxStart;
             QRectF boxEnd;
 
             QString str(textStr.c_str());
             QFontMetrics fm(*font);
-            boxFull = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str);
+			boxFull = fm.boundingRect(textRect, alignment, str);
 
             if (hiStart > 0)
-                boxStart = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str.left(hiStart));
+                boxStart = fm.boundingRect(textRect, alignment, str.left(hiStart));
             else {
-                boxStart = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str);
+                boxStart = fm.boundingRect(textRect, alignment, str);
                 boxStart.setWidth(0.0f);
             }
-            boxEnd = fm.boundingRect(textRect, Qt::AlignLeft | Qt::AlignVCenter, str.left(hiEnd));
+            boxEnd = fm.boundingRect(textRect, alignment, str.left(hiEnd));
 
             QColor highlightColor, highlightBorderColor;
             {
@@ -1806,7 +1818,9 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
             p.setPen(highlightBorderColor);
             bool oldAntialiasing = p.renderHints().testFlag(QPainter::Antialiasing);
             p.setRenderHint(QPainter::Antialiasing, true);
-            p.drawRoundedRect(highlightRect, 4.0, 4.0);
+
+			QRect intersectedHighlightRect = rect.intersect(highlightRect);
+            p.drawRoundedRect(intersectedHighlightRect, 4.0, 4.0);
             p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
         }
 	}
@@ -1816,7 +1830,7 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 	p.setPen(textColor);
 	QFont previousFont = p.font();
 	p.setFont(*font);
-    p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
+    p.drawText(textRect, alignment, QString(fromWideChar(text).c_str()), 0);
 	p.setFont(previousFont);
 }
 

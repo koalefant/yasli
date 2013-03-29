@@ -259,7 +259,7 @@ int PropertyRowPointer::widgetSizeMin() const
 {
 	QFontMetrics fm(*propertyTreeDefaultBoldFont());
     QString str(fromWideChar(generateLabel().c_str()).c_str());
-	return fm.width(str) + 10;
+	return fm.width(str) + 14;
 }
 
 void PropertyRowPointer::setValue(const yasli::PointerInterface& ptr)

@@ -145,16 +145,19 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 
 void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused) const
 {
-		QStyleOptionButton option;
-        option.text = QString(fromWideChar(text).c_str());
-		option.state |= QStyle::State_Enabled;
-		if (pressed)
-			option.state |= QStyle::State_On;
-		if (focused)
-			option.state |= QStyle::State_HasFocus;
-		option.rect = rect;
-		tree->style()->drawControl(QStyle::CE_PushButton, &option, painter);
-
+	QStyleOptionButton option;
+	//option.text = QString(fromWideChar(text).c_str());
+	option.state |= QStyle::State_Enabled;
+	//option.features |= QStyleOptionButton::HasMenu;
+	if (pressed)
+		option.state |= QStyle::State_On;
+	if (focused)
+		option.state |= QStyle::State_HasFocus;
+	option.rect = rect;
+	tree->style()->drawControl(QStyle::CE_PushButton, &option, painter);
+	QRect textRect = rect;
+	//textRect.adjust(0, 0, -4, 0);
+	tree->_drawRowValue(*painter, text, &tree->font(), textRect, tree->palette().color(QPalette::ButtonText), false, true);
 }
 
 
@@ -185,7 +188,9 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
 	tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
 	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
-	painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
+	//drawValueTextInRect(
+	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), false, false);
+	//painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
 }
 
 
