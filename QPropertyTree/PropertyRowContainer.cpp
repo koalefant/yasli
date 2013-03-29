@@ -77,7 +77,7 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	QBrush brush(gradient);
 
     const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
-	context.drawButton(rt, text, false, false);
+	context.drawButton(rt, text, false, false, !userReadOnly());
 }
 
 

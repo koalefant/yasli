@@ -1205,7 +1205,8 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 
 	QMenu* filter = menu.addMenu("Filter by");
 	{
-		yasli::string nameFilter = quoteIfNeeded(row->labelUndecorated());
+		yasli::string nameFilter = "#";
+		nameFilter += quoteIfNeeded(row->labelUndecorated());
 		handler->filterName = nameFilter;
 		connect(filter->addAction((yasli::string("Name:\t") + nameFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByName()));
 

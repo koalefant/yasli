@@ -188,7 +188,7 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	QRect widgetRect = context.widgetRect;
 	QRect rt = widgetRect;
 	rt.adjust(-1, 0, 0, 1);
-	context.drawButton(rt, L"", false, false);
+	context.drawButton(rt, L"", false, false, !userReadOnly());
 
 	const QPalette& pal = context.tree->palette();
 	QColor textColor = userReadOnly() ? pal.shadow().color() : pal.windowText().color();
@@ -259,7 +259,7 @@ int PropertyRowPointer::widgetSizeMin() const
 {
 	QFontMetrics fm(*propertyTreeDefaultBoldFont());
     QString str(fromWideChar(generateLabel().c_str()).c_str());
-	return fm.width(str) + 14;
+	return fm.width(str) + 18;
 }
 
 void PropertyRowPointer::setValue(const yasli::PointerInterface& ptr)

@@ -68,7 +68,7 @@ public:
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_AFTER_NAME; }
-	int widgetSizeMin() const{ return userWidgetSize() >=0 ? userWidgetSize() : 40; }
+	int widgetSizeMin() const{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
 
 protected:
 	void generateMenu(QMenu& menu, QPropertyTree* tree);

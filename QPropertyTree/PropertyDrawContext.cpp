@@ -143,21 +143,36 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 	tree->style()->drawControl(QStyle::CE_CheckBox, &option, painter);
 }
 
-void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused) const
+void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled) const
 {
 	QStyleOptionButton option;
-	//option.text = QString(fromWideChar(text).c_str());
-	option.state |= QStyle::State_Enabled;
-	//option.features |= QStyleOptionButton::HasMenu;
+	if (enabled)
+		option.state |= QStyle::State_Enabled;
+	else
+		option.state |= QStyle::State_ReadOnly;
+    option.state |= QStyle::State_Raised;
 	if (pressed)
 		option.state |= QStyle::State_On;
 	if (focused)
 		option.state |= QStyle::State_HasFocus;
-	option.rect = rect;
+	option.rect = rect.adjusted(0, 0, -1, -1);
 	tree->style()->drawControl(QStyle::CE_PushButton, &option, painter);
-	QRect textRect = rect;
-	//textRect.adjust(0, 0, -4, 0);
-	tree->_drawRowValue(*painter, text, &tree->font(), textRect, tree->palette().color(QPalette::ButtonText), false, true);
+	QRect textRect;
+	if (enabled)
+	{
+		QStyleOption arrowOption;
+		arrowOption.rect = QRect(rect.right() - 11, rect.top(), 8, rect.height());
+		arrowOption.state |= QStyle::State_Enabled;
+		tree->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &arrowOption, painter, 0);
+		textRect = rect.adjusted(0, 0, -8, 0);;;
+	}
+	else
+	{
+		textRect = rect;
+	}
+
+	QColor textColor = tree->palette().color(enabled ? QPalette::Active : QPalette::Disabled, QPalette::ButtonText);
+	tree->_drawRowValue(*painter, text, &tree->font(), textRect, textColor, false, true);
 }
 
 

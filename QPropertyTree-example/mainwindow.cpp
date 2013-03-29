@@ -80,7 +80,7 @@ struct TestData
     void serialize(Archive& ar)
     {
 		//ar(vec3, "vec3", "Vec3");
-        ar(elements, "elements", "Elements");
+        ar(elements, "elements", "!Elements");
 		ar(globalLogicEditor, "logicEditor", "Logic Editor");
     }
 } globalTestData;
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
 #ifdef NDEBUG
 	globalTestData.elements.resize(50000);
 #else
-	globalTestData.elements.resize(5000);
+	globalTestData.elements.resize(5);
 #endif
 
 
