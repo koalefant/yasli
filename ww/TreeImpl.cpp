@@ -628,15 +628,12 @@ void TreeImpl::updateArea()
 
 	tree_->_arrangeChildren();
 	updateScrollBar();
-
-	if(area_.width() > 0)
-		tree_->needUpdate_ = true;
 }
 
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 {
 	if(!creating()){
-        updateArea();
+        tree()->updateHeights();
 	}
 	return TRUE;
 }
@@ -769,15 +766,6 @@ protected:
 
 void TreeImpl::redraw(HDC dc)
 {
-	if(tree_->needUpdate_){
-		int sy = size_.y;
-		tree_->updateHeights();
-		if(!sy && size_.y > area_.height()){ // Не очень красивый фикс: появляющийся в первый раз скроллбар налезает на дерево. 
-			updateArea();
-			tree_->updateHeights();
-		}
-	}
-
 	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
     ::GetClientRect(handle_, &clientRect);
     int clientWidth = clientRect.right - clientRect.left;

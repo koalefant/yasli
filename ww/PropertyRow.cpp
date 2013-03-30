@@ -543,7 +543,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	if(isRoot())
 		expanded_ = true;
 	else{
-		if(nonPulledParent()->isRoot() || tree->compact() && nonPulledParent()->parent()->isRoot())
+		if(nonPulled->isRoot() || tree->compact() && nonPulled->parent()->isRoot())
 			_setExpanded(true);
 		else if(!pulledUp())
 			plusSize_ = tree->tabSize();
@@ -699,8 +699,6 @@ void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHei
         PropertyRow* row = *it;
 			if(row->visible(tree) && (nonPulled->expanded() || row->pulledUp()))
 				row->adjustVerticalPosition(tree, totalHeight);
-			else {
-			}
 		}
     }
 }

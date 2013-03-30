@@ -156,8 +156,6 @@ public:
 	signal0& signalPushUndo(){ return signalPushUndo_; }
 
 protected:
-	void applyChanged(bool enforceAll);
-	void revertChanged(bool enforceAll);
 
 	struct RowFilter {
 		enum Type {
@@ -236,7 +234,6 @@ protected:
 	PolyPtr<Entry> filterEntry_; 
 
 	bool autoRevert_;
-	bool needUpdate_;
 	int leftBorder_;
 	int rightBorder_;
 

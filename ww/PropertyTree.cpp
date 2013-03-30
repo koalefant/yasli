@@ -97,7 +97,6 @@ PropertyTree::PropertyTree(int border)
 , cursorX_(0)
 , attachedPropertyTree_(0)
 , autoRevert_(true)
-, needUpdate_(true)
 , capturedRow_(0)
 , leftBorder_(0)
 , rightBorder_(0)
@@ -417,10 +416,12 @@ void PropertyTree::interruptDrag()
 
 void PropertyTree::updateHeights()
 {
+	impl()->updateArea();
+
 	model()->root()->updateLabel(this, 0);
 	int lb = compact_ ? 0 : 4;
 	int rb = impl()->area_.size().x - lb*2;
-	bool force = lb != leftBorder() || rb != rightBorder();
+	bool force = lb != leftBorder_ || rb != rightBorder_;
 	leftBorder_ = lb;
 	rightBorder_ = rb;
 	model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
@@ -450,7 +451,7 @@ void PropertyTree::serialize(Archive& ar)
 			updateAttachedPropertyTree();
 			if(focused)
 				setFocus();
-			update();
+			updateHeights();
 			signalSelected_.emit();
 		}
 	}
@@ -511,24 +512,6 @@ void PropertyTree::detach()
 	update();
 }
 
-void PropertyTree::revertChanged(bool enforce)
-{
-	PropertyOArchive oa(model_, model_->root());
-	oa.setFilter(filter_);
-
-	Serializers::iterator it = attached_.begin();
-	(*it)(oa);
-	while(++it != attached_.end()){
-		PropertyTreeModel model2;
-		PropertyOArchive oa2(&model2, model_->root());
-		Archive::Context<ww::PropertyTree> treeContext(oa2, this);
-		oa2.setFilter(filter_);
-		(*it)(oa2);
-		model_->root()->intersect(model2.root());
-	}
-
-	updateHeights();
-}
 
 void PropertyTree::revert()
 {
@@ -536,7 +519,20 @@ void PropertyTree::revert()
 	widget_ = 0;
 
 	if (!attached_.empty()) {
-		revertChanged(true);
+		PropertyOArchive oa(model_, model_->root());
+		oa.setFilter(filter_);
+
+		Serializers::iterator it = attached_.begin();
+		(*it)(oa);
+		while(++it != attached_.end()){
+			PropertyTreeModel model2;
+			PropertyOArchive oa2(&model2, model_->root());
+			Archive::Context<ww::PropertyTree> treeContext(oa2, this);
+			oa2.setFilter(filter_);
+			(*it)(oa2);
+			model_->root()->intersect(model2.root());
+		}
+		updateHeights();
 	}
 	else
 		model_->clear();
@@ -547,30 +543,23 @@ void PropertyTree::revert()
 		onFilterChanged();
 	}
 
-	update();
-	updateAttachedPropertyTree();
 	signalReverted_.emit();
+	updateAttachedPropertyTree();
 }
 
 void PropertyTree::apply()
 {
-	applyChanged(true);
-}
-
-void PropertyTree::applyChanged(bool enforce)
-{
 	if (!attached_.empty()) {
 		Serializers::iterator it;
-		FOR_EACH(attached_, it) {
+		for(it = attached_.begin(); it != attached_.end(); ++it) {
 			PropertyIArchive ia(model_, model_->root());
  			Archive::Context<ww::PropertyTree> treeContext(ia, this);
  			ia.setFilter(filter_);
 			(*it)(ia);
 		}
 	}
-
-	updateHeights();
 }
+
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 {
@@ -729,19 +718,19 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows)
 		widget_ = 0;
 
 	if (immediateUpdate_) {
-		applyChanged(true);
-			rows.front()->calculateMinimalSize(this, rows.front()->pos().x, true, 0, 0); 
+		apply();
 		signalChanged_.emit();
 		if (autoRevert_)
 			revert();
+		else{
+			updateAttachedPropertyTree();
+			if(!immediateUpdate_)
+				signalChanged_.emit();
+		}
 	}
-
-	setFocus();
-	updateHeights();
-
-	updateAttachedPropertyTree();
-	if(!immediateUpdate_)
-		signalChanged_.emit();
+	else {
+		update();
+	}
 }
 
 void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
@@ -790,8 +779,7 @@ void PropertyTree::setFilterMode(bool inFilterMode)
     {
         onFilterChanged();
         impl()->updateArea();
-        needUpdate_ = true;
-		::InvalidateRect(impl()->handle(), 0, FALSE);
+		update();
     }
 }
 
