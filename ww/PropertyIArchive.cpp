@@ -348,15 +348,17 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 	if(currentNode_->empty())
 		return false;
 
+	Level& level = stack_.back();
+
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if (stack_.back().rowIndex < int(currentNode_->children_.size()))
-			node = currentNode_->children_[stack_.back().rowIndex];
-		++stack_.back().rowIndex;
+		if (level.rowIndex < int(currentNode_->children_.size()))
+			node = currentNode_->children_[level.rowIndex];
+		++level.rowIndex;
 	}
 	else {
-		node = currentNode_->findFromIndex(&stack_.back().rowIndex, name, typeName, stack_.back().rowIndex); // TODO: perform look-up in a proper order
-		++stack_.back().rowIndex;
+		node = currentNode_->findFromIndex(&level.rowIndex, name, typeName, level.rowIndex);
+		++level.rowIndex;
 		}
 
 	if(node){

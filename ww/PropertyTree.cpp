@@ -37,8 +37,30 @@
 #include "ww/PropertyEditor.h"
 #include "gdiplusUtils.h"
 
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 namespace ww{
+
+struct DebugTimer
+{
+	const char* name;
+	unsigned int startTime;
+	DebugTimer(const char* name)
+	: name(name)
+	{
+		startTime = timeGetTime();
+	}
+
+	~DebugTimer()
+	{
+		unsigned int endTime = timeGetTime();
+		char buf[128] = "";
+		sprintf_s(buf, "timer %s: %i\n", name, endTime-startTime);
+		// OutputDebugStringA(buf);
+	}
+
+};
 
 class FilterEntry : public Entry
 {
@@ -519,18 +541,21 @@ void PropertyTree::revert()
 	widget_ = 0;
 
 	if (!attached_.empty()) {
-		PropertyOArchive oa(model_, model_->root());
-		oa.setFilter(filter_);
+		{
+			DebugTimer timer("revert");
+			PropertyOArchive oa(model_, model_->root());
+			oa.setFilter(filter_);
 
-		Serializers::iterator it = attached_.begin();
-		(*it)(oa);
-		while(++it != attached_.end()){
-			PropertyTreeModel model2;
-			PropertyOArchive oa2(&model2, model_->root());
-			Archive::Context<ww::PropertyTree> treeContext(oa2, this);
-			oa2.setFilter(filter_);
-			(*it)(oa2);
-			model_->root()->intersect(model2.root());
+			Serializers::iterator it = attached_.begin();
+			(*it)(oa);
+			while(++it != attached_.end()){
+				PropertyTreeModel model2;
+				PropertyOArchive oa2(&model2, model_->root());
+				Archive::Context<ww::PropertyTree> treeContext(oa2, this);
+				oa2.setFilter(filter_);
+				(*it)(oa2);
+				model_->root()->intersect(model2.root());
+			}
 		}
 		updateHeights();
 	}
@@ -549,6 +574,7 @@ void PropertyTree::revert()
 
 void PropertyTree::apply()
 {
+	DebugTimer timer("apply");
 	if (!attached_.empty()) {
 		Serializers::iterator it;
 		for(it = attached_.begin(); it != attached_.end(); ++it) {

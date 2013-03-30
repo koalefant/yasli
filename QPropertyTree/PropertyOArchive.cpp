@@ -83,8 +83,9 @@ void PropertyOArchive::enterNode(PropertyRow* row)
 	currentNode_ = row;
 
 	stack_.push_back(Level());
-	stack_.back().oldRows.swap(row->children_);
-	row->children_.reserve(stack_.back().oldRows.size());	
+	Level& level = stack_.back();
+	level.oldRows.swap(row->children_);
+	row->children_.reserve(level.oldRows.size());	
 }
 
 void PropertyOArchive::closeStruct(const char* name)
@@ -148,13 +149,14 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 	}
 	else{
 
+		Level& level = stack_.back();
 		int rowIndex;
-		PropertyRow* oldRow = findRow(&rowIndex, stack_.back().oldRows, name, typeName, stack_.back().rowIndex);
+		PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
 		if(oldRow){
 			newRow = static_cast<RowType*>(oldRow);
-			stack_.back().oldRows[rowIndex] = 0;
-			stack_.back().rowIndex = rowIndex + 1;
+			level.oldRows[rowIndex] = 0;
+			level.rowIndex = rowIndex + 1;
 		}
 		else{
 			//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
@@ -187,13 +189,14 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		return 0;
 
 	int rowIndex;
-	PropertyRow* oldRow = findRow(&rowIndex, stack_.back().oldRows, name, typeName, stack_.back().rowIndex);
+	Level& level = stack_.back();
+	PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
 	if(oldRow){
 		oldRow->setMultiValue(false);
 		newRow.reset(static_cast<RowType*>(oldRow));
-		stack_.back().oldRows[rowIndex] = 0;
-		stack_.back().rowIndex = rowIndex + 1;
+		level.oldRows[rowIndex] = 0;
+		level.rowIndex = rowIndex + 1;
 	}
 	else{
 		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);

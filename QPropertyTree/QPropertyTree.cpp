@@ -1075,8 +1075,7 @@ void QPropertyTree::revert()
 			(*it)(oa2);
 			model_->root()->intersect(model2.root());
 		}
-
-		updateHeights();
+		revertTime_ = int(timer.elapsed());
 	}
 	else
 		model_->clear();
@@ -1086,7 +1085,9 @@ void QPropertyTree::revert()
 			model_->root()->updateLabel(this, 0);
         onFilterChanged(QString());
 	}
-
+	else {
+		updateHeights();
+	}
 
 	update();
 	updateAttachedPropertyTree();
@@ -1112,8 +1113,6 @@ void QPropertyTree::apply()
 
 	signalChanged();
 	applyTime_ = timer.elapsed();
-
-	updateHeights();
 }
 
 bool QPropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -2220,8 +2219,6 @@ bool QPropertyTree::toggleRow(PropertyRow* row)
 	if(!row->canBeToggled(this))
 		return false;
 	expandRow(row, !row->expanded());
-
-	updateHeights();
 	return true;
 }
 

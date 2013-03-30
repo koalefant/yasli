@@ -518,8 +518,10 @@ void PropertyRow::updateTextSizeInitial(const QPropertyTree* tree, int index)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
-	if(text[0] == '\0')
+	if(text[0] == '\0') {
 		textSizeInitial_ = 0;
+		textHash_ = 0;
+	}
 	else{
 		unsigned hash = calcHash(text);
 		const QFont* font = rowFont(tree);
@@ -544,7 +546,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	if(isRoot())
 		expanded_ = true;
 	else{
-		if(nonPulledParent()->isRoot() || tree->compact() && nonPulledParent()->parent()->isRoot())
+		if(nonPulled->isRoot() || tree->compact() && nonPulled->parent()->isRoot())
 			_setExpanded(true);
 		else if(!pulledUp())
 			plusSize_ = tree->tabSize();
