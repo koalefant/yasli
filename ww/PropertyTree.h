@@ -153,6 +153,7 @@ protected:
 
 	struct RowFilter {
 		enum Type {
+			NAME_VALUE,
 			NAME,
 			VALUE,
 			TYPE,

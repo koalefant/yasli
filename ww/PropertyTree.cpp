@@ -667,7 +667,8 @@ bool PropertyTree::onContextMenu(PropertyRow* row, PopupMenuItem& menu)
 	menu.addSeparator();
 	PopupMenuItem& filter = menu.add("Filter by");
 	{
-		wstring nameFilter = quoteIfNeeded(toWideChar(row->labelUndecorated()).c_str());
+		wstring nameFilter = L"#";
+		nameFilter += quoteIfNeeded(toWideChar(row->labelUndecorated()).c_str());
 		filter.add((wstring(L"Name:\t") + nameFilter).c_str(), nameFilter).connect(this, &PropertyTree::startFilter);
 
 		wstring valueFilter = L"=";
@@ -1018,9 +1019,12 @@ struct FilterVisitor
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree)
 	{
 		wstring label = toWideChar(row->labelUndecorated());
-		bool matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
-		if (matchFilter)
-			matchFilter = filter_.match(row->valueAsWString().c_str(), filter_.VALUE, 0, 0);
+		wstring value = row->valueAsWString();
+		bool matchFilter = filter_.match(label.c_str(), filter_.NAME_VALUE, 0, 0) || filter_.match(value.c_str(), filter_.NAME_VALUE, 0, 0);
+		if (matchFilter && filter_.typeRelevant(filter_.NAME))
+			matchFilter = filter_.match(label.c_str(), filter_.NAME, 0, 0);
+		if (matchFilter && filter_.typeRelevant(filter_.VALUE))
+			matchFilter = filter_.match(value.c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
 			matchFilter = filter_.match(toWideChar(row->typeNameForFilter()).c_str(), filter_.TYPE, 0, 0);						   
 		
@@ -1082,7 +1086,7 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 
 	const wchar_t* str = &filterBuf[0];
 
-	Type type = NAME;
+	Type type = NAME_VALUE;
 	while (true)
 	{
 		bool fromStart = false;
@@ -1121,8 +1125,11 @@ void PropertyTree::RowFilter::parse(const wchar_t* filter)
 		}
 		while (*str == ' ')
 			++str;
-
-		if (*str == L'=') {
+		if (*str == L'#') {
+			type = NAME;
+			++str;
+		}
+		else if (*str == L'=') {
 			type = VALUE;
 			++str;
 		}
@@ -1219,7 +1226,10 @@ void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const wchar_t* text
 	if (filterMode_) {
 		size_t hiStart = 0;
 		size_t hiEnd = 0;
-		if (rowFilter_.match(text, type, &hiStart, &hiEnd)) {
+		bool matched = rowFilter_.match(text, type, &hiStart, &hiEnd) && hiStart != hiEnd;
+		if (!matched && (type == RowFilter::NAME || type == RowFilter::VALUE))
+			matched = rowFilter_.match(text, RowFilter::NAME_VALUE, &hiStart, &hiEnd);
+        if (matched && hiStart != hiEnd) {
 			Gdiplus::RectF boxFull;
 			Gdiplus::RectF boxStart;
 			Gdiplus::RectF boxEnd;
