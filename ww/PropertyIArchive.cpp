@@ -320,7 +320,7 @@ bool PropertyIArchive::operator()(Object& obj, const char* name, const char* lab
 
 bool PropertyIArchive::openBlock(const char* name, const char* label)
 {
-	if(openRow(label, label, "")){
+	if(openRow(label, label, "block")){
 		return true;
 	}
 	else

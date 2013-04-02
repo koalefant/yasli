@@ -319,7 +319,7 @@ bool PropertyIArchive::operator()(yasli::Object& obj, const char* name, const ch
 
 bool PropertyIArchive::openBlock(const char* name, const char* label)
 {
-	if(openRow(label, label, "")){
+	if(openRow(label, label, "block")){
 		return true;
 	}
 	else
