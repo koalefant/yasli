@@ -519,13 +519,10 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 		Gdiplus::Font* font = rowFont(tree);
 		hash = calcHash(font, hash);
 		if(hash != textHash_){
-			HDC dc = GetDC(Win32::getDefaultWindowHandle());
-			Gdiplus::Graphics gr(dc);
 			wstring wstr(toWideChar(text));
 			Gdiplus::StringFormat format;
 			Gdiplus::RectF bound;
-			gr.MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
-			ReleaseDC(Win32::getDefaultWindowHandle(), dc);
+			tree->_graphics()->MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f), &format, &bound, 0);
 			textSizeInitial_ = bound.Width + 3;
 			textHash_ = hash;
 		}
@@ -695,8 +692,9 @@ void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHei
 	PropertyRow* nonPulled = nonPulledParent();
 
 	if (expanded_ || hasPulled_) {
-		for(PropertyRows::iterator it = children_.begin(); it != children_.end(); ++it){
-        PropertyRow* row = *it;
+		size_t numChildren = children_.size();
+		for (size_t i = 0; i < numChildren; ++i) {
+			PropertyRow* row = children_[i];
 			if(row->visible(tree) && (nonPulled->expanded() || row->pulledUp()))
 				row->adjustVerticalPosition(tree, totalHeight);
 		}
@@ -709,10 +707,12 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 
 	textSize_ = round(textSizeInitial_ * mult);
 
-	Rows::iterator i;
-	for(i = children_.begin(); i != children_.end(); ++i)
-		if((*i)->pulledUp())
-			(*i)->setTextSize(tree, 0, mult);
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->setTextSize(tree, 0, mult);
+	}
 }
 
 void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
@@ -724,9 +724,12 @@ void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int*
 		*freePulledChildren += 1;
 	*minimalWidth += textSizeInitial_ + widgetSizeMin();
 
-	for(Rows::const_iterator it = children_.begin(); it != children_.end(); ++it)
-		if((*it)->pulledUp())
-			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+	}
 }
 
 PropertyRow* PropertyRow::findSelected()

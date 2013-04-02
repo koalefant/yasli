@@ -59,7 +59,6 @@ struct DebugTimer
 		sprintf_s(buf, "timer %s: %i\n", name, endTime-startTime);
 		// OutputDebugStringA(buf);
 	}
-
 };
 
 class FilterEntry : public Entry
@@ -124,7 +123,12 @@ PropertyTree::PropertyTree(int border)
 , rightBorder_(0)
 , filterMode_(false)
 {
+	DrawingCache::get()->initialize();
+
 	(TreeConfig&)*this = defaultConfig;
+
+	HDC dc = GetDC(impl()->handle());
+	graphics_ = new Gdiplus::Graphics(dc);
 
 	_setMinimalSize(0, 0);
 
@@ -140,12 +144,15 @@ PropertyTree::PropertyTree(int border)
 	filterEntry_->_setParent(this);
 	filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
 
-	DrawingCache::get()->initialize();
 }
 #pragma warning(pop)
 
 PropertyTree::~PropertyTree()
 {
+	ReleaseDC(impl()->handle(), graphics_->GetHDC());
+	delete graphics_;
+	graphics_ = 0;
+
 	DrawingCache::get()->finalize();
 }
 
@@ -438,18 +445,21 @@ void PropertyTree::interruptDrag()
 
 void PropertyTree::updateHeights()
 {
-	impl()->updateArea();
+	{
+		DebugTimer("updateHeights");
+		impl()->updateArea();
 
-	model()->root()->updateLabel(this, 0);
-	int lb = compact_ ? 0 : 4;
-	int rb = impl()->area_.size().x - lb*2;
-	bool force = lb != leftBorder_ || rb != rightBorder_;
-	leftBorder_ = lb;
-	rightBorder_ = rb;
-	model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
+		model()->root()->updateLabel(this, 0);
+		int lb = compact_ ? 0 : 4;
+		int rb = impl()->area_.size().x - lb*2;
+		bool force = lb != leftBorder_ || rb != rightBorder_;
+		leftBorder_ = lb;
+		rightBorder_ = rb;
+		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
 
-	impl()->size_.y = 0;
-	model()->root()->adjustVerticalPosition(this, impl()->size_.y);
+		impl()->size_.y = 0;
+		model()->root()->adjustVerticalPosition(this, impl()->size_.y);
+	}
 	impl()->updateScrollBar();
 	update();
 }

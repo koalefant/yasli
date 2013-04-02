@@ -62,6 +62,7 @@ private:
 		int rowIndex;
 		Level() : rowIndex(0) {}
 	};
+	Level* currentLevel_;
 	std::vector<Level> stack_;
 
 	template<class RowType, class ValueType>

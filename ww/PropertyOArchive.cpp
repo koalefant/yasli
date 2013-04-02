@@ -39,6 +39,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 , rootNode_(root)
 {
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 	YASLI_ASSERT(model != 0);
 	if(!rootNode()->empty()){ 
 		updateMode_ = true;
@@ -58,6 +59,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 , rootNode_(0)
 {
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 }
 
 PropertyOArchive::~PropertyOArchive()
@@ -80,13 +82,18 @@ void PropertyOArchive::enterNode(PropertyRow* row)
 	currentNode_ = row;
 
 	stack_.push_back(Level());
-	stack_.back().oldRows.swap(row->children_);
-	row->children_.reserve(stack_.back().oldRows.size());	
+	currentLevel_ = &stack_.back();
+	currentLevel_->oldRows.swap(row->children_);
+	row->children_.reserve(currentLevel_->oldRows.size());	
 }
 
 void PropertyOArchive::closeStruct(const char* name)
 {
 	stack_.pop_back();
+	if (!stack_.empty())
+		currentLevel_ = &stack_.back();
+	else
+		currentLevel_ = 0;
 
 	if(currentNode_){
 		lastNode_ = currentNode_;
@@ -145,7 +152,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 	}
 	else{
 
-		Level& level = stack_.back();
+		Level& level = *currentLevel_;
 		int rowIndex;
 		PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
@@ -185,7 +192,7 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		return 0;
 
 	int rowIndex;
-	Level& level = stack_.back();
+	Level& level = *currentLevel_;
 	PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
 	if(oldRow){

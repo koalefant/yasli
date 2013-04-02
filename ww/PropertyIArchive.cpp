@@ -27,8 +27,10 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 , currentNode_(0)
 , lastNode_(0)
 , root_(root)
+, currentLevel_(0)
 {
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 
 	if (!root_)
 		root_ = model_->root();
@@ -232,6 +234,7 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
 	}
 
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 
 	size_t index = 0;
     if(ser.size() > 0)
@@ -243,6 +246,10 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
         }
 
 	stack_.pop_back();
+	if (!stack_.empty())
+		currentLevel_ = &stack_.back();
+	else
+		currentLevel_ = 0;
 
     closeRow(name);
 	return true;
@@ -261,10 +268,15 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const
 		return false;
 
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 
 	ser(*this);
 
 	stack_.pop_back();
+	if (!stack_.empty())
+		currentLevel_ = &stack_.back();
+	else
+		currentLevel_ = 0;
 
 	closeRow(name);
 	return true;
@@ -293,11 +305,16 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
         return false;
 
 	stack_.push_back(Level());
+	currentLevel_ = &stack_.back();
 
     if(ser.get() != 0)
         ser.serializer()( *this );
 
 	stack_.pop_back();
+	if (!stack_.empty())
+		currentLevel_ = &stack_.back();
+	else
+		currentLevel_ = 0;
 
 	closeRow(name);
     return true;
@@ -348,7 +365,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 	if(currentNode_->empty())
 		return false;
 
-	Level& level = stack_.back();
+	Level& level = *currentLevel_;
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){

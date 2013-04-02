@@ -32,6 +32,28 @@
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+
+struct DebugTimer
+{
+	const char* name;
+	unsigned int startTime;
+	DebugTimer(const char* name)
+	: name(name)
+	{
+		startTime = timeGetTime();
+	}
+
+	~DebugTimer()
+	{
+		unsigned int endTime = timeGetTime();
+		char buf[128] = "";
+		sprintf_s(buf, "timer %s: %i\n", name, endTime-startTime);
+		// OutputDebugStringA(buf);
+	}
+};
+
 using namespace Gdiplus;
 
 namespace ww{
@@ -766,6 +788,7 @@ protected:
 
 void TreeImpl::redraw(HDC dc)
 {
+	DebugTimer timer("redraw");
 	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
     ::GetClientRect(handle_, &clientRect);
     int clientWidth = clientRect.right - clientRect.left;

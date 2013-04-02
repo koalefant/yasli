@@ -139,14 +139,8 @@ public:
 	Rect _visibleRect() const;
 	bool _isDragged(const PropertyRow* row) const;
 	bool _isCapturedRow(const PropertyRow* row) const;
+	Gdiplus::Graphics* _graphics() const { return graphics_; }
 	TreeImpl* impl() const;
-
-
-
-
-
-
-
 
 	signal0& signalChanged(){ return signalChanged_; }
 	typedef signal1<const yasli::Object&> SignalObjectChanged;
@@ -232,6 +226,7 @@ protected:
 	bool filterMode_;
 	RowFilter rowFilter_;
 	PolyPtr<Entry> filterEntry_; 
+	Gdiplus::Graphics* graphics_;
 
 	bool autoRevert_;
 	int leftBorder_;
