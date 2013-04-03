@@ -149,15 +149,13 @@ void DragWindow::drawRow(HDC dc)
 	::SelectObject(dc, oldPen);
 
 	Vect2 leftTop = row_->rect().leftTop();
-	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), 0, 0);
-	PropertyRow::setDrawOffset(leftTop.y);
+	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
 	int index = 0;
 	if (row_->parent())
 		index = row_->parent()->childIndex(row_);
 	row_->drawRow(dc, treeImpl_->tree(), index);
 	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
 	SetViewportOrgEx(dc, 0, 0, 0);
-	PropertyRow::setDrawOffset(0);
 }
 
 BOOL DragWindow::onMessageEraseBkgnd(HDC dc)
@@ -237,7 +235,7 @@ bool DragController::dragOn(POINT screenPoint)
 	if(!dragging_ && (Vect2(startPoint_.x, startPoint_.y) - Vect2(screenPoint.x, screenPoint.y)).length2() >= 25)
 		if(row_->canBeDragged()){
 			needCapture = true;
-			Rect rect = row_->rect();
+			Rect rect = row_->rect() + Vect2(0, treeImpl_->area_.top());
             rect = Rect(rect.leftTop() - treeImpl_->offset_ + Vect2(treeImpl_->tree()->tabSize(), 0), 
                          rect.rightBottom() - treeImpl_->offset_);
             
@@ -796,6 +794,8 @@ void TreeImpl::redraw(HDC dc)
     int clientWidth = clientRect.right - clientRect.left;
     int clientHeight = clientRect.bottom - clientRect.top;
 
+	PropertyRow::setOffsetY(-offset_.y + area_.top());
+
 	{
 		Graphics gr(dc);
 		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left, 
@@ -815,15 +815,13 @@ void TreeImpl::redraw(HDC dc)
 
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
-	OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
+	//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
 	if(drag_.captured())
 		drag_.drawUnder(dc);
-	OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
+	//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
-	PropertyRow::setDrawOffset(offset_.y);
 	if (model()->root())
-		model()->root()->scanChildren(DrawVisitor(dc, area_, offset_.y), tree_);
-	PropertyRow::setDrawOffset(0);
+		model()->root()->scanChildren(DrawVisitor(dc, area_, 0), tree_);
 
 	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
 
@@ -857,9 +855,9 @@ void TreeImpl::redraw(HDC dc)
 	}
 
 	if(drag_.captured()){
-		OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
+		//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
 		drag_.drawOver(dc);
-		OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
+		//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 	}
 	else{
 		if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && tree_->hasFocus()){
@@ -868,6 +866,7 @@ void TreeImpl::redraw(HDC dc)
 			DrawFocusRect(dc, &clientRect);
 		}
 	}
+	PropertyRow::setOffsetY(0);
 }
 
 TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 pointInWindowSpace, const Rect& rowRect)

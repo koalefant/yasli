@@ -195,12 +195,12 @@ public:
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
-	const Vect2& pos() const { return pos_; }
-	Rect rect() const{ return Rect(pos_.x, pos_.y, pos_.x + size_.x, pos_.y + size_.y); }
-	Rect textRect() const{ return Rect(textPos_, pos_.y, textPos_ + textSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-    Rect widgetRect() const{ return Rect(widgetPos_, pos_.y, widgetPos_ + widgetSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-    Rect plusRect() const{ return Rect(pos_.x, pos_.y, pos_.x + plusSize_, pos_.y + ROW_DEFAULT_HEIGHT); }
-	Rect floorRect() const { return Rect(textPos_, pos_.y + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, pos_.y + size_.y); }
+	int posY() const { return pos_.y + offsetY_; }
+	Rect rect() const{ return Rect(pos_.x, posY(), pos_.x + size_.x, posY() + size_.y); }
+	Rect textRect() const{ return Rect(textPos_, posY(), textPos_ + textSize_, posY() + ROW_DEFAULT_HEIGHT); }
+    Rect widgetRect() const{ return Rect(widgetPos_, posY(), widgetPos_ + widgetSize_, posY() + ROW_DEFAULT_HEIGHT); }
+    Rect plusRect() const{ return Rect(pos_.x, posY(), pos_.x + plusSize_, posY() + ROW_DEFAULT_HEIGHT); }
+	Rect floorRect() const { return Rect(textPos_, posY() + ROW_DEFAULT_HEIGHT, pos_.x + size_.x, posY() + size_.y); }
 	Gdiplus::Font* rowFont(const PropertyTree* tree) const;
 	
 	void drawRow(HDC dc, const PropertyTree* tree, int index);
@@ -272,7 +272,7 @@ public:
 	void serialize(Archive& ar);
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
-	static void setDrawOffset(int offset) { drawOffset_ = offset; }
+	static void setOffsetY(int offset) { offsetY_ = offset; }
 
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
@@ -316,7 +316,7 @@ protected:
 	yasli::SharedPtr<PropertyRow> pulledContainer_;
 
 	static ConstStringList* constStrings_;
-	static int drawOffset_;
+	static int offsetY_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;
 };
