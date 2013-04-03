@@ -149,13 +149,15 @@ void DragWindow::drawRow(HDC dc)
 	::SelectObject(dc, oldPen);
 
 	Vect2 leftTop = row_->rect().leftTop();
-	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
+	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), 0, 0);
+	PropertyRow::setDrawOffset(leftTop.y);
 	int index = 0;
 	if (row_->parent())
 		index = row_->parent()->childIndex(row_);
 	row_->drawRow(dc, treeImpl_->tree(), index);
 	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
 	SetViewportOrgEx(dc, 0, 0, 0);
+	PropertyRow::setDrawOffset(0);
 }
 
 BOOL DragWindow::onMessageEraseBkgnd(HDC dc)
@@ -814,15 +816,14 @@ void TreeImpl::redraw(HDC dc)
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
 	OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
-
 	if(drag_.captured())
 		drag_.drawUnder(dc);
+	OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
-	OffsetViewportOrgEx(dc, area_.left(), area_.top(), 0);
+	PropertyRow::setDrawOffset(offset_.y);
 	if (model()->root())
 		model()->root()->scanChildren(DrawVisitor(dc, area_, offset_.y), tree_);
-	OffsetViewportOrgEx(dc, -area_.left(), -area_.top(), 0);
-	OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
+	PropertyRow::setDrawOffset(0);
 
 	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
 

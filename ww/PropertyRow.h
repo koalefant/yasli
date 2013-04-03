@@ -272,6 +272,7 @@ public:
 	void serialize(Archive& ar);
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
+	static void setDrawOffset(int offset) { drawOffset_ = offset; }
 
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
@@ -315,6 +316,7 @@ protected:
 	yasli::SharedPtr<PropertyRow> pulledContainer_;
 
 	static ConstStringList* constStrings_;
+	static int drawOffset_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;
 };

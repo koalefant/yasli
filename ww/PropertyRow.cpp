@@ -51,7 +51,8 @@ inline unsigned calcHash(const T& t, unsigned hash = 5381)
 
 // ---------------------------------------------------------------------------
 
-ConstStringList* PropertyRow::constStrings_ = 0;
+ConstStringList* PropertyRow::constStrings_;
+int PropertyRow::drawOffset_;
 
 PropertyRow::PropertyRow()
 {
@@ -884,6 +885,8 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree, int index)
     gr.SetSmoothingMode(SmoothingModeAntiAlias);
     gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
 
+	pos_.y -= drawOffset_;
+
 	PropertyDrawContext context;
 	context.tree = tree;
 	context.widgetRect = widgetRect();
@@ -982,6 +985,8 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree, int index)
         Font* font = rowFont(tree);
 		tree->_drawRowLabel(&gr, text.c_str(), font, textRect(), textColor);
     }
+
+	pos_.y += drawOffset_;
 }
 
 void PropertyRow::drawPlus(Gdiplus::Graphics* gr, const Rect& rect, bool expanded, bool selected, bool grayed) const
