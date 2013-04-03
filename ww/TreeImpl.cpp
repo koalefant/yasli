@@ -277,7 +277,7 @@ void DragController::trackRow(POINT pt)
 		return;
 
 	PropertyTree* tree = treeImpl_->tree();
-	float pos = (point.y - row->rect().top()) / float(row->rect().height());
+	float pos = (point.y - row->rect().top() - treeImpl_->area_.top()) / float(row->rect().height());
 	if(row_->canBeDroppedOn(row->parent(), row, tree)){
 		if(pos < 0.25f){
 			destinationRow_ = row->parent();
