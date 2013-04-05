@@ -728,10 +728,12 @@ void PropertyRow::setTextSize(const QPropertyTree* tree, int index, float mult)
 
 	textSize_ = round(textSizeInitial_ * mult);
 
-	Rows::iterator i;
-	for(i = children_.begin(); i != children_.end(); ++i)
-		if((*i)->pulledUp())
-			(*i)->setTextSize(tree, 0, mult);
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->setTextSize(tree, 0, mult);
+	}
 }
 
 void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree *tree, int index) 
@@ -743,9 +745,12 @@ void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int*
 		*freePulledChildren += 1;
 	*minimalWidth += textSizeInitial_ + widgetSizeMin();
 
-	for(Rows::const_iterator it = children_.begin(); it != children_.end(); ++it)
-		if((*it)->pulledUp())
-			(*it)->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+	}
 }
 
 PropertyRow* PropertyRow::findSelected()
