@@ -271,7 +271,7 @@ void DragWindow::set(QPropertyTree* tree, PropertyRow* row, const QRect& rowRect
 
 void DragWindow::setWindowPos(bool visible)
 {
-	QWidget::move(rect_.left() + offset_.x() - 1,  rect_.top() + offset_.y() - 1);
+	QWidget::move(rect_.left() + offset_.x() - 1,  rect_.top() + offset_.y() - 1 + tree_->area_.top());
 	QWidget::resize(rect_.width() + 2, rect_.height() + 2);
 }
 

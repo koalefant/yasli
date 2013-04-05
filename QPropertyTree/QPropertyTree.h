@@ -310,6 +310,7 @@ protected:
 
 	friend class TreeImpl;
 	friend class FilterEntry;
+	friend class DragWindow;
 	friend struct FilterVisitor;
 	friend struct PropertyTreeMenuHandler;
 };
