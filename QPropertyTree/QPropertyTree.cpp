@@ -996,21 +996,35 @@ void QPropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adju
 
 void QPropertyTree::attach(const yasli::Serializers& serializers)
 {
+	bool changed = false;
+	if (attached_.size() != serializers.size())
+		changed = true;
+	else {
+		for (size_t i = 0; i < serializers.size(); ++i) {
+			if (attached_[i].serializer() != serializers[i]) {
+				changed = true;
+				break;
+			}
+		}
+	}
 
 	// We can't perform plain copying here, as it was before:
 	//   attached_ = serializers;
 	// ...as move forwarder calls copying constructor with non-const argument
 	// which invokes second templated constructor of Serializer, which is not what we need.
-	attached_.assign(serializers.begin(), serializers.end());
-
-	revert();
+	if (changed) {
+		attached_.assign(serializers.begin(), serializers.end());
+		revert();
+	}
 }
 
 void QPropertyTree::attach(const yasli::Serializer& serializer)
 {
-	attached_.clear();
-	attached_.push_back(yasli::Object(serializer));
-	revert();
+	if (attached_.size() != 1 || attached_[0].serializer() != serializer) {
+		attached_.clear();
+		attached_.push_back(yasli::Object(serializer));
+		revert();
+	}
 }
 
 void QPropertyTree::attach(const yasli::Object& object)
@@ -1056,6 +1070,7 @@ void QPropertyTree::revert()
 {
 	interruptDrag();
 	widget_.reset();
+	capturedRow_ = 0;
 
 	if (!attached_.empty()) {
 		QElapsedTimer timer;
