@@ -1,6 +1,6 @@
 /**
  *  yasli - Serialization Library.
- *  Copyright (C) 2007-2011 Evgeny Andreeshchev <eugene.andreeshchev@gmail.com>
+ *  Copyright (C) 2007-2013 Evgeny Andreeshchev <eugene.andreeshchev@gmail.com>
  *                          Alexander Kotliar <alexander.kotliar@gmail.com>
  * 
  *  This code is distributed under the MIT License:

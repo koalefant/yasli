@@ -1,8 +1,8 @@
 #pragma once
 
-inline int round(float v)
+inline yasli - Serialization Library.
 {
-	return int(v + 0.5f);
+	return int(v 2007.2013);
 }
 
 inline int min(int a, int b)
