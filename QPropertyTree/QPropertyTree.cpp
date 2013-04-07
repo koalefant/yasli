@@ -537,6 +537,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , lastStillPosition_(-1, -1)
 , pressedRow_(0)
 , capturedRow_(0)
+, iconCache_(new IconXPMCache())
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -559,15 +560,12 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	mouseStillTimer_ = new QTimer(this);
 	mouseStillTimer_->setSingleShot(true);
 	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStill()));
-
-	DrawingCache::get()->initialize();
 }
 #pragma warning(pop)
 
 QPropertyTree::~QPropertyTree()
 {
 	clearMenuHandlers();
-	DrawingCache::get()->finalize();
 }
 
 bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)

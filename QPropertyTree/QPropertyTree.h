@@ -32,6 +32,7 @@ class PropertyRow;
 class PropertyRowWidget;
 class PropertyTreeOperator;
 class Entry;
+struct IconXPMCache;
 
 namespace yasli { class Object; }
 
@@ -174,6 +175,7 @@ public:
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	ConstStringList* constStrings() { return &constStrings_; }
+	IconXPMCache* _iconCache() const{ return iconCache_.data(); }
 
 signals:
 	void signalChanged();
@@ -285,6 +287,7 @@ protected:
 	bool filterMode_;
 	RowFilter rowFilter_;
 	QScopedPointer<QLineEdit> filterEntry_; 
+	QScopedPointer<IconXPMCache> iconCache_; 
 	
 	bool autoRevert_;
 	bool needUpdate_;

@@ -11,7 +11,8 @@
 #include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
 
-//#include "ww/Decorators.h"
+#include "yasli/decorators/IconXPM.h"
+using yasli::IconXPM;
 #include "yasli/Enum.h"
 
 #include "LogicEditor.h"
@@ -55,6 +56,8 @@ public:
 	virtual void serialize(Archive& ar)
 	{
         ConditionBase::serialize(ar);
+#include "folder.xpm"
+		ar(IconXPM(folder_xpm), "folder", "^^");
 		ar(mode_, "mode", "Mode");
 		ar(children_, "children", "^Subconditions");
 	}

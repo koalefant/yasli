@@ -40,13 +40,19 @@ set(SOURCES
 	Token.h
 	TypeID.h
 	)
+
+set(DECORATORS
+	decorators/IconXPM.h
+	)
+
 source_group("" FILES ${SOURCES})
+source_group("decorators" FILES ${DECORATORS})
 
 if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(WIN32)
 
-add_library("yasli" ${SOURCES})
+add_library("yasli" ${SOURCES} ${DECORATORS})
 set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 
 #include("Testo")

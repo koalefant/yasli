@@ -9,6 +9,7 @@
 
 #pragma once
 #include <map>
+#include <vector>
 
 #include "yasli/Config.h"
 #include "yasli/Assert.h"

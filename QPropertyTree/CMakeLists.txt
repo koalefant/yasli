@@ -10,7 +10,6 @@ find_package(Qt4 REQUIRED)
 set(SOURCES
 	Color.cpp
 	ConstStringList.cpp
-	Icon.cpp
 	PropertyDrawContext.cpp
 	PropertyIArchive.cpp
 	PropertyOArchive.cpp
@@ -18,6 +17,7 @@ set(SOURCES
 	PropertyRowBool.cpp
 	PropertyRowContainer.cpp
 	PropertyRowField.cpp
+	PropertyRowIconXPM.cpp
 	PropertyRowNumber.cpp
 	PropertyRowNumberField.cpp
 	PropertyRowObject.cpp
@@ -31,7 +31,6 @@ set(SOURCES
 	Color.h
 	ConstStringList.h
 	Factory.h
-	Icon.h
 	MathUtils.h
 	PropertyDrawContext.h
 	PropertyIArchive.h

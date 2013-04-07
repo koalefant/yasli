@@ -12,37 +12,36 @@
 #include <map>
 #include <vector>
 #include <QtCore/QRect>
+#include "Color.h"
 
 class QPainter;
-class QBitmap;
+class QImage;
 class QBrush;
 class QRect;
 class QColor;
 class QFont;
-class Icon;
+struct RGBAImage;
+namespace yasli { struct IconXPM; }
 struct Color;
 
-struct DrawingCache
+struct IconXPMCache
 {
 	void initialize();
 	void finalize();
 	void flush();
 
-	~DrawingCache();
+	~IconXPMCache();
 
-	static DrawingCache* get();
-
-	QBitmap* getBitmapForIcon(const Icon& icon);
+	QImage* getImageForIcon(const yasli::IconXPM& icon);
 private:
 	struct BitmapCache {
 		std::vector<Color> pixels;
-		QBitmap* bitmap;
+		QImage* bitmap;
 	};
-	typedef std::map<Icon, BitmapCache> IconToBitmap;
-	IconToBitmap iconToBitmapMap_;
 
-	void* token_;
-	int users_;
+	static bool parseXPM(RGBAImage* out, const yasli::IconXPM& xpm);
+	typedef std::map<const char* const*, BitmapCache> IconToBitmap;
+	IconToBitmap iconToImageMap_;
 };
 
 
@@ -67,7 +66,7 @@ struct PropertyDrawContext {
 	bool captured;
 	bool pressed;
 
-	void drawIcon(const QRect& rect, const Icon& icon) const;
+	void drawIcon(const QRect& rect, const yasli::IconXPM& icon) const;
 	void drawCheck(const QRect& rect, bool disabled, CheckState checked) const;
 	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, const QFont* font) const;
 	void drawValueText(bool highlighted, const wchar_t* text) const;

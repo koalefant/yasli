@@ -1342,6 +1342,7 @@ PropertyRowWidget::~PropertyRowWidget()
 
 FORCE_SEGMENT(PropertyRowNumber)
 FORCE_SEGMENT(PropertyRowStringList)
+FORCE_SEGMENT(PropertyRowIconXPM)
 /*
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)
@@ -1349,6 +1350,5 @@ FORCE_SEGMENT(PropertyRowFileSelector)
 FORCE_SEGMENT(PropertyRowColor)
 FORCE_SEGMENT(PropertyRowHotkey)
 FORCE_SEGMENT(PropertyRowSlider)
-FORCE_SEGMENT(PropertyRowIcon)
 */
 
