@@ -16,9 +16,11 @@ public:
 
 char exceptMSG[512] = "";
 char miniDampName[512] = "";
+void (*userHandler)();
 
 void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, 511); }
 void setMiniDampName(const char* name){ strncpy(miniDampName, name, 511); }
+void setExceptionHandler(void (*pf)()){ userHandler = pf; }
 
 #pragma warning (disable : 4073)
 #pragma init_seg(lib)
@@ -187,6 +189,8 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 
 
 	ErrH.WriteLog(msg);
+	if(userHandler)
+		userHandler();
 	ErrH.Abort(msg);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
