@@ -443,7 +443,7 @@ void PropertyTree::interruptDrag()
 	impl()->drag_.interrupt();
 }
 
-void PropertyTree::updateHeights()
+void PropertyTree::updateHeights(bool force)
 {
 	{
 		DebugTimer("updateHeights");
@@ -452,7 +452,7 @@ void PropertyTree::updateHeights()
 		model()->root()->updateLabel(this, 0);
 		int lb = compact_ ? 0 : 4;
 		int rb = impl()->area_.size().x - lb*2;
-		bool force = lb != leftBorder_ || rb != rightBorder_;
+		force = force || lb != leftBorder_ || rb != rightBorder_;
 		leftBorder_ = lb;
 		rightBorder_ = rb;
 		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
@@ -483,7 +483,7 @@ void PropertyTree::serialize(Archive& ar)
 			updateAttachedPropertyTree();
 			if(focused)
 				setFocus();
-			updateHeights();
+			updateHeights(true);
 			signalSelected_.emit();
 		}
 	}

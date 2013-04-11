@@ -177,7 +177,7 @@ protected:
 		}
 	};
 	void interruptDrag();
-	void updateHeights();
+	void updateHeights(bool force = false);
 
 	bool onContextMenu(PropertyRow* row, PopupMenuItem& menu);
 	bool onRowKeyDown(PropertyRow* row, KeyPress key);
