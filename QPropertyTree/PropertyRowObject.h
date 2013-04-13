@@ -26,13 +26,11 @@ using yasli::MemoryWriter;
 
 class PropertyRowObject : public PropertyRow {
 public:
-	enum { Custom = false };
 	PropertyRowObject();
 	~PropertyRowObject();
 	void setValue(const Object& obj) { object_ = obj; }
 	void setModel(PropertyTreeModel* model) { model_ = model; }
 	bool isObject() const{ return true; }
-	PropertyRow* cloneSelf() const;
 	bool assignTo(Object* obj);
 	void serialize(Archive& ar);
 	const Object& object() const{ return object_; }

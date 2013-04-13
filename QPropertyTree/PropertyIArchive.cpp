@@ -63,7 +63,7 @@ bool PropertyIArchive::operator()(yasli::WStringInterface& value, const char* na
 bool PropertyIArchive::operator()(bool& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "bool")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -74,7 +74,7 @@ bool PropertyIArchive::operator()(bool& value, const char* name, const char* lab
 bool PropertyIArchive::operator()(char& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "char")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -86,7 +86,7 @@ bool PropertyIArchive::operator()(char& value, const char* name, const char* lab
 bool PropertyIArchive::operator()(signed char& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "signed char")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -97,7 +97,7 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "short")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -108,7 +108,7 @@ bool PropertyIArchive::operator()(signed short& value, const char* name, const c
 bool PropertyIArchive::operator()(signed int& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "int")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -119,7 +119,7 @@ bool PropertyIArchive::operator()(signed int& value, const char* name, const cha
 bool PropertyIArchive::operator()(signed long& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "long")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -130,7 +130,7 @@ bool PropertyIArchive::operator()(signed long& value, const char* name, const ch
 bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "long long")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -142,7 +142,7 @@ bool PropertyIArchive::operator()(long long& value, const char* name, const char
 bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "unsigned char")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -153,7 +153,7 @@ bool PropertyIArchive::operator()(unsigned char& value, const char* name, const 
 bool PropertyIArchive::operator()(unsigned short& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "unsigned short")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -164,7 +164,7 @@ bool PropertyIArchive::operator()(unsigned short& value, const char* name, const
 bool PropertyIArchive::operator()(unsigned int& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "unsigned int")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -175,7 +175,7 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "unsigned long")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -186,7 +186,7 @@ bool PropertyIArchive::operator()(unsigned long& value, const char* name, const 
 bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "unsigned long long")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -197,7 +197,7 @@ bool PropertyIArchive::operator()(unsigned long long& value, const char* name, c
 bool PropertyIArchive::operator()(float& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "float")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -208,7 +208,7 @@ bool PropertyIArchive::operator()(float& value, const char* name, const char* la
 bool PropertyIArchive::operator()(double& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "double")){
-		currentNode_->assignTo(value);
+		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
 	}
@@ -251,7 +251,7 @@ bool PropertyIArchive::operator()(const yasli::Serializer& ser, const char* name
 {
 	if(openRow(name, label, ser.type().name())){
 		if(currentNode_->isLeaf() && !currentNode_->isRoot()){
-            currentNode_->assignTo(ser.pointer(), ser.size());
+            currentNode_->assignTo(ser);
             closeRow(name);
             return true;
 		}

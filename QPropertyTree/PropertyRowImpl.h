@@ -12,21 +12,19 @@
 #include "PropertyRowField.h"
 #include "Serialization.h"
 
-struct Unspecified_Derived_Argument {};
-
-template<class Type, class Derived>
+template<class Type>
 class PropertyRowImpl;
 
-template<class Type, class Derived = PropertyRowImpl<Type, Unspecified_Derived_Argument> >
+template<class Type>
 class PropertyRowImpl : public PropertyRowField{
 public:
-	bool assignTo(void* object, size_t size){
-		*reinterpret_cast<Type*>(object) = value();
+	bool assignTo(const Serializer& ser) const override{
+		*reinterpret_cast<Type*>(ser.pointer()) = value();
 		return true;
 	}
-	bool isLeaf() const{ return true; }
-	bool isStatic() const{ return false; }
-	void setValue(const Type& value) { value_ = value; }
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
+	void setValue(const Type& value) override{ value_ = value; }
 	Type& value() { return value_; }
 	const Type& value() const{ return value_; }
 
@@ -39,12 +37,6 @@ public:
 		ar(value_, "value", "Value");
 	}
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
-	PropertyRow* cloneSelf() const{
-		Derived* result = new Derived();
-		result->setNames(name_, label_, typeName_);
-		result->value_ = value_;
-		return result;
-	}
 protected:
 	Type value_; 
 };

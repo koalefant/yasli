@@ -125,19 +125,13 @@ public:
         return numberAsString(Type(value_));
 	}
 
-	bool assignTo(void* object, size_t size){
+	bool assignToPrimitive(void* object, size_t size) const override{
 		*reinterpret_cast<Type*>(object) = value_;
 		return true;
 	}
 
 	void serializeValue(yasli::Archive& ar){
 		ar(value_, "value", "Value");
-	}
-	PropertyRow* cloneSelf() const{
-		PropertyRowNumber* result = new PropertyRowNumber();
-		result->setNames(name_, label_, typeName_);
-		result->value_ = value_;
-		return result;
 	}
 
 	void startIncrement() override

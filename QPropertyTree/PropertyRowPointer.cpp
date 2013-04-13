@@ -115,11 +115,12 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 	}
 	else{
 		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(row->baseType(), index);
+		SharedPtr<PropertyRow> clonedDefault = defaultValue->root->clone(tree->model()->constStrings());
 		if (defaultValue && defaultValue->root) {
 			YASLI_ASSERT(defaultValue->root->refCount() == 1);
 			if(useDefaultValue){
 				row->clear();
-				row->cloneChildren(row, defaultValue->root);
+				row->swapChildren(clonedDefault);
 			}
 			row->setDerivedType(defaultValue->type, row->factory());
 			row->setLabelChanged();
@@ -177,8 +178,11 @@ yasli::wstring PropertyRowPointer::generateLabel() const
 		}
 	else
 		{
-				YASLI_ESCAPE(factory_ != 0, return L"NULL");
-				str = toWideChar(factory_->nullLabel() ? factory_->nullLabel() : "[ null ]");
+				if (factory_)
+					str = toWideChar(factory_->nullLabel() ? factory_->nullLabel() : "[ null ]");
+				else
+					str = L"[ null ]";
+
 		}
 		return str;
 }

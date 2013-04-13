@@ -241,7 +241,7 @@ void PropertyTreeModel::rowAboutToBeChanged(PropertyRow* row)
     YASLI_ESCAPE(row, return);
     if(fullUndo_){
         if(undoEnabled_){
-            PropertyRow* clonedRow = root()->clone();
+            SharedPtr<PropertyRow> clonedRow = root()->clone(constStrings());
             clonedRow->assignRowState(*root(), true);
             pushUndo(PropertyTreeOperator(TreePath(), clonedRow));
         }
@@ -251,7 +251,7 @@ void PropertyTreeModel::rowAboutToBeChanged(PropertyRow* row)
     }
     else{
         if(undoEnabled_){
-            PropertyRow* clonedRow = row->clone();
+			SharedPtr<PropertyRow> clonedRow = row->clone(constStrings());
             clonedRow->assignRowState(*row, true);
             pushUndo(PropertyTreeOperator(pathFromRow(row), clonedRow));
         }

@@ -9,8 +9,7 @@
 
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
-#include "yasli/BinaryOArchive.h"
-#include "yasli/BinaryIArchive.h"
+#include "yasli/BinArchive.h"
 #include "yasli/PointersImpl.h"
 #include "QPropertyTree.h"
 #include "PropertyDrawContext.h"
@@ -68,8 +67,8 @@ void PropertyTreeMenuHandler::onMenuUndo()
 static QMimeData* propertyRowToMimeData(PropertyRow* row, ConstStringList* constStrings)
 {
 	PropertyRow::setConstStrings(constStrings);
-	SharedPtr<PropertyRow> clonedRow(row->clone());
-	yasli::BinaryOArchive oa(true);
+	SharedPtr<PropertyRow> clonedRow(row->clone(constStrings));
+	yasli::BinOArchive oa;
 	PropertyRow::setConstStrings(constStrings);
 	if (!oa(clonedRow, "row", "Row")) {
 		PropertyRow::setConstStrings(0);
@@ -97,7 +96,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 
 				const char* derivedName = d->typeName();
 				const char* derivedNameAlt = d->typeName();
-				PropertyRowPointer* newSourceRoot = static_cast<PropertyRowPointer*>(d->clone());
+				SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
 					// new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
 				source->swapChildren(newSourceRoot);
 				source = newSourceRoot;
@@ -129,7 +128,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
-						PropertyRowPointer* newSourceRoot = static_cast<PropertyRowPointer*>(d->clone());
+						SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
 						//new PropertyRowPointer(d->name(), d->label(), d->typeName(), d->factory(), d->derivedTypeName()
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
@@ -152,7 +151,7 @@ static bool propertyRowFromMimeData(SharedPtr<PropertyRow>& row, const QMimeData
 	QByteArray array = mimeData->data("binary/qpropertytree");
 	if (array.isEmpty())
 		return 0;
-	yasli::BinaryIArchive ia(true);
+	yasli::BinIArchive ia;
 	if (!ia.open(array.data(), array.size()))
 		return 0;
 
@@ -174,7 +173,7 @@ bool propertyRowFromClipboard(SharedPtr<PropertyRow>& row, ConstStringList* cons
 
 void PropertyTreeMenuHandler::onMenuCopy()
 {
-	QMimeData* mime = propertyRowToMimeData(row, tree->constStrings());
+	QMimeData* mime = propertyRowToMimeData(row, tree->model()->constStrings());
 	if (mime)
 		QApplication::clipboard()->setMimeData(mime);
 }
@@ -188,7 +187,7 @@ void PropertyTreeMenuHandler::onMenuPaste()
 	tree->model()->rowAboutToBeChanged(row);
 
 	SharedPtr<PropertyRow> source;
-	if (!propertyRowFromClipboard(source, tree->constStrings()))
+	if (!propertyRowFromClipboard(source, tree->model()->constStrings()))
 		return;
 
 	if (!smartPaste(row, source, tree->model(), false))
@@ -955,7 +954,7 @@ void QPropertyTree::serialize(Archive& ar)
 
 		if(ar.isInput()){
 			ensureVisible(model()->focusedRow());
-			updateAttachedPropertyTree();
+			updateAttachedPropertyTree(false);
 			update();
 			signalSelected();
 		}
@@ -989,11 +988,11 @@ void QPropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adju
 	ensureVisible(row);
 	if(adjustCursorPos)
 		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
-	updateAttachedPropertyTree();
+	updateAttachedPropertyTree(false);
 	signalSelected();
 }
 
-void QPropertyTree::attach(const yasli::Serializers& serializers)
+bool QPropertyTree::attach(const yasli::Serializers& serializers)
 {
 	bool changed = false;
 	if (attached_.size() != serializers.size())
@@ -1015,6 +1014,8 @@ void QPropertyTree::attach(const yasli::Serializers& serializers)
 		attached_.assign(serializers.begin(), serializers.end());
 		revert();
 	}
+
+	return changed;
 }
 
 void QPropertyTree::attach(const yasli::Serializer& serializer)
@@ -1104,7 +1105,7 @@ void QPropertyTree::revert()
 	}
 
 	update();
-	updateAttachedPropertyTree();
+	updateAttachedPropertyTree(true);
 
 	signalReverted();
 }
@@ -1256,10 +1257,10 @@ void QPropertyTree::onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoin
 bool QPropertyTree::canBePasted(PropertyRow* destination)
 {
 	SharedPtr<PropertyRow> source;
-	if (!propertyRowFromClipboard(source, &constStrings_))
+	if (!propertyRowFromClipboard(source, model_->constStrings()))
 		return false;
 
-	if (!smartPaste(destination, source, model_.data(), true))
+	if (!smartPaste(destination, source, model(), true))
 		return false;
 	return true;
 }
@@ -1267,7 +1268,7 @@ bool QPropertyTree::canBePasted(PropertyRow* destination)
 bool QPropertyTree::canBePasted(const char* destinationType)
 {
 	SharedPtr<PropertyRow> source;
-	if (!propertyRowFromClipboard(source, &constStrings_))
+	if (!propertyRowFromClipboard(source, model()->constStrings()))
 		return false;
 
 	bool result = strcmp(source->typeName(), destinationType) == 0;
@@ -1306,7 +1307,7 @@ void QPropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 			revert();
 		else {
 			updateHeights();
-			updateAttachedPropertyTree();
+			updateAttachedPropertyTree(true);
 			if(!immediateUpdate_)
 				onSignalChanged();
 		}
@@ -1507,7 +1508,7 @@ void QPropertyTree::attachPropertyTree(QPropertyTree* propertyTree)
 		disconnect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
 	attachedPropertyTree_ = propertyTree; 
 	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	updateAttachedPropertyTree(); 
+	updateAttachedPropertyTree(true); 
 }
 
 void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
@@ -1532,12 +1533,13 @@ void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 	}
 }
 
-void QPropertyTree::updateAttachedPropertyTree()
+void QPropertyTree::updateAttachedPropertyTree(bool revert)
 {
 	if(attachedPropertyTree_) {
  		Serializers serializers;
  		getSelectionSerializers(&serializers);
- 		attachedPropertyTree_->attach(serializers);
+ 		if (!attachedPropertyTree_->attach(serializers) && revert)
+			attachedPropertyTree_->revert();
  	}
 }
 

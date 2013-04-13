@@ -11,6 +11,7 @@
 #include "PropertyTreeModel.h"
 #include "PropertyRowContainer.h"
 #include "PropertyDrawContext.h"
+#include "yasli/BinArchive.h"
 #include "yasli/ClassFactory.h"
 #include "Unicode.h"
 #include "Serialization.h"
@@ -301,21 +302,19 @@ yasli::string PropertyRow::valueAsString() const
 	return yasli::string();
 }
 
-PropertyRow* PropertyRow::clone() const
+SharedPtr<PropertyRow> PropertyRow::clone(ConstStringList* constStrings) const
 {
-	PropertyRow* result = cloneSelf();
-	return cloneChildren(result, this);
-}
+	PropertyRow::setConstStrings(constStrings);
+	yasli::BinOArchive oa;
+	SharedPtr<PropertyRow> self(const_cast<PropertyRow*>(this));
+	oa(self, "row", "Row");
 
-PropertyRow* PropertyRow::cloneChildren(PropertyRow* result, const PropertyRow* source) const
-{
-	PropertyRow::const_iterator it;
-	for(it = source->begin(); it != source->end(); ++it){
-		const PropertyRow* sourceChild = *it;
-		result->add(sourceChild->cloneSelf());
-	}
-
-	return result;
+	yasli::BinIArchive ia;
+	ia.open(oa);
+	SharedPtr<PropertyRow> clonedRow;
+	ia(clonedRow, "row", "Row");
+	PropertyRow::setConstStrings(0);
+	return clonedRow;
 }
 
 void PropertyRow::drawStaticText(QPainter& p, const QRect& widgetRect)

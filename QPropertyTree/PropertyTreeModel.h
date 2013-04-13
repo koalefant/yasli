@@ -13,6 +13,7 @@
 #include "PropertyRow.h"
 #include "PropertyTreeOperator.h"
 #include "yasli/Pointers.h"
+#include "ConstStringList.h"
 
 using std::vector;
 using std::map;
@@ -129,6 +130,7 @@ public:
 	bool defaultTypeRegistered(const yasli::TypeID& baseType, const yasli::TypeID& derivedType) const;
 	void addDefaultType(const yasli::TypeID& baseType, const PropertyDefaultTypeValue& value);
 	const PropertyDefaultTypeValue* defaultType(const yasli::TypeID& baseType, int index) const;
+	ConstStringList* constStrings() { return &constStrings_; }
 
 signals:
 	void signalUpdated(const PropertyRows& rows, bool needApply);
@@ -163,6 +165,8 @@ private:
 
 	std::vector<PropertyTreeOperator> undoOperators_;
 	std::vector<PropertyTreeOperator> redoOperators_;
+
+	ConstStringList constStrings_;
 
 	friend class TreeImpl;
 };

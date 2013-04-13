@@ -21,7 +21,7 @@ PropertyRowBool::PropertyRowBool()
 {
 }
 
-bool PropertyRowBool::assignTo(void* object, size_t size)
+bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 {
 	YASLI_ASSERT(size == sizeof(bool));
 	*reinterpret_cast<bool*>(object) = value_;

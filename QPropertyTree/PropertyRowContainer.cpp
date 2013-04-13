@@ -175,7 +175,7 @@ void ContainerMenuHandler::onMenuAppendElement()
 	tree->model()->rowAboutToBeChanged(container);
 	PropertyRow* defaultType = container->defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
-	PropertyRow* clonedRow = defaultType->clone();
+	PropertyRow* clonedRow = defaultType->clone(tree->model()->constStrings());
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
@@ -197,7 +197,8 @@ void ContainerMenuHandler::onMenuAppendElement()
 void ContainerMenuHandler::onMenuAppendPointerByIndex()
 {
 	PropertyRow* defaultType = container->defaultRow(tree->model());
-	PropertyRow* clonedRow = defaultType->clone();
+	PropertyRowPointer* defaultTypePointer = static_cast<PropertyRowPointer*>(defaultType);
+	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
 	// clonedRow->setFullRow(true); TODO
 	if(container->count() == 0)
 		tree->expandRow(container);
@@ -205,15 +206,18 @@ void ContainerMenuHandler::onMenuAppendPointerByIndex()
 	clonedRow->setLabelChanged();
 	clonedRow->setLabelChangedToChildren();
 	container->setMultiValue(false);
-	PropertyRowPointer* pointer = static_cast<PropertyRowPointer*>(clonedRow);
+	PropertyRowPointer* clonedRowPointer = static_cast<PropertyRowPointer*>(clonedRow.get());
+	clonedRowPointer->setDerivedType(defaultTypePointer->getDerivedType(defaultTypePointer->factory()), defaultTypePointer->factory());
+	clonedRowPointer->setBaseType(defaultTypePointer->baseType());
+	clonedRowPointer->setFactory(defaultTypePointer->factory());
 	if(container->expanded())
 		tree->model()->selectRow(clonedRow, true);
-	tree->expandRow(pointer);
+	tree->expandRow(clonedRowPointer);
 	PropertyTreeModel::Selection sel = tree->model()->selection();
 
 	CreatePointerMenuHandler handler;
 	handler.tree = tree;
-	handler.row = pointer;
+	handler.row = clonedRowPointer;
 	handler.index = pointerIndex;
 	handler.onMenuCreateByIndex();
 	tree->model()->setSelection(sel);
@@ -226,7 +230,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	PropertyRow* defaultType = tree->model()->defaultType(container->elementTypeName());
 	if(!defaultType)
 		return;
-	PropertyRow* clonedRow = defaultType->clone();
+	PropertyRow* clonedRow = defaultType->clone(tree->model()->constStrings());
 	element->setSelected(false);
 	container->addBefore(clonedRow, element);
 	container->setMultiValue(false);

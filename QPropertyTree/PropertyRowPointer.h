@@ -39,7 +39,6 @@ struct ClassMenuItemAdder
 class PropertyRowPointer : public PropertyRow
 {
 public:
-	enum { Custom = false };
 	PropertyRowPointer();
 
 	bool assignTo(yasli::PointerInterface &ptr);
@@ -47,9 +46,11 @@ public:
 	using PropertyRow::assignTo;
 
 	yasli::TypeID baseType() const{ return baseType_; }
+	void setBaseType(const yasli::TypeID& baseType) { baseType_ = baseType; }
 	const char* derivedTypeName() const{ return derivedTypeName_.c_str(); }
 	yasli::TypeID getDerivedType(yasli::ClassFactoryBase* factory) const;
 	void setDerivedType(const yasli::TypeID& typeID, yasli::ClassFactoryBase* factory);
+	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
 	bool onActivate( QPropertyTree* tree, bool force);
 	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed);
@@ -59,15 +60,6 @@ public:
 	int widgetSizeMin() const;
 	yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const;
-	PropertyRow* cloneSelf() const{
-		PropertyRowPointer* result = new PropertyRowPointer();
-		result->setNames(name_, label_, typeName_);
-		result->baseType_ = baseType_;
-		result->factory_ = factory_;
-		result->derivedTypeName_ = derivedTypeName_;
-		result->derivedLabel_ = derivedLabel_;
-		return result;
-	}
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar);

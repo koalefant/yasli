@@ -21,8 +21,6 @@ using yasli::IconXPMToggle;
 
 class PropertyRowIconXPM : public PropertyRow{
 public:
-	static const bool Custom = true;
-
 	bool assignTo(void* val, size_t size)
 	{
 		return false;
@@ -49,12 +47,6 @@ public:
 	}
 	yasli::wstring valueAsWString() const{ return L""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	PropertyRow* cloneSelf() const{
-		PropertyRowIconXPM* result = new PropertyRowIconXPM();
-		result->setNames(name_, label_, typeName_);
-		result->icon_ = icon_;
-		return cloneChildren(result, this);
-	}
 	void serializeValue(Archive& ar) {}
 	int widgetSizeMin() const{ return 18; }
 	int height() const{ return 16; }
@@ -62,10 +54,8 @@ protected:
 	IconXPM icon_;
 };
 
-class PropertyRowIconToggle : public PropertyRowImpl<IconXPMToggle, PropertyRowIconToggle>{
+class PropertyRowIconToggle : public PropertyRowImpl<IconXPMToggle>{
 public:
-	static const bool Custom = true;
-
 	void redraw(const PropertyDrawContext& context)
 	{
 		IconXPM& icon = value().value_ ? value().iconTrue_ : value().iconFalse_;

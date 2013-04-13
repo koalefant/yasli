@@ -35,21 +35,12 @@ public slots:
 class PropertyRowContainer : public PropertyRow
 {
 public:
-	enum { Custom = false };
 	PropertyRowContainer();
 	bool isContainer() const{ return true; }
 	bool onActivate( QPropertyTree* tree, bool force);
 	bool onContextMenu(QMenu& item, QPropertyTree* tree);
 	void redraw(const PropertyDrawContext& context);
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
-
-	PropertyRow* cloneSelf() const{
-		PropertyRowContainer* result = new PropertyRowContainer();
-		result->setNames(name_, label_, typeName_);
-		result->fixedSize_ = fixedSize_;
-		result->elementTypeName_ = elementTypeName_;
-		return result;
-	}
 
 	void labelChanged() override;
 	bool isStatic() const{ return false; }

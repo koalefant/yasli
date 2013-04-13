@@ -96,7 +96,6 @@ public:
 	static const int ICON_SIZE = 21; 
 	static const int TEXT_SIZE_MIN = 30; 
 	static const int WIDGET_SIZE_MIN = 30; 
-	static const bool Custom = true;
 
 	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
 	typedef Rows::iterator iterator;
@@ -190,11 +189,8 @@ public:
 	int horizontalIndex(QPropertyTree* tree, PropertyRow* row);
 	PropertyRow* rowByHorizontalIndex(QPropertyTree* tree, int index);
 
-	template<class T>
-	bool assignTo(T& object){
-		return assignTo(reinterpret_cast<void*>(&object), sizeof(T));
-	}
-	virtual bool assignTo(void* object, size_t size) { return false; }
+	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
+	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
 	virtual void setValue(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
@@ -278,8 +274,7 @@ public:
 	PropertyRow* pulledContainer() { return pulledContainer_; }
 	const PropertyRow* pulledContainer() const{ return pulledContainer_; }
 
-	PropertyRow* clone() const;
-	PropertyRow* cloneChildren(PropertyRow* result, const PropertyRow* source) const;
+	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
 
 	yasli::Serializer serializer() const{ return serializer_; }
     void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
@@ -289,13 +284,6 @@ public:
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
 
 protected:
-	virtual PropertyRow* cloneSelf() const {
-		PropertyRow* result = new PropertyRow();
-		result->setNames(name_, label_, typeName_);
-		result->setValue(serializer_);
-		return result;
-	}
-
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;

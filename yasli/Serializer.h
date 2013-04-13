@@ -70,6 +70,8 @@ public:
 
 	bool operator()(Archive& ar) const;
 	operator bool() const{ return object_ && serializeFunc_; }
+	bool operator==(const Serializer& rhs) { return object_ == rhs.object_ && serializeFunc_ == rhs.serializeFunc_; }
+	bool operator!=(const Serializer& rhs) { return !operator==(rhs); }
 	void* pointer() const{ return object_; }
 	TypeID type() const{ return type_; }
 	size_t size() const{ return size_; }

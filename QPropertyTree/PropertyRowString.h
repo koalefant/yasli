@@ -16,10 +16,9 @@
 
 #include <QtGui/QLineEdit>
 
-class PropertyRowString : public PropertyRowImpl<yasli::wstring, PropertyRowString>
+class PropertyRowString : public PropertyRowImpl<yasli::wstring>
 {
 public:
-	enum { Custom = false };
 	bool assignTo(yasli::string& str);
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);

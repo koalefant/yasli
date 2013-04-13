@@ -25,14 +25,6 @@ bool PropertyRowObject::assignTo(Object* obj)
 	return false;
 }
 
-PropertyRow* PropertyRowObject::cloneSelf() const
-{
-	PropertyRowObject* result =  new PropertyRowObject();
-	result->setNames(name_, label_, typeName_);
-	result->setModel(model_);
-	return result;
-}
-
 PropertyRowObject::~PropertyRowObject()
 {
 	object_ = Object();

@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "ConstStringList.h"
 #include <string>
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
@@ -113,7 +112,7 @@ public:
 
 	void attach(const yasli::Object& object);
 	void attach(const yasli::Serializer& serializer);
-	void attach(const yasli::Serializers& serializers);
+	bool attach(const yasli::Serializers& serializers);
 	void attachPropertyTree(QPropertyTree* propertyTree);
 	void getSelectionSerializers(yasli::Serializers* serializers);
 	void detach();
@@ -174,7 +173,6 @@ public:
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
-	ConstStringList* constStrings() { return &constStrings_; }
 	IconXPMCache* _iconCache() const{ return iconCache_.data(); }
 
 signals:
@@ -270,7 +268,7 @@ protected:
 	void setWidget(PropertyRowWidget* widget);
 	void _arrangeChildren();
 
-	void updateAttachedPropertyTree();
+	void updateAttachedPropertyTree(bool revert);
 	void drawFilteredString(QPainter& p, const wchar_t* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 
 	QScopedPointer<PropertyTreeModel> model_;
@@ -279,7 +277,6 @@ protected:
 	QScopedPointer<PropertyRowWidget> widget_; // in-place widget
 	vector<PropertyRowMenuHandler*> menuHandlers_;
 
-	ConstStringList constStrings_;
 	typedef vector<yasli::Object> Objects;
 	Objects attached_;
 	QPropertyTree* attachedPropertyTree_;

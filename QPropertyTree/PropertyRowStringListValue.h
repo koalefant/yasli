@@ -19,19 +19,26 @@
 
 
 using yasli::StringListValue;
-class PropertyRowStringListValue : public PropertyRowImpl<StringListValue, PropertyRowStringListValue>
+class PropertyRowStringListValue : public PropertyRow
 {
 public:
-	enum { Custom = true };
-
-	// virtuals:
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
 	yasli::string valueAsString() const override { return value_.c_str(); }
-	bool assignTo(void* object, size_t size) override {
-		*reinterpret_cast<StringListValue*>(object) = value().c_str();
+	bool assignTo(const Serializer& ser) const override {
+		*((StringListValue*)ser.pointer()) = value_.c_str();
 		return true;
 	}
+	void setValue(const yasli::Serializer& ser) override {
+		YASLI_ESCAPE(ser.size() == sizeof(StringListValue), return);
+		const StringListValue& stringListValue = *((StringListValue*)(ser.pointer()));
+		stringList_ = stringListValue.stringList();
+		value_ = stringListValue.c_str();
+	}
+
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
 	int widgetSizeMin() const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
 	void redraw(const PropertyDrawContext& context) override
 	{
@@ -53,21 +60,39 @@ public:
 
 		}
 	}
+
+
+	void serializeValue(yasli::Archive& ar){
+		ar(value_, "value", "Value");
+		ar(stringList_, "stringList", "String List");
+	}
+private:
+	yasli::StringList stringList_;
+	yasli::string value_;
+	friend class PropertyRowWidgetStringListValue;
 };
 
 using yasli::StringListStaticValue;
-class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue, PropertyRowStringListStaticValue>{
+class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue>{
 public:
-	enum { Custom = false };
-
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
-	yasli::string valueAsString() const  override{ return value_.c_str(); }
-	bool assignTo(void* object, size_t size) override{
-		*reinterpret_cast<StringListStaticValue*>(object) = value().index();
+	yasli::string valueAsString() const override { return value_.c_str(); }
+	bool assignTo(const Serializer& ser) const override {
+		*((StringListStaticValue*)ser.pointer()) = value_.c_str();
 		return true;
 	}
-	int widgetSizeMin() const override{ return userWidgetSize() >= 0 ? userWidgetSize() : 80; }
-	
+	void setValue(const Serializer& ser) override {
+		YASLI_ESCAPE(ser.size() == sizeof(StringListStaticValue), return);
+		const StringListStaticValue& stringListValue = *((StringListStaticValue*)(ser.pointer()));
+		stringList_.assign(stringListValue.stringList().begin(), stringListValue.stringList().end());
+		value_ = stringListValue.c_str();
+	}
+
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
+	int widgetSizeMin() const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
+
 	void redraw(const PropertyDrawContext& context) override
 	{
 		if(multiValue())
@@ -85,9 +110,23 @@ public:
 			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
 			textRect.adjust(1, 0, -1, 0);
 			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
+
 		}
 	}
+
+
+	void serializeValue(yasli::Archive& ar){
+		ar(value_, "value", "Value");
+		ar(stringList_, "stringList", "String List");
+	}
+private:
+	yasli::StringList stringList_;
+	yasli::string value_;
+	friend class PropertyRowWidgetStringListValue;
 };
+	
+
+// ---------------------------------------------------------------------------
 
 class QAutoComboBox : public QComboBox
 {
@@ -130,10 +169,10 @@ public:
 	: PropertyRowWidget(row, tree)
 	, comboBox_(new QAutoComboBox())
 	{
-		const StringListValue& slv = row->value();
-		for (size_t i = 0; i < slv.stringList().size(); ++i)
-			comboBox_->addItem(slv.stringList()[i].c_str());
-		comboBox_->setCurrentIndex(slv.index());
+		const yasli::StringList& stringList = row->stringList_;
+		for (size_t i = 0; i < stringList.size(); ++i)
+			comboBox_->addItem(stringList[i].c_str());
+		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
 		connect(comboBox_, SIGNAL(currentIndexChanged(int)), this, SLOT(onChange(int)));
 	}
 
@@ -141,10 +180,10 @@ public:
 	: PropertyRowWidget(row, tree)
 	, comboBox_(new QAutoComboBox())
 	{
-		const StringListStaticValue& slv = row->value();
-		for (size_t i = 0; i < slv.stringList().size(); ++i)
-			comboBox_->addItem(slv.stringList()[i]);
-		comboBox_->setCurrentIndex(slv.index());
+		const yasli::StringList& stringList = row->stringList_;
+		for (size_t i = 0; i < stringList.size(); ++i)
+			comboBox_->addItem(stringList[i].c_str());
+		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
 		connect(comboBox_, SIGNAL(currentIndexChanged(int)), this, SLOT(onChange(int)));
 	}
 
@@ -166,19 +205,14 @@ public slots:
 			{
 				PropertyRowStringListValue* row = static_cast<PropertyRowStringListValue*>(this->row());
 				model()->rowAboutToBeChanged(row);
-				StringListValue comboList = row->value();
-				comboList = comboBox_->currentIndex();
-				//getStringListValueFromComboBox(&comboList, comboBox_);
-				row->setValue(comboList);
+				row->value_ = comboBox_->currentText().toUtf8().data();
 				model()->rowChanged(row);
 			}
 			else if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0 )
 			{
 				PropertyRowStringListStaticValue* row = static_cast<PropertyRowStringListStaticValue*>(this->row());
 				model()->rowAboutToBeChanged(row);
-				StringListStaticValue comboList = row->value();
-				comboList = comboBox_->currentIndex();
-				row->setValue(comboList);
+				row->value_ = comboBox_->currentText().toUtf8().data();
 				model()->rowChanged(row);
 			}
 		}
