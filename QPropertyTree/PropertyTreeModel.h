@@ -107,7 +107,7 @@ public:
 	void selectRow(PropertyRow* row, bool selected, bool exclusive = true);
 	void deselectAll();
 
-	void push(PropertyRow* row);
+	void rowAboutToBeChanged(PropertyRow* row);
 	void rowChanged(PropertyRow* row, bool apply = true); // be careful: it can destroy 'row'
 
 	void setUndoEnabled(bool enabled) { undoEnabled_ = enabled; }

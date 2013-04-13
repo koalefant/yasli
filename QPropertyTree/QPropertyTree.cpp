@@ -185,7 +185,7 @@ void PropertyTreeMenuHandler::onMenuPaste()
 		return;
 	PropertyRow* parent = row->parent();
 
-	tree->model()->push(row);
+	tree->model()->rowAboutToBeChanged(row);
 
 	SharedPtr<PropertyRow> source;
 	if (!propertyRowFromClipboard(source, tree->constStrings()))

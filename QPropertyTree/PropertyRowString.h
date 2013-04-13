@@ -60,7 +60,7 @@ public:
 	void onEditingFinished(){
 		PropertyRowString* row = static_cast<PropertyRowString*>(this->row());
 		if(initialValue_ != entry_->text() || row_->multiValue()){
-			model()->push(row);
+			model()->rowAboutToBeChanged(row);
 			row->setValue((wchar_t*)entry_->text().data());
 			model()->rowChanged(row);
 		}

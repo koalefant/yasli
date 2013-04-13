@@ -230,7 +230,7 @@ void PropertyTreeModel::pushUndo(const PropertyTreeOperator& op)
         undoOperators_.push_back(oper);
 }
 
-void PropertyTreeModel::push(PropertyRow* row)
+void PropertyTreeModel::rowAboutToBeChanged(PropertyRow* row)
 {
     YASLI_ESCAPE(row, return);
     if(fullUndo_){

@@ -151,7 +151,7 @@ bool PropertyRowContainer::onContextMenu(QMenu& menu, QPropertyTree* tree)
 
 void ContainerMenuHandler::onMenuRemoveAll()
 {
-	tree->model()->push(container);
+	tree->model()->rowAboutToBeChanged(container);
 	container->clear();
 	tree->model()->rowChanged(container);
 }
@@ -172,7 +172,7 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 
 void ContainerMenuHandler::onMenuAppendElement()
 {
-	tree->model()->push(container);
+	tree->model()->rowAboutToBeChanged(container);
 	PropertyRow* defaultType = container->defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
 	PropertyRow* clonedRow = defaultType->clone();
@@ -222,7 +222,7 @@ void ContainerMenuHandler::onMenuAppendPointerByIndex()
 
 void ContainerMenuHandler::onMenuChildInsertBefore()
 {
-	tree->model()->push(container);
+	tree->model()->rowAboutToBeChanged(container);
 	PropertyRow* defaultType = tree->model()->defaultType(container->elementTypeName());
 	if(!defaultType)
 		return;
@@ -242,7 +242,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 
 void ContainerMenuHandler::onMenuChildRemove()
 {
-	tree->model()->push(container);
+	tree->model()->rowAboutToBeChanged(container);
 	container->erase(element);
 	container->setMultiValue(false);
 	tree->model()->rowChanged(container);

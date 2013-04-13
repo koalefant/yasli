@@ -40,7 +40,7 @@ bool PropertyRowHotkey::onActivate(PropertyTree* tree, bool force)
 
 	ww::HotkeyDialog hotkeyDialog(tree, key);
 	if(hotkeyDialog.showModal() == RESPONSE_OK){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		key = hotkeyDialog.get();
 		tree->model()->rowChanged(this);
 		return true;
@@ -59,7 +59,7 @@ bool PropertyRowHotkey::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
 
 void PropertyRowHotkey::onMenuClear(PropertyTreeModel* model)
 {
-    model->push(this);
+    model->rowAboutToBeChanged(this);
 	value() = KeyPress();
 	model->rowChanged(this);
 }

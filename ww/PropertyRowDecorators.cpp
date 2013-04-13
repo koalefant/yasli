@@ -91,7 +91,7 @@ void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2 point)
 		onActivate(tree, false);
     }
 	else{
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		value().pressed = false;
 		tree->redraw();
 	}
@@ -141,7 +141,7 @@ public:
 
 bool PropertyRowNot::onActivate(PropertyTree* tree, bool force)
 {
-    tree->model()->push(this);
+    tree->model()->rowAboutToBeChanged(this);
 	value() = !value();
 	tree->model()->rowChanged(this);
 	return true;
@@ -167,7 +167,7 @@ public:
 
 bool PropertyRowRadio::onActivate(PropertyTree* tree, bool force)
 {
-    tree->model()->push(this);
+    tree->model()->rowAboutToBeChanged(this);
 	value() = !value();
 	tree->model()->rowChanged(this);
 	return true;

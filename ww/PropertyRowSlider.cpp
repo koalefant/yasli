@@ -56,7 +56,7 @@ template<class WrapperType, class ScalarType>
 bool PropertyRowSlider<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, KeyPress key)
 {
 	if(key == KEY_LEFT){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		value().value() = clamp(value().value() - value().step(),
 			                    value().minValue(),
 								value().maxValue());
@@ -64,7 +64,7 @@ bool PropertyRowSlider<WrapperType, ScalarType>::onKeyDown(PropertyTree* tree, K
 		return true;
 	}
 	if(key == KEY_RIGHT){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		value().value() = clamp(value().value() + value().step(),
 			                    value().minValue(),
 								value().maxValue());
@@ -78,7 +78,7 @@ template<class WrapperType, class ScalarType>
 bool PropertyRowSlider<WrapperType, ScalarType>::onMouseDown(PropertyTree* tree, Vect2 point, bool& changed)
 {
 	if(floorRect().pointInside(point)){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		handleMouse(point);
 		tree->redraw();
 		::SetCapture(tree->impl()->handle());

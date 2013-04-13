@@ -63,7 +63,7 @@ bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
 {
 	ColorChooserDialog dialog(tree, Color(toARGB(value())));
     if(dialog.showModal() == ww::RESPONSE_OK){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		fromColor(&value(), dialog.get());
 		tree->model()->rowChanged(this);
 		return true;

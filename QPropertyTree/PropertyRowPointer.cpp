@@ -108,7 +108,7 @@ bool PropertyRowPointer::assignTo(yasli::PointerInterface &ptr)
 
 void CreatePointerMenuHandler::onMenuCreateByIndex()
 {
-	tree->model()->push(row);
+	tree->model()->rowAboutToBeChanged(row);
 	if(index < 0){ // NULL value
 		row->setDerivedType(TypeID(), 0);
 		row->clear();

@@ -150,7 +150,7 @@ public:
 		if (value_ != incrementStartValue_) {
 			Type value = value_;
 			value_ = incrementStartValue_;
-			tree->model()->push(this);
+			tree->model()->rowAboutToBeChanged(this);
 			value_ = value;
 			tree->model()->rowChanged(this, false);
 		}

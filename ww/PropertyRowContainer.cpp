@@ -161,7 +161,7 @@ bool PropertyRowContainer::onContextMenu(PopupMenuItem& root, PropertyTree* tree
 
 void PropertyRowContainer::onMenuClear(PropertyTreeModel* model)
 {
-    model->push(this);
+    model->rowAboutToBeChanged(this);
 	clear();
 	model->rowChanged(this);
 }
@@ -183,7 +183,7 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 
 void PropertyRowContainer::onMenuAppendElement(PropertyTree* tree)
 {
-	tree->model()->push(this);
+	tree->model()->rowAboutToBeChanged(this);
 	PropertyRow* defaultType = defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
 	SharedPtr<PropertyRow> clonedRow = defaultType->clone();
@@ -228,7 +228,7 @@ void PropertyRowContainer::onMenuAppendPointerByIndex(int index, PropertyTree* t
 
 void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyTree* tree)
 {
-    tree->model()->push(this);
+    tree->model()->rowAboutToBeChanged(this);
 	PropertyRow* defaultType = tree->model()->defaultType(elementTypeName_);
 	if(!defaultType)
 		return;
@@ -248,7 +248,7 @@ void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyT
 
 void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeModel* model)
 {
-    model->push(this);
+    model->rowAboutToBeChanged(this);
 	erase(child);
 	setMultiValue(false);
 	model->rowChanged(this);

@@ -1056,7 +1056,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, Prope
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();
 	if(parentRow->isContainer()){
-		tree->model()->push(tree->model()->root()); // FIXME: select optimal row
+		tree->model()->rowAboutToBeChanged(tree->model()->root()); // FIXME: select optimal row
 		setSelected(false);
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parentRow);
 		PropertyRow* oldParent = parent();

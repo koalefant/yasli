@@ -54,7 +54,7 @@ public:
 	void onChange(){
 		PropertyRowString* row = safe_cast<PropertyRowString*>(this->row());
         if(initialValue_ != entry_->textW() || row_->multiValue()){
-            model()->push(row);
+            model()->rowAboutToBeChanged(row);
 		    row->setValue(entry_->textW());
 		    model()->rowChanged(row);
         }

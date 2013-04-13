@@ -165,7 +165,7 @@ public slots:
 			if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListValue>().name()) == 0 )
 			{
 				PropertyRowStringListValue* row = static_cast<PropertyRowStringListValue*>(this->row());
-				model()->push(row);
+				model()->rowAboutToBeChanged(row);
 				StringListValue comboList = row->value();
 				comboList = comboBox_->currentIndex();
 				//getStringListValueFromComboBox(&comboList, comboBox_);
@@ -175,7 +175,7 @@ public slots:
 			else if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0 )
 			{
 				PropertyRowStringListStaticValue* row = static_cast<PropertyRowStringListStaticValue*>(this->row());
-				model()->push(row);
+				model()->rowAboutToBeChanged(row);
 				StringListStaticValue comboList = row->value();
 				comboList = comboBox_->currentIndex();
 				row->setValue(comboList);

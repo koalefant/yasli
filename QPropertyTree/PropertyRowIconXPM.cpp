@@ -77,7 +77,7 @@ public:
 	bool isSelectable() const{ return true; }
 	bool onActivate(QPropertyTree* tree, bool force)
 	{
-		tree->model()->push(this);
+		tree->model()->rowAboutToBeChanged(this);
 		value().value_ = !value().value_;
 		tree->model()->rowChanged(this);
 		return true;

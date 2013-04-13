@@ -708,7 +708,7 @@ void PropertyTree::onRowMenuPaste(SharedPtr<PropertyRow> row)
 		return;
 	PropertyRow* parent = row->parent();
 
-    model()->push(row);
+    model()->rowAboutToBeChanged(row);
 	Clipboard clipboard(this, &constStrings_, model());
 	if(clipboard.paste(row))
 		model()->rowChanged(parent ? parent : model()->root());

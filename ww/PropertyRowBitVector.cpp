@@ -41,7 +41,7 @@ public:
 
 	void onChange(){
 		PropertyRowBitVector* row = safe_cast<PropertyRowBitVector*>(this->row());
-        model()->push(row);
+        model()->rowAboutToBeChanged(row);
 		row->setValueAlt(comboBox_->value());
 		//row->setIndex(comboBox_->selectedIndex());
 		model()->rowChanged(row);

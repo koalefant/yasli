@@ -68,7 +68,7 @@ public:
 	void onChange(){
 		if ( PropertyRowStringListValue* row = dynamic_cast<PropertyRowStringListValue*>(this->row()) )
 		{
-            model()->push(row);
+            model()->rowAboutToBeChanged(row);
 			StringListValue comboList;
 			comboBox_->get(comboList);
 			row->setValue(comboList);
@@ -76,7 +76,7 @@ public:
 		}
 		else if ( PropertyRowStringListStaticValue* row = dynamic_cast<PropertyRowStringListStaticValue*>(this->row()) )
 		{
-            model()->push(row);
+            model()->rowAboutToBeChanged(row);
 			StringListStaticValue comboList = row->value();
 			comboBox_->get(comboList);
 			row->setValue(comboList);

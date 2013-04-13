@@ -36,7 +36,7 @@ void PropertyRowBool::redraw(const PropertyDrawContext& context)
 bool PropertyRowBool::onActivate(QPropertyTree* tree, bool force)
 {
 	if (!this->userReadOnly()) {
-		tree->model()->push(this);
+		tree->model()->rowAboutToBeChanged(this);
 		value_ = !value_;
 		tree->model()->rowChanged(this);
 		return true;

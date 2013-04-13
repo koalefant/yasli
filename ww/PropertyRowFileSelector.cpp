@@ -78,7 +78,7 @@ bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 
 	ww::FileDialog fileDialog(tree, options->save, masks, root.c_str(), fileName.c_str());
 	if(fileDialog.showModal()){
-        tree->model()->push(this);
+        tree->model()->rowAboutToBeChanged(this);
 		if(!root.empty()){
 			string relativePath = Files::relativePath(fileDialog.fileName(), root.c_str());;
 			if(!relativePath.empty())
@@ -108,7 +108,7 @@ bool PropertyRowFileSelector::onContextMenu(PopupMenuItem& root, PropertyTree* t
 
 void PropertyRowFileSelector::onMenuClear(PropertyTreeModel* model)
 {
-    model->push(this);
+    model->rowAboutToBeChanged(this);
 	value() = "";
 	model->rowChanged(this);
 }

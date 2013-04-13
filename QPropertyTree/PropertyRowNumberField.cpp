@@ -119,7 +119,7 @@ PropertyRowWidgetNumber::PropertyRowWidgetNumber(PropertyTreeModel* model, Prope
 
 void PropertyRowWidgetNumber::onEditingFinished()
 {
-	tree_->model()->push(row());
+	tree_->model()->rowAboutToBeChanged(row());
 	yasli::string str = entry_->text().toLocal8Bit().data();
 	if(row_->setValueFromString(str.c_str()) || row_->multiValue())
 		tree_->model()->rowChanged(row());

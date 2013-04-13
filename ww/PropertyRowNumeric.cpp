@@ -77,7 +77,7 @@ PropertyRowWidgetNumeric::PropertyRowWidgetNumeric(PropertyRow* row, PropertyTre
 
 void PropertyRowWidgetNumeric::onChange()
 {
-    model()->push(row());
+    model()->rowAboutToBeChanged(row());
 	if(numeric_->setValueFromString(entry_->text()) || row_->multiValue())
 		model()->rowChanged(row());
 	else
