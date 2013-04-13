@@ -154,6 +154,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
 		if(oldRow){
+			oldRow->setMultiValue(false);
 			newRow = static_cast<RowType*>(oldRow);
 			level.oldRows[rowIndex] = 0;
 			level.rowIndex = rowIndex + 1;
