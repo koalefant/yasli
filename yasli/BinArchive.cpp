@@ -280,13 +280,22 @@ bool BinOArchive::operator()(ContainerInterface& ser, const char* name, const ch
 
 bool BinOArchive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
-    YASLI_ASSERT_STR(ptr.baseType().registered() && "Writing type with unregistered base", ptr.baseType().name());
-    YASLI_ASSERT_STR(!ptr.get() || ptr.type().registered() && "Writing unregistered type", ptr.type().name());
-
 	openNode(name, false);
 
+
+	TypeID derived = ptr.type();
+	const TypeDescription* desc = 0;
+	const char* typeName = "";
+	if (derived) {
+		desc = ptr.factory()->descriptionByType(derived);
+		typeName = desc->name();
+		YASLI_ASSERT(desc != 0 && "Writing unregistered class. Use YASLI_CLASS macro for registration.");
+	}
+
+    TypeID baseType = ptr.baseType();
+
 	if(ptr.get()){
-		stream_ << ptr.type().name();
+		stream_ << typeName;
 		stream_.write(char(0));
 		ptr.serializer()(*this);
 	}
