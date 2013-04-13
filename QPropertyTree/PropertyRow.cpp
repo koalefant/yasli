@@ -301,12 +301,18 @@ yasli::string PropertyRow::valueAsString() const
 	return yasli::string();
 }
 
+PropertyRow* PropertyRow::clone() const
+{
+	PropertyRow* result = cloneSelf();
+	return cloneChildren(result, this);
+}
+
 PropertyRow* PropertyRow::cloneChildren(PropertyRow* result, const PropertyRow* source) const
 {
 	PropertyRow::const_iterator it;
 	for(it = source->begin(); it != source->end(); ++it){
 		const PropertyRow* sourceChild = *it;
-		result->add(sourceChild->clone());
+		result->add(sourceChild->cloneSelf());
 	}
 
 	return result;

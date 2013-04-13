@@ -29,11 +29,11 @@ public:
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
     yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		PropertyRowBool* result = new PropertyRowBool();
 		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
-		return cloneChildren(result, this);
+		return result;
 	}
     void serializeValue(yasli::Archive& ar);
 	int widgetSizeMin() const{ return ICON_SIZE; }

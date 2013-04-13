@@ -278,13 +278,8 @@ public:
 	PropertyRow* pulledContainer() { return pulledContainer_; }
 	const PropertyRow* pulledContainer() const{ return pulledContainer_; }
 
+	PropertyRow* clone() const;
 	PropertyRow* cloneChildren(PropertyRow* result, const PropertyRow* source) const;
-	virtual PropertyRow* clone() const {
-		PropertyRow* result = new PropertyRow();
-		result->setNames(name_, label_, typeName_);
-		result->setValue(serializer_);
-		return cloneChildren(result, this);
-	}
 
 	yasli::Serializer serializer() const{ return serializer_; }
     void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
@@ -294,6 +289,13 @@ public:
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
 
 protected:
+	virtual PropertyRow* cloneSelf() const {
+		PropertyRow* result = new PropertyRow();
+		result->setNames(name_, label_, typeName_);
+		result->setValue(serializer_);
+		return result;
+	}
+
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;

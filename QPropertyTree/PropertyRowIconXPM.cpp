@@ -49,7 +49,7 @@ public:
 	}
 	yasli::wstring valueAsWString() const{ return L""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		PropertyRowIconXPM* result = new PropertyRowIconXPM();
 		result->setNames(name_, label_, typeName_);
 		result->icon_ = icon_;

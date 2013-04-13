@@ -43,12 +43,12 @@ public:
 	void redraw(const PropertyDrawContext& context);
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
 
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		PropertyRowContainer* result = new PropertyRowContainer();
 		result->setNames(name_, label_, typeName_);
 		result->fixedSize_ = fixedSize_;
 		result->elementTypeName_ = elementTypeName_;
-		return cloneChildren(result, this);
+		return result;
 	}
 
 	void labelChanged() override;

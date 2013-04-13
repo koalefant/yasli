@@ -39,11 +39,11 @@ public:
 		ar(value_, "value", "Value");
 	}
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		Derived* result = new Derived();
 		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
-		return cloneChildren(result, static_cast<const Derived* const>(this));
+		return result;
 	}
 protected:
 	Type value_; 

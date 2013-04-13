@@ -133,11 +133,11 @@ public:
 	void serializeValue(yasli::Archive& ar){
 		ar(value_, "value", "Value");
 	}
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		PropertyRowNumber* result = new PropertyRowNumber();
 		result->setNames(name_, label_, typeName_);
 		result->value_ = value_;
-		return cloneChildren(result, this);
+		return result;
 	}
 
 	void startIncrement() override

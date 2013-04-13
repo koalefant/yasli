@@ -245,6 +245,7 @@ TreeConfig::TreeConfig()
 , filterWhenType_(true)
 , tabSize_(PropertyRow::ROW_DEFAULT_HEIGHT)
 , sliderUpdateDelay_(25)
+, undoEnabled_(true)
 {
 }
 

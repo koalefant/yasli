@@ -59,14 +59,14 @@ public:
 	int widgetSizeMin() const;
 	yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const;
-	PropertyRow* clone() const{
+	PropertyRow* cloneSelf() const{
 		PropertyRowPointer* result = new PropertyRowPointer();
 		result->setNames(name_, label_, typeName_);
 		result->baseType_ = baseType_;
 		result->factory_ = factory_;
 		result->derivedTypeName_ = derivedTypeName_;
 		result->derivedLabel_ = derivedLabel_;
-		return cloneChildren(result, this);
+		return result;
 	}
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }

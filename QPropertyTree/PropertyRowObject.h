@@ -32,7 +32,7 @@ public:
 	void setValue(const Object& obj) { object_ = obj; }
 	void setModel(PropertyTreeModel* model) { model_ = model; }
 	bool isObject() const{ return true; }
-	PropertyRow* clone() const;
+	PropertyRow* cloneSelf() const;
 	bool assignTo(Object* obj);
 	void serialize(Archive& ar);
 	const Object& object() const{ return object_; }
