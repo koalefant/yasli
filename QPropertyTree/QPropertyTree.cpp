@@ -72,7 +72,7 @@ static QMimeData* propertyRowToMimeData(PropertyRow* row, ConstStringList* const
 	PropertyRow::setConstStrings(constStrings);
 	if (!oa(clonedRow, "row", "Row")) {
 		PropertyRow::setConstStrings(0);
-		return false;
+        return 0;
 	}
 	PropertyRow::setConstStrings(0);
 

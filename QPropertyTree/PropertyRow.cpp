@@ -11,10 +11,11 @@
 #include "PropertyTreeModel.h"
 #include "PropertyRowContainer.h"
 #include "PropertyDrawContext.h"
-#include "yasli/BinArchive.h"
 #include "yasli/ClassFactory.h"
 #include "Unicode.h"
 #include "Serialization.h"
+
+#include "yasli/BinArchive.h"
 
 #include <QtGui/QMenu>
 #include <QtGui/QKeyEvent>

@@ -24,7 +24,7 @@ public:
 	}
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	void setValue(const Type& value) override{ value_ = value; }
+    void setValue(const Type& value) { value_ = value; }
 	Type& value() { return value_; }
 	const Type& value() const{ return value_; }
 
