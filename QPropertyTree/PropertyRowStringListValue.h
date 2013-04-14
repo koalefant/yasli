@@ -204,16 +204,22 @@ public slots:
 			if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListValue>().name()) == 0 )
 			{
 				PropertyRowStringListValue* row = static_cast<PropertyRowStringListValue*>(this->row());
-				model()->rowAboutToBeChanged(row);
-				row->value_ = comboBox_->currentText().toUtf8().data();
-				model()->rowChanged(row);
+				QByteArray newValue = comboBox_->currentText().toUtf8();
+				if (row->value_ != newValue.data()) {
+					model()->rowAboutToBeChanged(row);
+					row->value_ = newValue.data();
+					model()->rowChanged(row);
+				}
 			}
 			else if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0 )
 			{
 				PropertyRowStringListStaticValue* row = static_cast<PropertyRowStringListStaticValue*>(this->row());
-				model()->rowAboutToBeChanged(row);
-				row->value_ = comboBox_->currentText().toUtf8().data();
-				model()->rowChanged(row);
+				QByteArray newValue = comboBox_->currentText().toUtf8();
+				if (row->value_ != newValue.data()) {
+					model()->rowAboutToBeChanged(row);
+					row->value_ = newValue.data();
+					model()->rowChanged(row);
+				}
 			}
 		}
 protected:
