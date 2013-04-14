@@ -5,6 +5,9 @@
 
 #include "QPropertyTree/Color.h"
 
+#include "yasli/decorators/FileOpen.h"
+using yasli::FileOpen;
+
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
@@ -14,8 +17,6 @@
 #include "yasli/decorators/IconXPM.h"
 using yasli::IconXPM;
 
-#include "yasli/decorators/FileOpen.h"
-using yasli::FileOpen;
 
 #include "yasli/Enum.h"
 

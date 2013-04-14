@@ -1,7 +1,10 @@
 #pragma once
-#include "yasli/Archive.h"
+
+#include "yasli/Strings.h"
 
 namespace yasli {
+
+class Archive;
 
 struct FileOpen
 {
@@ -39,12 +42,9 @@ struct FileOpen
 			*pathPointer = path;
 	}
 
-	void serialize(Archive& ar)
-	{
-		ar(path, "path");
-		ar(filter, "filter");
-		ar(relativeToFolder, "folder");
-	}
+	void serialize(Archive& ar);
 };
 
 }
+
+bool serialize(yasli::Archive& ar, yasli::FileOpen& value, const char* name, const char* label);
