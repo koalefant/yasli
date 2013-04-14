@@ -13,6 +13,10 @@
 
 #include "yasli/decorators/IconXPM.h"
 using yasli::IconXPM;
+
+#include "yasli/decorators/FileOpen.h"
+using yasli::FileOpen;
+
 #include "yasli/Enum.h"
 
 #include "LogicEditor.h"
@@ -84,8 +88,7 @@ public:
 	virtual void serialize(Archive& ar)
 	{
         ConditionBase::serialize(ar);
-		//static ww::FileSelector::Options options("*.*", false);
-		//ar(ww::FileSelector(filename_, options), "filename", "<Filename");
+		ar(yasli::FileOpen(filename_, "Text Files (*.txt *.ta)", "."), "filename", "<Filename");
 		ar(isDirectory_, "isDirectory", "Directory");
 		ar(isReadOnly_, "isReadOnly", "Read Only");
 	}

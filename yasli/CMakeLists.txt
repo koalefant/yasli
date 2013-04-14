@@ -43,6 +43,7 @@ set(SOURCES
 
 set(DECORATORS
 	decorators/IconXPM.h
+	decorators/FileOpen.h
 	)
 
 source_group("" FILES ${SOURCES})

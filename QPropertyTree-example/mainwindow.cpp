@@ -105,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     attachedTree_ = new QPropertyTree(this);
 	attachedTree_->setSliderUpdateDelay(5);
-    tree_->attachPropertyTree(attachedTree_);
+	tree_->attachPropertyTree(attachedTree_);
 	attachedTree_->setUndoEnabled(true);
 	layout->addWidget(attachedTree_, 1);
 	

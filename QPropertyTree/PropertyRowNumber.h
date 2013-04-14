@@ -111,7 +111,6 @@ inline void clampedNumberFromString(double* value, const char* str)
 template<class Type>
 class PropertyRowNumber : public PropertyRowNumberField{
 public:
-	enum { Custom = false };
 	void setValue(Type value)
 	{
 		value_ = value;

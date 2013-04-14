@@ -1519,14 +1519,11 @@ void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 		if (!row)
 			continue;
 
-		Serializer ser = row->serializer();
 
-		if (!ser) {
-			while(row && (row->pulledUp() || row->pulledBefore())) {
-				row = row->parent();
-			}
-			ser = row->serializer();
+		while(row && ((row->pulledUp() || row->pulledBefore()) || row->isLeaf())) {
+			row = row->parent();
 		}
+		Serializer ser = row->serializer();
 
 		if (ser)
 			serializers->push_back(ser);

@@ -17,6 +17,7 @@ set(SOURCES
 	PropertyRowBool.cpp
 	PropertyRowContainer.cpp
 	PropertyRowField.cpp
+	PropertyRowFileOpen.cpp
 	PropertyRowIconXPM.cpp
 	PropertyRowNumber.cpp
 	PropertyRowNumberField.cpp
