@@ -1350,6 +1350,7 @@ FORCE_SEGMENT(PropertyRowNumber)
 FORCE_SEGMENT(PropertyRowStringList)
 FORCE_SEGMENT(PropertyRowIconXPM)
 FORCE_SEGMENT(PropertyRowFileOpen)
+FORCE_SEGMENT(PropertyRowFileSave)
 /*
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)

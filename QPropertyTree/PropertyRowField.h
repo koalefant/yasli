@@ -9,6 +9,7 @@
 
 #pragma once
 #include "PropertyRow.h"
+class QIcon;
 
 class PropertyRowField : public PropertyRow
 {
@@ -20,6 +21,10 @@ public:
 		else
 			return 40;
 	}
+
+	virtual int buttonCount() const{ return 0; }
+	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const{ return *(QIcon*)(0); }
+	virtual bool usePathEllipsis() const { return false; }
 
 	void redraw(const PropertyDrawContext& context);
 };

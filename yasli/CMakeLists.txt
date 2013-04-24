@@ -45,6 +45,8 @@ set(DECORATORS
 	decorators/IconXPM.h
 	decorators/FileOpen.h 
 	decorators/FileOpen.cpp
+	decorators/FileSave.h 
+	decorators/FileSave.cpp
 	)
 
 source_group("" FILES ${SOURCES})

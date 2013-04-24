@@ -14,14 +14,14 @@
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
-#include "yasli/decorators/FileOpen.h"
+#include "yasli/decorators/FileSave.h"
 #include "yasli/decorators/IconXPM.h"
 #include <QtGui/QFileDialog>
 #include <QtGui/QIcon>
 
-using yasli::FileOpen;
+using yasli::FileSave;
 
-class PropertyRowFileOpen : public PropertyRowImpl<FileOpen>{
+class PropertyRowFileSave : public PropertyRowImpl<FileSave>{
 public:
 
 	bool isLeaf() const override{ return true; }
@@ -29,8 +29,8 @@ public:
 	bool onActivate(QPropertyTree* tree, bool force) override
 	{
 		QFileDialog dialog(tree);
-		dialog.setAcceptMode(QFileDialog::AcceptOpen);
-		dialog.setFileMode(QFileDialog::ExistingFile);
+		dialog.setAcceptMode(QFileDialog::AcceptSave);
+		dialog.setFileMode(QFileDialog::AnyFile);
 		if (labelUndecorated())
 			dialog.setWindowTitle(QString("Choose file for '") + labelUndecorated() + "'");		
 		
@@ -59,14 +59,14 @@ public:
 
 	int buttonCount() const override{ return 1; }
 	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const override{ 
-		#include "file_open.xpm"
-		static QIcon fileOpenIcon = QIcon(QPixmap::fromImage(*tree->_iconCache()->getImageForIcon(yasli::IconXPM(file_open_xpm))));
-		return fileOpenIcon;
+		#include "file_save.xpm"
+		static QIcon icon = QIcon(QPixmap::fromImage(*tree->_iconCache()->getImageForIcon(yasli::IconXPM(file_save_xpm))));
+		return icon;
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 
 	yasli::string valueAsString() const{ return value().path; }
 };
 
-REGISTER_PROPERTY_ROW(FileOpen, PropertyRowFileOpen); 
-DECLARE_SEGMENT(PropertyRowFileOpen)
+REGISTER_PROPERTY_ROW(FileSave, PropertyRowFileSave); 
+DECLARE_SEGMENT(PropertyRowFileSave)

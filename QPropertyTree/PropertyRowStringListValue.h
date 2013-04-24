@@ -43,7 +43,7 @@ public:
 	void redraw(const PropertyDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(L" ... ", false, true);
+			context.drawEntry(L" ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsWString().c_str());
 		else
@@ -96,7 +96,7 @@ public:
 	void redraw(const PropertyDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(L" ... ", false, true);
+			context.drawEntry(L" ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsWString().c_str());
 		else

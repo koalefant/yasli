@@ -277,10 +277,10 @@ void PropertyDrawContext::drawValueText(bool highlighted, const wchar_t* text) c
 	tree->_drawRowValue(*painter, text, 0, textRect, textColor, false, false);
 }
 
-void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground) const
+void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset) const
 {
 	QRect rt = widgetRect;
-	rt.adjust(0, 0, 0, -1);
+	rt.adjust(0, 0, -trailingOffset, -1);
 
 	QStyleOption option;
 	option.state = QStyle::State_Sunken | QStyle::State_Editing;
