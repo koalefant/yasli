@@ -1781,70 +1781,79 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 {
 	int textLen = (int)wcslen(text);
 
-    if (textLen == 0)
-        return;
+	if (textLen == 0)
+		return;
 
-	int alignment =  (center ? Qt::AlignHCenter : Qt::AlignLeft) | Qt::AlignVCenter;
+	yasli::string textStr(fromWideChar(text));
+	QString str(textStr.c_str());
+	QFontMetrics fm(*font);
 	QRect textRect = rect;
+	int alignment;
+	if (center)
+		alignment = Qt::AlignHCenter | Qt::AlignVCenter;
+	else {
+		if (pathEllipsis && textRect.width() < fm.width(str))
+			alignment = Qt::AlignRight | Qt::AlignVCenter;
+		else
+			alignment = Qt::AlignLeft | Qt::AlignVCenter;
+	}
+
 	if (filterMode_) {
-        size_t hiStart = 0;
-        size_t hiEnd = 0;
-        yasli::string textStr(fromWideChar(text));
+		size_t hiStart = 0;
+		size_t hiEnd = 0;
 		bool matched = rowFilter_.match(textStr.c_str(), type, &hiStart, &hiEnd) && hiStart != hiEnd;
 		if (!matched && (type == RowFilter::NAME || type == RowFilter::VALUE))
 			matched = rowFilter_.match(textStr.c_str(), RowFilter::NAME_VALUE, &hiStart, &hiEnd);
-        if (matched && hiStart != hiEnd) {
-            QRectF boxFull;
-            QRectF boxStart;
-            QRectF boxEnd;
+		if (matched && hiStart != hiEnd) {
+			QRectF boxFull;
+			QRectF boxStart;
+			QRectF boxEnd;
 
-            QString str(textStr.c_str());
-            QFontMetrics fm(*font);
 			boxFull = fm.boundingRect(textRect, alignment, str);
 
-            if (hiStart > 0)
-                boxStart = fm.boundingRect(textRect, alignment, str.left(hiStart));
-            else {
-                boxStart = fm.boundingRect(textRect, alignment, str);
-                boxStart.setWidth(0.0f);
-            }
-            boxEnd = fm.boundingRect(textRect, alignment, str.left(hiEnd));
+			if (hiStart > 0)
+				boxStart = fm.boundingRect(textRect, alignment, str.left(hiStart));
+			else {
+				boxStart = fm.boundingRect(textRect, alignment, str);
+				boxStart.setWidth(0.0f);
+			}
+			boxEnd = fm.boundingRect(textRect, alignment, str.left(hiEnd));
 
-            QColor highlightColor, highlightBorderColor;
-            {
-                highlightColor = palette().color(QPalette::Highlight);
-                int h, s, v;
-                highlightColor.getHsv(&h, &s, &v);
-                h -= 175;
-                if (h < 0)
-                    h += 360;
-                highlightColor.setHsv(h, min(255, int(s * 1.33f)), v, 255);
-                highlightBorderColor.setHsv(h, s * 0.5f, v, 255);
-            }
+			QColor highlightColor, highlightBorderColor;
+			{
+				highlightColor = palette().color(QPalette::Highlight);
+				int h, s, v;
+				highlightColor.getHsv(&h, &s, &v);
+				h -= 175;
+				if (h < 0)
+					h += 360;
+				highlightColor.setHsv(h, min(255, int(s * 1.33f)), v, 255);
+				highlightBorderColor.setHsv(h, s * 0.5f, v, 255);
+			}
 
-            int left = int(boxFull.left() + boxStart.width()) - 1;
-            int top = int(boxFull.top());
-            int right = int(boxFull.left() + boxEnd.width());
-            int bottom = int(boxFull.top() + boxEnd.height());
-            QRect highlightRect(left, top, right - left, bottom - top);
-            QBrush br(highlightColor);
-            p.setBrush(br);
-            p.setPen(highlightBorderColor);
-            bool oldAntialiasing = p.renderHints().testFlag(QPainter::Antialiasing);
-            p.setRenderHint(QPainter::Antialiasing, true);
+			int left = int(boxFull.left() + boxStart.width()) - 1;
+			int top = int(boxFull.top());
+			int right = int(boxFull.left() + boxEnd.width());
+			int bottom = int(boxFull.top() + boxEnd.height());
+			QRect highlightRect(left, top, right - left, bottom - top);
+			QBrush br(highlightColor);
+			p.setBrush(br);
+			p.setPen(highlightBorderColor);
+			bool oldAntialiasing = p.renderHints().testFlag(QPainter::Antialiasing);
+			p.setRenderHint(QPainter::Antialiasing, true);
 
 			QRect intersectedHighlightRect = rect.intersect(highlightRect);
-            p.drawRoundedRect(intersectedHighlightRect, 4.0, 4.0);
-            p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
-        }
+			p.drawRoundedRect(intersectedHighlightRect, 4.0, 4.0);
+			p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
+		}
 	}
-	
+
 	QBrush textBrush(textColor);
 	p.setBrush(textBrush);
 	p.setPen(textColor);
 	QFont previousFont = p.font();
 	p.setFont(*font);
-    p.drawText(textRect, alignment, QString(fromWideChar(text).c_str()), 0);
+	p.drawText(textRect, alignment, str, 0);
 	p.setFont(previousFont);
 }
 

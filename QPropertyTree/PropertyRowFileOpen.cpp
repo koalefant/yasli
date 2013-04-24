@@ -54,6 +54,17 @@ public:
 		return true;
 	}
 
+
+	void redraw(const PropertyDrawContext& context)
+	{
+		if(multiValue())
+			context.drawEntry(L" ... ", false, true);
+		else if(userReadOnly())
+			context.drawValueText(pulledSelected(), valueAsWString().c_str());
+		else
+			context.drawEntry(valueAsWString().c_str(), true, false);
+	}
+
 	yasli::string valueAsString() const{ return value().path; }
 };
 

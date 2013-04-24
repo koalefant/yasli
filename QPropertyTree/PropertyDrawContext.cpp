@@ -298,7 +298,7 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
 	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
 	//drawValueTextInRect(
-	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), false, false);
+	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), pathEllipsis, false);
 	//painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
 }
 
