@@ -706,12 +706,15 @@ void PropertyTree::onRowMenuPaste(SharedPtr<PropertyRow> row)
 {
 	if(!canBePasted(row))
 		return;
-	PropertyRow* parent = row->parent();
+	PropertyRow* parent = row->parent() ? row->parent() : model()->root();
 
     model()->rowAboutToBeChanged(row);
 	Clipboard clipboard(this, &constStrings_, model());
-	if(clipboard.paste(row))
-		model()->rowChanged(parent ? parent : model()->root());
+	if(clipboard.paste(row)){
+		parent->setLabelChanged();
+		parent->setLabelChangedToChildren();
+		model()->rowChanged(parent);
+	}
 	else
 		YASLI_ASSERT(0 && "Unable to paste element!"); 
 }
