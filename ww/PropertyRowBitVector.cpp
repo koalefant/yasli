@@ -56,9 +56,10 @@ protected:
 //YASLI_CLASS(PropertyRow, PropertyRowBitVector, "BitVector");
 
 PropertyRowBitVector::PropertyRowBitVector()
-: description_(0)
+: description_(BitVectorWrapper::currentDescription)
 , flags_(0)
 {
+	YASLI_ASSERT(description_)
 	
 }
 

@@ -14,8 +14,11 @@
 #include "yasli/Archive.h"
 #include "StringList.h"
 #include "yasli/STLImpl.h"
+#include "yasli/BitVectorImpl.h"
 
 namespace yasli{
+
+const EnumDescription* BitVectorWrapper::currentDescription;
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
