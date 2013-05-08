@@ -60,11 +60,12 @@ PropertyRowBitVector::PropertyRowBitVector()
 , flags_(0)
 {
 	YASLI_ASSERT(description_)
-	
 }
 
-void PropertyRowBitVector::setValue(const BitVectorWrapper& wrapper)
+void PropertyRowBitVector::setValue(const Serializer& ser) 
 {
+	__super::setValue(ser);
+	flags_ = value_.value;
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);
 		joinStringList(&valueText_, values, '|');

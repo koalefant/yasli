@@ -24,7 +24,7 @@ public:
 	void serializeValue(Archive& ar);
 	bool assignTo(void* object, size_t size);
 	string valueAsString() const{ return valueAlt_; }
-	void setValue(const BitVectorWrapper& wrapper);
+	void setValue(const Serializer& ser) override;
 	//bool isStatic() const{ return false; }
 	const EnumDescription* description() { return description_; }
 	PropertyRowWidget* createWidget(PropertyTree* tree);

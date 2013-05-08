@@ -265,6 +265,7 @@ struct TestData
 		single_child = 0;
 		comboList_ = StringListValue(labels, 0);
 		float_value = 5.0000001e-002f;
+		flags = FIRST_FLAG;
 	}
 
 	void serialize_(Archive& ar) {
