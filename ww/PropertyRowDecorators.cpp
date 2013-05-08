@@ -41,11 +41,10 @@ public:
 	}
 protected:
 	bool underMouse_;
-	bool locked_;
 };
 
 PropertyRowButton::PropertyRowButton()
-: underMouse_(false), locked_(false)
+: underMouse_(false)
 {
 }
 	
@@ -87,7 +86,7 @@ void PropertyRowButton::onMouseMove(PropertyTree* tree, Vect2 point)
 
 void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2 point)
 {
-	if(!locked_ && widgetRect().pointInside(point)){
+	if(widgetRect().pointInside(point)){
 		onActivate(tree, false);
     }
 	else{
@@ -100,7 +99,6 @@ void PropertyRowButton::onMouseUp(PropertyTree* tree, Vect2 point)
 bool PropertyRowButton::onActivate(PropertyTree* tree, bool force)
 {
 	value().pressed = true;
-	locked_ = true;
 	tree->model()->rowChanged(this); // Row is recreated here, so don't unlock
 	return true;
 }
