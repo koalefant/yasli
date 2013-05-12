@@ -47,6 +47,8 @@ set(DECORATORS
 	decorators/FileOpen.cpp
 	decorators/FileSave.h 
 	decorators/FileSave.cpp
+	decorators/BitFlags.h
+	decorators/BitFlags.cpp
 	)
 
 source_group("" FILES ${SOURCES})

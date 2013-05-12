@@ -30,6 +30,7 @@ void EnumDescription::add(int value, const char* name, const char *label)
 	valueToIndex_[value] = int(names_.size());
 	names_.push_back(name);
 	labels_.push_back(label);
+	values_.push_back(value);
 }
 
 bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
@@ -131,6 +132,28 @@ int EnumDescription::indexByValue(int value) const
     else
         return it->second;
 }
+
+int EnumDescription::valueByIndex(int index) const
+{
+	if (size_t(index) < values_.size())
+		return values_[index];
+	return 0;
+}
+
+const char* EnumDescription::nameByIndex(int index) const
+{
+	if (size_t(index) < names_.size())
+		return names_[index];
+	return 0;
+}
+
+const char* EnumDescription::labelByIndex(int index) const
+{
+	if (size_t(index) < labels_.size())
+		return labels_[index];
+	return 0;
+}
+
 int EnumDescription::value(const char* name) const
 {
     NameToValue::const_iterator it = nameToValue_.find(name);

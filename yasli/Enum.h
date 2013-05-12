@@ -29,10 +29,12 @@ struct LessStrCmp : std::binary_function<const char*, const char*, bool>
 class EnumDescription{
 public:
 	int value(const char* name) const;
+	int valueByIndex(int index) const;
 	int valueByLabel(const char* label) const;
 	const char* name(int value) const;
-	const char* label(int value) const;
 	const char* nameByIndex(int index) const;
+	const char* label(int value) const;
+	const char* labelByIndex(int index) const;
 	const char* indexByName(const char* name) const;
 	int indexByValue(int value) const;
 
@@ -40,6 +42,7 @@ public:
 	bool serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const;
 
 	void add(int value, const char* name, const char* label = ""); // TODO
+	int count() const{ return values_.size(); }
 	const StringListStatic& names() const{ return names_; }
 	const StringListStatic& labels() const{ return labels_; }
 	StringListStatic nameCombination(int bitVector) const;
@@ -60,6 +63,7 @@ private:
 	ValueToName valueToName_;
 	typedef std::map<int, const char*> ValueToLabel;
 	ValueToName valueToLabel_;
+	std::vector<int> values_;
 	TypeID type_;
 };
 
