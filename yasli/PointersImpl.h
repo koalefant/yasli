@@ -63,16 +63,16 @@ public:
 
 	TypeID type() const{
 		if(ptr_)
-			return TypeID::get(ptr_.get());
+			return ClassFactory<T>::the().getTypeID(ptr_.get());
 		else
 			return TypeID();
 	}
 	void create(TypeID type) const{
 		// YASLI_ASSERT(!ptr_ || ptr_->refCount() == 1); not necessary to be true
 		if(type)
-			ptr_.set(ClassFactory<T>::the().create(type));
+			ptr_.reset(ClassFactory<T>::the().create(type));
 		else
-			ptr_.set((T*)0);
+			ptr_.reset((T*)0);
 	}
 	TypeID baseType() const{ return TypeID::get<T>(); }
 	virtual Serializer serializer() const{

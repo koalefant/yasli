@@ -105,7 +105,7 @@ public:
 
 	// internal methods:
 	void setDefaultWidget(Widget* widget);
-Win32::Window32* _window() const{ return window_; }
+	Win32::Window32* _window() const{ return window_; }
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget);
 	Widget* _focusedWidget(){ return focusedWidget_; }
