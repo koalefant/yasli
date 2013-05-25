@@ -105,6 +105,7 @@ YASLI_CLASS(ConditionBase, ConditionCheckFileAttributes, "Check File Attributes"
 class ActionBase : public yasli::RefCounter
 {
 public:
+	virtual ~ActionBase() {}
 	virtual void act() = 0;
 	virtual void serialize(Archive &ar) {}
 };

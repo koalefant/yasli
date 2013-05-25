@@ -1,7 +1,10 @@
 #pragma once
-#include "yasli/Archive.h"
+
+#include "yasli/Strings.h"
 
 namespace yasli {
+
+class Archive;
 
 struct FileSave
 {

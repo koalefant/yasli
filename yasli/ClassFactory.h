@@ -35,7 +35,7 @@ public:
 #if YASLI_NO_RTTI
 		const size_t bufLen = sizeof(typeID.typeInfo_->name);
 		strncpy(typeID.typeInfo_->name, name, bufLen - 1);
-		typeID.typeInfo_->name[bufLen] = '\0';
+		typeID.typeInfo_->name[bufLen - 1] = '\0';
 #endif
 	}
 	const char* name() const{ return name_; }

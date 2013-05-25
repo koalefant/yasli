@@ -12,6 +12,6 @@ set(TEST_SOURCES
   )
 source_group("" FILES ${TEST_SOURCES})
 
-add_executable(yasli-test ${TEST_SOURCES})
-target_link_libraries(yasli-test yasli UnitTestPP)
-add_custom_target(check ALL COMMAND yasli-test)
+add_executable(yasli-test-exe ${TEST_SOURCES})
+target_link_libraries(yasli-test-exe yasli UnitTestPP)
+add_custom_target(check ALL COMMAND yasli-test-exe)

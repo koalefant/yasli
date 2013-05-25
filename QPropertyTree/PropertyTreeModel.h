@@ -26,6 +26,7 @@ struct TreeSelection : vector<TreePath>
 		for(int i = 0; i < int(size()); ++i)
 			if((*this)[i] != rhs[i])
 				return false;
+		return true;
 	}
 };
 

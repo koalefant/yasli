@@ -1136,7 +1136,7 @@ bool QPropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 		interruptDrag();
 		setWidget(0);
 		PropertyRowWidget* newWidget = 0;
-		if (ignoreReadOnly && row->userReadOnlyRecurse() || !row->userReadOnly())
+		if ((ignoreReadOnly && row->userReadOnlyRecurse()) || !row->userReadOnly())
 			newWidget = row->createWidget(this);
 		setWidget(newWidget);
 		return newWidget != 0;
@@ -1662,7 +1662,6 @@ void QPropertyTree::RowFilter::parse(const char* filter)
 		
 		if (*str == '\"')
 		{
-			tokenStart;
 			++str;
 			while(*str != '\0' && *str != '\"')
 				++str;
@@ -1879,7 +1878,7 @@ struct DrawVisitor
 
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
-		if(row->visible(tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
+		if(row->visible(tree) && ((row->parent()->expanded() && !lastParent_) || row->pulledUp())){
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
@@ -2102,14 +2101,6 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 		}
 		QPoint point = ev->pos();
 		PropertyRow* row = rowByPoint(point);
-		if(row){
-			switch(hitTest(row, point, row->rect())){
-			case TREE_HIT_ROW:
-				;
-			//if(hoveredRow_)
-			//	update();
-			}			
-		}
 		if(capturedRow_){
 			QRect rowRect = capturedRow_->rect();
 			onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));

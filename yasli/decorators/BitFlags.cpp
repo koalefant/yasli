@@ -1,4 +1,3 @@
-#pragma once
 #include "yasli/decorators/BitFlags.h"
 #include "yasli/Archive.h"
 

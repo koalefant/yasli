@@ -552,7 +552,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	if(isRoot())
 		expanded_ = true;
 	else{
-		if(nonPulled->isRoot() || tree->compact() && nonPulled->parent()->isRoot())
+		if(nonPulled->isRoot() || (tree->compact() && nonPulled->parent()->isRoot()))
 			_setExpanded(true);
 		else if(!pulledUp())
 			plusSize_ = tree->tabSize();
@@ -1033,7 +1033,7 @@ bool PropertyRow::canBeToggled(const QPropertyTree* tree) const
 {
 	if(!visible(tree))
 		return false;
-	if((tree->compact() && (parent() && parent()->isRoot())) || isContainer() && pulledUp() || !hasVisibleChildren(tree))
+	if((tree->compact() && (parent() && parent()->isRoot())) || (isContainer() && pulledUp()) || !hasVisibleChildren(tree))
 		return false;
 	return !empty();
 }
@@ -1079,7 +1079,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 	if(parentRow->pulledContainer())
 		parentRow = parentRow->pulledContainer();
 	if(parentRow->isContainer()){
-        tree->model()->rowAboutToBeChanged(tree->model()->root()); // FIXME: select optimal row
+		tree->model()->rowAboutToBeChanged(tree->model()->root()); // FIXME: select optimal row
 		setSelected(false);
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parentRow);
 		PropertyRow* oldParent = parent();
@@ -1090,9 +1090,10 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 		else
 			parentRow->addAfter(this, cursorRow);
 		model->selectRow(this, true);
-        TreePath thisPath = tree->model()->pathFromRow(this);
+		TreePath thisPath = tree->model()->pathFromRow(this);
 		TreePath parentRowPath = tree->model()->pathFromRow(parentRow);
-		if (oldParent = tree->model()->rowFromPath(oldParentPath))
+		oldParent = tree->model()->rowFromPath(oldParentPath);
+		if (oldParent)
 			model->rowChanged(oldParent); // after this call we can get invalid this
 		if(PropertyRow* newThis = tree->model()->rowFromPath(thisPath)) {
 			TreeSelection selection;
@@ -1100,10 +1101,11 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 			model->setSelection(selection);
 
 			// we use path to obtain new row
-            tree->ensureVisible(newThis);
+			tree->ensureVisible(newThis);
 			model->rowChanged(newThis); // after this call row pointers are invalidated
 		}
-		if (parentRow = tree->model()->rowFromPath(parentRowPath))
+		parentRow = parentRow = tree->model()->rowFromPath(parentRowPath);
+		if (parentRow)
 			model->rowChanged(parentRow); // after this call row pointers are invalidated
 	}
 }
@@ -1145,7 +1147,7 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const QProper
 
 bool PropertyRow::hasVisibleChildren(const QPropertyTree* tree, bool internalCall) const
 {
-	if(empty() || !internalCall && pulledUp())
+	if(empty() || (!internalCall && pulledUp()))
 		return false;
 
 	PropertyRow::const_iterator it;

@@ -2408,6 +2408,8 @@ Mat3f& Mat3f::set(float angle, eAxis axis)
 			yx   = 0;	  yy	 =  1;	    yz	 = 0;
 			zx   = -salpha; zy	 =  0;	    zz	 = calpha;
 			break;
+        default:
+            break;
 		}
 	return *this;
 }
@@ -2900,6 +2902,8 @@ Mat3d& Mat3d::set(double angle, eAxis axis)
 			xx   = calpha;	xy	 =  0;	    xz	 = salpha;
 			yx   = 0;	  yy	 =  1;	    yz	 = 0;
 			zx   = -salpha; zy	 =  0;	    zz	 = calpha;
+			break;
+		default:
 			break;
 		}
 	return *this;

@@ -21,6 +21,12 @@ struct IconXPM
 		source = xpm;
 		lineCount = Size;
 	}
+    template<size_t Size>
+	explicit IconXPM(const char* (&xpm)[Size])
+	{
+		source = xpm;
+		lineCount = Size;
+	}
 
 	void serialize(yasli::Archive& ar) 	{}
 	bool operator<(const IconXPM& rhs) const { return source < rhs.source; }
@@ -36,6 +42,15 @@ struct IconXPMToggle
 
 	template<size_t Size1, size_t Size2>
 	IconXPMToggle(bool& variable, char* (&xpmTrue)[Size1], char* (&xpmFalse)[Size2])
+	: iconTrue_(xpmTrue)
+	, iconFalse_(xpmFalse)
+	, variable_(&variable)
+	, value_(variable)
+	{
+	}
+
+	template<size_t Size1, size_t Size2>
+	IconXPMToggle(bool& variable, const char* (&xpmTrue)[Size1], const char* (&xpmFalse)[Size2])
 	: iconTrue_(xpmTrue)
 	, iconFalse_(xpmFalse)
 	, variable_(&variable)

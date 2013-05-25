@@ -122,15 +122,21 @@ struct TypeInfo
 	template<size_t nameLen>
 	static void extractTypeName(char (&name)[nameLen], const char* funcName)
 	{
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
-        // static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
-        const char* s = strstr(funcName, "[with T = ");
-        if (s)
-            s += 9;
-        const char* send = strrchr(funcName, ']');
+#ifdef __clang__
+		// static yasli::TypeID yasli::TypeID::get() [T = ActualTypeName]
+		const char* s = strstr(funcName, "[T = ");
+		if (s)
+			s += 5;
+		const char* send = strrchr(funcName, ']');
+#elif __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+		// static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
+		const char* s = strstr(funcName, "[with T = ");
+		if (s)
+			s += 9;
+		const char* send = strrchr(funcName, ']');
 #else
-        // static yasli::TypeID yasli::TypeID::get<ActualTypeName>()
-        const char* s = strchr(funcName, '<');
+		// static yasli::TypeID yasli::TypeID::get<ActualTypeName>()
+		const char* s = strchr(funcName, '<');
 		const char* send = strrchr(funcName, '>');
 #endif
 		YASLI_ASSERT(s != 0  && send != 0);
@@ -155,11 +161,11 @@ struct TypeInfo
 
 	static unsigned int generateTypeID()
 	{
-        // on gcc 4.6.3: if we start this counter from the zero
-        // then the first two calls of this function returns same value
-        static unsigned int counter = 1;
-        return counter++;
-    }
+		// on gcc 4.6.3: if we start this counter from the zero
+		// then the first two calls of this function returns same value
+		static unsigned int counter = 1;
+		return counter++;
+	}
 
 	TypeInfo(size_t size, const char* templatedFunctionName)
 	: size(size)
@@ -176,14 +182,14 @@ TypeID TypeID::get()
 {
 #if YASLI_NO_RTTI
 # ifdef _MSC_VER
-  static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
+	static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
 # else
-  static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
+	static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
 # endif
-  return typeInfo.id;
+	return typeInfo.id;
 #else
-  static TypeID result(typeid(T));
-  return result;
+	static TypeID result(typeid(T));
+	return result;
 #endif
 }
 
