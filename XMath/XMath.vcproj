@@ -512,6 +512,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Macros.h"
+			>
+		</File>
+		<File
 			RelativePath=".\MinMax.h"
 			>
 		</File>
@@ -568,7 +572,15 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SafeCast.h"
+			>
+		</File>
+		<File
 			RelativePath="SafeMath.h"
+			>
+		</File>
+		<File
+			RelativePath=".\StaticMap.h"
 			>
 		</File>
 		<File
@@ -629,10 +641,6 @@
 		</File>
 		<File
 			RelativePath="xmath.h"
-			>
-		</File>
-		<File
-			RelativePath="XMathLib.h"
 			>
 		</File>
 	</Files>
