@@ -544,14 +544,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\RangedWrapper.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\RangedWrapper.h"
-			>
-		</File>
-		<File
 			RelativePath=".\Rectf.cpp"
 			>
 		</File>
