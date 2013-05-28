@@ -59,7 +59,7 @@ PropertyRowBitVector::PropertyRowBitVector()
 : description_(BitVectorWrapper::currentDescription)
 , flags_(0)
 {
-	YASLI_ASSERT(description_)
+	//YASLI_ASSERT(description_)
 }
 
 void PropertyRowBitVector::setValue(const Serializer& ser) 
