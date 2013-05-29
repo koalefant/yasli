@@ -138,7 +138,7 @@ protected:
 
 	// we need to know focused widget so we can restore it when focus goes away 
 	// and then comes back to the window
-	yasli::SharedPtr<Widget> focusedWidget_;
+	Widget* focusedWidget_;
 
 	yasli::SharedPtr<PopupMenu> menu_;
 	yasli::SharedPtr<HotkeyContext> hotkeyContext_;
