@@ -254,6 +254,7 @@ Window::Window(HWND parent, int border)
 
 Window::~Window()
 {
+	focusedWidget_ = 0;
 	if(app_){
 		if(hotkeyContext_ )
 			hotkeyContext_->uninstallFilter(app_);
@@ -634,7 +635,9 @@ void Window::serialize(Archive& ar)
 
 void Window::_setFocusedWidget(Widget* widget)
 {
+	acquire();
 	focusedWidget_ = widget;
+	release();
 	setDefaultWidget(widget);
 }
 

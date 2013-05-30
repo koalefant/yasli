@@ -205,7 +205,7 @@ int EntryImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
         {
 		int result = __super::onMessageCommand(command, code, wnd);
         owner_->_setFocus();
-		Edit_SetSel(handle(), 0, -1);
+		//Edit_SetSel(handle(), 0, -1);
         return result;
         }
 	case EN_KILLFOCUS:
