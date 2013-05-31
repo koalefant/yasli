@@ -115,21 +115,22 @@ private:
 		else 
 			return ve;
 	}
+
+	int lock_;
 	
 public:
-	StaticMap() {}
-	explicit StaticMap(const key_compare& comp, const allocator_type& a) : MapVector(a) {}
+	StaticMap() : lock_(0) {}
+	explicit StaticMap(const key_compare& comp, const allocator_type& a) : MapVector(a), lock_(0) {}
 
-	StaticMap(const_iterator first, const_iterator last) : MapVector(allocator_type()) {
+	StaticMap(const_iterator first, const_iterator last) : MapVector(allocator_type()) : lock_(0) {
 		insert(first, last);
 	}
 
-    StaticMap(const_iterator first, const_iterator last, const key_compare& comp,
-      const allocator_type& a) : MapVector(a) {
+    StaticMap(const_iterator first, const_iterator last, const key_compare& comp, const allocator_type& a) : MapVector(a), lock_(0) {
 		insert(first, last); 
 	}
 
-	StaticMap(const StaticMap& x) : MapVector(x.MapVector) {}
+	StaticMap(const StaticMap& x) : MapVector(x.MapVector), lock_(0) {}
     StaticMap& operator=(const StaticMap& x) {
 		MapVector = x.MapVector;
 		return *this; 
@@ -307,8 +308,10 @@ public:
 
 	mapped_type& operator[](const key_type& key) {
 		iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
-		if (vi==MapVector.end()||(key_comp()(key, vi->first)))
+		if (vi==MapVector.end()||(key_comp()(key, vi->first))){
+			ASSERT(!lock_ && "StaticMap is locked");
 			vi = MapVector.insert(vi, value_type(key, mapped_type()));
+		}
 		return (*vi).second;
 	}
 
@@ -325,11 +328,25 @@ public:
 		return true;
 	}
 
+	const mapped_type& get(const key_type& key) const {
+		static mapped_type def;
+		const_iterator it = find(key); 
+		return it != end() ? it->second : def;
+	}
+
 	void sort() { std::sort(MapVector.begin(), MapVector.end(), value_comp()); }
 	void reserve(size_type size) { MapVector.reserve(size);	}
 
 	template<class K, class T, class Cmp, class A> 
 	friend bool serialize(yasli::Archive& ar, StaticMap<K, T, Cmp, A>& map, const char* name, const char* nameAlt);
+
+	struct Lock {
+		StaticMap& map;
+		Lock(StaticMap& map) : map(map) { ++map.lock_; }
+		Lock(const Lock& loc) : map(loc.map) { ++map.lock_; }
+		~Lock() { --map.lock_; }
+	};
+	Lock lock() { return Lock(*this); }
 };
 
 template<class K, class T, class Cmp, class A> 
