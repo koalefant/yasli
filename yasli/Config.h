@@ -18,3 +18,8 @@
 
 // Default filter for Archive: 0 - strict mode, -1 - silent mode.
 #define YASLI_DEFAULT_FILTER 0
+
+// Toggles between russian and english serialization labels 
+#ifndef XMATH_IN_ENGLISH
+#define XMATH_IN_ENGLISH 0
+#endif
