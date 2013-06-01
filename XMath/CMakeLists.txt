@@ -1,7 +1,7 @@
 project("xmath")
 
 # file(GLOB SOURCES *.h *.cpp)
-set(SOURCES xmath.h XMath.cpp Recti.cpp Rectf.cpp Range.cpp RangedWrapper.cpp Colors.cpp ExceptionStub.cpp)
+set(SOURCES xmath.h XMath.cpp Recti.cpp Rectf.cpp Range.cpp Colors.cpp ExceptionStub.cpp)
 source_group("" FILES ${SOURCES})
 
 if(WIN32)

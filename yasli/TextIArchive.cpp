@@ -531,13 +531,13 @@ bool TextIArchive::load(const char* filename)
 
 		void* buffer = 0;
 		if(fileSize > 0){
-			buffer = std::malloc(fileSize + 1);
+			buffer = malloc(fileSize + 1);
 			YASLI_ASSERT(buffer != 0);
 			memset(buffer, 0, fileSize + 1);
 			size_t elementsRead = fread(buffer, fileSize, 1, file);
 			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
-				std::free(buffer);
+				free(buffer);
 				return false;
 			}
 		}
@@ -1015,7 +1015,7 @@ bool TextIArchive::operator()(double& value, const char* name, const char* label
 #ifdef _MSC_VER
         value = std::atof(token_.str().c_str());
 #else
-        value = std::strtod(token_.start, 0);
+        value = strtod(token_.start, 0);
 #endif
         return true;
     }

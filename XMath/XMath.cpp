@@ -20,8 +20,10 @@
 #pragma init_seg(lib)
 #endif
 
+#if !defined(EMSCRIPTEN)
 #if defined(_WIN64) || !defined(_WIN32)
 char exceptMSG[512] 	= "EXCEPTION OCCURED";
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1258,14 +1260,24 @@ void QuatD::serialize(yasli::Archive& ar)
 
 void Se3f::serialize(yasli::Archive& ar) 
 {
+#if XMATH_IN_ENGLISH
+	ar(rot(), "rotation", "Orientation");
+	ar(trans(), "position", "Position");
+#else
 	ar(rot(), "rotation", "Ориентация");
 	ar(trans(), "position", "Позиция");
+#endif
 }
 
 void Se3d::serialize(yasli::Archive& ar) 
 {
+#if XMATH_IN_ENGLISH
+	ar(rot(), "rotation", "Orientation");
+	ar(trans(), "position", "Position");
+#else
 	ar(rot(), "rotation", "Ориентация");
 	ar(trans(), "position", "Позиция");
+#endif
 }
 
 void Vect4f::serialize(yasli::Archive& ar) 

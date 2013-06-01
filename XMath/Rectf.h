@@ -3,6 +3,7 @@
 #include "xmath.h"
 #include <functional>
 #include <memory>
+#include <algorithm>
 
 #undef min
 #undef max

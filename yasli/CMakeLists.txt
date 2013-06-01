@@ -58,7 +58,12 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(WIN32)
 
-add_library("yasli" ${SOURCES} ${DECORATORS})
+if (EMSCRIPTEN)
+    add_library("yasli" SHARED ${SOURCES} ${DECORATORS})
+else (EMSCRIPTEN)
+    add_library("yasli" ${SOURCES} ${DECORATORS})
+endif (EMSCRIPTEN)
+
 set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 
 #include("Testo")
