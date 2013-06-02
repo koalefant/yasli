@@ -8,7 +8,12 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(WIN32)
 
+if (EMSCRIPTEN)
+add_library("xmath" SHARED ${SOURCES})
+else (EMSCRIPTEN)
 add_library("xmath" ${SOURCES})
+endif (EMSCRIPTEN)
+
 set_target_properties("xmath" PROPERTIES DEBUG_POSTFIX "-debug")
 
 #include("Testo")
