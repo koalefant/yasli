@@ -52,7 +52,7 @@ public:
 	}
 
 	template<class T>
-	explicit Serializer(T& object){
+	explicit Serializer(const T& object){
 		YASLI_ASSERT(TypeID::get<T>() != TypeID::get<Serializer>());
 		type_=  TypeID::get<T>();
 		object_ = (void*)(&object);
@@ -84,9 +84,7 @@ public:
 		return true;
 	}
 
-	void serialize(Archive& ar) { YASLI_ASSERT(0); }
 private:
-
 	TypeID type_;
 	void* object_;
 	size_t size_;
