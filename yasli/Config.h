@@ -14,10 +14,14 @@
 #define YASLI_NO_RTTI 1
 
 // Disable extra struct-level for polymorphic pointer serialization
+#ifndef YASLI_NO_EXTRA_BLOCK_FOR_POINTERS
 #define YASLI_NO_EXTRA_BLOCK_FOR_POINTERS 0
+#endif
 
 // Default filter for Archive: 0 - strict mode, -1 - silent mode.
+#ifndef YASLI_DEFAULT_FILTER
 #define YASLI_DEFAULT_FILTER 0
+#endif
 
 // Toggles between russian and english serialization labels 
 #ifndef XMATH_IN_ENGLISH
