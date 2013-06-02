@@ -203,7 +203,7 @@ MemoryWriter& MemoryWriter::operator<<(const char* value)
 
 MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
 {
-#ifdef ANDROID_NDK
+#if defined(ANDROID_NDK) || defined(NACL)
 	return *this;
 #else
     write((void*)value, wcslen(value) * sizeof(wchar_t));

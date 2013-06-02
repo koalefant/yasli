@@ -14,6 +14,7 @@
 #include "StdAfx.h"
 #include "InPlaceOArchive.h"
 #include "ClassFactory.h"
+#include <limits.h>
 
 namespace yasli {
 
