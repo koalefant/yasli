@@ -79,7 +79,6 @@ const Vect4f Vect4f::ZERO(0, 0, 0, 0);
 const Vect4f Vect4f::ID(1, 1, 1, 1);
 
 RandomGenerator xm_random_generator;
-int RandomGenerator::operator()(){ return ((value = value*214013L + 2531011L) >> 16) & 0x7fff; }
 
 extern char exceptMSG[];
 char* exceptMSGDummy = exceptMSG;
