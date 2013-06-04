@@ -134,8 +134,10 @@ public:
 		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.find(derivedType);
 		if(it != typeToCreatorMap_.end())
 			return it->second->create();
-		else
+		else{
+			YASLI_ASSERT_STR(0 && "ClassFactory::create: undefined type", derivedType.name());
 			return 0;
+		}
 	}
 
 	TypeID getTypeID(BaseType* ptr) const
@@ -199,6 +201,7 @@ public:
 			if (strcmp(name, typeID.name()) == 0)
 				return typeID;
 		}
+		YASLI_ASSERT_STR(0 && "ClassFactory::findTypeByName: undefined type", name);
 		return TypeID();
 	}
 	// ^^^
