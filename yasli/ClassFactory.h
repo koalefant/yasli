@@ -135,7 +135,7 @@ public:
 		if(it != typeToCreatorMap_.end())
 			return it->second->create();
 		else{
-			YASLI_ASSERT_STR(0 && "ClassFactory::create: undefined type", derivedType.name());
+			YASLI_ASSERT_STR(!strlen(derivedType.name()) && "ClassFactory::create: undefined type", derivedType.name());
 			return 0;
 		}
 	}
@@ -201,7 +201,7 @@ public:
 			if (strcmp(name, typeID.name()) == 0)
 				return typeID;
 		}
-		YASLI_ASSERT_STR(0 && "ClassFactory::findTypeByName: undefined type", name);
+		YASLI_ASSERT_STR(!strlen(name) && "ClassFactory::findTypeByName: undefined type", name);
 		return TypeID();
 	}
 	// ^^^
