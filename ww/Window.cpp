@@ -274,6 +274,7 @@ void Window::init(HWND owner, int border, Application* app)
 	showTitleBar_ = true;
 	windowPosition_ = POSITION_DEFAULT;
 	positioned_ = false;
+	focusedThis_ = false;
 	defaultSize_.set(0, 0);
 	defWidget_ = 0;
 	focusedWidget_ = 0;
@@ -635,9 +636,8 @@ void Window::serialize(Archive& ar)
 
 void Window::_setFocusedWidget(Widget* widget)
 {
-	acquire();
-	focusedWidget_ = widget;
-	release();
+	focusedThis_ = widget == this;
+	focusedWidget_ = focusedThis_ ? 0 : widget;
 	setDefaultWidget(widget);
 }
 
