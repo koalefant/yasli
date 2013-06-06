@@ -52,6 +52,7 @@ protected:
 
 	ww::Entry* owner_;
 	bool setting_;
+	wstring text_;
 	static WNDPROC controlWindowProc_;
 };
 
@@ -134,8 +135,8 @@ void EntryImpl::setText(const wchar_t* text)
 	setting_ = true;
 	WW_VERIFY(::SetWindowTextW(handle(), text));
 	setting_ = false;
+	text_ = text;
 }
-
 
 LRESULT EntryImpl::defaultWindowProcedure(UINT message, WPARAM wparam, LPARAM lparam)
 {
@@ -169,7 +170,12 @@ int EntryImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 int EntryImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
 	if(code == VK_RETURN || code == VK_ESCAPE || code == VK_TAB){
-		commit();
+		if(code == VK_ESCAPE){
+			wstring text = text_;
+			setText(text.c_str());
+		}
+		if(owner()->parent())
+			owner()->parent()->setFocus();
 		if(code != VK_TAB)
 			return 0;
 	}
