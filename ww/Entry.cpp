@@ -169,10 +169,7 @@ int EntryImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 int EntryImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
 	if(code == VK_RETURN || code == VK_ESCAPE || code == VK_TAB){
-		if(code != VK_ESCAPE)
-			commit();	
-		if(owner()->parent())
-			owner()->parent()->setFocus();
+		commit();
 		if(code != VK_TAB)
 			return 0;
 	}
@@ -200,9 +197,9 @@ int EntryImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
 {
 	switch(command){
 	case EN_CHANGE:
-// 		if(!setting_){
-//             updateOwnerText();
-// 		}
+		if(!setting_){
+            updateOwnerText();
+		}
 		return TRUE;
 	case EN_SETFOCUS:
         {
@@ -212,8 +209,8 @@ int EntryImpl::onMessageCommand(USHORT command, USHORT code, HWND wnd)
         return result;
         }
 	case EN_KILLFOCUS:
- 		if(GetFocus() != handle())
-			owner_->onEdited(); 
+		if(GetFocus() != handle())
+			commit();
 		return TRUE;
 	}
 	return __super::onMessageCommand(command, code, wnd);
