@@ -51,7 +51,7 @@ MemoryReader::MemoryReader(const void* memory, std::size_t size, bool ownAndFree
 MemoryReader::~MemoryReader()
 {
     if(ownedMemory_){
-        std::free(const_cast<char*>(memory_));
+        delete[] memory_;
         memory_ = 0;
         size_ = 0;
     }
