@@ -36,7 +36,7 @@ protected:
 	HotkeySignals signalsPressed_;
 
 	signal2<KeyPress, bool&> signalPressedAny_;
-    HotkeyFilter* filter_;
+    SharedPtr<HotkeyFilter> filter_;
 };
 
 }
