@@ -36,7 +36,7 @@ protected:
 	HotkeySignals signalsPressed_;
 
 	signal2<KeyPress, bool&> signalPressedAny_;
-    SharedPtr<HotkeyFilter> filter_;
+	yasli::SharedPtr<HotkeyFilter> filter_;
 };
 
 }
