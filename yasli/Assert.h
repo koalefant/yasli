@@ -24,7 +24,7 @@ inline bool assertionDialog(const char* function, const char* fileName, int line
 #define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
 #define YASLI_CHECK YASLI_ASSERT
 #else
-# define YASLI_ASSERT(x)
+#define YASLI_ASSERT(expr) (1, true)
 #define YASLI_CHECK(expr, ...) (expr)
 #endif
 
