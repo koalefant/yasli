@@ -10,18 +10,6 @@
 #pragma once 
 #include <stdio.h>
 
-#ifdef YASLI_ASSERT
-# undef YASLI_ASSERT
-#endif
-
-#ifdef YASLI_VERIFY
-# undef YASLI_VERIFY
-#endif
-
-#ifdef YASLI_ESCAPE
-# undef YASLI_ESCAPE
-#endif
-
 namespace yasli{
 void setTestMode(bool interactive);
 }
@@ -32,11 +20,15 @@ void setInteractiveAssertion(bool interactive);
 bool assertionDialog(const char* function, const char* fileName, int line, const char* expr, const char* str, ...);
 inline bool assertionDialog(const char* function, const char* fileName, int line, const char* expr) { return assertionDialog(function, fileName, line, expr, ""); }
 }
+// if(YASLI_ASSERT(expr, "Message %i", 10)
 #define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
+#define YASLI_CHECK YASLI_ASSERT
 #else
 # define YASLI_ASSERT(x)
+#define YASLI_CHECK(expr, ...) (expr)
 #endif
 
-#define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; };
+// use YASLI_CHECK instead
+#define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; } 
 
 #pragma warning(disable:4127)
