@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 #include "MemoryWriter.h"
+#include "BinArchive.h"
 
 namespace yasli{
 
@@ -31,40 +32,50 @@ void setTestMode(bool testMode)
     testMode = testMode;
 }
 
-int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line)
+bool assertionDialog(const char* function, const char* fileName, int line, const char* expr, const char* str, ...)
 {
+	MemoryWriter text;
+	text << fileName << "(" << line << "): error: " << "Assertion in " << function << "(): " << expr; // output in msvc error format
+
+	int hash = calcHash(text.c_str());
+
+	const int hashesMax = 1000;
+	static int hashes[hashesMax];
+	int index = 0;
+	for(; index < hashesMax; ++index)
+		if(hashes[index] == hash)
+			return false;
+		else if(!hashes[index])
+			break;
+
+	char buffer[4000];
+	va_list args;
+	va_start(args, str);
+	vsprintf_s(buffer, 4000, str, args);
+	va_end(args);
+
+	text << " ( " << buffer << " )";
+	text << "\n";
+
     if(interactiveAssertion || IsDebuggerPresent()){
-        MemoryWriter text;
-        text << "in " << function << "():\n";
-        text << "\n    " << message;
-        if(str){
-            text << "\n    ( " << str << " )";
-        }
-        text << "\n\n";
-        text << fileName << ": line " << line << "\n";
         int result = MessageBoxA(0, text.c_str(), "Debug Assertion Triggered", MB_ICONERROR | MB_ABORTRETRYIGNORE | MB_TASKMODAL);
         switch(result){
-        case IDRETRY: return 0;
-        case IDIGNORE: return 1;
-        case IDABORT: return 2;
+        case IDRETRY: 
+			return false;
+        case IDIGNORE: 
+			hashes[index] = hash;
+			return false;
+        case IDABORT: 
+			return true;
         }
-        return 0;
     }
     else{
-        MemoryWriter text;
-		// output in msvc error format
-		text << fileName << "(" << line << "): error: " << "Assertion in " << function << "(): " << message;
-        if(str)
-            text << " ( " << str << " )";
-		text << "\n";
         fwrite(text.c_str(), text.size(), 1, stderr);
 		fflush(stderr);
-		if (testMode)
-		{
+		if(testMode)
 			exit(-1);
-		}
-        return 0; // Retry
     }
+	return false; 
 }
 
 #endif

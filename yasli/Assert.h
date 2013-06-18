@@ -29,29 +29,12 @@ void setTestMode(bool interactive);
 #ifndef NDEBUG
 namespace yasli{
 void setInteractiveAssertion(bool interactive);
-int assertionDialog(const char* message, const char* str, const char* function, const char* fileName, int line);
+bool assertionDialog(const char* function, const char* fileName, int line, const char* expr, const char* str, ...);
+inline bool assertionDialog(const char* function, const char* fileName, int line, const char* expr) { return assertionDialog(function, fileName, line, expr, ""); }
 }
-# ifdef WIN32
-#  define YASLI_ASSERT(x) \
-      { \
-          static bool ignore = false; \
-          if(!(x) && !ignore) \
-		  switch(yasli::assertionDialog((#x), 0, __FUNCTION__, __FILE__, __LINE__)) {  \
-          case 0: break; \
-          case 1: ignore = true; break;  \
-          case 2: __debugbreak(); break;  \
-          }  \
-      } 
-#  define YASLI_ASSERT_STR(x, str) \
-      { \
-          static bool ignore = false; \
-          if(!(x) && !ignore) \
-		  switch(yasli::assertionDialog((#x), (str), __FUNCTION__, __FILE__, __LINE__)) {  \
-          case 0: break; \
-          case 1: ignore = true; break;  \
-          case 2: __debugbreak(); break;  \
-          }  \
-      } 
+#ifdef WIN32
+#define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
+#define YASLI_ASSERT_STR(expr, str) YASLI_ASSERT(expr, str)
 # else
 #  define YASLI_ASSERT(x) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x "\n\tin %s()\n", __LINE__, __FUNCTION__); }  }
 #  define YASLI_ASSERT_STR(x, str) { bool val = (x); if (!val) { fprintf(stderr, __FILE__ ":%i: assertion: " #x " (%s)\n\tin %s()\n", __LINE__, str, __FUNCTION__); }  }
