@@ -16,6 +16,7 @@ namespace yasli{
 #ifdef WIN32
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
+#endif
 
 #ifndef NDEBUG
 static bool interactiveAssertion = true;
@@ -37,6 +38,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 	MemoryWriter text;
 	text << fileName << "(" << line << "): error: " << "Assertion in " << function << "(): " << expr; // output in msvc error format
 
+#ifdef WIN32
 	int hash = calcHash(text.c_str());
 
 	const int hashesMax = 1000;
@@ -47,6 +49,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 			return false;
 		else if(!hashes[index])
 			break;
+#endif
 
 	char buffer[4000];
 	va_list args;
@@ -57,6 +60,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 	text << " ( " << buffer << " )";
 	text << "\n";
 
+#ifdef WIN32
     if(interactiveAssertion || IsDebuggerPresent()){
         int result = MessageBoxA(0, text.c_str(), "Debug Assertion Triggered", MB_ICONERROR | MB_ABORTRETRYIGNORE | MB_TASKMODAL);
         switch(result){
@@ -75,10 +79,12 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 		if(testMode)
 			exit(-1);
     }
+#else
+	fprintf(stderr, text.c_str()); 
+#endif
 	return false; 
 }
 
-#endif
 #endif
 
 }
