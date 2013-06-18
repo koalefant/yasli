@@ -134,7 +134,7 @@ bool FileDialog::showModal()
             switch(errorCode)
             {
             case FNERR_INVALIDFILENAME:
-                YASLI_ASSERT_STR(0 && "Invalid file name!", fromWideChar(openFileName.lpstrFile).c_str());
+				YASLI_ASSERT(0, "Invalid file name: %s", fromWideChar(openFileName.lpstrFile).c_str());
                 break;
             default:
 			    YASLI_ASSERT(errorCode == 0);

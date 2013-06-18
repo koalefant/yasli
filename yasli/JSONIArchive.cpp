@@ -593,7 +593,7 @@ void JSONIArchive::expect(char token)
         MemoryWriter msg;
 		msg << "Error parsing file, expected ':' at line " << line(token_.start) << ":\n"
          << std::string(token_.start, lineEnd).c_str();
-		YASLI_ASSERT_STR(0, msg.c_str());
+		YASLI_ASSERT(0, msg.c_str());
     }
 }
 
@@ -772,7 +772,7 @@ bool JSONIArchive::closeBracket()
             const char* start = stack_.back().start;
             msg << filename_.c_str() << ": " << line(start) << " line";
             msg << ": End of file while no matching bracket found";
-			YASLI_ASSERT_STR(0, msg.c_str());
+			YASLI_ASSERT(0, msg.c_str());
 			return false;
         }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
@@ -961,7 +961,7 @@ void JSONIArchive::checkValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        YASLI_ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT(0, msg.c_str());
     }
 }
 
@@ -973,7 +973,7 @@ bool JSONIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        YASLI_ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT(0, msg.c_str());
 		return false;
     }
     if(token_.start[0] != '"' || token_.end[-1] != '"'){
@@ -982,7 +982,7 @@ bool JSONIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": Expected string";
-        YASLI_ASSERT_STR(0, msg.c_str());
+        YASLI_ASSERT(0, msg.c_str());
 		return false;
     }
     return true;

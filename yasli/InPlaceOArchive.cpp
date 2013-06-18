@@ -43,7 +43,7 @@ bool InPlaceOArchive::findOffset(size_t* offset, const void* addr, size_t size, 
 			MemoryWriter msg;
 			msg << "Address of member '" << name << "' lies out of '" << chunk.typeID.name() << "' struct. Are you serializing a stack variable?";
 			warning(msg.c_str());
-			YASLI_ASSERT_STR(0, msg.c_str());
+			YASLI_ASSERT(0, msg.c_str());
 			return false;
 		}
 	}
@@ -240,14 +240,14 @@ bool InPlaceOArchive::operator()(PointerInterface& ptr, const char* name, const 
 	const ClassFactoryBase *factory = ClassFactoryManager::the().find(ptr.baseType());
 	if (!factory)
 	{
-		YASLI_ASSERT_STR(0 && "Base type is not registered", ptr.baseType().name());;
+		YASLI_ASSERT(0, "Base type is not registered %s", ptr.baseType().name());
 		return false;
 	}
 
 	size_t size = factory->sizeOf(derivedType);
 	if (size == 0)
 	{
-		YASLI_ASSERT_STR(0 && "No type description for type", ptr.type().name());;
+		YASLI_ASSERT(0, "No type description for type %s", ptr.type().name());
 		return false;
 	}
 
