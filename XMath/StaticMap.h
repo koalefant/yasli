@@ -309,7 +309,7 @@ public:
 	mapped_type& operator[](const key_type& key) {
 		iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
 		if (vi==MapVector.end()||(key_comp()(key, vi->first))){
-			ASSERT(!lock_ && "StaticMap is locked");
+			YASLI_ASSERT(!lock_ && "StaticMap is locked");
 			vi = MapVector.insert(vi, value_type(key, mapped_type()));
 		}
 		return (*vi).second;
