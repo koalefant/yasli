@@ -309,7 +309,7 @@ public:
 	mapped_type& operator[](const key_type& key) {
 		iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
 		if (vi==MapVector.end()||(key_comp()(key, vi->first))){
-			YASLI_ASSERT(!lock_ && "StaticMap is locked");
+			ASSERT(!lock_ && "StaticMap is locked");
 			vi = MapVector.insert(vi, value_type(key, mapped_type()));
 		}
 		return (*vi).second;
@@ -317,7 +317,7 @@ public:
 
 	const mapped_type& operator[](const key_type& key) const {
 		const_iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
-		YASLI_ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "Не найден элемент в const-operator[]");
+		ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "Не найден элемент в const-operator[]");
 		return (*vi).second;
 	}
 
@@ -347,6 +347,19 @@ public:
 		~Lock() { --map.lock_; }
 	};
 	Lock lock() { return Lock(*this); }
+
+	class Ref {
+		T* t_;
+		StaticMap* map_;
+	public:
+		Ref(StaticMap& map, const K& key) : map_(&map), t_(&map[key]) { ++map_->lock_; }
+		explicit Ref(T* t) : map_(0), t_(t) {}
+		Ref& operator=(const Ref& ref) { t_ = ref.t_; map_ = ref.map_; if(map_) ++map_->lock_; return *this; }
+		Ref(const Ref& ref) { *this = ref; }
+		~Ref() { if(map_) --map_->lock_; }
+		operator T *() const  { return t_; }
+		T *operator->() const { return t_; }
+	};
 };
 
 template<class K, class T, class Cmp, class A> 
