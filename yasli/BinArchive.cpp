@@ -87,7 +87,7 @@ inline void BinOArchive::closeNode(const char* name, bool size8)
 	if(!strlen(name))
 		return;
 
-    unsigned int offset = blockSizeOffsets_.back();
+	unsigned int offset = blockSizeOffsets_.back();
 	unsigned int size = (unsigned int)(stream_.position() - offset - sizeof(unsigned char) - (size8 ? 0 : sizeof(unsigned short)));
 	blockSizeOffsets_.pop_back();
 	unsigned char* sizePtr = (unsigned char*)(stream_.buffer() + offset);
@@ -118,10 +118,10 @@ inline void BinOArchive::closeNode(const char* name, bool size8)
 
 bool BinOArchive::operator()(bool& value, const char* name, const char* label)
 {
-    openNode(name);
+	openNode(name);
 	stream_.write(value);
-    closeNode(name);
-    return true;
+	closeNode(name);
+	return true;
 }
 
 bool BinOArchive::operator()(StringInterface& value, const char* name, const char* label)
@@ -396,7 +396,9 @@ bool BinIArchive::operator()(bool& value, const char* name, const char* label)
 bool BinIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
-		read(value);
+		string str;
+		read(str);
+		value.set(str.c_str());
 		return true;
 	}
 
@@ -413,7 +415,9 @@ bool BinIArchive::operator()(StringInterface& value, const char* name, const cha
 bool BinIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
-		read(value);
+		wstring str;
+		read(str);
+		value.set(str.c_str());
 		return true;
 	}
 
