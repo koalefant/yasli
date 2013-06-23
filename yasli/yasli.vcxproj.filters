@@ -19,6 +19,9 @@
     <Filter Include="impl">
       <UniqueIdentifier>{58c85fb4-8718-4036-8381-500b4329dfef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="archives\JSON">
+      <UniqueIdentifier>{b197661a-58b5-472b-aa61-814b30f3d5cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assert.cpp">
@@ -57,6 +60,12 @@
     <ClCompile Include="Enum.cpp" />
     <ClCompile Include="MemoryReader.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="JSONIArchive.cpp">
+      <Filter>archives\JSON</Filter>
+    </ClCompile>
+    <ClCompile Include="JSONOArchive.cpp">
+      <Filter>archives\JSON</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +133,12 @@
     <ClInclude Include="Strings.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="JSONIArchive.h">
+      <Filter>archives\JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="JSONOArchive.h">
+      <Filter>archives\JSON</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt" />

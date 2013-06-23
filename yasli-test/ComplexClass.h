@@ -223,6 +223,11 @@ public:
 		polyVector_.push_back(new PolyDerivedB);
 		polyVector_.push_back(new PolyBase);
 
+		Member& a = stringToStructMap_["a"];
+		a.name = "A";
+		Member& b = stringToStructMap_["b"];
+		b.name = "B";
+
 		members_.resize(13);
 	}
 
@@ -236,6 +241,8 @@ public:
 		for (size_t i = 0; i < members_.size(); ++i)
 			members_[i].change(int(i));
 
+		members_.erase(members_.begin());
+
 		for (size_t i = 0; i < polyVector_.size(); ++i)
 			polyVector_[i]->change();
 
@@ -248,6 +255,14 @@ public:
 			array_[i].change(int(arrayLen - i));
 
     numericTypes_.change();
+
+		vectorOfStrings_.push_back("str1");
+		vectorOfStrings_.push_back("2str");
+		vectorOfStrings_.push_back("thirdstr");
+		
+		stringToStructMap_.erase("a");
+		Member& c = stringToStructMap_["c"];
+		c.name = "C";
 	}
 
 	void serialize(Archive& ar)
@@ -270,6 +285,7 @@ public:
 		}
 		ar(array_, "array");
 		ar(numericTypes_, "numericTypes");
+		ar(vectorOfStrings_, "vectorOfStrings");
 	}
 
 	void checkEquality(const ComplexClass& copy) const
@@ -310,6 +326,7 @@ public:
 protected:
 	std::string name_;
 	typedef std::vector<Member> Members;
+	std::vector<std::string> vectorOfStrings_;
 	Members members_;
 	int index_;
   NumericTypes numericTypes_;
@@ -317,6 +334,8 @@ protected:
 	StringListStatic stringList_;
 	std::vector< SharedPtr<PolyBase> > polyVector_;
 	SharedPtr<PolyBase> polyPtr_;
+
+	std::map<std::string, Member> stringToStructMap_;
 
 	Member array_[5];
 };

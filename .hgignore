@@ -13,3 +13,8 @@ glob:tags
 glob:states
 glob:*.user
 glob:*.sdf
+syntax: glob
+yasli-example-*
+qpropertytree-example-*
+*.a
+example-*

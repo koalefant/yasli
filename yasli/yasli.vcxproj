@@ -266,6 +266,8 @@
     <ClCompile Include="Assert.cpp" />
     <ClCompile Include="ClassFactory.cpp" />
     <ClCompile Include="Enum.cpp" />
+    <ClCompile Include="JSONIArchive.cpp" />
+    <ClCompile Include="JSONOArchive.cpp" />
     <ClCompile Include="MemoryReader.cpp" />
     <ClCompile Include="MemoryWriter.cpp" />
     <ClCompile Include="StringList.cpp" />
@@ -296,6 +298,8 @@
     <ClInclude Include="ClassFactoryBase.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Enum.h" />
+    <ClInclude Include="JSONIArchive.h" />
+    <ClInclude Include="JSONOArchive.h" />
     <ClInclude Include="MemoryReader.h" />
     <ClInclude Include="MemoryWriter.h" />
     <ClInclude Include="Object.h" />

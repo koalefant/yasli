@@ -9,6 +9,7 @@ set(TEST_SOURCES
   "TestInPlaceArchive.cpp"
   "TestTextArchive.cpp"
   "TestJSONArchive.cpp"
+  "TestBinArchive.cpp"
   )
 source_group("" FILES ${TEST_SOURCES})
 
