@@ -804,15 +804,11 @@ bool TextIArchive::closeContainerBracket()
 {
     readToken();
     if(token_ == ']'){
-#ifdef DEBUG_TEXTIARCHIVE
-        std::cout << "closeContainerBracket(): ok" << std::endl;
-#endif
+		DEBUG_TRACE("closeContainerBracket(): ok");
         return true;
     }
     else{
-#ifdef DEBUG_TEXTIARCHIVE
-        std::cout << "closeContainerBracket(): failed ('" << token_.str() << "')" << std::endl;
-#endif
+		DEBUG_TRACE("closeContainerBracket(): failed ('%s')", token_.str().c_str());
         putToken();
         return false;
     }

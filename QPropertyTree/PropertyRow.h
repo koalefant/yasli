@@ -286,14 +286,26 @@ public:
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
+	yasli::Serializer serializer_;
+	Rows children_;
+	// do we really need QPoint here? 
+	QPoint pos_;
+	QPoint size_;
+	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	const char* name_;
 	const char* label_;
 	const char* labelUndecorated_;
 	const char* typeName_;
-	yasli::Serializer serializer_;
 	PropertyRow* parent_;
-	Rows children_;
 
+	unsigned int textHash_;
+	short int textPos_;
+	short int textSizeInitial_;
+	short int textSize_;
+	short int widgetPos_; // widget == icon!
+	short int widgetSize_;
+	short int userWidgetSize_;
+	unsigned char plusSize_;
 	bool visible_ : 1;
 	bool matchFilter_ : 1;
 	bool belongsToFilteredRow_ : 1;
@@ -309,20 +321,6 @@ protected:
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
-
-	// do we really need QPoint here? 
-	QPoint pos_;
-	QPoint size_;
-	short int plusSize_;
-	short int textPos_;
-	short int textSizeInitial_;
-	short int textSize_;
-	short int widgetPos_; // widget == icon!
-	short int widgetSize_;
-	short int userWidgetSize_;
-	unsigned textHash_;
-
-	yasli::SharedPtr<PropertyRow> pulledContainer_;
 
 	static ConstStringList* constStrings_;
 	friend class PropertyOArchive;

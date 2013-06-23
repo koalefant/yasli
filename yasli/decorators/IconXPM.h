@@ -15,7 +15,13 @@ struct IconXPM
 	, lineCount(0)
 	{
 	}
-    template<size_t Size>
+  template<size_t Size>
+	explicit IconXPM(const char* (&xpm)[Size])
+	{
+		source = xpm;
+		lineCount = Size;
+	}
+  template<size_t Size>
 	explicit IconXPM(char* (&xpm)[Size])
 	{
 		source = xpm;
