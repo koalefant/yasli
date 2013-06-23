@@ -52,7 +52,7 @@ static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static void unescapeString(string& buf, const char* begin, const char* end)
+static void unescapeString(std::vector<char>& buf, string& out, const char* begin, const char* end)
 {
 	// TODO: use stack string
 	buf.resize(end-begin);
@@ -91,6 +91,10 @@ static void unescapeString(string& buf, const char* begin, const char* end)
 		++begin;
 	}
 	buf.resize(ptr - &buf[0]);
+	if (!buf.empty())
+		out.assign(&buf[0], &buf[0] + buf.size());
+	else
+		out.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -579,22 +583,24 @@ bool JSONIArchive::isName(Token token) const
 	char firstChar = token.start[0];
 	if (firstChar == '"')
 		return true;
-    return false;
+	return false;
 }
 
 
-void JSONIArchive::expect(char token)
+bool JSONIArchive::expect(char token)
 {
-    if(token_ != token){
-      const char* lineEnd = token_.start;
-      while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
-        ++lineEnd;
+	if(token_ != token){
+		const char* lineEnd = token_.start;
+		while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
+			++lineEnd;
 
-        MemoryWriter msg;
+		MemoryWriter msg;
 		msg << "Error parsing file, expected ':' at line " << line(token_.start) << ":\n"
-         << std::string(token_.start, lineEnd).c_str();
+		<< std::string(token_.start, lineEnd).c_str();
 		YASLI_ASSERT(0, msg.c_str());
-    }
+		return false;
+	}
+	return true;
 }
 
 void JSONIArchive::skipBlock()
@@ -612,142 +618,124 @@ void JSONIArchive::skipBlock()
 
 bool JSONIArchive::findName(const char* name, Token* outName)
 {
-    DEBUG_TRACE(" * finding name '%s'", name);
-    DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
-    if(stack_.empty()) {
+	DEBUG_TRACE(" * finding name '%s'", name);
+	DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
+	if(stack_.empty()) {
 		// TODO: diagnose
 		return false;
 	}
 	if (stack_.back().isKeyValue)
 		return true;
-    const char* start = 0;
-    const char* blockBegin = stack_.back().start;
+	const char* start = 0;
+	const char* blockBegin = stack_.back().start;
 	if(*blockBegin == '\0')
 		return false;
 
-    readToken();
+	readToken();
 	if (token_ == ',')
 		readToken();
-    if(!token_){
-	    start = blockBegin;
-        token_.set(blockBegin, blockBegin);
+	if(!token_){
+		start = blockBegin;
+		token_.set(blockBegin, blockBegin);
 		readToken();
 	}
 
-    if(stack_.size() == 1 || stack_.back().isContainer || outName != 0){
-        if(isName(token_)){
-			if (outName) {
-				*outName = token_;
-				DEBUG_TRACE("Token: '%s'", token_.str().c_str());
-
-				start = token_.start;
-				readToken();
-				expect(':');
-				return true;
-			}
-			else {
-				start = token_.start;
-				readToken();
-				expect(':');
-			}
-        }
-        else{
-			if(token_ == ']' || token_ == '}'){
-				DEBUG_TRACE("Got close bracket...");
-                putToken();
-                return false;
-            }
-            else{
-				DEBUG_TRACE("Got unnamed value: '%s'", token_.str().c_str());
-                putToken();
-                return true;
-            }
-        }
-    }
-    else{
-        if(isName(token_)){
+	if(stack_.size() == 1 || stack_.back().isContainer || outName != 0){
+		if(token_ == ']' || token_ == '}'){
+			DEBUG_TRACE("Got close bracket...");
+			putToken();
+			return false;
+		}
+		else{
+			DEBUG_TRACE("Got unnamed value: '%s'", token_.str().c_str());
+			putToken();
+			return true;
+		}
+	}
+	else{
+		if(isName(token_)){
 			DEBUG_TRACE("Seems to be a name '%s'", token_.str().c_str());
 			Token nameContent(token_.start+1, token_.end-1);
-            if(nameContent == name){
-                readToken();
+			if(nameContent == name){
+				readToken();
 				expect(':');
 				DEBUG_TRACE("Got one");
-                return true;
-            }
-            else{
-                start = token_.start;
+				return true;
+			}
+			else{
+				start = token_.start;
 
-                readToken();
+				readToken();
 				expect(':');
-                skipBlock();
-            }
-        }
-        else{
-            start = token_.start;
+				skipBlock();
+			}
+		}
+		else{
+			start = token_.start;
 			if(token_ == ']' || token_ == '}')
-                token_ = Token(blockBegin, blockBegin);
-            else{
-                putToken();
-                skipBlock();
-            }
-        }
-    }
+				token_ = Token(blockBegin, blockBegin);
+			else{
+				putToken();
+				skipBlock();
+			}
+		}
+	}
 
-    while(true){
-        readToken();
+	while(true){
+		readToken();
 		if(!token_){
 			token_.set(blockBegin, blockBegin);
 			continue;
 		}
-            //return false; // Reached end of file while searching for name
+		//return false; // Reached end of file while searching for name
 		DEBUG_TRACE("'%s'", token_.str().c_str());
 		DEBUG_TRACE("Checking for loop: %i and %i", token_.start - reader_->begin(), start - reader_->begin());
 		YASLI_ASSERT(start != 0);
-        if(token_.start == start){
-            putToken();
+		if(token_.start == start){
+			putToken();
 			DEBUG_TRACE("unable to find...");
-            return false; // Reached a full circle: unable to find name
-        }
+			return false; // Reached a full circle: unable to find name
+		}
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
 			DEBUG_TRACE("Going to begin of block, from %i", token_.start - reader_->begin());
-            token_ = Token(blockBegin, blockBegin);
+			token_ = Token(blockBegin, blockBegin);
 			DEBUG_TRACE(" to %i", token_.start - reader_->begin());
-            continue; // Reached '}' or ']' while searching for name, continue from begin of block
-        }
+			continue; // Reached '}' or ']' while searching for name, continue from begin of block
+		}
 
-        if(name[0] == '\0'){
-            if(isName(token_)){
-                readToken();
-                if(!token_)
-                    return false; // Reached end of file while searching for name
+		if(name[0] == '\0'){
+			if(isName(token_)){
+				readToken();
+				if(!token_)
+					return false; // Reached end of file while searching for name
 				expect(':');
-                skipBlock();
-            }
-            else{
-                putToken(); // Not a name - put it back
-                return true;
-            }
-        }
-        else{
-            if(isName(token_)){
-                Token nameContent(token_.start+1, token_.end-1);
-                readToken();
+				skipBlock();
+			}
+			else{
+				putToken(); // Not a name - put it back
+				return true;
+			}
+		}
+		else{
+			if(isName(token_)){
+				Token nameContent(token_.start+1, token_.end-1);
+				readToken();
 				expect(':');
-                if(nameContent == name)
-                    return true;
-                else
-                    skipBlock();
-            }
-            else{
-                putToken();
-                skipBlock();
-            }
-        }
+				if(nameContent == name)
+					return true;
+				else
+					skipBlock();
+			}
+			else{
+				putToken();
+				skipBlock();
+			}
+		}
 
-    }
+	}
 
-    return false;
+	return false;
 }
 
 bool JSONIArchive::openBracket()
@@ -839,9 +827,27 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
 {
 	Token nextName;
-    if(findName("", &nextName)){
+	if(!stack_.empty() && stack_.back().isContainer) {
+		readToken();
+		if(isName(token_) && checkStringValueToken()) {
+			string key;
+			unescapeString(unescapeBuffer_, key, token_.start + 1, token_.end - 1);
+			keyValue.set(key.c_str());
+			readToken();
+			if(!expect(':'))
+				return false;
+			if(!keyValue.serializeValue(*this, "", 0))
+				return false;
+			return true;
+		}
+		else {
+			putToken();
+			return false;
+		}
+	}
+	else if(findName("", &nextName)) {
 		string key;
-		unescapeString(key, nextName.start + 1, nextName.end - 1);
+		unescapeString(unescapeBuffer_, key, nextName.start + 1, nextName.end - 1);
 		keyValue.set(key.c_str());
 		stack_.push_back(Level());
 		stack_.back().isKeyValue = true;
@@ -851,9 +857,9 @@ bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, con
 			// TODO: diagnose
 			return false;
 		}
-        stack_.pop_back();
-        return result;
-    }
+		stack_.pop_back();
+		return result;
+	}
 	return false;
 }
 
@@ -861,16 +867,16 @@ bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, con
 bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const char* label)
 {
 	if (findName(name)) {
-		  if(openBracket()){
-            stack_.push_back(Level());
-            stack_.back().start = token_.end;
+		if(openBracket()){
+			stack_.push_back(Level());
+			stack_.back().start = token_.end;
 			stack_.back().isKeyValue = true;
 
 			readToken();
 			if (isName(token_)) {
 				if(checkStringValueToken()){
 					string typeName;
-					unescapeString(typeName, token_.start + 1, token_.end - 1);
+					unescapeString(unescapeBuffer_, typeName, token_.start + 1, token_.end - 1);
 
 					TypeID type = ser.factory()->findTypeByName(typeName.c_str());
 					if (ser.type() != type)
@@ -887,12 +893,6 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 			}
 			closeBracket();
 			stack_.pop_back();
-			/*
-			if (!closeBracket()) {
-				// TODO diagnose
-				return false;
-			}
-			*/
 			return true;
 		}
 	}
@@ -907,48 +907,50 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 		bool dictionaryBracket = false;
 		if (!containerBracket)
 			dictionaryBracket = openBracket();
-        if(containerBracket || dictionaryBracket){
-            stack_.push_back(Level());
+		if(containerBracket || dictionaryBracket){
+			stack_.push_back(Level());
 			stack_.back().isContainer = true;
-            stack_.back().start = token_.end;
+			stack_.back().start = token_.end;
 
-            std::size_t size = ser.size();
-            std::size_t index = 0;
+			std::size_t size = ser.size();
+			std::size_t index = 0;
 
-            while(true){
-                readToken();
+			while(true){
+				readToken();
+				if (token_ == ',')
+					readToken();
 				if(token_ == '}')
 				{
 					break;
-				    //YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
-				//	return false;
+					//YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
+					//	return false;
 				}
-                if(token_ == ']')
-                    break;
-                else if(!token_)
+				if(token_ == ']')
+					break;
+				else if(!token_)
 				{
-                    YASLI_ASSERT(0 && "Reached end of file while reading container!");
+					YASLI_ASSERT(0 && "Reached end of file while reading container!");
 					return false;
 				}
-                putToken();
-                if(index == size)
-                    size = index + 1;
-                if(index < size){
-                    ser(*this, "", "");
-                }
-                else{
-                    skipBlock();
-                }
-                ser.next();
+				putToken();
+				if(index == size)
+					size = index + 1;
+				if(index < size){
+					ser(*this, "", "");
+				}
+				else{
+					skipBlock();
+				}
+				ser.next();
 				++index;
-            }
-            if(size > index)
-                ser.resize(index);
+			}
+			if(size > index)
+				ser.resize(index);
 
-            YASLI_ASSERT(!stack_.empty());
-            stack_.pop_back();
-            return true;
-        }
+			YASLI_ASSERT(!stack_.empty());
+			stack_.pop_back();
+			return true;
+		}
     }
     return false;
 }
@@ -1099,7 +1101,7 @@ bool JSONIArchive::operator()(StringInterface& value, const char* name, const ch
         readToken();
         if(checkStringValueToken()){
 			string buf;
-			unescapeString(buf, token_.start + 1, token_.end - 1);
+			unescapeString(unescapeBuffer_, buf, token_.start + 1, token_.end - 1);
 			value.set(buf.c_str());
 		}
 		else
@@ -1199,7 +1201,7 @@ bool JSONIArchive::operator()(WStringInterface& value, const char* name, const c
 		readToken();
 		if(checkStringValueToken()){
 			string buf;
-			unescapeString(buf, token_.start + 1, token_.end - 1);
+			unescapeString(unescapeBuffer_, buf, token_.start + 1, token_.end - 1);
 			wstring wbuf;
 			utf8ToUtf16(&wbuf, buf.c_str());
 			value.set(wbuf.c_str());

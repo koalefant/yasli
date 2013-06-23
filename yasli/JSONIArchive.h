@@ -64,7 +64,7 @@ private:
 	int line(const char* position) const; 
 	bool isName(Token token) const;
 
-	void expect(char token);
+	bool expect(char token);
 	void skipBlock();
 
 	struct Level{
@@ -79,6 +79,7 @@ private:
 
 	std::auto_ptr<MemoryReader> reader_;
 	Token token_;
+	std::vector<char> unescapeBuffer_;
 	std::string filename_;
 };
 
