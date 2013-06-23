@@ -649,7 +649,6 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
 			expandRow(parentRow, false);
-			//model()->requestUpdate();
 			selectedRow = model()->focusedRow();
 		}
 		break;
@@ -657,7 +656,6 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
 			expandRow(parentRow, true);
-			//model()->requestUpdate();
 			selectedRow = model()->focusedRow();
 		}
 		break;
@@ -790,7 +788,6 @@ void QPropertyTree::expandParents(PropertyRow* row)
 
 void QPropertyTree::expandAll(PropertyRow* root)
 {
-
 	if(!root){
 		root = model()->root();
 		PropertyRow::iterator it;
@@ -798,6 +795,7 @@ void QPropertyTree::expandAll(PropertyRow* root)
 			PropertyRow* row = *it;
 			row->setExpandedRecursive(this, true);
 		}
+		root->setLayoutChanged();
 	}
 	else
 		root->setExpandedRecursive(this, true);
@@ -955,7 +953,7 @@ void QPropertyTree::serialize(Archive& ar)
 		if(ar.isInput()){
 			ensureVisible(model()->focusedRow());
 			updateAttachedPropertyTree(false);
-			update();
+			updateHeights();
 			signalSelected();
 		}
 	}

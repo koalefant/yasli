@@ -26,9 +26,9 @@ public:
 
 	bool onActivate(QPropertyTree* tree, bool force);
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
-    yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
+	yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-    void serializeValue(yasli::Archive& ar);
+	void serializeValue(yasli::Archive& ar);
 	int widgetSizeMin() const{ return ICON_SIZE; }
 protected:
 	bool value_;

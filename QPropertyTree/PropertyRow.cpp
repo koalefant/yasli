@@ -17,10 +17,10 @@
 
 #include "yasli/BinArchive.h"
 
-#include <QtGui/QMenu>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QPainter>
-#include <QtCore/QObject>
+#include <QMenu>
+#include <QKeyEvent>
+#include <QPainter>
+#include <QObject>
 #include "MathUtils.h"
 
 #if 0
@@ -162,9 +162,9 @@ void PropertyRow::setExpandedRecursive(QPropertyTree* tree, bool expanded)
 {
 	if(canBeToggled(tree))
 		_setExpanded(expanded);
-	
-    SetExpandedOp op(expanded);
-    scanChildren(op, tree);
+
+	SetExpandedOp op(expanded);
+	scanChildren(op, tree);
 }
 
 int PropertyRow::childIndex(PropertyRow* row)

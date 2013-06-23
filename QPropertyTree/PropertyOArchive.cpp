@@ -10,7 +10,6 @@
 #include <math.h>
 #include <memory>
 
-#include "yasli/BitVector.h"
 #include "yasli/STL.h"
 #include "PropertyOArchive.h"
 #include "PropertyTreeModel.h"
@@ -70,7 +69,7 @@ PropertyOArchive::~PropertyOArchive()
 PropertyRow* PropertyOArchive::rootNode()
 {
 	if(rootNode_)
-	return rootNode_;
+		return rootNode_;
 	else{
 		YASLI_ASSERT(model_);
 		YASLI_ASSERT(model_->root());
@@ -107,7 +106,7 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 			continue;
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
-		    *index = (int)i;
+			*index = (int)i;
 			return row;
 		}
 	}
@@ -117,7 +116,7 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 			continue;
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
-		    *index = (int)i;
+			*index = (int)i;
 			return row;
 		}
 	}
@@ -135,7 +134,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
 		if(updateMode_){
-				model_->setRoot(newRow);
+			model_->setRoot(newRow);
 			return newRow;
 		}
 		else{
@@ -193,11 +192,14 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 	Level& level = stack_.back();
 	PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
+	const char* oldLabel = 0;
 	if(oldRow){
 		oldRow->setMultiValue(false);
 		newRow.reset(static_cast<RowType*>(oldRow));
 		level.oldRows[rowIndex] = 0;
 		level.rowIndex = rowIndex + 1;
+		oldLabel = oldRow->label();
+		oldRow->setNames(name, label, typeName);
 	}
 	else{
 		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
@@ -205,12 +207,11 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		newRow->setNames(name, label, typeName);
 		if(model_->expandLevels() != 0){
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
-			newRow->_setExpanded(true);
+				newRow->_setExpanded(true);
+		}
 	}
-	}
-	newRow->setNames(name, label, typeName);
 	currentNode_->add(newRow);
-	if (!oldRow)
+	if (!oldRow || oldLabel != label)
 		// for new rows we should mark all parents with labelChanged_
 		newRow->setLabelChanged();
 
@@ -368,7 +369,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 			if ( !ser.next() )
 				break;
 		}
-
+	currentNode_->labelChanged();
 	closeStruct(name);
 	return true;
 }

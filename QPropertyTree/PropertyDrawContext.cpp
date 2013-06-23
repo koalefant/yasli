@@ -273,8 +273,8 @@ void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, boo
 void PropertyDrawContext::drawValueText(bool highlighted, const wchar_t* text) const
 {
 	QColor textColor = highlighted ? tree->palette().highlightedText().color() : tree->palette().buttonText().color();
-	QRect textRect(widgetRect.left() + 3, widgetRect.top() + 2, widgetRect.right() - 3, widgetRect.bottom() - 2);
-	tree->_drawRowValue(*painter, text, 0, textRect, textColor, false, false);
+	QRect textRect(widgetRect.left() + 3, widgetRect.top() + 2, widgetRect.width() - 6, widgetRect.height() - 4);
+	tree->_drawRowValue(*painter, text, &tree->font(), textRect, textColor, false, false);
 }
 
 void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset) const

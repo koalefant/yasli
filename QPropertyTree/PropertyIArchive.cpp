@@ -339,11 +339,13 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 	if(!currentNode_){
 		lastNode_ = currentNode_ = model_->root();
 		YASLI_ASSERT(currentNode_);
+		if (currentNode_ && strcmp(currentNode_->typeName(), typeName) != 0)
+			return false;
 		return true;
 	}
 
 	YASLI_ESCAPE(currentNode_, return false);
-	
+
 	if(currentNode_->empty())
 		return false;
 
@@ -364,6 +366,8 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 		lastNode_ = node;
 		if(node->isContainer() || !node->multiValue()){
 			currentNode_ = node;
+			if (currentNode_ && strcmp(currentNode_->typeName(), typeName) != 0)
+				return false;
 			return true;
 		}
 	}

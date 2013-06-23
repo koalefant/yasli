@@ -36,7 +36,7 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		QStyleOption option;
 		option.state = QStyle::State_Sunken/* | QStyle::State_Editing*/;
 		if (context.captured) {
-             painter->fillRect(rt, tree->palette().base()); // TODO: this doesn't work well on Ubuntu style
+			painter->fillRect(rt, tree->palette().base()); // TODO: this doesn't work well on Ubuntu style
 			option.state |= QStyle::State_HasFocus;
 			option.state |= QStyle::State_Active;
 			option.state |= QStyle::State_MouseOver;
@@ -61,7 +61,7 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed)
 {
 	changed = false;
-	if (widgetRect().contains(point)) {
+	if (widgetRect().contains(point) && !userReadOnly()) {
 		startIncrement();
 		return true;
 	}
