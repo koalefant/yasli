@@ -27,12 +27,6 @@ struct IconXPM
 		source = xpm;
 		lineCount = Size;
 	}
-    template<size_t Size>
-	explicit IconXPM(const char* (&xpm)[Size])
-	{
-		source = xpm;
-		lineCount = Size;
-	}
 
 	void serialize(yasli::Archive& ar) 	{}
 	bool operator<(const IconXPM& rhs) const { return source < rhs.source; }

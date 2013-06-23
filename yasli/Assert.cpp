@@ -10,6 +10,7 @@
 #include "StdAfx.h"
 #include "MemoryWriter.h"
 #include "BinArchive.h"
+#include <stdio.h>
 
 namespace yasli{
 
@@ -54,7 +55,12 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 	char buffer[4000];
 	va_list args;
 	va_start(args, str);
-	vsprintf_s(buffer, 4000, str, args);
+#ifdef _MSC_VER
+	vsprintf_s(buffer, sizeof(buffer), str, args);
+#else
+	vsnprintf(buffer, sizeof(buffer) - 1, str, args);
+	buffer[sizeof(buffer)-1] = '\0';
+#endif
 	va_end(args);
 
 	text << " ( " << buffer << " )";
@@ -80,7 +86,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 			exit(-1);
     }
 #else
-	fprintf(stderr, text.c_str()); 
+	fprintf(stderr, "%s", text.c_str()); 
 #endif
 	return false; 
 }

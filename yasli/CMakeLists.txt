@@ -54,9 +54,9 @@ set(DECORATORS
 source_group("" FILES ${SOURCES})
 source_group("decorators" FILES ${DECORATORS})
 
-if(WIN32)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif(WIN32)
+if(MSVC)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif(MSVC)
 
 if (EMSCRIPTEN)
     add_library("yasli" SHARED ${SOURCES} ${DECORATORS})

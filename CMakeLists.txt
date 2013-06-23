@@ -3,6 +3,8 @@ project("yasli")
 
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+else (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-value")
 endif (MSVC)
 
 set(CMAKE_BUILD_TYPE "Debug")

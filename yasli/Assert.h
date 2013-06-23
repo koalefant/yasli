@@ -20,8 +20,12 @@ void setInteractiveAssertion(bool interactive);
 bool assertionDialog(const char* function, const char* fileName, int line, const char* expr, const char* str, ...);
 inline bool assertionDialog(const char* function, const char* fileName, int line, const char* expr) { return assertionDialog(function, fileName, line, expr, ""); }
 }
-// if(YASLI_ASSERT(expr, "Message %i", 10) right_code else finaly_removed_remedy
-#define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
+#ifdef _MSC_VER
+# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
+#else
+// gcc doesn't remove trailing comma when __VA_ARGS__ is empty, but one can workaround this with ## prefix
+# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__) ? __debugbreak(), false : false))
+#endif
 #define YASLI_CHECK YASLI_ASSERT
 #else
 #define YASLI_ASSERT(expr) (1, true)
