@@ -46,7 +46,7 @@ struct WidgetVisitor{
 // When you override one of these methods in custom widget, please keep them
 // protected or private.
 	
-class Widget : public PolyRefCounter, public has_slots{
+class Widget : public PolyRefCounter, public yasli::WeakObject, public has_slots{
 public:
 	Widget();
 	virtual ~Widget();

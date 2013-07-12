@@ -108,7 +108,7 @@ public:
 	Win32::Window32* _window() const{ return window_; }
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget);
-	Widget* _focusedWidget(){ return focusedThis_ ? this : focusedWidget_; }
+	Widget* _focusedWidget(){ return focusedWidget_; }
 protected:
 	void init(HWND parent, int border, Application* app);
 
@@ -138,8 +138,7 @@ protected:
 
 	// we need to know focused widget so we can restore it when focus goes away 
 	// and then comes back to the window
-	yasli::SharedPtr<Widget> focusedWidget_;
-	bool focusedThis_;
+	yasli::WeakPtr<Widget> focusedWidget_;
 
 	yasli::SharedPtr<PopupMenu> menu_;
 	yasli::SharedPtr<HotkeyContext> hotkeyContext_;

@@ -14,10 +14,8 @@ namespace yasli{
 
 class RefCounter{
 public:
-    RefCounter()
-    : refCounter_(0)
-    {}
-    ~RefCounter() {};
+    RefCounter() : refCounter_(0) {}
+    ~RefCounter() {}
 
     int refCount() const{ return refCounter_; }
 
@@ -157,6 +155,8 @@ protected:
 };
 
 
+//////////////////////////////////////////////////////////////////////////
+
 template<class T>
 class AutoPtr{
 public:
@@ -209,6 +209,105 @@ struct AsObjectWrapper
 	: ptr_(ptr)
 	{
 	}
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+
+class WeakObject
+{
+public:
+	WeakObject() : node_(0) {}
+
+	~WeakObject()
+	{
+		if(node_) 
+			node_->pointer_ = 0;
+	}
+
+private:
+	struct Node
+	{
+		WeakObject* pointer_;
+		int refCounter_;
+	};
+	Node* node_;
+
+	WeakObject(const WeakObject &);
+	void operator=(const WeakObject &);
+
+	template<class T> friend class WeakPtr;
+};
+
+template<class T> class WeakPtr
+{
+public:
+	WeakPtr() : node_(0) {}
+	WeakPtr(T *p) { reset(p); }
+	WeakPtr(const WeakPtr &p)
+	{
+		if(p.node_) 
+			p.node_->refCounter_++;
+		node_ = p.node_;
+	}
+	~WeakPtr() { release(); }
+
+	operator T*() const { return get(); }
+	T* operator->() const { return get(); }
+
+	WeakPtr& operator=(T *p)
+	{
+		if (!p || get() != p)
+		{
+			release();
+			reset(p);
+		}
+		return *this;
+	}
+	WeakPtr& operator=(const WeakPtr &p)
+	{
+		release();
+		if(p.node_) 
+			p.node_->refCounter_++;
+		node_ = p.node_;
+		return *this;
+	}
+
+private:
+	WeakObject::Node *node_;
+
+	void reset(T *p)
+	{
+		if(p){
+			if(p->node_){
+				node_ = p->node_;
+				node_->refCounter_++;
+			}
+			else{
+				node_ = p->node_ = new WeakObject::Node;
+				node_->pointer_ = p;
+				node_->refCounter_ = 1;
+			}
+		}
+		else 
+			node_ = 0;
+	}
+
+	void release()
+	{
+		if(node_){
+			if(--node_->refCounter_ == 0){
+				if(node_->pointer_) 
+					node_->pointer_->node_ = 0;
+				delete node_;
+			}
+		}
+	}
+
+	T* get() const { return node_ ? static_cast<T*>(node_->pointer_) : 0; }
+
+	friend class WeakObject;
+	template<class T> friend class WeakPtr;
 };
 
 }
