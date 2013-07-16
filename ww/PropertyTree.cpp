@@ -361,7 +361,7 @@ void PropertyTree::expandParents(PropertyRow* row)
 		}
 	}
 	if (hasChanges)
-		updateHeights();
+		updateHeights(true);
 }
 
 void PropertyTree::expandAll(PropertyRow* root)
