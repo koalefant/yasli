@@ -108,7 +108,7 @@ public:
 	Win32::Window32* _window() const{ return window_; }
 	HotkeyContext* _hotkeyContext(){ return hotkeyContext_; }
 	void _setFocusedWidget(Widget* widget);
-	Widget* _focusedWidget(){ return focusedWidget_; }
+	Widget* _focusedWidget() const { return focusedWidget_; }
 protected:
 	void init(HWND parent, int border, Application* app);
 
