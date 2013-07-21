@@ -260,9 +260,13 @@ bool BinOArchive::operator()(ContainerInterface& ser, const char* name, const ch
 		if(size > 0){
 			int i = 0;
 			do {
-				MemoryWriter buffer;
-				buffer << i++;
-				ser(*this, buffer.c_str(), "");
+				char buffer[16];
+#ifdef _MSC_VER
+				_itoa(i, buffer, 10);
+#else
+				itoa(i, buffer, 10);
+#endif
+				ser(*this, buffer, "");
 			} while (ser.next());
 		}
 
@@ -396,18 +400,18 @@ bool BinIArchive::operator()(bool& value, const char* name, const char* label)
 bool BinIArchive::operator()(StringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
-		string str;
-		read(str);
-		value.set(str.c_str());
+		stringBuffer_.clear();
+		read(stringBuffer_);
+		value.set(stringBuffer_.c_str());
 		return true;
 	}
 
 	if(!openNode(name))
 		return false;
 
-	string str;
-	read(str);
-	value.set(str.c_str());
+	stringBuffer_.clear();
+	read(stringBuffer_);
+	value.set(stringBuffer_.c_str());
 	closeNode(name);
 	return true;
 }
@@ -415,18 +419,18 @@ bool BinIArchive::operator()(StringInterface& value, const char* name, const cha
 bool BinIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
-		wstring str;
-		read(str);
-		value.set(str.c_str());
+		wstringBuffer_.clear();
+		read(wstringBuffer_);
+		value.set(wstringBuffer_.c_str());
 		return true;
 	}
 
 	if(!openNode(name))
 		return false;
 
-	wstring str;
-	read(str);
-	value.set(str.c_str());
+	wstringBuffer_.clear();
+	read(wstringBuffer_);
+	value.set(wstringBuffer_.c_str());
 	closeNode(name);
 	return true;
 }
@@ -624,9 +628,13 @@ bool BinIArchive::operator()(ContainerInterface& ser, const char* name, const ch
 		if(size > 0){
 			int i = 0;
 			do{
-				MemoryWriter buffer;
-				buffer << i++;
-				ser(*this, buffer.c_str(), "");
+				char buffer[16];
+#ifdef _MSC_VER
+				_itoa(i, buffer, 10);
+#else
+				itoa(i, buffer, 10);
+#endif
+				ser(*this, buffer, "");
 			}
 			while(ser.next());
 		}
@@ -650,7 +658,8 @@ bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char
 	if(strlen(name) && !openNode(name))
 		return false;
 
-	string typeName;
+	string& typeName = stringBuffer_;
+	typeName.clear();
 	read(typeName);
 	TypeID type;
 	if(!typeName.empty())

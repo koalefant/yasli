@@ -164,6 +164,8 @@ private:
 	typedef std::vector<Block> Blocks;
 	Blocks blocks_;
 	const char* loadedData_;
+	string stringBuffer_;
+	wstring wstringBuffer_;
 
 	bool openNode(const char* name);
 	void closeNode(const char* name, bool check = true);
