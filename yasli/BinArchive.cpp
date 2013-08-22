@@ -262,9 +262,9 @@ bool BinOArchive::operator()(ContainerInterface& ser, const char* name, const ch
 			do {
 				char buffer[16];
 #ifdef _MSC_VER
-				_itoa(i, buffer, 10);
+				_itoa(i++, buffer, 10);
 #else
-				itoa(i, buffer, 10);
+				itoa(i++, buffer, 10);
 #endif
 				ser(*this, buffer, "");
 			} while (ser.next());
@@ -630,9 +630,9 @@ bool BinIArchive::operator()(ContainerInterface& ser, const char* name, const ch
 			do{
 				char buffer[16];
 #ifdef _MSC_VER
-				_itoa(i, buffer, 10);
+				_itoa(i++, buffer, 10);
 #else
-				itoa(i, buffer, 10);
+				itoa(i++, buffer, 10);
 #endif
 				ser(*this, buffer, "");
 			}
