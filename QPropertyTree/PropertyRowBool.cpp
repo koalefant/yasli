@@ -45,6 +45,24 @@ bool PropertyRowBool::onActivate(QPropertyTree* tree, bool force)
 		return false;
 }
 
+DragCheckBegin PropertyRowBool::onMouseDragCheckBegin() 
+{
+	if (userReadOnly())
+		return DRAG_CHECK_IGNORE;
+	return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
+}
+
+bool PropertyRowBool::onMouseDragCheck(QPropertyTree* tree, bool value)
+{
+	if (value_ != value) {
+		tree->model()->rowAboutToBeChanged(this);
+		value_ = value;
+		tree->model()->rowChanged(this);
+		return true;
+	}
+	return false;
+}
+
 void PropertyRowBool::serializeValue(yasli::Archive& ar)
 {
     ar(value_, "value", "Value");

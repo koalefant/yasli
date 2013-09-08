@@ -307,6 +307,8 @@ protected:
 	int revertTime_;
 	int updateHeightsTime_;
 	int paintTime_;
+	bool dragCheckMode_;
+	bool dragCheckValue_;
 
 	friend class TreeImpl;
 	friend class FilterEntry;

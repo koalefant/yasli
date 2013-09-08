@@ -72,6 +72,22 @@ public:
 		tree->model()->rowChanged(this);
 		return true;
 	}
+	DragCheckBegin onMouseDragCheckBegin() override
+	{
+		if (userReadOnly())
+			return DRAG_CHECK_IGNORE;
+		return value().value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
+	}
+	bool onMouseDragCheck(QPropertyTree* tree, bool value) override
+	{
+		if (this->value().value_ != value) {
+			tree->model()->rowAboutToBeChanged(this);
+			this->value().value_ = value;
+			tree->model()->rowChanged(this);
+			return true;
+		}
+		return false;
+	}
 	yasli::wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 

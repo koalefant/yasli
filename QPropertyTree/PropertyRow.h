@@ -64,6 +64,12 @@ struct PropertyDragEvent
 	QPoint lastDelta;
 };
 
+enum DragCheckBegin {
+	DRAG_CHECK_IGNORE,
+	DRAG_CHECK_SET,
+	DRAG_CHECK_UNSET
+};
+
 class PropertyRowWidget : public QObject
 {
 	Q_OBJECT
@@ -246,6 +252,9 @@ public:
     virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseStill(const PropertyDragEvent& e) {}
 	virtual void onMouseUp(QPropertyTree* tree, QPoint point) {}
+	// "drag check" allows you to "paint" with the mouse through checkboxes to set all values at once
+	virtual DragCheckBegin onMouseDragCheckBegin() { return DRAG_CHECK_IGNORE; }
+	virtual bool onMouseDragCheck(QPropertyTree* tree, bool value) { return false; }
 	virtual bool onContextMenu(QMenu &menu, QPropertyTree* tree);
 
 	bool isFullRow(const QPropertyTree* tree) const;

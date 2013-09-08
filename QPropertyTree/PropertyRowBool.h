@@ -25,6 +25,8 @@ public:
 	bool isStatic() const{ return false; }
 
 	bool onActivate(QPropertyTree* tree, bool force);
+	DragCheckBegin onMouseDragCheckBegin() override;
+	bool onMouseDragCheck(QPropertyTree* tree, bool value) override;
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
 	yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }

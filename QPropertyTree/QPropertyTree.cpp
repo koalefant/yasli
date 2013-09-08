@@ -538,6 +538,8 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , pressedRow_(0)
 , capturedRow_(0)
 , iconCache_(new IconXPMCache())
+, dragCheckMode_(false)
+, dragCheckValue_(false)
 {
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
@@ -716,15 +718,26 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 	row = model()->root()->hit(this, point);
 	if(row && !row->isRoot()){
 		bool changed = false;
-		bool capture = row->onMouseDown(this, point, changed);
-		if(!changed && !widget_){ // FIXME: осмысленный метод для проверки
-			if(capture)
-				return true;
-			else if(row->widgetRect().contains(point)){
-				if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
-					interruptDrag();
-				row->onActivate(this, false);
-				return false;
+		if (row->widgetRect().contains(point)) {
+			DragCheckBegin dragCheck = row->onMouseDragCheckBegin();
+			if (dragCheck != DRAG_CHECK_IGNORE) {
+				dragCheckValue_ = dragCheck == DRAG_CHECK_SET;
+				dragCheckMode_ = true;
+				changed = row->onMouseDragCheck(this, dragCheckValue_);
+			}
+		}
+		
+		if (!dragCheckMode_) {
+			bool capture = row->onMouseDown(this, point, changed);
+			if(!changed && !widget_){ // FIXME: осмысленный метод для проверки
+				if(capture)
+					return true;
+				else if(row->widgetRect().contains(point)){
+					if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
+						interruptDrag();
+					row->onActivate(this, false);
+					return false;
+				}
 			}
 		}
 	}
@@ -2039,7 +2052,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 		if(row){
 			if(onRowLMBDown(row, row->rect(), pointToRootSpace(ev->pos()), ev->modifiers().testFlag(Qt::ControlModifier)))
 				capturedRow_ = row;
-			else{
+			else if (!dragCheckMode_){
 				row = rowByPoint(ev->pos());
 				PropertyRow* draggedRow = row;
 				while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
@@ -2097,15 +2110,20 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			else
 				update();
 		}
-		QPoint point = ev->pos();
-		PropertyRow* row = rowByPoint(point);
-		if(capturedRow_){
-			QRect rowRect = capturedRow_->rect();
-			onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));
-			mouseStillTimer_->stop();
-			capturedRow_ = 0;
-			update();
-		}
+		 if (dragCheckMode_) {
+			 dragCheckMode_ = false;
+		 }
+		 else {
+			 QPoint point = ev->pos();
+			 PropertyRow* row = rowByPoint(point);
+			 if(capturedRow_){
+				 QRect rowRect = capturedRow_->rect();
+				 onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));
+				 mouseStillTimer_->stop();
+				 capturedRow_ = 0;
+				 update();
+			 }
+		 }
 	}
 	else if (ev->button() == Qt::RightButton)
 	{
@@ -2184,28 +2202,11 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 	}
 	else{
 		QPoint point = ev->pos();
-		PropertyRow* row = rowByPoint(pointToRootSpace(point));
-		if(row){
-			switch(hitTest(row, point, row->rect())){
-			case TREE_HIT_ROW:
-			//if(row != hoveredRow_){
-				//hoveredRow_ = row;
-				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-			//}
-			break;
-			case TREE_HIT_PLUS:
-			case TREE_HIT_TEXT:
-			//if(hoveredRow_){
-			//	hoveredRow_ = 0;
-				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-			//}
-			break;
-			case TREE_HIT_NONE:
-			default:
-			break;
-			}
+		PropertyRow* row = rowByPoint(point);
+		if (row && dragCheckMode_ && row->widgetRect().contains(pointToRootSpace(point))) {
+			row->onMouseDragCheck(this, dragCheckValue_);
 		}
-		if(capturedRow_){
+		else if(capturedRow_){
 			onRowMouseMove(capturedRow_, QRect(), point);
 			if (sliderUpdateDelay_ >= 0)
 				mouseStillTimer_->start(sliderUpdateDelay_);
