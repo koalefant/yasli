@@ -98,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
 
     tree_ = new QPropertyTree(this);
+	tree_->setExpandLevels(1);
 	tree_->setSliderUpdateDelay(5);
     tree_->attach(yasli::Serializer(globalTestData));
 	tree_->setUndoEnabled(true);

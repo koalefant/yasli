@@ -307,7 +307,7 @@ private:
 	T* get() const { return node_ ? static_cast<T*>(node_->pointer_) : 0; }
 
 	friend class WeakObject;
-	template<class T> friend class WeakPtr;
+	template<class U> friend class WeakPtr;
 };
 
 }

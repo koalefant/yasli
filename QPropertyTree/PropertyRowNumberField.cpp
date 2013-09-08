@@ -11,9 +11,9 @@
 #include "PropertyTreeModel.h"
 #include "PropertyRowNumberField.h"
 #include "PropertyDrawContext.h"
-#include <QtGui/QStyleOption>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QApplication>
+#include <QStyleOption>
+#include <QDesktopWidget>
+#include <QApplication>
 
 PropertyRowWidget* PropertyRowNumberField::createWidget(QPropertyTree* tree)
 {
@@ -33,27 +33,35 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		QRect rt = context.widgetRect;
 		rt.adjust(0, 0, 0, -1);
 
-		QStyleOption option;
-		option.state = QStyle::State_Sunken/* | QStyle::State_Editing*/;
+		QStyleOptionFrameV2 option;
+		option.state = QStyle::State_Sunken;
+		option.lineWidth = tree->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, &option, 0);
+		option.midLineWidth = 0;
+		option.features = QStyleOptionFrameV2::None;
+
 		if (context.captured) {
-			painter->fillRect(rt, tree->palette().base()); // TODO: this doesn't work well on Ubuntu style
 			option.state |= QStyle::State_HasFocus;
 			option.state |= QStyle::State_Active;
 			option.state |= QStyle::State_MouseOver;
 		}
 		else if (!userReadOnly()) {
-             painter->fillRect(rt, tree->palette().base()); // TODO: remove this fill, doesn't work in other styles
 			option.state |= QStyle::State_Enabled;
 		}
 		option.rect = rt; // option.rect is the rectangle to be drawn on.
-		QRect textRect = tree->style()->subElementRect(QStyle::SE_FrameContents, &option, 0);
+		option.palette = tree->palette();
+		option.fontMetrics = tree->fontMetrics();
+		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
 		if (!textRect.isValid()) {
 			textRect = rt;
 			textRect.adjust(3, 1, -3, -2);
 		}
+		else {
+			textRect.adjust(2, 1, -2, -1);
+		}
+		// some styles rely on default pens
+		painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
+		painter->setBrush(QBrush(tree->palette().color(QPalette::Base)));
 		tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
-		tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, 0);
-        painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
 		painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(valueAsString().c_str()), 0);
 	}
 }

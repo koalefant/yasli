@@ -61,7 +61,7 @@ bool IconXPMCache::parseXPM(RGBAImage* out, const yasli::IconXPM& icon)
 	int hotSpotX = -1;
 	int hotSpotY = -1;
 
-    int scanResult = sscanf(icon.source[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, &hotSpotX, &hotSpotY);
+	int scanResult = sscanf(icon.source[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, &hotSpotX, &hotSpotY);
 	if (scanResult != 4 && scanResult != 6)
 		return false;
 
@@ -108,7 +108,7 @@ bool IconXPMCache::parseXPM(RGBAImage* out, const yasli::IconXPM& icon)
 			++p;
 			if (strlen(p) == 6) {
 				int colorCode;
-                if(sscanf(p, "%x", &colorCode) != 1)
+				if(sscanf(p, "%x", &colorCode) != 1)
 					return false;
 				Color color((colorCode & 0xff0000) >> 16,
 							(colorCode & 0xff00) >> 8,
@@ -150,7 +150,7 @@ bool IconXPMCache::parseXPM(RGBAImage* out, const yasli::IconXPM& icon)
 			++pi;
 		}
 	}
-	
+
 	out->pixels_.swap(pixels);
 	out->width_ = width;
 	out->height_ = height;
@@ -162,7 +162,7 @@ QImage* IconXPMCache::getImageForIcon(const yasli::IconXPM& icon)
 {
 	IconToBitmap::iterator it = iconToImageMap_.find(icon.source);
 	if (it != iconToImageMap_.end())
-	 	return it->second.bitmap;
+		return it->second.bitmap;
 
 	RGBAImage image;
 	if (!parseXPM(&image, icon))
@@ -207,9 +207,9 @@ void PropertyDrawContext::drawIcon(const QRect& rect, const yasli::IconXPM& icon
 	QImage* image = tree->_iconCache()->getImageForIcon(icon);
 	if (!image)
 		return;
-	 int x = rect.left() + (rect.width() - image->width()) / 2;
-	 int y = rect.top() + (rect.height() - image->height()) / 2;
-	 painter->drawImage(x, y, *image);
+	int x = rect.left() + (rect.width() - image->width()) / 2;
+	int y = rect.top() + (rect.height() - image->height()) / 2;
+	painter->drawImage(x, y, *image);
 }
 
 void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState checked) const
@@ -223,11 +223,9 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 		option.state |= QStyle::State_NoChange;
 	else
 		option.state |= QStyle::State_Off;
-	option.rect = rect;
-	
-	
-	//QRect rect = tree->style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option, 0);
-	tree->style()->drawControl(QStyle::CE_CheckBox, &option, painter);
+	option.rect = QRect(rect.center().x() - 7, rect.center().y() - 6, 13, 13);
+
+	tree->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, 0);
 }
 
 void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, const QFont* font) const
@@ -282,10 +280,15 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	QRect rt = widgetRect;
 	rt.adjust(0, 0, -trailingOffset, -1);
 
-	QStyleOption option;
-	option.state = QStyle::State_Sunken | QStyle::State_Editing;
+	QStyleOptionFrameV2 option;
+	option.state = QStyle::State_Sunken;
+	option.lineWidth = tree->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, &option, 0);
+	option.midLineWidth = 0;
+	option.features = QStyleOptionFrameV2::None;
 	if (!grayBackground)
 		option.state |= QStyle::State_Enabled;
+	if (captured)
+	  option.state |= QStyle::State_HasFocus;
 	option.rect = rt; // option.rect is the rectangle to be drawn on.
 	QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
 	if (!textRect.isValid())
@@ -293,13 +296,10 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 		textRect = rt;
 		textRect.adjust(3, 1, -3, -2);
 	}
-	painter->fillRect(rt, tree->palette().base());
-	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, tree);
-	tree->style()->drawPrimitive(QStyle::PE_FrameLineEdit, &option, painter, tree);
+	// some styles rely on default pens
 	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
-	//drawValueTextInRect(
-	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), pathEllipsis, false);
-	//painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, QString(fromWideChar(text).c_str()), 0);
+	painter->setBrush(QBrush(tree->palette().color(QPalette::Base)));
+	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
 }
 
 

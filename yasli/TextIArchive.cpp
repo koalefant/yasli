@@ -537,7 +537,7 @@ bool TextIArchive::load(const char* filename)
 			size_t elementsRead = fread(buffer, fileSize, 1, file);
 			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
-				delete[] buffer;
+				delete[] (char*)buffer;
 				return false;
 			}
 		}

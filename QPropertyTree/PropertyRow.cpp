@@ -21,6 +21,7 @@
 #include <QKeyEvent>
 #include <QPainter>
 #include <QObject>
+#include <QStyleOption>
 #include "MathUtils.h"
 
 #if 0
@@ -1006,20 +1007,14 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 
 void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const
 {	
-	QPoint size(9, 9);
-	QPoint center(rect.center());
-	QPoint pt = center - QPoint(4, 4);
-	QRect r(pt.x(), pt.y(), size.x(), size.y());
-
-	fillRoundRectangle(p, tree->palette().window(), r, tree->palette().shadow().color(), 3);
-	
-
-	QPen pen(tree->palette().shadow().color());
-	p.setPen(pen);
-	p.drawLine(center.x() - 2, center.y(), center.x() + 2, center.y());
-	if (!expanded)
-		p.drawLine(center.x(), center.y() - 2, center.x(), center.y() + 2);
-
+	QStyleOption option;
+	option.rect = rect;
+	option.state = QStyle::State_Enabled | QStyle::State_Children;
+	if (expanded)
+		option.state |= QStyle::State_Open;
+	p.setPen(QPen());
+	p.setBrush(QBrush());
+	tree->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &option, &p, 0);
 }
 
 bool PropertyRow::visible(const QPropertyTree* tree) const
