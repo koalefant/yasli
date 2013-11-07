@@ -32,6 +32,7 @@
 #include "yasli/BinaryOArchive.h"
 #include "yasli/BinaryIArchive.h"
 #include "yasli/BinArchive.h"
+#include "yasli/JSONOArchive.h"
 
 #include "TestData.h"
 
@@ -358,6 +359,10 @@ void MainWindow::onPropertyTreeSaveToText()
 	TextOArchive oa;
 	oa(testData, "testData", "testData");
 	oa.save("Test.ta");
+
+	JSONOArchive joa;
+	joa(testData, "testData", "testData");
+	joa.save("Test.json");
 }
 
 void MainWindow::onPropertyTreeLoadFromText()
