@@ -78,6 +78,10 @@
 #ifndef SIGSLOT_H__
 #define SIGSLOT_H__
 
+#ifndef NULL
+# define NULL 0
+#endif
+
 #include <set>
 #include <list>
 
@@ -88,6 +92,7 @@ namespace sigslot {
 	class _connection_base0
 	{
 	public:
+		virtual ~_connection_base0() {}
 		virtual has_slots* getdest() const = 0;
 		virtual void emit() = 0;
 		virtual _connection_base0* clone() = 0;
@@ -370,8 +375,8 @@ namespace sigslot {
 		_signal_base1(const _signal_base1<arg1_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -384,8 +389,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -405,8 +410,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -421,8 +426,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -440,8 +445,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -475,8 +480,8 @@ namespace sigslot {
 		_signal_base2(const _signal_base2<arg1_type, arg2_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -489,8 +494,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -510,8 +515,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -526,8 +531,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -545,8 +550,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -579,8 +584,8 @@ namespace sigslot {
 		_signal_base3(const _signal_base3<arg1_type, arg2_type, arg3_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -593,8 +598,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -614,8 +619,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -630,8 +635,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -649,8 +654,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -683,8 +688,8 @@ namespace sigslot {
 		_signal_base4(const _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -697,8 +702,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -718,8 +723,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -734,8 +739,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -753,8 +758,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -789,8 +794,8 @@ namespace sigslot {
 			arg5_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -803,8 +808,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -824,8 +829,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -840,8 +845,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -859,8 +864,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -895,8 +900,8 @@ namespace sigslot {
 			arg5_type, arg6_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -909,8 +914,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -930,8 +935,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -946,8 +951,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -965,8 +970,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1001,8 +1006,8 @@ namespace sigslot {
 			arg5_type, arg6_type, arg7_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1015,8 +1020,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1036,8 +1041,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1052,8 +1057,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1071,8 +1076,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1108,8 +1113,8 @@ namespace sigslot {
 			arg5_type, arg6_type, arg7_type, arg8_type>& s)
 			: _signal_base(s)
 		{
-			connections_list::const_iterator it = s.m_connected_slots.begin();
-			connections_list::const_iterator itEnd = s.m_connected_slots.end();
+			typename connections_list::const_iterator it = s.m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1122,8 +1127,8 @@ namespace sigslot {
 
 		void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1143,8 +1148,8 @@ namespace sigslot {
 
 		void disconnect_all()
 		{
-			connections_list::const_iterator it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename connections_list::const_iterator it = m_connected_slots.begin();
+			typename connections_list::const_iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1159,8 +1164,8 @@ namespace sigslot {
 
 		void disconnect(has_slots* pclass)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1178,8 +1183,8 @@ namespace sigslot {
 
 		void slot_disconnect(has_slots* pslot)
 		{
-			connections_list::iterator it = m_connected_slots.begin();
-			connections_list::iterator itEnd = m_connected_slots.end();
+			typename connections_list::iterator it = m_connected_slots.begin();
+			typename connections_list::iterator itEnd = m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1204,8 +1209,8 @@ namespace sigslot {
 	public:
 		_connection0()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection0(dest_type* pobject, void (dest_type::*pmemfun)())
@@ -1245,8 +1250,8 @@ namespace sigslot {
 	public:
 		_connection1()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection1(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type))
@@ -1286,8 +1291,8 @@ namespace sigslot {
 	public:
 		_connection2()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection2(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1328,8 +1333,8 @@ namespace sigslot {
 	public:
 		_connection3()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection3(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1372,8 +1377,8 @@ namespace sigslot {
 	public:
 		_connection4()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection4(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1418,8 +1423,8 @@ namespace sigslot {
 	public:
 		_connection5()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection5(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1468,8 +1473,8 @@ namespace sigslot {
 	public:
 		_connection6()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection6(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1518,8 +1523,8 @@ namespace sigslot {
 	public:
 		_connection7()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection7(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1569,8 +1574,8 @@ namespace sigslot {
 	public:
 		_connection8()
 		{
-			pobject = NULL;
-			pmemfun = NULL;
+			m_pobject = NULL;
+			m_pmemfun = NULL;
 		}
 
 		_connection8(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1688,14 +1693,14 @@ namespace sigslot {
 		{
 			_connection1<desttype, arg1_type>* conn = 
 				new _connection1<desttype, arg1_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			_signal_base1<arg1_type>::m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base1<arg1_type>::connections_list::const_iterator itNext, it = _signal_base1<arg1_type>::m_connected_slots.begin();
+			typename _signal_base1<arg1_type>::connections_list::const_iterator itEnd = _signal_base1<arg1_type>::m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1710,8 +1715,8 @@ namespace sigslot {
 
 		void operator()(arg1_type a1)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base1<arg1_type>::connections_list::const_iterator itNext, it = _signal_base1<arg1_type>::m_connected_slots.begin();
+			typename _signal_base1<arg1_type>::connections_list::const_iterator itEnd = _signal_base1<arg1_type>::m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1746,14 +1751,14 @@ namespace sigslot {
 		{
 			_connection2<desttype, arg1_type, arg2_type>* conn = new
 				_connection2<desttype, arg1_type, arg2_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			_signal_base2<arg1_type, arg2_type>::m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base2<arg1_type, arg2_type>::connections_list::const_iterator itNext, it = _signal_base2<arg1_type, arg2_type>::m_connected_slots.begin();
+			typename _signal_base2<arg1_type, arg2_type>::connections_list::const_iterator itEnd = _signal_base2<arg1_type, arg2_type>::m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1768,8 +1773,8 @@ namespace sigslot {
 
 		void operator()(arg1_type a1, arg2_type a2)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base2<arg1_type, arg2_type>::connections_list::const_iterator itNext, it = _signal_base2<arg1_type, arg2_type>::m_connected_slots.begin();
+			typename _signal_base2<arg1_type, arg2_type>::connections_list::const_iterator itEnd = _signal_base2<arg1_type, arg2_type>::m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1805,14 +1810,14 @@ namespace sigslot {
 			_connection3<desttype, arg1_type, arg2_type, arg3_type>* conn = 
 				new _connection3<desttype, arg1_type, arg2_type, arg3_type>(pclass,
 				pmemfun);
-			m_connected_slots.push_back(conn);
+			_signal_base3<arg1_type, arg2_type, arg3_type>::m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base3<arg1_type, arg2_type, arg3_type>::connections_list::const_iterator itNext, it = _signal_base3<arg1_type, arg2_type, arg3_type>::m_connected_slots.begin();
+			typename _signal_base3<arg1_type, arg2_type, arg3_type>::connections_list::const_iterator itEnd = _signal_base3<arg1_type, arg2_type, arg3_type>::m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1827,8 +1832,8 @@ namespace sigslot {
 
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base3<arg1_type, arg2_type, arg3_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base3<arg1_type, arg2_type, arg3_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1865,14 +1870,14 @@ namespace sigslot {
 			_connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type>*
 				conn = new _connection4<desttype, arg1_type, arg2_type, arg3_type,
 				arg4_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			this->m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1887,8 +1892,8 @@ namespace sigslot {
 
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1928,15 +1933,15 @@ namespace sigslot {
 			_connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type,
 				arg5_type>* conn = new _connection5<desttype, arg1_type, arg2_type,
 				arg3_type, arg4_type, arg5_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			this->m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1952,8 +1957,8 @@ namespace sigslot {
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -1995,15 +2000,15 @@ namespace sigslot {
 				arg5_type, arg6_type>* conn = 
 				new _connection6<desttype, arg1_type, arg2_type, arg3_type,
 				arg4_type, arg5_type, arg6_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			this->m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -2019,8 +2024,8 @@ namespace sigslot {
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -2062,15 +2067,15 @@ namespace sigslot {
 				arg5_type, arg6_type, arg7_type>* conn = 
 				new _connection7<desttype, arg1_type, arg2_type, arg3_type,
 				arg4_type, arg5_type, arg6_type, arg7_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			this->m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6, arg7_type a7)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -2086,8 +2091,8 @@ namespace sigslot {
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6, arg7_type a7)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -2130,15 +2135,15 @@ namespace sigslot {
 				new _connection8<desttype, arg1_type, arg2_type, arg3_type,
 				arg4_type, arg5_type, arg6_type, arg7_type, 
 				arg8_type>(pclass, pmemfun);
-			m_connected_slots.push_back(conn);
+			this->m_connected_slots.push_back(conn);
 			pclass->signal_connect(this);
 		}
 
 		void emit(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6, arg7_type a7, arg8_type a8)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
@@ -2154,8 +2159,8 @@ namespace sigslot {
 		void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4,
 			arg5_type a5, arg6_type a6, arg7_type a7, arg8_type a8)
 		{
-			connections_list::const_iterator itNext, it = m_connected_slots.begin();
-			connections_list::const_iterator itEnd = m_connected_slots.end();
+			typename _signal_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type>::connections_list::const_iterator itNext, it = this->m_connected_slots.begin();
+			typename _signal_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type>::connections_list::const_iterator itEnd = this->m_connected_slots.end();
 
 			while(it != itEnd)
 			{
