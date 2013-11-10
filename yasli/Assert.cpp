@@ -11,6 +11,7 @@
 #include "MemoryWriter.h"
 #include "BinArchive.h"
 #include <stdio.h>
+#include <stdarg.h>
 
 namespace yasli{
 
