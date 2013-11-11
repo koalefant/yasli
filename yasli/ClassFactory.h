@@ -83,12 +83,39 @@ public:
 
 	class CreatorBase{
 	public:
-		virtual ~CreatorBase() {}
+		CreatorBase() {
+			if (head() == this) {
+				YASLI_ASSERT(0);
+			}
+			if (head()) {
+				next = head();
+				head()->previous = this;
+			}
+			else {
+				next = 0;
+				previous = 0;
+			}
+			head() = this;
+		}
+
+		virtual ~CreatorBase() {
+			if (previous) {
+				previous->next = next;
+			}
+			if (this == head()) {
+				head() = next;
+				if (next)
+					next->previous = 0;
+			}
+		}
 		virtual BaseType* create() const = 0;
 		const TypeDescription& description() const{ return *description_; }
 #if YASLI_NO_RTTI
 		void* vptr() const{ return vptr_; }
 #endif
+		static CreatorBase*& head() { static CreatorBase* head; return head; }
+		CreatorBase* next;
+		CreatorBase* previous;
 	protected:
 		const TypeDescription* description_;
 #if YASLI_NO_RTTI
@@ -205,7 +232,33 @@ public:
 		return TypeID();
 	}
 	// ^^^
+	
+	CreatorBase* creatorChain() { return CreatorBase::head(); }
+	
+	void registerChain(CreatorBase* head)
+	{
+		CreatorBase* current = head;
+		while (current) {
+			registerCreator(current);
+			current = current->next;
+		}
+	}
 
+	void unregisterChain(CreatorBase* head)
+	{
+		CreatorBase* current = head;
+		while (current) {
+			typeToCreatorMap_.erase(current->description().typeID());
+			vptrToCreatorMap_.erase(current->vptr());
+			for (size_t i = 0; i < creators_.size(); ++i) {
+				if (creators_[i] == current) {
+					creators_.erase(creators_.begin() + i);
+					--i;
+				}
+			}
+			current = current->next;
+		}
+	}
 protected:
 	void registerCreator(CreatorBase* creator){
 		typeToCreatorMap_[creator->description().typeID()] = creator;

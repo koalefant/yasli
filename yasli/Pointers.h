@@ -149,7 +149,10 @@ public:
                 ptr_->acquire();
         }
     }
-
+	void reset()
+	{
+		reset<T>(0);
+	}
 protected:
     T* ptr_;
 };
