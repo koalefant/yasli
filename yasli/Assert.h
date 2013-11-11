@@ -24,7 +24,7 @@ inline bool assertionDialog(const char* function, const char* fileName, int line
 # define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
 #else
 // gcc doesn't remove trailing comma when __VA_ARGS__ is empty, but one can workaround this with ## prefix
-# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__) ? false, false : false))
+# define YASLI_ASSERT(expr, ...) ((expr) || ((void)yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__), false))
 #endif
 #define YASLI_CHECK YASLI_ASSERT
 #else
