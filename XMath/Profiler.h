@@ -7,7 +7,7 @@ enum ProfilerMode
 	PROFILER_MEMORY
 };
 
-#if !defined(_FINAL_VERSION_) && !defined(_FINAL)
+#if !defined(_FINAL_VERSION_) && !defined(_FINAL) && defined(WIN32)
 
 #include <vector>
 #include <string>

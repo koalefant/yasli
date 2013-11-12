@@ -19,7 +19,7 @@ bool serialize(yasli::Archive& ar, std::pair<T1, T2>& data, const char* name, co
 	return ar(yasli::Serializer((S&)data), name, label);
 }
 
-template<class K, class T, class Cmp=std::less<K>, class A=std::allocator<std::pair<K, T>>> 
+template<class K, class T, class Cmp=std::less<K>, class A=std::allocator<std::pair<K, T> > > 
 class StaticMap 
 {
 public:
@@ -122,7 +122,7 @@ public:
 	StaticMap() : lock_(0) {}
 	explicit StaticMap(const key_compare& comp, const allocator_type& a) : MapVector(a), lock_(0) {}
 
-	StaticMap(const_iterator first, const_iterator last) : MapVector(allocator_type()) : lock_(0) {
+	StaticMap(const_iterator first, const_iterator last) : MapVector(allocator_type()), lock_(0) {
 		insert(first, last);
 	}
 
@@ -317,7 +317,7 @@ public:
 
 	const mapped_type& operator[](const key_type& key) const {
 		const_iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
-		ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "Не найден элемент в const-operator[]");
+		ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "StaticMap: element not found in const-operator[]");
 		return (*vi).second;
 	}
 
@@ -337,8 +337,8 @@ public:
 	void sort() { std::sort(MapVector.begin(), MapVector.end(), value_comp()); }
 	void reserve(size_type size) { MapVector.reserve(size);	}
 
-	template<class K, class T, class Cmp, class A> 
-	friend bool serialize(yasli::Archive& ar, StaticMap<K, T, Cmp, A>& map, const char* name, const char* nameAlt);
+	template<class K1, class T1, class Cmp1, class A1> 
+	friend bool serialize(yasli::Archive& ar, StaticMap<K1, T1, Cmp1, A1>& map, const char* name, const char* nameAlt);
 
 	struct Lock {
 		StaticMap& map;

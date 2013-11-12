@@ -117,7 +117,7 @@ bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* 
 				_snprintf_s(msg, sizeof(msg), _TRUNCATE, "Unable to read TypeID: unregistered type name: \'%s\'", typeName.c_str());
 #else
                 snprintf(msg, sizeof(msg), "Unable to read TypeID: unregistered type name: \'%s\'", typeName.c_str());
-                msg[sizeof(msg-1)] = '\0';
+                msg[sizeof(msg)-1] = '\0';
 #endif
 				ar.warning(msg);
 				return false;

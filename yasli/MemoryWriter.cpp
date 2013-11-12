@@ -189,8 +189,8 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 		cutRightZeros(buf + point);
 		operator<<(buf + point);
     }
-	return *this;
 #endif
+	return *this;
 }
 
 MemoryWriter& MemoryWriter::operator<<(const char* value)

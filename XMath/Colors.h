@@ -92,8 +92,6 @@ struct Color4c
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
 	void interpolate(const Color4c &u,const Color4c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); a=round(u.a+(v.a-u.a)*f); }
 	
-	friend bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label);
-
 	static const Color4c WHITE;
 	static const Color4c BLACK;
 	static const Color4c RED;
@@ -104,6 +102,9 @@ struct Color4c
 	static const Color4c CYAN;
 	static const Color4c ZERO;
 };
+
+bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label);
+
 
 struct Color3c
 {
@@ -126,9 +127,9 @@ struct Color3c
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
 	void interpolate(const Color3c &u,const Color3c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); }
 	unsigned long argb() const 						{ return (0xff000000 | (r << 16) | g << 8 | b); }
-
-	friend bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label);
 };
+
+bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label);
 
 
 inline Color4f::Color4f(const Color4c& color) 
