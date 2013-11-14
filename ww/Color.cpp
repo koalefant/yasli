@@ -10,7 +10,6 @@
 #include "StdAfx.h"
 #include "Color.h"
 #include "yasli/Archive.h"
-#include <math.h>
 
 namespace ww {
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 #ifdef _WIN32
 # include <emmintrin.h>
 #endif

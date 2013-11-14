@@ -18,11 +18,13 @@
 #include <stdlib.h>
 #include <memory.h>
 
+#ifdef WIN32
 #define _WIN32_WINNT 0x0501
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef min
 #undef max
+#endif
 
 #include <string>
 #include <vector>
