@@ -10,7 +10,7 @@
 
 #pragma once
 
-inline int round(float v)
+inline int xround(float v)
 {
 	return int(v + 0.5f);
 }
