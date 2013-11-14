@@ -20,6 +20,8 @@
 
 namespace yasli{
 void setTestMode(bool interactive);
+typedef void (*LogHandler)(const char*);
+void setLogHandler(LogHandler handler);
 }
 
 

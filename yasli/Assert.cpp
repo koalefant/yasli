@@ -20,6 +20,12 @@ namespace yasli{
 # include <windows.h>
 #endif
 
+static LogHandler logHandler;
+void setLogHandler(LogHandler handler)
+{
+	logHandler = handler;
+}
+
 #ifndef NDEBUG
 static bool interactiveAssertion = true;
 static bool testMode = true;
@@ -66,6 +72,9 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 
 	text << " ( " << buffer << " )";
 	text << "\n";
+
+	if(logHandler)
+		logHandler(text.c_str());
 
 #ifdef WIN32
     if(interactiveAssertion || IsDebuggerPresent()){
