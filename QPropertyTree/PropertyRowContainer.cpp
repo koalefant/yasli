@@ -230,7 +230,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	PropertyRow* defaultType = tree->model()->defaultType(container->elementTypeName());
 	if(!defaultType)
 		return;
-	PropertyRow* clonedRow = defaultType->clone(tree->model()->constStrings());
+	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
 	element->setSelected(false);
 	container->addBefore(clonedRow, element);
 	container->setMultiValue(false);
