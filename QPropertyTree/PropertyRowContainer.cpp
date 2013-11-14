@@ -173,9 +173,9 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 void ContainerMenuHandler::onMenuAppendElement()
 {
 	tree->model()->rowAboutToBeChanged(container);
-	PropertyRow* defaultType = container->defaultRow(tree->model());
+	SharedPtr<PropertyRow> defaultType = container->defaultRow(tree->model());
 	YASLI_ESCAPE(defaultType != 0, return);
-	PropertyRow* clonedRow = defaultType->clone(tree->model()->constStrings());
+	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
@@ -267,7 +267,7 @@ void PropertyRowContainer::serializeValue(yasli::Archive& ar)
 yasli::string PropertyRowContainer::valueAsString() const
 {
 	char buf[32] = { 0 };
-    sprintf(buf, "%i", children_.size());
+    sprintf(buf, "%d", (int)children_.size());
 	return yasli::string(buf);
 }
 
