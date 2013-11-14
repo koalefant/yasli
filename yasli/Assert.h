@@ -10,9 +10,18 @@
 #pragma once 
 #include <stdio.h>
 
+#ifdef _MSC_VER
+#define YASLI_DEBUG_BREAK __debug_break()
+#elif defined(EMSCRIPTEN)
+#define YASLI_DEBUG_BREAK ES_ASM("console.error(\"debug-break\")")
+#else
+#define YASLI_DEBUG_BREAK __builtin_trap()
+#endif
+
 namespace yasli{
 void setTestMode(bool interactive);
 }
+
 
 #ifndef NDEBUG
 namespace yasli{
@@ -21,10 +30,11 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 inline bool assertionDialog(const char* function, const char* fileName, int line, const char* expr) { return assertionDialog(function, fileName, line, expr, ""); }
 }
 #ifdef _MSC_VER
-# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? __debugbreak(), false : false))
+# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? YASLI_DEBUG_BREAK, false : false))
 #else
 // gcc doesn't remove trailing comma when __VA_ARGS__ is empty, but one can workaround this with ## prefix
-# define YASLI_ASSERT(expr, ...) ((expr) || ((void)yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__), false))
+# pragma clang system_header // to disable -Wunused-value
+# define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__) ? YASLI_DEBUG_BREAK, false : false))
 #endif
 #define YASLI_CHECK YASLI_ASSERT
 #else
