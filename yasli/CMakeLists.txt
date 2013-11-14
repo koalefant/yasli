@@ -58,6 +58,7 @@ if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
+include_directories(..)
 if (EMSCRIPTEN)
     add_library("yasli" SHARED ${SOURCES} ${DECORATORS})
 else (EMSCRIPTEN)

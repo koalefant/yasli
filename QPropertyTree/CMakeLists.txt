@@ -55,6 +55,7 @@ set(SOURCES
 	Serialization.h
 	Unicode.h
 	)
+include_directories(..)
 add_library(qpropertytree ${SOURCES})
 source_group("" FILES ${SOURCES})
 include(${QT_USE_FILE})
