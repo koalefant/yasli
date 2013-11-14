@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #ifdef _MSC_VER
-#define YASLI_DEBUG_BREAK __debug_break()
+#define YASLI_DEBUG_BREAK __debugbreak()
 #elif defined(EMSCRIPTEN)
 #define YASLI_DEBUG_BREAK ES_ASM("console.error(\"debug-break\")")
 #else
