@@ -9,23 +9,30 @@
 
 #pragma once
 
-#include "PropertyRowImpl.h"
+#include "PropertyRowField.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
 
 #include <QtGui/QLineEdit>
 
-class PropertyRowString : public PropertyRowImpl<yasli::wstring>
+class PropertyRowString : public PropertyRowField
 {
 public:
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
 	bool assignTo(yasli::string& str);
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);
 	void setValue(const wchar_t* str);
 	PropertyRowWidget* createWidget(QPropertyTree* tree);
-	yasli::string valueAsString() const;
-	yasli::wstring valueAsWString() const { return value_; }
+	yasli::string valueAsString() const override;
+	yasli::wstring valueAsWString() const override { return value_; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
+	void serializeValue(yasli::Archive& ar) override;
+	const yasli::wstring& value() const{ return value_; }
+private:
+	yasli::wstring value_;
 };
 
 class PropertyRowWidgetString : public PropertyRowWidget
@@ -60,7 +67,12 @@ public:
 		PropertyRowString* row = static_cast<PropertyRowString*>(this->row());
 		if(initialValue_ != entry_->text() || row_->multiValue()){
 			model()->rowAboutToBeChanged(row);
-			row->setValue((wchar_t*)entry_->text().data());
+			vector<wchar_t> str;
+			QString text = entry_->text();
+			str.resize(text.size() + 1, L'\0');
+			if (!text.isEmpty())
+				text.toWCharArray(&str[0]);
+			row->setValue(&str[0]);
 			model()->rowChanged(row);
 		}
 		else

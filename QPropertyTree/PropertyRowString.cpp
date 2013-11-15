@@ -14,7 +14,9 @@
 #include "PropertyDrawContext.h"
 #include "QPropertyTree.h"
 
+#include "yasli/STL.h"
 #include "yasli/Archive.h"
+#include "yasli/STLImpl.h"
 #include "yasli/ClassFactory.h"
 #include <QtGui/QMenu>
 #include "Unicode.h"
@@ -52,6 +54,11 @@ void PropertyRowString::setValue(const wchar_t* str)
 void PropertyRowString::setValue(const char* str)
 {
 	value_ = toWideChar(str);
+}
+
+void PropertyRowString::serializeValue(yasli::Archive& ar)
+{
+	ar(value_, "value", "Value");
 }
 
 // vim:ts=4 sw=4:

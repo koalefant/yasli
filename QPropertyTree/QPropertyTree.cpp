@@ -1795,7 +1795,7 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 		return;
 
 	yasli::string textStr(fromWideChar(text));
-	QString str(textStr.c_str());
+	QString str = QString::fromWCharArray(text);
 	QFontMetrics fm(*font);
 	QRect textRect = rect;
 	int alignment;

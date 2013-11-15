@@ -291,15 +291,18 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	  option.state |= QStyle::State_HasFocus;
 	option.rect = rt; // option.rect is the rectangle to be drawn on.
 	QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
-	if (!textRect.isValid())
-	{
+	if (!textRect.isValid()) {
 		textRect = rt;
 		textRect.adjust(3, 1, -3, -2);
+	}
+	else {
+		textRect.adjust(2, 1, 0, -1);
 	}
 	// some styles rely on default pens
 	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));
 	painter->setBrush(QBrush(tree->palette().color(QPalette::Base)));
 	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
+	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), pathEllipsis, false);
 }
 
 

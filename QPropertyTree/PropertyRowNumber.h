@@ -151,7 +151,7 @@ public:
 
 	void incrementLog(float screenFraction)
 	{
-		if (TypeID::get<Type>() == TypeID::get<float>() || TypeID::get<Type>() == TypeID::get<double>()) 
+		if (yasli::TypeID::get<Type>() == yasli::TypeID::get<float>() || yasli::TypeID::get<Type>() == yasli::TypeID::get<double>()) 
 		{
 			double startPower = log10(fabs(double(incrementStartValue_) + 1.0)) - 3.0;
 			double power = startPower + fabs(screenFraction) * 10.0f;
