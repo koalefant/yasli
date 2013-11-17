@@ -132,16 +132,17 @@ struct TypeInfo
 		// static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
 		const char* s = strstr(funcName, "[with T = ");
 		if (s)
-			s += 9;
+			s += 10;
 		const char* send = strrchr(funcName, ']');
 #else
 		// static yasli::TypeID yasli::TypeID::get<ActualTypeName>()
 		const char* s = strchr(funcName, '<');
 		const char* send = strrchr(funcName, '>');
-#endif
 		YASLI_ASSERT(s != 0  && send != 0);
 		if (s != send)
 			++s;
+#endif
+		YASLI_ASSERT(s != 0  && send != 0);
 		if(strncmp(s, "class ", 6) == 0)
 			s += 6;
 		else if(strncmp(s, "struct ", 7) == 0)
