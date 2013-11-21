@@ -18,3 +18,4 @@ yasli-example-*
 qpropertytree-example-*
 *.a
 example-*
+.garbage/*
