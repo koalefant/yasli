@@ -1183,7 +1183,7 @@ PropertyRow* PropertyRow::hit(const QPropertyTree* tree, QPoint point)
     return 0;
 }
 
-PropertyRow* PropertyRow::findByAddress(void* addr)
+PropertyRow* PropertyRow::findByAddress(const void* addr)
 {
     if(serializer_.pointer() == addr)
         return this;

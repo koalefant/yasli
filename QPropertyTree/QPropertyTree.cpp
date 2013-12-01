@@ -1470,37 +1470,48 @@ QPoint QPropertyTree::_toScreen(QPoint point) const
 	return mapToGlobal(pt);
 }
 
-bool QPropertyTree::selectByAddress(void* addr, bool keepSelectionIfChildSelected)
+bool QPropertyTree::selectByAddress(const void* addr, bool keepSelectionIfChildSelected)
+{
+	return selectByAddresses(vector<const void*>(1, addr), keepSelectionIfChildSelected);
+}
+
+bool QPropertyTree::selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected)
 {
 	if (model()->root()) {
-		PropertyRow* row = model()->root()->findByAddress(addr);
+		TreeSelection sel;
 
 		bool keepSelection = false;
-		if (keepSelectionIfChildSelected && row && !model()->selection().empty()) {
-			keepSelection = true;
-			TreeSelection::const_iterator it;
-			for(it = model()->selection().begin(); it != model()->selection().end(); ++it){
-				PropertyRow* selectedRow = model()->rowFromPath(*it);
-				if (!selectedRow)
-					continue;
-				if (!selectedRow->isChildOf(row)){
-					keepSelection = false;
-					break;
+		for (size_t i = 0; i < addresses.size(); ++i) {
+			const void* addr = addresses[i];
+			PropertyRow* row = model()->root()->findByAddress(addr);
+
+			if (keepSelectionIfChildSelected && row && !model()->selection().empty()) {
+				keepSelection = true;
+				TreeSelection::const_iterator it;
+				for(it = model()->selection().begin(); it != model()->selection().end(); ++it){
+					PropertyRow* selectedRow = model()->rowFromPath(*it);
+					if (!selectedRow)
+						continue;
+					if (!selectedRow->isChildOf(row)){
+						keepSelection = false;
+						break;
+					}
+				}
+			}
+
+			if (!keepSelection) {
+				if(row) {
+					sel.push_back(model()->pathFromRow(row));
+					ensureVisible(row);
 				}
 			}
 		}
 
-		if (!keepSelection) {
-			TreeSelection sel;
-			if(row)
-				sel.push_back(model()->pathFromRow(row));
-			if (model()->selection() != sel) {
-				model()->setSelection(sel);
-				if (row)
-					ensureVisible(row);
-				repaint();
-				return true;
-			}
+		if (model()->selection() != sel) {
+			model()->setSelection(sel);
+			updateAttachedPropertyTree(true); 
+			repaint();
+			return true;
 		}
 	}
 	return false;

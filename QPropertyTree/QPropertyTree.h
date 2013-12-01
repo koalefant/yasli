@@ -141,7 +141,8 @@ public:
 	bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
 	PropertyRow* selectedRow();
 	bool getSelectedObject(yasli::Object* object);
-	bool selectByAddress(void*, bool keepSelectionIfChildSelected = false);
+	bool selectByAddress(const void*, bool keepSelectionIfChildSelected = false);
+	bool selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected);
 	void ensureVisible(PropertyRow* row, bool update = true);
 	void expandParents(PropertyRow* row);
 	void expandRow(PropertyRow* row, bool expanded = true, bool updateHeights = true);

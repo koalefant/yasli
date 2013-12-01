@@ -152,7 +152,7 @@ public:
 	bool empty() const{ return children_.empty(); }
 	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
 	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
-	PropertyRow* findByAddress(void* addr);
+	PropertyRow* findByAddress(const void* addr);
 	iterator begin() { return children_.begin(); }
 	iterator end() { return children_.end(); }
 	const_iterator begin() const{ return children_.begin(); }
