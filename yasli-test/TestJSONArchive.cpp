@@ -6,6 +6,9 @@
 #include "yasli/JSONIArchive.h"
 #include "yasli/JSONOArchive.h"
 
+#include <vector>
+using std::vector;
+
 #ifndef _MSC_VER
 # include <wchar.h>
 #endif
@@ -45,6 +48,42 @@ SUITE(JSONArchive)
 			CHECK(!bufChanged.empty());
 		}
 		CHECK_EQUAL(bufChanged, bufResaved);
+	}
+
+	TEST(RegressionFreezeReadingStructureAsContainer)
+	{
+		struct Element
+		{
+			bool enabled;
+			string name;
+			void serialize(Archive& ar)
+			{
+				ar(enabled, "enabled");
+				ar(name, "name");
+			}
+		};
+
+		struct Root
+		{
+			vector<Element> elements;
+			void serialize(Archive& ar)
+			{
+				ar(elements, "elements");
+			}
+		};
+
+		const char* content = 
+		"[\n"
+		"\t{ \"enabled\": true, \"name\": \"test\" },\n"
+		"\t{ \"enabled\": true, \"name\": \"test\" }\n"
+		"]";
+
+		JSONIArchive ia;
+		ia.open(content, strlen(content));
+
+		Root obj;
+		UNITTEST_TIME_CONSTRAINT(5);
+		ia(obj, "");
 	}
 }
 

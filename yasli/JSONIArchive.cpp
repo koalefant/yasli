@@ -936,7 +936,10 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 				if(index == size)
 					size = index + 1;
 				if(index < size){
-					ser(*this, "", "");
+					if (!ser(*this, "", "")) {
+						stack_.pop_back();
+						return false;
+					}
 				}
 				else{
 					skipBlock();
