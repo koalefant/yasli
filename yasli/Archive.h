@@ -103,11 +103,18 @@ public:
 	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) { return operator()(Serializer(keyValue), name, label); }
 
-  // there is no point to support long double since it is represented as double on MSVC
+	// No point in supporting long double since it is represented as double on MSVC
 	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
-	// fall back to int implementation for long
+
+	// Fall back to int/long long implementation for long, depending on the platform.
+	// Note that serialization of long is not portable with some archives.
+#if !defined(_WIN32) && defined(__x86_64__) // ILP64
+	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<long long*>(&value), name, label); }
+	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned long long*>(&value), name, label); }
+#else // LLP64
 	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
 	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
+#endif
 
 	// block call are osbolete, please do not use
 	virtual bool openBlock(const char* name, const char* label) { return true; }
