@@ -16,6 +16,7 @@ set(SOURCES
 	PropertyRow.cpp
 	PropertyRowBool.cpp
 	PropertyRowContainer.cpp
+	PropertyRowColor.cpp
 	PropertyRowField.cpp
 	PropertyRowFileOpen.cpp
 	PropertyRowFileSave.cpp
@@ -39,6 +40,7 @@ set(SOURCES
 	PropertyOArchive.h
 	PropertyRow.h
 	PropertyRowBool.h
+	PropertyRowColor.h
 	PropertyRowContainer.h
 	PropertyRowField.h
 	PropertyRowImpl.h

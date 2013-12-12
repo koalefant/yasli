@@ -113,8 +113,8 @@ void Color::toHSV(float& h,float& s,float& v)
 
 void Color::serialize(yasli::Archive& ar) 
 {
-	ar(r, "", "^R");
-	ar(g, "", "^G");
-	ar(b, "", "^B");
-	ar(a, "", "^A");
+	ar(r, "", "^");
+	ar(g, "", "^");
+	ar(b, "", "^");
+	ar(a, "", "^");
 }

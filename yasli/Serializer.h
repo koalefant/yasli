@@ -68,6 +68,8 @@ public:
 		serializeFunc_ = &Serializer::serializeRaw<T>;
 	}
 
+	template<class T>
+	T* cast() const{ return type_ == TypeID::get<T>() ? (T*)object_ : 0; }
 	bool operator()(Archive& ar) const;
 	operator bool() const{ return object_ && serializeFunc_; }
 	bool operator==(const Serializer& rhs) { return object_ == rhs.object_ && serializeFunc_ == rhs.serializeFunc_; }
