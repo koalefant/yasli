@@ -95,7 +95,8 @@ public:
 		WIDGET_NONE,
 		WIDGET_ICON,
 		WIDGET_AFTER_NAME,
-		WIDGET_VALUE
+		WIDGET_VALUE,
+		WIDGET_AFTER_PULLED
 	};
 
 	static const int ROW_DEFAULT_HEIGHT = 21; 
@@ -236,6 +237,7 @@ public:
 	virtual bool isObject() const{ return false; }
 
 	virtual bool isLeaf() const{ return false; }
+	virtual void closeNonLeaf(const yasli::Serializer& ser) {}
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
 	virtual bool isSelectable() const{ return true; }
 	virtual bool activateOnAdd() const{ return false; }

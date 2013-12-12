@@ -226,11 +226,14 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 
 	lastNode_ = currentNode_;
 	PropertyRow* row = updateRow<PropertyRow>(name, label, typeName, ser);
+	PropertyRow* nonLeaf = 0;
 	if(!row->isLeaf() || currentNode_ == 0){
 		enterNode(row);
 
 		if(currentNode_->isLeaf())
 			return false;
+		else
+			nonLeaf = currentNode_;
 	}
 	else{
 		lastNode_ = row;
@@ -238,7 +241,10 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 	}
 
 	if (ser)
-    ser(*this);
+		ser(*this);
+
+	if (nonLeaf)
+		nonLeaf->closeNonLeaf(ser);
 
     closeStruct(name);
 	return true;

@@ -249,12 +249,17 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 
 bool PropertyIArchive::operator()(const yasli::Serializer& ser, const char* name, const char* label)
 {
+	PropertyRow* nonLeaf = 0;
 	if(openRow(name, label, ser.type().name())){
-		if(currentNode_->isLeaf() && !currentNode_->isRoot()){
-            currentNode_->assignTo(ser);
-            closeRow(name);
-            return true;
+		if(currentNode_->isLeaf()) {
+			if(!currentNode_->isRoot()){
+				currentNode_->assignTo(ser);
+				closeRow(name);
+				return true;
+			}
 		}
+		else
+			nonLeaf = currentNode_;
     }
 	else
 		return false;
@@ -265,6 +270,8 @@ bool PropertyIArchive::operator()(const yasli::Serializer& ser, const char* name
 
 	stack_.pop_back();
 
+	if (nonLeaf)
+		nonLeaf->closeNonLeaf(ser);
     closeRow(name);
 	return true;
 }

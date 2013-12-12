@@ -701,6 +701,9 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
 	}
 
+	if (widgetPlace == WIDGET_AFTER_PULLED)
+		widgetPos_ = posX;
+
 	if(!pulledUp())
 		size_.setX(tree->rightBorder() - pos_.x());
 	DEBUG_TRACE_ROW("calculateMinimalSize: '%s' %i %i (%s)", label(), size_.x(), size_.y(), isRoot() ? "root" : "non-root");
