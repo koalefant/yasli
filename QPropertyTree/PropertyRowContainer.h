@@ -53,7 +53,7 @@ public:
 	const char* elementTypeName() const{ return elementTypeName_; }
 	void setValue(const yasli::ContainerInterface& value) {
 		fixedSize_ = value.isFixedSize();
-		elementTypeName_ = value.type().name();
+		elementTypeName_ = value.elementType().name();
 	}
 	yasli::string valueAsString() const;
 	// C-array is an example of fixed size container

@@ -42,9 +42,9 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 {
 	stack_.push_back(Level());
 	YASLI_ASSERT(model != 0);
-	if(!rootNode()->empty()){
+	if(!rootNode_->empty()){
 		updateMode_ = true;
-		stack_.back().oldRows.swap(rootNode()->children_);
+		stack_.back().oldRows.swap(rootNode_->children_);
 	}
 }
 
@@ -59,6 +59,9 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 , defaultValueCreationMode_(forDefaultType)
 , rootNode_(0)
 {
+	rootNode_ = new PropertyRow();
+	rootNode_->setName("root");
+	currentNode_ = rootNode_.get();
 	stack_.push_back(Level());
 }
 
@@ -66,15 +69,11 @@ PropertyOArchive::~PropertyOArchive()
 {
 }
 
-PropertyRow* PropertyOArchive::rootNode()
+PropertyRow* PropertyOArchive::defaultValueRootNode()
 {
-	if(rootNode_)
-		return rootNode_;
-	else{
-		YASLI_ASSERT(model_);
-		YASLI_ASSERT(model_->root());
-		return model_->root();
-	}
+	if (!rootNode_)
+		return 0;
+	return rootNode_->childByIndex(0);
 }
 
 void PropertyOArchive::enterNode(PropertyRow* row)
@@ -355,20 +354,19 @@ bool PropertyOArchive::operator()(double& value, const char* name, const char* l
 
 bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *name, const char *label)
 {
-	const char* elementTypeName = ser.type().name();
+	const char* elementTypeName = ser.elementType().name();
 	bool fixedSizeContainer = ser.isFixedSize();
 	lastNode_ = currentNode_;
-	enterNode(updateRow<PropertyRowContainer>(name, label, ser.type().name(), ser));
+	enterNode(updateRow<PropertyRowContainer>(name, label, ser.containerType().name(), ser));
 
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
 		ar.setFilter(getFilter());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
-		ser.serializeNewElement(ar, "", "0");
-		if (ar.rootNode() != 0)
-			model_->addDefaultType(ar.rootNode(), ser.type().name());
+		ser.serializeNewElement(ar, "", "<");
+		if (ar.defaultValueRootNode() != 0)
+			model_->addDefaultType(ar.defaultValueRootNode(), elementTypeName);
 	}
-
 	if ( ser.size() > 0 )
 		while( true ) {
 			ser(*this, "", "<");
@@ -417,9 +415,9 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 
 				model_->addDefaultType(baseType, defaultValue);
 				factory->serializeNewByIndex(ar, (int)i, "name", "label");
-				if (ar.rootNode() != 0) {
-					ar.rootNode()->setTypeName(desc->name());
-					defaultValue.root = ar.rootNode();
+				if (ar.defaultValueRootNode() != 0) {
+					ar.defaultValueRootNode()->setTypeName(desc->name());
+					defaultValue.root = ar.defaultValueRootNode();
 					model_->addDefaultType(baseType, defaultValue);
 				}
 			}

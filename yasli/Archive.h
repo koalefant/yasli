@@ -184,7 +184,7 @@ struct SerializeArray{};
 template<class T, int Size>
 struct SerializeArray<T[Size]>{
 	static bool invoke(Archive& ar, T value[Size], const char* name, const char* label){
-		ContainerArray<T> ser(value, Size);
+		ContainerArray<T, Size> ser(value);
 		return ar(static_cast<ContainerInterface&>(ser), name, label);
 	}
 };

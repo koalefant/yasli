@@ -9,7 +9,7 @@
 
 #pragma once
 #include "PropertyRow.h"
-#include <QtGui/QLineEdit>
+#include <QLineEdit>
 
 class PropertyRowNumberField;
 class PropertyRowWidgetNumber : public PropertyRowWidget

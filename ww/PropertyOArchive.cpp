@@ -350,10 +350,10 @@ bool PropertyOArchive::operator()(double& value, const char* name, const char* l
 
 bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, const char *label)
 {
-	const char* elementTypeName = ser.type().name();
+	const char* elementTypeName = ser.elementType().name();
 	bool fixedSizeContainer = ser.isFixedSize();
 	lastNode_ = currentNode_;
-	enterNode(updateRow<PropertyRowContainer>(name, label, ser.type().name(), ser));
+	enterNode(updateRow<PropertyRowContainer>(name, label, ser.containerType().name(), ser));
 
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
@@ -361,7 +361,7 @@ bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, con
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
 		ser.serializeNewElement(ar, "", "0");
 		if (ar.rootNode() != 0)
-			model_->addDefaultType(ar.rootNode(), ser.type().name());
+			model_->addDefaultType(ar.rootNode(), elementTypeName);
 	}
 
 	if ( ser.size() > 0 )

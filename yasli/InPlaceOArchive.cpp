@@ -204,12 +204,12 @@ bool InPlaceOArchive::operator()(ContainerInterface &container, const char* name
 	stack.swap(stack_);
 
 	size_t containerSize = container.size();
-	pushChunk(buffer_.position(), containerSize ? container.elementPointer() : 0, container.type(), 
-						container.elementSize(), containerSize);
+	pushChunk(buffer_.position(), containerSize ? container.elementPointer() : 0, container.elementType(), 
+			  container.elementType().sizeOf(), containerSize);
 
 	if (containerSize > 0)
 	{
-		buffer_.write(container.elementPointer(), container.elementSize() * containerSize);
+		buffer_.write(container.elementPointer(), container.elementType().sizeOf() * containerSize);
 
 		do {
 			container(*this, "", "");

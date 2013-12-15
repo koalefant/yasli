@@ -85,7 +85,8 @@ public:
 	}
 
 	void* pointer() const{ return reinterpret_cast<void*>(container_); }
-	TypeID type() const{ return TypeID::get<Element>(); }
+	TypeID elementType() const{ return TypeID::get<Element>(); }
+	TypeID containerType() const{ return TypeID::get<Element>(); }
 
 	bool next()
 	{
@@ -94,8 +95,7 @@ public:
 		return it_ != container_->end();
 	}
 
-	void* elementPointer() const { return &*it_; }
-  size_t elementSize() const { return sizeof(typename Container::value_type); }
+	void* elementPointer() const{ return &*it_; }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
 		YASLI_ESCAPE(container_, return false);

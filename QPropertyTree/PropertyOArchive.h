@@ -69,7 +69,7 @@ private:
 
 	void enterNode(PropertyRow* row); // sets currentNode
 	void closeStruct(const char* name);
-	PropertyRow* rootNode();
+	PropertyRow* defaultValueRootNode();
 
 	bool updateMode_;
 	bool defaultValueCreationMode_;

@@ -243,7 +243,7 @@ bool BinaryOArchive::operator()(const Serializer &ser, const char *_name, const 
 bool BinaryOArchive::operator()(ContainerInterface &ser, const char *_name, const char* label)
 {
     int size = int(ser.size());
-    TypeID type = ser.type();
+    TypeID type = ser.elementType();
     openContainer(_name, size, type.name());
 
     if (size > 0)
