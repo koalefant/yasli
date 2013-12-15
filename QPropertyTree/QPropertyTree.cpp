@@ -86,19 +86,34 @@ static QMimeData* propertyRowToMimeData(PropertyRow* row, ConstStringList* const
 static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, PropertyTreeModel* model, bool onlyCheck)
 {
 	bool result = false;
-	// FIXME: typeName is generated inproperly here, as it will fail to provide
-	// match for vector<vector<> >.
-	if(strcmp(dest->typeName(), source->typeName()) == 0 && 
-		source->isContainer() == dest->isContainer()){
+	// content of the pulled container has a priority over the node itself
+	PropertyRowContainer* destPulledContainer = static_cast<PropertyRowContainer*>(dest->pulledContainer());
+	if((destPulledContainer && strcmp(destPulledContainer->elementTypeName(), source->typeName()) == 0)) {
+		PropertyRow* elementRow = model->defaultType(destPulledContainer->elementTypeName());
+		YASLI_ESCAPE(elementRow, return false);
+		if(strcmp(elementRow->typeName(), source->typeName()) == 0){
+			result = true;
+			if(!onlyCheck){
+				PropertyRow* dest = elementRow;
+				if(dest->isPointer() && !source->isPointer()){
+					PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
+					SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
+					source->swapChildren(newSourceRoot);
+					source = newSourceRoot;
+				}
+				destPulledContainer->add(source.get());
+			}
+		}
+	}
+	else if((source->isContainer() && dest->isContainer() &&
+			 strcmp(static_cast<PropertyRowContainer*>(source.get())->elementTypeName(),
+					static_cast<PropertyRowContainer*>(dest)->elementTypeName()) == 0) ||
+			(!source->isContainer() && !dest->isContainer() && strcmp(source->typeName(), dest->typeName()) == 0)){
 		result = true;
 		if(!onlyCheck){
 			if(dest->isPointer() && !source->isPointer()){
 				PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
-
-				const char* derivedName = d->typeName();
-				const char* derivedNameAlt = d->typeName();
 				SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
-					// new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
 				source->swapChildren(newSourceRoot);
 				source = newSourceRoot;
 			}
@@ -126,11 +141,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 					PropertyRow* dest = elementRow;
 					if(dest->isPointer() && !source->isPointer()){
 						PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
-
-						const char* derivedName = d->typeName();
-						const char* derivedNameAlt = d->typeName();
 						SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
-						//new PropertyRowPointer(d->name(), d->label(), d->typeName(), d->factory(), d->derivedTypeName()
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
 					}
@@ -1418,7 +1429,7 @@ void QPropertyTree::_arrangeChildren()
 	if (filterEntry_) {
 		QSize size = rect().size();
 		const int padding = 2;
-        QRect pos(padding, padding, size.width() - padding * 2, filterEntry_->height());
+		QRect pos(padding, padding, size.width() - padding * 2, filterEntry_->height());
 		filterEntry_->move(pos.topLeft());
 		filterEntry_->resize(pos.size() - QSize(scrollBar_ ? scrollBar_->width() : 0, 0));
 	}
@@ -1932,19 +1943,6 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	int clientWidth = clientRect.width();
 	int clientHeight = clientRect.height();
 	painter.fillRect(clientRect, palette().window());
-
-	if (filterMode_)
-	{
-		// Win32::AutoSelector font(dc, Win32::defaultBoldFont());
-
-		// SetBkMode(dc, TRANSPARENT);
-		// const wchar_t filterStr[] = L"Filter:";
-		// Vect2 size = Win32::calculateTextSize(handle(), Win32::defaultBoldFont(), filterStr);
-		// int right = tree_->filterEntry_->_position().left();
-		// ExtTextOutW(dc, right - size.x - 6, 6, 0, 0, filterStr, ARRAY_LEN(filterStr) - 1, 0);
-	}
-
-	//painter.setClipRect(area_);
 
 	painter.translate(-offset_.x(), -offset_.y());
 
