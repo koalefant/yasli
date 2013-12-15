@@ -223,7 +223,9 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 		option.state |= QStyle::State_NoChange;
 	else
 		option.state |= QStyle::State_Off;
-	option.rect = QRect(rect.center().x() - 7, rect.center().y() - 6, 13, 13);
+
+	QSize checkboxSize = tree->style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option, 0).size();
+	option.rect = QRect(rect.center().x() - checkboxSize.width() / 2, rect.center().y() - checkboxSize.height() / 2, checkboxSize.width(), checkboxSize.height());
 
 	tree->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, 0);
 }
@@ -296,7 +298,7 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 		textRect.adjust(3, 1, -3, -2);
 	}
 	else {
-		textRect.adjust(2, 1, 0, -1);
+		textRect.adjust(2, 1, -2, -1);
 	}
 	// some styles rely on default pens
 	painter->setPen(QPen(tree->palette().color(QPalette::WindowText)));

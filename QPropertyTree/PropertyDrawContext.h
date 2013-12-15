@@ -11,7 +11,7 @@
 
 #include <map>
 #include <vector>
-#include <QtCore/QRect>
+#include <QRect>
 #include "Color.h"
 
 class QPainter;
