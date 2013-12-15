@@ -28,9 +28,10 @@ class PropertyRowObject : public PropertyRow {
 public:
 	PropertyRowObject();
 	~PropertyRowObject();
-	void setValue(const Object& obj) { object_ = obj; }
+	bool isObject() const override{ return true; }
+
+	void setValueAndContext(const Object& obj, yasli::Archive& ar) { object_ = obj; }
 	void setModel(PropertyTreeModel* model) { model_ = model; }
-	bool isObject() const{ return true; }
 	bool assignTo(Object* obj);
 	void serialize(Archive& ar);
 	const Object& object() const{ return object_; }

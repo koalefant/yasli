@@ -10,8 +10,6 @@
 #pragma once
 #pragma warning (disable : 4100) 
 
-#include <map>
-
 #include "yasli/Helpers.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
@@ -31,20 +29,38 @@ template <class Enum>
 EnumDescription& getEnumDescription();
 bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label);
 
+// Context is used to pass arguments to nested serialization functions.
+// Example of usage:
+//
+// void EntityLibrary::serialize(yasli::Archive& ar)
+// {
+//   yasli::Context libraryContext(ar, this);
+//   ar(entities, "entities");
+// }
+//
+// void Entity::serialize(yasli::Archive& ar)
+// {
+//   if (EntityLibrary* library = ar.context<EntityLibrary>()) {
+//     ...
+//   }
+// }
+//
+// You may have multiple contexts of different types, but note that the context
+// lookup complexity is O(n) in respect to number of contexts.
+struct Context {
+	void* object;
+	TypeID type;
+	Context* previousContext;
+	Archive* archive;
+
+	Context() : object(0), previousContext(0) {}
+	template<class T>
+	Context(Archive& ar, T* context);
+	~Context();
+};
+
 class Archive{
 public:
-	template<class T>
-	class Context{
-	public:
-		Context(Archive& ar, T* context) : ar_(ar) { previousContext_ = ar_.setContext(context); }
-		~Context() { ar_.setContext( previousContext_ ); }
-
-		T* previous() const{ return previousContext_; }
-	private:
-		Archive &ar_;
-		T* previousContext_;
-	};
-
 	enum ArchiveCaps{
 		INPUT = 1 << 0,
 		OUTPUT = 1 << 1,
@@ -132,26 +148,21 @@ public:
 	}
 
 	template<class T>
-	T* context()
-	{
-		ContextMap::iterator it = contextMap_.find(TypeID::get<T>());
-		if(it == contextMap_.end())
-			return 0;
-		return reinterpret_cast<T*>(it->second);
+	T* context() const {
+		TypeID type = TypeID::get<T>();
+		for (Context* current = lastContext_; current != 0; current = current->previousContext)
+			if (current->type == type)
+				return (T*)current->object;
+		return 0;
 	}
-	template<class T>
-	T* setContext(T* c)
-	{
-		void*& ptr = contextMap_[TypeID::get<T>()];
-		T* result = reinterpret_cast<T*>(ptr);
-		ptr = reinterpret_cast<void*>(c);
-		return result;
+	Context* setLastContext(Context* context) {
+		Context* previousContext = lastContext_;
+		lastContext_ = context;
+		return previousContext;
 	}
-	typedef std::map<TypeID, void*> ContextMap;
-	void setContextMap(const ContextMap& contextMap){ contextMap_ = contextMap; }
-	const ContextMap& contextMap() const{ return contextMap_; }
+	Context* lastContext() const{ return lastContext_; }
 protected:
-	ContextMap contextMap_;
+	Context* lastContext_;
 	int caps_;
 
 private:
@@ -189,6 +200,18 @@ struct SerializeArray<T[Size]>{
 	}
 };
 
+}
+
+template<class T>
+Context::Context(Archive& ar, T* context) {
+	archive = &ar;
+	object = (void*)context;
+	type = TypeID::get<T>();
+	previousContext = ar.setLastContext(this);
+}
+
+inline Context::~Context() {
+	archive->setLastContext(previousContext);
 }
 
 template<class T>

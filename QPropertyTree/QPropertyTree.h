@@ -33,7 +33,7 @@ class PropertyTreeOperator;
 class Entry;
 struct IconXPMCache;
 
-namespace yasli { class Object; }
+namespace yasli { class Object; struct Context; }
 
 class TreeConfig
 {
@@ -130,6 +130,7 @@ public:
 	void setUndoEnabled(bool enabled, bool full = false);
 	void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
+	void setArchiveContext(yasli::Context* lastContext);
 
 	QPoint treeSize() const;
 	int leftBorder() const { return leftBorder_; }
@@ -304,6 +305,7 @@ protected:
 	PropertyRow* capturedRow_;
 	PropertyRow* pressedRow_;
 	QTimer* mouseStillTimer_;
+	yasli::Context* archiveContext_;
 
 	int applyTime_;
 	int revertTime_;

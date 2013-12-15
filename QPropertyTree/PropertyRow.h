@@ -199,7 +199,7 @@ public:
 
 	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
 	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
-	virtual void setValue(const yasli::Serializer& ser) { serializer_ = ser; }
+	virtual void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) { serializer_ = ser; }
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
 

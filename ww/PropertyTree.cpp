@@ -561,7 +561,7 @@ void PropertyTree::revert()
 			while(++it != attached_.end()){
 				PropertyTreeModel model2;
 				PropertyOArchive oa2(&model2, model_->root());
-				Archive::Context<ww::PropertyTree> treeContext(oa2, this);
+				yasli::Context treeContext(oa2, this);
 				oa2.setFilter(filter_);
 				(*it)(oa2);
 				model_->root()->intersect(model2.root());
@@ -589,7 +589,7 @@ void PropertyTree::apply()
 		Serializers::iterator it;
 		for(it = attached_.begin(); it != attached_.end(); ++it) {
 			PropertyIArchive ia(model_, model_->root());
- 			Archive::Context<ww::PropertyTree> treeContext(ia, this);
+ 			yasli::Context treeContext(ia, this);
  			ia.setFilter(filter_);
 			(*it)(ia);
 		}

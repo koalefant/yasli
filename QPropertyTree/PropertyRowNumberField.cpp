@@ -137,7 +137,7 @@ void PropertyRowWidgetNumber::onEditingFinished()
 
 void PropertyRowWidgetNumber::commit()
 {
-	//if(entry_)
-	//	entry_->commit();
+	if(entry_)
+		onEditingFinished();
 }
 

@@ -51,7 +51,7 @@ public:
 	void serializeValue(yasli::Archive& ar);
 
 	const char* elementTypeName() const{ return elementTypeName_; }
-	void setValue(const yasli::ContainerInterface& value) {
+	virtual void setValueAndContext(const yasli::ContainerInterface& value, yasli::Archive& ar) {
 		fixedSize_ = value.isFixedSize();
 		elementTypeName_ = value.elementType().name();
 	}

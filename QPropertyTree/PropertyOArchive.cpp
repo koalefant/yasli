@@ -141,7 +141,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 				rootNode_ = newRow;
 			else
 				model_->setRoot(newRow);
-			newRow->setValue(value);
+			newRow->setValueAndContext(value, *this);
 			return newRow;
 		}
 	}
@@ -174,7 +174,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			newRow->setLabelChanged();
 			newRow->setLabelChangedToChildren();
 		}
-		newRow->setValue(value);
+		newRow->setValueAndContext(value, *this);
 		return newRow;
 	}
 }
@@ -362,6 +362,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
 		ar.setFilter(getFilter());
+		ar.setLastContext(lastContext());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
 		ser.serializeNewElement(ar, "", "<");
 		if (ar.defaultValueRootNode() != 0)
@@ -403,8 +404,7 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 			const yasli::TypeDescription *desc = factory->descriptionByIndex((int)i);
 			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
 				PropertyOArchive ar(model_, true);
-				//ar.setInnerContext(getInnerContext());
-				ar.setContextMap(contextMap());
+				ar.setLastContext(lastContext());
 				ar.setFilter(getFilter());
 
 				PropertyDefaultTypeValue defaultValue;

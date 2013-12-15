@@ -21,11 +21,6 @@ using yasli::IconXPMToggle;
 
 class PropertyRowIconXPM : public PropertyRow{
 public:
-	bool assignTo(void* val, size_t size)
-	{
-		return false;
-	}
-
 	void redraw(const PropertyDrawContext& context)
 	{
 		QRect rect = context.widgetRect;
@@ -36,12 +31,11 @@ public:
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return false; }
 
-	bool onActivate(QPropertyTree* tree, bool force)
+	bool onActivate(QPropertyTree* tree, bool force) override
 	{
-
 		return false;
 	}
-	void setValue(const Serializer& ser) override {
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(IconXPM), return);
 		icon_ = *(IconXPM*)(ser.pointer());
 	}
@@ -54,21 +48,36 @@ protected:
 	IconXPM icon_;
 };
 
-class PropertyRowIconToggle : public PropertyRowImpl<IconXPMToggle>{
+class PropertyRowIconToggle : public PropertyRow{
 public:
-	void redraw(const PropertyDrawContext& context)
+	void redraw(const PropertyDrawContext& context) override
 	{
-		IconXPM& icon = value().value_ ? value().iconTrue_ : value().iconFalse_;
+		IconXPM& icon = value_ ? iconTrue_ : iconFalse_;
 		context.drawIcon(context.widgetRect, icon);
 	}
 
-	bool isLeaf() const{ return true; }
-	bool isStatic() const{ return false; }
-	bool isSelectable() const{ return true; }
-	bool onActivate(QPropertyTree* tree, bool force)
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
+		YASLI_ESCAPE(ser.size() == sizeof(IconXPMToggle), return);
+		const IconXPMToggle* icon = (IconXPMToggle*)(ser.pointer());
+		iconTrue_ = icon->iconTrue_;
+		iconFalse_ = icon->iconFalse_;
+		value_ = icon->value_;
+	}
+
+	bool assignTo(const yasli::Serializer& ser) const override
+	{
+		IconXPMToggle* toggle = (IconXPMToggle*)ser.pointer();
+		toggle->value_ = value_;
+		return true;
+	}
+
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
+	bool isSelectable() const override{ return true; }
+	bool onActivate(QPropertyTree* tree, bool force) override
 	{
 		tree->model()->rowAboutToBeChanged(this);
-		value().value_ = !value().value_;
+		value_ = !value_;
 		tree->model()->rowChanged(this);
 		return true;
 	}
@@ -76,23 +85,27 @@ public:
 	{
 		if (userReadOnly())
 			return DRAG_CHECK_IGNORE;
-		return value().value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
+		return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
 	}
 	bool onMouseDragCheck(QPropertyTree* tree, bool value) override
 	{
-		if (this->value().value_ != value) {
+		if (value_ != value) {
 			tree->model()->rowAboutToBeChanged(this);
-			this->value().value_ = value;
+			value_ = value;
 			tree->model()->rowChanged(this);
 			return true;
 		}
 		return false;
 	}
-	yasli::wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
+	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
 	int widgetSizeMin() const{ return 18; }
 	int height() const{ return 16; }
+
+	IconXPM iconTrue_;
+	IconXPM iconFalse_;
+	bool value_;
 };
 
 REGISTER_PROPERTY_ROW(IconXPM, PropertyRowIconXPM); 

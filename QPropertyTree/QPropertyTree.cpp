@@ -549,6 +549,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , iconCache_(new IconXPMCache())
 , dragCheckMode_(false)
 , dragCheckValue_(false)
+, archiveContext_(0)
 {
 	setFocusPolicy(Qt::WheelFocus);
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
@@ -970,15 +971,13 @@ void QPropertyTree::onScroll(int pos)
 
 void QPropertyTree::serialize(Archive& ar)
 {
-	if(ar.filter(SERIALIZE_STATE)){
-		model()->serialize(ar, this);
+	model()->serialize(ar, this);
 
-		if(ar.isInput()){
-			ensureVisible(model()->focusedRow());
-			updateAttachedPropertyTree(false);
-			updateHeights();
-			signalSelected();
-		}
+	if(ar.isInput()){
+		ensureVisible(model()->focusedRow());
+		updateAttachedPropertyTree(false);
+		updateHeights();
+		signalSelected();
 	}
 }
 
@@ -1098,6 +1097,7 @@ void QPropertyTree::revert()
 		timer.start();
 
 		PropertyOArchive oa(model_.data(), model_->root());
+		oa.setLastContext(archiveContext_);
 		oa.setFilter(filter_);
 
 		Objects::iterator it = attached_.begin();
@@ -1106,7 +1106,8 @@ void QPropertyTree::revert()
 		PropertyTreeModel model2;
 		while(++it != attached_.end()){
 			PropertyOArchive oa2(&model2, model2.root());
-			Archive::Context<QPropertyTree> treeContext(oa2, this);
+			oa2.setLastContext(archiveContext_);
+			yasli::Context treeContext(oa2, this);
 			oa2.setFilter(filter_);
 			(*it)(oa2);
 			model_->root()->intersect(model2.root());
@@ -1141,7 +1142,8 @@ void QPropertyTree::apply()
 		Objects::iterator it;
 		for(it = attached_.begin(); it != attached_.end(); ++it) {
 			PropertyIArchive ia(model_.data(), model_->root());
- 			Archive::Context<QPropertyTree> treeContext(ia, this);
+			ia.setLastContext(archiveContext_);
+ 			yasli::Context treeContext(ia, this);
  			ia.setFilter(filter_);
 			(*it)(ia);
 		}
@@ -2264,7 +2266,10 @@ bool QPropertyTree::_isCapturedRow(const PropertyRow* row) const
 	return capturedRow_ == row;
 }
 
-
+void QPropertyTree::setArchiveContext(yasli::Context* lastContext)
+{
+	archiveContext_ = lastContext;
+}
 
 QPropertyTree::QPropertyTree(const QPropertyTree&)
 {

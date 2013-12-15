@@ -206,24 +206,24 @@ protected:
 
 void PropertyTreeModel::serialize(Archive& ar, QPropertyTree* tree)
 {
-	if(ar.filter(SERIALIZE_STATE)){
-		ar(focusedRow_, "focusedRow", 0);		
-		ar(selection_, "selection", 0);
+	ar(focusedRow_, "focusedRow", 0);		
+	ar(selection_, "selection", 0);
 
-		if (root()) {
+	if (root()) {
 		std::vector<char> expanded;
-        if(ar.isOutput()) {
-            RowObtainer op(expanded);
-            root()->scanChildren(op);
-        }
-		ar(expanded, "expanded", 0);
-			if(ar.isInput()){
-			Selection sel = selection_;
-            setSelection(sel);
-            RowExpander op(expanded);
-            root()->scanChildren(op, tree);
+		if(ar.isOutput()) {
+			RowObtainer op(expanded);
+			root()->scanChildren(op);
 		}
-	}
+		ar(expanded, "expanded", 0);
+		if(ar.isInput()){
+			Selection sel = selection_;
+			setSelection(sel);
+			RowExpander op(expanded);
+			root()->scanChildren(op, tree);
+			root()->setLayoutChanged();
+			root()->setLayoutChangedToChildren();
+		}
 	}
 }
 

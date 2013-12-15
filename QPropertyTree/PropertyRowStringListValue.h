@@ -30,7 +30,7 @@ public:
 		*((StringListValue*)ser.pointer()) = value_.c_str();
 		return true;
 	}
-	void setValue(const yasli::Serializer& ser) override {
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(StringListValue), return);
 		const StringListValue& stringListValue = *((StringListValue*)(ser.pointer()));
 		stringList_ = stringListValue.stringList();
@@ -87,7 +87,7 @@ public:
 		*((StringListStaticValue*)ser.pointer()) = value_.c_str();
 		return true;
 	}
-	void setValue(const Serializer& ser) override {
+	void setValueAndContext(const Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(StringListStaticValue), return);
 		const StringListStaticValue& stringListValue = *((StringListStaticValue*)(ser.pointer()));
 		stringList_.assign(stringListValue.stringList().begin(), stringListValue.stringList().end());

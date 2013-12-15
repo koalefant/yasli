@@ -20,10 +20,3 @@ using yasli::Serializer;
 using yasli::Serializers;
 using yasli::TypeID;
 using yasli::SharedPtr;
-
-enum{
-	SERIALIZE_DESIGN = 1 << 0,
-	SERIALIZE_STATE  = 1 << 1
-};
-	
-

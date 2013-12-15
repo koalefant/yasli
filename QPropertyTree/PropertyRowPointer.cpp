@@ -13,7 +13,7 @@
 #include "PropertyDrawContext.h"
 #include "Serialization.h"
 #include "Unicode.h"
-#include <QtGui/QMenu>
+#include <QMenu>
 
 
 // ---------------------------------------------------------------------------
@@ -262,7 +262,7 @@ int PropertyRowPointer::widgetSizeMin() const
 	return fm.width(str) + 18;
 }
 
-void PropertyRowPointer::setValue(const yasli::PointerInterface& ptr)
+void PropertyRowPointer::setValueAndContext(const yasli::PointerInterface& ptr, yasli::Archive& ar)
 {
 	baseType_ = ptr.baseType();
 	factory_ = ptr.factory();

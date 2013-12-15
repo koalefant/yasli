@@ -57,8 +57,7 @@ public:
 	}
 
 	void commit(){
-		//if(entry_)
-		//	entry_->commit();
+		onEditingFinished();
 	}
 	QWidget* actualWidget() { return entry_.data(); }
 

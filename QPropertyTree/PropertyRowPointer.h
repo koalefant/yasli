@@ -42,8 +42,7 @@ public:
 	PropertyRowPointer();
 
 	bool assignTo(yasli::PointerInterface &ptr);
-	void setValue(const yasli::PointerInterface& ptr);
-	using PropertyRow::assignTo;
+	void setValueAndContext(const yasli::PointerInterface& ptr, yasli::Archive& ar);
 
 	yasli::TypeID baseType() const{ return baseType_; }
 	void setBaseType(const yasli::TypeID& baseType) { baseType_ = baseType; }
