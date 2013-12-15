@@ -550,6 +550,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , dragCheckMode_(false)
 , dragCheckValue_(false)
 {
+	setFocusPolicy(Qt::WheelFocus);
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
 
@@ -1187,6 +1188,8 @@ void QPropertyTree::clearMenuHandlers()
 
 static yasli::string quoteIfNeeded(const char* str)
 {
+	if (!str)
+		return yasli::string();
 	if (strchr(str, ' ') != 0) {
 		yasli::string result;
 		result = "\"";
@@ -1345,7 +1348,7 @@ void QPropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 void QPropertyTree::setWidget(PropertyRowWidget* widget)
 {
 	if(widget_){
-		//oldWidget->commit();
+		widget_->setParent(0);
 	}
 	widget_.reset(widget);
 	model()->dismissUpdate();
@@ -1354,6 +1357,7 @@ void QPropertyTree::setWidget(PropertyRowWidget* widget)
 		if(widget_->actualWidget())
 			widget_->actualWidget()->setParent(this);
 		_arrangeChildren();
+		widget_->showPopup();
 	}
 }
 
@@ -2134,6 +2138,12 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 	{
 
 	}
+}
+
+void QPropertyTree::focusInEvent(QFocusEvent* ev)
+{
+	QWidget::focusInEvent(ev);
+	widget_.reset();
 }
 
 void QPropertyTree::keyPressEvent(QKeyEvent* ev)

@@ -13,9 +13,11 @@
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
 #include "QPropertyTree.h"
-#include <QtGui/QComboBox>
-#include <QtGui/QStyle>
-#include <QtGui/QPainter>
+#include <QComboBox>
+#include <QStyle>
+#include <QPainter>
+#include <QMouseEvent>
+#include <QApplication>
 
 
 using yasli::StringListValue;
@@ -49,15 +51,19 @@ public:
 		else
 		{
 			QStyleOptionComboBox option;
+			option.editable = false;
+			option.frame = true;
 			option.currentText = QString(valueAsString().c_str());
 			option.state |= QStyle::State_Enabled;
-			option.rect = context.widgetRect;
+			option.rect = QRect(0, 0, context.widgetRect.width(), context.widgetRect.height());
+			// we have to translate painter here to work around bug in some themes
+			context.painter->translate(context.widgetRect.left(), context.widgetRect.top());
 			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
 			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
 			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
 			textRect.adjust(1, 0, -1, 0);
 			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
-
+			context.painter->translate(-context.widgetRect.left(), -context.widgetRect.top());
 		}
 	}
 
@@ -102,15 +108,19 @@ public:
 		else
 		{
 			QStyleOptionComboBox option;
+			option.editable = false;
+			option.frame = true;
 			option.currentText = QString(valueAsString().c_str());
 			option.state |= QStyle::State_Enabled;
-			option.rect = context.widgetRect;
+			option.rect = QRect(0, 0, context.widgetRect.width(), context.widgetRect.height());
+			// we have to translate painter here to work around bug in some themes
+			context.painter->translate(context.widgetRect.left(), context.widgetRect.top());
 			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
 			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
 			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
 			textRect.adjust(1, 0, -1, 0);
 			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
-
+			context.painter->translate(-context.widgetRect.left(), -context.widgetRect.top());
 		}
 	}
 
@@ -128,38 +138,6 @@ private:
 
 // ---------------------------------------------------------------------------
 
-class QAutoComboBox : public QComboBox
-{
-public:
-	QAutoComboBox() : firstShow_(true), hiding_(false) {}
-protected:
-	void hidePopup() override
-	{
-		QComboBox::hidePopup();
-		hiding_ = true;
-	}
-
-	void focusOutEvent(QFocusEvent* ev)
-	{
-		QComboBox::focusOutEvent(ev);
-		if (hiding_)
-		{
-			currentIndexChanged(currentIndex());
-			hiding_ = false;
-		}
-	}
-
-	void focusInEvent(QFocusEvent* ev) override
-	{
-		QComboBox::focusInEvent(ev);
-		if (firstShow_) {
-			showPopup();
-			firstShow_ = false;
-		}
-	}
-	bool firstShow_;
-	bool hiding_;
-};
 
 class PropertyRowWidgetStringListValue : public PropertyRowWidget
 {
@@ -167,24 +145,36 @@ class PropertyRowWidgetStringListValue : public PropertyRowWidget
 public:
 	PropertyRowWidgetStringListValue(PropertyRowStringListValue* row, QPropertyTree* tree)
 	: PropertyRowWidget(row, tree)
-	, comboBox_(new QAutoComboBox())
+	, comboBox_(new QComboBox())
 	{
 		const yasli::StringList& stringList = row->stringList_;
 		for (size_t i = 0; i < stringList.size(); ++i)
 			comboBox_->addItem(stringList[i].c_str());
 		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
-		connect(comboBox_, SIGNAL(currentIndexChanged(int)), this, SLOT(onChange(int)));
+		connect(comboBox_, SIGNAL(activated(int)), this, SLOT(onChange(int)));
 	}
 
 	PropertyRowWidgetStringListValue(PropertyRowStringListStaticValue* row, QPropertyTree* tree)
 	: PropertyRowWidget(row, tree)
-	, comboBox_(new QAutoComboBox())
+	, comboBox_(new QComboBox())
 	{
 		const yasli::StringList& stringList = row->stringList_;
 		for (size_t i = 0; i < stringList.size(); ++i)
 			comboBox_->addItem(stringList[i].c_str());
 		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
-		connect(comboBox_, SIGNAL(currentIndexChanged(int)), this, SLOT(onChange(int)));
+		connect(comboBox_, SIGNAL(activated(int)), this, SLOT(onChange(int)));
+	}
+
+	void showPopup() override
+	{
+		// We could use QComboBox::showPopup() here, but in this case some of
+		// the Qt themes (i.e. Fusion) are closing the combobox with following
+		// mouse relase because internal timer wasn't fired during the mouse
+		// click. We work around this by sending real click to the combo box.
+		QSize size = comboBox_->size();
+		QPoint centerPoint = QPoint(size.width() * 0.5f, size.height() * 0.5f);
+		QMouseEvent ev(QMouseEvent::MouseButtonPress, centerPoint, comboBox_->mapToGlobal(centerPoint), Qt::LeftButton, Qt::LeftButton, Qt::KeyboardModifiers());
+		QApplication::sendEvent(comboBox_, &ev);
 	}
 
 	~PropertyRowWidgetStringListValue()
@@ -201,25 +191,28 @@ public:
 public slots:
 		void onChange(int)
 		{
-			if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListValue>().name()) == 0 )
-			{
-				PropertyRowStringListValue* row = static_cast<PropertyRowStringListValue*>(this->row());
+			if (strcmp(row()->typeName(), yasli::TypeID::get<StringListValue>().name()) == 0) {
+				PropertyRowStringListValue* r = static_cast<PropertyRowStringListValue*>(row());
 				QByteArray newValue = comboBox_->currentText().toUtf8();
-				if (row->value_ != newValue.data()) {
-					model()->rowAboutToBeChanged(row);
-					row->value_ = newValue.data();
-					model()->rowChanged(row);
+				if (r->value_ != newValue.data()) {
+					model()->rowAboutToBeChanged(r);
+					r->value_ = newValue.data();
+					model()->rowChanged(r);
 				}
+				else
+					tree_->_cancelWidget();
+
 			}
-			else if ( strcmp(this->row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0 )
-			{
-				PropertyRowStringListStaticValue* row = static_cast<PropertyRowStringListStaticValue*>(this->row());
+			else if (strcmp(row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0) {
+				PropertyRowStringListStaticValue* r = static_cast<PropertyRowStringListStaticValue*>(row());
 				QByteArray newValue = comboBox_->currentText().toUtf8();
-				if (row->value_ != newValue.data()) {
-					model()->rowAboutToBeChanged(row);
-					row->value_ = newValue.data();
-					model()->rowChanged(row);
+				if (r->value_ != newValue.data()) {
+					model()->rowAboutToBeChanged(r);
+					r->value_ = newValue.data();
+					model()->rowChanged(r);
 				}
+				else
+					tree_->_cancelWidget();
 			}
 		}
 protected:

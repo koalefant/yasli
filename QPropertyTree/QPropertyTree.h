@@ -215,6 +215,7 @@ protected:
 	void mouseMoveEvent(QMouseEvent* ev) override;
 	void wheelEvent(QWheelEvent* ev) override;
 	void keyPressEvent(QKeyEvent* ev) override;
+	void focusInEvent(QFocusEvent* ev) override;
 
 	void updateArea();
 	bool toggleRow(PropertyRow* row);

@@ -77,6 +77,7 @@ public:
 	PropertyRowWidget(PropertyRow* row, QPropertyTree* tree);
 	virtual ~PropertyRowWidget();
 	virtual QWidget* actualWidget() { return 0; }
+	virtual void showPopup() {}
 	virtual void commit() = 0;
 	PropertyRow* row() { return row_; }
 	PropertyTreeModel* model() { return model_; }

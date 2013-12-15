@@ -18,8 +18,8 @@
 
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
-#include <QtGui/QMenu>
-#include <QtGui/QComboBox>
+#include <QMenu>
+#include <QComboBox>
 
 using yasli::StringList;
 using yasli::StringListValue;
