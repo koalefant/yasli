@@ -221,7 +221,7 @@ public:
 	QRect textRect() const{ return QRect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, ROW_DEFAULT_HEIGHT); }
 	QRect widgetRect() const{ return QRect(widgetPos_, pos_.y(), widgetSize_, ROW_DEFAULT_HEIGHT); }
 	QRect plusRect() const{ return QRect(pos_.x(), pos_.y(), plusSize_, ROW_DEFAULT_HEIGHT); }
-	QRect floorRect() const { return QRect(textPos_, pos_.y() + ROW_DEFAULT_HEIGHT, size_.x(), size_.y() - ROW_DEFAULT_HEIGHT); }
+	QRect floorRect() const { return QRect(textPos_, pos_.y() + ROW_DEFAULT_HEIGHT, size_.x() - (textPos_ - pos_.x()) , size_.y() - ROW_DEFAULT_HEIGHT); }
 	void adjustHoveredRect(QRect& hoveredRect);
 	const QFont* rowFont(const QPropertyTree* tree) const;
 
@@ -297,19 +297,19 @@ public:
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
-	yasli::Serializer serializer_;
-	Rows children_;
-	// do we really need QPoint here? 
-	QPoint pos_;
-	QPoint size_;
-	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	const char* name_;
 	const char* label_;
 	const char* labelUndecorated_;
 	const char* typeName_;
+	yasli::Serializer serializer_;
 	PropertyRow* parent_;
+	Rows children_;
 
 	unsigned int textHash_;
+
+	// do we really need QPoint here? 
+	QPoint pos_;
+	QPoint size_;
 	short int textPos_;
 	short int textSizeInitial_;
 	short int textSize_;
@@ -333,6 +333,7 @@ protected:
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
 
+	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	static ConstStringList* constStrings_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;

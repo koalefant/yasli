@@ -22,21 +22,22 @@
 #include "PropertyIArchive.h"
 #include "Unicode.h"
 
-#include <QtCore/QRect>
-#include <QtCore/QTimer>
-#include <QtGui/QMenu>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QScrollBar>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPainter>
-#include <QtCore/QElapsedTimer>
+#include <QRect>
+#include <QTimer>
+#include <QMimeData>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QScrollBar>
+#include <QLineEdit>
+#include <QPainter>
+#include <QElapsedTimer>
 #include "PropertyTreeMenuHandler.h"
 
 #include "MathUtils.h"
 
 // only for clipboard:
-#include <QtGui/QClipboard>
-#include <QtGui/QApplication>
+#include <QClipboard>
+#include <QApplication>
 #include "PropertyRowPointer.h"
 #include "PropertyRowContainer.h"
 // ^^^
@@ -203,9 +204,6 @@ public:
     : QLineEdit(tree)
     , tree_(tree)
 	{
-        //setSwallowArrows(true);
-        //setSwallowReturn(true);
-        //setSwallowEscape(true);
 	}
 protected:
 
@@ -1774,7 +1772,6 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 	for (size_t i = 0; i < numSubstrings; ++i) {
 		const char* substr = strstr(startPos, substrings[i].c_str());
 		if (!substr){
-            //_freea(text);
 			return false;
 		}
 		startPos += substrings[i].size();
@@ -1784,7 +1781,6 @@ bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t
 		if (matchEnd)
 			*matchEnd = substr - text + substrings[i].size();
 	}
-    //_freea(text);
 	return true;
 }
 
@@ -1904,7 +1900,7 @@ struct DrawVisitor
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
-			if(row->rect().bottom() > scrollOffset_)
+			if(row->rect().bottom() > scrollOffset_ && row->rect().width() > 0)
 				row->drawRow(painter_, tree, index);
 
 			return SCAN_CHILDREN_SIBLINGS;
@@ -2242,6 +2238,7 @@ bool QPropertyTree::toggleRow(PropertyRow* row)
 	if(!row->canBeToggled(this))
 		return false;
 	expandRow(row, !row->expanded());
+	updateHeights();
 	return true;
 }
 

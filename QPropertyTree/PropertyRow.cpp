@@ -429,13 +429,15 @@ struct ResetSerializerOp{
 
 void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 {
-	userFullRow_ = false;
-	pulledUp_ = false;
-	pulledBefore_ = false;
-	userReadOnly_ = false;
-	userReadOnlyRecurse_ = false;
-	userFixedWidget_ = false;
-	userWidgetSize_ = -1;
+	if (changeLabel) {
+		userFullRow_ = false;
+		pulledUp_ = false;
+		pulledBefore_ = false;
+		userReadOnly_ = false;
+		userReadOnlyRecurse_ = false;
+		userFixedWidget_ = false;
+		userWidgetSize_ = -1;
+	}
 
 	while(true){
 		if(*ptr == '^'){
@@ -682,7 +684,6 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 	size_.setX(textSize_ + widgetSize_);
 
-	//PropertyRow* nonPulled = nonPulledParent();
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
 		if(!row->visible(tree)) {
@@ -932,7 +933,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 	yasli::wstring text = toWideChar(rowText(containerLabel, tree, index));
 
 	if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-		 !pulledUp() && !isFullRow(tree) && !hasPulled())
+		 !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
 	{
 		QRect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
 
@@ -979,9 +980,9 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 			// draw rectangle around parent of selected pulled row
 			QColor color1(tree->palette().button().color());
 			QColor color2(tree->hasFocusOrInplaceHasFocus() ? tree->palette().highlight().color() : tree->palette().shadow().color());
-			QColor brushColor = interpolate(color1,  color2, 0.22f);
+			QColor brushColor = interpolate(color1,  color2, 0.33f);
 			QBrush brush(brushColor);
-			QColor borderColor(brushColor.alpha() / 8, brushColor.red(), brushColor.green(), brushColor.blue());
+			QColor borderColor(brushColor.red(), brushColor.green(), brushColor.blue(), brushColor.alpha() / 8);
 			fillRoundRectangle(painter, brush, selectionRect, borderColor, 6);
 		}
 	}
@@ -996,7 +997,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 	}
 
 	// custom drawing
-	if(!isStatic())
+	if(!isStatic() && context.widgetRect.isValid())
 		redraw(context);
 
 	if(textSize_ > 0){
@@ -1102,7 +1103,7 @@ void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QProp
 			tree->ensureVisible(newThis);
 			model->rowChanged(newThis); // after this call row pointers are invalidated
 		}
-		parentRow = parentRow = tree->model()->rowFromPath(parentRowPath);
+		parentRow = tree->model()->rowFromPath(parentRowPath);
 		if (parentRow)
 			model->rowChanged(parentRow); // after this call row pointers are invalidated
 	}
