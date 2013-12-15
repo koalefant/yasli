@@ -83,14 +83,14 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 
 bool PropertyRowContainer::onActivate( QPropertyTree* tree, bool force)
 {
-    if(userReadOnly())
-        return false;
-		QMenu menu;
-    generateMenu(menu, tree);
+	if(userReadOnly())
+		return false;
+	QMenu menu;
+	generateMenu(menu, tree);
 	tree->_setPressedRow(this);
-    menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
+	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
 	tree->_setPressedRow(0);
-    return true;
+	return true;
 }
 
 
@@ -103,8 +103,8 @@ void PropertyRowContainer::generateMenu(QMenu& menu, QPropertyTree* tree)
 	{
 		menu.addAction("[ Fixed Size Container ]")->setEnabled(false);
 	}
-  else if(userReadOnly())
-  {
+	else if(userReadOnly())
+	{
 		menu.addAction("[ Read Only Container ]")->setEnabled(false);
 	}
 	else
@@ -128,8 +128,8 @@ void PropertyRowContainer::generateMenu(QMenu& menu, QPropertyTree* tree)
 			menu.addSeparator();
 		}
 
-		QAction* removeAll = menu.addAction("Remove All");
-		removeAll->setShortcut(Qt::Key_Delete);
+		QAction* removeAll = menu.addAction(pulledUp() ? "Remove Children" : "Remove All");
+		removeAll->setShortcut(QKeySequence("Shift+Delete"));
 		removeAll->setEnabled(!userReadOnly());
 		QObject::connect(removeAll, SIGNAL(triggered()), handler, SLOT(onMenuRemoveAll()));
 	}
