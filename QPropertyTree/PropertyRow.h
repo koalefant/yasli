@@ -239,7 +239,7 @@ public:
 	virtual bool isLeaf() const{ return false; }
 	virtual void closeNonLeaf(const yasli::Serializer& ser) {}
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
-	virtual bool isSelectable() const{ return true; }
+	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!pulledUp() && !pulledBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
 
 	bool canBeToggled(const QPropertyTree* tree) const;
