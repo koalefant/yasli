@@ -76,6 +76,7 @@ public:
 	Archive(int caps)
 	: caps_(caps)
 	, filter_(YASLI_DEFAULT_FILTER)
+	, lastContext_(0)
 	{
 	}
 	virtual ~Archive() {}
