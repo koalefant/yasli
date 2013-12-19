@@ -402,7 +402,7 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
 				PropertyOArchive ar(model_, true);
 				//ar.setInnerContext(getInnerContext());
-				ar.setContextMap(contextMap());
+				ar.setLastContext(lastContext());
 				ar.setFilter(getFilter());
 
 				PropertyDefaultTypeValue defaultValue;
