@@ -672,7 +672,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 			size_.x += row->size_.x;
 			size_.y = max(size_.y, row->size_.y);
 		}
-		else if(expanded())
+		else if(nonPulled->expanded())
 			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
 	}
 
