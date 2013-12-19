@@ -196,7 +196,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 			PropertyRowContainer* container = static_cast<PropertyRowContainer*>(dest);
 			PropertyRow* elementRow = model_->defaultType(container->elementTypeName());
 			YASLI_ESCAPE(elementRow, return false);
-			if(strcmp(elementRow->typeName(), source->typeName()) == 0){
+			if(strcmp(container->elementTypeName(), source->typeName()) == 0){
 				result = true;
 				if(!onlyCheck){
 					PropertyRow* dest = elementRow;
@@ -205,7 +205,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
-						PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone(); //new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+						PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone();
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
 					}

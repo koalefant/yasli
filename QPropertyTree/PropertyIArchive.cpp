@@ -218,7 +218,7 @@ bool PropertyIArchive::operator()(double& value, const char* name, const char* l
 
 bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* name, const char* label)
 {
-	const char* typeName = ser.elementType().name();
+	const char* typeName = ser.containerType().name();
 	if(!openRow(name, label, typeName))
         return false;
 
