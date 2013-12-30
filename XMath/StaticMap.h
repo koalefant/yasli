@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include "yasli/Assert.h"
 
 namespace yasli { class Archive; }
 
@@ -317,7 +318,7 @@ public:
 
 	const mapped_type& operator[](const key_type& key) const {
 		const_iterator vi = binary_search(MapVector.begin(), MapVector.end(), key);
-		ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "StaticMap: element not found in const-operator[]");
+		YASLI_ASSERT(!(vi==MapVector.end() || (key_comp()(key, vi->first))) && "Не найден элемент в const-operator[]");
 		return (*vi).second;
 	}
 
