@@ -349,9 +349,10 @@ void TreePathLeaf::serialize(Archive& ar)
 	ar(index, "", 0);
 }
 
+bool serialize(yasli::Archive& ar, TreeSelection& value, const char* name, const char* label)
+{
+	return ar(static_cast<std::vector<TreePath>&>(value), name, label);
 }
 
-bool serialize(yasli::Archive& ar, ww::TreeSelection& value, const char* name, const char* label)
-{
-	return ar(static_cast<std::vector<ww::TreePath>&>(value), name, label);
 }
+

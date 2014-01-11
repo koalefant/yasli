@@ -317,7 +317,7 @@ void Entry::setMultiline(bool multiline)
 void Entry::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(textW_, "text", "&Текст");
+		ar(textW_, "text", "&Текст");
         if(ar.isInput())
             text_ = fromWideChar(textW_.c_str());
 	}

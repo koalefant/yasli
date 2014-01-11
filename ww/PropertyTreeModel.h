@@ -167,6 +167,7 @@ private:
 	friend class TreeImpl;
 };
 
+bool serialize(yasli::Archive& ar, TreeSelection &selection, const char* name, const char* label);
+
 }
 
-bool serialize(yasli::Archive& ar, ww::TreeSelection &selection, const char* name, const char* label);

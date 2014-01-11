@@ -228,8 +228,8 @@ void RadioButton::onChanged()
 void RadioButton::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(text_, "text", "&Текст");
-		ar.serialize(status_, "status", "&Статус");
+		ar(text_, "text", "&Текст");
+		ar(status_, "status", "&Статус");
 	}
 	Widget::serialize(ar);
 }

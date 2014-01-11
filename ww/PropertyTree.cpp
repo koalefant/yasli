@@ -10,7 +10,6 @@
 #include "StdAfx.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
-#include "yasli/PointersImpl.h"
 #include "ww/PropertyTree.h"
 #include "ww/PropertyDrawContext.h"
 #include "ww/Serialization.h"

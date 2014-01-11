@@ -355,10 +355,10 @@ void ComboBox::setFocus()
 
 void ComboBox::serialize(Archive& ar)
 {
-	ar.serialize(items_, "items", "Items");
-	ar.serialize(selectedIndex_, "selectedIndex", "&Selected Item Index");
-	ar.serialize(dropDownHeight_, "dropDownHeight_", "Drop Down Height");
-	ar.serialize(expandByContent_, "expandByContent", "Expand by Content");
+	ar(items_, "items", "Items");
+	ar(selectedIndex_, "selectedIndex", "&Selected Item Index");
+	ar(dropDownHeight_, "dropDownHeight_", "Drop Down Height");
+	ar(expandByContent_, "expandByContent", "Expand by Content");
 	Widget::serialize(ar);
 }
 

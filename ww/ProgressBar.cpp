@@ -84,7 +84,7 @@ ProgressBar::ProgressBar(int border)
 void ProgressBar::serialize(Archive& ar)
 {
     if(ar.filter(SERIALIZE_DESIGN)){
-        ar.serialize(pos_, "pos", 0);
+        ar(pos_, "pos", 0);
     }
     Widget::serialize(ar);
 }

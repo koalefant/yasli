@@ -14,7 +14,7 @@
 #include "ww/CheckComboBox.h"
 #include "ww/PropertyTreeModel.h"
 #include "ww/SafeCast.h"
-#include "yasli/PointersImpl.h"
+#include "yasli/Pointers.h"
 #include "yasli/ClassFactory.h"
 
 namespace ww{
@@ -109,8 +109,8 @@ PropertyRowWidget* PropertyRowBitVector::createWidget(PropertyTree* tree)
 
 void PropertyRowBitVector::serializeValue(Archive& ar)
 {
-	ar.serialize(valueAlt_, "valueAlt", "ValueAlt");
-	ar.serialize(flags_, "flags", "Flags");
+	ar(valueAlt_, "valueAlt", "ValueAlt");
+	ar(flags_, "flags", "Flags");
 }
 
 REGISTER_PROPERTY_ROW(BitVectorWrapper, PropertyRowBitVector)

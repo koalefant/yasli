@@ -45,6 +45,7 @@ struct FileSave
 	void serialize(Archive& ar);
 };
 
+bool serialize(Archive& ar, FileSave& value, const char* name, const char* label);
+
 }
 
-bool serialize(yasli::Archive& ar, yasli::FileSave& value, const char* name, const char* label);

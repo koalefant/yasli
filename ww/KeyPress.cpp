@@ -11,7 +11,6 @@
 #include "KeyPress.h"
 #include "yasli/BitVector.h"
 #include "yasli/Archive.h"
-#include "yasli/BitVectorImpl.h"
 
 namespace ww{
 

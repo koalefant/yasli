@@ -11,7 +11,6 @@
 #include <algorithm>
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
 
 ConstStringList globalConstStringList;
 

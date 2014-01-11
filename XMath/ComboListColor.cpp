@@ -4,6 +4,6 @@
 
 void ComboListColor::serialize(yasli::Archive& ar)
 {
-	ar.serialize(index_, "index", 0);
+	ar(index_, "index", 0);
 }
 

@@ -24,9 +24,8 @@
 #include "ConstStringList.h"
 
 #include "yasli/Archive.h"
-#include "yasli/BitVectorImpl.h"
+#include "yasli/BitVector.h"
 #include "yasli/ClassFactory.h"
-#include "yasli/STLImpl.h"
 #include "yasli/StringList.h"
 using yasli::TypeID;
 

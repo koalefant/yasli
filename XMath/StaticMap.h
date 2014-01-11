@@ -365,7 +365,7 @@ public:
 
 template<class K, class T, class Cmp, class A> 
 bool serialize(yasli::Archive& ar, StaticMap<K, T, Cmp, A>& map, const char* name, const char* nameAlt) {
-	bool nodeExists = ar.serialize(map.MapVector, name, nameAlt);
+	bool nodeExists = ar(map.MapVector, name, nameAlt);
 	if(!ar.isEdit()) 
 		map.sort();
 	return nodeExists;

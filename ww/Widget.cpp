@@ -193,10 +193,10 @@ void Widget::serialize(Archive& ar)
 {
 	if(ar.filter(ww::SERIALIZE_DESIGN)){
 		/*
-		ar.serialize(_property(border_, this, &Widget::setBorder), "border", "Отступы");
-		ar.serialize(requestSize_, "requestSize", "Размер");
-		ar.serialize(_property(sensitive_, this, &Widget::setSensitive), "sensitive", "Активность");
-		ar.serialize(_property(visible_, this, &Widget::setVisibility), "visible", "Видимость");
+		ar(_property(border_, this, &Widget::setBorder), "border", "Отступы");
+		ar(requestSize_, "requestSize", "Размер");
+		ar(_property(sensitive_, this, &Widget::setSensitive), "sensitive", "Активность");
+		ar(_property(visible_, this, &Widget::setVisibility), "visible", "Видимость");
 		*/
 	}
 }

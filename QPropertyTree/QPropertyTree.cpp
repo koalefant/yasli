@@ -10,7 +10,6 @@
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
 #include "yasli/BinArchive.h"
-#include "yasli/PointersImpl.h"
 #include "QPropertyTree.h"
 #include "PropertyDrawContext.h"
 #include "Serialization.h"

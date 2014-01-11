@@ -167,9 +167,9 @@ void Label::setExpandByContent(bool expand)
 void Label::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(text_, "text", "&Текст");
-		ar.serialize(emphasis_, "emphasis", "Выделить");
-		ar.serialize(expandByContent_, "expandByContent", "Растягивать под содержимое");
+		ar(text_, "text", "&Текст");
+		ar(emphasis_, "emphasis", "Выделить");
+		ar(expandByContent_, "expandByContent", "Растягивать под содержимое");
 	}
 	Widget::serialize(ar);
 }

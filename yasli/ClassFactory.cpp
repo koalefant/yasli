@@ -12,7 +12,6 @@
 #include "yasli/STL.h"
 #include "ClassFactory.h"
 #include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
 #include "MemoryWriter.h"
 
 #include "yasli/Strings.h"
@@ -96,9 +95,7 @@ size_t TypeID::sizeOf() const{
 #endif
 }
 
-}
-
-bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* name, const char* label)
+bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label)
 {
 	std::string typeName;
 	if(ar.isOutput()){
@@ -110,7 +107,7 @@ bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* 
 			if(!typeName.empty())
 				value.type = value.factory->findTypeByName(typeName.c_str());
 			else
-				value.type = yasli::TypeID();
+				value.type = TypeID();
 			if(!value.type){
 				char msg[128];
 #ifdef _MSC_VER
@@ -130,3 +127,4 @@ bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* 
 	}
 }
 
+}

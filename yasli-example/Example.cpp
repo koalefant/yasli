@@ -9,8 +9,6 @@
 #include "yasli/Pointers.h"
 #include "yasli/StringList.h"
 #include "yasli/Archive.h"
-#include "yasli/PointersImpl.h"
-#include "yasli/STLImpl.h"
 #include "yasli/ClassFactory.h"
 
 #include "yasli/TextOArchive.h"

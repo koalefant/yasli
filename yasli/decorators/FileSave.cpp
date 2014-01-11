@@ -12,13 +12,13 @@ void FileSave::serialize(Archive& ar)
 	ar(relativeToFolder, "folder");
 }
 
-}
-
-bool serialize(yasli::Archive& ar, yasli::FileSave& value, const char* name, const char* label)
+bool serialize(Archive& ar, FileSave& value, const char* name, const char* label)
 {
 	if (ar.isEdit())
-		return ar(yasli::Serializer(value), name, label);
+		return ar(Serializer(value), name, label);
 	else
 		return ar(value.path, name, label);
+}
+
 }
 

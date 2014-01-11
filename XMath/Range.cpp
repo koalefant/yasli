@@ -49,11 +49,11 @@ float Rangef::clip(float& _value) const
 void Rangef::serialize(Archive& ar)
 {
 #if XMATH_IN_ENGLISH
-	ar.serialize(min_, "", "&Min");
-	ar.serialize(max_, "", "&Max");
+	ar(min_, "", "&Min");
+	ar(max_, "", "&Max");
 #else
-	ar.serialize(min_, "", "&Минимум");
-	ar.serialize(max_, "", "&Максимум");
+	ar(min_, "", "&Минимум");
+	ar(max_, "", "&Максимум");
 #endif
 }
 
@@ -101,11 +101,11 @@ int Rangei::clip(int& _value)
 void Rangei::serialize(Archive& ar)
 {
 #if XMATH_IN_ENGLISH
-	ar.serialize(min_, "", "&Min");
-	ar.serialize(max_, "", "&Max");
+	ar(min_, "", "&Min");
+	ar(max_, "", "&Max");
 #else
-	ar.serialize(min_, "", "&Минимум");
-	ar.serialize(max_, "", "&Максимум");
+	ar(min_, "", "&Минимум");
+	ar(max_, "", "&Максимум");
 #endif
 }
 

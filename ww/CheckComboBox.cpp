@@ -549,10 +549,10 @@ int CheckComboBox::dropDownHeight() const
 void CheckComboBox::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(items_, "items", "Элементы");
-		ar.serialize(value_, "value", "&Выбранные элементы");
-		ar.serialize(dropDownHeight_, "dropDownHeight_", "Высота списка");
-		ar.serialize(expandByContent_, "expandByContent", "Расширять по содержимому");
+		ar(items_, "items", "Элементы");
+		ar(value_, "value", "&Выбранные элементы");
+		ar(dropDownHeight_, "dropDownHeight_", "Высота списка");
+		ar(expandByContent_, "expandByContent", "Расширять по содержимому");
 	}
 	Widget::serialize(ar);
 }

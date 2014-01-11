@@ -13,7 +13,6 @@
 #include "yasli/STL.h"
 #include "yasli/Pointers.h"
 #include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
 #include "yasli/PointersImpl.h"
 
 YASLI_ENUM_BEGIN_NESTED(PropertyTreeOperator, Type, "PropertyTreeOp")

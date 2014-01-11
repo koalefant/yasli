@@ -9,8 +9,9 @@
 
 #pragma once
 
+#include "Archive.h"
 #include "Pointers.h"
-#include "yasli/ClassFactoryBase.h"
+#include "ClassFactoryBase.h"
 #include "ClassFactory.h"
 #include "Object.h"
 
@@ -108,8 +109,6 @@ int releaseByVoidPtr(void* ptr) {
 	return result;
 }
 
-}
-
 template<class T>
 bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
@@ -139,6 +138,8 @@ bool serialize(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >&
 	if (ar.isInput())
 		ptr.ptr_ = (T*)obj.address();
 	return true;
+}
+
 }
 
 // vim:sw=4 ts=4:

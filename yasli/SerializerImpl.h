@@ -22,8 +22,6 @@ inline bool Serializer::operator()(Archive& ar) const{
 	return serializeFunc_(object_, ar);
 }
 
-
-
 inline void PointerInterface::serialize(Archive& ar) const
 {
 	TypeID baseTypeID = baseType();

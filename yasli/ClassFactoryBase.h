@@ -53,8 +53,8 @@ struct TypeIDWithFactory
 	}
 };
 
+bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label);
 
 }
 
-bool serialize(yasli::Archive& ar, yasli::TypeIDWithFactory& value, const char* name, const char* label);
 // vim:ts=4 sw=4:

@@ -221,7 +221,7 @@ void Button::onPressed()
 void Button::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(text_, "text", "&Текст");
+		ar(text_, "text", "&Текст");
 	}
 	Widget::serialize(ar);
 }

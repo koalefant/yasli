@@ -67,24 +67,24 @@ namespace ww{
 	_PropertyConstRef<T, Object> _property(T& value, Object* object, void(Object::*setter)(const T&)){
 		return _Property<T, Object>(value, object, setter);
 	}
+
+	template<class T, class Object>
+	inline bool serialize(yasli::Archive& ar, _Property<T, Object>& prop, const char* name, const char* label){
+	  T value(prop.value_);
+	  bool result = ar(value, name, label);
+	  if(ar.isInput() && value != prop.value_)
+		(prop.object_->*prop.setter_)(value);
+	  return result;
+	}
+
+
+	template<class T, class Object>
+	bool serialize(yasli::Archive& ar, _PropertyConstRef<T, Object>& prop, const char* name, const char* label){
+	  T value(prop.value_);
+	  bool result = ar(value, name, label);
+	  if(ar.isInput() && value != prop.value_)
+		(prop.object_->*prop.setter_)(value);
+	  return result;
+	}
+
 }
-
-template<class T, class Object>
-inline bool serialize(yasli::Archive& ar, ww::_Property<T, Object>& prop, const char* name, const char* label){
-  T value(prop.value_);
-  bool result = ar(value, name, label);
-  if(ar.isInput() && value != prop.value_)
-    (prop.object_->*prop.setter_)(value);
-  return result;
-}
-
-
-template<class T, class Object>
-bool serialize(yasli::Archive& ar, ww::_PropertyConstRef<T, Object>& prop, const char* name, const char* label){
-  T value(prop.value_);
-  bool result = ar(value, name, label);
-  if(ar.isInput() && value != prop.value_)
-    (prop.object_->*prop.setter_)(value);
-  return result;
-}
-

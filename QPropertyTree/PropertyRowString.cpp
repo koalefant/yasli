@@ -16,7 +16,6 @@
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
 #include "yasli/ClassFactory.h"
 #include <QtGui/QMenu>
 #include "Unicode.h"

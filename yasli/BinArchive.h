@@ -174,5 +174,4 @@ private:
 	void read(T& t) { currentBlock().read(t); }
 };
 
-
 }

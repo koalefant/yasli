@@ -15,12 +15,12 @@
 #include "yasli/KeyValue.h"
 #include "yasli/TypeID.h"
 
-namespace yasli{ class Archive; }
+namespace yasli{
+
+class Archive;
 
 template<class T>
-bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label);
-
-namespace yasli{
+bool serialize(Archive& ar, T& object, const char* name, const char* label);
 
 class Object;
 class KeyValueInterface;
@@ -141,13 +141,6 @@ public:
 	template<class T>
 	bool operator()(const T& value, const char* name = "", const char* label = 0);
 
-	// for compatibility
-	template<class T>
-	bool serialize(const T& value, const char* name, const char* label)
-	{
-		return operator()(const_cast<T&>(value), name, label);
-	}
-
 	template<class T>
 	T* context() const {
 		TypeID type = TypeID::get<T>();
@@ -217,7 +210,7 @@ inline Context::~Context() {
 
 template<class T>
 bool Archive::operator()(const T& value, const char* name, const char* label){
-    return ::serialize(*this, const_cast<T&>(value), name, label);
+    return serialize(*this, const_cast<T&>(value), name, label);
 }
 
 inline bool Archive::operator()(PointerInterface& ptr, const char* name, const char* label)
@@ -225,17 +218,15 @@ inline bool Archive::operator()(PointerInterface& ptr, const char* name, const c
 	return (*this)(Serializer(const_cast<PointerInterface&>(ptr)), name, label);
 }
 
-}
-
 template<class T, int Size>
-bool serialize(yasli::Archive& ar, T object[Size], const char* name, const char* label)
+bool serialize(Archive& ar, T object[Size], const char* name, const char* label)
 {
 	YASLI_ASSERT(0);
 	return false;
 }
 
 template<class T>
-bool serialize(yasli::Archive& ar, const T& object, const char* name, const char* label)
+bool serialize(Archive& ar, const T& object, const char* name, const char* label)
 {
 	T::unable_to_serialize_CONST_object();
 	YASLI_ASSERT(0);
@@ -243,9 +234,9 @@ bool serialize(yasli::Archive& ar, const T& object, const char* name, const char
 }
 
 template<class T>
-bool serialize(yasli::Archive& ar, T& object, const char* name, const char* label)
+bool serialize(Archive& ar, T& object, const char* name, const char* label)
 {
-	using namespace yasli::Helpers;
+	using namespace Helpers;
 
 	return
 		Select< IsClass<T>,
@@ -255,6 +246,8 @@ bool serialize(yasli::Archive& ar, T& object, const char* name, const char* labe
 					Identity< SerializeEnum<T> >
 				>
 		>::type::invoke(ar, object, name, label);
+}
+
 }
 
 #include "yasli/SerializerImpl.h"

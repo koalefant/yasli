@@ -13,12 +13,9 @@
 #include "ww/Strings.h"
 
 namespace ww{
-	class ConstStringWrapper;
-};
 
-bool serialize(yasli::Archive& ar, ww::ConstStringWrapper &wrapper, const char* name, const char* label);
-
-namespace ww{
+class ConstStringWrapper;
+bool serialize(yasli::Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
 
 class ConstStringList{
 public:
@@ -34,7 +31,7 @@ public:
 protected:
 	ConstStringList* list_;
 	const char*& string_;
-	friend bool ::serialize(Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
+	friend bool serialize(Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
 };
 
 extern ConstStringList globalConstStringList;

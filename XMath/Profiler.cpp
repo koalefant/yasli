@@ -179,7 +179,7 @@ void TimerData::serialize(Archive& ar)
 		buf << "size = " << accumulated_alloc.size << ", blocks = " << accumulated_alloc.blocks << ", operations = " << accumulated_alloc.operations;
 
 	string str = buf.c_str();
-	ar.serialize(str, title_, "^!");
+	ar(str, title_, "^!");
 
 	if(!children_.empty()){
 		serializing_ = true;
@@ -194,13 +194,13 @@ void TimerData::serialize(Archive& ar)
 			if((*i)->empty())
 				continue;
 			if(!(*i)->serializing_)
-				ar.serialize(**i, (*i)->title_, (*i)->title_);
+				ar(**i, (*i)->title_, (*i)->title_);
 			else{
 				string message = "Recursive";
-				ar.serialize(message, (*i)->title_, (*i)->title_);
+				ar(message, (*i)->title_, (*i)->title_);
 			}
 		}
-		//ar.serialize(HLineDecorator(), "hline", "<");
+		//ar(HLineDecorator(), "hline", "<");
 		serializing_ = false;
 	}
 }
@@ -231,7 +231,7 @@ void StatisticalData::serialize(Archive& ar)
 	buf.setDigits(4);
 	buf << avr() << " ± " << (avr() ? sigma()*100/avr() : 0) << " %, max = " << x_max << " (" << profiler.ticks2time(t_max) << "), min = " << x_min << " (" << profiler.ticks2time(t_min) << "), sampling: " << n;
 	string str = buf.c_str();
-	ar.serialize(str, title_, title_);
+	ar(str, title_, title_);
 }
 
 double StatisticalData::sigma() const 
@@ -442,20 +442,20 @@ void Profiler::serializeAll(Archive& ar)
 #endif
 			break;
 	}
-	ar.serialize(mode, "Mode", "!Mode");
+	ar(mode, "Mode", "!Mode");
 
-	ar.serialize(milliseconds, "Time_interval_mS", "!Time interval, mS");
+	ar(milliseconds, "Time_interval_mS", "!Time interval, mS");
 	char total_name[2048];
 	string  ticksName = _i64toa(ticks, total_name, 10);
-	ar.serialize(ticksName, "Ticks", "!Ticks");
-	ar.serialize((float)ticks/(milliseconds*1000.), "CPU_MHz", "!CPU, MHz");
-	//ar.serialize(memory, "Memory start", "Memory start");
-	//ar.serialize(totalMemoryUsed(), "Memory end", "Memory end");
+	ar(ticksName, "Ticks", "!Ticks");
+	ar((float)ticks/(milliseconds*1000.), "CPU_MHz", "!CPU, MHz");
+	//ar(memory, "Memory start", "Memory start");
+	//ar(totalMemoryUsed(), "Memory end", "Memory end");
 
 	//Profilers::iterator end = remove_if(profilers_.begin(), profilers_.end(), mem_fun(&Profiler::empty));
 	//profilers_.erase(end, profilers_.end());
 
-	ar.serialize(HLineDecorator(), "line1", "<");
+	ar(HLineDecorator(), "line1", "<");
 
 	if(profilers_.empty()){
 		string noData = "No data";
@@ -465,13 +465,13 @@ void Profiler::serializeAll(Archive& ar)
 		profilers_.front()->serialize(ar);
 	else
 		FOR_EACH(profilers_, i, Profilers::iterator)
-			ar.serialize(**i, (*i)->name_.c_str(), (*i)->name_.c_str());
+			ar(**i, (*i)->name_.c_str(), (*i)->name_.c_str());
 
-	ar.serialize(HLineDecorator(), "line2", "<");
+	ar(HLineDecorator(), "line2", "<");
 
-	ar.serialize(sortByAvr_, "sortByAvr", "Sort by average");
+	ar(sortByAvr_, "sortByAvr", "Sort by average");
 	if(ar.isEdit())
-		ar.serialize(profileFile_, "profileFile", "Save to file");
+		ar(profileFile_, "profileFile", "Save to file");
 }
 
 void Profiler::serialize(Archive& ar)
@@ -485,8 +485,8 @@ void Profiler::serialize(Archive& ar)
 
 	profilerForSerialization_ = this;
 	if(profilerMode_ != PROFILER_MEMORY){
-		ar.serialize(frames, "Frames", "!Frames");
-		ar.serialize(frames*1000./milliseconds, "FPS", "!FPS");
+		ar(frames, "Frames", "!Frames");
+		ar(frames*1000./milliseconds, "FPS", "!FPS");
 	}
 
 	Timers& list = !roots_.empty() ? roots_ : timers_;
@@ -499,7 +499,7 @@ void Profiler::serialize(Archive& ar)
 
 	Timers::iterator i;
 	FOR_EACH(list, i)
-		ar.serialize(**i, (*i)->title_, (*i)->title_);
+		ar(**i, (*i)->title_, (*i)->title_);
 
 	if(ar.openBlock("Stat", "!Statistics")){
 		Statistics::iterator i;

@@ -13,7 +13,6 @@
 #include <algorithm>
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
-#include "yasli/STLImpl.h"
 
 namespace ww{
 
@@ -40,8 +39,6 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 	YASLI_ASSERT(string_);
 }
 
-}
-
 bool serialize(yasli::Archive& ar, ww::ConstStringWrapper& val, const char* name, const char* label)
 {
 	using ww::string;
@@ -57,4 +54,6 @@ bool serialize(yasli::Archive& ar, ww::ConstStringWrapper& val, const char* name
 		val.string_ = val.list_->findOrAdd(in.c_str());
 		return result;
 	}
+}
+
 }

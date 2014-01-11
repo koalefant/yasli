@@ -13,7 +13,6 @@
 #include <algorithm>
 #include "yasli/STL.h"
 #include "JSONIArchive.h"
-#include "yasli/STLImpl.h"
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
 

@@ -168,8 +168,8 @@ void splitStringList(StringList* result, const char *str, char sep);
 void joinStringList(std::string* result, const StringList& stringList, char sep);
 void joinStringList(std::string* result, const StringListStatic& stringList, char sep);
 
-}
+bool serialize(Archive& ar, StringList& value, const char* name, const char* label);
+bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
+bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
 
-bool serialize(yasli::Archive& ar, yasli::StringList& value, const char* name, const char* label);
-bool serialize(yasli::Archive& ar, yasli::StringListValue& value, const char* name, const char* label);
-bool serialize(yasli::Archive& ar, yasli::StringListStaticValue& value, const char* name, const char* label);
+}

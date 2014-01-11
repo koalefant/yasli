@@ -15,12 +15,9 @@ namespace yasli{
 }
 
 namespace ww{
-	class FileSelector;
-}
 
+class FileSelector;
 bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name, const char* label);
-
-namespace ww{
 
 // File selector is a serialization decorator.
 // It allows you to select filename with file open/save dialog.
@@ -77,7 +74,7 @@ protected:
 	string* fileNamePtr_;
 	string fileName_;
 	const Options* options_;
-	friend bool ::serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name, const char* label);
+	friend bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name, const char* label);
 };
 
 }

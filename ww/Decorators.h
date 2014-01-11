@@ -110,7 +110,7 @@ struct OptionalPtr : PointerType{
 		xassert(ar.isEdit());
 		bool optionallyEnabled = false;
 		if(ar.isInput()){
-			ar.serialize(optionallyEnabled, "optionallyEnabled", "^");
+			ar(optionallyEnabled, "optionallyEnabled", "^");
 			if(optionallyEnabled){
 				if(!get())
 					set(new T());
@@ -121,7 +121,7 @@ struct OptionalPtr : PointerType{
 		}
 		else{
 			optionallyEnabled = get() != 0;
-			ar.serialize(optionallyEnabled, "optionallyEnabled", "^");
+			ar(optionallyEnabled, "optionallyEnabled", "^");
 			if(optionallyEnabled)
 				get()->serialize(ar);
 		}

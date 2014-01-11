@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "yasli/Archive.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
 
@@ -125,6 +126,8 @@ protected:
 
 }
 
+namespace std{
+
 template<class T, class Alloc>
 bool serialize(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label)
 {
@@ -137,6 +140,8 @@ bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* n
 {
 	yasli::ContainerSTL<std::list<T, Alloc>, T> ser(&container);
 	return ar(static_cast<yasli::ContainerInterface&>(ser), name, label);
+}
+
 }
 
 // ---------------------------------------------------------------------------
@@ -166,14 +171,19 @@ private:
 
 }
 
+namespace std {
+
 inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label)
 {
 	yasli::StringSTL str(value);
 	return ar(static_cast<yasli::StringInterface&>(str), name, label);
 }
 
+}
+
 
 // ---------------------------------------------------------------------------
+namespace std {
 
 template<class K, class V, class C, class Alloc>
 bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label)
@@ -187,6 +197,7 @@ bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const ch
 	return true;
 }
 
+}
 // ---------------------------------------------------------------------------
 
 namespace yasli {
@@ -204,13 +215,19 @@ private:
 
 }
 
+namespace std {
+
 inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
 {
 	yasli::WStringSTL str(value);
 	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
 }
 
+}
+
 // ---------------------------------------------------------------------------
+
+namespace yasli {
 
 template<class V>
 struct StdPair : yasli::KeyValueInterface
@@ -231,9 +248,15 @@ struct StdPair : yasli::KeyValueInterface
 	std::pair<std::string, V>& pair_;
 };
 
+}
+
+namespace std{
+
 template<class V>
 bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
 {
-	StdPair<V> keyValue(pair);
+	yasli::StdPair<V> keyValue(pair);
 	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
+}
+
 }

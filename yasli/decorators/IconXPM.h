@@ -28,7 +28,7 @@ struct IconXPM
 		lineCount = Size;
 	}
 
-	void serialize(yasli::Archive& ar) 	{}
+	void serialize(Archive& ar) 	{}
 	bool operator<(const IconXPM& rhs) const { return source < rhs.source; }
 
 };

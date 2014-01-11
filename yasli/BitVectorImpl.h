@@ -62,10 +62,8 @@ void BitVector<Enum>::serialize(Archive& ar)
     ar(value_, "value", "Value");
 }
 
-}
-
 template<class Enum>
-bool serialize(yasli::Archive& ar, yasli::BitVector<Enum>& value, const char* name, const char* label)
+bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label)
 {
     using namespace yasli;
     EnumDescription &desc = getEnumDescription<Enum>();
@@ -77,3 +75,4 @@ bool serialize(yasli::Archive& ar, yasli::BitVector<Enum>& value, const char* na
     }
 }
 
+}

@@ -158,7 +158,7 @@ void Frame::setText(const char* text)
 
 void Frame::serialize(Archive& ar)
 {
-	ar.serialize(text_, "text", "&Текст");
+	ar(text_, "text", "&Текст");
 	Widget::serialize(ar);
 }
 

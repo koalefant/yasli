@@ -167,8 +167,8 @@ void CheckBox::onChanged()
 void CheckBox::serialize(Archive& ar)
 {
 	if(ar.filter(SERIALIZE_DESIGN)){
-		ar.serialize(text_, "text", "&Текст");
-		ar.serialize(status_, "status", "&Статус");
+		ar(text_, "text", "&Текст");
+		ar(status_, "status", "&Статус");
 	}
 	Widget::serialize(ar);
 }

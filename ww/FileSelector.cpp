@@ -19,9 +19,7 @@ void FileSelector::serialize(yasli::Archive& ar)
 	ar(fileName_, "fileName", "File Name");
 }
 
-}
-
-bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name, const char* label)
+bool serialize(yasli::Archive& ar, FileSelector& selector, const char* name, const char* label)
 {
     if(ar.isEdit())
         return ar(yasli::Serializer(selector), name, label);
@@ -29,4 +27,4 @@ bool serialize(yasli::Archive& ar, ww::FileSelector& selector, const char* name,
         return ar(selector.fileName_, name, label);
 }
 
-
+}

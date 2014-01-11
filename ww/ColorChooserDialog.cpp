@@ -48,7 +48,7 @@ static const int DIALOG_BORDER = 12;
 	BinIArchive ia;
 	if(ia.load(stateFileName.c_str())){
 		ia.setFilter(SERIALIZE_STATE);
-		ia.serialize(*this, "window", 0);
+		ia(*this, "window", 0);
 	}
 }
 
@@ -56,7 +56,7 @@ ColorChooserDialog::~ColorChooserDialog()
 {
 	BinOArchive oa;
 	oa.setFilter(SERIALIZE_STATE);
-	oa.serialize(*this, "window", 0);
+	oa(*this, "window", 0);
 	oa.save(stateFileName.c_str());
 }
 

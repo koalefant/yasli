@@ -72,7 +72,7 @@ void EditorDialog::init(const Serializer& serializer, const char* title, const c
 	TextIArchive ia;
 	if(stateFileName && ia.load(stateFileName)){
 		ia.setFilter(SERIALIZE_STATE);
-		ia.serialize(*this, "window", 0);
+		ia(*this, "window", 0);
 	}
 
 	if((flags & ww::IMMEDIATE_UPDATE) == 0)
@@ -119,7 +119,7 @@ void EditorDialog::onResponse(int response)
 	if(!stateFileName_.empty()){
 		TextOArchive oa;
 		oa.setFilter(SERIALIZE_STATE);
-		oa.serialize(*this, "window", 0);
+		oa(*this, "window", 0);
 		oa.save(stateFileName_.c_str());
 	}
 	Dialog::onResponse(response);
@@ -128,7 +128,7 @@ void EditorDialog::onResponse(int response)
 void EditorDialog::serialize(Archive& ar)
 {
 	__super::serialize(ar);
-    ar.serialize(*tree_, "tree", 0);
+    ar(*tree_, "tree", 0);
 }
 
 }
