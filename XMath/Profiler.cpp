@@ -448,7 +448,8 @@ void Profiler::serializeAll(Archive& ar)
 	char total_name[2048];
 	string  ticksName = _i64toa(ticks, total_name, 10);
 	ar(ticksName, "Ticks", "!Ticks");
-	ar((float)ticks/(milliseconds*1000.), "CPU_MHz", "!CPU, MHz");
+	float freq(ticks/(milliseconds*1000.));
+	ar(freq, "CPU_MHz", "!CPU, MHz");
 	//ar(memory, "Memory start", "Memory start");
 	//ar(totalMemoryUsed(), "Memory end", "Memory end");
 
@@ -486,7 +487,8 @@ void Profiler::serialize(Archive& ar)
 	profilerForSerialization_ = this;
 	if(profilerMode_ != PROFILER_MEMORY){
 		ar(frames, "Frames", "!Frames");
-		ar(frames*1000./milliseconds, "FPS", "!FPS");
+		float fps(frames*1000./milliseconds);
+		ar(fps, "FPS", "!FPS");
 	}
 
 	Timers& list = !roots_.empty() ? roots_ : timers_;
