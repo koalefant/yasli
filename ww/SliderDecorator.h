@@ -145,8 +145,8 @@ public:
 	int value_;
 };
 
-}
-
 bool serialize(yasli::Archive& ar, ww::SliderDecoratorf &wrapper, const char* name, const char* label);
 bool serialize(yasli::Archive& ar, ww::SliderDecoratori &wrapper, const char* name, const char* label);
+
+}
 

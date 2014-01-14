@@ -128,8 +128,6 @@ struct OptionalPtr : PointerType{
 	}
 };
 
-}
-
 inline bool serialize(yasli::Archive& ar, ww::HLineDecorator& value, const char* name, const char* label){		
     if(ar.isEdit())
         return ar(yasli::Serializer(value), name, label);
@@ -148,4 +146,6 @@ inline bool serialize(yasli::Archive& ar, ww::NotDecorator& value, const char* n
         return ar(yasli::Serializer(value), name, label);
     else
         return ar(value.value_, name, label);
+}
+
 }

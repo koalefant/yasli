@@ -43,8 +43,6 @@ void SliderDecoratori::serialize(Archive& ar)
   ar(step_, "step", 0);
 }
 
-}
-
 bool serialize(Archive& ar, ww::SliderDecoratorf& wrapper, const char* name, const char* label)
 {
 	if(ar.isInPlace())
@@ -79,3 +77,4 @@ bool serialize(Archive& ar, ww::SliderDecoratori& wrapper, const char* name, con
 	return result;
 }
 
+}
