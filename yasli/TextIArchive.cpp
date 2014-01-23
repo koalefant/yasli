@@ -695,7 +695,7 @@ bool TextIArchive::findName(const char* name)
         }
     }
 
-	while(true){
+	for(int itt = 0; itt < 10000; ++itt){
 		readToken();
 		if(!token_){
 			token_.set(blockBegin, blockBegin);
@@ -746,8 +746,9 @@ bool TextIArchive::findName(const char* name)
 				skipBlock();
 			}
 		}
-
 	}
+
+	YASLI_ASSERT(0, "Infinite loop due to incorrect text format");
 
     return false;
 }
