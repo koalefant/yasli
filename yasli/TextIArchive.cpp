@@ -638,7 +638,8 @@ bool TextIArchive::findName(const char* name)
 	if(*blockBegin == '\0')
 		return false;
 
-    readToken();
+	Token initialToken = token_;
+	readToken();
     if(!token_){
 	    start = blockBegin;
         token_.set(blockBegin, blockBegin);
@@ -749,6 +750,7 @@ bool TextIArchive::findName(const char* name)
 	}
 
 	YASLI_ASSERT(0, "Infinite loop due to incorrect text format");
+	token_ = initialToken;
 
     return false;
 }
