@@ -15,6 +15,9 @@
 #include "ClassFactory.h"
 #include "Object.h"
 
+#pragma warning (push)
+#pragma warning (disable: 4512)
+
 namespace yasli{
 
 template<class T>
@@ -141,5 +144,7 @@ bool serialize(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >&
 }
 
 }
+
+#pragma warning (pop)
 
 // vim:sw=4 ts=4:
