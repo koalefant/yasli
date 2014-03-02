@@ -358,6 +358,7 @@ bool PropertyOArchive::operator()(ContainerInterface& ser, const char *name, con
 
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
+		ar.setLastContext(lastContext());
 		ar.setFilter(getFilter());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
 		ser.serializeNewElement(ar, "", "0");
@@ -401,7 +402,6 @@ bool PropertyOArchive::operator()(PointerInterface& ptr, const char *name, const
 			const TypeDescription *desc = factory->descriptionByIndex((int)i);
 			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
 				PropertyOArchive ar(model_, true);
-				//ar.setInnerContext(getInnerContext());
 				ar.setLastContext(lastContext());
 				ar.setFilter(getFilter());
 
