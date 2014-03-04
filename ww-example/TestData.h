@@ -234,6 +234,7 @@ struct TestData
 	S1 s1;
 	S0 s0;
 	Cells cells;
+	std::vector<std::string> names;
 
 	std::list<TestData> childs;
 	std::list<TestBase> childsBase;
@@ -284,6 +285,7 @@ struct TestData
 	}
 
 	void serialize(Archive& ar) {
+		ar(names, "names", "names");
 		ar(s1, "s1", "s1");
 		if(ar.openBlock("customEditors", "Custom Editors")){
 			static FileSelector::Options options("*.ta", false, "");
