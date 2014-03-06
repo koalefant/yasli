@@ -65,7 +65,6 @@ private:
 	};
 
 	vector<Level> stack_;
-	Level* currentLevel_;
 
 	PropertyTreeModel* model_;
 	PropertyRow* currentNode_;

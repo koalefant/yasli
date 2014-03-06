@@ -27,10 +27,8 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 , currentNode_(0)
 , lastNode_(0)
 , root_(root)
-, currentLevel_(0)
 {
 	stack_.push_back(Level());
-	currentLevel_ = &stack_.back();
 
 	if (!root_)
 		root_ = model_->root();
@@ -234,7 +232,6 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
 	}
 
 	stack_.push_back(Level());
-	currentLevel_ = &stack_.back();
 
 	size_t index = 0;
     if(ser.size() > 0)
@@ -246,10 +243,6 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
         }
 
 	stack_.pop_back();
-	if (!stack_.empty())
-		currentLevel_ = &stack_.back();
-	else
-		currentLevel_ = 0;
 
     closeRow(name);
 	return true;
@@ -268,15 +261,10 @@ bool PropertyIArchive::operator()(const Serializer& ser, const char* name, const
 		return false;
 
 	stack_.push_back(Level());
-	currentLevel_ = &stack_.back();
 
-	ser(*this);
+    ser(*this);
 
 	stack_.pop_back();
-	if (!stack_.empty())
-		currentLevel_ = &stack_.back();
-	else
-		currentLevel_ = 0;
 
 	closeRow(name);
 	return true;
@@ -305,16 +293,11 @@ bool PropertyIArchive::operator()(PointerInterface& ser, const char* name, const
         return false;
 
 	stack_.push_back(Level());
-	currentLevel_ = &stack_.back();
 
     if(ser.get() != 0)
         ser.serializer()( *this );
 
 	stack_.pop_back();
-	if (!stack_.empty())
-		currentLevel_ = &stack_.back();
-	else
-		currentLevel_ = 0;
 
 	closeRow(name);
     return true;
@@ -332,7 +315,7 @@ bool PropertyIArchive::operator()(Object& obj, const char* name, const char* lab
 		return result;
 	}
 	else
-	return false;
+		return false;
 }
 
 bool PropertyIArchive::openBlock(const char* name, const char* label)
@@ -357,15 +340,17 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 	if(!currentNode_){
 		lastNode_ = currentNode_ = model_->root();
 		YASLI_ASSERT(currentNode_);
+		if (currentNode_ && strcmp(currentNode_->typeName(), typeName) != 0)
+			return false;
 		return true;
 	}
 
 	YASLI_ESCAPE(currentNode_, return false);
-	
+
 	if(currentNode_->empty())
 		return false;
 
-	Level& level = *currentLevel_;
+	Level& level = stack_.back();
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
@@ -376,12 +361,14 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 	else {
 		node = currentNode_->findFromIndex(&level.rowIndex, name, typeName, level.rowIndex);
 		++level.rowIndex;
-		}
+	}
 
 	if(node){
 		lastNode_ = node;
 		if(node->isContainer() || !node->multiValue()){
 			currentNode_ = node;
+			if (currentNode_ && strcmp(currentNode_->typeName(), typeName) != 0)
+				return false;
 			return true;
 		}
 	}
@@ -391,7 +378,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 void PropertyIArchive::closeRow(const char* name)
 {
 	YASLI_ESCAPE(currentNode_, return);
-		currentNode_ = currentNode_->parent();
+	currentNode_ = currentNode_->parent();
 }
 
 };
