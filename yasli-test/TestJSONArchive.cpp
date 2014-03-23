@@ -85,5 +85,104 @@ SUITE(JSONArchive)
 		UNITTEST_TIME_CONSTRAINT(5);
 		ia(obj, "");
 	}
+
+
+	struct SimpleElement
+	{
+		string value;
+		void serialize(Archive& ar)
+		{
+			ar(value, "value");
+		}
+	};
+
+	TEST(RegressionStdPairStringToStruct)
+	{
+		const char* json =
+		"{ \"el1\": { \"value\": \"value1\" }, "
+		" \"el2\": { \"value\": \"value2\" } } ";
+
+		typedef std::vector<std::pair<string, SimpleElement> > StringToElement;
+		StringToElement elements;
+		{
+			JSONIArchive ia;
+			CHECK(ia.open(json, strlen(json)));
+			ia(elements);
+		}
+
+		CHECK_EQUAL(2, elements.size());
+		CHECK_EQUAL("el1", elements[0].first);
+		CHECK_EQUAL("value1", elements[0].second.value);
+		CHECK_EQUAL("el2", elements[1].first);
+		CHECK_EQUAL("value2", elements[1].second.value);
+
+		JSONOArchive oa;
+		oa(elements);
+
+		elements.clear();
+		{
+			JSONIArchive ia;
+			CHECK(ia.open(oa.c_str(), oa.length()));
+			ia(elements);
+		}
+
+		CHECK_EQUAL(2, elements.size());
+		CHECK_EQUAL("el1", elements[0].first);
+		CHECK_EQUAL("value1", elements[0].second.value);
+		CHECK_EQUAL("el2", elements[1].first);
+		CHECK_EQUAL("value2", elements[1].second.value);
+	}
+
+	TEST(RegressionStdPairStringToInt)
+	{
+		const char* json =
+		"{ \"el1\": 1, \"el2\": 2 } ";
+
+		typedef std::vector<std::pair<string, int> > StringToElement;
+		StringToElement elements;
+		{
+			JSONIArchive ia;
+			CHECK(ia.open(json, strlen(json)));
+			ia(elements);
+		}
+
+		CHECK_EQUAL(2, elements.size());
+		CHECK_EQUAL("el1", elements[0].first);
+		CHECK_EQUAL(1, elements[0].second);
+		CHECK_EQUAL("el2", elements[1].first);
+		CHECK_EQUAL(2, elements[1].second);
+
+		JSONOArchive oa;
+		oa(elements);
+
+		elements.clear();
+
+		{
+			JSONIArchive ia;
+			ia.open(oa.c_str(), oa.length());
+			ia(elements);
+		}
+
+		CHECK_EQUAL(2, elements.size());
+		CHECK_EQUAL("el1", elements[0].first);
+		CHECK_EQUAL(1, elements[0].second);
+		CHECK_EQUAL("el2", elements[1].first);
+		CHECK_EQUAL(2, elements[1].second);
+	}
+
+
+	TEST(RegressionStdPairCommaBeforeValue)
+	{
+		std::vector<std::pair<string, int> > elements;
+		elements.resize(1);
+		elements[0].first = "v";
+		elements[0].second = 1;
+
+		JSONOArchive oa;
+		oa(elements);
+
+		CHECK(strchr(oa.c_str(), ',') == 0);
+	}
+	
 }
 

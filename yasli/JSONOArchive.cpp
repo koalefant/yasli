@@ -419,23 +419,25 @@ void JSONOArchive::placeIndent(bool putComma)
 
 void JSONOArchive::placeIndentCompact(bool putComma)
 {
+	if (stack_.back().isKeyValue)
+		return;
 	if (putComma && stack_.back().elementIndex > 0)
 		*buffer_ << ",";	
-  if ((compactOffset_ % 32) != 0 && stack_.back().isContainer){
+	if ((compactOffset_ % 32) != 0 && stack_.back().isContainer){
 		*buffer_ << " ";
 		compactOffset_ += 1;
 		stack_.back().elementIndex += 1;
 	}
-  else if (buffer_->size())
-  {
-	*buffer_ << "\n";
-    int count = int(stack_.size() - 1);
-    stack_.back().indentCount += count/* * TAB_WIDTH*/;
-	stack_.back().elementIndex += 1;
-    for(int i = 0; i < count; ++i)
-        *buffer_ << "\t";
-	 compactOffset_ = 1;
-  }
+	else if (buffer_->size())
+	{
+		*buffer_ << "\n";
+		int count = int(stack_.size() - 1);
+		stack_.back().indentCount += count/* * TAB_WIDTH*/;
+		stack_.back().elementIndex += 1;
+		for(int i = 0; i < count; ++i)
+			*buffer_ << "\t";
+		compactOffset_ = 1;
+	}
 }
 
 bool JSONOArchive::operator()(bool& value, const char* name, const char* label)
