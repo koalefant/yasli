@@ -100,11 +100,6 @@ public:
 		WIDGET_AFTER_PULLED
 	};
 
-	static const int ROW_DEFAULT_HEIGHT = 21; 
-	static const int ICON_SIZE = 21; 
-	static const int TEXT_SIZE_MIN = 30; 
-	static const int WIDGET_SIZE_MIN = 30; 
-
 	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
 	typedef Rows::iterator iterator;
 	typedef Rows::const_iterator const_iterator;
@@ -205,7 +200,7 @@ public:
 
 	int height() const{ return size_.y(); }
 
-	virtual int widgetSizeMin() const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
+	virtual int widgetSizeMin(const QPropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
 	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree* tree, int index);
@@ -219,10 +214,10 @@ public:
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	QRect rect() const{ return QRect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
-	QRect textRect() const{ return QRect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, ROW_DEFAULT_HEIGHT); }
-	QRect widgetRect() const{ return QRect(widgetPos_, pos_.y(), widgetSize_, ROW_DEFAULT_HEIGHT); }
-	QRect plusRect() const{ return QRect(pos_.x(), pos_.y(), plusSize_, ROW_DEFAULT_HEIGHT); }
-	QRect floorRect() const { return QRect(textPos_, pos_.y() + ROW_DEFAULT_HEIGHT, size_.x() - (textPos_ - pos_.x()) , size_.y() - ROW_DEFAULT_HEIGHT); }
+	QRect textRect(const QPropertyTree* tree) const;
+	QRect widgetRect(const QPropertyTree* tree) const;
+	QRect plusRect(const QPropertyTree* tree) const;
+	QRect floorRect(const QPropertyTree* tree) const;
 	void adjustHoveredRect(QRect& hoveredRect);
 	const QFont* rowFont(const QPropertyTree* tree) const;
 

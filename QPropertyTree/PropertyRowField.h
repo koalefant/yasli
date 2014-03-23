@@ -14,8 +14,8 @@ class QIcon;
 class PropertyRowField : public PropertyRow
 {
 public:
-	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
-	int widgetSizeMin() const{ 
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
+	int widgetSizeMin(const QPropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
@@ -26,6 +26,6 @@ public:
 	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const{ return *(QIcon*)(0); }
 	virtual bool usePathEllipsis() const { return false; }
 
-	void redraw(const PropertyDrawContext& context);
+	void redraw(const PropertyDrawContext& context) override;
 };
 

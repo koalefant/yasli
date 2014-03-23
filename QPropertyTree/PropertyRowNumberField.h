@@ -40,7 +40,7 @@ class PropertyRowNumberField : public PropertyRow
 {
 public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-	int widgetSizeMin() const{ 
+	int widgetSizeMin(const QPropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else

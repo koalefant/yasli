@@ -225,14 +225,14 @@ bool PropertyRowPointer::onActivate( QPropertyTree* tree, bool force)
 	QMenu menu;
 	ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu, tree->model()->typeStringList(baseType()));
 	tree->_setPressedRow(this);
-	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + ROW_DEFAULT_HEIGHT)));
+	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
 	tree->_setPressedRow(0);
 	return true;
 }
 
 bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) 
 {
-		if(widgetRect().contains(point)){
+		if(widgetRect(tree).contains(point)){
 				if(onActivate(tree, false))
 						changed = true;
 		}
@@ -255,7 +255,7 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 	ar(derivedTypeName_, "derivedTypeName", "Derived Type Name");
 }
 
-int PropertyRowPointer::widgetSizeMin() const
+int PropertyRowPointer::widgetSizeMin(const QPropertyTree*) const
 {
 	QFontMetrics fm(*propertyTreeDefaultBoldFont());
     QString str(fromWideChar(generateLabel().c_str()).c_str());

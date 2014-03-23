@@ -36,15 +36,15 @@ class PropertyRowContainer : public PropertyRow
 {
 public:
 	PropertyRowContainer();
-	bool isContainer() const{ return true; }
-	bool onActivate( QPropertyTree* tree, bool force);
-	bool onContextMenu(QMenu& item, QPropertyTree* tree);
-	void redraw(const PropertyDrawContext& context);
+	bool isContainer() const override{ return true; }
+	bool onActivate( QPropertyTree* tree, bool force) override;
+	bool onContextMenu(QMenu& item, QPropertyTree* tree) override;
+	void redraw(const PropertyDrawContext& context) override;
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
 
 	void labelChanged() override;
-	bool isStatic() const{ return false; }
-	bool isSelectable() const{ return userWidgetSize() == 0 ? false : true; }
+	bool isStatic() const override{ return false; }
+	bool isSelectable() const override{ return userWidgetSize() == 0 ? false : true; }
 
 	PropertyRow* defaultRow(PropertyTreeModel* model);
 	const PropertyRow* defaultRow(const PropertyTreeModel* model) const;
@@ -56,11 +56,11 @@ public:
 		elementTypeName_ = value.elementType().name();
 	}
 	const char* typeNameForFilter(QPropertyTree* tree) const override;
-	yasli::string valueAsString() const;
+	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
-	bool isFixedSize() const{ return fixedSize_; }
-	WidgetPlacement widgetPlacement() const{ return WIDGET_AFTER_NAME; }
-	int widgetSizeMin() const{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
+	bool isFixedSize() const override{ return fixedSize_; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_NAME; }
+	int widgetSizeMin(const QPropertyTree*) const override{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
 
 protected:
 	void generateMenu(QMenu& menu, QPropertyTree* tree);

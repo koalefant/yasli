@@ -51,18 +51,18 @@ public:
 	void setDerivedType(const yasli::TypeID& typeID, yasli::ClassFactoryBase* factory);
 	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
-	bool onActivate( QPropertyTree* tree, bool force);
-	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed);
-	bool onContextMenu(QMenu &root, QPropertyTree* tree);
-	bool isStatic() const{ return false; }
-	bool isPointer() const{ return true; }
-	int widgetSizeMin() const;
-	yasli::wstring generateLabel() const;
-	yasli::string valueAsString() const;
+	bool onActivate( QPropertyTree* tree, bool force) override;
+	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;
+	bool onContextMenu(QMenu &root, QPropertyTree* tree) override;
+	bool isStatic() const override{ return false; }
+	bool isPointer() const override{ return true; }
+	int widgetSizeMin(const QPropertyTree*) const override;
+	yasli::wstring generateLabel() const override;
+	yasli::string valueAsString() const override;
 	const char* typeNameForFilter() const override { return baseType_.name(); }
-	void redraw(const PropertyDrawContext& context);
-	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
-	void serializeValue(yasli::Archive& ar);
+	void redraw(const PropertyDrawContext& context) override;
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
+	void serializeValue(yasli::Archive& ar) override;
 protected:
 
 	yasli::TypeID baseType_;

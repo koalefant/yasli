@@ -69,7 +69,7 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed)
 {
 	changed = false;
-	if (widgetRect().contains(point) && !userReadOnly()) {
+	if (widgetRect(tree).contains(point) && !userReadOnly()) {
 		startIncrement();
 		return true;
 	}

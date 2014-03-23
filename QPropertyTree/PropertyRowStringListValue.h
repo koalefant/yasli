@@ -39,7 +39,7 @@ public:
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin() const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin(const QPropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
 	void redraw(const PropertyDrawContext& context) override
@@ -96,7 +96,7 @@ public:
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin() const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin(const QPropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
 	void redraw(const PropertyDrawContext& context) override

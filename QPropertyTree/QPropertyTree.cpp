@@ -244,8 +244,6 @@ private:
 
 // ---------------------------------------------------------------------------
 
-TreeConfig TreeConfig::defaultConfig;
-
 TreeConfig::TreeConfig()
 : immediateUpdate_(true)
 , hideUntranslated_(true)
@@ -255,10 +253,13 @@ TreeConfig::TreeConfig()
 , fullRowMode_(false)
 , showContainerIndices_(true)
 , filterWhenType_(true)
-, tabSize_(PropertyRow::ROW_DEFAULT_HEIGHT)
 , sliderUpdateDelay_(25)
 , undoEnabled_(true)
 {
+	QFont font;
+	QFontMetrics fm(font);
+	defaultRowHeight_ = max(17, fm.height() + 6); // to fit at least 16x16 icons
+	tabSize_ = defaultRowHeight_;
 }
 
 // ---------------------------------------------------------------------------
@@ -559,8 +560,6 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
 
-	(TreeConfig&)*this = defaultConfig;
-
 	model_.reset(new PropertyTreeModel());
 	model_->setExpandLevels(expandLevels_);
 	model_->setUndoEnabled(undoEnabled_);
@@ -720,7 +719,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 	pressPoint_ = point;
 	row = model()->root()->hit(this, point);
 	if(row){
-		if(!row->isRoot() && row->plusRect().contains(point) && toggleRow(row))
+		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
 			return true;
 		PropertyRow* rowToSelect = row;
 		while (rowToSelect && !rowToSelect->isSelectable())
@@ -733,7 +732,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 	row = model()->root()->hit(this, point);
 	if(row && !row->isRoot()){
 		bool changed = false;
-		if (row->widgetRect().contains(point)) {
+		if (row->widgetRect(this).contains(point)) {
 			DragCheckBegin dragCheck = row->onMouseDragCheckBegin();
 			if (dragCheck != DRAG_CHECK_IGNORE) {
 				dragCheckValue_ = dragCheck == DRAG_CHECK_SET;
@@ -747,7 +746,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 			if(!changed && !widget_){ // FIXME: осмысленный метод для проверки
 				if(capture)
 					return true;
-				else if(row->widgetRect().contains(point)){
+				else if(row->widgetRect(this).contains(point)){
 					if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
 						interruptDrag();
 					row->onActivate(this, false);
@@ -764,7 +763,7 @@ void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint po
 	onMouseStill();
 	row->onMouseUp(this, point);
 
-	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect().contains(point)) {
+	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect(this).contains(point)) {
 		row->onActivateRelease(this);
 	}
 }
@@ -1412,7 +1411,7 @@ void QPropertyTree::_arrangeChildren()
 			QWidget* w = widget_->actualWidget();
 			YASLI_ASSERT(w);
 			if(w){
-				QRect rect = row->widgetRect();
+				QRect rect = row->widgetRect(this);
 				rect = QRect(rect.topLeft() - offset_ + area_.topLeft(), 
 							 rect.bottomRight() - offset_ + area_.topLeft());
 				w->move(rect.topLeft());
@@ -2006,10 +2005,10 @@ QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const QPoint& po
 {
 	QPoint point = pointToRootSpace(pointInWindowSpace);
 
-	if(!row->hasVisibleChildren(this) && row->plusRect().contains(point))
+	if(!row->hasVisibleChildren(this) && row->plusRect(this).contains(point))
 		return TREE_HIT_PLUS;
 
-	if(row->textRect().contains(point))
+	if(row->textRect(this).contains(point))
 		return TREE_HIT_TEXT;
 
 	if(rowRect.contains(point))
@@ -2178,7 +2177,7 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	QPoint point = ev->pos();
 	PropertyRow* row = rowByPoint(point);
 	if(row){
-		if(row->widgetRect().contains(pointToRootSpace(point))){
+		if(row->widgetRect(this).contains(pointToRootSpace(point))){
 			if(!row->onActivate(this, true) &&
 				!row->onActivateRelease(this))
 				toggleRow(row);	
@@ -2219,7 +2218,7 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 	else{
 		QPoint point = ev->pos();
 		PropertyRow* row = rowByPoint(point);
-		if (row && dragCheckMode_ && row->widgetRect().contains(pointToRootSpace(point))) {
+		if (row && dragCheckMode_ && row->widgetRect(this).contains(pointToRootSpace(point))) {
 			row->onMouseDragCheck(this, dragCheckValue_);
 		}
 		else if(capturedRow_){

@@ -20,18 +20,18 @@ public:
 	bool assignToPrimitive(void* val, size_t size) const override;
 	void setValue(bool value) { value_ = value; }
 
-	void redraw(const PropertyDrawContext& context);
-	bool isLeaf() const{ return true; }
-	bool isStatic() const{ return false; }
+	void redraw(const PropertyDrawContext& context) override;
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
 
-	bool onActivate(QPropertyTree* tree, bool force);
+	bool onActivate(QPropertyTree* tree, bool force) override;
 	DragCheckBegin onMouseDragCheckBegin() override;
 	bool onMouseDragCheck(QPropertyTree* tree, bool value) override;
-	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
-	yasli::string valueAsString() const{ return value_ ? "true" : "false"; }
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
+	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
+	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(yasli::Archive& ar);
-	int widgetSizeMin() const{ return ICON_SIZE; }
+	int widgetSizeMin(const QPropertyTree* tree) const override;
 protected:
 	bool value_;
 };

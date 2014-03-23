@@ -554,11 +554,11 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 		}
 	}
 
-	widgetSize_ = widgetSizeMin();
+	widgetSize_ = widgetSizeMin(tree);
 
 	updateTextSizeInitial(tree, index);
 
-	size_ = QPoint(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
+	size_ = QPoint(textSizeInitial_ + widgetSizeMin(tree), isRoot() ? 0 : tree->_defaultRowHeight() + floorHeight());
 
 	pos_.setX(posX);
 	posX += plusSize_;
@@ -682,7 +682,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			size_.setY(max(size_.y(), row->size_.y()));
 		}
 		else if(expanded())
-			row->calculateMinimalSize(tree, nonPulled->plusRect().right(), force, &extraSize, i);
+			row->calculateMinimalSize(tree, nonPulled->plusRect(tree).right(), force, &extraSize, i);
 	}
 
 	if (widgetPlace == WIDGET_AFTER_PULLED)
@@ -737,7 +737,7 @@ void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int*
 	*minTextSize += textSizeInitial_;
 	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
 		*freePulledChildren += 1;
-	*minimalWidth += textSizeInitial_ + widgetSizeMin();
+	*minimalWidth += textSizeInitial_ + widgetSizeMin(tree);
 
 	size_t numChildren = children_.size();
 	for (size_t i = 0; i < numChildren; ++i) {
@@ -901,8 +901,8 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 {
 	PropertyDrawContext context;
 	context.tree = tree;
-	context.widgetRect = widgetRect();
-	context.lineRect = floorRect();
+	context.widgetRect = widgetRect(tree);
+	context.lineRect = floorRect(tree);
 	context.painter = &painter;
 	context.captured = tree->_isCapturedRow(this);
 	context.pressed = tree->_pressedRow() == this;
@@ -975,7 +975,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 
 	if(!tree->compact() || !parent()->isRoot()){
 		if(hasVisibleChildren(tree)){
-			drawPlus(painter, tree, plusRect(), expanded(), selected(), expanded());
+			drawPlus(painter, tree, plusRect(tree), expanded(), selected(), expanded());
 		}
 	}
 
@@ -985,7 +985,7 @@ void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int inde
 
 	if(textSize_ > 0){
 		const QFont* font = rowFont(tree);
-		tree->_drawRowLabel(painter, text.c_str(), font, textRect(), textColor);
+		tree->_drawRowLabel(painter, text.c_str(), font, textRect(tree), textColor);
 	}
 }
 
@@ -1311,6 +1311,25 @@ bool PropertyRow::isFullRow(const QPropertyTree* tree) const
 	return userFullRow();
 }
 
+QRect PropertyRow::textRect(const QPropertyTree* tree) const
+{
+	return QRect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, tree->_defaultRowHeight());
+}
+
+QRect PropertyRow::widgetRect(const QPropertyTree* tree) const
+{
+	return QRect(widgetPos_, pos_.y(), widgetSize_, tree->_defaultRowHeight());
+}
+
+QRect PropertyRow::plusRect(const QPropertyTree* tree) const
+{
+	return QRect(pos_.x(), pos_.y(), plusSize_, tree->_defaultRowHeight());
+}
+
+QRect PropertyRow::floorRect(const QPropertyTree* tree) const
+{
+	return QRect(textPos_, pos_.y() + tree->_defaultRowHeight(), size_.x() - (textPos_ - pos_.x()) , size_.y() - tree->_defaultRowHeight());
+}
 
 YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
 

@@ -30,7 +30,7 @@ bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 
 void PropertyRowBool::redraw(const PropertyDrawContext& context)
 {
-	context.drawCheck(widgetRect(), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
+	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
 bool PropertyRowBool::onActivate(QPropertyTree* tree, bool force)
@@ -66,4 +66,9 @@ bool PropertyRowBool::onMouseDragCheck(QPropertyTree* tree, bool value)
 void PropertyRowBool::serializeValue(yasli::Archive& ar)
 {
     ar(value_, "value", "Value");
+}
+
+int PropertyRowBool::widgetSizeMin(const QPropertyTree* tree) const
+{
+	return tree->_defaultRowHeight();
 }

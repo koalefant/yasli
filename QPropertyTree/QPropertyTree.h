@@ -58,6 +58,7 @@ public:
 	void setShowContainerIndices(bool showContainerIndices) { showContainerIndices_ = showContainerIndices; }
 	void setSliderUpdateDelay(int delayMS) { sliderUpdateDelay_ = delayMS; }
 	bool showContainerIndices() const{ return showContainerIndices_; }
+	int _defaultRowHeight() const { return defaultRowHeight_; }
 
 	static TreeConfig defaultConfig;
 
@@ -72,6 +73,7 @@ protected:
 	int filter_;
 	int tabSize_;
 	int sliderUpdateDelay_;
+	int defaultRowHeight_;
 
 	int expandLevels_;
 	bool undoEnabled_;

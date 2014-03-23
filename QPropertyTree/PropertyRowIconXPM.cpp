@@ -42,7 +42,7 @@ public:
 	yasli::wstring valueAsWString() const{ return L""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	void serializeValue(Archive& ar) {}
-	int widgetSizeMin() const{ return 18; }
+	int widgetSizeMin(const QPropertyTree*) const{ return 18; }
 	int height() const{ return 16; }
 protected:
 	IconXPM icon_;
@@ -100,7 +100,7 @@ public:
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
-	int widgetSizeMin() const{ return 18; }
+	int widgetSizeMin(const QPropertyTree*) const override{ return 18; }
 	int height() const{ return 16; }
 
 	IconXPM iconTrue_;

@@ -10,6 +10,11 @@ PropertyRowColor::PropertyRowColor()
 {
 }
 
+int PropertyRowColor::widgetSizeMin(const QPropertyTree* tree) const
+{
+	return tree->_defaultRowHeight();
+}
+
 void PropertyRowColor::redraw(const PropertyDrawContext& context)
 {
 	context.painter->save();
