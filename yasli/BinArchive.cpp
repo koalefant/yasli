@@ -350,6 +350,10 @@ bool BinIArchive::load(const char* filename)
 
 bool BinIArchive::open(const char* buffer, size_t size)
 {
+    if(!buffer)
+        return false;
+    if(size < sizeof(unsigned int))
+        return false;
 	if(*(unsigned*)(buffer) != BIN_MAGIC)
 		return false;
 	buffer += sizeof(unsigned int);
