@@ -24,6 +24,7 @@ public:
 	yasli::string filterType;
 
 public slots:
+	void onMenuFilter();
 	void onMenuFilterByName();
 	void onMenuFilterByValue();
 	void onMenuFilterByType();

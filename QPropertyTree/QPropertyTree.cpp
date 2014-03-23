@@ -44,6 +44,11 @@
 
 using yasli::Serializers;
 
+void PropertyTreeMenuHandler::onMenuFilter()
+{
+	tree->startFilter("");
+}
+
 void PropertyTreeMenuHandler::onMenuFilterByName()
 {
 	tree->startFilter(filterName.c_str());
@@ -1239,6 +1244,7 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 
 	menu.addSeparator();
 
+	menu.addAction("Filter...", handler, SLOT(onMenuFilter()))->setShortcut(QKeySequence("Ctrl+F"));
 	QMenu* filter = menu.addMenu("Filter by");
 	{
 		yasli::string nameFilter = "#";
@@ -1397,9 +1403,6 @@ void QPropertyTree::startFilter(const char* filter)
 	filterEntry_->setText(filter);
     onFilterChanged(filter);
 }
-
-
-
 
 void QPropertyTree::_arrangeChildren()
 {
