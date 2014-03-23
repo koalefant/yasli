@@ -119,6 +119,60 @@ struct TypeInfo
 	size_t size;
 	char name[128];
 
+	// We are trying to minimize type names here. Stripping namespaces,
+	// whitespaces and S/C/E/I prefixes. Why namespaces? Type names are usually
+	// used in two contexts: for unique name within factory context, where
+	// collision is unlikely, or for filtering in PropertyTree where concise
+	// name is much more useful.
+	static void cleanTypeName(char*& d, const char* dend, const char*& s, const char* send)
+	{
+		if(strncmp(s, "class ", 6) == 0)
+			s += 6;
+		else if(strncmp(s, "struct ", 7) == 0)
+			s += 7;
+
+		while(*s == ' ' && s != send)
+			++s;
+
+		// strip C/S/I/E prefixes
+		if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
+			++s;
+
+		if (s >= send)
+			return;
+
+		char* startd = d;
+		while (d != dend && s != send) {
+			while(*s == ' ' && s != send)
+				++s;
+			if (s == send)
+				break;
+			if (*s == ':' && s[1] == ':') {
+				// strip namespaces
+				s += 2;
+				d = startd;
+
+				if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
+					++s;
+			}
+			if (s >= send)
+				break;
+			if (*s == '<') {
+				*d = '<';
+				++d;
+				++s;
+				cleanTypeName(d, dend, s, send);
+			}
+			else if (*s == '>') {
+				*d = '\0';
+				return;
+			}
+			*d = *s;
+			++s;
+			++d;
+		}
+	}
+
 	template<size_t nameLen>
 	static void extractTypeName(char (&name)[nameLen], const char* funcName)
 	{
@@ -143,21 +197,15 @@ struct TypeInfo
 			++s;
 #endif
 		YASLI_ASSERT(s != 0  && send != 0);
-		if(strncmp(s, "class ", 6) == 0)
-			s += 6;
-		else if(strncmp(s, "struct ", 7) == 0)
-			s += 7;
 
 		char* d = name;
 		const char* dend = name + sizeof(name) - 1;
-		while (d != dend && s != send)
-		{
-			*d = *s;
-			++s;
-			++d;
-		}
+		cleanTypeName(d, dend, s, send);
 		*d = '\0';
-		YASLI_ASSERT(s == send && "Type name doesn't fit into the buffer");
+		
+		// This assertion is not critical, but may result in collision as
+		// stripped name wil be used, e.g. for lookup in factory.
+		YASLI_ASSERT(s == send && "Type name does not fit into the buffer");
 	}
 
 	static unsigned int generateTypeID()

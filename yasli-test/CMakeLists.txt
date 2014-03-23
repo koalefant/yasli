@@ -4,12 +4,13 @@ project("yasli-test")
 include_directories(.)
 
 set(TEST_SOURCES
-  "Test.cpp"
-  "ComplexClass.h"
-  "TestInPlaceArchive.cpp"
-  "TestTextArchive.cpp"
-  "TestJSONArchive.cpp"
-  "TestBinArchive.cpp"
+  ComplexClass.h
+  Test.cpp
+  TestBinArchive.cpp
+  TestGeneral.cpp
+  TestInPlaceArchive.cpp
+  TestJSONArchive.cpp
+  TestTextArchive.cpp
   )
 source_group("" FILES ${TEST_SOURCES})
 
