@@ -1221,22 +1221,19 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 	if(undoEnabled_){
 		if(!menu.isEmpty())
 			menu.addSeparator();
-		QAction* undo = menu.addAction("Undo");
+		QAction* undo = menu.addAction("Undo", handler, SLOT(onMenuUndo()));
 		undo->setEnabled(model()->canUndo());
 		undo->setShortcut(QKeySequence("Ctrl+Z"));
-		connect(undo, SIGNAL(triggered()), handler, SLOT(onMenuUndo()));
 	}
 	if(!menu.isEmpty())
 		menu.addSeparator();
 
-	QAction* copy = menu.addAction("Copy");
+	QAction* copy = menu.addAction("Copy", handler, SLOT(onMenuCopy()));
 	copy->setShortcut(QKeySequence("Ctrl+C"));
-	connect(copy, SIGNAL(triggered()), handler, SLOT(onMenuCopy()));
 
 	if(!row->userReadOnly()){
-		QAction* paste = menu.addAction("Paste");
+		QAction* paste = menu.addAction("Paste", handler, SLOT(onMenuPaste()));
 		paste->setShortcut(QKeySequence("Ctrl+V"));
-		connect(paste, SIGNAL(triggered()), handler, SLOT(onMenuPaste()));
 		paste->setEnabled(canBePasted(row));
 	}
 
@@ -1247,17 +1244,17 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 		yasli::string nameFilter = "#";
 		nameFilter += quoteIfNeeded(row->labelUndecorated());
 		handler->filterName = nameFilter;
-		connect(filter->addAction((yasli::string("Name:\t") + nameFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByName()));
+		filter->addAction((yasli::string("Name:\t") + nameFilter).c_str(), handler, SLOT(onMenuFilterByName()));
 
 		yasli::string valueFilter = "=";
 		valueFilter += quoteIfNeeded(row->valueAsString().c_str());
 		handler->filterValue = valueFilter;
-		connect(filter->addAction((yasli::string("Value:\t") + valueFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByValue()));
+		filter->addAction((yasli::string("Value:\t") + valueFilter).c_str(), handler, SLOT(onMenuFilterByValue()));
 
 		yasli::string typeFilter = ":";
-		typeFilter += quoteIfNeeded(row->typeNameForFilter());
+		typeFilter += quoteIfNeeded(row->typeNameForFilter(this));
 		handler->filterType = typeFilter;
-		connect(filter->addAction((yasli::string("Type:\t") + typeFilter).c_str()), SIGNAL(triggered()), handler, SLOT(onMenuFilterByType()));
+		filter->addAction((yasli::string("Type:\t") + typeFilter).c_str(), handler, SLOT(onMenuFilterByType()));
 	}
 
 #if 0
@@ -1624,7 +1621,7 @@ struct FilterVisitor
 		if (matchFilter && filter_.typeRelevant(filter_.VALUE))
 			matchFilter = filter_.match(value.c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
-			matchFilter = filter_.match(row->typeNameForFilter(), filter_.TYPE, 0, 0);						   
+			matchFilter = filter_.match(row->typeNameForFilter(tree), filter_.TYPE, 0, 0);						   
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {

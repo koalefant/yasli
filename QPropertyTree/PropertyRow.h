@@ -183,7 +183,7 @@ public:
 	virtual void labelChanged() {}
 	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
-	const char* typeNameForFilter() const;
+	virtual const char* typeNameForFilter(QPropertyTree* tree) const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
 	const char* rowText(char (&containerLabelBuffer)[16], const QPropertyTree* tree, int rowIndex) const;
 

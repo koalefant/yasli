@@ -59,6 +59,7 @@ public:
 	int widgetSizeMin() const;
 	yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const;
+	const char* typeNameForFilter() const override { return baseType_.name(); }
 	void redraw(const PropertyDrawContext& context);
 	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar);

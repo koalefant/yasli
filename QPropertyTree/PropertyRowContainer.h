@@ -55,6 +55,7 @@ public:
 		fixedSize_ = value.isFixedSize();
 		elementTypeName_ = value.elementType().name();
 	}
+	const char* typeNameForFilter(QPropertyTree* tree) const override;
 	yasli::string valueAsString() const;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
