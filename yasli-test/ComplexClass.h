@@ -229,6 +229,13 @@ public:
 		b.name = "B";
 
 		members_.resize(13);
+
+		intToString_.push_back(std::make_pair(1, "one"));
+		intToString_.push_back(std::make_pair(2, "two"));
+		intToString_.push_back(std::make_pair(3, "three"));
+		stringToInt_.push_back(std::make_pair("one", 1));
+		stringToInt_.push_back(std::make_pair("two", 2));
+		stringToInt_.push_back(std::make_pair("three", 3));
 	}
 
 	void change()
@@ -254,7 +261,7 @@ public:
 		for (size_t i = 0; i < arrayLen; ++i)
 			array_[i].change(int(arrayLen - i));
 
-    numericTypes_.change();
+		numericTypes_.change();
 
 		vectorOfStrings_.push_back("str1");
 		vectorOfStrings_.push_back("2str");
@@ -263,6 +270,9 @@ public:
 		stringToStructMap_.erase("a");
 		Member& c = stringToStructMap_["c"];
 		c.name = "C";
+
+		intToString_.push_back(std::make_pair(4, "four"));
+		stringToInt_.push_back(std::make_pair("four", 4));
 	}
 
 	void serialize(Archive& ar)
@@ -286,6 +296,8 @@ public:
 		ar(array_, "array");
 		ar(numericTypes_, "numericTypes");
 		ar(vectorOfStrings_, "vectorOfStrings");
+		ar(intToString_, "intToString");
+		ar(stringToInt_, "stringToInt");
 	}
 
 	void checkEquality(const ComplexClass& copy) const
@@ -321,12 +333,26 @@ public:
 			array_[i].checkEquality(copy.array_[i]);
 		}
 
-    numericTypes_.checkEquality(copy.numericTypes_);
+		numericTypes_.checkEquality(copy.numericTypes_);
+
+		YCHECK(intToString_.size() == copy.intToString_.size());
+		for (size_t i = 0; i < intToString_.size(); ++i)
+		{
+			YCHECK(intToString_[i] == copy.intToString_[i]);
+		}
+
+		YCHECK(stringToInt_.size() == copy.stringToInt_.size());
+		for (size_t i = 0; i < stringToInt_.size(); ++i)
+		{
+			YCHECK(stringToInt_[i] == copy.stringToInt_[i]);
+		}
 	}
 protected:
 	std::string name_;
 	typedef std::vector<Member> Members;
 	std::vector<std::string> vectorOfStrings_;
+	std::vector<std::pair<int, string> > intToString_;
+	std::vector<std::pair<string, int> > stringToInt_;
 	Members members_;
 	int index_;
   NumericTypes numericTypes_;

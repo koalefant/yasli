@@ -230,7 +230,7 @@ inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name,
 namespace yasli {
 
 template<class V>
-struct StdPair : yasli::KeyValueInterface
+struct StdStringPair : yasli::KeyValueInterface
 {
 	const char* get() const { return pair_.first.c_str(); }
 	void set(const char* key) { pair_.first.assign(key); }
@@ -239,13 +239,23 @@ struct StdPair : yasli::KeyValueInterface
 		return ar(pair_.second, name, label);
 	}
 
-	StdPair(std::pair<std::string, V>& pair)
+	StdStringPair(std::pair<std::string, V>& pair)
 	: pair_(pair)
 	{
 	}
 
 
 	std::pair<std::string, V>& pair_;
+};
+
+template<class K, class V>
+struct StdPair : std::pair<K, V>
+{
+	void serialize(yasli::Archive& ar) 
+	{
+		ar(this->first, "key");
+		ar(this->second, "value");
+	}
 };
 
 }
@@ -255,8 +265,14 @@ namespace std{
 template<class V>
 bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
 {
-	yasli::StdPair<V> keyValue(pair);
+	yasli::StdStringPair<V> keyValue(pair);
 	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
+}
+
+template<class K, class V>
+bool serialize(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label)
+{
+	return ar(static_cast<yasli::StdPair<K, V>&>(pair), name, label);
 }
 
 }

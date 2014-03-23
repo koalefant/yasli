@@ -34,6 +34,8 @@ bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const 
 
 template<class V>
 bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label);
+template<class K, class V>
+bool serialize(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label);
 
 }
 
