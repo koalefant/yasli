@@ -221,7 +221,7 @@ public:
 	void adjustHoveredRect(QRect& hoveredRect);
 	const QFont* rowFont(const QPropertyTree* tree) const;
 
-	void drawRow(QPainter& painter, const QPropertyTree* tree, int rowIndex);
+	void drawRow(QPainter& painter, const QPropertyTree* tree, int rowIndex, bool selectionPass);
 	void drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const;
 	void drawStaticText(QPainter& p, const QRect& widgetRect);
 

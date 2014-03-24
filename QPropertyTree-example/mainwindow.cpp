@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
 	globalTestData.elements.resize(5);
 #endif
 
+	resize(800, 600);
 
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
 

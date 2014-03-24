@@ -191,8 +191,7 @@ void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& _r, const
 	p.setRenderHints(QPainter::Antialiasing, true);
 
 	p.setBrush(brush);
-	QPen pen(QBrush(border), 1.0, Qt::SolidLine);
-	p.setPen(pen);
+	p.setPen(QPen(border, 1.0));
 	QRectF adjustedRect = _r;
 	adjustedRect.adjust(0.5f, 0.5f, -0.5f, -0.5f);
 	p.drawRoundedRect(adjustedRect, radius, radius);

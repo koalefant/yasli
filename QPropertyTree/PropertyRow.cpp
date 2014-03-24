@@ -37,9 +37,9 @@ static QColor interpolate(const QColor& a, const QColor& b, float k)
 {
 	float mk = 1.0f - k;
 	return QColor(a.red() * k  + b.red() * mk,
-								a.green() * k + b.red() * mk,
-								a.blue() * k + b.blue() * mk,
-								a.alpha() * k + b.alpha() * mk);
+				  a.green() * k + b.green() * mk,
+				  a.blue() * k + b.blue() * mk,
+				  a.alpha() * k + b.alpha() * mk);
 }
 
 // ---------------------------------------------------------------------------
@@ -897,100 +897,93 @@ const QFont* PropertyRow::rowFont(const QPropertyTree* tree) const
 	return hasVisibleChildren(tree) || isContainer() ? boldFont : normalFont;
 }
 
-void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int index)
+void PropertyRow::drawRow(QPainter& painter, const QPropertyTree* tree, int index, bool selectionPass)
 {
-	PropertyDrawContext context;
-	context.tree = tree;
-	context.widgetRect = widgetRect(tree);
-	context.lineRect = floorRect(tree);
-	context.painter = &painter;
-	context.captured = tree->_isCapturedRow(this);
-	context.pressed = tree->_pressedRow() == this;
-
-	QColor textColor = tree->palette().buttonText().color();
-
 	QRect rowRect = rect();
+	QRect selectionRect;
+	if(!pulledUp())
+		selectionRect = rowRect.adjusted(plusSize_ - (tree->compact() ? 1 : 2), -2, 1, 1);
+	else
+		selectionRect = rowRect.adjusted(-1, 0, 1, -1);
 
-	// drawing a horizontal line
-	char containerLabel[16] = "";
-	yasli::wstring text = toWideChar(rowText(containerLabel, tree, index));
-
-	if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-		 !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
-	{
-		QRect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
-
-		QLinearGradient gradient(rect.left(), rect.top(), rect.right(), rect.top());
-		gradient.setColorAt(0.0f, tree->palette().color(QPalette::Button));
-		gradient.setColorAt(0.6f, tree->palette().color(QPalette::Light));
-		gradient.setColorAt(0.95f, tree->palette().color(QPalette::Light));
-		gradient.setColorAt(1.0f, tree->palette().color(QPalette::Button));
-		QBrush brush(gradient);
-		painter.fillRect(rect, brush);
-	}
-
-	QRect selectionRect = rowRect;
-	if(!pulledUp()){
-		selectionRect.setLeft(rowRect.left() + plusSize_ - (tree->compact() ? 1 : 2));
-		selectionRect.setWidth(rowRect.right() - selectionRect.left());
-	}
-	else{
-		selectionRect.setLeft(rowRect.left() - 1);
-		selectionRect.setWidth(rowRect.width() + 1);
-		selectionRect.adjust(0, 1, 0, -1);
-	}
-
-	if(selected()){
-		// drawing a selection rectangle
-		QBrush brush(tree->hasFocusOrInplaceHasFocus() ? tree->palette().highlight() : tree->palette().shadow());
-		QColor brushColor = brush.color();
-		QColor borderColor(brushColor.alpha() / 4, brushColor.red(), brushColor.green(), brushColor.blue());
-		fillRoundRectangle(painter, brush, selectionRect, borderColor, 6);
-	}
-	else 
-	{
-		bool pulledChildrenSelected = false;
-
-		for (size_t i = 0; i < children_.size(); ++i) {
-			PropertyRow* child = children_[i];
-			if (!child)
-				continue;
-			if ((child->pulledBefore() || child->pulledUp()) && child->selected())
-				pulledChildrenSelected = true;
-		}
-
-		if (pulledChildrenSelected) {
-			// draw rectangle around parent of selected pulled row
-			QColor color1(tree->palette().button().color());
-			QColor color2(tree->hasFocusOrInplaceHasFocus() ? tree->palette().highlight().color() : tree->palette().shadow().color());
-			QColor brushColor = interpolate(color1,  color2, 0.33f);
-			QBrush brush(brushColor);
-			QColor borderColor(brushColor.red(), brushColor.green(), brushColor.blue(), brushColor.alpha() / 8);
+	if (selectionPass) {
+		if (selected()) {
+			// drawing a selection rectangle
+			QBrush brush(tree->hasFocusOrInplaceHasFocus() ? tree->palette().highlight() : tree->palette().shadow());
+			QColor brushColor = brush.color();
+			QColor borderColor(brushColor.red(), brushColor.green(), brushColor.blue(), brushColor.alpha() / 4);
 			fillRoundRectangle(painter, brush, selectionRect, borderColor, 6);
 		}
-	}
+		else{
+			bool pulledChildrenSelected = false;
 
-	if(pulledSelected())
-		textColor = tree->palette().highlightedText().color();
+			for (size_t i = 0; i < children_.size(); ++i) {
+				PropertyRow* child = children_[i];
+				if (!child)
+					continue;
+				if ((child->pulledBefore() || child->pulledUp()) && child->selected())
+					pulledChildrenSelected = true;
+			}
 
-	if(!tree->compact() || !parent()->isRoot()){
-		if(hasVisibleChildren(tree)){
-			drawPlus(painter, tree, plusRect(tree), expanded(), selected(), expanded());
+			if (pulledChildrenSelected) {
+				// draw rectangle around parent of selected pulled row
+				QColor color1(tree->palette().button().color());
+				QColor color2(tree->palette().highlight().color());
+				QColor brushColor = tree->hasFocusOrInplaceHasFocus() ? interpolate(color1, color2, 0.33f) : tree->palette().shadow().color();
+				fillRoundRectangle(painter, QBrush(brushColor), selectionRect, brushColor, 6);
+			}
 		}
 	}
+	else{
+		PropertyDrawContext context;
+		context.tree = tree;
+		context.widgetRect = widgetRect(tree);
+		context.lineRect = floorRect(tree);
+		context.painter = &painter;
+		context.captured = tree->_isCapturedRow(this);
+		context.pressed = tree->_pressedRow() == this;
 
-	// custom drawing
-	if(!isStatic() && context.widgetRect.isValid())
-		redraw(context);
+		QColor textColor = tree->palette().buttonText().color();
 
-	if(textSize_ > 0){
-		const QFont* font = rowFont(tree);
-		tree->_drawRowLabel(painter, text.c_str(), font, textRect(tree), textColor);
+
+		// drawing a horizontal line
+		char containerLabel[16] = "";
+		yasli::wstring text = toWideChar(rowText(containerLabel, tree, index));
+
+		if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
+		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
+		{
+			QRect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
+
+			QLinearGradient gradient(rect.left(), rect.top(), rect.right(), rect.top());
+			gradient.setColorAt(0.0f, tree->palette().color(QPalette::Button));
+			gradient.setColorAt(0.6f, tree->palette().color(QPalette::Light));
+			gradient.setColorAt(0.95f, tree->palette().color(QPalette::Light));
+			gradient.setColorAt(1.0f, tree->palette().color(QPalette::Button));
+			QBrush brush(gradient);
+			painter.fillRect(rect, brush);
+		}
+
+
+		if(pulledSelected())
+			textColor = tree->palette().highlightedText().color();
+
+		if(!tree->compact() || !parent()->isRoot()){
+			if(hasVisibleChildren(tree)){
+				drawPlus(painter, tree, plusRect(tree), expanded(), selected(), expanded());
+			}
+		}
+
+		// custom drawing
+		if(!isStatic() && context.widgetRect.isValid())
+			redraw(context);
+
+		if(textSize_ > 0){
+			const QFont* font = rowFont(tree);
+			tree->_drawRowLabel(painter, text.c_str(), font, textRect(tree), textColor);
+		}
 	}
 }
-
-
-
 
 void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const
 {	

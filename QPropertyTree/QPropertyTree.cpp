@@ -285,8 +285,8 @@ void DragWindow::set(QPropertyTree* tree, PropertyRow* row, const QRect& rowRect
 
 void DragWindow::setWindowPos(bool visible)
 {
-	QWidget::move(rect_.left() + offset_.x() - 1,  rect_.top() + offset_.y() - 1 + tree_->area_.top());
-	QWidget::resize(rect_.width() + 2, rect_.height() + 2);
+	QWidget::move(rect_.left() + offset_.x() - 3,  rect_.top() + offset_.y() - 3 + tree_->area_.top());
+	QWidget::resize(rect_.width() + 5, rect_.height() + 5);
 }
 
 void DragWindow::show()
@@ -313,8 +313,10 @@ struct DrawRowVisitor
 
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
-		if(row->pulledUp() && row->visible(tree))
-			row->drawRow(painter_, tree, index);
+		if(row->pulledUp() && row->visible(tree)) {
+			row->drawRow(painter_, tree, index, true);
+			row->drawRow(painter_, tree, index, false);
+		}
 
 		return SCAN_CHILDREN_SIBLINGS;
 	}
@@ -325,20 +327,21 @@ protected:
 
 void DragWindow::drawRow(QPainter& p)
 {
-	QRect entireRowRect(0, 0, rect_.width() + 1, rect_.height() + 1);
+	QRect entireRowRect(0, 0, rect_.width() + 4, rect_.height() + 4);
 
 	p.setBrush(tree_->palette().button());
 	p.setPen(QPen(tree_->palette().color(QPalette::WindowText)));
 	p.drawRect(entireRowRect);
 
 	QPoint leftTop = row_->rect().topLeft();
-	int offsetX = -leftTop.x() - tree_->tabSize() + 2;
-	int offsetY = -leftTop.y() + 1;
+	int offsetX = -leftTop.x() - tree_->tabSize() + 3;
+	int offsetY = -leftTop.y() + 3;
 	p.translate(offsetX, offsetY);
 	int rowIndex = 0;
 	if (row_->parent())
 		rowIndex = row_->parent()->childIndex(row_);
-	row_->drawRow(p, tree_, 0);
+	row_->drawRow(p, tree_, 0, true);
+	row_->drawRow(p, tree_, 0, false);
 	DrawRowVisitor visitor(p);
 	row_->scanChildren(visitor, tree_);
 	p.translate(-offsetX, -offsetY);
@@ -1901,12 +1904,13 @@ void QPropertyTree::_drawRowValue(QPainter& p, const wchar_t* text, const QFont*
 
 struct DrawVisitor
 {
-	DrawVisitor(QPainter& painter, const QRect& area, int scrollOffset)
+	DrawVisitor(QPainter& painter, const QRect& area, int scrollOffset, bool selectionPass)
 		: area_(area)
 		, painter_(painter)
 		, offset_(0)
 		, scrollOffset_(scrollOffset)
 		, lastParent_(0)
+		, selectionPass_(selectionPass)
 	{}
 
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
@@ -1916,7 +1920,7 @@ struct DrawVisitor
 				lastParent_ = row->parent();
 
 			if(row->rect().bottom() > scrollOffset_ && row->rect().width() > 0)
-				row->drawRow(painter_, tree, index);
+				row->drawRow(painter_, tree, index, selectionPass_);
 
 			return SCAN_CHILDREN_SIBLINGS;
 		}
@@ -1930,6 +1934,7 @@ protected:
 	int offset_;
 	int scrollOffset_;
 	PropertyRow* lastParent_;
+	bool selectionPass_;
 };
 
 QSize QPropertyTree::sizeHint() const
@@ -1956,7 +1961,10 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	painter.translate(area_.left(), area_.top());
 
     if (model()->root()) {
-        DrawVisitor op(painter, area_, offset_.y());
+        DrawVisitor selectionOp(painter, area_, offset_.y(), true);
+        model()->root()->scanChildren(selectionOp, this);
+
+        DrawVisitor op(painter, area_, offset_.y(), false);
         model()->root()->scanChildren(op, this);
     }
 
