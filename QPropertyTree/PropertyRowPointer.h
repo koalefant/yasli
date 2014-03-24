@@ -57,9 +57,9 @@ public:
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
 	int widgetSizeMin(const QPropertyTree*) const override;
-	yasli::wstring generateLabel() const override;
+    yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const override;
-	const char* typeNameForFilter() const override { return baseType_.name(); }
+    const char* typeNameForFilter(QPropertyTree* tree) const override { return baseType_.name(); }
 	void redraw(const PropertyDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;

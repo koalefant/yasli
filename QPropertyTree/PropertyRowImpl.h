@@ -28,7 +28,7 @@ public:
 	Type& value() { return value_; }
 	const Type& value() const{ return value_; }
 
-	void setValue(const Serializer& ser) override {
+    void setValueAndContext(const Serializer& ser, Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(Type), return);
 		value_ = *(Type*)(ser.pointer());
 	}

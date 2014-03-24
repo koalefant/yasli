@@ -58,7 +58,7 @@ public:
 	const char* typeNameForFilter(QPropertyTree* tree) const override;
 	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
-	bool isFixedSize() const override{ return fixedSize_; }
+    bool isFixedSize() const { return fixedSize_; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_NAME; }
 	int widgetSizeMin(const QPropertyTree*) const override{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
 
