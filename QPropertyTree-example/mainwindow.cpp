@@ -8,7 +8,9 @@
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
+#include "yasli/decorators/Range.h"
 using yasli::Archive;
+using yasli::Range;
 #include "yasli/STLImpl.h"
 
 struct Vec3
@@ -49,8 +51,8 @@ struct Element
 		ar(signedChar_, "signedChar", "signedChar");
 		ar(unsignedChar_, "unsignedChar", "unsignedChar");
 		ar(unsignedInteger_, "unsignedInteger", "unsignedInteger");
-		ar(short_, "short", "short");
-		ar(unsignedShort_, "unsignedShort", "unsignedShort");
+		ar(Range(short_, -10000, 10000), "short", "short");
+		ar(Range(unsignedShort_, 0, 20000), "unsignedShort", "unsignedShort");
 		ar(longInteger_, "longInteger", "longInteger");
 		ar(unsignedLongInteger_, "unsignedLongInteger", "unsignedLongInteger");
 		ar(float_, "float", "float");

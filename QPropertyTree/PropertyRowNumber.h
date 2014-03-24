@@ -11,9 +11,10 @@
 
 #include "QPropertyTree.h"
 #include "yasli/MemoryWriter.h"
+#include "yasli/decorators/Range.h"
 #include "PropertyRowNumberField.h"
 
-#include <limits.h>
+#include <limits>
 #include <float.h>
 #include <math.h>
 
@@ -65,21 +66,7 @@ Output clamp(Input value, Output min, Output max)
 	return Output(value);
 }
 
-template<class T> void clampToType(char* out, T value) { *out = clamp(value, CHAR_MIN, CHAR_MAX); }
-template<class T> void clampToType(signed char* out, T value) { *out = clamp(value, SCHAR_MIN, SCHAR_MAX); }
-template<class T> void clampToType(short* out, T value) { *out = clamp(value, SHRT_MIN, SHRT_MAX); }
-template<class T> void clampToType(int* out, T value) { *out = clamp(value, INT_MIN, INT_MAX); }
-template<class T> void clampToType(long* out, T value) { *out = clamp(value, LONG_MIN, LONG_MAX); }
-template<class T> void clampToType(long long* out, T value) { *out = clamp(value, LLONG_MIN, LLONG_MAX); }
-
-template<class T> void clampToType(unsigned char* out, T value) { *out = clamp(value, 0, UCHAR_MAX); }
-template<class T> void clampToType(unsigned short* out, T value) { *out = clamp(value, 0, USHRT_MAX); }
-template<class T> void clampToType(unsigned int* out, T value) { *out = clamp(value, (unsigned int)0, UINT_MAX); }
-template<class T> void clampToType(unsigned long* out, T value) { *out = clamp(value, (unsigned long)0, ULONG_MAX); }
-template<class T> void clampToType(unsigned long long* out, T value) { *out = clamp(value, (unsigned long long)0, ULLONG_MAX); }
-
-template<class T> void clampToType(float* out, T value) { *out = clamp(value, -FLT_MAX, FLT_MAX); }
-template<class T> void clampToType(double* out, T value) { *out = clamp(value, -DBL_MAX, DBL_MAX); }
+template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, std::numeric_limits<Out>::min(), std::numeric_limits<Out>::max()); }
 
 inline void clampedNumberFromString(char* value, const char* str)        { clampToType(value, stringToSignedInteger(str)); }
 inline void clampedNumberFromString(signed char* value, const char* str) { clampToType(value, stringToSignedInteger(str)); }
@@ -111,6 +98,14 @@ inline void clampedNumberFromString(double* value, const char* str)
 template<class Type>
 class PropertyRowNumber : public PropertyRowNumberField{
 public:
+	PropertyRowNumber()
+	{
+		softMin_ = std::numeric_limits<Type>::min();
+		softMax_ = std::numeric_limits<Type>::max();
+		hardMin_ = std::numeric_limits<Type>::min();
+		hardMax_ = std::numeric_limits<Type>::max();
+	}
+
 	void setValue(Type value)
 	{
 		value_ = value;
@@ -129,8 +124,27 @@ public:
 		return true;
 	}
 
+    void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
+		yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
+		value_ = *range->value;
+		softMin_ = range->softMin;
+		softMax_ = range->softMax;
+		hardMin_ = range->hardMin;
+		hardMax_ = range->hardMax;
+	}
+
+    bool assignTo(const yasli::Serializer& ser) const override {
+		yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
+		*range->value = value_;
+        return true;
+	}
+
 	void serializeValue(yasli::Archive& ar){
 		ar(value_, "value", "Value");
+		ar(softMin_, "softMin", "SoftMin");
+		ar(softMax_, "softMax", "SoftMax");
+		ar(hardMin_, "hardMin", "HardMin");
+		ar(hardMax_, "hardMax", "HardMax");
 	}
 
 	void startIncrement() override
@@ -151,33 +165,23 @@ public:
 
 	void incrementLog(float screenFraction)
 	{
-		if (yasli::TypeID::get<Type>() == yasli::TypeID::get<float>() || yasli::TypeID::get<Type>() == yasli::TypeID::get<double>()) 
+		bool bothSoftLimitsSet = (std::numeric_limits<Type>::min() == 0 || softMin_ != std::numeric_limits<Type>::min()) && softMax_ != std::numeric_limits<Type>::max();
+
+		if (bothSoftLimitsSet)
 		{
-			double startPower = log10(fabs(double(incrementStartValue_) + 1.0)) - 3.0;
-			double power = startPower + fabs(screenFraction) * 10.0f;
-			double delta = powf(10.0f, power) - powf(10.0f, startPower) + 10.0f * fabsf(screenFraction);
-			double newValue;
-			if (screenFraction > 0.0f)
-				newValue = double(incrementStartValue_) + delta;
-			else
-				newValue = double(incrementStartValue_) - delta;
-#ifdef _MSC_VER
-            if (_isnan(newValue)) {
-#else
-            if (isnan(newValue)) {
-#endif
-				if (screenFraction > 0.0f)
-					newValue = DBL_MAX;
-				else
-					newValue = -DBL_MAX;
-			}
-			clampToType(&value_, newValue);
+			Type softRange = softMax_ - softMin_;
+			double newValue = incrementStartValue_ + softRange * screenFraction * 3.0f;
+			value_ = clamp(newValue, hardMin_, hardMax_);
 		}
 		else
 		{
-			double startPower = log10(fabs(double(incrementStartValue_) + 1.0)) - 3.0;
+			double screenFractionMultiplier = 1000.0;
+			if (yasli::TypeID::get<Type>() == yasli::TypeID::get<float>() || yasli::TypeID::get<Type>() == yasli::TypeID::get<double>()) 
+				screenFractionMultiplier = 10.0;
+
+			double startPower = log10(fabs(double(incrementStartValue_)) + 1.0) - 3.0;
 			double power = startPower + fabs(screenFraction) * 10.0f;
-			double delta = powf(10.0f, power) - powf(10.0f, startPower) + 1000.0f * fabsf(screenFraction);
+			double delta = powf(10.0f, power) - powf(10.0f, startPower) + screenFractionMultiplier * fabsf(screenFraction);
 			double newValue;
 			if (screenFraction > 0.0f)
 				newValue = double(incrementStartValue_) + delta;
@@ -186,17 +190,21 @@ public:
 #ifdef _MSC_VER
 			if (_isnan(newValue)) {
 #else
-            if (isnan(newValue)) {
+			if (isnan(newValue)) {
 #endif
 				if (screenFraction > 0.0f)
 					newValue = DBL_MAX;
 				else
 					newValue = -DBL_MAX;
 			}
-			clampToType(&value_, newValue);
+			value_ = clamp(newValue, hardMin_, hardMax_);
 		}
 	}
 protected:
 	Type incrementStartValue_; 
 	Type value_; 
+	Type softMin_;
+	Type softMax_;
+	Type hardMin_;
+	Type hardMax_;
 };
