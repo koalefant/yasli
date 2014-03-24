@@ -50,28 +50,27 @@ SUITE(JSONArchive)
 		CHECK_EQUAL(bufChanged, bufResaved);
 	}
 
+    struct Element
+    {
+        bool enabled;
+        string name;
+        void serialize(Archive& ar)
+        {
+            ar(enabled, "enabled");
+            ar(name, "name");
+        }
+    };
+    struct Root
+    {
+        vector<Element> elements;
+        void serialize(Archive& ar)
+        {
+            ar(elements, "elements");
+        }
+    };
+
 	TEST(RegressionFreezeReadingStructureAsContainer)
 	{
-		struct Element
-		{
-			bool enabled;
-			string name;
-			void serialize(Archive& ar)
-			{
-				ar(enabled, "enabled");
-				ar(name, "name");
-			}
-		};
-
-		struct Root
-		{
-			vector<Element> elements;
-			void serialize(Archive& ar)
-			{
-				ar(elements, "elements");
-			}
-		};
-
 		const char* content = 
 		"[\n"
 		"\t{ \"enabled\": true, \"name\": \"test\" },\n"
