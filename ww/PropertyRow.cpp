@@ -102,6 +102,7 @@ PropertyRow::~PropertyRow()
 void PropertyRow::setNames(const char* name, const char* label, const char* typeName)
 {
 	name_ = name;
+	YASLI_ASSERT(name);
 	label_ = label ? label : "";
 	typeName_ = typeName;
 }

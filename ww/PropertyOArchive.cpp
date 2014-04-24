@@ -443,7 +443,7 @@ bool PropertyOArchive::operator()(Object& obj, const char *name, const char *lab
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
-	PropertyRow* row = updateRow<PropertyRow>(label, label, "block", Serializer());
+	PropertyRow* row = updateRow<PropertyRow>(name, label, "block", Serializer());
 	lastNode_ = currentNode_;
 	enterNode(row);
 	return true;
