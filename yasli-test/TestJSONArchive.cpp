@@ -182,6 +182,25 @@ SUITE(JSONArchive)
 
 		CHECK(strchr(oa.c_str(), ',') == 0);
 	}
+
+	struct DoubleQuotes
+	{
+		string value;
+
+		void serialize(Archive& ar) { ar(value, "value"); }
+	};
+
+	TEST(RegressionEscapedDoubleQuotes)
+	{
+		const char* json = "{ \"value\": \"\\\"\\\"\" }\n";
+
+		JSONIArchive ia;
+		CHECK(ia.open(json, strlen(json)));
+		DoubleQuotes instance;
+		CHECK(ia(instance));
+
+		CHECK(instance.value == "\"\"");
+	}
 	
 }
 

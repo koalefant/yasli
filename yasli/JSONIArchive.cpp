@@ -104,30 +104,24 @@ public:
 
     Token operator()(const char* text) const;
 private:
-    inline bool isSpace(char c) const;
-    inline bool isWordPart(unsigned char c) const;
-    inline bool isComment(char c) const;
-    inline bool isQuoteOpen(int& quoteIndex, char c) const;
-    inline bool isQuoteClose(int quoteIndex, char c) const;
-    inline bool isQuote(char c) const;
+    inline static bool isSpace(char c);
+    inline static bool isWordPart(unsigned char c);
+    inline static bool isComment(char c);
+    inline static bool isQuoteOpen(int& quoteIndex, char c);
+    inline static bool isQuoteClose(int quoteIndex, char c);
+    inline static bool isQuote(char c);
 };
 
 JSONTokenizer::JSONTokenizer()
 {
 }
 
-inline bool JSONTokenizer::isSpace(char c) const
+inline bool JSONTokenizer::isSpace(char c)
 {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-inline bool JSONTokenizer::isComment(char c) const
-{
-	return c == '#';
-}
-
-
-inline bool JSONTokenizer::isQuote(char c) const
+inline bool JSONTokenizer::isQuote(char c)
 {
 	return c == '\"';
 }
@@ -367,7 +361,7 @@ static const char charTypes[256] = {
 	0 /* 0xCF: П */,
 
 
-	0 /* 0xD0: Р */,
+	0 /* 0xD0: �  */,
 	0 /* 0xD1: С */,
 	0 /* 0xD2: Т */,
 	0 /* 0xD3: У */,
@@ -421,7 +415,7 @@ static const char charTypes[256] = {
 	0 /* 0xFF: я */
 };
 
-inline bool JSONTokenizer::isWordPart(unsigned char c) const
+inline bool JSONTokenizer::isWordPart(unsigned char c)
 {
 		return charTypes[c] != 0;
 }
@@ -432,15 +426,6 @@ Token JSONTokenizer::operator()(const char* ptr) const
 		++ptr;
 	Token cur(ptr, ptr);
 	while(!cur && *ptr != '\0'){
-		while(isComment(*cur.end)){
-			const char* commentStart = ptr;
-			while(*cur.end && *cur.end != '\n')
-				++cur.end;
-			while(isSpace(*cur.end))
-				++cur.end;
-			DEBUG_TRACE_TOKENIZER("Got comment: '%s'", string(commentStart, cur.end).c_str());
-			cur.start = cur.end;
-		}
 		YASLI_ASSERT(!isSpace(*cur.end));
 		if(isQuote(*cur.end)){
 			++cur.end;
@@ -456,6 +441,7 @@ Token JSONTokenizer::operator()(const char* ptr) const
 								++cur.end;
 						}
 					}
+                    continue;
 				}
 				if(isQuote(*cur.end)){
 					++cur.end;
@@ -561,7 +547,7 @@ void JSONIArchive::readToken()
 {
 	JSONTokenizer tokenizer;
 	token_ = tokenizer(token_.end);
-	DEBUG_TRACE(" ~ read token '%s' at %i", token_.str().c_str(), token_.start - reader_->begin());
+	DEBUG_TRACE(" ~ read token '%s' at %i", token_.str().c_str(), int(token_.start - reader_->begin()));
 }
 
 void JSONIArchive::putToken()
@@ -604,7 +590,7 @@ bool JSONIArchive::expect(char token)
 
 void JSONIArchive::skipBlock()
 {
-	DEBUG_TRACE("Skipping block from %i ...", token_.end - reader_->begin());
+	DEBUG_TRACE("Skipping block from %i ...", int(token_.end - reader_->begin()));
     if(openBracket() || openContainerBracket())
         closeBracket(); // Skipping entire block
     else
@@ -612,7 +598,7 @@ void JSONIArchive::skipBlock()
 	readToken();
 	if (token_ != ',')
 		putToken();
-	DEBUG_TRACE(" ...till %i", token_.end - reader_->begin());
+	DEBUG_TRACE(" ...till %i", int(token_.end - reader_->begin()));
 }
 
 bool JSONIArchive::findName(const char* name, Token* outName)
