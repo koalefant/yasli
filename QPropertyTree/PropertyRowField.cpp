@@ -25,7 +25,7 @@ void PropertyRowField::redraw(const PropertyDrawContext& context)
 
 	int iconSpace = offset ? offset + 2 : 0;
     if(multiValue())
-		context.drawEntry(L" ... ", false, true, iconSpace);
+		context.drawEntry(L" ... ", false, userReadOnly(), iconSpace);
     else if(userReadOnly())
 		context.drawValueText(pulledSelected(), valueAsWString().c_str());
     else

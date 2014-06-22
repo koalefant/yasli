@@ -271,6 +271,8 @@ void PropertyRowPointer::setValueAndContext(const yasli::PointerInterface& ptr, 
 	const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
 	if (desc)
 		derivedTypeName_ = desc->name();
+	else
+		derivedTypeName_.clear();
 }
 
 // vim:ts=4 sw=4:
