@@ -29,7 +29,7 @@ REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
 PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
 {
-	return new PropertyRowWidgetStringListValue(this, tree);
+	return new PropertyRowWidgetComboBox(this, this, tree);
 }
 
 // ---------------------------------------------------------------------------
@@ -37,7 +37,7 @@ REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 
 PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(QPropertyTree* tree)
 {
-	return new PropertyRowWidgetStringListValue(this, tree);
+	return new PropertyRowWidgetComboBox(this, this, tree);
 }
 
 DECLARE_SEGMENT(PropertyRowStringList)

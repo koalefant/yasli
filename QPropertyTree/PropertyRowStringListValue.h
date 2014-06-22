@@ -19,12 +19,35 @@
 #include <QMouseEvent>
 #include <QApplication>
 
+struct ComboBoxClientRow {
+	virtual void populateComboBox(QComboBox* box, QPropertyTree* tree) = 0;
+	virtual bool onComboBoxSelected(QComboBox* box, QPropertyTree* tree) = 0;
+};
 
 using yasli::StringListValue;
-class PropertyRowStringListValue : public PropertyRow
-{
+class PropertyRowStringListValue : public PropertyRow, public ComboBoxClientRow {
 public:
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
+
+	void populateComboBox(QComboBox* box, QPropertyTree* tree) override
+	{
+		for (size_t i = 0; i < stringList_.size(); ++i)
+			box->addItem(stringList_[i].c_str());
+		box->setCurrentIndex(stringList_.find(value_.c_str()));
+	}
+
+	bool onComboBoxSelected(QComboBox* box, QPropertyTree* tree) override
+	{
+		QByteArray newValue = box->currentText().toUtf8();
+		if (value_ != newValue.data()) {
+			tree->model()->rowAboutToBeChanged(this);
+			value_ = newValue.data();
+			tree->model()->rowChanged(this);
+			return true;
+		}
+		return false;
+	}
+
 	yasli::string valueAsString() const override { return value_.c_str(); }
 	bool assignTo(const Serializer& ser) const override {
 		*((StringListValue*)ser.pointer()) = value_.c_str();
@@ -79,9 +102,28 @@ private:
 };
 
 using yasli::StringListStaticValue;
-class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue>{
+class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue>, public ComboBoxClientRow {
 public:
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
+
+	void populateComboBox(QComboBox* box, QPropertyTree* tree) override
+	{
+		for (size_t i = 0; i < stringList_.size(); ++i)
+			box->addItem(stringList_[i].c_str());
+		box->setCurrentIndex(stringList_.find(value_.c_str()));
+	}
+
+	bool onComboBoxSelected(QComboBox* box, QPropertyTree* tree) override
+	{
+		QByteArray newValue = box->currentText().toUtf8();
+		if (value_ != newValue.data()) {
+			tree->model()->rowAboutToBeChanged(this);
+			value_ = newValue.data();
+			tree->model()->rowChanged(this);
+			return true;
+		}
+		return false;
+	}
 	yasli::string valueAsString() const override { return value_.c_str(); }
 	bool assignTo(const Serializer& ser) const override {
 		*((StringListStaticValue*)ser.pointer()) = value_.c_str();
@@ -136,32 +178,16 @@ private:
 };
 	
 
-// ---------------------------------------------------------------------------
-
-
-class PropertyRowWidgetStringListValue : public PropertyRowWidget
+class PropertyRowWidgetComboBox : public PropertyRowWidget
 {
 	Q_OBJECT
 public:
-	PropertyRowWidgetStringListValue(PropertyRowStringListValue* row, QPropertyTree* tree)
+	PropertyRowWidgetComboBox(PropertyRow* row, ComboBoxClientRow* client, QPropertyTree* tree)
 	: PropertyRowWidget(row, tree)
 	, comboBox_(new QComboBox())
+	, client_(client)
 	{
-		const yasli::StringList& stringList = row->stringList_;
-		for (size_t i = 0; i < stringList.size(); ++i)
-			comboBox_->addItem(stringList[i].c_str());
-		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
-		connect(comboBox_, SIGNAL(activated(int)), this, SLOT(onChange(int)));
-	}
-
-	PropertyRowWidgetStringListValue(PropertyRowStringListStaticValue* row, QPropertyTree* tree)
-	: PropertyRowWidget(row, tree)
-	, comboBox_(new QComboBox())
-	{
-		const yasli::StringList& stringList = row->stringList_;
-		for (size_t i = 0; i < stringList.size(); ++i)
-			comboBox_->addItem(stringList[i].c_str());
-		comboBox_->setCurrentIndex(stringList.find(row->value_.c_str()));
+		client_->populateComboBox(comboBox_, tree_);
 		connect(comboBox_, SIGNAL(activated(int)), this, SLOT(onChange(int)));
 	}
 
@@ -177,7 +203,7 @@ public:
 		QApplication::sendEvent(comboBox_, &ev);
 	}
 
-	~PropertyRowWidgetStringListValue()
+	~PropertyRowWidgetComboBox()
 	{
 		comboBox_->hide();
 		comboBox_->setParent(0);
@@ -185,37 +211,17 @@ public:
 		comboBox_ = 0;
 	}	
 
-
 	void commit(){}
 	QWidget* actualWidget() { return comboBox_; }
-public slots:
-		void onChange(int)
-		{
-			if (strcmp(row()->typeName(), yasli::TypeID::get<StringListValue>().name()) == 0) {
-				PropertyRowStringListValue* r = static_cast<PropertyRowStringListValue*>(row());
-				QByteArray newValue = comboBox_->currentText().toUtf8();
-				if (r->value_ != newValue.data()) {
-					model()->rowAboutToBeChanged(r);
-					r->value_ = newValue.data();
-					model()->rowChanged(r);
-				}
-				else
-					tree_->_cancelWidget();
-
-			}
-			else if (strcmp(row()->typeName(), yasli::TypeID::get<StringListStaticValue>().name()) == 0) {
-				PropertyRowStringListStaticValue* r = static_cast<PropertyRowStringListStaticValue*>(row());
-				QByteArray newValue = comboBox_->currentText().toUtf8();
-				if (r->value_ != newValue.data()) {
-					model()->rowAboutToBeChanged(r);
-					r->value_ = newValue.data();
-					model()->rowChanged(r);
-				}
-				else
-					tree_->_cancelWidget();
-			}
-		}
+	public slots:
+	void onChange(int)
+	{
+		if (!client_->onComboBoxSelected(comboBox_, tree_))
+			tree_->_cancelWidget();
+	}
 protected:
 	QComboBox* comboBox_;
+	ComboBoxClientRow* client_;
 };
+
 
