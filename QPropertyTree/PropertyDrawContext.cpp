@@ -229,7 +229,7 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 	tree->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, 0);
 }
 
-void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, const QFont* font) const
+void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, const QFont* font) const
 {
 	QStyleOptionButton option;
 	if (enabled)
@@ -248,7 +248,7 @@ void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, boo
 	option.rect = rect.adjusted(0, 0, -1, -1);
 	tree->style()->drawControl(QStyle::CE_PushButton, &option, painter);
 	QRect textRect;
-	if (enabled)
+	if (enabled && dropDownArrow)
 	{
 		QStyleOption arrowOption;
 		arrowOption.rect = QRect(rect.right() - 11, rect.top(), 8, rect.height());
@@ -304,18 +304,4 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	painter->setBrush(QBrush(tree->palette().color(QPalette::Base)));
 	tree->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter, 0);
 	tree->_drawRowValue(*painter, text, &tree->font(),  textRect,  tree->palette().color(QPalette::WindowText), pathEllipsis, false);
-}
-
-
-QFont* propertyTreeDefaultFont()
-{
-	static QFont font;
-	return &font;
-}
-
-QFont* propertyTreeDefaultBoldFont()
-{
-	static QFont font;
-	font.setBold(true);
-	return &font;
 }

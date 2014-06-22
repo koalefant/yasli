@@ -15,6 +15,7 @@ set(SOURCES
 	PropertyOArchive.cpp
 	PropertyRow.cpp
 	PropertyRowBool.cpp
+	PropertyRowButton.cpp
 	PropertyRowContainer.cpp
 	PropertyRowColor.cpp
 	PropertyRowField.cpp
