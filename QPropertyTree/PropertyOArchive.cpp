@@ -150,8 +150,10 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		int rowIndex;
 		PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
 
+		const char* oldLabel = 0;
 		if(oldRow){
 			oldRow->setMultiValue(false);
+			oldLabel = oldRow->label();
 			newRow = static_cast<RowType*>(oldRow);
 			level.oldRows[rowIndex] = 0;
 			level.rowIndex = rowIndex + 1;
@@ -168,7 +170,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		}
 		newRow->setNames(name, label, typeName);
 		currentNode_->add(newRow);
-		if (!oldRow) {
+		if (!oldRow || oldLabel != label) {
 			// for new rows we should mark all parents with labelChanged_
 			newRow->setLabelChanged();
 			newRow->setLabelChangedToChildren();
