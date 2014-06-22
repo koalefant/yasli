@@ -224,9 +224,9 @@ public:
 	TypeID findTypeByName(const char* name) const {
 		const size_t numCreators = creators_.size();
 		for (size_t i = 0; i < numCreators; ++i) {
-			const TypeID& typeID = creators_[i]->description().typeID();
-			if (strcmp(name, typeID.name()) == 0)
-				return typeID;
+			const TypeDescription& description = creators_[i]->description();
+			if (strcmp(name, description.name()) == 0)
+				return description.typeID();
 		}
 		YASLI_ASSERT(!strlen(name), "ClassFactory::findTypeByName: undefined type %s", name);
 		return TypeID();

@@ -99,7 +99,7 @@ bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const ch
 {
 	std::string typeName;
 	if(ar.isOutput()){
-		typeName = value.type.name();
+		typeName = value.factory->descriptionByType(value.type)->name();
 		return ar(typeName, name);
 	}
 	else{
