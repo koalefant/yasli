@@ -95,6 +95,7 @@ PropertyRow::PropertyRow()
 	userReadOnlyRecurse_ = false;
 	userFullRow_ = false;
 	multiValue_ = false;
+	userHideChildren_ = false;
 	
 	label_ = "";
 	labelChanged_ = true;
@@ -411,6 +412,14 @@ void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
 
 	parseControlCodes(label_, true);
 	visible_ = *labelUndecorated_ != '\0' || userFullRow_ || pulledUp_ || isRoot();
+	if (userHideChildren_) {
+		for (int i = 0; i < numChildren; ++i) {
+			PropertyRow* row = children_[i];
+			if (row->pulledUp())
+				continue;
+			row->visible_ = false;
+		}
+	}
 
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());
@@ -437,6 +446,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 		userReadOnlyRecurse_ = false;
 		userFixedWidget_ = false;
 		userWidgetSize_ = -1;
+		userHideChildren_ = false;
 	}
 
 	while(true){
@@ -466,6 +476,8 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 			}
 			continue;
 		}
+		else if(*ptr == '-')
+			userHideChildren_ = true;
 		else if(*ptr == '~'){
             ResetSerializerOp op;
             scanChildren(op);

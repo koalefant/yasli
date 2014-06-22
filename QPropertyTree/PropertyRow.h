@@ -324,6 +324,7 @@ protected:
 	bool userReadOnlyRecurse_ : 1;
 	bool userFixedWidget_ : 1;
 	bool userFullRow_ : 1;
+	bool userHideChildren_ : 1;
 	bool pulledUp_ : 1;
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
