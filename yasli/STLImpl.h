@@ -21,8 +21,8 @@ class ContainerSTL : public ContainerInterface/*{{{*/
 public:
 	explicit ContainerSTL(Container* container = 0)
 	: container_(container)
-	, size_(container->size())
 	, it_(container->begin())
+	, size_(container->size())
 	{
 		YASLI_ASSERT(container_ != 0);
 	}
@@ -87,7 +87,7 @@ public:
 
 	void* pointer() const{ return reinterpret_cast<void*>(container_); }
 	TypeID elementType() const{ return TypeID::get<Element>(); }
-	TypeID containerType() const{ return TypeID::get<Element>(); }
+	TypeID containerType() const{ return TypeID::get<Container>(); }
 
 	bool next()
 	{
