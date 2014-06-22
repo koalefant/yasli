@@ -579,6 +579,9 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 	mouseStillTimer_ = new QTimer(this);
 	mouseStillTimer_->setSingleShot(true);
 	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStill()));
+
+	boldFont_ = font();
+	boldFont_.setBold(true);
 }
 #pragma warning(pop)
 
@@ -806,7 +809,7 @@ void QPropertyTree::expandParents(PropertyRow* row)
 	Parents::iterator it;
 	for(it = parents.begin(); it != parents.end(); ++it) {
 		PropertyRow* row = *it;
-		if (!row->expanded()) {
+		if (!row->expanded() || hasChanges) {
 			row->_setExpanded(true);
 			hasChanges = true;
 		}
@@ -966,6 +969,11 @@ bool QPropertyTree::updateScrollBar()
 QPoint QPropertyTree::treeSize() const
 {
 	return size_ + (compact() ? QPoint(0,0) : QPoint(8, 8));
+}
+
+const QFont& QPropertyTree::boldFont() const
+{
+	return boldFont_;
 }
 
 void QPropertyTree::onScroll(int pos)

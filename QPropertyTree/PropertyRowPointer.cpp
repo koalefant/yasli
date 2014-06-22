@@ -193,8 +193,8 @@ void PropertyRowPointer::redraw(const PropertyDrawContext& context)
 	QRect rt = widgetRect;
 	rt.adjust(-1, 0, 0, 1);
 	yasli::wstring str = generateLabel();
-	QFont* font = derivedTypeName_.empty() ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
-	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, font);
+	const QFont* font = derivedTypeName_.empty() ? &context.tree->font() : &context.tree->boldFont();
+	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, true, font);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
@@ -255,9 +255,10 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 	ar(derivedTypeName_, "derivedTypeName", "Derived Type Name");
 }
 
-int PropertyRowPointer::widgetSizeMin(const QPropertyTree*) const
+int PropertyRowPointer::widgetSizeMin(const QPropertyTree* tree) const
 {
-	QFontMetrics fm(*propertyTreeDefaultBoldFont());
+	const QFont* font = derivedTypeName_.empty() ? &tree->font() : &tree->boldFont();
+	QFontMetrics fm(*font);
     QString str(fromWideChar(generateLabel().c_str()).c_str());
 	return fm.width(str) + 18;
 }

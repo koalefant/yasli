@@ -135,6 +135,7 @@ public:
 	void setArchiveContext(yasli::Context* lastContext);
 
 	QPoint treeSize() const;
+	const QFont& boldFont() const; 
 	int leftBorder() const { return leftBorder_; }
 	int rightBorder() const { return rightBorder_; }
 	bool multiSelectable() const { return attachedPropertyTree_ != 0; }
@@ -296,6 +297,7 @@ protected:
 	bool needUpdate_;
 
 	QScrollBar* scrollBar_;
+	QFont boldFont_;
 	QRect area_;
 	int leftBorder_;
 	int rightBorder_;

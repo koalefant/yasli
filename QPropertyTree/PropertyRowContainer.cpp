@@ -76,8 +76,8 @@ void PropertyRowContainer::redraw(const PropertyDrawContext& context)
 	gradient.setColorAt(1.0f, context.tree->palette().color(QPalette::Shadow));
 	QBrush brush(gradient);
 
-    const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
-	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, &context.tree->font());
+	const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
+	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, &context.tree->font());
 }
 
 

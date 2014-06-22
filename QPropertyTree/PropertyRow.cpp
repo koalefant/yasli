@@ -904,8 +904,8 @@ bool PropertyRow::pulledSelected() const
 
 const QFont* PropertyRow::rowFont(const QPropertyTree* tree) const
 {
-	QFont* normalFont = propertyTreeDefaultFont();
-	QFont* boldFont = propertyTreeDefaultBoldFont();
+	const QFont* normalFont = &tree->font();
+	const QFont* boldFont = &tree->boldFont();
 	return hasVisibleChildren(tree) || isContainer() ? boldFont : normalFont;
 }
 

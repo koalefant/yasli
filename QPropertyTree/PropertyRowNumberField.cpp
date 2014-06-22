@@ -24,7 +24,7 @@ PropertyRowWidget* PropertyRowNumberField::createWidget(QPropertyTree* tree)
 void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 {
     if(multiValue())
-		context.drawEntry(L" ... ", false, true, 0);
+		context.drawEntry(L" ... ", false, userReadOnly(), 0);
     else 
 	{
 		QPainter* painter = context.painter;
