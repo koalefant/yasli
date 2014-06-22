@@ -56,6 +56,8 @@ struct Context {
 	Context() : object(0), previousContext(0) {}
 	template<class T>
 	Context(Archive& ar, T* context);
+	template<class T>
+	Context(T* context);
 	~Context();
 };
 
@@ -74,9 +76,9 @@ public:
 	};
 
 	Archive(int caps)
-	: caps_(caps)
+	: lastContext_(0)
+	, caps_(caps)
 	, filter_(YASLI_DEFAULT_FILTER)
-	, lastContext_(0)
 	{
 	}
 	virtual ~Archive() {}
@@ -201,11 +203,23 @@ Context::Context(Archive& ar, T* context) {
 	archive = &ar;
 	object = (void*)context;
 	type = TypeID::get<T>();
-	previousContext = ar.setLastContext(this);
+	if (archive)
+		previousContext = ar.setLastContext(this);
+	else
+		previousContext = 0;
+}
+
+template<class T>
+Context::Context(T* context) {
+	archive = 0;
+	object = (void*)context;
+	type = TypeID::get<T>();
+	previousContext = 0;
 }
 
 inline Context::~Context() {
-	archive->setLastContext(previousContext);
+	if (archive)
+		archive->setLastContext(previousContext);
 }
 
 template<class T>
