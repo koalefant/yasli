@@ -13,6 +13,7 @@
 //#include <xutility>
 #include "BinaryNode.h"
 #include "yasli/MemoryWriter.h"
+#include <algorithm>
 
 namespace yasli{
 

@@ -24,7 +24,6 @@ inline bool Serializer::operator()(Archive& ar) const{
 
 inline void PointerInterface::serialize(Archive& ar) const
 {
-	TypeID baseTypeID = baseType();
 	TypeID oldTypeID = type();
 	ClassFactoryBase* factory = this->factory();
 

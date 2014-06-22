@@ -12,6 +12,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <algorithm>
 
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
