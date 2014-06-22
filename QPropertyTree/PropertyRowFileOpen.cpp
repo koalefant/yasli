@@ -9,6 +9,7 @@
 
 #include "yasli/ClassFactory.h"
 
+#include "PropertyRowFileOpen.h"
 #include "PropertyDrawContext.h"
 #include "PropertyRowImpl.h"
 #include "QPropertyTree.h"
@@ -16,8 +17,42 @@
 #include "Serialization.h"
 #include "yasli/decorators/FileOpen.h"
 #include "yasli/decorators/IconXPM.h"
-#include <QtGui/QFileDialog>
-#include <QtGui/QIcon>
+#include <QFileDialog>
+#include <QIcon>
+#include <QMenu>
+
+using std::string;
+
+static const char* getExtension(const char* path)
+{
+	const char* ext = strrchr(path, '.');
+	if (!ext)
+		return path + strlen(path);
+	return ext;
+}
+
+static string removeExtension(const char* filename)
+{
+	const char* ext = getExtension(filename);
+	return string(filename, ext);
+}
+
+static string extractExtensionFromFilter(const char* filter)
+{
+	const char* supposedMask = strstr(filter, "*.");
+	if (!supposedMask)
+		return string();
+	const char* ext = supposedMask + 1;
+	const char* p = supposedMask + 2;
+	while (*p) {
+		if (*p == '*')
+			return string();
+		if (*p == ' ' || *p == ')')
+			break;
+		++p;
+	}
+	return string(ext, p);
+}
 
 using yasli::FileOpen;
 
@@ -38,24 +73,52 @@ public:
 		dialog.setNameFilter(value().filter.c_str());
 		
 		QString existingFile = value().path.c_str();
-		if (!QDir::isAbsolutePath(existingFile))
-			existingFile = directory.currentPath() + QDir::separator() + existingFile;
+        if (!QDir::isAbsolutePath(existingFile)) {
+            existingFile = directory.currentPath();
+            if (!value().relativeToFolder.empty()) {
+                existingFile += QDir::separator();
+                existingFile += value().relativeToFolder.c_str();
+            }
+            existingFile += QDir::separator();
+            existingFile += value().path.c_str();
+        }
+        if (value().flags & FileOpen::STRIP_EXTENSION)
+            existingFile += QString(extractExtensionFromFilter(value().filter.c_str()).c_str());
 
 		if (!QFile::exists(existingFile))
 			dialog.setDirectory(directory);
 		else
-			dialog.selectFile(QString(value().path.c_str()));
+            dialog.selectFile(existingFile);
 
 		if (dialog.exec() && !dialog.selectedFiles().isEmpty()) {
 			tree->model()->rowAboutToBeChanged(this);
 			QString filename = dialog.selectedFiles()[0];
 			QString relativeFilename = directory.relativeFilePath(filename);
 			value().path = relativeFilename.toLocal8Bit().data();
+			if (value().flags & FileOpen::STRIP_EXTENSION)
+				value().path = removeExtension(value().path.c_str());
 			tree->model()->rowChanged(this);
 		}
 		return true;
 	}
 
+	void clear(QPropertyTree* tree)
+	{
+		tree->model()->rowAboutToBeChanged(this);
+		value().path.clear();
+		tree->model()->rowChanged(this);
+	}
+
+	bool onContextMenu(QMenu &menu, QPropertyTree* tree) override
+	{
+		FileOpenMenuHandler* handler = new FileOpenMenuHandler(this, tree);
+		tree->addMenuHandler(handler);
+
+		menu.setDefaultAction(menu.addAction("Choose File...", handler, SLOT(onMenuActivate())));
+		menu.addAction("Clear", handler, SLOT(onMenuClear()));
+
+		return PropertyRow::onContextMenu(menu, tree);
+	}
 
 	int buttonCount() const override{ return 1; }
 	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const override{ 
@@ -70,3 +133,16 @@ public:
 
 REGISTER_PROPERTY_ROW(FileOpen, PropertyRowFileOpen); 
 DECLARE_SEGMENT(PropertyRowFileOpen)
+
+// ---------------------------------------------------------------------------
+
+void FileOpenMenuHandler::onMenuActivate()
+{
+	self->onActivate(tree, false);
+}
+
+void FileOpenMenuHandler::onMenuClear()
+{
+	self->clear(tree);
+}
+

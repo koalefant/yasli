@@ -26,6 +26,7 @@ set(SOURCES
 	PropertyRowColor.cpp
 	PropertyRowField.cpp
 	PropertyRowFileOpen.cpp
+	PropertyRowFileOpen.h
 	PropertyRowFileSave.cpp
 	PropertyRowIconXPM.cpp
 	PropertyRowNumber.cpp

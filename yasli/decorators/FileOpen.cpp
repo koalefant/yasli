@@ -10,6 +10,7 @@ void FileOpen::serialize(Archive& ar)
 	ar(path, "path");
 	ar(filter, "filter");
 	ar(relativeToFolder, "folder");
+	ar(flags, "flags");
 }
 
 bool serialize(Archive& ar, FileOpen& value, const char* name, const char* label)
