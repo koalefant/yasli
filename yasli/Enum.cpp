@@ -22,14 +22,17 @@ const EnumDescription* BitVectorWrapper::currentDescription;
 
 void EnumDescription::add(int value, const char* name, const char *label)
 {
-	YASLI_ESCAPE( name && label, return );
+    YASLI_ESCAPE( name, return );
 	nameToValue_[name] = value;
-	labelToValue_[label] = value;
+    if (label)
+        labelToValue_[label] = value;
 	valueToName_[value] = name;
-	valueToLabel_[value] = label;
+    if (label)
+        valueToLabel_[value] = label;
 	valueToIndex_[value] = int(names_.size());
 	names_.push_back(name);
-	labels_.push_back(label);
+	if (label)
+		labels_.push_back(label);
 	values_.push_back(value);
 }
 
