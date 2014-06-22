@@ -247,9 +247,17 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 void ContainerMenuHandler::onMenuChildRemove()
 {
 	tree->model()->rowAboutToBeChanged(container);
+    int index = container->childIndex(element);
 	container->erase(element);
 	container->setMultiValue(false);
+    tree->model()->deselectAll();
+    tree->updateAttachedPropertyTree(false);
 	tree->model()->rowChanged(container);
+    PropertyRow* newSelectedRow = container->childByIndex(index);
+    if (newSelectedRow == 0)
+        newSelectedRow = container;
+    tree->model()->selectRow(newSelectedRow, true, true);
+    tree->updateAttachedPropertyTree(false);
 }
 
 

@@ -324,6 +324,7 @@ protected:
 	friend class DragWindow;
 	friend struct FilterVisitor;
 	friend struct PropertyTreeMenuHandler;
+	friend class ContainerMenuHandler;
 };
 
 yasli::wstring generateDigest(yasli::Serializer& ser);
