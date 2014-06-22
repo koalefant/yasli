@@ -1107,6 +1107,7 @@ void QPropertyTree::revert()
 		oa.setFilter(filter_);
 
 		Objects::iterator it = attached_.begin();
+		signalAboutToSerialize(oa);
 		(*it)(oa);
 		
 		PropertyTreeModel model2;
@@ -1115,6 +1116,7 @@ void QPropertyTree::revert()
 			oa2.setLastContext(archiveContext_);
 			yasli::Context treeContext(oa2, this);
 			oa2.setFilter(filter_);
+			signalAboutToSerialize(oa2);
 			(*it)(oa2);
 			model_->root()->intersect(model2.root());
 		}
@@ -1151,6 +1153,7 @@ void QPropertyTree::apply()
 			ia.setLastContext(archiveContext_);
  			yasli::Context treeContext(ia, this);
  			ia.setFilter(filter_);
+			signalAboutToSerialize(ia);
 			(*it)(ia);
 		}
 	}

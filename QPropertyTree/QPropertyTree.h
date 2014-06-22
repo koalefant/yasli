@@ -180,6 +180,7 @@ public:
 	IconXPMCache* _iconCache() const{ return iconCache_.data(); }
 
 signals:
+	void signalAboutToSerialize(yasli::Archive& ar);
 	void signalChanged();
 	void signalObjectChanged(const yasli::Object& obj);
 	void signalSelected();
