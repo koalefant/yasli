@@ -291,7 +291,7 @@ void PropertyDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool
 	if (captured)
 	  option.state |= QStyle::State_HasFocus;
 	option.rect = rt; // option.rect is the rectangle to be drawn on.
-	QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
+	QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, tree);
 	if (!textRect.isValid()) {
 		textRect = rt;
 		textRect.adjust(3, 1, -3, -2);

@@ -50,7 +50,7 @@ void PropertyRowNumberField::redraw(const PropertyDrawContext& context)
 		option.rect = rt; // option.rect is the rectangle to be drawn on.
 		option.palette = tree->palette();
 		option.fontMetrics = tree->fontMetrics();
-		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, 0);
+		QRect textRect = tree->style()->subElementRect(QStyle::SE_LineEditContents, &option, tree);
 		if (!textRect.isValid()) {
 			textRect = rt;
 			textRect.adjust(3, 1, -3, -2);
