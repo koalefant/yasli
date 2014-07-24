@@ -42,7 +42,7 @@ public:
 	bool serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const;
 
 	void add(int value, const char* name, const char* label = ""); // TODO
-	int count() const{ return values_.size(); }
+	int count() const{ return (int)values_.size(); }
 	const StringListStatic& names() const{ return names_; }
 	const StringListStatic& labels() const{ return labels_; }
 	StringListStatic nameCombination(int bitVector) const;
