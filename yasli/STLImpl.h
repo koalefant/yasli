@@ -253,8 +253,13 @@ struct StdPair : std::pair<K, V>
 {
 	void serialize(yasli::Archive& ar) 
 	{
+#if YASLI_STD_PAIR_FIRST_SECOND
+		ar(this->first, "first", "^");
+		ar(this->second, "second", "^");
+#else
 		ar(this->first, "key");
 		ar(this->second, "value");
+#endif
 	}
 };
 

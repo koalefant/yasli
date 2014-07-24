@@ -29,3 +29,8 @@
 #ifndef XMATH_IN_ENGLISH
 #define XMATH_IN_ENGLISH 0
 #endif
+
+// Serialize std::pair: 1 - ("first", "second") or 0 - ("key", "value")
+#ifndef YASLI_STD_PAIR_FIRST_SECOND
+#define YASLI_STD_PAIR_FIRST_SECOND 0
+#endif

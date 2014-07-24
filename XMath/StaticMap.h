@@ -7,21 +7,6 @@
 
 namespace yasli { class Archive; }
 
-namespace std {
-template<class T1, class T2>
-bool serialize(yasli::Archive& ar, std::pair<T1, T2>& data, const char* name, const char* label)
-{
-	struct S : std::pair<T1, T2> { 
-		void serialize(yasli::Archive& ar) {
-			ar(first, "first", "^");
-			ar(second, "second", "^");
-		}
-	};
-
-	return ar(yasli::Serializer((S&)data), name, label);
-}
-}
-
 template<class K, class T, class Cmp=std::less<K>, class A=std::allocator<std::pair<K, T> > > 
 class StaticMap 
 {
