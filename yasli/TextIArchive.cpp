@@ -991,16 +991,37 @@ bool TextIArchive::operator()(unsigned long long& value, const char* name, const
     return false;
 }
 
+inline bool isDigit(int ch) 
+{
+	return unsigned(ch - '0') <= 9;
+}
+
+double parseFloat(const char* s)
+{
+	double res = 0, f = 1, sign = 1;
+	while(*s && (*s == ' ' || *s == '\t')) 
+		s++;
+
+	if(*s == '-') 
+		sign=-1, s++; 
+	else if (*s == '+') 
+		s++;
+
+	for(; isDigit(*s); s++)
+		res = res * 10 + (*s - '0');
+
+	if(*s == '.')
+		for (s++; isDigit(*s); s++)
+			res += (f *= 0.1)*(*s - '0');
+	return res*sign;
+}
+
 bool TextIArchive::operator()(float& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
         checkValueToken();
-#ifdef _MSC_VER
-        value = float(std::atof(token_.str().c_str()));
-#else
-        value = strtof(token_.start, 0);
-#endif
+        value = (float)parseFloat(token_.start);
         return true;
     }
     return false;
@@ -1011,11 +1032,7 @@ bool TextIArchive::operator()(double& value, const char* name, const char* label
     if(findName(name)){
         readToken();
         checkValueToken();
-#ifdef _MSC_VER
-        value = std::atof(token_.str().c_str());
-#else
-        value = strtod(token_.start, 0);
-#endif
+		value = parseFloat(token_.start);
         return true;
     }
     return false;

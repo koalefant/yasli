@@ -1058,11 +1058,7 @@ bool JSONIArchive::operator()(float& value, const char* name, const char* label)
     if(findName(name)){
         readToken();
         checkValueToken();
-#ifdef _MSC_VER
-        value = float(std::atof(token_.str().c_str()));
-#else
-        value = strtof(token_.start, 0);
-#endif
+		value = (float)parseFloat(token_.start);
         return true;
     }
     return false;
@@ -1073,11 +1069,7 @@ bool JSONIArchive::operator()(double& value, const char* name, const char* label
     if(findName(name)){
         readToken();
         checkValueToken();
-#ifdef _MSC_VER
-        value = std::atof(token_.str().c_str());
-#else
-        value = strtod(token_.start, 0);
-#endif
+		value = parseFloat(token_.start);
         return true;
     }
     return false;

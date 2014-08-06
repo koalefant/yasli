@@ -83,4 +83,6 @@ private:
 	std::string filename_;
 };
 
+double parseFloat(const char* s);
+
 }
