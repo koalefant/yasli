@@ -34,3 +34,8 @@
 #ifndef YASLI_STD_PAIR_FIRST_SECOND
 #define YASLI_STD_PAIR_FIRST_SECOND 0
 #endif
+
+// BinArchives use short hash of name to compact and speed up. Collision on particular level of hierarchy could cause to wrong result.
+#ifdef _DEBUG
+//#define YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION 
+#endif
