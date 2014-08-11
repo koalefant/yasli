@@ -701,6 +701,10 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 
 	const char* currInitial = curr_;
 	bool restarted = false;
+	if(curr_ == end_){
+		curr_ = begin_;
+		restarted = true;
+	}
 	for(;;){
 		if(curr_ >= end_)
 			return false;
