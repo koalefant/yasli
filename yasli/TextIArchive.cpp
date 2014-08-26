@@ -862,7 +862,8 @@ bool TextIArchive::operator()(ContainerInterface& ser, const char* name, const c
                 if(index == size)
                     size = index + 1;
                 if(index < size){
-                    ser(*this, "", "");
+                    if(!YASLI_CHECK(ser(*this, "", "")))
+						return false;
                 }
                 else{
                     skipBlock();
