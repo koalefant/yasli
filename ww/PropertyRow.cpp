@@ -773,7 +773,8 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 		}
 	}
 
-	for (int i = 0; i < startIndex; ++i) {
+	int size = min(startIndex, numChildren);
+	for (int i = 0; i < size; ++i) {
 		PropertyRow* row = children_[i];
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
