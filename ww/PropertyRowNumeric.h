@@ -17,6 +17,7 @@
 
 namespace yasli{
 class EnumDescription;
+double parseFloat(const char* s);
 }
 
 namespace ww{
@@ -84,7 +85,7 @@ public:
 	}
 	bool setValueFromString(const char* str){
 		Type value = value_;
-		value_ = Type(atof(str));
+		value_ = Type(parseFloat(str));
 		return value_ != value;
 	}
 	string valueAsString() const{ 
