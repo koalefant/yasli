@@ -204,6 +204,8 @@ protected:
 void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 {
 	if(ar.filter(SERIALIZE_STATE)){
+		if(ar.isInput())
+			deselectAll();
 		ar(focusedRow_, "focusedRow", 0);		
 		ar(selection_, "selection", 0);
 
@@ -214,7 +216,7 @@ void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 			ar(expanded, "expanded", 0);
 			if(ar.isInput()){
 				Selection sel = selection_;
-							setSelection(sel);
+				setSelection(sel);
 				root()->scanChildren(RowExpander(expanded), tree);
 			}
 		}

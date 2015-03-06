@@ -251,6 +251,7 @@ void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeMod
     model->rowAboutToBeChanged(this);
 	erase(child);
 	setMultiValue(false);
+	model->deselectAll();
 	model->rowChanged(this);
 }
 
