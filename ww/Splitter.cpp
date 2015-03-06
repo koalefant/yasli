@@ -510,6 +510,10 @@ void Splitter::serialize(Archive& ar)
 			ar(*i->widget, "widget", "Widget");
 			ar(i->position, "position", "&Position");
 		}
+		if(ar.isInput()){
+			_arrangeChildren();
+			::RedrawWindow(window_->handle(), 0, 0, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+		}
 	}
 }
 
