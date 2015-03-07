@@ -246,12 +246,19 @@ void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyT
 		clonedRow->onActivate(tree, false);
 }
 
-void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTreeModel* model)
+void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTree* tree)
 {
+	PropertyTreeModel* model = tree->model();
     model->rowAboutToBeChanged(this);
+	int y = 0;
+	if(PropertyRow* focusedRow = model->focusedRow()){
+		PropertyRow* parentRow = focusedRow->nonPulledParent();
+		y = model->root()->verticalIndex(tree, parentRow);
+	}
 	erase(child);
 	setMultiValue(false);
-	model->deselectAll();
+	if(PropertyRow* selectedRow = model->root()->rowByVerticalIndex(tree, --y))
+		tree->onRowSelected(selectedRow, false, false);	
 	model->rowChanged(this);
 }
 

@@ -797,7 +797,7 @@ bool PropertyRow::onKeyDown(PropertyTree* tree, KeyPress key)
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = safe_cast<PropertyRowContainer*>(parent());
 		if(key == KeyPress(KEY_DELETE)){
-			container->onMenuChildRemove(this, tree->model());
+			container->onMenuChildRemove(this, tree);
 			return true;
 		}
 		if(key == KeyPress(KEY_INSERT, KEY_MOD_SHIFT)){
@@ -819,7 +819,7 @@ bool PropertyRow::onContextMenu(PopupMenuItem &root, PropertyTree* tree)
 			    .connect(container, &PropertyRowContainer::onMenuChildInsertBefore)
 			    .setHotkey(KeyPress(KEY_INSERT, KEY_MOD_SHIFT))
 			    .enable(!container->userReadOnly());
-		    root.add(TRANSLATE("Remove"), this, tree->model())
+		    root.add(TRANSLATE("Remove"), this, tree)
 			    .connect(container, &PropertyRowContainer::onMenuChildRemove)
 			    .setHotkey(KeyPress(KEY_DELETE, KEY_MOD_SHIFT))
 			    .enable(!container->userReadOnly());

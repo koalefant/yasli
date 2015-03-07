@@ -39,7 +39,7 @@ public:
 	void onMenuClear(PropertyTreeModel* model);
 
 	void onMenuChildInsertBefore(PropertyRow* child, PropertyTree* model);
-	void onMenuChildRemove(PropertyRow* child, PropertyTreeModel* model);
+	void onMenuChildRemove(PropertyRow* child, PropertyTree* model);
 
 	PropertyRow* clone() const{
 		PropertyRowContainer* result = new PropertyRowContainer();
