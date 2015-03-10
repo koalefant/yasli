@@ -28,17 +28,17 @@ void setLogHandler(LogHandler handler)
 
 #ifndef NDEBUG
 static bool interactiveAssertion = true;
-static bool testMode = true;
+static bool testMode = false;
 
 void setInteractiveAssertion(bool interactive)
 {
     interactiveAssertion = interactive;
 }
 
-void setTestMode(bool testMode)
+void setTestMode(bool _testMode)
 {
 	interactiveAssertion = false;
-    testMode = testMode;
+    testMode = _testMode;
 }
 
 bool assertionDialog(const char* function, const char* fileName, int line, const char* expr, const char* str, ...)
