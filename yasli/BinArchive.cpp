@@ -22,6 +22,12 @@ static const unsigned char SIZE32 = 255;
 
 static const unsigned int BIN_MAGIC = 0xb1a4c17f;
 
+// #ifdef _DEBUG
+// #pragma init_seg(lib)
+// typedef std::map<unsigned short, string> HashMap;
+// static HashMap hashMap;
+// #endif
+
 BinOArchive::BinOArchive()
 : Archive(OUTPUT | BINARY)
 {
@@ -67,6 +73,13 @@ inline void BinOArchive::openNode(const char* name, bool size8)
 	stream_.write((unsigned char)0); 
 	if(!size8)
 		stream_.write((unsigned short)0); 
+	
+// #ifdef _DEBUG
+// 	HashMap::iterator i = hashMap.find(hash);
+// //	if(i != hashMap.end() && i->second != name)
+// //		ASSERT_STR(0, name);
+// 	hashMap[hash] = name;
+// #endif
 }
 
 inline void BinOArchive::closeNode(const char* name, bool size8)
@@ -691,20 +704,8 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 		return false;
 	complex_ = true;
 	unsigned short hashName = calcHash(name);
-
-#ifdef YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION
-	HashMap::iterator i = hashMap_.find(hashName);
-	if(i != hashMap_.end() && i->second != name)
-		YASLI_ASSERT(0, "BinArchive hash colliding: %s - %s", i->second.c_str(), name);
-	hashMap_[hashName] = name;
-#endif
-
 	const char* currInitial = curr_;
 	bool restarted = false;
-	if(curr_ == end_){
-		curr_ = begin_;
-		restarted = true;
-	}
 	for(;;){
 		if(curr_ >= end_)
 			return false;

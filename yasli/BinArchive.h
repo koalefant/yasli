@@ -12,8 +12,8 @@
 // ƒл€ тегов используетс€ 16-бит xor-hash с проверкой уникальности в debug'e
 // –азмер блока 8, 16, 32 бита автоматически
 
-#include "Archive.h"
-#include "MemoryWriter.h" 
+#include "yasli/Archive.h"
+#include "yasli/MemoryWriter.h" 
 
 namespace yasli{
 
@@ -159,11 +159,6 @@ private:
 		const char* end_;
 		const char* curr_;
 		bool complex_;
-
-#ifdef YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION
-		typedef std::map<unsigned short, string> HashMap;
-		HashMap hashMap_;
-#endif
 	};
 
 	typedef std::vector<Block> Blocks;

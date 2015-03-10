@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <list>
 #include "yasli/Archive.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"

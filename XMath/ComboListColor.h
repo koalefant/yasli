@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "XMath\Colors.h"
-#include "Yasli\Archive.h"
+#include "yasli\Archive.h"
 
 typedef std::vector<Color4f> ColorContainer;
 
