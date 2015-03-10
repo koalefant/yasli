@@ -90,6 +90,7 @@ bool PropertyRowPointer::assignTo(yasli::PointerInterface &ptr)
 	TypeID derivedType = getDerivedType(ptr.factory());
 	if ( ptr.type() != derivedType ) {
 		ptr.create(derivedType);
+		setValue(ptr);
 	}
 
     return true;
