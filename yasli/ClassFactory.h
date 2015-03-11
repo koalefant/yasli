@@ -135,7 +135,7 @@ public:
 	class Creator : public CreatorBase{
 	public:
 		Creator(const TypeDescription* description){
-			description_ = description;
+			this->description_ = description;
 #if YASLI_NO_RTTI
 			// TODO: remove unnecessary static initialisation
 			Derived vptrProbe;
