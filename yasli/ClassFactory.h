@@ -135,7 +135,7 @@ public:
 	class Creator : public CreatorBase{
 	public:
 		Creator(const TypeDescription* description){
-			this->description_ = description;
+			description_ = description;
 #if YASLI_NO_RTTI
 			// TODO: remove unnecessary static initialisation
 			Derived vptrProbe;
@@ -301,18 +301,16 @@ namespace{ \
 }
 
 #define YASLI_CLASS_NULL(BaseType, name) \
-namespace { \
-    bool BaseType##_NullRegistered = yasli::ClassFactory<BaseType>::the().setNullLabel(name); \
-}
+    bool BaseType##_NullRegistered = yasli::ClassFactory<BaseType>::the().setNullLabel(name); 
 
 #define YASLI_CLASS(BaseType, Type, label) \
-	const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label, sizeof(Type)); \
-	yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label, sizeof(Type)); \
+	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
 	int dummyForType_##Type##BaseType;
 
 #define YASLI_CLASS_NAME(BaseType, Type, name, label) \
-	const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \
-	yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \
+	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
 	int dummyForType_##Type##BaseType;
 
 #define YASLI_FORCE_CLASS(BaseType, Type) \
