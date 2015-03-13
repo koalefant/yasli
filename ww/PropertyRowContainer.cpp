@@ -232,6 +232,7 @@ void PropertyRowContainer::onMenuChildInsertBefore(PropertyRow* child, PropertyT
 	PropertyRow* defaultType = tree->model()->defaultType(elementTypeName_);
 	if(!defaultType)
 		return;
+	tree->model()->deselectAll();
 	PropertyRow* clonedRow = defaultType->clone();
 	clonedRow->setSelected(false);
 	addBefore(clonedRow, child);
