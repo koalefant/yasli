@@ -159,6 +159,11 @@ private:
 		const char* end_;
 		const char* curr_;
 		bool complex_;
+
+#ifdef YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION
+		typedef std::map<unsigned short, string> HashMap;
+		HashMap hashMap_;
+#endif
 	};
 
 	typedef std::vector<Block> Blocks;
