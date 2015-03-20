@@ -596,6 +596,8 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	}
 
 	WidgetPlacement widgetPlace = widgetPlacement();
+	if(widgetPlace == WIDGET_AFTER_NAME && !tree->fullRowContainers())
+		widgetPlace = WIDGET_VALUE;
 
 	if(widgetPlace == WIDGET_ICON){
 		widgetPos_ = widgetSize_ ? posX : -1000;
@@ -1295,7 +1297,7 @@ bool PropertyRow::isFullRow(const PropertyTree* tree) const
 {
 	if (tree->fullRowMode())
 		return true;
-	if (parent() && parent()->isContainer())
+	if (parent() && parent()->isContainer() && tree->fullRowContainers())
 		return true;
 	return userFullRow();
 }

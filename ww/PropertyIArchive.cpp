@@ -237,7 +237,7 @@ bool PropertyIArchive::operator()(ContainerInterface& ser, const char* name, con
     if(ser.size() > 0)
         while(index < size)
         {
-            ser(*this, "", "<");
+            ser(*this, "", "xxx");
             ser.next();
 			++index;
         }

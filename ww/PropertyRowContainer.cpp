@@ -266,6 +266,7 @@ void PropertyRowContainer::onMenuChildRemove(PropertyRow* child, PropertyTree* t
 void PropertyRowContainer::labelChanged()
 {
     swprintf(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
+	userFixedWidget_ = true;
 }
 
 void PropertyRowContainer::serializeValue(Archive& ar)

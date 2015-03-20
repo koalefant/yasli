@@ -49,6 +49,8 @@ public:
 	int tabSize() const { return tabSize_; }
 	void setFullRowMode(bool fullRowMode) { fullRowMode_ = fullRowMode; }
 	bool fullRowMode() const { return fullRowMode_; }
+	void setFullRowContainers(bool fullRowContainers) { fullRowContainers_ = fullRowContainers; }
+	bool fullRowContainers() const { return fullRowContainers_; }
 	void setHideUntranslated(bool hideUntranslated) { hideUntranslated_ = hideUntranslated; }
 	bool hideUntranslated() const{ return hideUntranslated_; }
 	void setValueColumnWidth(float valueColumnWidth) { valueColumnWidth_ = valueColumnWidth; }
@@ -67,6 +69,7 @@ public:
 protected:
 	bool compact_;
 	bool fullRowMode_;
+	bool fullRowContainers_;
 	bool immediateUpdate_;
 	bool hideUntranslated_;
 	bool showContainerIndices_;
@@ -98,6 +101,7 @@ public:
 
 	void setCompact(bool compact) { compact_ = compact; update(); }
 	void setFullRowMode(bool fullRowMode) { fullRowMode_ = fullRowMode; update(); }
+	void setFullRowContainers(bool fullRowContainers) { fullRowContainers_ = fullRowContainers; update(); }
 	void setExpandLevels(int levels);
 	void setUndoEnabled(bool enabled, bool full = false);
 	void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
