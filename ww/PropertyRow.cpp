@@ -563,6 +563,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 
 	size_.set(textSizeInitial_ + widgetSizeMin(), isRoot() ? 0 : ROW_DEFAULT_HEIGHT + floorHeight());
 
+	widgetPos_ = 0;
 	pos_.x = posX;
 	posX += plusSize_;
 
@@ -667,6 +668,8 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 			continue;
 		if(row->pulledUp()){
 			if(!row->pulledBefore()){
+				if(!widgetPos_)
+					widgetPos_ = posX;
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 				posX += row->size_.x;
 			}
@@ -902,23 +905,20 @@ void PropertyRow::drawRow(HDC dc, const PropertyTree* tree, int index)
 	char containerLabel[16] = "";
     wstring text = toWideChar(rowText(containerLabel, tree, index));
 
-    if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-	   !pulledUp() && !isFullRow(tree) && !hasPulled())
-	{
+	int lineSize = widgetPos_ - textPos_ - 2;
+	if(lineSize > textSize_){
 		Color color1;
         color1.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
         Color color2;
         color2.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
 		Rect rect = gdiplusRect(rowRect);
-        rect.X = textPos_ - 1;
+        rect.X = textPos_;
         rect.Y = rowRect.bottom() - 3;
-        rect.Height = 1;
-		rect.Width = max(textSize_ + 8, rowRect.width() - textPos_ - 3);
+		rect.Width = lineSize;
+		rect.Height = 1;
         Gdiplus::LinearGradientBrush gradientBrush(rect, color1, color2, Gdiplus::LinearGradientModeHorizontal);
-        rect.X += 1;
-        rect.Width -= 2;
-        gradientBrush.SetWrapMode(Gdiplus::WrapModeClamp);
-        gr.FillRectangle(&gradientBrush, rect);
+		gradientBrush.SetWrapMode(Gdiplus::WrapModeClamp);
+		gr.FillRectangle(&gradientBrush, rect);
     }
 
     Rect selectionRect = gdiplusRect(rowRect);
