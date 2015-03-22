@@ -55,7 +55,7 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 {
 	// TODO: use stack string
 	buf.resize(end-begin);
-	char* ptr = &buf[0];
+	char* ptr = buf.data();
 	while(begin != end){
 		if(*begin != '\\'){
 			*ptr = *begin;
@@ -89,9 +89,9 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 		}
 		++begin;
 	}
-	buf.resize(ptr - &buf[0]);
+	buf.resize(ptr - buf.data());
 	if (!buf.empty())
-		out.assign(&buf[0], &buf[0] + buf.size());
+		out.assign(buf.data(), buf.data() + buf.size());
 	else
 		out.clear();
 }
@@ -119,6 +119,11 @@ JSONTokenizer::JSONTokenizer()
 inline bool JSONTokenizer::isSpace(char c)
 {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+inline bool JSONTokenizer::isComment(char c)
+{
+	return c == '#';
 }
 
 inline bool JSONTokenizer::isQuote(char c)
@@ -426,6 +431,15 @@ Token JSONTokenizer::operator()(const char* ptr) const
 		++ptr;
 	Token cur(ptr, ptr);
 	while(!cur && *ptr != '\0'){
+		while(isComment(*cur.end)){
+			const char* commentStart = ptr;
+			while(*cur.end && *cur.end != '\n')
+				++cur.end;
+			while(isSpace(*cur.end))
+				++cur.end;
+			DEBUG_TRACE_TOKENIZER("Got comment: '%s'", string(commentStart, cur.end).c_str());
+			cur.start = cur.end;
+		}
 		YASLI_ASSERT(!isSpace(*cur.end));
 		if(isQuote(*cur.end)){
 			++cur.end;
@@ -527,6 +541,7 @@ bool JSONIArchive::load(const char* filename)
 			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
 			if(elementsRead != 1){
 				free(buffer);
+				fclose(file);
 				return false;
 			}
 		}
@@ -799,7 +814,8 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 		else 
 			return false;
 
-        ser(*this);
+        if (ser)
+            ser(*this);
         YASLI_ASSERT(!stack_.empty());
         stack_.pop_back();
         bool closed = closeBracket();
