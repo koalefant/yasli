@@ -21,6 +21,38 @@ SUITE(General)
 		template<class T> struct Container {};
 		class CPrefix {};
 	}
+
+	struct TestBaseA
+	{
+		virtual void testA() {}
+		void serialize(Archive& ar) {}
+	};
+
+	struct TestBaseB : TestBaseA
+	{
+		virtual void testB() {}
+	};
+
+	struct TestClass : TestBaseB
+	{
+		void testA() {}
+		void testB() {}
+	};
+
+	YASLI_CLASS_NAME(TestBaseA, TestClass, "a-class", "A Class")
+	YASLI_CLASS_NAME(TestBaseB, TestClass, "b-class", "B Class")
+
+	TEST(RegistrationInMultipleFactories)
+	{
+		yasli::ClassFactory<TestBaseA>& aFactory = yasli::ClassFactory<TestBaseA>::the(); 
+		TestBaseA* a = aFactory.create(aFactory.findTypeByName("a-class"));
+		CHECK(a != 0);
+
+		yasli::ClassFactory<TestBaseB>& bFactory = yasli::ClassFactory<TestBaseB>::the(); 
+		TestBaseB* b = bFactory.create(bFactory.findTypeByName("b-class"));
+		CHECK(b != 0);
+	}
+
 	TEST(TypeIDNameParsing)
 	{
 		CHECK_EQUAL("int", string(TypeID::get<int>().name()));

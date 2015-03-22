@@ -18,51 +18,6 @@
 
 namespace yasli{
 
-TypeLibrary& TypeLibrary::the()
-{
-    static TypeLibrary typeLibrary;
-    return typeLibrary;
-}
-
-TypeLibrary::TypeLibrary()
-{
-
-}
-
-const TypeDescription* TypeLibrary::find(TypeID typeID) const
-{
-    if(!typeID)
-		return 0;
-    TypeToDescriptionMap::const_iterator it = typeToDescriptionMap_.find(typeID);
-    if(it != typeToDescriptionMap_.end())
-        return it->second;
-    else
-        return 0;
-}
-
-const TypeDescription* TypeLibrary::findByName(const char* name) const
-{
-    YASLI_ASSERT(name && strlen(name));
-    TypeToDescriptionMap::const_iterator it;
-
-    for(it = typeToDescriptionMap_.begin(); it != typeToDescriptionMap_.end(); ++it)
-        if(strcmp(it->second->name(), name) == 0)
-            return it->second;
-
-    return 0;
-}
-
-const TypeDescription* TypeLibrary::registerType(const TypeDescription* description){
-    typeToDescriptionMap_[description->typeID()] = description;
-    return description;
-}
-
-// ----------------------------------------------------------------------------
-
-bool TypeID::registered() const{
-    return TypeLibrary::the().find(*this) != 0;
-}
-
 const char* TypeID::name() const{
 #if YASLI_NO_RTTI
 	if (typeInfo_)
@@ -70,10 +25,7 @@ const char* TypeID::name() const{
 	else
 		return "";
 #else
-    const TypeDescription* description = TypeLibrary::the().find(*this);
-    if(description)
-        return description->name();
-    else if(typeInfo_)
+    if(typeInfo_)
         return typeInfo_->name();
 	else
 		return name_.c_str();
@@ -87,11 +39,7 @@ size_t TypeID::sizeOf() const{
 	else
 		return 0;
 #else
-    const TypeDescription* description = TypeLibrary::the().find(*this);
-    if(description)
-        return description->size();
-    else
-        return 0;
+	return 0;
 #endif
 }
 

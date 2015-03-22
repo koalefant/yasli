@@ -277,41 +277,29 @@ protected:
 #endif
 };
 
-
-class TypeLibrary{
-public:
-	static TypeLibrary& the();
-	const TypeDescription* findByName(const char*) const;
-	const TypeDescription* find(TypeID type) const;
-
-	const TypeDescription* registerType(const TypeDescription* info);
-protected:
-	TypeLibrary();
-
-	typedef std::map<TypeID, const TypeDescription*> TypeToDescriptionMap;
-	TypeToDescriptionMap typeToDescriptionMap_;
-};
-
 }
 
-#define YASLI_TYPE_NAME(Type, name) \
-namespace{ \
-	const yasli::TypeDescription Type##_Description(yasli::TypeID::get<Type>(), #Type, name, sizeof(Type)); \
-	bool registered_##Type = yasli::TypeLibrary::the().registerType(&Type##_Description) != 0; \
-}
+#define YASLI_JOIN_HELPER(x,y,z,w) x ## y ## z ## w
+#define YASLI_JOIN(x,y,z,w) YASLI_JOIN_HELPER(x,y,z,w)
+
+#define YASLI_CLASS_NULL_HELPER(Counter, BaseType, name) \
+	static bool YASLI_JOIN(baseType, _NullRegistered_, _,Counter) = yasli::ClassFactory<BaseType>::the().setNullLabel(name); \
+
 
 #define YASLI_CLASS_NULL(BaseType, name) \
-    bool BaseType##_NullRegistered = yasli::ClassFactory<BaseType>::the().setNullLabel(name); 
+	YASLI_CLASS_NULL_HELPER(__COUNTER__, BaseType, name)
 
 #define YASLI_CLASS(BaseType, Type, label) \
 	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label, sizeof(Type)); \
-	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
+	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(&Type##BaseType##_DerivedDescription); \
 	int dummyForType_##Type##BaseType;
 
+#define YASLI_CLASS_NAME_HELPER(Counter, BaseType, Type, name, label) \
+	static yasli::TypeDescription YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \
+	static const yasli::ClassFactory<BaseType>::Creator<Type> YASLI_JOIN(globalCreator,__LINE__,_,Counter)(&YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)); \
+
 #define YASLI_CLASS_NAME(BaseType, Type, name, label) \
-	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \
-	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(yasli::TypeLibrary::the().registerType(&Type##BaseType##_DerivedDescription)); \
-	int dummyForType_##Type##BaseType;
+	YASLI_CLASS_NAME_HELPER(__COUNTER__, BaseType, Type, name, label)
 
 #define YASLI_FORCE_CLASS(BaseType, Type) \
 	extern int dummyForType_##Type##BaseType; \
