@@ -12,10 +12,10 @@
 #include "QPropertyTree.h"
 #include "yasli/decorators/IconXPM.h"
 #include "Unicode.h"
-#include <QtGui/QApplication>
-#include <QtGui/QStyleOption>
-#include <QtGui/QPainter>
-#include <QtGui/QBitmap>
+#include <QApplication>
+#include <QStyleOption>
+#include <QPainter>
+#include <QBitmap>
 
 #ifndef _MSC_VER
 # define _stricmp strcasecmp

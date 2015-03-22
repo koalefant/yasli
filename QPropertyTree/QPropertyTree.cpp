@@ -1888,7 +1888,7 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 			bool oldAntialiasing = p.renderHints().testFlag(QPainter::Antialiasing);
 			p.setRenderHint(QPainter::Antialiasing, true);
 
-			QRect intersectedHighlightRect = rect.intersect(highlightRect);
+			QRect intersectedHighlightRect = rect.intersected(highlightRect);
 			p.drawRoundedRect(intersectedHighlightRect, 4.0, 4.0);
 			p.setRenderHint(QPainter::Antialiasing, oldAntialiasing);
 		}

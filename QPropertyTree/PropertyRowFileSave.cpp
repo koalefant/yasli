@@ -16,8 +16,8 @@
 #include "Serialization.h"
 #include "yasli/decorators/FileSave.h"
 #include "yasli/decorators/IconXPM.h"
-#include <QtGui/QFileDialog>
-#include <QtGui/QIcon>
+#include <QFileDialog>
+#include <QIcon>
 
 using yasli::FileSave;
 

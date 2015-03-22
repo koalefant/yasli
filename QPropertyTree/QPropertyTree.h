@@ -14,8 +14,8 @@
 #include "yasli/Object.h"
 #include "yasli/Pointers.h"
 #include "PropertyRow.h"
-#include <QtGui/QWidget>
-#include <QtGui/QPainter>
+#include <QWidget>
+#include <QPainter>
 #include <vector>
 
 class QMenu;

@@ -7,14 +7,13 @@ class QPropertyTree;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 public slots:
+
 	void onPropertyChanged();
-    
 private:
 	QPropertyTree* tree_;
 	QPropertyTree* attachedTree_;

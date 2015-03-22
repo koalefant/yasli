@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include <QtGui/QBoxLayout>
+#include <QBoxLayout>
 #include "QPropertyTree/QPropertyTree.h"
 
 #include <limits.h>
@@ -31,13 +31,13 @@ struct Element
 {
     Element()
 	: enabled(false)
+	, integer_(INT_MAX)
 	, char_(255)
 	, signedChar_(127)
 	, unsignedChar_(255)
+	, unsignedInteger_(UINT_MAX)
 	, short_(SHRT_MAX)
 	, unsignedShort_(USHRT_MAX)
-	, unsignedInteger_(UINT_MAX)
-	, integer_(INT_MAX)
 	, float_(FLT_MAX)
 	, double_(DBL_MAX)
 	{}

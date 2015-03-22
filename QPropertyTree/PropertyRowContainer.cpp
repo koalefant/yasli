@@ -15,8 +15,8 @@
 #include "Serialization.h"
 #include "PropertyRowPointer.h"
 
-#include <QtGui/QMenu>
-#include <QtGui/QKeyEvent>
+#include <QMenu>
+#include <QKeyEvent>
 
 // ---------------------------------------------------------------------------
 

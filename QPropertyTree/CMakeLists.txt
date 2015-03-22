@@ -1,18 +1,20 @@
 project(QPropertyTree)
 set(CMAKE_AUTOMOC TRUE)
 
-if (CMAKE_COMPILER_IS_GNUCC)
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-endif (CMAKE_COMPILER_IS_GNUCC)
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+endif (UNIX)
 
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 endif(MSVC)
 
-if (NOT QT4_FOUND)
-	find_package(Qt4 REQUIRED)
+if (NOT QT4_FOUND AND NOT Qt5_INCLUDE_DIRS)
+	find_package(Qt5Widgets)
+	include_directories(${Qt5Widgets_INCLUDE_DIRS})
+	add_definitions(${Qt5Widgets_DEFINITIONS})
 endif()
-#file(GLOB SOURCES *.h *.cpp)
+
 set(SOURCES
 	Color.cpp
 	ConstStringList.cpp
@@ -68,7 +70,5 @@ set(SOURCES
 include_directories(..)
 add_library(qpropertytree ${SOURCES})
 source_group("" FILES ${SOURCES})
-include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-target_link_libraries(qpropertytree yasli ${QT_LIBRARIES})
+target_link_libraries(qpropertytree yasli ${Qt5Widgets_LIBRARIES})
 set_target_properties(qpropertytree PROPERTIES DEBUG_POSTFIX "-debug")
