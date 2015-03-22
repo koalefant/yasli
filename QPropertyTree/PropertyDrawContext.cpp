@@ -223,7 +223,7 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 	else
 		option.state |= QStyle::State_Off;
 
-	QSize checkboxSize = tree->style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option, 0).size();
+	QSize checkboxSize = tree->style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option, tree).size();
 	option.rect = QRect(rect.center().x() - checkboxSize.width() / 2, rect.center().y() - checkboxSize.height() / 2, checkboxSize.width(), checkboxSize.height());
 
 	tree->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, 0);
