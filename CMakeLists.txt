@@ -7,7 +7,6 @@ else (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-value")
 endif (MSVC)
 
-set(CMAKE_BUILD_TYPE "Debug")
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 mark_as_advanced(QT_QMAKE_EXECUTABLE)
 
@@ -25,8 +24,13 @@ add_subdirectory(yasli-test)
 
 add_subdirectory(XMath)
 
+add_subdirectory(UIMirror)
+
 add_subdirectory(QPropertyTree)
 add_subdirectory(QPropertyTree-example)
+add_subdirectory(QPropertyTree-benchmark)
+
+add_subdirectory(UIMirror-sandbox)
 
 # if (MSVC)
 #   add_subdirectory(ww)
