@@ -26,10 +26,10 @@ yasli::string fromWideChar(const wchar_t* wstr)
 	const unsigned int codepage = CP_ACP;
 	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
 	char* buf = (char*)alloca(len);
-    if(len > 1){ 
-        WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
+	if(len > 1){
+		WideCharToMultiByte(codepage, 0, wstr, -1, buf, len, 0, 0);
 		return yasli::string(buf, len - 1);
-    }
+	}
 	return yasli::string();
 #else
     return QString::fromWCharArray(wstr).toUtf8().data();
