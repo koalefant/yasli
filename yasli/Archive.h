@@ -55,6 +55,8 @@ struct Context {
 
 	Context() : object(0), previousContext(0) {}
 	template<class T>
+	void set(T* object);
+	template<class T>
 	Context(Archive& ar, T* context);
 	template<class T>
 	Context(T* context);
@@ -211,10 +213,15 @@ Context::Context(Archive& ar, T* context) {
 
 template<class T>
 Context::Context(T* context) {
-	archive = 0;
-	object = (void*)context;
+    archive = 0;
+    previousContext = 0;
+    set<T>(context);
+}
+
+template<class T>
+void Context::set(T* object) {
+	this->object = (void*)object;
 	type = TypeID::get<T>();
-	previousContext = 0;
 }
 
 inline Context::~Context() {
