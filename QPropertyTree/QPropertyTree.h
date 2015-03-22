@@ -120,8 +120,9 @@ public:
 	void detach();
 	bool attached() const { return !attached_.empty(); }
 
-	void apply();
+	void apply(bool continuous = false);
 	void revert();
+	void revertNonInterrupting();
 	int revertObjects(vector<void*> objectAddresses);
 	bool revertObject(void* objectAddress);
 
@@ -183,6 +184,7 @@ public:
 signals:
 	void signalAboutToSerialize(yasli::Archive& ar);
 	void signalChanged();
+	void signalContinuousChange();
 	void signalObjectChanged(const yasli::Object& obj);
 	void signalSelected();
 	void signalReverted();
@@ -324,7 +326,7 @@ protected:
 	friend class DragWindow;
 	friend struct FilterVisitor;
 	friend struct PropertyTreeMenuHandler;
-	friend class ContainerMenuHandler;
+    friend struct ContainerMenuHandler;
 };
 
 yasli::wstring generateDigest(yasli::Serializer& ser);

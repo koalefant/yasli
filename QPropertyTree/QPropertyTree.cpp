@@ -30,6 +30,7 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QElapsedTimer>
+#include <QStyle>
 #include "PropertyTreeMenuHandler.h"
 
 #include "MathUtils.h"
@@ -909,9 +910,9 @@ void QPropertyTree::updateHeights()
 
 	QRect widgetRect = this->rect();
 
-	int scrollBarW = 16;
+	int scrollBarW = style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 	int lb = compact_ ? 0 : 4;
-	int rb = widgetRect.right() - lb - scrollBarW;
+	int rb = widgetRect.right() - lb - scrollBarW - 2;
 	bool force = lb != leftBorder_ || rb != rightBorder_;
 	leftBorder_ = lb;
 	rightBorder_ = rb;
@@ -988,6 +989,7 @@ void QPropertyTree::serialize(Archive& ar)
 	model()->serialize(ar, this);
 
 	if(ar.isInput()){
+		updateHeights();
 		ensureVisible(model()->focusedRow());
 		updateAttachedPropertyTree(false);
 		updateHeights();
@@ -1148,8 +1150,14 @@ void QPropertyTree::revert()
 	signalReverted();
 }
 
+void QPropertyTree::revertNonInterrupting()
+{
+	if (!capturedRow_) {
+		revert();
+	}
+}
 
-void QPropertyTree::apply()
+void QPropertyTree::apply(bool continuous)
 {
 	QElapsedTimer timer;
 	timer.start();
@@ -1166,7 +1174,11 @@ void QPropertyTree::apply()
 		}
 	}
 
-	signalChanged();
+	if (continuous)
+		signalContinuousChange();
+	else
+		signalChanged();
+
 	applyTime_ = timer.elapsed();
 }
 
@@ -1831,7 +1843,12 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 		return;
 
 	yasli::string textStr(fromWideChar(text));
+#ifdef _MSC_VER
+	// default qt 4.8 builds have 32-bit wchar_t
+	QString str = QString::fromUtf16((const ushort*)text);
+#else
 	QString str = QString::fromWCharArray(text);
+#endif
 	QFontMetrics fm(*font);
 	QRect textRect = rect;
 	int alignment;
