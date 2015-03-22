@@ -37,21 +37,28 @@ static string removeExtension(const char* filename)
 	return string(filename, ext);
 }
 
-static string extractExtensionFromFilter(const char* filter)
+string extractExtensionFromFilter(const char* mask)
 {
-	const char* supposedMask = strstr(filter, "*.");
-	if (!supposedMask)
+	const char* start = strchr(mask, '(');
+	const char* end = strchr(mask, ')');
+	if (!start || !end)
 		return string();
-	const char* ext = supposedMask + 1;
-	const char* p = supposedMask + 2;
-	while (*p) {
-		if (*p == '*')
+	++start;
+	const char* ext = strchr(mask, '.');
+	if (!ext)
+		return string();
+	if (ext > end)
+		return string();
+	++ext;
+	const char* ext_end = ext;
+	while (*ext_end && *ext_end != ' ' && *ext_end != ')' && ext_end < end) {
+		if (*ext_end == '*' || *ext_end == '?')
 			return string();
-		if (*p == ' ' || *p == ')')
-			break;
-		++p;
+		++ext_end;
 	}
-	return string(ext, p);
+	if (ext_end != end)
+		++ext_end;
+	return string(ext, ext_end);
 }
 
 using yasli::FileOpen;

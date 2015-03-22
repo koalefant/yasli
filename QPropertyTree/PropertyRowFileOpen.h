@@ -23,3 +23,4 @@ public slots:
 	void onMenuClear();
 };
 
+std::string extractExtensionFromFilter(const char* fileSelectorFilter);

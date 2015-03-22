@@ -19,6 +19,8 @@
 #include <QFileDialog>
 #include <QIcon>
 
+#include "PropertyRowFileOpen.h"
+
 using yasli::FileSave;
 
 class PropertyRowFileSave : public PropertyRowImpl<FileSave>{
@@ -31,6 +33,7 @@ public:
 		QFileDialog dialog(tree);
 		dialog.setAcceptMode(QFileDialog::AcceptSave);
 		dialog.setFileMode(QFileDialog::AnyFile);
+		dialog.setDefaultSuffix(extractExtensionFromFilter(value().filter.c_str()).c_str());
 		if (labelUndecorated())
 			dialog.setWindowTitle(QString("Choose file for '") + labelUndecorated() + "'");		
 		
