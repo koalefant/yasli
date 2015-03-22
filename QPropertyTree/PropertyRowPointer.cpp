@@ -37,18 +37,17 @@ void ClassMenuItemAdder::generateMenu(QMenu& createItem, const StringList& combo
 		splitStringList(&path, it->c_str(), '\\');
 		int level = 0;
 		QMenu* item = &createItem;
-		//createItem.addMenu(
+
 		for(int level = 0; level < int(path.size()); ++level){
 			const char* leaf = path[level].c_str();
 			if(level == path.size() - 1){
 				addAction(*item, leaf, index++);
 			}
 			else{
-				QAction* action = 0;
-				if(QAction* subItem = findAction(item->actions(), leaf))
-					action = subItem;
+				if (QMenu* menu = item->findChild<QMenu*>(leaf))
+					item = menu;
 				else
-					item = addMenu(*item, leaf); //&item->add(leaf);
+					item = addMenu(*item, leaf);
 			}
 		}
 	}
@@ -61,7 +60,9 @@ void ClassMenuItemAdder::addAction(QMenu& menu, const char* text, int index)
 
 QMenu* ClassMenuItemAdder::addMenu(QMenu& menu, const char* text)
 {
-	return menu.addMenu(text);
+	QMenu* result = menu.addMenu(text);
+	result->setObjectName(text);
+	return result;
 }
 
 
