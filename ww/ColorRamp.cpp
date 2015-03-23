@@ -15,6 +15,7 @@
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Rectangle.h"
 #include <float.h>
+#include <algorithm>
 
 namespace ww{
 
@@ -271,8 +272,8 @@ void ColorRampImpl::redraw(HDC dc)
     StretchBlt(dc, 0, 0, ramp_width, ramp_height, tempDC, 0, 0, 255, 255, SRCCOPY);
     
     // Курсор в Saturation/Brightness области
-    int posY = round((1.0f - hlsColor_.brightness) * float(ramp_height));
-    int posX = round((hlsColor_.saturation) * float(ramp_width));
+    int posY = xround((1.0f - hlsColor_.brightness) * float(ramp_height));
+    int posX = xround((hlsColor_.saturation) * float(ramp_width));
     Color color = hlsColor_.toRGB();
 
     FillRect(dc, &Win32::Rect(posX - 4, posY - 4, posX + 5, posY + 5), HBRUSH(GetStockObject(BLACK_BRUSH)));
@@ -294,7 +295,7 @@ void ColorRampImpl::redraw(HDC dc)
 	::SelectObject(dc, oldPen);
 
     // Курсор на Hue полоске
-	int pos = round(hlsColor_.hue / 360.0f * rect.height());
+	int pos = xround(hlsColor_.hue / 360.0f * rect.height());
 		
 	color = HBSColor(hlsColor_.hue, 1.0f, 1.0f).toRGB();
 	FillRect(dc, &Win32::Rect(width - HUE_WIDTH - 2, pos - 2, width + 2, pos + 3), HBRUSH(GetStockObject(BLACK_BRUSH)));

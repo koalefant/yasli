@@ -27,13 +27,13 @@ struct Color4f
 	Color4f	operator / (float f) const 		{ if(f!=0.f) f=1/f; else f=0.001f; Color4f tmp(r*f,g*f,b*f,a*f); return tmp; }
 	void mul3(const Color4f& x,const Color4f& y){r=x.r*y.r;g=x.g*y.g;b=x.b*y.b;}
 
-	int GetR() const 						{ return round(255*r); }
-	int GetG() const 						{ return round(255*g); }
-	int GetB() const 						{ return round(255*b); }
-	int GetA() const 						{ return round(255*a); }
-	unsigned long RGBA() const 						{ return (round(255*r) << 16) | (round(255*g) << 8) | round(255*b) | (round(255*a) << 24); }
-	unsigned long GetRGB() const 					{ return (round(255*r) << 16) | (round(255*g) << 8) | round(255*b); }
-	unsigned long RGBGDI() const 					{ return round(255*r) | (round(255*g) << 8) | (round(255*b) << 16); }
+	int GetR() const 						{ return xround(255*r); }
+	int GetG() const 						{ return xround(255*g); }
+	int GetB() const 						{ return xround(255*b); }
+	int GetA() const 						{ return xround(255*a); }
+	unsigned long RGBA() const 						{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b) | (xround(255*a) << 24); }
+	unsigned long GetRGB() const 					{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b); }
+	unsigned long RGBGDI() const 					{ return xround(255*r) | (xround(255*g) << 8) | (xround(255*b) << 16); }
 	void interpolate(const Color4f &u,const Color4f &v,float f) { r=u.r+(v.r-u.r)*f; g=u.g+(v.g-u.g)*f; b=u.b+(v.b-u.b)*f; a=u.a+(v.a-u.a)*f; }
 	void interpolate3(const Color4f &u,const Color4f &v,float f) { r=u.r+(v.r-u.r)*f; g=u.g+(v.g-u.g)*f; b=u.b+(v.b-u.b)*f; }
 	bool operator == (const Color4f &color) const { return fabs(r - color.r) < FLT_EPS && fabs(g - color.g) < FLT_EPS && fabs(b - color.b) < FLT_EPS && fabs(a - color.a) < FLT_EPS; }
@@ -72,12 +72,12 @@ struct Color4c
 	Color4c& setGDI(unsigned long color);
 	void setHSV(float h,float s,float v, unsigned char alpha = 255);
 
-	Color4c& operator *= (float f)			{ r=round(r*f); g=round(g*f); b=round(b*f); a=round(a*f); return *this; }
+	Color4c& operator *= (float f)			{ r=xround(r*f); g=xround(g*f); b=xround(b*f); a=xround(a*f); return *this; }
   Color4c& operator += (const Color4c &p)		{ r+=p.r; g+=p.g; b+=p.b; a+=p.a; return *this; }
   Color4c& operator -= (const Color4c &p)		{ r-=p.r; g-=p.g; b-=p.b; a-=p.a; return *this; }
   Color4c operator + (const Color4c &p)		{ return Color4c(r+p.r,g+p.g,b+p.b,a+p.a); }
   Color4c operator - (const Color4c &p)		{ return Color4c(r-p.r,g-p.g,b-p.b,a-p.a); }
-	Color4c operator * (float f) const 		{ return Color4c(round(r*f), round(g*f), round(b*f), round(a*f)); }
+	Color4c operator * (float f) const 		{ return Color4c(xround(r*f), xround(g*f), xround(b*f), xround(a*f)); }
 	Color4c operator * (int f) const 		{ return Color4c(r*f,g*f,b*f,a*f); }
 	Color4c operator / (int f) const 		{ if(f!=0) f=(1<<16)/f; else f=1<<16; return Color4c((r*f)>>16,(g*f)>>16,(b*f)>>16,(a*f)>>16); }
 	
@@ -90,7 +90,7 @@ struct Color4c
 	unsigned long rgba() const 					{ return r | g << 8 | b << 16 | a << 24; }
 	void hsv(float& h,float& s,float& v);
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
-	void interpolate(const Color4c &u,const Color4c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); a=round(u.a+(v.a-u.a)*f); }
+	void interpolate(const Color4c &u,const Color4c &v,float f) { r=xround(u.r+int(v.r-u.r)*f); g=xround(u.g+int(v.g-u.g)*f); b=xround(u.b+int(v.b-u.b)*f); a=xround(u.a+(v.a-u.a)*f); }
 	
 	static const Color4c WHITE;
 	static const Color4c BLACK;
@@ -117,7 +117,7 @@ struct Color3c
 
 	void set(int rc,int gc,int bc)	{ r=rc; g=gc; b=bc; }
 	void set(const Color4f& color)			{ set(color.GetR(),color.GetG(),color.GetB()); }
-	Color3c& operator *= (float f)			{ r=round(r*f); g=round(g*f); b=round(b*f); return *this; }
+	Color3c& operator *= (float f)			{ r=xround(r*f); g=xround(g*f); b=xround(b*f); return *this; }
 	Color3c& operator += (Color3c &p)		{ r+=p.r; g+=p.g; b+=p.b; return *this; }
 	Color3c& operator -= (Color3c &p)		{ r-=p.r; g-=p.g; b-=p.b; return *this; }
 	Color3c operator + (Color3c &p)		{ return Color3c(r+p.r,g+p.g,b+p.b); }
@@ -125,7 +125,7 @@ struct Color3c
 	Color3c operator * (int f) const 		{ return Color3c(r*f,g*f,b*f); }
 	Color3c operator / (int f) const 		{ if(f!=0) f=(1<<16)/f; else f=1<<16; return Color3c((r*f)>>16,(g*f)>>16,(b*f)>>16); }
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
-	void interpolate(const Color3c &u,const Color3c &v,float f) { r=round(u.r+int(v.r-u.r)*f); g=round(u.g+int(v.g-u.g)*f); b=round(u.b+int(v.b-u.b)*f); }
+	void interpolate(const Color3c &u,const Color3c &v,float f) { r=xround(u.r+int(v.r-u.r)*f); g=xround(u.g+int(v.g-u.g)*f); b=xround(u.b+int(v.b-u.b)*f); }
 	unsigned long argb() const 						{ return (0xff000000 | (r << 16) | g << 8 | b); }
 };
 

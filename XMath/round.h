@@ -16,8 +16,8 @@ inline T clamp(const T& x, const T1& xmin, const T2& xmax)
   return x;
 }
 
-#ifdef _WIN32
-inline int round(double x)
+#if defined(_WIN32) 
+inline int xround(double x)
 {
 #ifdef _M_AMD64
 	return _mm_cvtsd_si32(_mm_load_sd(&x));
@@ -31,20 +31,13 @@ inline int round(double x)
 #endif
 }
 
-inline int round(float x)
+inline int xround(float x)
 {
 	return _mm_cvtss_si32(_mm_load_ss(&x));//assume that current rounding mode is always correct (i.e. round to nearest)
 }
 #else
-inline int round(float x)
+inline int xround(float x)
 {
   return lroundf(x);
 }
-
-/*
-inline int round(double x)
-{
-  return lround(x);
-}
-*/
 #endif

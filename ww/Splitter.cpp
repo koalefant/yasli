@@ -268,8 +268,8 @@ void Splitter::_arrangeChildren()
 			if(widget){
 				float position = lastElement ? 1.0f : it->position;
 
-				int start = round(totalLength * lastPosition) + offset;
-				int end = round(totalLength * position) + offset;
+				int start = xround(totalLength * lastPosition) + offset;
+				int end = xround(totalLength * position) + offset;
 				int len = end - start;
 
 				int snapOffset = 0;
@@ -278,7 +278,7 @@ void Splitter::_arrangeChildren()
 				if(lastSplitter){
 					Elements::iterator nextIt = it;
 					++nextIt;
-					int len = round((1.0f - position) * totalLength);
+					int len = xround((1.0f - position) * totalLength);
 					int nextElementSize = nextIt->widget ? elementSize(nextIt->widget).x : 0;
 					if(nextElementSize > len){
 						if(nextElementSize > 2 * (len || totalLength < len + nextElementSize + offset + splitterWidth())){

@@ -20,6 +20,7 @@
 #include "gdiplusUtils.h"
 #include "PropertyDrawContext.h" // rename
 #include "yasli/Archive.h"
+#include <algorithm>
 
 namespace ww{
 
@@ -162,8 +163,8 @@ void TabsImpl::recalculateRects()
 		item.rect.bottom = rect.height();//item.rect.top + height;
 		if(offset > rect.width()){
 			float scale =  rect.width() / float(offset);
-			item.rect.left = round(item.rect.left * scale);
-			item.rect.right = round(item.rect.right * scale);
+			item.rect.left = xround(item.rect.left * scale);
+			item.rect.right = xround(item.rect.right * scale);
 		}
 	}
 	owner_->_setMinimalSize(20, height);

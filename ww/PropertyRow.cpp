@@ -630,7 +630,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	if(!pulledUp() && extraSize > 0){ // align widget value to value column
 		if(!isFullRow(tree)){
 			int oldX = posX;
-			int newX = max(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth())), posX);
+			int newX = max(tree->leftBorder() + xround((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth())), posX);
 			int xDelta = newX - oldX;
 			if (xDelta <= extraSize){
 				extraSize -= xDelta;
@@ -706,7 +706,7 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 {
 	updateTextSizeInitial(tree, index);
 
-	textSize_ = round(textSizeInitial_ * mult);
+	textSize_ = xround(textSizeInitial_ * mult);
 
 	size_t numChildren = children_.size();
 	for (size_t i = 0; i < numChildren; ++i) {

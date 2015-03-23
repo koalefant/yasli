@@ -108,8 +108,8 @@ public:
 	Vect2f& set(float x_, float y_)			{ x = x_; y = y_; return *this; }
 	Vect2f operator - () const				{ return Vect2f(-x,-y); }
 
-	int xi() const { return round(x); }
-	int yi() const { return round(y); }
+	int xi() const { return xround(x); }
+	int yi() const { return xround(y); }
 
 	const float& operator[](int i) const			{ return *(&x + i); }
 	float& operator[](int i)						{ return *(&x + i); }
@@ -169,13 +169,13 @@ public:
 
 	Vect2i()								{ }
 	Vect2i(int x_, int y_)						{ x = x_; y = y_; }
-	Vect2i(float x_, float y_)					{ x = round(x_); y = round(y_); }
+	Vect2i(float x_, float y_)					{ x = xround(x_); y = xround(y_); }
 	
-	Vect2i(const Vect2f& v)			{ x = round(v.x); y = round(v.y); }
+	Vect2i(const Vect2f& v)			{ x = xround(v.x); y = xround(v.y); }
 	inline Vect2i(const Vect2s& v);
 
 	void set(int x_, int y_)					{ x = x_; y=y_; }
-	void set(float x_, float y_)				{ x = round(x_); y = round(y_); }
+	void set(float x_, float y_)				{ x = xround(x_); y = xround(y_); }
 	Vect2i operator - () const				{ return Vect2i(-x, -y); }
 
 	const int& operator[](int i) const			{ return *(&x + i); }
@@ -196,7 +196,7 @@ public:
 	Vect2i& operator>>=(int n)				{ x >>= n; y >>= n; return *this; }
 	Vect2i operator>>(int n) const 		{ return Vect2i(*this) >>= n; }
 
-	Vect2i& operator*=(float f)				{ x = round(x*f); y = round(y*f); return *this; }
+	Vect2i& operator*=(float f)				{ x = xround(x*f); y = xround(y*f); return *this; }
 	Vect2i& operator/=(float f)				{  return *this *= 1.f/f; }
 	Vect2i& operator/=(int f)				{  x /= f; y /= f; return *this; }
 	Vect2i operator*(float f) const 		{ return Vect2i(*this) *= f; }
@@ -209,10 +209,10 @@ public:
 	
 	int operator%(const Vect2i &v) const { return x*v.y - y*v.x; }
 
-	int norm() const 						{ return round(sqrtFast(float(x*x+y*y))); }
+	int norm() const 						{ return xround(sqrtFast(float(x*x+y*y))); }
 	int norm2() const						{ return x*x+y*y; }
 	
-	void normalize(int norma)				{ float f=(float)norma*invSqrtFast((float)(x*x + y*y)); x=round(x*f); y=round(y*f); }
+	void normalize(int norma)				{ float f=(float)norma*invSqrtFast((float)(x*x + y*y)); x=xround(x*f); y=xround(y*f); }
 	int distance2(const Vect2i& v) const	{ return sqr(x - v.x) + sqr(y - v.y); }
 	Vect2i& interpolate(const Vect2i& u, const Vect2i& v, float lambda);
 
@@ -241,7 +241,7 @@ public:
 	Vect2s()										{ }
 	Vect2s(int x_,int y_)							{ x = x_; y = y_; }
 
-	Vect2s(const Vect2f& v)			{ x = round(v.x); y = round(v.y); }
+	Vect2s(const Vect2f& v)			{ x = xround(v.x); y = xround(v.y); }
 	Vect2s(const Vect2i& v)			{ x = v.x; y = v.y; }
 
 	void set(int x_, int y_)					{ x = x_; y = y_; }
@@ -253,21 +253,21 @@ public:
 	Vect2s& operator+=(const Vect2s& v)	{ x += v.x; y += v.y; return *this; }
 	Vect2s& operator-=(const Vect2s& v)	{ x -= v.x; y -= v.y; return *this; }
 	Vect2s& operator*=(const Vect2s& v)	{ x *= v.x; y *= v.y; return *this; }
-	Vect2s& operator*=(float f)			{ x = round(x * f); y = round(y * f); return *this; }
-	Vect2s& operator/=(float f)			{ if(f != 0.f) f = 1.f / f; else f = 0.0001f; x = round(x * f); y = round(y * f); return *this; }
+	Vect2s& operator*=(float f)			{ x = xround(x * f); y = xround(y * f); return *this; }
+	Vect2s& operator/=(float f)			{ if(f != 0.f) f = 1.f / f; else f = 0.0001f; x = xround(x * f); y = xround(y * f); return *this; }
 	Vect2s operator-(const Vect2s& v) const	{ return Vect2s(x - v.x, y - v.y); }
 	Vect2s operator+(const Vect2s& v) const	{ return Vect2s(x + v.x, y + v.y); }
 	Vect2s operator*(const Vect2s& v) const	{ return Vect2s(x*v.x, y*v.y); }
-	Vect2s operator*(float f) const				{ Vect2s tmp(round(x*f),round(y*f)); return tmp; }
-	Vect2s operator/(float f) const				{ if(f!=0.f) f=1/f; else f=0.0001f; Vect2s tmp(round(x*f),round(y*f)); return tmp; }
+	Vect2s operator*(float f) const				{ Vect2s tmp(xround(x*f),xround(y*f)); return tmp; }
+	Vect2s operator/(float f) const				{ if(f!=0.f) f=1/f; else f=0.0001f; Vect2s tmp(xround(x*f),xround(y*f)); return tmp; }
 
 	bool operator==(const Vect2s& v)	const	{ return x == v.x && y == v.y; }
 	bool operator!=(const Vect2s& v)	const	{ return x != v.x || y != v.y; }
 
-	int norm() const								{ return round(sqrtFast((float)(x*x+y*y))); }
+	int norm() const								{ return xround(sqrtFast((float)(x*x+y*y))); }
 	int norm2() const								{ return x*x+y*y; }
-	int distance(const Vect2s& v) const			{ int dx=v.x-x,dy=v.y-y; return round(sqrtFast((float)(dx*dx+dy*dy))); }
-	void normalize(int norma)				{ float f=(float)norma*invSqrtFast((float)((int)x*x + (int)y*y)); x=round(x*f); y=round(y*f); }
+	int distance(const Vect2s& v) const			{ int dx=v.x-x,dy=v.y-y; return xround(sqrtFast((float)(dx*dx+dy*dy))); }
+	void normalize(int norma)				{ float f=(float)norma*invSqrtFast((float)((int)x*x + (int)y*y)); x=xround(x*f); y=xround(y*f); }
 
 	void swap(Vect2s &v)					{ Vect2s tmp = v; v = *this; *this = tmp; }
 	
@@ -408,9 +408,9 @@ public:
   float& operator()(int i)       {return *(&x + i - 1);}
 
   // Convertion to int ///////
-  int xi() const{ return round(x); }
-  int yi() const{ return round(y); }
-  int zi() const{ return round(z); }
+  int xi() const{ return xround(x); }
+  int yi() const{ return xround(y); }
+  int zi() const{ return xround(z); }
 
   //  Negate  ////////////////////////////////////
   inline Vect3f operator-() const;
@@ -541,9 +541,9 @@ public:
   inline double& operator[](int i)       {return *(&x + i);}
 
   // Convertion to int ///////
-  int xi() const { return round(x); }
-  int yi() const { return round(y); }
-  int zi() const { return round(z); }
+  int xi() const { return xround(x); }
+  int yi() const { return xround(y); }
+  int zi() const { return xround(z); }
 
   //  Negate  ////////////////////////////////////
   inline Vect3d operator-() const;
@@ -1673,10 +1673,10 @@ public:
   float& operator[](int i)       {return *(&x + i);}
 
   // Convertion to int ///////
-  inline int xi() const { return round(x); }
-  inline int yi() const { return round(y); }
-  inline int zi() const { return round(z); }
-  inline int wi() const { return round(w); }
+  inline int xi() const { return xround(x); }
+  inline int yi() const { return xround(y); }
+  inline int zi() const { return xround(z); }
+  inline int wi() const { return xround(w); }
 
   //  Logical operations  ////////////////////////////////
   inline bool eq(const Vect4f& v, float delta = FLT_COMPARE_TOLERANCE) const;

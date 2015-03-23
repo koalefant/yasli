@@ -111,7 +111,7 @@ public:
 
 	void serializeAll(yasli::Archive& ar);
 
-	int ticks2time(__int64 t) { return t ? round((t - start_ticks)*time_factor) : 0; }
+	int ticks2time(__int64 t) { return t ? xround((t - start_ticks)*time_factor) : 0; }
 
 	static Profiler& instance() { return TimerData::profiler(); }
 

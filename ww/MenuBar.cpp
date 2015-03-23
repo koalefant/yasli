@@ -17,6 +17,7 @@
 #include "ww/Unicode.h"
 #include "ww/HotkeyContext.h"
 #include "ww/Window.h"
+#include <algorithm>
 
 namespace ww{
 

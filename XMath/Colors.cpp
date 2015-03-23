@@ -122,7 +122,7 @@ inline void HSVtoRGB(float h,float s,float v,
 		else
 			h=h/60.0f;
 
-		i=round(floor(h));
+		i=xround(floor(h));
 		f=h-i;
 		m=v*(1-s);
 		n=v*(1-s*f);
@@ -167,9 +167,9 @@ void Color4c::setHSV(float h,float s,float v, unsigned char alpha)
 {
 	float rf,gf,bf;
 	HSVtoRGB(h,s,v, rf,gf,bf);
-	r = round(rf*255);
-	g = round(gf*255);
-	b = round(bf*255);
+	r = xround(rf*255);
+	g = xround(gf*255);
+	b = xround(bf*255);
 	a = alpha;
 }
 

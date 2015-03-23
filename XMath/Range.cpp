@@ -2,6 +2,7 @@
 #include "Range.h"
 #include "yasli/Config.h"
 #include "yasli/Archive.h"
+#include <algorithm> 
 using namespace yasli;
 
 void Rangef::set(float _min, float _max)

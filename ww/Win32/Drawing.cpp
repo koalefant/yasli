@@ -30,9 +30,9 @@ static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
 namespace Win32{
 
 
-int round(float v)
+int xround(float v)
 {
-	return int(v);
+	return int(v + 0.5f);
 }
 
 ww::Color toColor(COLORREF c)
@@ -123,8 +123,8 @@ void drawNotCheck(Gdiplus::Graphics *gr, const Gdiplus::Rect& checkRect, bool ch
 		rect.Inflate(-3, -3);
 		gr->FillEllipse(&SolidBrush(gdiplusSysColor(COLOR_WINDOW)), gdiplusRectF(rect));
 		gr->DrawEllipse(&Pen(gdiplusSysColor(COLOR_3DSHADOW)), gdiplusRectF(rect));
-		int dx = round(cosf(float(M_PI) * 0.25f) * size / 2) - 1;
-		int dy = round(sinf(float(M_PI) * 0.25f) * size / 2) - 1;
+		int dx = xround(cosf(float(M_PI) * 0.25f) * size / 2) - 1;
+		int dy = xround(sinf(float(M_PI) * 0.25f) * size / 2) - 1;
 		gr->DrawLine(&Pen(color, 3), center.X - dx, center.Y + dy, center.X + dx, center.Y - dy);
 	}
 	else{
@@ -288,7 +288,7 @@ void drawSlider(HDC dc, const RECT& rect, float value, bool focused)
         const int handleWidth = 4;
 		
 		Rect filledRect( rect.left, rect.top, 
-                         round((rect.right - rect.left - handleWidth - 1) * clamp(value, 0.0f, 1.0f)) + handleWidth,
+                         xround((rect.right - rect.left - handleWidth - 1) * clamp(value, 0.0f, 1.0f)) + handleWidth,
                          rect.bottom - rect.top );
 
 		Color colors2[3] = { gdiplusSysColor(COLOR_BTNFACE), gdiplusSysColor(COLOR_BTNFACE), gdiplusSysColor(COLOR_3DSHADOW) };

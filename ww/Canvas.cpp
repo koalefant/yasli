@@ -83,7 +83,7 @@ void Canvas::fillRectangle(const Rectf& rect, const Color4c& color)
 
 Vect2 Canvas::toView(const Vect2f& p) const
 {
-    return Vect2(round(p.x), round(p.y));
+    return Vect2(xround(p.x), xround(p.y));
 }
 
 Vect2f Canvas::fromView(const Vect2& p) const

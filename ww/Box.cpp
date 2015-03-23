@@ -269,9 +269,9 @@ bool Box::updateMinimalSize()
     length += float(spacing_)*float(std::max(0, int(elements_.size()) + 1)) + border_ * 2.0f;
     width += border_ * 2.0f;
     if(clipChildren_)
-        setBoxSize(Vect2(0, round(width)));
+        setBoxSize(Vect2(0, xround(width)));
     else
-        setBoxSize(Vect2(round(length), round(width)));
+        setBoxSize(Vect2(xround(length), xround(width)));
     ::RedrawWindow(window->handle(), 0, 0, RDW_INVALIDATE | RDW_ALLCHILDREN);
     return oldMinimalSize != _minimalSize();
 
@@ -300,7 +300,7 @@ float VBox::boxLength() const
 void VBox::setElementPosition(Element& element, float offset, float length)
 {
 	int border = this->border();
-	Rect rect(border, border + round(offset), _position().width() - border, border + round(offset) + round(length));
+	Rect rect(border, border + xround(offset), _position().width() - border, border + xround(offset) + xround(length));
 	if(element.fill()){
 		element.widget->_setPosition(rect + position_.leftTop());
 	}
@@ -345,7 +345,7 @@ float HBox::boxLength() const
 void HBox::setElementPosition(Element& element, float offset, float length)
 {
 	int border = this->border();
-	Rect rect(border + round(offset), border, border + round(offset) + round(length), _position().height() - border);
+	Rect rect(border + xround(offset), border, border + xround(offset) + xround(length), _position().height() - border);
 	if(element.fill()){
 		element.widget->_setPosition(rect + position_.leftTop());
 	}

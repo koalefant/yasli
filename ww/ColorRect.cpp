@@ -64,12 +64,12 @@ void ColorRectImpl::redraw(HDC dc)
 
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 2; ++j) {
-			RECT rect = { round(i * w), round(j * h + h * 2), round((i + 1) * w), round ((j + 1) * h + h * 2) };
+			RECT rect = { xround(i * w), xround(j * h + h * 2), xround((i + 1) * w), xround ((j + 1) * h + h * 2) };
 			FillRect(dc, &rect, ((i + j) % 2) ? whiteBrush : blackBrush);
 		}
 	}
 
-	RECT r = { filledRect.left, filledRect.top, filledRect.left + round(w * 4), filledRect.top + round(h * 2) };
+	RECT r = { filledRect.left, filledRect.top, filledRect.left + xround(w * 4), filledRect.top + xround(h * 2) };
 	::FillRect(dc, &r, brush);
 
 	::SelectClipRgn(dc, 0);

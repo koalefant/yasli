@@ -221,7 +221,7 @@ void Viewport2D::serialize(Archive& ar)
 
 void Viewport2D::createFont()
 {
-	positionFont_ = CreateFont(round(fontHeight_*viewScale().y), 0, 0, 0,
+	positionFont_ = CreateFont(xround(fontHeight_*viewScale().y), 0, 0, 0,
 		FW_NORMAL, FALSE, FALSE, FALSE, RUSSIAN_CHARSET,
 		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Tahoma");
 }
@@ -363,10 +363,10 @@ void Viewport2D::drawCircle(HDC dc, const Vect2f& pos, float radius, const Color
 	AutoSelector oldPen(dc, CreateSolidBrush(RGB(color.r, color.g, color.b)));
 	AutoSelector oldBrush(dc, CreatePen(PS_SOLID, outline_width, RGB(0, 0, 0)));
 	Ellipse(dc,
-		round(center.x - radius*viewScale().x),
-		round(center.y - radius*viewScale().y),
-		round(center.x + radius*viewScale().x),
-		round(center.y + radius*viewScale().y));
+		xround(center.x - radius*viewScale().x),
+		xround(center.y - radius*viewScale().y),
+		xround(center.x + radius*viewScale().x),
+		xround(center.y + radius*viewScale().y));
 }
 
 void Viewport2D::drawLine(HDC dc, const Vect2f& _start, const Vect2f& _end, const Color4c& color, int style, int width)
@@ -448,8 +448,8 @@ void Viewport2D::drawText(HDC dc, const Vect2f& pos, const char* _text, const Co
 	SetTextColor(dc, textColor.rgb());
 
 	Vect2 posScr = coordsToScreen(pos);
-	posScr.x += round(size.x*sign.x);
-	posScr.y += round(size.y*sign.y);
+	posScr.x += xround(size.x*sign.x);
+	posScr.y += xround(size.y*sign.y);
 	TextOut(dc, posScr.x, posScr.y, text.c_str(), (int)wcslen(text.c_str()));
 }
 
