@@ -9,8 +9,8 @@
 
 #pragma once
 
-// ƒл€ тегов используетс€ 16-бит xor-hash с проверкой уникальности в debug'e
-// –азмер блока 8, 16, 32 бита автоматически
+// Tags are 16-bit xor-hashes, checked for uniqueness in debug.
+// Block is automatic: 8, 16 or 32-bits
 
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h" 
@@ -142,12 +142,23 @@ private:
 		  }
 		  void read(std::wstring& s)
 		  {
-			  if(curr_ + sizeof(wchar_t) * wcslen((wchar_t*)curr_) < end_){
-				s = (wchar_t*)curr_;
-				curr_ += (wcslen((wchar_t*)curr_) + 1) * sizeof(wchar_t);
+			  // make sure that accessed wchar_t is always aligned
+			  const char* strEnd = curr_;
+			  const wchar_t nullChar = L'\0';
+			  while (strEnd < end_) {
+				  if (memcmp(strEnd, &nullChar, sizeof(nullChar)) == 0)
+					  break;
+				  strEnd += sizeof(wchar_t);
 			  }
-			  else
-				  YASLI_ASSERT(0);
+			  int len = (strEnd - curr_) / sizeof(wchar_t);
+
+			  s.resize(len);
+			  if (len)
+				  memcpy(&s[0], curr_, len * sizeof(wchar_t));
+
+			  curr_ = curr_ + (len + 1) * sizeof(wchar_t);
+			  if (curr_ > end_)
+				  curr_ = end_;
 		  }
 
 		  unsigned int readPackedSize();

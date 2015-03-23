@@ -8,6 +8,7 @@
 #include "yasli/PointersImpl.h"
 #include "yasli/STLImpl.h"
 #include "yasli/TextOArchive.h"
+#include <string>
 
 using namespace yasli;
 
@@ -20,6 +21,7 @@ using namespace yasli;
 struct Member
 {
 	std::string name;
+	std::wstring wname;
 	float weight;
 
 	Member()
@@ -28,6 +30,7 @@ struct Member
 	void checkEquality(const Member& copy) const
 	{
 		YCHECK(name == copy.name);
+		YCHECK(wname == copy.wname);
 		YCHECK(weight == copy.weight);
 	}
 
@@ -35,12 +38,15 @@ struct Member
 	{
 		name = "Changed name ";
 		name += (index % 10) + '0';
+		wname = L"New unique name";
+		wname += (index % 10) + L'0';
 		weight = float(index);
 	}
 
 	void serialize(Archive& ar)
 	{
 		ar(name, "name");
+		ar(wname, "wname");
 		ar(weight, "weight");
 	}
 };
@@ -104,6 +110,7 @@ public:
 	{		
 		PolyBase::serialize(ar);
 		ar(derivedMember_, "derivedMember");
+		ar(derivedWMember_, "derivedWMember");
 	}
 
 	void checkEquality(const PolyBase* copyBase) const
@@ -111,11 +118,13 @@ public:
 		const PolyDerivedB* copy = dynamic_cast<const PolyDerivedB*>(copyBase);
 		YCHECK(copy != 0);
 		YCHECK(derivedMember_ == copy->derivedMember_);
+		YCHECK(derivedWMember_ == copy->derivedWMember_);
 
 		PolyBase::checkEquality(copyBase);
 	}
 protected:
 	std::string derivedMember_;
+	std::wstring derivedWMember_;
 };
 
 struct NumericTypes
@@ -209,6 +218,7 @@ public:
 	: index_(0)
 	{
 		name_ = "Foo";
+		wname_ = L"Bar";
 		stringList_.push_back("Choice 1");
 		stringList_.push_back("Choice 2");
 		stringList_.push_back("Choice 3");
@@ -241,6 +251,7 @@ public:
 	void change()
 	{
 		name_ = "Slightly changed name";
+		wname_ = L"Another changed string";
 		index_ = 2;
 		polyPtr_.reset( new PolyDerivedB() );
 		polyPtr_->change();
@@ -278,6 +289,7 @@ public:
 	void serialize(Archive& ar)
 	{
 		ar(name_, "name");
+		ar(wname_, "wname");
 		ar(polyPtr_, "polyPtr");
 		ar(polyVector_, "polyVector");
 		ar(members_, "members");
@@ -303,6 +315,7 @@ public:
 	void checkEquality(const ComplexClass& copy) const
 	{
 		YCHECK(name_ == copy.name_);
+		YCHECK(wname_ == copy.wname_);
 		YCHECK(index_ == copy.index_);
 
 		YCHECK(polyPtr_ != 0);
@@ -349,6 +362,7 @@ public:
 	}
 protected:
 	std::string name_;
+	std::wstring wname_;
 	typedef std::vector<Member> Members;
 	std::vector<std::string> vectorOfStrings_;
 	std::vector<std::pair<int, string> > intToString_;
