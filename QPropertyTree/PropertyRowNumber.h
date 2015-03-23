@@ -66,7 +66,7 @@ Output clamp(Input value, Output min, Output max)
 	return Output(value);
 }
 
-template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, std::numeric_limits<Out>::min(), std::numeric_limits<Out>::max()); }
+template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, std::numeric_limits<Out>::lowest(), std::numeric_limits<Out>::max()); }
 
 inline void clampedNumberFromString(char* value, const char* str)        { clampToType(value, stringToSignedInteger(str)); }
 inline void clampedNumberFromString(signed char* value, const char* str) { clampToType(value, stringToSignedInteger(str)); }
@@ -100,9 +100,9 @@ class PropertyRowNumber : public PropertyRowNumberField{
 public:
 	PropertyRowNumber()
 	{
-		softMin_ = std::numeric_limits<Type>::min();
+		softMin_ = std::numeric_limits<Type>::lowest();
 		softMax_ = std::numeric_limits<Type>::max();
-		hardMin_ = std::numeric_limits<Type>::min();
+		hardMin_ = std::numeric_limits<Type>::lowest();
 		hardMax_ = std::numeric_limits<Type>::max();
 	}
 
@@ -165,7 +165,7 @@ public:
 
 	void incrementLog(float screenFraction)
 	{
-		bool bothSoftLimitsSet = (std::numeric_limits<Type>::min() == 0 || softMin_ != std::numeric_limits<Type>::min()) && softMax_ != std::numeric_limits<Type>::max();
+		bool bothSoftLimitsSet = (std::numeric_limits<Type>::lowest() == 0 || softMin_ != std::numeric_limits<Type>::lowest()) && softMax_ != std::numeric_limits<Type>::max();
 
 		if (bothSoftLimitsSet)
 		{

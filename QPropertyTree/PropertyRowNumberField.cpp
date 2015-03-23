@@ -90,7 +90,7 @@ void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 
 void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
 {
-	e.tree->apply();
+	e.tree->apply(true);
 }
 
 void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, QPoint point) 
