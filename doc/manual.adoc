@@ -1,0 +1,80 @@
+== yasli manual ==
+=== Motivation ===
+Serialization is an important tool of software development. Unfortunately 
+standard C++ library provides very scarce means for serialization, such as
+standard I/O-streams. 
+
+yasli was born as a tool for data-driven game development. It allowed
+programmer to rapidly define data structures and expose their content to game
+designers.
+
+With the time it gather number of properties that make it valueable outside
+of initial domain:
+
+- Concise and easy to define serialization procedures
+- Abstract archives decouple user serialization code from specific format
+implementation
+- Multiple formats supported:
+	* JSON
+	* BinArchive - compact hash-based binary stream
+	* QPropertyTree - a flexible UI for interctive editing of the serialized data
+- Decent performance
+- Ability to change format with time
+
+=== Installation ===
+==== Supported compilers ====
+
+yasli (except for QPropertyTree) is known to work on following platforms:
+
+- Windows, MSVC 2005-2013 (x86/x64)
+- Linux, x86/x64, clang/gcc
+- various Android versions, clang/gcc (arm)
+- iOS, XCode (arm, arm64)
+- OS X, XCode x86/x64
+- Emscripten (C++ to JavaScript compiler)
+
+QPropertyTree requires Qt5 to work and compiles on following platforms:
+
+- Windows, MSVC 2005-2013 (x86/x64)
+- Linux, x86/x64, clang/gcc
+- OS X, x86/x64
+
+yasli is written in portable C++ and compiling it on a new platform is
+relatively straightforward.
+
+==== Downloading source code ====
+
+==== Adding yasli to the project ====
+yasli is using http://cmake.org[CMake] for its project files. CMake is a
+project files generator that support variety of different platforms.
+
+If your project happens to use CMake as well adding yasli to project should
+be quite straightforward:
+[source,cmake]
+----
+add_subdirectory(yasli/yasli)
+target_link_libraries(my_application yasli)
+
+add_subdirectory(yasli/QPropertyTree)
+target_link_libraries(my_qt_application QPropertyTree)
+----
+
+Alternatively, for core functionality you can include source files from
+yasli folder into your project. To QPropertyTree you can include files from 
+QPropertyTree folder.
+
+=== Usage ===
+==== Serialization method ====
+==== Containers ====
+==== Enumerations ====
+==== Pointers and polymorphic types ====
+==== Non-intrusive serialization ====
+==== Changing format and conversion ====
+=== Extending yasli ===
+=== QPropertyTree ===
+==== Basic usage ====
+==== Decorators ====
+==== Control characters ====
+==== Multiple trees ====
+
+:vim tw=78:
