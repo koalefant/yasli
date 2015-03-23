@@ -13,7 +13,8 @@
 #ifdef _MSC_VER
 #define YASLI_DEBUG_BREAK __debugbreak()
 #elif defined(EMSCRIPTEN)
-#define YASLI_DEBUG_BREAK ES_ASM("console.error(\"debug-break\")")
+#include <emscripten/emscripten.h>
+#define YASLI_DEBUG_BREAK EM_ASM(console.error("debug-break"))
 #else
 #define YASLI_DEBUG_BREAK __builtin_trap()
 #endif
