@@ -1006,7 +1006,7 @@ void PropertyRow::drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& 
 		option.state |= QStyle::State_Open;
 	p.setPen(QPen());
 	p.setBrush(QBrush());
-	tree->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &option, &p, 0);
+	tree->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &option, &p, tree);
 }
 
 bool PropertyRow::visible(const QPropertyTree* tree) const
