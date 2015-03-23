@@ -24,13 +24,8 @@ add_subdirectory(yasli-test)
 
 add_subdirectory(XMath)
 
-add_subdirectory(UIMirror)
-
 add_subdirectory(QPropertyTree)
 add_subdirectory(QPropertyTree-example)
-add_subdirectory(QPropertyTree-benchmark)
-
-add_subdirectory(UIMirror-sandbox)
 
 # if (MSVC)
 #   add_subdirectory(ww)
