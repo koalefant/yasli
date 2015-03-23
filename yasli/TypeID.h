@@ -30,18 +30,19 @@ class TypeID{
 	friend class TypesFactory;
 public:
 	TypeID()
-	: typeInfo_(0)
+	: 
 #if YASLI_NO_RTTI
-	, runtimeID_(0)
+	runtimeID_(0),
 #endif
+    typeInfo_(0)
 	{}
 
 	TypeID(const TypeID& original)
 	: 
 #if !YASLI_NO_RTTI
-	name_(original.name_) ,
+	name_(original.name_),
 #else
-	runtimeID_(original.runtimeID_) ,
+	runtimeID_(original.runtimeID_),
 #endif
     typeInfo_(original.typeInfo_)
 	{
@@ -178,11 +179,29 @@ struct TypeInfo
 	static void extractTypeName(char (&name)[nameLen], const char* funcName)
 	{
 #ifdef __clang__
-		// static yasli::TypeID yasli::TypeID::get() [T = ActualTypeName]
-		const char* s = strstr(funcName, "[T = ");
-		if (s)
-			s += 5;
-		const char* send = strrchr(funcName, ']');
+        const char* s;
+        const char* send;
+        const char* lastSquareBracket = strrchr(funcName, ']');
+        const char* lastRoundBracket = strrchr(funcName, ')');
+        if (lastSquareBracket && lastRoundBracket && lastSquareBracket > lastRoundBracket)
+        {
+            // static yasli::TypeID yasli::TypeID::get() [T = ActualTypeName]
+            s = strstr(funcName, "[T = ");
+            if (s)
+                s += 5;
+            send = strrchr(funcName, ']');
+        }
+        else
+        {
+            // old versions of Xcode
+            // static yasli::funcNameHelper(ActualTypeName *)
+            s = strstr(funcName, "(");
+            if (s)
+                s += 1;
+            send = strstr(funcName, "*)");
+            if (send > s && *(send-1) == ' ')
+                --send;
+        }
 #elif __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 		// static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
 		const char* s = strstr(funcName, "[with T = ");
@@ -227,6 +246,10 @@ struct TypeInfo
 };
 #endif
 
+#ifdef __APPLE__
+template<class T> const char* funcNameHelper(T* ref) { return __PRETTY_FUNCTION__; }
+#endif
+    
 template<class T>
 TypeID TypeID::get()
 {
@@ -234,7 +257,11 @@ TypeID TypeID::get()
 # ifdef _MSC_VER
 	static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
 # else
+#if defined(__APPLE__)
+    static TypeInfo typeInfo(sizeof(T), funcNameHelper((T*)0));
+#else
 	static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
+#endif
 # endif
 	return typeInfo.id;
 #else
