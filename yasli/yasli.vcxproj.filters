@@ -7,9 +7,6 @@
     <Filter Include="archives">
       <UniqueIdentifier>{336f1c74-1f75-40b2-9133-36567dd00e69}</UniqueIdentifier>
     </Filter>
-    <Filter Include="archives\InPlace">
-      <UniqueIdentifier>{49132a1f-e08b-4572-b1e5-116f29e41ce4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="archives\Binary">
       <UniqueIdentifier>{3123fd99-8781-4aa7-ad49-b542c7ffe959}</UniqueIdentifier>
     </Filter>

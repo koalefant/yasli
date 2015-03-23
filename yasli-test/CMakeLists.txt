@@ -8,7 +8,6 @@ set(TEST_SOURCES
   Test.cpp
   TestBinArchive.cpp
   TestGeneral.cpp
-  TestInPlaceArchive.cpp
   TestJSONArchive.cpp
   TestTextArchive.cpp
   )

@@ -18,8 +18,6 @@ set(SOURCES
 	Config.h
 	Enum.cpp Enum.h
 	Helpers.h
-	InPlaceIArchive.cpp InPlaceIArchive.h
-	InPlaceOArchive.cpp InPlaceOArchive.h
 	JSONIArchive.cpp JSONIArchive.h
 	JSONOArchive.cpp JSONOArchive.h
 	KeyValue.h

@@ -13,8 +13,6 @@
 
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
-#include "yasli/InPlaceOArchive.h"
-#include "yasli/InPlaceIArchive.h"
 #include "yasli/Enum.h"
 
 using namespace yasli;
@@ -208,61 +206,6 @@ int getFileSize(const char* filename)
 #endif
 
   return (int)desc.st_size;
-}
-
-void benchmark()
-{
-	const char* filename = "benchmark.inp";
-	// and write back
-	if(true)
-	{
-		InPlaceOArchive oa(false);
-		MyDataContainer container;
-		AutoTimer t("write time");
-		oa(container);
-		oa.save(filename);
-	}
-
-	size_t fileSize = getFileSize(filename);
-	const int iterations = 1;
-	{
-		AutoTimer t("read time");
-		for(int i = 0; i < iterations; ++i)
-		{
-
-			// let's read it
-			InPlaceIArchive ia;
-			const MyDataContainer* loaded = 0;
-			{
-				loaded = ia.load<MyDataContainer>(filename);
-			}
-
-			if(loaded)
-			{
-				free((void*)loaded);
-				//ia(objects, "objects");
-			}
-		}
-		printf("speed: %.2f MB/s\n", float(fileSize * iterations) / (1024 * 1024) / (float(t.result() / 1000.0f)));
-	}
-}
-
-void testInplace()
-{
-	const char* inplaceFilename = "test.inp";
-	{
-		std::auto_ptr<MyDataClass> test(new MyDataClass());
-		InPlaceOArchive oa(false);
-        YASLI_ESCAPE(oa(*test, "test"), return);
-		oa.save(inplaceFilename);
-	}
-
-	InPlaceIArchive ia;
-	const MyDataClass* result = ia.load<MyDataClass>(inplaceFilename);
-	if(result)
-	{
-		free((void*)(result));
-	}
 }
 
 void testText()

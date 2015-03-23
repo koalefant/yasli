@@ -595,26 +595,6 @@
 			Name="archives"
 			>
 			<Filter
-				Name="InPlace"
-				>
-				<File
-					RelativePath=".\InPlaceIArchive.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\InPlaceIArchive.h"
-					>
-				</File>
-				<File
-					RelativePath=".\InPlaceOArchive.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\InPlaceOArchive.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Binary"
 				>
 				<File

@@ -271,8 +271,6 @@
     <ClCompile Include="MemoryReader.cpp" />
     <ClCompile Include="MemoryWriter.cpp" />
     <ClCompile Include="StringList.cpp" />
-    <ClCompile Include="InPlaceIArchive.cpp" />
-    <ClCompile Include="InPlaceOArchive.cpp" />
     <ClCompile Include="BinArchive.cpp" />
     <ClCompile Include="TextIArchive.cpp" />
     <ClCompile Include="TextOArchive.cpp" />
