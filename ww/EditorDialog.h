@@ -14,7 +14,7 @@
 #include "ww/Dialog.h"
 
 namespace yasli{
-	class BinaryOArchive;
+	class BinOArchive;
 }
 
 
@@ -36,7 +36,7 @@ protected:
 	void onTreeChanged();
 
 	Serializer serializer_;
-	std::auto_ptr<BinaryOArchive> originalData_;
+	std::auto_ptr<BinOArchive> originalData_;
 	yasli::SharedPtr<PropertyTree> tree_;
 	std::string stateFileName_;
 };

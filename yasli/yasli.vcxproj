@@ -274,8 +274,6 @@
     <ClCompile Include="InPlaceIArchive.cpp" />
     <ClCompile Include="InPlaceOArchive.cpp" />
     <ClCompile Include="BinArchive.cpp" />
-    <ClCompile Include="BinaryIArchive.cpp" />
-    <ClCompile Include="BinaryOArchive.cpp" />
     <ClCompile Include="TextIArchive.cpp" />
     <ClCompile Include="TextOArchive.cpp" />
     <ClCompile Include="Archive.cpp" />
@@ -310,8 +308,6 @@
     <ClInclude Include="InPlaceIArchive.h" />
     <ClInclude Include="InPlaceOArchive.h" />
     <ClInclude Include="BinArchive.h" />
-    <ClInclude Include="BinaryIArchive.h" />
-    <ClInclude Include="BinaryOArchive.h" />
     <ClInclude Include="Strings.h" />
     <ClInclude Include="TextIArchive.h" />
     <ClInclude Include="TextOArchive.h" />

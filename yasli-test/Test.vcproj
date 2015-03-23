@@ -625,14 +625,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\TestBinaryArchive.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TestInPlaceArchive.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\TestJSONArchive.cpp"
 			>
 		</File>

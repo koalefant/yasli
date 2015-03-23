@@ -12,8 +12,7 @@
 
 #include "yasli/TextIArchive.h"
 #include "yasli/TextOArchive.h"
-#include "yasli/BinaryIArchive.h"
-#include "yasli/BinaryOArchive.h"
+#include "yasli/BinArchive.h"
 #include "ww/PropertyTree.h"
 #include "ww/Win32/Window32.h"
 
@@ -80,7 +79,7 @@ void EditorDialog::init(const Serializer& serializer, const char* title, const c
 	else
 	{
 		tree_->signalChanged().connect(this, &EditorDialog::onTreeChanged);
-		originalData_.reset(new BinaryOArchive(true));
+		originalData_.reset(new BinOArchive());
 		if (serializer)
 			serializer(*originalData_);
 	}
@@ -110,7 +109,7 @@ void EditorDialog::onResponse(int response)
 
 	if(response == ww::RESPONSE_CANCEL && originalData_.get() != 0)
 	{
-		BinaryIArchive ia(true);
+		BinIArchive ia;
 		if(ia.open(originalData_->buffer(), originalData_->length()))
 			if (serializer_)
 				serializer_(ia);

@@ -13,9 +13,6 @@ set(SOURCES
 	Archive.cpp Archive.h
 	Assert.cpp Assert.h
 	BinArchive.cpp BinArchive.h
-	BinaryIArchive.cpp BinaryIArchive.h
-	BinaryNode.h
-	BinaryOArchive.cpp BinaryOArchive.h
 	BitVector.h BitVectorImpl.h
 	ClassFactory.cpp ClassFactory.h ClassFactoryBase.h
 	Config.h

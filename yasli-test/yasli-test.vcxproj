@@ -367,8 +367,6 @@
   <ItemGroup>
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="TestBinArchive.cpp" />
-    <ClCompile Include="TestBinaryArchive.cpp" />
-    <ClCompile Include="TestInPlaceArchive.cpp" />
     <ClCompile Include="TestJSONArchive.cpp" />
     <ClCompile Include="TestTextArchive.cpp" />
   </ItemGroup>

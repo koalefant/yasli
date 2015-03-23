@@ -23,8 +23,7 @@
 
 #include "yasli/ClassFactory.h"
 #include "yasli/Serializer.h"
-#include "yasli/BinaryIArchive.h"
-#include "yasli/BinaryOArchive.h"
+#include "yasli/BinArchive.h"
 
 #include <windows.h>
 
@@ -37,7 +36,7 @@ struct PasteSerializerFunc : PasteFunc
     : ser_(ser) , name_(name) , label_(label) {}
     bool operator()(const char* mem, size_t memSize)
     {
-        BinaryIArchive ia(true);
+        BinIArchive ia;
         if(ia.open(mem, memSize))
             return ia(ser_, name_, label_);
         return false;
@@ -54,7 +53,7 @@ struct PasteRowFunc : PasteFunc
     : row_(row){}
     bool operator()(const char* mem, size_t memSize)
     {
-        BinaryIArchive ia(true);
+        BinIArchive ia;
         if(ia.open(mem, memSize))
             return ia(*row_, "row", "Row");
         return false;
@@ -228,7 +227,7 @@ bool Clipboard::copy(PropertyRow* row)
 	YASLI_ASSERT(window);
 
     SharedPtr<PropertyRow> clonedRow(row->clone());
-	BinaryOArchive oa(true);
+	BinOArchive oa;
 	if(!oa(clonedRow, "row", "Row")){
 		PropertyRow::setConstStrings(0);
 		return false;

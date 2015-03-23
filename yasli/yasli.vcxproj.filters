@@ -42,12 +42,6 @@
     <ClCompile Include="BinArchive.cpp">
       <Filter>archives\Binary</Filter>
     </ClCompile>
-    <ClCompile Include="BinaryIArchive.cpp">
-      <Filter>archives\Binary</Filter>
-    </ClCompile>
-    <ClCompile Include="BinaryOArchive.cpp">
-      <Filter>archives\Binary</Filter>
-    </ClCompile>
     <ClCompile Include="TextIArchive.cpp">
       <Filter>archives\Text</Filter>
     </ClCompile>
@@ -100,12 +94,6 @@
       <Filter>archives\InPlace</Filter>
     </ClInclude>
     <ClInclude Include="BinArchive.h">
-      <Filter>archives\Binary</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryIArchive.h">
-      <Filter>archives\Binary</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryOArchive.h">
       <Filter>archives\Binary</Filter>
     </ClInclude>
     <ClInclude Include="TextIArchive.h">

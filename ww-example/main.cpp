@@ -29,8 +29,6 @@
 #include "ww/Win32/Window32.h"
 #include "yasli/TextOArchive.h"
 #include "yasli/TextIArchive.h"
-#include "yasli/BinaryOArchive.h"
-#include "yasli/BinaryIArchive.h"
 #include "yasli/BinArchive.h"
 #include "yasli/JSONOArchive.h"
 
