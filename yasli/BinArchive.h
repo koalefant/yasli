@@ -137,8 +137,10 @@ private:
 				s = curr_;
 				curr_ += strlen(curr_) + 1;
 			  }
-			  else
+			  else{
 				  YASLI_ASSERT(0);
+				  curr_ = end_;
+			  }
 		  }
 		  void read(std::wstring& s)
 		  {
@@ -157,8 +159,10 @@ private:
 				  memcpy(&s[0], curr_, len * sizeof(wchar_t));
 
 			  curr_ = curr_ + (len + 1) * sizeof(wchar_t);
-			  if (curr_ > end_)
+			  if (curr_ > end_){
+				  YASLI_ASSERT(0);
 				  curr_ = end_;
+			  }
 		  }
 
 		  unsigned int readPackedSize();
