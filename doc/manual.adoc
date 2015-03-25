@@ -1,7 +1,12 @@
 :source-highlighter: pygments
 :icons: font
+:toc: left
+:toclevels: 3
+
 == yasli manual ==
+
 === Motivation ===
+
 Serialization is an important tool of software development. Unfortunately 
 standard C++ library provides very scarce means for serialization, such as
 standard I/O-streams. 
@@ -24,6 +29,7 @@ implementation
 - Ability to change format with time
 
 === Installation ===
+
 ==== Supported compilers ====
 
 yasli (except for QPropertyTree) is known to work on following platforms:
@@ -35,14 +41,14 @@ yasli (except for QPropertyTree) is known to work on following platforms:
 - OS X, XCode x86/x64
 - Emscripten (C++ to JavaScript compiler)
 
+yasli is written in portable C++ and compiling it on a new platform is
+relatively straightforward.
+
 QPropertyTree requires Qt5 to work and compiles on following platforms:
 
 - Windows, MSVC 2005-2013 (x86/x64)
 - Linux, x86/x64, clang/gcc
 - OS X, x86/x64
-
-yasli is written in portable C++ and compiling it on a new platform is
-relatively straightforward.
 
 ==== Downloading source code ====
 
@@ -136,7 +142,7 @@ label, a human readable text for the data element that can be used with
 <<QPropertyTree>>. If you have no plans of editing your data through UI it can
 be omitted.
 
-==== STL Containers and strings ====
+==== STL containers and strings ====
 
 yasli supports serialization of following STL types out of the box:
 
@@ -145,6 +151,7 @@ yasli supports serialization of following STL types out of the box:
 - std::vector
 - std::list
 - std::map
+- std::pair
 
 To be able to serialize one of these, you will need to include one more header:
 [source,cpp]
@@ -203,7 +210,7 @@ YASLI_ENUM_END()
 WARNING: To prevent double registration YASLI_ENUM_* macros should be placed 
 within implementation file, instead of keeping them in the header.
 
-==== Pointers and polymorphic types ====
+==== Polymorphic types ====
 yasli has notion of polymorphic types, such types can be serialized by
 serializing smart pointers pointing to the base type. Example of such pointer
 is provided in yasli/Pointers.h, you can follow it to implement serialization
@@ -338,11 +345,163 @@ bool serialize(yasli::Archive&, Vector3& v, const char* name, const char* label)
 
 ----
 
+WARNING: Note that due to
+http://en.wikipedia.org/wiki/Argument-dependent_name_lookup[Argument Dependent
+name Lookup] (or Koenig-lookup) global serialize function has to be placed into
+the same namespace as serialized type.
+
 ==== Conversion and versioning ====
+Although yasli doesn't provide direct support for versioning of the data it
+provides tools that allows you to implement it easily on top of existing
+functionality.
+
+===== Conversion based on field names =====
+First proposed technique to maintain multiple versions of data
+relies on naming of the fields, and ability to check if specific field
+was read. A brief example:
+
+[source,cpp]
+----
+struct EternalType
+{
+	// version 1 used one string to store a reference
+	// std::string reference;
+
+	// version 2 switched to a vector of strings
+	// std::vector<std::string> references;
+
+	// version 3 switch to an array of structures
+	struct Reference
+	{
+		bool import = false;
+		string filename;
+
+		void serialize(yasli::Archive& ar)
+		{
+			ar(filename, "filename");
+			ar(preload, "preload");
+		}
+	};
+	std::vector<Reference> imports;
+
+	void serialize(yasli::Archive& ar)
+	{
+		if(!ar(imports, "imports"))
+		{
+			// "references" were not loaded, let's try to read old formats
+			string reference_v1;
+			vector<string> references_v2;
+
+			if (ar(references_v2, "references"))
+			{
+				imports.clear();
+				imports.resize(references_v2.size());
+				for (size_t i = 0; i < references_v2.size(); ++i)
+				{
+					imports[i].filename = references_v2[i];
+					imports[i].preload = false;
+				}
+			}
+			else if (ar(reference_v1, "reference"))
+			{
+				imports.clear();
+				Reference r;
+				r.filename = reference_v1;
+				imports.push_back(r);
+			}
+		}
+	}
+};
+----
+NOTE: Ability to serialize/deserialize variables created on the stack makes
+it possible to do a variety of data conversions on the fly.
+
+===== Explicit versioning =====
+
+Below is a similar example that uses explicit versioning to perform data
+conversion.
+
+[source,cpp]
+----
+struct EternalType
+{
+	enum { ACTUAL_VERSION = 3 };
+
+	// version 1 used one string to store a reference
+	// std::string reference;
+
+	// version 2 switched to a vector of strings
+	// std::vector<std::string> references;
+
+	// version 3 switch to an array of structures
+	struct Reference
+	{
+		bool preload = false;
+		string filename;
+
+		void serialize(yasli::Archive& ar)
+		{
+			ar(filename, "filename");
+			ar(preload, "preload");
+		}
+	};
+	std::vector<Reference> imports;
+
+	void serialize(yasli::Archive& ar)
+	{
+		int version = ACTUAL_VERSION;
+		if (!ar(version, "version"))
+			version = 0;
+
+		switch(version) 
+		{
+		case 0:
+		{
+			// handle missing/broke data
+			break;
+		}
+		case 1:
+		{
+			string reference;
+			ar(reference, "reference");
+			imports.clear();
+			Reference r;
+			r.filename = reference;
+			imports.push_back(r);
+			break;
+		}
+		case 2:
+		{
+			vector<string> references;
+			imports.resize(references.size());
+			for (size_t i = 0; i < references.size(); ++i)
+			{
+				imports[i].filename = references[i];
+				imports[i].preload = false;
+			}
+			break;
+		}
+		case ACTUAL_VERSION:
+		{
+			ar(imports, "imports");
+			break;
+		}
+		default:
+		{
+			// handle unsupported version
+			break;
+		}
+		};
+	}
+};
+----
+As you see with minimal effort you get full control over data loading and
+conversion process.
+
 === QPropertyTree ===
 ==== Basic usage ====
 ==== Decorators ====
 ==== Control characters ====
 ==== Multiple trees ====
 
-:vim tw=78:
+:v: vim:tw=78:
