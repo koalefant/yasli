@@ -1,3 +1,5 @@
+:source-highlighter: pygments
+:icons: font
 == yasli manual ==
 === Motivation ===
 Serialization is an important tool of software development. Unfortunately 
@@ -44,10 +46,25 @@ relatively straightforward.
 
 ==== Downloading source code ====
 
-==== Adding yasli to the project ====
+yasli source code is available on bitbucket:
+https://bitbucket.org/admix/yasli
+
+Source code is stored using http://mercurial.selenic.com/[Mercurial] version
+control system. You can obtain it using
+http://tortoisehg.bitbucket.org/[TortoiseHg] - wonderful GUI client for
+Mercurial, available for Windows, Mac OS X and Linux.
+
+Alternatively you can obtain source code using command line:
+[source,bash]
+----
+hg clone https://admix@bitbucket.org/admix/yasli
+----
+
+==== Adding yasli to your project ====
 yasli is using http://cmake.org[CMake] for its project files. CMake is a
 project files generator that support variety of different platforms.
 
+===== CMake =====
 If your project happens to use CMake as well adding yasli to project should
 be quite straightforward:
 [source,cmake]
@@ -59,18 +76,269 @@ add_subdirectory(yasli/QPropertyTree)
 target_link_libraries(my_qt_application QPropertyTree)
 ----
 
+===== Visual Studio =====
+If you are using Visual Studio you can include yasli to your project by referencing
+yasli/yasli.vcxproj (or yasli/yasli.vcproj for older versions).
+
+===== Including source files directly =====
+
 Alternatively, for core functionality you can include source files from
 yasli folder into your project. To QPropertyTree you can include files from 
 QPropertyTree folder.
 
 === Usage ===
+
+yasli structured in a moduler way, and often different features require
+different headers. If you feel like adding same headers in your code starts
+beign repetitive, you may create own Serialization.h-header with commonly used
+features, for example:
+
+[source,cpp]
+----
+#include <yasli/Archive.h>
+#include <yasli/STL.h>
+#include <yasli/Enum.h>
+#include <yasli/ClassFactory.h>
+----
+
+Rest of the section will describe each of those in details.
+
 ==== Serialization method ====
-==== Containers ====
+
+The easiest way to get started with yasli is to add serialize() method to your types.
+For example:
+
+[source,cpp]
+----
+#include <yasli/Archive.h>
+
+struct MyType
+{
+	int field_a;
+	float field_b;
+	bool field_c;
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(field_a, "field_a", "Field A");
+		ar(field_b, "field_b", "Field B");
+		ar(field_c, "field_c", "Field C");
+	}
+};
+----
+
+Same approach works for nested structures/class instances, normally each nested
+structure would receive each own "block", depending on the archive type. For
+example, for JSON that would be a new level of dictionary/map.
+
+NOTE: You may wonder why third why third parameter is needed: this defines a
+label, a human readable text for the data element that can be used with
+<<QPropertyTree>>. If you have no plans of editing your data through UI it can
+be omitted.
+
+==== STL Containers and strings ====
+
+yasli supports serialization of following STL types out of the box:
+
+- std::string
+- std::wstring
+- std::vector
+- std::list
+- std::map
+
+To be able to serialize one of these, you will need to include one more header:
+[source,cpp]
+----
+#include <yasli/STL.h>
+----
+
+Now you can serialize instances of these types in the same way as standard
+types. Containers can contain both primitive types, structures, or even other
+containers.
+
 ==== Enumerations ====
+
+yasli is able to serialize variables of enumeration types, but requires user to
+register names for specific enumeration values. 
+
+After 
+
+Example of enum registration:
+
+[source,cpp]
+----
+// header
+enum Shape
+{
+	SHAPE_CIRCLE,
+	SHAPE_ROUND_RECTANGLE,
+	SHAPE_RECTANGLE
+};
+
+class MyClass
+{
+public:
+	enum NestedEnum
+	{
+		NESTED_VALUE1,
+		NESTED_VALUE2
+	};
+};
+
+// implementation file
+#include <yasli/Enum.h>
+
+YASLI_ENUM_BEGIN(Shape, "Shape")
+YASLI_ENUM(SHAPE_CIRCLE, "circle", "Circle")
+YASLI_ENUM(SHAPE_ROUND_RECTANGLE, "round_rectangle", "Round Rectangle")
+YASLI_ENUM(SHAPE_RECTANGLE, "shape_rectangle", "Rectangle")
+YASLI_ENUM_END()
+
+YASLI_ENUM_BEGIN_NESTED(MyClass, NestedEnum, "Nested Enumeration")
+YASLI_ENUM(MyClass::NESTED_VALUE1, "nested_value1", "Nested Value 1")
+YASLI_ENUM(MyClass::NESTED_VALUE2, "nested_value2", "Nested Value 2")
+YASLI_ENUM_END()
+----
+
+WARNING: To prevent double registration YASLI_ENUM_* macros should be placed 
+within implementation file, instead of keeping them in the header.
+
 ==== Pointers and polymorphic types ====
+yasli has notion of polymorphic types, such types can be serialized by
+serializing smart pointers pointing to the base type. Example of such pointer
+is provided in yasli/Pointers.h, you can follow it to implement serialization
+of your own pointers.
+
+To be deserialized propertly each derived type should be registered in
+yasli::ClassFactory:
+
+[source,cpp]
+----
+#include <yasli/Pointers.h>
+#include <yasli/ClassFactory.h>
+
+#include <string>
+#include <stdio.h>
+
+
+struct IAction
+{
+	virtual ~IAction() {}
+	virtual void serialize(yasli::Archive& ar) = 0;
+	virtual void execute() {}
+};
+
+struct MessageAction : IAction
+{
+	std::string text;
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(text, "text", "Text");
+	}
+};
+YASLI_CLASS_NAME(IAction, MessageAction, "message", "Message")
+
+struct ActionUser
+{
+	yasli::SharedPtr<IAction> action;
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(action, "action", "Action");
+	}
+};
+----
+
 ==== Non-intrusive serialization ====
-==== Changing format and conversion ====
-=== Extending yasli ===
+It is often usefull to be able to serialize types without modifying them, this
+could happen for number of reasons, for example:
+
+- When using types from Standard Template Library types
+- When using third party code
+- When extra dependencies are not desirable in type definitions
+
+For such cases yasli provides additional serialize function, this one is global overloaded function:
+
+[source,cpp]
+----
+bool serialize(yasli::Archive& ar, UserType& instance, const char* name, const char* label);
+----
+UserType should be replaced with a type, that you want to be serialized.
+
+Such external serialize function is different from serialize method in number of ways:
+
+- It doesn't add additional level of nesting. In practice that means that you
+would serialize only one object or field and use supplied name and label. This
+object however can implement serialzation for the user type.
+- Function returns bool, it tells whatever the value was read from the archive. Usually
+this is just a return value of nested ar() call.
+
+Here is a simple example for a little wrapper that wraps integer.
+
+[source,cpp]
+----
+struct MyId
+{
+	int value;
+};
+
+bool serialize(yasli::Archive& ar, MyId& id, const char* name, const char* label)
+{
+	return ar(id.value, name, label);
+};
+----
+Note that you don't need to call this function directly, you can call serialization in a usual way:
+
+[source,cpp]
+----
+struct MyType
+{
+	MyId id;
+	void serialize(yasli::Archive& ar)
+	{
+		ar(id, "id", "Id");
+	}
+}
+----
+Consistent way of calling serialization gives you flexibility to change the
+serialization logic of a specific type without breaking its users.
+
+Here is another example, where you would serialize a structure with nested fields:
+
+[source,cpp]
+----
+struct Vector3
+{
+	float x, y, z;
+};
+
+// possibly, in other header:
+bool serialize(yasli::Archive&, Vector3& v, const char* name, const char* label);
+
+// implementation
+struct Vector3Serializer
+{
+	Vector3& v;
+	Vector3Serializer(Vector3& v) : v(v) {}
+
+	bool serialize(yasli::Archive& ar)
+	{
+		ar(v.x, "x", "X");
+		ar(v.y, "y", "Y");
+		ar(v.z, "z", "Z");
+	}
+};
+
+bool serialize(yasli::Archive&, Vector3& v, const char* name, const char* label)
+{
+	Vector3Serializer serializer(v);
+	return ar(serializer, name, label);
+}
+
+----
+
+==== Conversion and versioning ====
 === QPropertyTree ===
 ==== Basic usage ====
 ==== Decorators ====
