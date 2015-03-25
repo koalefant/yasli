@@ -71,10 +71,9 @@ public:
 		TEXT = 1 << 2,
 		BINARY = 1 << 3,
 		EDIT = 1 << 4,
-		INPLACE = 1 << 5,
-		CUSTOM1 = 1 << 6,
-		CUSTOM2 = 1 << 7,
-		CUSTOM3 = 1 << 8
+		CUSTOM1 = 1 << 5,
+		CUSTOM2 = 1 << 6,
+		CUSTOM3 = 1 << 7
 	};
 
 	Archive(int caps)
@@ -88,7 +87,6 @@ public:
 	bool isInput() const{ return caps_ & INPUT ? true : false; }
 	bool isOutput() const{ return caps_ & OUTPUT ? true : false; }
 	bool isEdit() const{ return caps_ & EDIT ? true : false; }
-	bool isInPlace() const{ return caps_ & INPLACE ? true : false; }
 	bool caps(int caps) const { return (caps_ & caps) == caps; }
 
 	void setFilter(int filter){
@@ -102,7 +100,6 @@ public:
 	}
 
 	virtual void warning(const char* message) {}
-	virtual void inPlacePointer(void** pointer, size_t offset) { YASLI_ASSERT(0 && "Not implemented"); }
 	virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
 	virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }

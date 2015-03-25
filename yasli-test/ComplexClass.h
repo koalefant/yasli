@@ -293,18 +293,13 @@ public:
 		ar(polyPtr_, "polyPtr");
 		ar(polyVector_, "polyVector");
 		ar(members_, "members");
-		if(ar.isInPlace())
-		{
-			ar(index_, "index");
-		}
-		else
-		{
-			StringListValue value(stringList_, stringList_[index_]);
-			ar(value, "stringList");
-			index_ = value.index();
-			if(index_ == -1)
-				index_ = 0;
-		}
+
+		StringListValue value(stringList_, stringList_[index_]);
+		ar(value, "stringList");
+		index_ = value.index();
+		if(index_ == -1)
+			index_ = 0;
+
 		ar(array_, "array");
 		ar(numericTypes_, "numericTypes");
 		ar(vectorOfStrings_, "vectorOfStrings");

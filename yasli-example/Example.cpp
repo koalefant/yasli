@@ -122,25 +122,17 @@ public:
 		ar(polyVector_, "polyVector");
 		ar(members_, "members");
 
-		if(!ar.isInPlace())
-		{
-			size_t s = floatValues_.size();
-			ar(s, "numFloatValues");
-			if(ar.isInput())
-				floatValues_.reserve(s);
-			//ar(floatValues_, "floatValues");
+		size_t s = floatValues_.size();
+		ar(s, "numFloatValues");
+		if(ar.isInput())
+			floatValues_.reserve(s);
+		//ar(floatValues_, "floatValues");
 
-			StringListValue value(stringList_, stringList_[index_]);
-			ar(value, "stringList");
-			index_ = value.index();
-			if(index_ == -1)
-				index_ = 0;
-		}
-		else
-		{
-			ar(floatValues_, "floatValues");
-			ar(index_, "stringList");
-		}
+		StringListValue value(stringList_, stringList_[index_]);
+		ar(value, "stringList");
+		index_ = value.index();
+		if(index_ == -1)
+			index_ = 0;
 	}
 protected:
 	std::wstring name_;
@@ -222,9 +214,7 @@ void testText()
 
 int main(int argc, char** argv)
 {
-	//benchmark();
-//  testInplace();
-   testText();
-	
+	testText();
+
 	return 0;
 }

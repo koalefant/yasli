@@ -49,33 +49,6 @@ public:
 			container_->insert(container_->end(), Element());
 	}
 
-	void extractInPlacePointersHelper(Archive& ar, ...) const
-	{
-		YASLI_ASSERT(0 && "Container is not supported");
-	}
-
-	template<class T, class A> 
-	void extractInPlacePointersHelper(Archive& ar, std::vector<T, A>* _v) const
-	{
-#ifdef _MSC_VER
-#pragma pack(push,_CRT_PACKING)
-		struct MSVector {
-			char padding[8];
-			T* ptr1;
-			T* ptr2;
-			T* ptr3;
-		};
-#pragma pack(pop)
-		MSVector* v = (MSVector*)_v;
-		ar.inPlacePointer((void**)&v->ptr1, 0);
-		ar.inPlacePointer((void**)&v->ptr2, (v->ptr2 - v->ptr1) * sizeof(T));
-		ar.inPlacePointer((void**)&v->ptr3, (v->ptr3 - v->ptr1) * sizeof(T));
-#else
-    YASLI_ASSERT(0 && "Unsupported platform");
-// # warning Unsupported platform
-#endif
-	}
-
 	// from ContainerInterface
 	size_t size() const{
 		YASLI_ESCAPE(container_ != 0, return 0);
@@ -111,10 +84,6 @@ public:
 		}
 		else
 			return ar(*it_, name, label);
-	}
-	void extractInPlacePointers(Archive& ar) const
-	{
-		extractInPlacePointersHelper(ar, container_);
 	}
 	operator bool() const{ return container_ != 0; }
 	void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
@@ -158,17 +127,6 @@ public:
 
 	void set(const char* value) { str_ = value; }
 	const char* get() const { return str_.c_str(); }
-	const char** getInplacePointer() const
-	{
-#ifdef _MSC_VER
-		bool usesInternalBuffer = str_.c_str() >= (const char*)&str_ && str_.c_str() < (const char*)&str_ + sizeof(str_);
-		if (!usesInternalBuffer)
-			return ((const char**)&str_) + 2;
-#else
-		YASLI_ASSERT(0 && "Unsupported platform");
-#endif
-		return 0;
-	}
 private:
 	std::string& str_;
 };
@@ -184,7 +142,6 @@ inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, 
 }
 
 }
-
 
 // ---------------------------------------------------------------------------
 namespace std {

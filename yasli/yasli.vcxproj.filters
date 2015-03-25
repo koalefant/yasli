@@ -30,12 +30,6 @@
     <ClCompile Include="StringList.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="InPlaceIArchive.cpp">
-      <Filter>archives\InPlace</Filter>
-    </ClCompile>
-    <ClCompile Include="InPlaceOArchive.cpp">
-      <Filter>archives\InPlace</Filter>
-    </ClCompile>
     <ClCompile Include="BinArchive.cpp">
       <Filter>archives\Binary</Filter>
     </ClCompile>
@@ -83,12 +77,6 @@
     </ClInclude>
     <ClInclude Include="StringList.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="InPlaceIArchive.h">
-      <Filter>archives\InPlace</Filter>
-    </ClInclude>
-    <ClInclude Include="InPlaceOArchive.h">
-      <Filter>archives\InPlace</Filter>
     </ClInclude>
     <ClInclude Include="BinArchive.h">
       <Filter>archives\Binary</Filter>

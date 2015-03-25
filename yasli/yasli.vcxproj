@@ -303,8 +303,6 @@
     <ClInclude Include="PointersImpl.h" />
     <ClInclude Include="SerializerImpl.h" />
     <ClInclude Include="StringList.h" />
-    <ClInclude Include="InPlaceIArchive.h" />
-    <ClInclude Include="InPlaceOArchive.h" />
     <ClInclude Include="BinArchive.h" />
     <ClInclude Include="Strings.h" />
     <ClInclude Include="TextIArchive.h" />

@@ -106,7 +106,6 @@ public:
 	virtual TypeID elementType() const = 0;
 	virtual TypeID containerType() const = 0;
 	virtual bool next() = 0;
-	virtual void extractInPlacePointers(Archive& ar) const { YASLI_ASSERT(0 && "Not implemented"); }
 
 	virtual void* elementPointer() const = 0;
 
@@ -122,10 +121,6 @@ public:
 	explicit ContainerArray(T* array = 0)
 	: array_(array)
 	, index_(0)
-	{
-	}
-
-	virtual void extractInPlacePointers(Archive& ar) const
 	{
 	}
 
@@ -172,7 +167,6 @@ public:
 	virtual Serializer serializer() const = 0;
 	virtual void* get() const = 0;
 	virtual ClassFactoryBase* factory() const = 0;
-	virtual void extractInPlacePointers(Archive& ar) const{ YASLI_ASSERT(0 && "Not implemented"); }
 	
 	void serialize(Archive& ar) const;
 };
@@ -182,14 +176,12 @@ class StringInterface
 public:
 	virtual void set(const char* value) = 0;
 	virtual const char* get() const = 0;
-	virtual const char** getInplacePointer() const{ return 0; }
 };
 class WStringInterface
 {
 public:
 	virtual void set(const wchar_t* value) = 0;
 	virtual const wchar_t* get() const = 0;
-	virtual const wchar_t** getInplacePointer() const{ return 0; }
 };
 
 struct TypeIDWithFactory;

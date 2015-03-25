@@ -48,10 +48,6 @@ public:
 	void* get() const{
 		return reinterpret_cast<void*>(ptr_.get());
 	}
-	void extractInPlacePointers(Archive& ar) const
-	{
-		ar.inPlacePointer(reinterpret_cast<void**>(&ptr_), 0);
-	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
 protected:
 	SharedPtr<T>& ptr_;
@@ -84,10 +80,6 @@ public:
 	}
 	void* get() const{
 		return reinterpret_cast<void*>(ptr_.get());
-	}
-	void extractInPlacePointers(Archive& ar) const
-	{
-		ar.inPlacePointer(reinterpret_cast<void**>(&ptr_), 0);
 	}
 	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
 protected:
