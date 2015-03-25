@@ -11,13 +11,13 @@ Highlights:
 - Extendable in user code
 - Crossplatform
 
-	:::cpp
+
+	:::json
 	enum Position
 	{
 	   ENGINEER,
 	   MANAGER,
-	};
-	
+	};	
 	struct Entry
 	{
 	    std::string name = "Foo Bar";
@@ -30,8 +30,7 @@ Highlights:
 	        ar(age, "age");
 	        ar(position, "position");
 	    }
-	};
-	
+	};	
 	struct Document
 	{
 	    std::vector<Entry> entries = { Entry() };
@@ -40,12 +39,12 @@ Highlights:
 	    {
 	        ar(entries, "entries");
 	    }
-	};
-	
+	};	
 	YASLI_ENUM_BEGIN(Position, "Position")
 	YASLI_ENUM(ENGINEER, "engineer", "Engineer")
 	YASLI_ENUM(MANAGER, "manager", "Manager")
 	YASLI_ENUM_END()
+
 
 Document instance, serialized through JSON-archive will look like this:
 
