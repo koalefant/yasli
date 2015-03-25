@@ -54,6 +54,8 @@ Document instance, serialized through JSON-archive will look like this:
 	:::json
 	{ "entries": [ { "name": "Foo Bar", "age": 25, "position": "engineer" } ] }
 
+See [Documentation](yasli/raw/default/doc/manual.adoc) for further details.
+
 ## QPropertyTree - property widget for Qt
 
 Features:
@@ -63,4 +65,3 @@ Features:
 - Enumerations appear as combo-boxes
 - Access to polymorphic types
 - Extendable
-
