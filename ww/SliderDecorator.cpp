@@ -45,9 +45,6 @@ void SliderDecoratori::serialize(Archive& ar)
 
 bool serialize(Archive& ar, ww::SliderDecoratorf& wrapper, const char* name, const char* label)
 {
-	if(ar.isInPlace())
-		return ar(*wrapper.valuePointer_, name, label);
-
 	bool result;
 	if(ar.isEdit()){
 		result = ar(Serializer(wrapper), name, label);
@@ -62,9 +59,6 @@ bool serialize(Archive& ar, ww::SliderDecoratorf& wrapper, const char* name, con
 
 bool serialize(Archive& ar, ww::SliderDecoratori& wrapper, const char* name, const char* label)
 {
-	if(ar.isInPlace())
-		return ar(*wrapper.valuePointer_, name, label);
-
 	bool result;
 	if(ar.isEdit()){
       result = ar(Serializer(wrapper), name, label);
