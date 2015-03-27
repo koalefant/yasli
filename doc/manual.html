@@ -475,7 +475,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </style>
 </head>
-<body class="article toc2 toc-left">
+<body class="article toc2 toc-right">
 <div id="header">
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -487,7 +487,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel3">
 <li><a href="#_supported_compilers">Supported compilers</a></li>
 <li><a href="#_downloading_source_code">Downloading source code</a></li>
-<li><a href="#_adding_yasli_to_your_project">Adding yasli to your project</a></li>
+<li><a href="#_adding_yasli_to_your_project">Adding yasli to your project</a>
+<ul class="sectlevel4">
+<li><a href="#_cmake">CMake</a></li>
+<li><a href="#_visual_studio">Visual Studio</a></li>
+<li><a href="#_including_source_files_directly">Including source files directly</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_usage">Usage</a>
@@ -497,15 +503,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_enumerations">Enumerations</a></li>
 <li><a href="#_polymorphic_types">Polymorphic types</a></li>
 <li><a href="#_non_intrusive_serialization">Non-intrusive serialization</a></li>
-<li><a href="#_conversion_and_versioning">Conversion and versioning</a></li>
+<li><a href="#_conversion_and_versioning">Conversion and versioning</a>
+<ul class="sectlevel4">
+<li><a href="#_conversion_based_on_field_names">Conversion based on field names</a></li>
+<li><a href="#_explicit_versioning">Explicit versioning</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_qpropertytree">QPropertyTree</a>
 <ul class="sectlevel3">
 <li><a href="#_basic_usage">Basic usage</a></li>
-<li><a href="#_decorators">Decorators</a></li>
-<li><a href="#_control_characters">Control characters</a></li>
-<li><a href="#_multiple_trees">Multiple trees</a></li>
+<li><a href="#_qpropertytree_methods">QPropertyTree methods</a></li>
+<li><a href="#_decorators_annotations">Decorators (annotations)</a>
+<ul class="sectlevel4">
+<li><a href="#_range">Range</a></li>
+<li><a href="#_bitflags">BitFlags</a></li>
+</ul>
+</li>
+<li><a href="#_control_characters_layout">Control characters (layout)</a></li>
+<li><a href="#_editing_multiple_objects_at_the_same_time">Editing multiple objects at the same time</a></li>
 </ul>
 </li>
 </ul>
@@ -1198,20 +1215,226 @@ conversion process.</p>
 </div>
 <div class="sect2">
 <h3 id="_qpropertytree">QPropertyTree</h3>
+<div class="paragraph">
+<p>QPropertyTree is a powerful property grid. Among its features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Easy creation of properties through serialization.</p>
+</li>
+<li>
+<p>Enumerations presented as drop-down menus</p>
+</li>
+<li>
+<p>Editing of containers and polymorphic types</p>
+</li>
+<li>
+<p>Drag &amp; drop</p>
+</li>
+<li>
+<p>Copy &amp; paste</p>
+</li>
+<li>
+<p>Automatic undo</p>
+</li>
+<li>
+<p>Can be extended to have custom UI for specific user types.</p>
+</li>
+<li>
+<p>Value decorators provide annotations to data fields, like:</p>
+</li>
+<li>
+<p>Ranges for numbers</p>
+</li>
+<li>
+<p>Filetered file selection</p>
+</li>
+<li>
+<p>Unit conversion, i.e. edit radians as degrees or quaternions as euler
+angles.</p>
+</li>
+<li>
+<p>Additional control characters provide basic control over layout and
+attributes of the properties, such as:</p>
+</li>
+<li>
+<p>Inlining of properties</p>
+</li>
+<li>
+<p>Control of property alignment and width</p>
+</li>
+<li>
+<p>Read-only properties</p>
+</li>
+<li>
+<p>Hidden properties (allows to transfer additional data during copy&amp;paste
+or drag&amp;drop).</p>
+</li>
+</ul>
+</div>
 <div class="sect3">
 <h4 id="_basic_usage">Basic usage</h4>
+<div class="paragraph">
+<p>QProprtyTree is a regular Qt widget. Usually such widget is instantiated on
+heap through "new" call.</p>
+</div>
+<div class="paragraph">
+<p>The only way to populate QPropertyTree is by attached serializable object.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-cp">#include &lt;QPropertyTree/QPropertyTree.h&gt;</span>
+<span class="tok-cp">#include &lt;yasli/Serializer.h&gt;</span>
+
+<span class="tok-k">struct</span> <span class="tok-n">MyType</span>
+<span class="tok-p">{</span>
+	<span class="tok-kt">bool</span> <span class="tok-n">testOption</span> <span class="tok-o">=</span> <span class="tok-nb">false</span><span class="tok-p">;</span>
+
+	<span class="tok-kt">void</span> <span class="tok-nf">serialize</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">Archive</span><span class="tok-o">&amp;</span> <span class="tok-n">ar</span><span class="tok-p">)</span>
+	<span class="tok-p">{</span>
+		<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">testOption</span><span class="tok-p">,</span> <span class="tok-s">&quot;testOption&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Test Option&quot;</span><span class="tok-p">);</span>
+	<span class="tok-p">}</span>
+<span class="tok-p">};</span>
+
+<span class="tok-n">MyType</span> <span class="tok-n">instance</span><span class="tok-p">;</span>
+
+<span class="tok-n">QPropertyTree</span><span class="tok-o">*</span> <span class="tok-n">propertyTree</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-n">QPropertyTree</span><span class="tok-p">(</span><span class="tok-k">this</span><span class="tok-p">);</span>
+<span class="tok-n">propertyTree</span><span class="tok-o">-&gt;</span><span class="tok-n">attach</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">Serializer</span><span class="tok-p">(</span><span class="tok-n">instance</span><span class="tok-p">));</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Such property tree should display one checkbox label "Test Option".</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Note that tree stores reference to attached object and user of the
+QPropertyTree is responsible for maintaining its lifetime and calling
+QPropertyTree::detach() in case attached object seizes to exist.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>How does the tree update apply changes to attached instance? It calls
+serialization each time user changes data. It does it twice: once to read
+fields of instance from properties, and then it writes properties back.
+At may appear wasteful at first, but in practice this procedure is quite fast.
+You can serialize hundreads of thousands of properties and still have
+interactive update speeds. Such approach gimes some interesting qualities to
+the PropertyTree:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Set of serialized parameters can be changed dynamically, i.e. serialize
+function can contain conditions that would present only relevant
+parameters.</p>
+</li>
+<li>
+<p>As QPropertyTree stores only to top-level reference to attached object there
+are no limitations to lifetime of individual fieldsl. They can be constructed
+on the stack and this opens door for all kind of conversion and
+data transformations in a concise and localized faschion.</p>
+</li>
+<li>
+<p>Validation and clamping of values can be peformed during serialization and
+user will be able to observe it in interactive way.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Below is description of main QPropertyTree methods:</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_qpropertytree_methods">QPropertyTree methods</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">attach(yasli::Serializer&amp;)</dt>
+<dd>
+<p>Used to populate tree with properties of serializable object.</p>
+</dd>
+<dt class="hdlist1">detach()</dt>
+<dd>
+<p>Disconnects object from the tree and clears properties.</p>
+</dd>
+<dt class="hdlist1">revert()</dt>
+<dd>
+<p>Updates properties by writing fields of attached object into them.
+You can use this function once attached object changed and you want to</p>
+</dd>
+<dt class="hdlist1">apply()</dt>
+<dd>
+<p>Force to read fields of object from properties.</p>
+</dd>
+<dt class="hdlist1">setExpandLevels(int levels)</dt>
+<dd>
+<p>Specifies how deep tree should be expanded by default. To take effect
+this function should be called <em>before call to attach()</em>.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_decorators_annotations">Decorators (annotations)</h4>
+<div class="paragraph">
+<p>yasli provides following decorators that can be used to annotate your data
+for QPropertyTree.</p>
+</div>
+<div class="sect4">
+<h5 id="_range">Range</h5>
+<div class="paragraph">
+<p>Provides a range for numbers and makes them behave like sliders:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-cp">#include &lt;yasli/decorators/Range.h&gt;</span>
+
+<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">Range</span><span class="tok-p">(</span><span class="tok-n">floatValue</span><span class="tok-p">,</span> <span class="tok-mf">0.0f</span><span class="tok-p">,</span> <span class="tok-mf">100.0f</span><span class="tok-p">),</span> <span class="tok-s">&quot;floatValue&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Float Value&quot;</span><span class="tok-p">);</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_bitflags">BitFlags</h5>
+<div class="paragraph">
+<p>Display individual bits of an integer as checkboxes. Names for individual
+bits are registered as <a href="#_enumerations">Enumerations</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-cp">#include &lt;yasli/decorators/BitFlags.h&gt;</span>
+
+<span class="tok-k">enum</span> <span class="tok-n">AxisMask</span>
+<span class="tok-p">{</span>
+	<span class="tok-n">X_AXIS_BIT</span> <span class="tok-o">=</span> <span class="tok-mi">1</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-mi">0</span><span class="tok-p">,</span>
+	<span class="tok-n">Y_AXIS_BIT</span> <span class="tok-o">=</span> <span class="tok-mi">1</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-mi">1</span><span class="tok-p">,</span>
+	<span class="tok-n">Z_AXIS_BIT</span> <span class="tok-o">=</span> <span class="tok-mi">1</span> <span class="tok-o">&lt;&lt;</span> <span class="tok-mi">2</span>
+<span class="tok-p">};</span>
+
+<span class="tok-n">YASLI_ENUM_BEGIN</span><span class="tok-p">(</span><span class="tok-n">AxisMask</span><span class="tok-p">,</span> <span class="tok-s">&quot;Axis Mask&quot;</span><span class="tok-p">)</span>
+<span class="tok-n">YASLI_ENUM</span><span class="tok-p">(</span><span class="tok-n">X_AXIS_BIT</span><span class="tok-p">,</span> <span class="tok-s">&quot;x&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;X Axis&quot;</span><span class="tok-p">)</span>
+<span class="tok-n">YASLI_ENUM</span><span class="tok-p">(</span><span class="tok-n">Y_AXIS_BIT</span><span class="tok-p">,</span> <span class="tok-s">&quot;y&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Y Axis&quot;</span><span class="tok-p">)</span>
+<span class="tok-n">YASLI_ENUM</span><span class="tok-p">(</span><span class="tok-n">Z_AXIS_BIT</span><span class="tok-p">,</span> <span class="tok-s">&quot;z&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Z Axis&quot;</span><span class="tok-p">)</span>
+<span class="tok-n">YASLI_ENUM_END</span><span class="tok-p">()</span>
+
+<span class="tok-kt">int</span> <span class="tok-n">axisMask</span> <span class="tok-o">=</span> <span class="tok-n">X_AXIS_BIT</span> <span class="tok-o">|</span> <span class="tok-n">Y_AXIS_BIT</span><span class="tok-p">;</span>
+<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">BitFlags</span><span class="tok-o">&lt;</span><span class="tok-n">AxisMask</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">axisMask</span><span class="tok-p">),</span> <span class="tok-s">&quot;axisMask&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Axices&quot;</span><span class="tok-p">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_control_characters_layout">Control characters (layout)</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_decorators">Decorators</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_control_characters">Control characters</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_multiple_trees">Multiple trees</h4>
+<h4 id="_editing_multiple_objects_at_the_same_time">Editing multiple objects at the same time</h4>
 
 </div>
 </div>
@@ -1220,7 +1443,7 @@ conversion process.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-03-25 03:53:13 CET
+Last updated 2015-03-27 02:37:32 CET
 </div>
 </div>
 </body>

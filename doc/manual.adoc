@@ -1,7 +1,7 @@
 :source-highlighter: pygments
 :icons: font
-:toc: left
-:toclevels: 3
+:toc: right
+:toclevels: 4
 
 == yasli manual ==
 
@@ -499,9 +499,144 @@ As you see with minimal effort you get full control over data loading and
 conversion process.
 
 === QPropertyTree ===
+
+QPropertyTree is a powerful property grid. Among its features:
+
+* Easy creation of properties through serialization.
+* Enumerations presented as drop-down menus
+* Editing of containers and polymorphic types
+* Drag & drop
+* Copy & paste
+* Automatic undo
+* Can be extended to have custom UI for specific user types.
+* Value decorators provide annotations to data fields, like:
+	* Ranges for numbers
+	* Filetered file selection
+	* Unit conversion, i.e. edit radians as degrees or quaternions as euler
+	  angles.
+* Additional control characters provide basic control over layout and
+  attributes of the properties, such as:
+	* Inlining of properties
+	* Control of property alignment and width
+	* Read-only properties
+	* Hidden properties (allows to transfer additional data during copy&paste
+	  or drag&drop).
+
 ==== Basic usage ====
-==== Decorators ====
-==== Control characters ====
-==== Multiple trees ====
+
+QProprtyTree is a regular Qt widget. Usually such widget is instantiated on
+heap through "new" call.
+
+The only way to populate QPropertyTree is by attached serializable object.
+
+[source,cpp]
+----
+#include <QPropertyTree/QPropertyTree.h>
+#include <yasli/Serializer.h>
+
+struct MyType
+{
+	bool testOption = false;
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(testOption, "testOption", "Test Option");
+	}
+};
+
+MyType instance;
+
+QPropertyTree* propertyTree = new QPropertyTree(this);
+propertyTree->attach(yasli::Serializer(instance));
+
+----
+
+Such property tree should display one checkbox label "Test Option".
+
+WARNING: Note that tree stores reference to attached object and user of the
+QPropertyTree is responsible for maintaining its lifetime and calling
+QPropertyTree::detach() in case attached object seizes to exist.
+
+How does the tree update apply changes to attached instance? It calls
+serialization each time user changes data. It does it twice: once to read
+fields of instance from properties, and then it writes properties back.
+At may appear wasteful at first, but in practice this procedure is quite fast.
+You can serialize hundreads of thousands of properties and still have
+interactive update speeds. Such approach gimes some interesting qualities to
+the PropertyTree:
+
+* Set of serialized parameters can be changed dynamically, i.e. serialize
+  function can contain conditions that would present only relevant
+  parameters. 
+* As QPropertyTree stores only to top-level reference to attached object there
+  are no limitations to lifetime of individual fieldsl. They can be constructed
+  on the stack and this opens door for all kind of conversion and
+  data transformations in a concise and localized faschion.
+* Validation and clamping of values can be peformed during serialization and
+  user will be able to observe it in interactive way.
+
+Below is description of main QPropertyTree methods:
+
+==== QPropertyTree methods ====
+
+attach(yasli::Serializer&)::
+	Used to populate tree with properties of serializable object.
+
+detach()::
+	Disconnects object from the tree and clears properties.
+	
+revert()::
+	Updates property tree by writing fields of attached object over again.
+	You can use this function once attached object changed and you want to 
+	update content of the tree to reflect the changes.
+
+apply()::
+	Force to read fields of object from properties. May be used to rollback
+	state of attached object to the last property tree state.
+
+setExpandLevels(int levels)::
+	Specifies how deep tree should be expanded by default. To take effect
+	this function should be called _before call to attach()_.
+
+==== Decorators (annotations) ====
+
+yasli provides following decorators that can be used to annotate your data
+for QPropertyTree.
+
+===== Range =====
+Provides a range for numbers and makes them behave like sliders:
+[source,cpp]
+----
+#include <yasli/decorators/Range.h>
+
+ar(yasli::Range(floatValue, 0.0f, 100.0f), "floatValue", "Float Value");
+----
+
+===== BitFlags =====
+Display individual bits of an integer as checkboxes. Names for individual
+bits are registered as <<Enumerations>>.
+[source,cpp]
+----
+#include <yasli/decorators/BitFlags.h>
+
+enum AxisMask
+{
+	X_AXIS_BIT = 1 << 0,
+	Y_AXIS_BIT = 1 << 1,
+	Z_AXIS_BIT = 1 << 2
+};
+
+YASLI_ENUM_BEGIN(AxisMask, "Axis Mask")
+YASLI_ENUM(X_AXIS_BIT, "x", "X Axis")
+YASLI_ENUM(Y_AXIS_BIT, "y", "Y Axis")
+YASLI_ENUM(Z_AXIS_BIT, "z", "Z Axis")
+YASLI_ENUM_END()
+
+int axisMask = X_AXIS_BIT | Y_AXIS_BIT;
+ar(yasli::BitFlags<AxisMask>(axisMask), "axisMask", "Axis Mask");
+----
+
+==== Control characters (layout) ====
+==== Editing multiple objects at the same time ====
 
 :v: vim:tw=78:
