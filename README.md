@@ -54,7 +54,7 @@ Document instance, serialized through JSON-archive will look like this:
 	:::json
 	{ "entries": [ { "name": "Foo Bar", "age": 25, "position": "engineer" } ] }
 
-See [Documentation](http://admix.bitbucket.org/yasli/) for further details.
+See [Documentation](http://yasli.bitbucket.org/) for further details.
 
 ## QPropertyTree - property widget for Qt
 
