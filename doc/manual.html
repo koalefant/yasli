@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
-<title>yasli manual</title>
+<title>yasli - C++ serialization</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -480,7 +480,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_yasli_manual">yasli manual</a>
+<li><a href="#_yasli_c_serialization">yasli - C++ serialization</a>
 <ul class="sectlevel2">
 <li><a href="#_motivation">Motivation</a></li>
 <li><a href="#_installation">Installation</a>
@@ -532,7 +532,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_yasli_manual">yasli manual</h2>
+<h2 id="_yasli_c_serialization">yasli - C++ serialization</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_motivation">Motivation</h3>
@@ -1243,7 +1243,8 @@ conversion process.</p>
 </li>
 <li>
 <p>Value decorators provide annotations to data fields, like:</p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p>Ranges for numbers</p>
 </li>
@@ -1254,10 +1255,14 @@ conversion process.</p>
 <p>Unit conversion, i.e. edit radians as degrees or quaternions as euler
 angles.</p>
 </li>
+</ul>
+</div>
+</li>
 <li>
 <p>Additional control characters provide basic control over layout and
 attributes of the properties, such as:</p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p>Inlining of properties</p>
 </li>
@@ -1270,6 +1275,9 @@ attributes of the properties, such as:</p>
 <li>
 <p>Hidden properties (allows to transfer additional data during copy&amp;paste
 or drag&amp;drop).</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -1321,6 +1329,10 @@ QPropertyTree::detach() in case attached object seizes to exist.
 </table>
 </div>
 <div class="paragraph">
+<p>QPropertyTree uses third argument to Archive::operator() call to specify
+label, text that appears next to the value.</p>
+</div>
+<div class="paragraph">
 <p>How does the tree update apply changes to attached instance? It calls
 serialization each time user changes data. It does it twice: once to read
 fields of instance from properties, and then it writes properties back.
@@ -1366,12 +1378,14 @@ user will be able to observe it in interactive way.</p>
 </dd>
 <dt class="hdlist1">revert()</dt>
 <dd>
-<p>Updates properties by writing fields of attached object into them.
-You can use this function once attached object changed and you want to</p>
+<p>Updates property tree by writing fields of attached object over again.
+You can use this function once attached object changed and you want to
+update content of the tree to reflect the changes.</p>
 </dd>
 <dt class="hdlist1">apply()</dt>
 <dd>
-<p>Force to read fields of object from properties.</p>
+<p>Force to read fields of object from properties. May be used to rollback
+state of attached object to the last property tree state.</p>
 </dd>
 <dt class="hdlist1">setExpandLevels(int levels)</dt>
 <dd>
@@ -1404,7 +1418,7 @@ for QPropertyTree.</p>
 <h5 id="_bitflags">BitFlags</h5>
 <div class="paragraph">
 <p>Display individual bits of an integer as checkboxes. Names for individual
-bits are registered as <a href="#_enumerations">Enumerations</a>.</p>
+bits are registered the same way as <a href="#_enumerations">Enumerations</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1424,14 +1438,72 @@ bits are registered as <a href="#_enumerations">Enumerations</a>.</p>
 <span class="tok-n">YASLI_ENUM_END</span><span class="tok-p">()</span>
 
 <span class="tok-kt">int</span> <span class="tok-n">axisMask</span> <span class="tok-o">=</span> <span class="tok-n">X_AXIS_BIT</span> <span class="tok-o">|</span> <span class="tok-n">Y_AXIS_BIT</span><span class="tok-p">;</span>
-<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">BitFlags</span><span class="tok-o">&lt;</span><span class="tok-n">AxisMask</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">axisMask</span><span class="tok-p">),</span> <span class="tok-s">&quot;axisMask&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Axices&quot;</span><span class="tok-p">);</span></code></pre>
+<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">yasli</span><span class="tok-o">::</span><span class="tok-n">BitFlags</span><span class="tok-o">&lt;</span><span class="tok-n">AxisMask</span><span class="tok-o">&gt;</span><span class="tok-p">(</span><span class="tok-n">axisMask</span><span class="tok-p">),</span> <span class="tok-s">&quot;axisMask&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;Axis Mask&quot;</span><span class="tok-p">);</span></code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_control_characters_layout">Control characters (layout)</h4>
+<div class="paragraph">
+<p>PropertyTree supports some simple layout control, this is implemented through
+special characters that that can be embedded into the label. Sounds scary? It
+is quite practilal though. Some simple example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">value</span><span class="tok-p">,</span> <span class="tok-s">&quot;value&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;!&lt;Value&quot;</span><span class="tok-p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This value will appear as read-only and expanded field. See below for
+descriptions of specific control characters.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">inline (^)</dt>
+<dd>
+<p>Used to bring multiple children properties on one line.
+For example, often it is useful to have X,Y and Z components of the vector to
+appear next to each other, rather than each on a separate line. It can be
+serialized in a following way then:</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="cpp"><span class="tok-k">struct</span> <span class="tok-n">Vector3</span>
+<span class="tok-p">{</span>
+	<span class="tok-kt">float</span> <span class="tok-n">x</span><span class="tok-p">,</span> <span class="tok-n">y</span><span class="tok-p">,</span> <span class="tok-n">z</span><span class="tok-p">;</span>
 
+	<span class="tok-kt">void</span> <span class="tok-nf">serialize</span><span class="tok-p">(</span><span class="tok-n">Archive</span><span class="tok-o">&amp;</span> <span class="tok-n">ar</span><span class="tok-p">)</span>
+	<span class="tok-p">{</span>
+		<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">x</span><span class="tok-p">,</span> <span class="tok-s">&quot;x&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;^X&quot;</span><span class="tok-p">);</span>
+		<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">y</span><span class="tok-p">,</span> <span class="tok-s">&quot;y&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;^Y&quot;</span><span class="tok-p">);</span>
+		<span class="tok-n">ar</span><span class="tok-p">(</span><span class="tok-n">z</span><span class="tok-p">,</span> <span class="tok-s">&quot;z&quot;</span><span class="tok-p">,</span> <span class="tok-s">&quot;^Z&quot;</span><span class="tok-p">);</span>
+	<span class="tok-p">}</span>
+<span class="tok-p">};</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">read-only (!)</dt>
+<dd>
+<p>Read only fields can not be changed by the user.</p>
+</dd>
+<dt class="hdlist1">expand (&lt;)</dt>
+<dd>
+<p>Value of expanded field will occupy the all available space. Useful for
+parameters that are known to have longer text than most of other parameters,
+i.e. file paths, or long text fields.</p>
+</dd>
+<dt class="hdlist1">contract (&gt;)</dt>
+<dd>
+<p>Value field is contracted to minimal size. Useful for limiting parameters
+size, when serializing tables of data.</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_editing_multiple_objects_at_the_same_time">Editing multiple objects at the same time</h4>
@@ -1443,7 +1515,7 @@ bits are registered as <a href="#_enumerations">Enumerations</a>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-03-27 02:37:32 CET
+Last updated 2015-03-29 22:43:14 CEST
 </div>
 </div>
 </body>

@@ -3,7 +3,7 @@
 :toc: right
 :toclevels: 4
 
-== yasli manual ==
+== yasli - C++ serialization ==
 
 === Motivation ===
 
@@ -510,16 +510,16 @@ QPropertyTree is a powerful property grid. Among its features:
 * Automatic undo
 * Can be extended to have custom UI for specific user types.
 * Value decorators provide annotations to data fields, like:
-	* Ranges for numbers
-	* Filetered file selection
-	* Unit conversion, i.e. edit radians as degrees or quaternions as euler
+	- Ranges for numbers
+	- Filetered file selection
+	- Unit conversion, i.e. edit radians as degrees or quaternions as euler
 	  angles.
 * Additional control characters provide basic control over layout and
   attributes of the properties, such as:
-	* Inlining of properties
-	* Control of property alignment and width
-	* Read-only properties
-	* Hidden properties (allows to transfer additional data during copy&paste
+	- Inlining of properties
+	- Control of property alignment and width
+	- Read-only properties
+	- Hidden properties (allows to transfer additional data during copy&paste
 	  or drag&drop).
 
 ==== Basic usage ====
@@ -556,6 +556,9 @@ Such property tree should display one checkbox label "Test Option".
 WARNING: Note that tree stores reference to attached object and user of the
 QPropertyTree is responsible for maintaining its lifetime and calling
 QPropertyTree::detach() in case attached object seizes to exist.
+
+QPropertyTree uses third argument to Archive::operator() call to specify
+label, text that appears next to the value.
 
 How does the tree update apply changes to attached instance? It calls
 serialization each time user changes data. It does it twice: once to read
@@ -614,7 +617,7 @@ ar(yasli::Range(floatValue, 0.0f, 100.0f), "floatValue", "Float Value");
 
 ===== BitFlags =====
 Display individual bits of an integer as checkboxes. Names for individual
-bits are registered as <<Enumerations>>.
+bits are registered the same way as <<Enumerations>>.
 [source,cpp]
 ----
 #include <yasli/decorators/BitFlags.h>
@@ -637,6 +640,49 @@ ar(yasli::BitFlags<AxisMask>(axisMask), "axisMask", "Axis Mask");
 ----
 
 ==== Control characters (layout) ====
+PropertyTree supports some simple layout control, this is implemented through
+special characters that that can be embedded into the label. Sounds scary? It
+is quite practilal though. Some simple example:
+[source,cpp]
+----
+ar(value, "value", "!<Value");
+----
+
+This value will appear as read-only and expanded field. See below for
+descriptions of specific control characters.
+
+inline (^)::
+	Used to bring multiple children properties on one line.
+	For example, often it is useful to have X,Y and Z components of the vector to
+	appear next to each other, rather than each on a separate line. It can be
+	serialized in a following way then:
+[source,cpp]
+----
+struct Vector3
+{
+	float x, y, z;
+
+	void serialize(Archive& ar)
+	{
+		ar(x, "x", "^X");
+		ar(y, "y", "^Y");
+		ar(z, "z", "^Z");
+	}
+};
+----
+
+read-only (!)::
+Read only fields can not be changed by the user. 
+
+expand (<)::
+Value of expanded field will occupy the all available space. Useful for
+parameters that are known to have longer text than most of other parameters,
+i.e. file paths, or long text fields.
+
+contract (>)::
+Value field is contracted to minimal size. Useful for limiting parameters
+size, when serializing tables of data.
+
 ==== Editing multiple objects at the same time ====
 
 :v: vim:tw=78:
