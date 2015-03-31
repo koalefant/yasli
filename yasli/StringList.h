@@ -19,14 +19,14 @@ namespace yasli{
 class Archive;
 class StringListStatic : public std::vector<const char*>{
 public:
-    enum { npos = -1 };
     int find(const char* value) const{
 		int numItems = int(size());
 		for(int i = 0; i < numItems; ++i){
             if(strcmp((*this)[i], value) == 0)
                 return i;
         }
-        return npos;
+		YASLI_ASSERT(0, "Value not found: %s", value);
+        return 0;
     }
     static StringListStatic EMPTY;
 };
@@ -38,7 +38,7 @@ public:
 	, index_(original.index_)
 	{
 	}
-    explicit StringListStaticValue(const StringListStatic& stringList = StringListStatic::EMPTY, int value = StringListStatic::npos)
+    explicit StringListStaticValue(const StringListStatic& stringList = StringListStatic::EMPTY, int value = 0)
     : stringList_(&stringList)
     , index_(value)
     {
@@ -47,7 +47,6 @@ public:
     : stringList_(&stringList)
     , index_(stringList.find(value))
     {
-        YASLI_ASSERT(index_ != StringListStatic::npos);
     }
     StringListStaticValue& operator=(const char* value){
         index_ = stringList_->find(value);

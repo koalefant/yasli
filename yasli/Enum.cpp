@@ -38,21 +38,14 @@ void EnumDescription::add(int value, const char* name, const char *label)
 
 bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
 {
-	int index = StringListStatic::npos;
-	if(ar.isOutput()){
-		index =  indexByValue(value);
-		if(index == StringListStatic::npos){
-			ar.warning("Unregistered Enum value!");
-		}
-	}
+	int index = 0;
+	if(ar.isOutput())
+		index = indexByValue(value);
 
 	StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
 	ar(stringListValue, name, label);
-	if(ar.isInput()){
-		if(stringListValue.index() == StringListStatic::npos)
-			return false;
+	if(ar.isInput())
 		value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
-	}
 	return true;
 }
 
@@ -122,45 +115,58 @@ StringListStatic EnumDescription::labelCombination(int bitVector) const
 
 int EnumDescription::indexByValue(int value) const
 {
+	if(!YASLI_CHECK(!valueToIndex_.empty()))
+		return 0;
     ValueToIndex::const_iterator it = valueToIndex_.find(value);
-    if(it == valueToIndex_.end())
-        return -1;
-    else
-        return it->second;
+	if(!YASLI_CHECK(it != valueToIndex_.end()))
+		it = valueToIndex_.begin();
+	return it->second;
 }
 
 int EnumDescription::valueByIndex(int index) const
 {
-	if (size_t(index) < values_.size())
+	if(!YASLI_CHECK(!values_.empty()))
+		return 0;
+	if(YASLI_CHECK(size_t(index) < values_.size()))
 		return values_[index];
-	return 0;
+	return values_[0];
 }
 
 const char* EnumDescription::nameByIndex(int index) const
 {
-	if (size_t(index) < names_.size())
+	if(!YASLI_CHECK(!names_.empty()))
+		return "";
+	if(YASLI_CHECK(size_t(index) < names_.size()))
 		return names_[index];
-	return 0;
+	return names_[0];
 }
 
 const char* EnumDescription::labelByIndex(int index) const
 {
-	if (size_t(index) < labels_.size())
+	if(!YASLI_CHECK(!labels_.empty()))
+		return "";
+	if(YASLI_CHECK(size_t(index) < labels_.size()))
 		return labels_[index];
-	return 0;
+	return labels_[0];
 }
 
 int EnumDescription::value(const char* name) const
 {
-    NameToValue::const_iterator it = nameToValue_.find(name);
-    YASLI_ESCAPE(it != nameToValue_.end(), return 0);
-    return it->second;
+	if(!YASLI_CHECK(!nameToValue_.empty()))
+		return 0;
+	NameToValue::const_iterator it = nameToValue_.find(name);
+	if(!YASLI_CHECK(it != nameToValue_.end()))
+		it = nameToValue_.begin();
+	return it->second;
 }
 int EnumDescription::valueByLabel(const char* label) const
 {
-    LabelToValue::const_iterator it = labelToValue_.find(label);
-    YASLI_ESCAPE(it != labelToValue_.end(), return 0);
-    return it->second;
+	if(!YASLI_CHECK(!labelToValue_.empty()))
+		return 0;
+	LabelToValue::const_iterator it = labelToValue_.find(label);
+	if(!YASLI_CHECK(it != labelToValue_.end()))
+		it = labelToValue_.begin();
+	return it->second;
 }
 
 }
