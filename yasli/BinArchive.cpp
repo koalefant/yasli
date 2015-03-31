@@ -22,12 +22,6 @@ static const unsigned char SIZE32 = 255;
 
 static const unsigned int BIN_MAGIC = 0xb1a4c17f;
 
-// #ifdef _DEBUG
-// #pragma init_seg(lib)
-// typedef std::map<unsigned short, string> HashMap;
-// static HashMap hashMap;
-// #endif
-
 BinOArchive::BinOArchive()
 : Archive(OUTPUT | BINARY)
 {
@@ -38,6 +32,10 @@ void BinOArchive::clear()
 {
     stream_.clear();
     stream_.write((const char*)&BIN_MAGIC, sizeof(BIN_MAGIC));
+
+#ifdef YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
+	blockTypes_.push_back(UNDEFINED);
+#endif
 }
 
 size_t BinOArchive::length() const
@@ -63,6 +61,12 @@ bool BinOArchive::save(const char* filename)
 
 inline void BinOArchive::openNode(const char* name, bool size8)
 {
+#ifdef YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
+	YASLI_ASSERT(blockTypes_.back() == UNDEFINED || blockTypes_.back() == (!strlen(name) ? POD : NON_POD), "Mixing empty and non-empty names is dangerous for BinArchives");
+	blockTypes_.back() = (!strlen(name) ? POD : NON_POD);
+	blockTypes_.push_back(UNDEFINED);
+#endif
+
 	if(!strlen(name))
 		return;
 
@@ -73,17 +77,14 @@ inline void BinOArchive::openNode(const char* name, bool size8)
 	stream_.write((unsigned char)0); 
 	if(!size8)
 		stream_.write((unsigned short)0); 
-	
-// #ifdef _DEBUG
-// 	HashMap::iterator i = hashMap.find(hash);
-// //	if(i != hashMap.end() && i->second != name)
-// //		ASSERT_STR(0, name);
-// 	hashMap[hash] = name;
-// #endif
 }
 
 inline void BinOArchive::closeNode(const char* name, bool size8)
 {
+#ifdef YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
+	blockTypes_.pop_back();
+#endif
+
 	if(!strlen(name))
 		return;
 
@@ -714,28 +715,23 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 
 	const char* currInitial = curr_;
 	bool restarted = false;
-	if(curr_ == end_){
+	if(curr_ >= end_){
 		curr_ = begin_;
 		restarted = true;
 	}
 	for(;;){
-		if(curr_ >= end_)
-			return false;
-
 		unsigned short hash;
 		read(hash);
 		unsigned int size = readPackedSize();
 		
 		const char* currPrev = curr_;
-		if((curr_ += size) == end_){
+		if((curr_ += size) >= end_){
 			if(restarted)
 				return false;
 			curr_ = begin_;
 			restarted = true;
 		}
 
-		//ASSERT(curr_ < end_);
-		
 		if(hash == hashName){
 			block = Block(currPrev, size);
 			return true;
