@@ -66,6 +66,9 @@ void PropertyRowBitVector::setValue(const Serializer& ser)
 {
 	__super::setValue(ser);
 	flags_ = value_.value;
+	if(!description_)
+		description_ = ser.cast<BitVectorWrapper>()->description;
+
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);
 		joinStringList(&valueText_, values, '|');
@@ -73,6 +76,7 @@ void PropertyRowBitVector::setValue(const Serializer& ser)
 		joinStringList(&valueAlt_, labels, '|');
 	}
 	else{
+		YASLI_ASSERT(0);
 		typeName_ = "";
 		//value_ = "";
 		valueAlt_ = "";

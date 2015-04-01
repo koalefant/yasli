@@ -36,7 +36,7 @@ public:
 		result->valueAlt_ = valueAlt_;
 		result->flags_ = flags_;
 		result->description_ = description_;
-		return result;
+		return cloneChildren(result, this);
 	}
 protected:
 	string valueText_;
