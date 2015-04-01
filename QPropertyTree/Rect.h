@@ -25,6 +25,15 @@ struct Rect
 	Rect(const QRect& rect);
 	operator const QRect&() const;
 
+	template<class TPoint>
+	bool contains(const TPoint& p) const {
+		if (p.x() < x || p.x() >= x + w)
+			return false;
+		if (p.y() < y || p.y() >= y + h)
+			return false;
+		return true;
+	}
+
 	Rect adjusted(int l, int t, int r, int b) const {
 		return Rect(x + l, y + t,
 			x + w + r - (x + l),

@@ -337,7 +337,7 @@ void DragWindow::drawRow(QPainter& p)
 	p.setPen(QPen(tree_->palette().color(QPalette::WindowText)));
 	p.drawRect(entireRowRect);
 
-	QPoint leftTop = row_->rect().topLeft();
+	QPoint leftTop = QRect(row_->rect()).topLeft();
 	int offsetX = -leftTop.x() - tree_->tabSize() + 3;
 	int offsetY = -leftTop.y() + 3;
 	p.translate(offsetX, offsetY);

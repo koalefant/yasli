@@ -320,7 +320,7 @@ SharedPtr<PropertyRow> PropertyRow::clone(ConstStringList* constStrings) const
 	return clonedRow;
 }
 
-void PropertyRow::drawStaticText(QPainter& p, const QRect& widgetRect)
+void PropertyRow::drawStaticText(QPainter& p, const Rect& widgetRect)
 {
 }
 
@@ -951,7 +951,7 @@ void PropertyRow::drawRow(PropertyDrawContext& context, const QPropertyTree* tre
 		if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
 		{
-			QRect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
+			Rect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
 
 			context.drawHorizontalLine(rect);
 		}
@@ -1134,7 +1134,7 @@ PropertyRow* PropertyRow::hit(const QPropertyTree* tree, QPoint point)
             if(PropertyRow* result = child->hit(tree, point))
                 return result;
     }
-	if (QRect(pos_.x(), pos_.y(), size_.x(), size_.y()).contains(point))
+	if (Rect(pos_.x(), pos_.y(), size_.x(), size_.y()).contains(point))
         return this;
     return 0;
 }
@@ -1280,24 +1280,24 @@ bool PropertyRow::isFullRow(const QPropertyTree* tree) const
 	return userFullRow();
 }
 
-QRect PropertyRow::textRect(const QPropertyTree* tree) const
+Rect PropertyRow::textRect(const QPropertyTree* tree) const
 {
-	return QRect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, tree->_defaultRowHeight());
+	return Rect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, tree->_defaultRowHeight());
 }
 
-QRect PropertyRow::widgetRect(const QPropertyTree* tree) const
+Rect PropertyRow::widgetRect(const QPropertyTree* tree) const
 {
-	return QRect(widgetPos_, pos_.y(), widgetSize_, tree->_defaultRowHeight());
+	return Rect(widgetPos_, pos_.y(), widgetSize_, tree->_defaultRowHeight());
 }
 
-QRect PropertyRow::plusRect(const QPropertyTree* tree) const
+Rect PropertyRow::plusRect(const QPropertyTree* tree) const
 {
-	return QRect(pos_.x(), pos_.y(), plusSize_, tree->_defaultRowHeight());
+	return Rect(pos_.x(), pos_.y(), plusSize_, tree->_defaultRowHeight());
 }
 
-QRect PropertyRow::floorRect(const QPropertyTree* tree) const
+Rect PropertyRow::floorRect(const QPropertyTree* tree) const
 {
-	return QRect(textPos_, pos_.y() + tree->_defaultRowHeight(), size_.x() - (textPos_ - pos_.x()) , size_.y() - tree->_defaultRowHeight());
+	return Rect(textPos_, pos_.y() + tree->_defaultRowHeight(), size_.x() - (textPos_ - pos_.x()) , size_.y() - tree->_defaultRowHeight());
 }
 
 YASLI_CLASS(PropertyRow, PropertyRow, "Structure");

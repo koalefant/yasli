@@ -38,7 +38,6 @@ void PropertyRowNumberField::redraw(PropertyDrawContext& context)
 		option.lineWidth = tree->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, &option, 0);
 		option.midLineWidth = 0;
 		option.features = QStyleOptionFrameV2::None;
-
 		if (context.captured) {
 			option.state |= QStyle::State_HasFocus;
 			option.state |= QStyle::State_Active;

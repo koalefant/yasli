@@ -27,7 +27,6 @@
 
 #include <QObject>
 #include <QPoint>
-#include <QRect>
 
 class QWidget;
 class QFont;
@@ -215,17 +214,16 @@ public:
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
-	QRect rect() const{ return QRect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
-	QRect textRect(const QPropertyTree* tree) const;
-	QRect widgetRect(const QPropertyTree* tree) const;
-	QRect plusRect(const QPropertyTree* tree) const;
-	QRect floorRect(const QPropertyTree* tree) const;
-	void adjustHoveredRect(QRect& hoveredRect);
+	Rect rect() const{ return Rect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
+	Rect textRect(const QPropertyTree* tree) const;
+	Rect widgetRect(const QPropertyTree* tree) const;
+	Rect plusRect(const QPropertyTree* tree) const;
+	Rect floorRect(const QPropertyTree* tree) const;
+	void adjustHoveredRect(Rect& hoveredRect);
 	Font rowFont(const QPropertyTree* tree) const;
 
 	void drawRow(PropertyDrawContext& x, const QPropertyTree* tree, int rowIndex, bool selectionPass);
-	void drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const;
-	void drawStaticText(QPainter& p, const QRect& widgetRect);
+	void drawStaticText(QPainter& p, const Rect& widgetRect);
 
 	virtual void redraw(PropertyDrawContext& context);
 	virtual PropertyRowWidget* createWidget(QPropertyTree* tree) { return 0; }

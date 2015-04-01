@@ -47,10 +47,7 @@ PropertyRowButton::PropertyRowButton()
 
 void PropertyRowButton::redraw(PropertyDrawContext& context)
 {
-	QRect buttonRect(context.widgetRect);
-	buttonRect.setLeft(buttonRect.left() - 1);
-	buttonRect.setRight(buttonRect.right() + 1);
-	buttonRect.setBottom(buttonRect.bottom() + 2);
+	Rect buttonRect(context.widgetRect.adjusted(-1, 0, 1, 2));
 
 	wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
 	bool pressed = underMouse_ && value();
