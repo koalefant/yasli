@@ -11,6 +11,7 @@
 #include "yasli/Archive.h"
 #include "yasli/BinArchive.h"
 #include "QPropertyTree.h"
+#include "frontend-qt/QUIFacade.h"
 #include "PropertyDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
@@ -42,6 +43,7 @@
 #include "PropertyRowContainer.h"
 // ^^^
 #include "PropertyRowObject.h"
+#include "frontend-qt/QDrawContext.h"
 
 using yasli::Serializers;
 
@@ -315,8 +317,9 @@ struct DrawRowVisitor
 	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
 	{
 		if(row->pulledUp() && row->visible(tree)) {
-			row->drawRow(painter_, tree, index, true);
-			row->drawRow(painter_, tree, index, false);
+			QDrawContext context(tree, &painter_);
+			row->drawRow(context, tree, index, true);
+			row->drawRow(context, tree, index, false);
 		}
 
 		return SCAN_CHILDREN_SIBLINGS;
@@ -341,8 +344,9 @@ void DragWindow::drawRow(QPainter& p)
 	int rowIndex = 0;
 	if (row_->parent())
 		rowIndex = row_->parent()->childIndex(row_);
-	row_->drawRow(p, tree_, 0, true);
-	row_->drawRow(p, tree_, 0, false);
+	QDrawContext context(tree_, &p);
+	row_->drawRow(context, tree_, 0, true);
+	row_->drawRow(context, tree_, 0, false);
 	DrawRowVisitor visitor(p);
 	row_->scanChildren(visitor, tree_);
 	p.translate(-offsetX, -offsetY);
@@ -537,6 +541,7 @@ protected:
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 QPropertyTree::QPropertyTree(QWidget* parent)
 : QWidget(parent)
+, PropertyTree(new QUIFacade(this))
 , sizeHint_(180, 180)
 , model_(0)
 , cursorX_(0)
@@ -1920,11 +1925,6 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 	p.setFont(previousFont);
 }
 
-void QPropertyTree::_drawRowLabel(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& textColor) const
-{
-	drawFilteredString(p, text, RowFilter::NAME, font, rect, textColor, false, false);
-}
-
 void QPropertyTree::_drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
 {
 	drawFilteredString(p, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
@@ -1947,8 +1947,9 @@ struct DrawVisitor
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
+			QDrawContext context(tree, &painter_);
 			if(row->rect().bottom() > scrollOffset_ && row->rect().width() > 0)
-				row->drawRow(painter_, tree, index, selectionPass_);
+				row->drawRow(context, tree, index, selectionPass_);
 
 			return SCAN_CHILDREN_SIBLINGS;
 		}
@@ -2306,6 +2307,7 @@ void QPropertyTree::setArchiveContext(yasli::Context* lastContext)
 }
 
 QPropertyTree::QPropertyTree(const QPropertyTree&)
+: PropertyTree(0)
 {
 }
 

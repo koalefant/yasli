@@ -18,6 +18,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QApplication>
+#include "Rect.h"
 
 struct ComboBoxClientRow {
 	virtual void populateComboBox(QComboBox* box, QPropertyTree* tree) = 0;
@@ -65,29 +66,15 @@ public:
 	int widgetSizeMin(const QPropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
-	void redraw(const PropertyDrawContext& context) override
+	void redraw(PropertyDrawContext& context) override
 	{
 		if(multiValue())
 			context.drawEntry(L" ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsWString().c_str());
 		else
-		{
-			QStyleOptionComboBox option;
-			option.editable = false;
-			option.frame = true;
-			option.currentText = QString(valueAsString().c_str());
-			option.state |= QStyle::State_Enabled;
-			option.rect = QRect(0, 0, context.widgetRect.width(), context.widgetRect.height());
-			// we have to translate painter here to work around bug in some themes
-			context.painter->translate(context.widgetRect.left(), context.widgetRect.top());
-			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
-			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
-			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
-			textRect.adjust(1, 0, -1, 0);
-			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
-			context.painter->translate(-context.widgetRect.left(), -context.widgetRect.top());
-		}
+			context.drawComboBox(context.widgetRect, valueAsString().c_str());
+
 	}
 
 
@@ -141,7 +128,7 @@ public:
 	int widgetSizeMin(const QPropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
-	void redraw(const PropertyDrawContext& context) override
+	void redraw(PropertyDrawContext& context) override
 	{
 		if(multiValue())
 			context.drawEntry(L" ... ", false, true, 0);

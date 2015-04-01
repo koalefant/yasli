@@ -13,6 +13,7 @@
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
 #include "yasli/Pointers.h"
+#include "PropertyTree.h"
 #include "PropertyRow.h"
 #include <QWidget>
 #include <QPainter>
@@ -105,7 +106,7 @@ protected:
 	QPoint offset_;
 };
 
-class QPropertyTree : public QWidget, public TreeConfig
+class QPropertyTree : public QWidget, public TreeConfig, public PropertyTree
 {
 	Q_OBJECT
 public:
@@ -166,7 +167,6 @@ public:
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 	QPoint _toScreen(QPoint point) const;
 	void _cancelWidget(){ widget_.reset(); }
-	void _drawRowLabel(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color) const;
 	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 	QRect _visibleRect() const;
 	bool _isDragged(const PropertyRow* row) const;
@@ -327,6 +327,8 @@ protected:
 	friend struct FilterVisitor;
 	friend struct PropertyTreeMenuHandler;
     friend struct ContainerMenuHandler;
+	friend class QDrawContext;
+	friend class QUIFacade;
 };
 
 yasli::wstring generateDigest(yasli::Serializer& ser);

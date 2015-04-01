@@ -60,7 +60,7 @@ public:
     yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const override;
     const char* typeNameForFilter(QPropertyTree* tree) const override { return baseType_.name(); }
-	void redraw(const PropertyDrawContext& context) override;
+	void redraw(PropertyDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;
 protected:

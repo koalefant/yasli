@@ -62,22 +62,16 @@ protected:
 	bool insert_;
 };
 
-void PropertyRowContainer::redraw(const PropertyDrawContext& context)
+void PropertyRowContainer::redraw(PropertyDrawContext& context)
 {
 	QRect widgetRect = context.widgetRect;
 	if (widgetRect.width() == 0)
 		return;
 	QRect rt = widgetRect;
 	rt.adjust(0, 1, -1, -1);
-	QColor brushColor = context.tree->palette().button().color(); 
-	QLinearGradient gradient(rt.left(), rt.top(), rt.left(), rt.bottom());
-	gradient.setColorAt(0.0f, brushColor);
-	gradient.setColorAt(0.6f, brushColor);
-	gradient.setColorAt(1.0f, context.tree->palette().color(QPalette::Shadow));
-	QBrush brush(gradient);
 
 	const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
-	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, &context.tree->font());
+	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, FONT_NORMAL);
 }
 
 

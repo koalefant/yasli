@@ -14,7 +14,7 @@
 #include "Serialization.h"
 #include "Unicode.h"
 #include <QMenu>
-
+#include "Rect.h"
 
 // ---------------------------------------------------------------------------
 
@@ -188,13 +188,12 @@ yasli::wstring PropertyRowPointer::generateLabel() const
 		return str;
 }
 
-void PropertyRowPointer::redraw(const PropertyDrawContext& context)
+void PropertyRowPointer::redraw(PropertyDrawContext& context)
 {
-	QRect widgetRect = context.widgetRect;
-	QRect rt = widgetRect;
-	rt.adjust(-1, 0, 0, 1);
+	Rect widgetRect = context.widgetRect;
+	Rect rt = widgetRect.adjusted(-1, 0, 0, 1);
 	yasli::wstring str = generateLabel();
-	const QFont* font = derivedTypeName_.empty() ? &context.tree->font() : &context.tree->boldFont();
+	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
 	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, true, font);
 }
 

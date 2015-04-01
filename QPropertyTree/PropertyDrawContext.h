@@ -13,6 +13,7 @@
 #include <vector>
 #include <QRect>
 #include "Color.h"
+#include "IDrawContext.h"
 
 class QPainter;
 class QImage;
@@ -55,7 +56,7 @@ enum CheckState {
 };
 
 class QPropertyTree;
-struct PropertyDrawContext {
+struct PropertyDrawContext : property_tree::IDrawContext {
 	const QPropertyTree* tree;
 	QPainter* painter;
 	QRect widgetRect;
@@ -65,7 +66,7 @@ struct PropertyDrawContext {
 
 	void drawIcon(const QRect& rect, const yasli::IconXPM& icon) const;
 	void drawCheck(const QRect& rect, bool disabled, CheckState checked) const;
-	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, const QFont* font) const;
+	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) const;
 	void drawValueText(bool highlighted, const wchar_t* text) const;
 	void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset) const;
 

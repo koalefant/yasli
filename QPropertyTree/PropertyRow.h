@@ -22,10 +22,12 @@
 #include "yasli/Strings.h"
 #include "Factory.h"
 #include "ConstStringList.h"
+#include "IDrawContext.h"
+#include "Rect.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QPoint>
-#include <QtCore/QRect>
+#include <QObject>
+#include <QPoint>
+#include <QRect>
 
 class QWidget;
 class QFont;
@@ -219,13 +221,13 @@ public:
 	QRect plusRect(const QPropertyTree* tree) const;
 	QRect floorRect(const QPropertyTree* tree) const;
 	void adjustHoveredRect(QRect& hoveredRect);
-	const QFont* rowFont(const QPropertyTree* tree) const;
+	Font rowFont(const QPropertyTree* tree) const;
 
-	void drawRow(QPainter& painter, const QPropertyTree* tree, int rowIndex, bool selectionPass);
+	void drawRow(PropertyDrawContext& x, const QPropertyTree* tree, int rowIndex, bool selectionPass);
 	void drawPlus(QPainter& p, const QPropertyTree* tree, const QRect& rect, bool expanded, bool selected, bool grayed) const;
 	void drawStaticText(QPainter& p, const QRect& widgetRect);
 
-	virtual void redraw(const PropertyDrawContext& context);
+	virtual void redraw(PropertyDrawContext& context);
 	virtual PropertyRowWidget* createWidget(QPropertyTree* tree) { return 0; }
 
 	virtual bool isContainer() const{ return false; }

@@ -20,7 +20,7 @@ public:
 	bool assignToPrimitive(void* val, size_t size) const override;
 	void setValue(bool value) { value_ = value; }
 
-	void redraw(const PropertyDrawContext& context) override;
+	void redraw(PropertyDrawContext& context) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 

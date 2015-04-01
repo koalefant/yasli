@@ -28,7 +28,7 @@ bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 	return true;
 }
 
-void PropertyRowBool::redraw(const PropertyDrawContext& context)
+void PropertyRowBool::redraw(PropertyDrawContext& context)
 {
 	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }

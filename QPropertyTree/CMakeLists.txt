@@ -16,6 +16,10 @@ if (NOT QT4_FOUND AND NOT Qt5_INCLUDE_DIRS)
 endif()
 
 set(SOURCES
+	frontend-qt/QDrawContext.cpp
+	frontend-qt/QDrawContext.h
+	frontend-qt/QUIFacade.cpp
+	frontend-qt/QUIFacade.h
 	Color.cpp
 	ConstStringList.cpp
 	PropertyDrawContext.cpp

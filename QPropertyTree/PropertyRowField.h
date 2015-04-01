@@ -11,6 +11,8 @@
 #include "PropertyRow.h"
 class QIcon;
 
+#include "yasli/decorators/IconXPM.h"
+
 class PropertyRowField : public PropertyRow
 {
 public:
@@ -23,9 +25,9 @@ public:
 	}
 
 	virtual int buttonCount() const{ return 0; }
-	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const{ return *(QIcon*)(0); }
+	virtual yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const{ return yasli::IconXPM(); }
 	virtual bool usePathEllipsis() const { return false; }
 
-	void redraw(const PropertyDrawContext& context) override;
+	void redraw(PropertyDrawContext& context) override;
 };
 

@@ -22,7 +22,7 @@ using yasli::Button;
 class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
-	void redraw(const PropertyDrawContext& context);
+	void redraw(PropertyDrawContext& context) override;
 	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed);
 	void onMouseMove(QPropertyTree* tree, QPoint point);
 	void onMouseUp(QPropertyTree* tree, QPoint point);
@@ -45,7 +45,7 @@ PropertyRowButton::PropertyRowButton()
 }
 	
 
-void PropertyRowButton::redraw(const PropertyDrawContext& context)
+void PropertyRowButton::redraw(PropertyDrawContext& context)
 {
 	QRect buttonRect(context.widgetRect);
 	buttonRect.setLeft(buttonRect.left() - 1);

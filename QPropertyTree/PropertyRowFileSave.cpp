@@ -61,10 +61,9 @@ public:
 
 
 	int buttonCount() const override{ return 1; }
-	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const override{ 
+	yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const override{ 
 		#include "file_save.xpm"
-		static QIcon icon = QIcon(QPixmap::fromImage(*tree->_iconCache()->getImageForIcon(yasli::IconXPM(file_save_xpm))));
-		return icon;
+		return yasli::IconXPM(file_save_xpm);
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 

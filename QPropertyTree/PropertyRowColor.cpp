@@ -4,6 +4,7 @@
 #include <QPainter>
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
+#include "Rect.h"
 
 PropertyRowColor::PropertyRowColor()
 : value_(255, 255, 255, 255)
@@ -15,14 +16,9 @@ int PropertyRowColor::widgetSizeMin(const QPropertyTree* tree) const
 	return tree->_defaultRowHeight();
 }
 
-void PropertyRowColor::redraw(const PropertyDrawContext& context)
+void PropertyRowColor::redraw(PropertyDrawContext& context)
 {
-	context.painter->save();
-	context.painter->setBrush(QBrush(QColor(value_.r, value_.g, value_.b, value_.a)));
-	context.painter->setPen(QPen(context.tree->palette().color(QPalette::Shadow)));
-	QRect rt = context.widgetRect.adjusted(1,1,-1,-3);
-	context.painter->drawRoundedRect(rt, 2, 2);
-	context.painter->restore();
+	context.drawColor(context.widgetRect.adjusted(1,1,-1,-3), value_);
 }
 
 void PropertyRowColor::closeNonLeaf(const yasli::Serializer& ser)

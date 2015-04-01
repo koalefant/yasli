@@ -229,8 +229,9 @@ void PropertyDrawContext::drawCheck(const QRect& rect, bool disabled, CheckState
 	tree->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, 0);
 }
 
-void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, const QFont* font) const
+void PropertyDrawContext::drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font_name) const
 {
+	const QFont* font = font_name == property_tree::FONT_NORMAL ? &tree->font() : &tree->boldFont();
 	QStyleOptionButton option;
 	if (enabled)
 		option.state |= QStyle::State_Enabled;

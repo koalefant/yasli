@@ -9,17 +9,17 @@
 
 #include "PropertyRowField.h"
 #include "PropertyDrawContext.h"
-#include <QtGui/QIcon>
+#include <QIcon>
+#include "Rect.h"
 
-void PropertyRowField::redraw(const PropertyDrawContext& context)
+void PropertyRowField::redraw(PropertyDrawContext& context)
 {
 	int buttonCount = this->buttonCount();
 	int offset = 0;
 	for (int i = 0; i < buttonCount; ++i) {
-		const QIcon& icon = buttonIcon(context.tree, i);
 		int width = 16;
-		QRect iconRect(context.widgetRect.right() - offset - width, context.widgetRect.top(), width, context.widgetRect.height());
-		icon.paint(context.painter, iconRect);
+		Rect iconRect(context.widgetRect.right() - offset - width, context.widgetRect.top(), width, context.widgetRect.height());
+		context.drawIcon(iconRect, buttonIcon(context.tree, i));
 		offset += width;
 	}
 

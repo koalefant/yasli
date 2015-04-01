@@ -50,7 +50,7 @@ public:
 	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	void redraw(const PropertyDrawContext& context) override;
+	void redraw(PropertyDrawContext& context) override;
 	bool onActivate(QPropertyTree* tree, bool force) override;
 	bool onActivateRelease(QPropertyTree* tree) override;
 	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;

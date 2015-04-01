@@ -39,7 +39,7 @@ public:
 	bool isContainer() const override{ return true; }
 	bool onActivate( QPropertyTree* tree, bool force) override;
 	bool onContextMenu(QMenu& item, QPropertyTree* tree) override;
-	void redraw(const PropertyDrawContext& context) override;
+	void redraw(PropertyDrawContext& context) override;
 	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
 
 	void labelChanged() override;

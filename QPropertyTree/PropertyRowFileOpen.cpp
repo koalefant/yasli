@@ -128,10 +128,9 @@ public:
 	}
 
 	int buttonCount() const override{ return 1; }
-	virtual const QIcon& buttonIcon(const QPropertyTree* tree, int index) const override{ 
+	virtual yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const override{ 
 		#include "file_open.xpm"
-		static QIcon fileOpenIcon = QIcon(QPixmap::fromImage(*tree->_iconCache()->getImageForIcon(yasli::IconXPM(file_open_xpm))));
-		return fileOpenIcon;
+		return yasli::IconXPM(file_open_xpm);
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 

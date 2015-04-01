@@ -21,10 +21,9 @@ using yasli::IconXPMToggle;
 
 class PropertyRowIconXPM : public PropertyRow{
 public:
-	void redraw(const PropertyDrawContext& context)
+	void redraw(PropertyDrawContext& context) override
 	{
-		QRect rect = context.widgetRect;
-		context.drawIcon(rect, icon_);
+		context.drawIcon(context.widgetRect, icon_);
 	}
 
 	bool isLeaf() const{ return true; }
@@ -50,7 +49,7 @@ protected:
 
 class PropertyRowIconToggle : public PropertyRow{
 public:
-	void redraw(const PropertyDrawContext& context) override
+	void redraw(PropertyDrawContext& context) override
 	{
 		IconXPM& icon = value_ ? iconTrue_ : iconFalse_;
 		context.drawIcon(context.widgetRect, icon);
