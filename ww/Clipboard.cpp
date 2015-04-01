@@ -37,6 +37,8 @@ struct PasteSerializerFunc : PasteFunc
     bool operator()(const char* mem, size_t memSize)
     {
         BinIArchive ia;
+		SerializeForCopyPaste sfcp;
+		Context context(ia, &sfcp);
         if(ia.open(mem, memSize))
             return ia(ser_, name_, label_);
         return false;
@@ -54,6 +56,8 @@ struct PasteRowFunc : PasteFunc
     bool operator()(const char* mem, size_t memSize)
     {
         BinIArchive ia;
+		SerializeForCopyPaste sfcp;
+		Context context(ia, &sfcp);
         if(ia.open(mem, memSize))
             return ia(*row_, "row", "Row");
         return false;
@@ -228,6 +232,8 @@ bool Clipboard::copy(PropertyRow* row)
 
     SharedPtr<PropertyRow> clonedRow(row->clone());
 	BinOArchive oa;
+	SerializeForCopyPaste sfcp;
+	Context context(oa, &sfcp);
 	if(!oa(clonedRow, "row", "Row")){
 		PropertyRow::setConstStrings(0);
 		return false;
