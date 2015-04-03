@@ -83,7 +83,7 @@ bool serialize(Archive& ar, StringListValue& value, const char* name, const char
 
 bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
 {
-    if(ar.isEdit() || ar.context<SerializeForCopyPaste>())
+    if(ar.isEdit())
         return ar(Serializer(value), name, label);
     else{
         std::string str;

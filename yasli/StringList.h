@@ -171,6 +171,4 @@ bool serialize(Archive& ar, StringList& value, const char* name, const char* lab
 bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
 bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
 
-struct SerializeForCopyPaste{};
-
 }
