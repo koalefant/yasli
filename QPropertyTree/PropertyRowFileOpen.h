@@ -3,16 +3,16 @@
 #include "PropertyRow.h"
 
 class PropertyRowFileOpen;
-class QPropertyTree;
+class PropertyTree;
 
-struct FileOpenMenuHandler : PropertyRowMenuHandler
+struct FileOpenMenuHandler : QObject, PropertyRowMenuHandler
 {
 Q_OBJECT
 public:
 	PropertyRowFileOpen* self;
-	QPropertyTree* tree;
+	PropertyTree* tree;
 
-	FileOpenMenuHandler(PropertyRowFileOpen* self, QPropertyTree* tree)
+	FileOpenMenuHandler(PropertyRowFileOpen* self, PropertyTree* tree)
 	: self(self)
 	, tree(tree)
 	{

@@ -7,7 +7,7 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyRowContainer.h"
 #include "PropertyDrawContext.h"
@@ -18,10 +18,7 @@
 
 #include "yasli/BinArchive.h"
 
-#include <QMenu>
-#include <QKeyEvent>
-#include <QPainter>
-#include <QObject>
+#include "IMenu.h"
 #include "MathUtils.h"
 
 #if 0
@@ -32,17 +29,6 @@
 # define DEBUG_TRACE_ROW(...)
 #endif
 	
-
-static QColor interpolate(const QColor& a, const QColor& b, float k)
-{
-	float mk = 1.0f - k;
-	return QColor(a.red() * k  + b.red() * mk,
-				  a.green() * k + b.green() * mk,
-				  a.blue() * k + b.blue() * mk,
-				  a.alpha() * k + b.alpha() * mk);
-}
-
-// ---------------------------------------------------------------------------
 
 inline unsigned calcHash(const char* str, unsigned hash = 5381)
 {
@@ -152,7 +138,7 @@ void PropertyRow::_setExpanded(bool expanded)
 struct SetExpandedOp {
     bool expanded_;
     SetExpandedOp(bool expanded) : expanded_(expanded) {}
-    ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
         if(row->canBeToggled(tree))
             row->_setExpanded(expanded_);
@@ -160,7 +146,7 @@ struct SetExpandedOp {
     }
 };
 
-void PropertyRow::setExpandedRecursive(QPropertyTree* tree, bool expanded)
+void PropertyRow::setExpandedRecursive(PropertyTree* tree, bool expanded)
 {
 	if(canBeToggled(tree))
 		_setExpanded(expanded);
@@ -350,7 +336,7 @@ void PropertyRow::serialize(Archive& ar)
 	}
 }
 
-bool PropertyRow::onActivate(QPropertyTree* tree, bool force)
+bool PropertyRow::onActivate(PropertyTree* tree, bool force)
 {
     return tree->spawnWidget(this, force);
 }
@@ -394,7 +380,7 @@ void PropertyRow::setLabel(const char* label)
 	}
 }
 
-void PropertyRow::updateLabel(const QPropertyTree* tree, int index)
+void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 {
 	if (!labelChanged_) {
 		if (pulledUp_)
@@ -513,12 +499,12 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	labelChanged();
 }
 
-const char* PropertyRow::typeNameForFilter(QPropertyTree* tree) const
+const char* PropertyRow::typeNameForFilter(PropertyTree* tree) const
 {
 	return typeName();
 }
 
-void PropertyRow::updateTextSizeInitial(const QPropertyTree* tree, int index)
+void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
@@ -536,7 +522,7 @@ void PropertyRow::updateTextSizeInitial(const QPropertyTree* tree, int index)
 	}
 }
 
-void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index)
+void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
 	PropertyRow* nonPulled = nonPulledParent();
 	if (!layoutChanged_ && !force && !nonPulled->layoutChanged_) {
@@ -704,7 +690,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 	layoutChanged_ = false;
 }
 
-void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight)
+void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHeight)
 {
 	pos_.setY(totalHeight);
 	if(!pulledUp())
@@ -726,7 +712,7 @@ void PropertyRow::adjustVerticalPosition(const QPropertyTree* tree, int& totalHe
 	}
 }
 
-void PropertyRow::setTextSize(const QPropertyTree* tree, int index, float mult)
+void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 {
 	updateTextSizeInitial(tree, index);
 
@@ -740,7 +726,7 @@ void PropertyRow::setTextSize(const QPropertyTree* tree, int index, float mult)
 	}
 }
 
-void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree *tree, int index) 
+void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
 {
 	updateTextSizeInitial(tree, index);
 
@@ -815,7 +801,7 @@ const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, cons
 }
 
 
-bool PropertyRow::onKeyDown(QPropertyTree* tree, const QKeyEvent* ev)
+bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parent());
@@ -833,7 +819,7 @@ bool PropertyRow::onKeyDown(QPropertyTree* tree, const QKeyEvent* ev)
 	return false;
 }
 
-bool PropertyRow::onContextMenu(QMenu &menu, QPropertyTree* tree)
+bool PropertyRow::onContextMenu(IMenu &menu, PropertyTree* tree)
 {
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parent());
@@ -844,15 +830,11 @@ bool PropertyRow::onContextMenu(QMenu &menu, QPropertyTree* tree)
 		    if(!menu.isEmpty())
 			    menu.addSeparator();
 
-				QAction* insertBefore = menu.addAction("Insert Before");
-				insertBefore->setShortcut(QKeySequence("Shift+Insert"));
-				insertBefore->setEnabled(!container->userReadOnly());
-				QObject::connect(insertBefore, SIGNAL(triggered()), handler, SLOT(onMenuChildInsertBefore()));
+				menu.addAction("Insert Before", "Shift+Insert",
+					container->userReadOnly() ? MENU_DISABLED : 0, handler, &ContainerMenuHandler::onMenuChildInsertBefore);
 				
-				QAction* remove = menu.addAction("Remove");
-				remove->setShortcut(QKeySequence("Shift+Delete"));
-				remove->setEnabled(!container->userReadOnly());
-				QObject::connect(remove, SIGNAL(triggered()), handler, SLOT(onMenuChildRemove()));
+				menu.addAction("Remove", "Shift+Delete",
+					container->userReadOnly() ? MENU_DISABLED : 0, handler, &ContainerMenuHandler::onMenuChildRemove);
 		}
 	}
 
@@ -860,8 +842,8 @@ bool PropertyRow::onContextMenu(QMenu &menu, QPropertyTree* tree)
 		if(!menu.isEmpty())
 			menu.addSeparator();
 
-		QObject::connect(menu.addAction("Expand"), SIGNAL(triggered()), tree, SLOT(expandAll()));
-		QObject::connect(menu.addAction("Collapse"), SIGNAL(triggered()), tree, SLOT(collapseAll()));
+		menu.addAction("Expand", 0, tree, &PropertyTree::expandAll);
+		menu.addAction("Collapse", 0, tree, &PropertyTree::collapseAll);
 	}
 
 	return !menu.isEmpty();
@@ -900,12 +882,12 @@ bool PropertyRow::pulledSelected() const
 }
 
 
-Font PropertyRow::rowFont(const QPropertyTree* tree) const
+Font PropertyRow::rowFont(const PropertyTree* tree) const
 {
 	return hasVisibleChildren(tree) || isContainer() ? FONT_BOLD : FONT_NORMAL;
 }
 
-void PropertyRow::drawRow(PropertyDrawContext& context, const QPropertyTree* tree, int index, bool selectionPass)
+void PropertyRow::drawRow(PropertyDrawContext& context, const PropertyTree* tree, int index, bool selectionPass)
 {
 	Rect rowRect = rect();
 	Rect selectionRect;
@@ -973,14 +955,14 @@ void PropertyRow::drawRow(PropertyDrawContext& context, const QPropertyTree* tre
 	}
 }
 
-bool PropertyRow::visible(const QPropertyTree* tree) const
+bool PropertyRow::visible(const PropertyTree* tree) const
 {
 	if (tree->_isDragged(this))
 		return false;
 	return ((visible_ || !tree->hideUntranslated()) && (matchFilter_ || belongsToFilteredRow_));
 }
 
-bool PropertyRow::canBeToggled(const QPropertyTree* tree) const
+bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 {
 	if(!visible(tree))
 		return false;
@@ -998,7 +980,7 @@ bool PropertyRow::canBeDragged() const
 	return false;
 }
 
-bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const QPropertyTree* tree) const
+bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const
 {
 	YASLI_ASSERT(parentRow);
 
@@ -1021,7 +1003,7 @@ bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow
 	return false;	
 }
 
-void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QPropertyTree* tree, bool before)
+void PropertyRow::dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before)
 {
 	SharedPtr<PropertyRow> ref(this);
 
@@ -1082,7 +1064,7 @@ void PropertyRow::intersect(const PropertyRow* row)
 	}
 }
 
-const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const QPropertyTree* tree, int index) const
+const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int index) const
 {
 	if(parent() && parent()->isContainer()){
 		if (tree->showContainerIndices()) {
@@ -1096,7 +1078,7 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const QProper
 		return labelUndecorated() ? labelUndecorated() : "";
 }
 
-bool PropertyRow::hasVisibleChildren(const QPropertyTree* tree, bool internalCall) const
+bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall) const
 {
 	if(empty() || (!internalCall && pulledUp()))
 		return false;
@@ -1114,12 +1096,12 @@ bool PropertyRow::hasVisibleChildren(const QPropertyTree* tree, bool internalCal
 	return false;
 }
 
-const PropertyRow* PropertyRow::hit(const QPropertyTree* tree, Point point) const
+const PropertyRow* PropertyRow::hit(const PropertyTree* tree, Point point) const
 {
   return const_cast<PropertyRow*>(this)->hit(tree, point);
 }
 
-PropertyRow* PropertyRow::hit(const QPropertyTree* tree, Point point)
+PropertyRow* PropertyRow::hit(const PropertyTree* tree, Point point)
 {
     bool expanded = this->expanded();
     if(isContainer() && pulledUp())
@@ -1160,7 +1142,7 @@ struct GetVerticalIndexOp{
 
     GetVerticalIndexOp(const PropertyRow* row) : row_(row), index_(0) {}
 
-    ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
         if(row == row_)
             return SCAN_FINISHED;
@@ -1170,7 +1152,7 @@ struct GetVerticalIndexOp{
     }
 };
 
-int PropertyRow::verticalIndex(QPropertyTree* tree, PropertyRow* row)
+int PropertyRow::verticalIndex(PropertyTree* tree, PropertyRow* row)
 {
     GetVerticalIndexOp op(row);
 	scanChildren(op, tree);
@@ -1184,7 +1166,7 @@ struct RowByVerticalIndexOp{
 
     RowByVerticalIndexOp(int index) : row_(0), index_(index) {}
 
-    ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
         if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
             row_ = row;
@@ -1195,7 +1177,7 @@ struct RowByVerticalIndexOp{
     }
 };
 
-PropertyRow* PropertyRow::rowByVerticalIndex(QPropertyTree* tree, int index)
+PropertyRow* PropertyRow::rowByVerticalIndex(PropertyTree* tree, int index)
 {
     RowByVerticalIndexOp op(index);
 	scanChildren(op, tree);
@@ -1209,7 +1191,7 @@ struct HorizontalIndexOp{
 
     HorizontalIndexOp(PropertyRow* row) : row_(row), index_(0), pulledBefore_(row->pulledBefore()) {}
 
-    ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
         if(!row->pulledUp())
             return SCAN_SIBLINGS;
@@ -1222,7 +1204,7 @@ struct HorizontalIndexOp{
     }
 };
 
-int PropertyRow::horizontalIndex(QPropertyTree* tree, PropertyRow* row)
+int PropertyRow::horizontalIndex(PropertyTree* tree, PropertyRow* row)
 {
 	if(row == this)
 		return 0;
@@ -1241,7 +1223,7 @@ struct RowByHorizontalIndexOp{
 
     RowByHorizontalIndexOp(int index) : row_(0), index_(index), pulledBefore_(index < 0) {}
 
-    ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
         if(!row->pulledUp())
             return SCAN_SIBLINGS;
@@ -1254,7 +1236,7 @@ struct RowByHorizontalIndexOp{
     }
 };
 
-PropertyRow* PropertyRow::rowByHorizontalIndex(QPropertyTree* tree, int index)
+PropertyRow* PropertyRow::rowByHorizontalIndex(PropertyTree* tree, int index)
 {
 	if(!index)
 		return this;
@@ -1271,7 +1253,7 @@ void PropertyRow::redraw(PropertyDrawContext& context)
 
 }
 
-bool PropertyRow::isFullRow(const QPropertyTree* tree) const
+bool PropertyRow::isFullRow(const PropertyTree* tree) const
 {
     if (tree->fullRowMode())
 		return true;
@@ -1280,22 +1262,22 @@ bool PropertyRow::isFullRow(const QPropertyTree* tree) const
 	return userFullRow();
 }
 
-Rect PropertyRow::textRect(const QPropertyTree* tree) const
+Rect PropertyRow::textRect(const PropertyTree* tree) const
 {
 	return Rect(textPos_, pos_.y(), textSize_ < textSizeInitial_ ? textSize_ - 1 : textSize_, tree->_defaultRowHeight());
 }
 
-Rect PropertyRow::widgetRect(const QPropertyTree* tree) const
+Rect PropertyRow::widgetRect(const PropertyTree* tree) const
 {
 	return Rect(widgetPos_, pos_.y(), widgetSize_, tree->_defaultRowHeight());
 }
 
-Rect PropertyRow::plusRect(const QPropertyTree* tree) const
+Rect PropertyRow::plusRect(const PropertyTree* tree) const
 {
 	return Rect(pos_.x(), pos_.y(), plusSize_, tree->_defaultRowHeight());
 }
 
-Rect PropertyRow::floorRect(const QPropertyTree* tree) const
+Rect PropertyRow::floorRect(const PropertyTree* tree) const
 {
 	return Rect(textPos_, pos_.y() + tree->_defaultRowHeight(), size_.x() - (textPos_ - pos_.x()) , size_.y() - tree->_defaultRowHeight());
 }
@@ -1304,18 +1286,18 @@ YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
 
 // ---------------------------------------------------------------------------
 
-PropertyRowWidget::PropertyRowWidget(PropertyRow* row, QPropertyTree* tree)
+InplaceWidget::InplaceWidget(PropertyRow* row, PropertyTree* tree)
 : row_(row)
 , model_(tree->model())
 , tree_(tree)
 {
 }
 
-PropertyRowWidget::~PropertyRowWidget()
+InplaceWidget::~InplaceWidget()
 {
-	if(actualWidget())
-		actualWidget()->setParent(0);
-	tree_->setFocus();
+	//if(actualWidget())
+	//	actualWidget()->setParent(0);
+	//tree_->setFocus();
 }
 
 FORCE_SEGMENT(PropertyRowNumber)

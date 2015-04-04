@@ -11,7 +11,7 @@
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "yasli/decorators/Button.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "PropertyDrawContext.h"
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
@@ -23,10 +23,10 @@ class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
 	void redraw(PropertyDrawContext& context) override;
-	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed);
-	void onMouseMove(QPropertyTree* tree, Point point);
-	void onMouseUp(QPropertyTree* tree, Point point);
-	bool onActivate(QPropertyTree* tree, bool force);
+	bool onMouseDown(PropertyTree* tree, Point point, bool& changed);
+	void onMouseMove(PropertyTree* tree, Point point);
+	void onMouseUp(PropertyTree* tree, Point point);
+	bool onActivate(PropertyTree* tree, bool force);
 	int floorHeight() const{ return 3; }
 	string valueAsString() const { return value_ ? value_.text : ""; }
 	int widgetSizeMin() const{ 
@@ -52,30 +52,30 @@ void PropertyRowButton::redraw(PropertyDrawContext& context)
 	wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
 	bool pressed = underMouse_ && value();
 	context.drawButton(buttonRect, text.c_str(), pressed, 
-					   selected() && context.tree->hasFocus(), true, true, false, rowFont(context.tree));
+					   selected() && context.tree->hasFocusOrInplaceHasFocus(), true, true, false, rowFont(context.tree));
 }
 
-bool PropertyRowButton::onMouseDown(QPropertyTree* tree, Point point, bool& changed)
+bool PropertyRowButton::onMouseDown(PropertyTree* tree, Point point, bool& changed)
 {
 	if(widgetRect(tree).contains(point)){
 		value().pressed = !value().pressed;
 		underMouse_ = true;
-		tree->update();
+		tree->repaint();
 		return true;
 	}
 	return false;
 }
 
-void PropertyRowButton::onMouseMove(QPropertyTree* tree, Point point)
+void PropertyRowButton::onMouseMove(PropertyTree* tree, Point point)
 {
 	bool underMouse = widgetRect(tree).contains(point);
 	if(underMouse != underMouse_){
 		underMouse_ = underMouse;
-		tree->update();
+		tree->repaint();
 	}
 }
 
-void PropertyRowButton::onMouseUp(QPropertyTree* tree, Point point)
+void PropertyRowButton::onMouseUp(PropertyTree* tree, Point point)
 {
 	if(widgetRect(tree).contains(point)){
 		onActivate(tree, false);
@@ -83,11 +83,11 @@ void PropertyRowButton::onMouseUp(QPropertyTree* tree, Point point)
 	else{
         tree->model()->rowAboutToBeChanged(this);
 		value().pressed = false;
-		tree->update();
+		tree->repaint();
 	}
 }
 
-bool PropertyRowButton::onActivate(QPropertyTree* tree, bool force)
+bool PropertyRowButton::onActivate(PropertyTree* tree, bool force)
 {
 	value().pressed = true;
 	tree->model()->rowChanged(this); // Row is recreated here, so don't unlock

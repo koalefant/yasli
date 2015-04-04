@@ -24,14 +24,14 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 
-	bool onActivate(QPropertyTree* tree, bool force) override;
+	bool onActivate(PropertyTree* tree, bool force) override;
 	DragCheckBegin onMouseDragCheckBegin() override;
-	bool onMouseDragCheck(QPropertyTree* tree, bool value) override;
+	bool onMouseDragCheck(PropertyTree* tree, bool value) override;
 	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
 	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(yasli::Archive& ar);
-	int widgetSizeMin(const QPropertyTree* tree) const override;
+	int widgetSizeMin(const PropertyTree* tree) const override;
 protected:
 	bool value_;
 };

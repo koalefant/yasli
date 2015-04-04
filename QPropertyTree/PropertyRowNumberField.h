@@ -11,13 +11,14 @@
 #include "PropertyRow.h"
 #include <QLineEdit>
 
+class QPropertyTree;
 class PropertyRowNumberField;
-class PropertyRowWidgetNumber : public PropertyRowWidget
+class InplaceWidgetNumber : public QObject, public InplaceWidget
 {
 	Q_OBJECT
 public:
-	PropertyRowWidgetNumber(PropertyTreeModel* mode, PropertyRowNumberField* numberField, QPropertyTree* tree);
-	~PropertyRowWidgetNumber(){
+	InplaceWidgetNumber(PropertyTreeModel* mode, PropertyRowNumberField* numberField, QPropertyTree* tree);
+	~InplaceWidgetNumber(){
 		if (entry_)
 			entry_->setParent(0);
 		entry_->deleteLater();
@@ -25,7 +26,7 @@ public:
 	}
 
 	void commit();
-	QWidget* actualWidget() { return entry_; }
+	void* actualWidget() { return entry_; }
 public slots:
 	void onEditingFinished();
 protected:
@@ -40,26 +41,26 @@ class PropertyRowNumberField : public PropertyRow
 {
 public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-	int widgetSizeMin(const QPropertyTree* tree) const override{ 
+	int widgetSizeMin(const PropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
 			return 40;
 	}
 
-	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
+	InplaceWidget* createWidget(PropertyTree* tree) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	void redraw(PropertyDrawContext& context) override;
-	bool onActivate(QPropertyTree* tree, bool force) override;
-	bool onActivateRelease(QPropertyTree* tree) override;
-	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) override;
-	void onMouseUp(QPropertyTree* tree, Point point) override;
+	bool onActivate(PropertyTree* tree, bool force) override;
+	bool onActivateRelease(PropertyTree* tree) override;
+	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
+	void onMouseUp(PropertyTree* tree, Point point) override;
 	void onMouseDrag(const PropertyDragEvent& e) override;
 	void onMouseStill(const PropertyDragEvent& e) override;
 
 	virtual void startIncrement() = 0;
-	virtual void endIncrement(QPropertyTree* tree) = 0;
+	virtual void endIncrement(PropertyTree* tree) = 0;
 	virtual void incrementLog(float screenFraction) = 0;
 	virtual bool setValueFromString(const char* str) = 0;
 };

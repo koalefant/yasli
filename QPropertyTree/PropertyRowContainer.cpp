@@ -9,18 +9,19 @@
 
 #include "PropertyRowContainer.h"
 #include "PropertyRowPointer.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
 #include "Serialization.h"
 #include "PropertyRowPointer.h"
 
-#include <QMenu>
+#include "IMenu.h"
+#include "IUIFacade.h"
 #include <QKeyEvent>
 
 // ---------------------------------------------------------------------------
 
-ContainerMenuHandler::ContainerMenuHandler(QPropertyTree* tree, PropertyRowContainer* container)
+ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContainer* container)
 : container(container)
 , tree(tree)
 , pointerIndex(-1)
@@ -42,23 +43,22 @@ PropertyRowContainer::PropertyRowContainer()
 
 struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder
 {
-	ClassMenuItemAdderRowContainer(PropertyRowContainer* row, QPropertyTree* tree, bool insert = false) 
+	ClassMenuItemAdderRowContainer(PropertyRowContainer* row, PropertyTree* tree, bool insert = false) 
 	: row_(row)
 	, tree_(tree)
 	, insert_(insert) {}    
 
-	void addAction(QMenu& menu, const char* text, int index) override
+	void addAction(IMenu& menu, const char* text, int index) override
 	{
 		ContainerMenuHandler* handler = new ContainerMenuHandler(tree_, row_);
 		tree_->addMenuHandler(handler);
 		handler->pointerIndex = index;
 
-		QAction* action = menu.addAction(text);
-		QObject::connect(action, SIGNAL(triggered()), handler, SLOT(onMenuAppendPointerByIndex()));
+		menu.addAction(text, 0, handler, &ContainerMenuHandler::onMenuAppendPointerByIndex);
 	}
 protected:
 	PropertyRowContainer* row_;
-	QPropertyTree* tree_;
+	PropertyTree* tree_;
 	bool insert_;
 };
 
@@ -75,38 +75,38 @@ void PropertyRowContainer::redraw(PropertyDrawContext& context)
 }
 
 
-bool PropertyRowContainer::onActivate( QPropertyTree* tree, bool force)
+bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
 	if(userReadOnly())
 		return false;
-	QMenu menu;
-	generateMenu(menu, tree);
+	std::auto_ptr<IMenu> menu(tree->ui()->createMenu());
+	generateMenu(*menu, tree);
 	tree->_setPressedRow(this);
-	menu.exec(tree->_toScreen(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
+	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
 	tree->_setPressedRow(0);
 	return true;
 }
 
 
-void PropertyRowContainer::generateMenu(QMenu& menu, QPropertyTree* tree)
+void PropertyRowContainer::generateMenu(IMenu& menu, PropertyTree* tree)
 {
 	ContainerMenuHandler* handler = new ContainerMenuHandler(tree, this);
 	tree->addMenuHandler(handler);
 
 	if (fixedSize_)
 	{
-		menu.addAction("[ Fixed Size Container ]")->setEnabled(false);
+		menu.addAction("[ Fixed Size Container ]", MENU_DISABLED);
 	}
 	else if(userReadOnly())
 	{
-		menu.addAction("[ Read Only Container ]")->setEnabled(false);
+		menu.addAction("[ Read Only Container ]", MENU_DISABLED);
 	}
 	else
 	{
 		PropertyRow* row = defaultRow(tree->model());
 		if (row && row->isPointer())
 		{
-			QMenu* createItem = menu.addMenu("Add");
+			IMenu* createItem = menu.addMenu("Add");
 			menu.addSeparator();
 
 			PropertyRowPointer* pointerRow = static_cast<PropertyRowPointer*>(row);
@@ -115,21 +115,16 @@ void PropertyRowContainer::generateMenu(QMenu& menu, QPropertyTree* tree)
 		else
 		{
 
-			QAction* createItem = menu.addAction("Add");
-			createItem->setShortcut(Qt::Key_Insert);
-			QObject::connect(createItem, SIGNAL(triggered()), handler, SLOT(onMenuAppendElement()));
-
+			menu.addAction("Add", "Insert", 0, handler, &ContainerMenuHandler::onMenuAppendElement);
 			menu.addSeparator();
 		}
 
-		QAction* removeAll = menu.addAction(pulledUp() ? "Remove Children" : "Remove All");
-		removeAll->setShortcut(QKeySequence("Shift+Delete"));
-		removeAll->setEnabled(!userReadOnly());
-		QObject::connect(removeAll, SIGNAL(triggered()), handler, SLOT(onMenuRemoveAll()));
+		menu.addAction(pulledUp() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
+			handler, &ContainerMenuHandler::onMenuRemoveAll);
 	}
 }
 
-bool PropertyRowContainer::onContextMenu(QMenu& menu, QPropertyTree* tree)
+bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTree* tree)
 {
 	if(!menu.isEmpty())
 		menu.addSeparator();
@@ -182,7 +177,7 @@ void ContainerMenuHandler::onMenuAppendElement()
 	PropertyTreeModel::Selection sel = tree->model()->selection();
 	tree->model()->rowChanged(clonedRow);
 	tree->model()->setSelection(sel);
-	tree->update(); 
+	tree->repaint(); 
 	clonedRow = tree->selectedRow();
 	if(clonedRow->activateOnAdd())
 		clonedRow->onActivate(tree, false);
@@ -215,7 +210,7 @@ void ContainerMenuHandler::onMenuAppendPointerByIndex()
 	handler.index = pointerIndex;
 	handler.onMenuCreateByIndex();
 	tree->model()->setSelection(sel);
-	tree->update(); 
+	tree->repaint(); 
 }
 
 void ContainerMenuHandler::onMenuChildInsertBefore()
@@ -232,7 +227,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	PropertyTreeModel::Selection sel = tree->model()->selection();
 	tree->model()->rowChanged(clonedRow);
 	tree->model()->setSelection(sel);
-	tree->update(); 
+	tree->repaint(); 
 	clonedRow = tree->selectedRow();
 	if(clonedRow->activateOnAdd())
 		clonedRow->onActivate(tree, false);
@@ -273,7 +268,7 @@ yasli::string PropertyRowContainer::valueAsString() const
 	return yasli::string(buf);
 }
 
-const char* PropertyRowContainer::typeNameForFilter(QPropertyTree* tree) const 
+const char* PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const 
 {
 	const PropertyRow* defaultType = defaultRow(tree->model());
 	if (defaultType)
@@ -282,7 +277,7 @@ const char* PropertyRowContainer::typeNameForFilter(QPropertyTree* tree) const
 		return elementTypeName_;
 }
 
-bool PropertyRowContainer::onKeyDown(QPropertyTree* tree, const QKeyEvent* ev)
+bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {
 	ContainerMenuHandler handler(tree, this);
 	if(ev->key() == Qt::Key_Delete && ev->modifiers() == Qt::SHIFT){

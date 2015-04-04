@@ -8,12 +8,13 @@
  */
 
 #include "PropertyTreeModel.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "Serialization.h"
 #include "yasli/ClassFactory.h"
 
-PropertyTreeModel::PropertyTreeModel()
-: expandLevels_(0)
+PropertyTreeModel::PropertyTreeModel(PropertyTree* tree)
+: tree_(tree)
+, expandLevels_(0)
 , undoEnabled_(true)
 , fullUndo_(false)
 {
@@ -184,7 +185,7 @@ protected:
 
 struct RowExpander {
 	RowExpander(const std::vector<char>& states) : states_(states), index_(0) {}
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(size_t(index_) >= states_.size())
 			return SCAN_FINISHED;
@@ -204,7 +205,7 @@ protected:
 	const std::vector<char>& states_;
 };
 
-void PropertyTreeModel::serialize(Archive& ar, QPropertyTree* tree)
+void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 {
 	ar(focusedRow_, "focusedRow", 0);		
 	ar(selection_, "selection", 0);
@@ -347,6 +348,17 @@ const yasli::StringList& PropertyTreeModel::typeStringList(const yasli::TypeID& 
 	const BaseClass& base = it->second;
 	return base.strings;
 }
+
+void PropertyTreeModel::signalUpdated(const PropertyRows& rows, bool needApply)
+{
+	tree_->onModelUpdated(rows, needApply);
+}
+
+void PropertyTreeModel::signalPushUndo(PropertyTreeOperator* op, bool* result)
+{
+	tree_->onModelPushUndo(op, result);
+}
+
 
 // ----------------------------------------------------------------------------------
 

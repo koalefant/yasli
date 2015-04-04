@@ -14,6 +14,8 @@
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
 
+#include <QObject>
+#include <QWidget>
 #include <QLineEdit>
 
 class PropertyRowString : public PropertyRowField
@@ -25,7 +27,7 @@ public:
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);
 	void setValue(const wchar_t* str);
-	PropertyRowWidget* createWidget(QPropertyTree* tree);
+	InplaceWidget* createWidget(PropertyTree* tree);
 	yasli::string valueAsString() const override;
 	yasli::wstring valueAsWString() const override { return value_; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
@@ -35,12 +37,12 @@ private:
 	yasli::wstring value_;
 };
 
-class PropertyRowWidgetString : public PropertyRowWidget
+class InplaceWidgetString : public QObject, public InplaceWidget
 {
 	Q_OBJECT
 public:
-  PropertyRowWidgetString(PropertyRowString* row, QPropertyTree* tree)
-	: PropertyRowWidget(row, tree)
+  InplaceWidgetString(PropertyRowString* row, QPropertyTree* tree)
+	: InplaceWidget(row, tree)
 	, entry_(new QLineEdit())
 	, tree_(tree)
 	{
@@ -51,9 +53,9 @@ public:
 #endif
 		entry_->setText(initialValue_);
 		entry_->selectAll();
-		connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
+		QObject::connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
 	}
-	~PropertyRowWidgetString()
+	~InplaceWidgetString()
 	{
 		entry_->hide();
 		entry_->setParent(0);
@@ -63,7 +65,7 @@ public:
 	void commit(){
 		onEditingFinished();
 	}
-	QWidget* actualWidget() { return entry_.data(); }
+	void* actualWidget() { return entry_.data(); }
 
 	public slots:
 	void onEditingFinished(){

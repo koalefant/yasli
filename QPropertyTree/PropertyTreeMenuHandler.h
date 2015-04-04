@@ -14,16 +14,15 @@
 
 struct PropertyTreeMenuHandler : PropertyRowMenuHandler
 {
-	Q_OBJECT
 public:
 	PropertyRow* row;
-	QPropertyTree* tree;
+	PropertyTree* tree;
 
 	yasli::string filterName;
 	yasli::string filterValue;
 	yasli::string filterType;
 
-public slots:
+public:
 	void onMenuFilter();
 	void onMenuFilterByName();
 	void onMenuFilterByValue();

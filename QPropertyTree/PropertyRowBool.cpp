@@ -8,7 +8,7 @@
  */
 
 #include "PropertyRowBool.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
 #include "yasli/ClassFactory.h"
@@ -33,7 +33,7 @@ void PropertyRowBool::redraw(PropertyDrawContext& context)
 	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
-bool PropertyRowBool::onActivate(QPropertyTree* tree, bool force)
+bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
 {
 	if (!this->userReadOnly()) {
 		tree->model()->rowAboutToBeChanged(this);
@@ -52,7 +52,7 @@ DragCheckBegin PropertyRowBool::onMouseDragCheckBegin()
 	return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
 }
 
-bool PropertyRowBool::onMouseDragCheck(QPropertyTree* tree, bool value)
+bool PropertyRowBool::onMouseDragCheck(PropertyTree* tree, bool value)
 {
 	if (value_ != value) {
 		tree->model()->rowAboutToBeChanged(this);
@@ -68,7 +68,7 @@ void PropertyRowBool::serializeValue(yasli::Archive& ar)
     ar(value_, "value", "Value");
 }
 
-int PropertyRowBool::widgetSizeMin(const QPropertyTree* tree) const
+int PropertyRowBool::widgetSizeMin(const PropertyTree* tree) const
 {
 	return tree->_defaultRowHeight();
 }

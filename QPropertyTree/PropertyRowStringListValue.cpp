@@ -13,13 +13,12 @@
 #include "PropertyRowStringListValue.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "ConstStringList.h"
 
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
-#include <QMenu>
-#include <QComboBox>
+#include "IMenu.h"
 
 using yasli::StringList;
 using yasli::StringListValue;
@@ -27,17 +26,17 @@ using yasli::StringListValue;
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
 
-PropertyRowWidget* PropertyRowStringListValue::createWidget(QPropertyTree* tree)
+InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
 {
-	return new PropertyRowWidgetComboBox(this, this, tree);
+	return new InplaceWidgetComboBox(this, this, (QPropertyTree*)tree);
 }
 
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 
-PropertyRowWidget* PropertyRowStringListStaticValue::createWidget(QPropertyTree* tree)
+InplaceWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
 {
-	return new PropertyRowWidgetComboBox(this, this, tree);
+	return new InplaceWidgetComboBox(this, this, (QPropertyTree*)tree);
 }
 
 DECLARE_SEGMENT(PropertyRowStringList)

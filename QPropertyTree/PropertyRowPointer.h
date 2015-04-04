@@ -14,26 +14,25 @@ using yasli::StringList;
 
 #include "PropertyRow.h"
 
-class QPropertyTree;
+class PropertyTree;
 class PropertyRowPointer;
 struct CreatePointerMenuHandler : PropertyRowMenuHandler
 {
-	Q_OBJECT
 public:
-	QPropertyTree* tree;
+	PropertyTree* tree;
 	PropertyRowPointer* row;
 	int index;
 	bool useDefaultValue;
-public slots:
+
 	void onMenuCreateByIndex();
 };
 
-class QMenu;
+class IMenu;
 struct ClassMenuItemAdder
 {
-	virtual void addAction(QMenu& menu, const char* text, int index);
-	virtual QMenu* addMenu(QMenu& menu, const char* text);
-	void generateMenu(QMenu& createItem, const StringList& comboStrings);
+	virtual void addAction(IMenu& menu, const char* text, int index);
+	virtual IMenu* addMenu(IMenu& menu, const char* text);
+	void generateMenu(IMenu& createItem, const StringList& comboStrings);
 };
 
 class PropertyRowPointer : public PropertyRow
@@ -51,15 +50,15 @@ public:
 	void setDerivedType(const yasli::TypeID& typeID, yasli::ClassFactoryBase* factory);
 	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
-	bool onActivate( QPropertyTree* tree, bool force) override;
-	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) override;
-	bool onContextMenu(QMenu &root, QPropertyTree* tree) override;
+	bool onActivate( PropertyTree* tree, bool force) override;
+	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
+	bool onContextMenu(IMenu &root, PropertyTree* tree) override;
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
-	int widgetSizeMin(const QPropertyTree*) const override;
+	int widgetSizeMin(const PropertyTree*) const override;
     yasli::wstring generateLabel() const;
 	yasli::string valueAsString() const override;
-    const char* typeNameForFilter(QPropertyTree* tree) const override { return baseType_.name(); }
+    const char* typeNameForFilter(PropertyTree* tree) const override { return baseType_.name(); }
 	void redraw(PropertyDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;

@@ -19,7 +19,7 @@
 #include "yasli/decorators/IconXPM.h"
 #include <QFileDialog>
 #include <QIcon>
-#include <QMenu>
+#include "IMenu.h"
 
 using std::string;
 
@@ -68,9 +68,9 @@ public:
 
 	bool isLeaf() const override{ return true; }
 
-	bool onActivate(QPropertyTree* tree, bool force) override
+	bool onActivate(PropertyTree* tree, bool force) override
 	{
-		QFileDialog dialog(tree);
+		QFileDialog dialog((QPropertyTree*)tree);
 		dialog.setAcceptMode(QFileDialog::AcceptOpen);
 		dialog.setFileMode(QFileDialog::ExistingFile);
 		if (labelUndecorated())
@@ -109,26 +109,26 @@ public:
 		return true;
 	}
 
-	void clear(QPropertyTree* tree)
+	void clear(PropertyTree* tree)
 	{
 		tree->model()->rowAboutToBeChanged(this);
 		value().path.clear();
 		tree->model()->rowChanged(this);
 	}
 
-	bool onContextMenu(QMenu &menu, QPropertyTree* tree) override
+	bool onContextMenu(IMenu &menu, PropertyTree* tree) override
 	{
 		FileOpenMenuHandler* handler = new FileOpenMenuHandler(this, tree);
 		tree->addMenuHandler(handler);
 
-		menu.setDefaultAction(menu.addAction("Choose File...", handler, SLOT(onMenuActivate())));
-		menu.addAction("Clear", handler, SLOT(onMenuClear()));
+		menu.addAction("Choose File...", MENU_DEFAULT, handler, &FileOpenMenuHandler::onMenuActivate);
+		menu.addAction("Clear", 0, handler, &FileOpenMenuHandler::onMenuClear);
 
 		return PropertyRow::onContextMenu(menu, tree);
 	}
 
 	int buttonCount() const override{ return 1; }
-	virtual yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const override{ 
+	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
 		#include "file_open.xpm"
 		return yasli::IconXPM(file_open_xpm);
 	}

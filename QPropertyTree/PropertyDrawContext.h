@@ -14,6 +14,7 @@
 #include <QRect>
 #include "Color.h"
 #include "IDrawContext.h"
+#include "Rect.h"
 
 class QPainter;
 class QImage;
@@ -49,30 +50,17 @@ private:
 void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& r, const QColor& borderColor, int radius);
 void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width);
 
-enum CheckState {
-	CHECK_SET,
-	CHECK_NOT_SET,
-	CHECK_IN_BETWEEN
-};
 
-class QPropertyTree;
+class PropertyTree;
 struct PropertyDrawContext : property_tree::IDrawContext {
-	const QPropertyTree* tree;
-	QPainter* painter;
-	QRect widgetRect;
-	QRect lineRect;
+	const PropertyTree* tree;
+	Rect widgetRect;
+	Rect lineRect;
 	bool captured;
 	bool pressed;
 
-	void drawIcon(const QRect& rect, const yasli::IconXPM& icon) const;
-	void drawCheck(const QRect& rect, bool disabled, CheckState checked) const;
-	void drawButton(const QRect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) const;
-	void drawValueText(bool highlighted, const wchar_t* text) const;
-	void drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset) const;
-
 	PropertyDrawContext()
 	: tree(0)
-	, painter(0)
 	, captured(false)
 	, pressed(false)
 	{

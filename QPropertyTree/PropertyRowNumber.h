@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/decorators/Range.h"
 #include "PropertyRowNumberField.h"
@@ -152,7 +152,7 @@ public:
 		incrementStartValue_ = value_;
 	}
 
-	void endIncrement(QPropertyTree* tree) override
+	void endIncrement(PropertyTree* tree) override
 	{
 		if (value_ != incrementStartValue_) {
 			Type value = value_;

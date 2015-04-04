@@ -49,22 +49,22 @@ using yasli::Serializers;
 
 void PropertyTreeMenuHandler::onMenuFilter()
 {
-	tree->startFilter("");
+	((QPropertyTree*)tree)->startFilter("");
 }
 
 void PropertyTreeMenuHandler::onMenuFilterByName()
 {
-	tree->startFilter(filterName.c_str());
+	((QPropertyTree*)tree)->startFilter(filterName.c_str());
 }
 
 void PropertyTreeMenuHandler::onMenuFilterByValue()
 {
-	tree->startFilter(filterValue.c_str());
+	((QPropertyTree*)tree)->startFilter(filterValue.c_str());
 }
 
 void PropertyTreeMenuHandler::onMenuFilterByType()
 {
-	tree->startFilter(filterType.c_str());
+	((QPropertyTree*)tree)->startFilter(filterType.c_str());
 }
 
 void PropertyTreeMenuHandler::onMenuUndo()
@@ -247,26 +247,6 @@ private:
 
 // ---------------------------------------------------------------------------
 
-TreeConfig::TreeConfig()
-: immediateUpdate_(true)
-, hideUntranslated_(true)
-, valueColumnWidth_(.5f)
-, filter_(YASLI_DEFAULT_FILTER)
-, compact_(false)
-, fullRowMode_(false)
-, showContainerIndices_(true)
-, filterWhenType_(true)
-, sliderUpdateDelay_(25)
-, undoEnabled_(true)
-{
-	QFont font;
-	QFontMetrics fm(font);
-	defaultRowHeight_ = max(17, fm.height() + 6); // to fit at least 16x16 icons
-	tabSize_ = defaultRowHeight_;
-}
-
-// ---------------------------------------------------------------------------
-
 DragWindow::DragWindow(QPropertyTree* tree)
 : tree_(tree)
 , offset_(0, 0)
@@ -310,14 +290,50 @@ void DragWindow::hide()
 	QWidget::hide();
 }
 
+struct DrawVisitor
+{
+	DrawVisitor(QPainter& painter, const QRect& area, int scrollOffset, bool selectionPass)
+		: area_(area)
+		, painter_(painter)
+		, offset_(0)
+		, scrollOffset_(scrollOffset)
+		, lastParent_(0)
+		, selectionPass_(selectionPass)
+	{}
+
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
+	{
+		if(row->visible(tree) && ((row->parent()->expanded() && !lastParent_) || row->pulledUp())){
+			if(row->rect().top() > scrollOffset_ + area_.height())
+				lastParent_ = row->parent();
+
+			QDrawContext context((QPropertyTree*)tree, &painter_);
+			if(row->rect().bottom() > scrollOffset_ && row->rect().width() > 0)
+				row->drawRow(context, tree, index, selectionPass_);
+
+			return SCAN_CHILDREN_SIBLINGS;
+		}
+		else
+			return SCAN_SIBLINGS;
+	}
+
+protected:
+	QPainter& painter_;
+	QRect area_;
+	int offset_;
+	int scrollOffset_;
+	PropertyRow* lastParent_;
+	bool selectionPass_;
+};
+
 struct DrawRowVisitor
 {
 	DrawRowVisitor(QPainter& painter) : painter_(painter) {}
 
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
 		if(row->pulledUp() && row->visible(tree)) {
-			QDrawContext context(tree, &painter_);
+			QDrawContext context((QPropertyTree*)tree, &painter_);
 			row->drawRow(context, tree, index, true);
 			row->drawRow(context, tree, index, false);
 		}
@@ -328,6 +344,7 @@ struct DrawRowVisitor
 protected:
 	QPainter& painter_;
 };
+
 
 void DragWindow::drawRow(QPainter& p)
 {
@@ -543,40 +560,14 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 : QWidget(parent)
 , PropertyTree(new QUIFacade(this))
 , sizeHint_(180, 180)
-, model_(0)
-, cursorX_(0)
-, attachedPropertyTree_(0)
-, autoRevert_(true)
 , dragController_(new DragController(this))
-, leftBorder_(0)
-, rightBorder_(0)
-, filterMode_(false)
 
-, applyTime_(0)
-, revertTime_(0)
 , updateHeightsTime_(0)
 , paintTime_(0)
-, pressPoint_(-1, -1)
-, lastStillPosition_(-1, -1)
-, pressedRow_(0)
-, capturedRow_(0)
-, iconCache_(new IconXPMCache())
-, dragCheckMode_(false)
-, dragCheckValue_(false)
-, archiveContext_(0)
 {
 	setFocusPolicy(Qt::WheelFocus);
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
-
-	model_.reset(new PropertyTreeModel());
-	model_->setExpandLevels(expandLevels_);
-	model_->setUndoEnabled(undoEnabled_);
-	model_->setFullUndo(fullUndo_);
-
-	connect(model_.data(), SIGNAL(signalUpdated(const PropertyRows&, bool)), this, SLOT(onModelUpdated(const PropertyRows&, bool)));
-	connect(model_.data(), SIGNAL(signalPushUndo(PropertyTreeOperator*, bool*)), this, SLOT(onModelPushUndo(PropertyTreeOperator*, bool*)));
-	//model_->signalPushUndo().connect(this, &QPropertyTree::onModelPushUndo);
 
     filterEntry_.reset(new FilterEntry(this));
     QObject::connect(filterEntry_.data(), SIGNAL(textChanged(const QString&)), this, SLOT(onFilterChanged(const QString&)));
@@ -584,7 +575,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 
 	mouseStillTimer_ = new QTimer(this);
 	mouseStillTimer_->setSingleShot(true);
-	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStill()));
+	connect(mouseStillTimer_, SIGNAL(timeout()), this, SLOT(onMouseStillTimer()));
 
 	boldFont_ = font();
 	boldFont_.setBold(true);
@@ -594,311 +585,6 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 QPropertyTree::~QPropertyTree()
 {
 	clearMenuHandlers();
-}
-
-bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
-{
-	PropertyTreeMenuHandler handler;
-	handler.row = row;
-	handler.tree = this;
-
-	if(row->onKeyDown(this, ev))
-		return true;
-
-  switch(ev->key()){
-		case Qt::Key_C:
-			if (ev->modifiers() == Qt::CTRL)
-				handler.onMenuCopy();
-		return true;
-		case Qt::Key_V:
-			if (ev->modifiers() == Qt::CTRL)
-				handler.onMenuPaste();
-		return true;
-		case Qt::Key_Z:
-			if (ev->modifiers() == Qt::CTRL)
-				if(model()->canUndo()){
-					model()->undo();
-					return true;
-				}
-		break;
-	case Qt::Key_F2:
-		if (ev->modifiers() == Qt::NoModifier) {
-			if(selectedRow()) {
-				selectedRow()->onActivate(this, true);
-				selectedRow()->onActivateRelease(this);
-			}
-		}
-		break;
-	case Qt::Key_Menu:
-		{
-			if (ev->modifiers() == Qt::NoModifier) {
-			QMenu menu(this);
-
-			if(onContextMenu(row, menu)){
-				QRect rect(row->rect());
-				QPoint pt = _toScreen(QPoint(rect.left() + rect.height(), rect.bottom()));
-				menu.exec(pt);
-			}
-			return true;
-		}
-		break;
-	}
-	}
-
-	PropertyRow* focusedRow = model()->focusedRow();
-	if(!focusedRow)
-		return false;
-	PropertyRow* parentRow = focusedRow->nonPulledParent();
-	int x = parentRow->horizontalIndex(this, focusedRow);
-	int y = model()->root()->verticalIndex(this, parentRow);
-	PropertyRow* selectedRow = 0;
-	switch(ev->key()){
-	case Qt::Key_Up:
-		if (filterMode_ && y == 0) {
-			setFilterMode(true);
-		}
-		else {
-			selectedRow = model()->root()->rowByVerticalIndex(this, --y);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-		}
-		break;
-	case Qt::Key_Down:
-	if (filterMode_ && filterEntry_->hasFocus()) {
-		setFocus();
-	}
-	else {
-		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
-		if (selectedRow)
-			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-	}
-		break;
-	case Qt::Key_Left:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
-		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
-			expandRow(parentRow, false);
-			selectedRow = model()->focusedRow();
-		}
-		break;
-	case Qt::Key_Right:
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
-		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
-			expandRow(parentRow, true);
-			selectedRow = model()->focusedRow();
-		}
-		break;
-	case Qt::Key_Home:
-		if (ev->modifiers() == Qt::CTRL) {
-			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
-		}
-		else {
-			selectedRow = model()->root()->rowByVerticalIndex(this, 0);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-		}
-		break;
-	case Qt::Key_End:
-		if (ev->modifiers() == Qt::CTRL) {
-			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
-		}
-		else {
-			selectedRow = model()->root()->rowByVerticalIndex(this, INT_MAX);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-		}
-		break;
-	case Qt::Key_Space:
-		if (filterWhenType_)
-			break;
-	case Qt::Key_Return:
-		if(focusedRow->canBeToggled(this))
-			expandRow(focusedRow, !focusedRow->expanded());
-		else {
-			focusedRow->onActivate(this, false);
-			focusedRow->onActivateRelease(this);
-		}
-		break;
-	}
-	if(selectedRow){
-		onRowSelected(selectedRow, false, false);	
-		return true;
-	}
-	return false;
-}
-
-bool QPropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
-{
-	pressPoint_ = point;
-	row = model()->root()->hit(this, point);
-	if(row){
-		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
-			return true;
-		PropertyRow* rowToSelect = row;
-		while (rowToSelect && !rowToSelect->isSelectable())
-			rowToSelect = rowToSelect->parent();
-		if (rowToSelect)
-			onRowSelected(rowToSelect, multiSelectable() && controlPressed, true);	
-	}
-
-	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
-	row = model()->root()->hit(this, point);
-	if(row && !row->isRoot()){
-		bool changed = false;
-		if (row->widgetRect(this).contains(point)) {
-			DragCheckBegin dragCheck = row->onMouseDragCheckBegin();
-			if (dragCheck != DRAG_CHECK_IGNORE) {
-				dragCheckValue_ = dragCheck == DRAG_CHECK_SET;
-				dragCheckMode_ = true;
-				changed = row->onMouseDragCheck(this, dragCheckValue_);
-			}
-		}
-		
-		if (!dragCheckMode_) {
-			bool capture = row->onMouseDown(this, point, changed);
-			if(!changed && !widget_){ // FIXME: осмысленный метод для проверки
-				if(capture)
-					return true;
-				else if(row->widgetRect(this).contains(point)){
-					if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
-						interruptDrag();
-					row->onActivate(this, false);
-					return false;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-void QPropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point)
-{
-	onMouseStill();
-	row->onMouseUp(this, point);
-
-	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect(this).contains(point)) {
-		row->onActivateRelease(this);
-	}
-}
-
-void QPropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point)
-{
-	SharedPtr<PropertyRow> handle = row;
-	PropertyRow* menuRow = 0;
-
-	if (row->isSelectable()){
-		menuRow = row;
-	}
-	else{
-		if (row->parent() && row->parent()->isSelectable())
-			menuRow = row->parent();
-	}
-
-	if (menuRow) {
-		onRowSelected(menuRow, false, true);	
-		QMenu menu(this);
-		clearMenuHandlers();
-		if(onContextMenu(menuRow, menu))
-			menu.exec(point);
-	}
-}
-
-void QPropertyTree::expandParents(PropertyRow* row)
-{
-	bool hasChanges = false;
-	typedef std::vector<PropertyRow*> Parents;
-	Parents parents;
-	PropertyRow* p = row->nonPulledParent()->parent();
-	while(p){
-		parents.push_back(p);
-		p = p->parent();
-	}
-	Parents::iterator it;
-	for(it = parents.begin(); it != parents.end(); ++it) {
-		PropertyRow* row = *it;
-		if (!row->expanded() || hasChanges) {
-			row->_setExpanded(true);
-			hasChanges = true;
-		}
-	}
-	if (hasChanges)
-		updateHeights();
-}
-
-
-void QPropertyTree::expandAll(PropertyRow* root)
-{
-	if(!root){
-		root = model()->root();
-		PropertyRow::iterator it;
-		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
-			PropertyRow* row = *it;
-			row->setExpandedRecursive(this, true);
-		}
-		root->setLayoutChanged();
-	}
-	else
-		root->setExpandedRecursive(this, true);
-
-	for (PropertyRow* r = root; r != 0; r = r->parent())
-		r->setLayoutChanged();
-
-	updateHeights();
-}
-
-void QPropertyTree::collapseAll(PropertyRow* root)
-{
-	if(!root){
-		root = model()->root();
-
-		PropertyRow::iterator it;
-		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
-			PropertyRow* row = *it;
-			row->setExpandedRecursive(this, false);
-		}
-	}
-	else{
-		root->setExpandedRecursive(this, false);
-		PropertyRow* row = model()->focusedRow();
-		while(row){
-			if(root == row){
-				model()->selectRow(row, true);
-				break;
-			}
-			row = row->parent();
-		}
-	}
-
-	for (PropertyRow* r = root; r != 0; r = r->parent())
-		r->setLayoutChanged();
-
-	updateHeights();
-}
-
-
-void QPropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
-{
-	bool hasChanges = false;
-	if (row->expanded() != expanded) {
-		row->_setExpanded(expanded);
-		hasChanges = true;
-	}
-
-	for (PropertyRow* r = row; r != 0; r = r->parent())
-		r->setLayoutChanged();
-
-    if(!row->expanded()){
-		PropertyRow* f = model()->focusedRow();
-		while(f){
-			if(row == f){
-				model()->selectRow(row, true);
-				break;
-			}
-			f = f->parent();
-		}
-	}
-
-	if (hasChanges && updateHeights)
-		this->updateHeights();
 }
 
 void QPropertyTree::interruptDrag()
@@ -931,10 +617,7 @@ void QPropertyTree::updateHeights()
 
 	bool hasScrollBar = updateScrollBar();
 
-	area_.setLeft(widgetRect.left() + 2);
-	area_.setRight(widgetRect.right() - 2 - scrollBarW);
-	area_.setTop(widgetRect.top() + 2);
-	area_.setBottom(widgetRect.bottom() - 2);
+	area_ = widgetRect.adjusted(2, 2, -2 - scrollBarW, -2);
 	size_.setX(area_.width());
 
 	if (filterMode_)
@@ -972,11 +655,6 @@ bool QPropertyTree::updateScrollBar()
 	}
 }
 
-Point QPropertyTree::treeSize() const
-{
-	return size_ + (compact() ? Point(0,0) : Point(8, 8));
-}
-
 const QFont& QPropertyTree::boldFont() const
 {
 	return boldFont_;
@@ -1002,315 +680,6 @@ void QPropertyTree::serialize(Archive& ar)
 	}
 }
 
-void QPropertyTree::ensureVisible(PropertyRow* row, bool update)
-{
-	if (row == 0)
-		return;
-	if(row->isRoot())
-		return;
-
-	expandParents(row);
-
-	QRect rect = row->rect();
-	if(rect.top() < area_.top() + offset_.y()){
-		offset_.setY(max(0, rect.top() - area_.top()));
-	}
-	else if(rect.bottom() > area_.bottom() + offset_.y()){
-		offset_.setY(max(0, rect.bottom() - area_.bottom()));
-	}
-	if(update)
-		this->update();
-}
-
-void QPropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos)
-{
-	if(!row->isRoot())
-		model()->selectRow(row, !(addSelection && row->selected() && model()->selection().size() > 1), !addSelection);
-	ensureVisible(row);
-	if(adjustCursorPos)
-		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
-	updateAttachedPropertyTree(false);
-	signalSelected();
-}
-
-bool QPropertyTree::attach(const yasli::Serializers& serializers)
-{
-	bool changed = false;
-	if (attached_.size() != serializers.size())
-		changed = true;
-	else {
-		for (size_t i = 0; i < serializers.size(); ++i) {
-			if (attached_[i].serializer() != serializers[i]) {
-				changed = true;
-				break;
-			}
-		}
-	}
-
-	// We can't perform plain copying here, as it was before:
-	//   attached_ = serializers;
-	// ...as move forwarder calls copying constructor with non-const argument
-	// which invokes second templated constructor of Serializer, which is not what we need.
-	if (changed) {
-		attached_.assign(serializers.begin(), serializers.end());
-		revert();
-	}
-
-	return changed;
-}
-
-void QPropertyTree::attach(const yasli::Serializer& serializer)
-{
-	if (attached_.size() != 1 || attached_[0].serializer() != serializer) {
-		attached_.clear();
-		attached_.push_back(yasli::Object(serializer));
-		revert();
-	}
-}
-
-void QPropertyTree::attach(const yasli::Object& object)
-{
-	attached_.clear();
-	attached_.push_back(object);
-
-	revert();
-}
-
-void QPropertyTree::detach()
-{
-	if(widget_)
-		widget_.reset();
-	attached_.clear();
-	model()->root()->clear();
-	update();
-}
-
-int QPropertyTree::revertObjects(vector<void*> objectAddresses)
-{
-	int result = 0;
-	for (size_t i = 0; i < objectAddresses.size(); ++i) {
-		if (revertObject(objectAddresses[i]))
-			++result;
-	}
-	return result;
-}
-
-bool QPropertyTree::revertObject(void* objectAddress)
-{
-	PropertyRow* row = model()->root()->findByAddress(objectAddress);
-	if (row && row->isObject()) {
-		// TODO:
-		// revertObjectRow(row);
-		return true;
-	}
-	return false;
-}
-
-
-void QPropertyTree::revert()
-{
-	interruptDrag();
-	widget_.reset();
-	capturedRow_ = 0;
-
-	if (!attached_.empty()) {
-		QElapsedTimer timer;
-		timer.start();
-
-		PropertyOArchive oa(model_.data(), model_->root());
-		oa.setLastContext(archiveContext_);
-		oa.setFilter(filter_);
-
-		Objects::iterator it = attached_.begin();
-		signalAboutToSerialize(oa);
-		(*it)(oa);
-		
-		PropertyTreeModel model2;
-		while(++it != attached_.end()){
-			PropertyOArchive oa2(&model2, model2.root());
-			oa2.setLastContext(archiveContext_);
-			yasli::Context treeContext(oa2, this);
-			oa2.setFilter(filter_);
-			signalAboutToSerialize(oa2);
-			(*it)(oa2);
-			model_->root()->intersect(model2.root());
-		}
-		revertTime_ = int(timer.elapsed());
-	}
-	else
-		model_->clear();
-
-	if (filterMode_) {
-		if (model_->root())
-			model_->root()->updateLabel(this, 0);
-        onFilterChanged(QString());
-	}
-	else {
-		updateHeights();
-	}
-
-	update();
-	updateAttachedPropertyTree(true);
-
-	signalReverted();
-}
-
-void QPropertyTree::revertNonInterrupting()
-{
-	if (!capturedRow_) {
-		revert();
-	}
-}
-
-void QPropertyTree::apply(bool continuous)
-{
-	QElapsedTimer timer;
-	timer.start();
-
-	if (!attached_.empty()) {
-		Objects::iterator it;
-		for(it = attached_.begin(); it != attached_.end(); ++it) {
-			PropertyIArchive ia(model_.data(), model_->root());
-			ia.setLastContext(archiveContext_);
- 			yasli::Context treeContext(ia, this);
- 			ia.setFilter(filter_);
-			signalAboutToSerialize(ia);
-			(*it)(ia);
-		}
-	}
-
-	if (continuous)
-		signalContinuousChange();
-	else
-		signalChanged();
-
-	applyTime_ = timer.elapsed();
-}
-
-bool QPropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
-{
-	if(!widget_ || widget_->row() != row){
-		interruptDrag();
-		setWidget(0);
-		PropertyRowWidget* newWidget = 0;
-		if ((ignoreReadOnly && row->userReadOnlyRecurse()) || !row->userReadOnly())
-			newWidget = row->createWidget(this);
-		setWidget(newWidget);
-		return newWidget != 0;
-	}
-	return false;
-}
-
-bool QPropertyTree::activateRow(PropertyRow* row)
-{
-	interruptDrag();
-	return row->onActivate(this, false);
-}
-
-void QPropertyTree::addMenuHandler(PropertyRowMenuHandler* handler)
-{
-	menuHandlers_.push_back(handler);
-}
-
-void QPropertyTree::clearMenuHandlers()
-{
-	for (size_t i = 0; i < menuHandlers_.size(); ++i)
-	{
-		PropertyRowMenuHandler* handler = menuHandlers_[i];
-		delete handler;
-	}
-	menuHandlers_.clear();
-}
-
-static yasli::string quoteIfNeeded(const char* str)
-{
-	if (!str)
-		return yasli::string();
-	if (strchr(str, ' ') != 0) {
-		yasli::string result;
-		result = "\"";
-		result += str;
-		result += "\"";
-		return result;
-	}
-	else {
-		return yasli::string(str);
-	}
-}
-
-bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
-{
-	SharedPtr<PropertyRow> row(r);
-	PropertyTreeMenuHandler* handler = new PropertyTreeMenuHandler();
-	addMenuHandler(handler);
-	handler->tree = this;
-	handler->row = row;
-
-	PropertyRow::iterator it;
-	for(it = row->begin(); it != row->end(); ++it){
-		PropertyRow* child = *it;
-		if(child->isContainer() && child->pulledUp())
-			child->onContextMenu(menu, this);
-	}
-	row->onContextMenu(menu, this);
-	if(undoEnabled_){
-		if(!menu.isEmpty())
-			menu.addSeparator();
-		QAction* undo = menu.addAction("Undo", handler, SLOT(onMenuUndo()));
-		undo->setEnabled(model()->canUndo());
-		undo->setShortcut(QKeySequence("Ctrl+Z"));
-	}
-	if(!menu.isEmpty())
-		menu.addSeparator();
-
-	QAction* copy = menu.addAction("Copy", handler, SLOT(onMenuCopy()));
-	copy->setShortcut(QKeySequence("Ctrl+C"));
-
-	if(!row->userReadOnly()){
-		QAction* paste = menu.addAction("Paste", handler, SLOT(onMenuPaste()));
-		paste->setShortcut(QKeySequence("Ctrl+V"));
-		paste->setEnabled(canBePasted(row));
-	}
-
-	menu.addSeparator();
-
-	menu.addAction("Filter...", handler, SLOT(onMenuFilter()))->setShortcut(QKeySequence("Ctrl+F"));
-	QMenu* filter = menu.addMenu("Filter by");
-	{
-		yasli::string nameFilter = "#";
-		nameFilter += quoteIfNeeded(row->labelUndecorated());
-		handler->filterName = nameFilter;
-		filter->addAction((yasli::string("Name:\t") + nameFilter).c_str(), handler, SLOT(onMenuFilterByName()));
-
-		yasli::string valueFilter = "=";
-		valueFilter += quoteIfNeeded(row->valueAsString().c_str());
-		handler->filterValue = valueFilter;
-		filter->addAction((yasli::string("Value:\t") + valueFilter).c_str(), handler, SLOT(onMenuFilterByValue()));
-
-		yasli::string typeFilter = ":";
-		typeFilter += quoteIfNeeded(row->typeNameForFilter(this));
-		handler->filterType = typeFilter;
-		filter->addAction((yasli::string("Type:\t") + typeFilter).c_str(), handler, SLOT(onMenuFilterByType()));
-	}
-
-#if 0
-	menu.addSeparator();
-	menu.addAction(TRANSLATE("Decompose"), row).connect(this, &QPropertyTree::onRowMenuDecompose);
-#endif
-	return true;
-}
-
-void QPropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point)
-{
-	PropertyDragEvent e;
-	e.tree = this;
-	e.pos = point;
-	e.start = pressPoint_;
-	row->onMouseDrag(e);
-	update();
-}
-
-
 bool QPropertyTree::canBePasted(PropertyRow* destination)
 {
 	SharedPtr<PropertyRow> source;
@@ -1332,67 +701,9 @@ bool QPropertyTree::canBePasted(const char* destinationType)
 	return result;
 }
 
-struct DecomposeProxy
-{
-	DecomposeProxy(SharedPtr<PropertyRow>& row) : row(row) {}
-	
-	void serialize(yasli::Archive& ar)
-	{
-		ar(row, "row", "Row");
-	}
-
-	SharedPtr<PropertyRow>& row;
-};
-
-void QPropertyTree::onRowMenuDecompose(PropertyRow* row)
-{
-  // SharedPtr<PropertyRow> clonedRow = row->clone();
-  // DecomposeProxy proxy(clonedRow);
-  // edit(SStruct(proxy), 0, IMMEDIATE_UPDATE, this);
-}
-
-void QPropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
-{
-	if(widget_)
-		widget_.reset();
-
-	if(immediateUpdate_){
-		if (needApply)
-			apply();
-
-		if(autoRevert_)
-			revert();
-		else {
-			updateHeights();
-			updateAttachedPropertyTree(true);
-			if(!immediateUpdate_)
-				onSignalChanged();
-		}
-	}
-	else {
-		update();
-	}
-}
-
 void QPropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 {
 	signalPushUndo();
-}
-
-void QPropertyTree::setWidget(PropertyRowWidget* widget)
-{
-	if(widget_){
-		widget_->setParent(0);
-	}
-	widget_.reset(widget);
-	model()->dismissUpdate();
-	if(widget_){
-		YASLI_ASSERT(widget_->actualWidget());
-		if(widget_->actualWidget())
-			widget_->actualWidget()->setParent(this);
-		_arrangeChildren();
-		widget_->showPopup();
-	}
 }
 
 bool QPropertyTree::hasFocusOrInplaceHasFocus() const
@@ -1400,7 +711,7 @@ bool QPropertyTree::hasFocusOrInplaceHasFocus() const
 	if (hasFocus())
 		return true;
 
-	if (widget_ && widget_->actualWidget() && widget_->actualWidget()->hasFocus())
+	if (widget_.get() && widget_->actualWidget() && ((QWidget*)widget_->actualWidget())->hasFocus())
 		return true;
 
 	return false;
@@ -1423,7 +734,6 @@ void QPropertyTree::setFilterMode(bool inFilterMode)
     if (changed)
     {
         onFilterChanged(QString());
-        updateArea();
     }
 }
 
@@ -1436,10 +746,10 @@ void QPropertyTree::startFilter(const char* filter)
 
 void QPropertyTree::_arrangeChildren()
 {
-	if(widget_){
+	if(widget_.get()){
 		PropertyRow* row = widget_->row();
 		if(row->visible(this)){
-			QWidget* w = widget_->actualWidget();
+			QWidget* w = (QWidget*)widget_->actualWidget();
 			YASLI_ASSERT(w);
 			if(w){
 				QRect rect = row->widgetRect(this);
@@ -1470,42 +780,6 @@ void QPropertyTree::_arrangeChildren()
 	}
 }
 
-
-
-void QPropertyTree::setExpandLevels(int levels)
-{
-	expandLevels_ = levels;
-    model()->setExpandLevels(levels);
-}
-
-PropertyRow* QPropertyTree::selectedRow()
-{
-    const PropertyTreeModel::Selection &sel = model()->selection();
-    if(sel.empty())
-        return 0;
-    return model()->rowFromPath(sel.front());
-}
-
-bool QPropertyTree::getSelectedObject(yasli::Object* object)
-{
-	const PropertyTreeModel::Selection &sel = model()->selection();
-	if(sel.empty())
-		return 0;
-	PropertyRow* row = model()->rowFromPath(sel.front());
-	while (row && !row->isObject())
-		row = row->parent();
-	if (!row)
-		return false;
-
-	if (PropertyRowObject* obj = dynamic_cast<PropertyRowObject*>(row)) {
-		*object = obj->object();
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
 QPoint QPropertyTree::_toScreen(Point point) const
 {
 	QPoint pt ( point.x() - offset_.x() + area_.left(), 
@@ -1514,96 +788,12 @@ QPoint QPropertyTree::_toScreen(Point point) const
 	return mapToGlobal(pt);
 }
 
-bool QPropertyTree::selectByAddress(const void* addr, bool keepSelectionIfChildSelected)
-{
-	return selectByAddresses(vector<const void*>(1, addr), keepSelectionIfChildSelected);
-}
-
-bool QPropertyTree::selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected)
-{
-	if (model()->root()) {
-		TreeSelection sel;
-
-		bool keepSelection = false;
-		for (size_t i = 0; i < addresses.size(); ++i) {
-			const void* addr = addresses[i];
-			PropertyRow* row = model()->root()->findByAddress(addr);
-
-			if (keepSelectionIfChildSelected && row && !model()->selection().empty()) {
-				keepSelection = true;
-				TreeSelection::const_iterator it;
-				for(it = model()->selection().begin(); it != model()->selection().end(); ++it){
-					PropertyRow* selectedRow = model()->rowFromPath(*it);
-					if (!selectedRow)
-						continue;
-					if (!selectedRow->isChildOf(row)){
-						keepSelection = false;
-						break;
-					}
-				}
-			}
-
-			if (!keepSelection) {
-				if(row) {
-					sel.push_back(model()->pathFromRow(row));
-					ensureVisible(row);
-				}
-			}
-		}
-
-		if (model()->selection() != sel) {
-			model()->setSelection(sel);
-			updateAttachedPropertyTree(true); 
-			repaint();
-			return true;
-		}
-	}
-	return false;
-}
-
-void QPropertyTree::setUndoEnabled(bool enabled, bool full)
-{
-	undoEnabled_ = enabled; fullUndo_ = full;
-    model()->setUndoEnabled(enabled);
-    model()->setFullUndo(full);
-}
-
 void QPropertyTree::attachPropertyTree(QPropertyTree* propertyTree) 
 { 
 	if(attachedPropertyTree_)
-		disconnect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	attachedPropertyTree_ = propertyTree; 
-	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	updateAttachedPropertyTree(true); 
-}
-
-void QPropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
-{
-	TreeSelection::const_iterator i;
-	for(i = model()->selection().begin(); i != model()->selection().end(); ++i){
-		PropertyRow* row = model()->rowFromPath(*i);
-		if (!row)
-			continue;
-
-
-		while(row && ((row->pulledUp() || row->pulledBefore()) || row->isLeaf())) {
-			row = row->parent();
-		}
-		Serializer ser = row->serializer();
-
-		if (ser)
-			serializers->push_back(ser);
-	}
-}
-
-void QPropertyTree::updateAttachedPropertyTree(bool revert)
-{
-	if(attachedPropertyTree_) {
- 		Serializers serializers;
- 		getSelectionSerializers(&serializers);
- 		if (!attachedPropertyTree_->attach(serializers) && revert)
-			attachedPropertyTree_->revert();
- 	}
+		disconnect((QPropertyTree*)attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
+	PropertyTree::attachPropertyTree(propertyTree);
+	connect((QPropertyTree*)attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
 }
 
 struct FilterVisitor
@@ -1643,8 +833,9 @@ struct FilterVisitor
 		return false;
 	}
 
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree)
+	ScanResult operator()(PropertyRow* row, PropertyTree* _tree)
 	{
+		QPropertyTree* tree = (QPropertyTree*)_tree;
 		const char* label = row->labelUndecorated();
 		yasli::string value = row->valueAsString();
 
@@ -1697,138 +888,6 @@ protected:
 	yasli::string labelStart_;
 };
 
-
-
-void QPropertyTree::RowFilter::parse(const char* filter)
-{
-	for (int i = 0; i < NUM_TYPES; ++i) {
-		start[i].clear();
-		substrings[i].clear();
-		tillEnd[i] = false;
-	}
-
-	YASLI_ESCAPE(filter != 0, return);
-
-	vector<char> filterBuf(filter, filter + strlen(filter) + 1);
-	for (size_t i = 0; i < filterBuf.size(); ++i)
-		filterBuf[i] = tolower(filterBuf[i]);
-
-	const char* str = &filterBuf[0];
-
-	Type type = NAME_VALUE;
-	while (true)
-	{
-		bool fromStart = false;
-		while (*str == '^') {
-			fromStart = true;
-			++str;
-		}
-
-		const char* tokenStart = str;
-		
-		if (*str == '\"')
-		{
-			++str;
-			while(*str != '\0' && *str != '\"')
-				++str;
-		}
-		else
-		{
-			while (*str != '\0' && *str != ' ' && *str != '*' && *str != '=' && *str != ':' && *str != '#')
-					++str;
-		}
-		if (str != tokenStart) {
-			if (*tokenStart == '\"' && *str == '\"') {
-				start[type].assign(tokenStart + 1, str);
-				tillEnd[type] = true;
-				++str;
-			}
-			else
-			{
-				if (fromStart)
-					start[type].assign(tokenStart, str);
-				else
-					substrings[type].push_back(yasli::string(tokenStart, str));
-			}
-		}
-		while (*str == ' ')
-			++str;
-		if (*str == '#') {
-			type = NAME;
-			++str;
-		}
-		else if (*str == '=') {
-			type = VALUE;
-			++str;
-		}
-		else if(*str == ':') {
-			type = TYPE;
-			++str;
-		}
-		else if (*str == '\0')
-			break;
-	}
-}
-
-bool QPropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t* matchStart, size_t* matchEnd) const
-{
-	YASLI_ESCAPE(textOriginal, return false);
-
-	char* text;
-	{
-		size_t textLen = strlen(textOriginal);
-        text = (char*)alloca((textLen + 1));
-		memcpy(text, textOriginal, (textLen + 1));
-		for (char* p = text; *p; ++p)
-			*p = tolower(*p);
-	}
-	
-	const yasli::string &start = this->start[type];
-	if (tillEnd[type]){
-		if (start == text) {
-			if (matchStart)
-				*matchStart = 0;
-			if (matchEnd)
-				*matchEnd = start.size();
-			return true;
-		}
-		else
-			return false;
-	}
-
-	const vector<yasli::string> &substrings = this->substrings[type];
-
-	const char* startPos = text;
-
-	if (matchStart)
-		*matchStart = 0;
-	if (matchEnd)
-		*matchEnd = 0;
-	if (!start.empty()) {
-		if (strncmp(text, start.c_str(), start.size()) != 0){
-            //_freea(text);
-			return false;
-		}
-		if (matchEnd)
-			*matchEnd = start.size();
-		startPos += start.size();
-	}
-
-	size_t numSubstrings = substrings.size();
-	for (size_t i = 0; i < numSubstrings; ++i) {
-		const char* substr = strstr(startPos, substrings[i].c_str());
-		if (!substr){
-			return false;
-		}
-		startPos += substrings[i].size();
-		if (matchStart && i == 0 && start.empty()) {
-			*matchStart = substr - text;
-		}
-		if (matchEnd)
-			*matchEnd = substr - text + substrings[i].size();
-	}
-	return true;
-}
 
 void QPropertyTree::onFilterChanged(const QString& text)
 {
@@ -1930,42 +989,6 @@ void QPropertyTree::_drawRowValue(QPainter& p, const wchar_t* text, const QFont*
 	drawFilteredString(p, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }
 
-struct DrawVisitor
-{
-	DrawVisitor(QPainter& painter, const QRect& area, int scrollOffset, bool selectionPass)
-		: area_(area)
-		, painter_(painter)
-		, offset_(0)
-		, scrollOffset_(scrollOffset)
-		, lastParent_(0)
-		, selectionPass_(selectionPass)
-	{}
-
-	ScanResult operator()(PropertyRow* row, QPropertyTree* tree, int index)
-	{
-		if(row->visible(tree) && ((row->parent()->expanded() && !lastParent_) || row->pulledUp())){
-			if(row->rect().top() > scrollOffset_ + area_.height())
-				lastParent_ = row->parent();
-
-			QDrawContext context(tree, &painter_);
-			if(row->rect().bottom() > scrollOffset_ && row->rect().width() > 0)
-				row->drawRow(context, tree, index, selectionPass_);
-
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-		else
-			return SCAN_SIBLINGS;
-	}
-
-protected:
-	QPainter& painter_;
-	QRect area_;
-	int offset_;
-	int scrollOffset_;
-	PropertyRow* lastParent_;
-	bool selectionPass_;
-};
-
 QSize QPropertyTree::sizeHint() const
 {
 	return sizeHint_;
@@ -2038,37 +1061,6 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	paintTime_ = timer.elapsed();
 }
 
-QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const Point& pointInWindowSpace, const Rect& rowRect)
-{
-	QPoint point = pointToRootSpace(pointInWindowSpace);
-
-	if(!row->hasVisibleChildren(this) && row->plusRect(this).contains(point))
-		return TREE_HIT_PLUS;
-
-	if(row->textRect(this).contains(point))
-		return TREE_HIT_TEXT;
-
-	if(rowRect.contains(point))
-		return TREE_HIT_ROW;
-
-	return TREE_HIT_NONE;
-
-}
-
-PropertyRow* QPropertyTree::rowByPoint(const Point& pt)
-{
-	if (!model_->root())
-		return 0;
-	if (!area_.contains(pt))
-		return 0;
-  return model_->root()->hit(this, pointToRootSpace(pt));
-}
-
-Point QPropertyTree::pointToRootSpace(const Point& point) const
-{
-	return Point(point.x() + offset_.x() - area_.left(), point.y() + offset_.y() - area_.top());
-}
-
 void QPropertyTree::moveEvent(QMoveEvent* ev)
 {
 	QWidget::moveEvent(ev);
@@ -2088,7 +1080,6 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 
 	if (ev->button() == Qt::LeftButton)
 	{
-		updateArea();
 		int x = ev->x();
 		int y = ev->y();
 
@@ -2103,7 +1094,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 				PropertyRow* draggedRow = row;
 				while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
 					draggedRow = draggedRow->parent();
-				if(draggedRow && !draggedRow->userReadOnly() && !widget_){
+				if(draggedRow && !draggedRow->userReadOnly() && !widget_.get()){
 					dragController_->beginDrag(row, draggedRow, ev->globalPos());
 				}
 			}
@@ -2118,11 +1109,11 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			model()->setFocusedRow(row);
 			update();
 
-			onRowRMBDown(row, row->rect(), _toScreen(pointToRootSpace(point)));
+			onRowRMBDown(row, row->rect(), pointToRootSpace(point));
 		}
 		else{
 			QRect rect = this->rect();
-			onRowRMBDown(model()->root(), rect, _toScreen(pointToRootSpace(point)));
+			onRowRMBDown(model()->root(), rect, pointToRootSpace(point));
 		}
 	}
 	else if (ev->button() == Qt::MiddleButton)
@@ -2189,6 +1180,22 @@ void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 		setFilterMode(true);
 	}
 
+	if (ev->key() == Qt::Key_Up){
+		int y = model()->root()->verticalIndex(this, model()->focusedRow());
+		if (filterMode_ && y == 0) {
+			setFilterMode(true);
+			update();
+			return;
+		}
+	}
+	else if (ev->key() == Qt::Key_Down) {
+		if (filterMode_ && filterEntry_->hasFocus()) {
+			setFocus();
+			update();
+			return;
+		}
+	}
+
 	if (filterMode_) {
 		if (ev->key() == Qt::Key_Escape && ev->modifiers() == Qt::NoModifier) {
 			setFilterMode(false);
@@ -2196,10 +1203,14 @@ void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 	}
 
 	bool result = false;
-	if (!widget_) {
+	if (!widget_.get()) {
 		PropertyRow* row = model()->focusedRow();
-		if (row)
-			onRowKeyDown(row, ev);
+		if (row) {
+			KeyEvent keyEvent;
+			keyEvent.key_ = ev->key();
+			keyEvent.modifiers_ = ev->modifiers();
+			onRowKeyDown(row, &keyEvent);
+		}
 	}
 	update();
 	if(!result)
@@ -2226,19 +1237,9 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	}
 }
 
-void QPropertyTree::onMouseStill()
+void QPropertyTree::onMouseStillTimer()
 {
-	if (capturedRow_) {
-		PropertyDragEvent e;
-		e.tree = this;
-		e.pos = mapFromGlobal(QCursor::pos());
-		e.start = pressPoint_;
-
-		if (e.pos != lastStillPosition_) {
-			capturedRow_->onMouseStill(e);
-			lastStillPosition_ = e.pos;
-		}
-	}
+	onMouseStill();
 }
 
 void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
@@ -2274,19 +1275,6 @@ void QPropertyTree::wheelEvent(QWheelEvent* ev)
  		scrollBar_->setValue(scrollBar_->value() + -ev->delta());
 }
 
-void QPropertyTree::updateArea()
-{
-}
-
-bool QPropertyTree::toggleRow(PropertyRow* row)
-{
-	if(!row->canBeToggled(this))
-		return false;
-	expandRow(row, !row->expanded());
-	updateHeights();
-	return true;
-}
-
 bool QPropertyTree::_isDragged(const PropertyRow* row) const
 {
 	if (!dragController_->dragging())
@@ -2294,27 +1282,6 @@ bool QPropertyTree::_isDragged(const PropertyRow* row) const
 	if (dragController_->draggedRow() == row)
 		return true;
 	return false;
-}
-
-bool QPropertyTree::_isCapturedRow(const PropertyRow* row) const
-{
-	return capturedRow_ == row;
-}
-
-void QPropertyTree::setArchiveContext(yasli::Context* lastContext)
-{
-	archiveContext_ = lastContext;
-}
-
-QPropertyTree::QPropertyTree(const QPropertyTree&)
-: PropertyTree(0)
-{
-}
-
-
-QPropertyTree& QPropertyTree::operator=(const QPropertyTree&)
-{
-	return *this;
 }
 
 void QPropertyTree::onAttachedTreeChanged()

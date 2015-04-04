@@ -28,7 +28,7 @@ struct ComboBoxClientRow {
 using yasli::StringListValue;
 class PropertyRowStringListValue : public PropertyRow, public ComboBoxClientRow {
 public:
-	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
+	InplaceWidget* createWidget(PropertyTree* tree) override;
 
 	void populateComboBox(QComboBox* box, QPropertyTree* tree) override
 	{
@@ -85,13 +85,13 @@ public:
 private:
 	yasli::StringList stringList_;
 	yasli::string value_;
-	friend class PropertyRowWidgetStringListValue;
+	friend class InplaceWidgetStringListValue;
 };
 
 using yasli::StringListStaticValue;
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue>, public ComboBoxClientRow {
 public:
-	PropertyRowWidget* createWidget(QPropertyTree* tree) override;
+	InplaceWidget* createWidget(PropertyTree* tree) override;
 
 	void populateComboBox(QComboBox* box, QPropertyTree* tree) override
 	{
@@ -135,22 +135,7 @@ public:
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsWString().c_str());
 		else
-		{
-			QStyleOptionComboBox option;
-			option.editable = false;
-			option.frame = true;
-			option.currentText = QString(valueAsString().c_str());
-			option.state |= QStyle::State_Enabled;
-			option.rect = QRect(0, 0, context.widgetRect.width(), context.widgetRect.height());
-			// we have to translate painter here to work around bug in some themes
-			context.painter->translate(context.widgetRect.left(), context.widgetRect.top());
-			context.tree->style()->drawComplexControl(QStyle::CC_ComboBox, &option, context.painter);
-			context.painter->setPen(QPen(context.tree->palette().color(QPalette::WindowText)));
-			QRect textRect = context.tree->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
-			textRect.adjust(1, 0, -1, 0);
-			context.tree->_drawRowValue(*context.painter, valueAsWString().c_str(), &context.tree->font(), textRect, context.tree->palette().color(QPalette::WindowText), false, false);
-			context.painter->translate(-context.widgetRect.left(), -context.widgetRect.top());
-		}
+			context.drawComboBox(context.widgetRect, valueAsString().c_str());
 	}
 
 
@@ -161,18 +146,19 @@ public:
 private:
 	yasli::StringList stringList_;
 	yasli::string value_;
-	friend class PropertyRowWidgetStringListValue;
+	friend class InplaceWidgetStringListValue;
 };
 	
 
-class PropertyRowWidgetComboBox : public PropertyRowWidget
+class InplaceWidgetComboBox : public QObject, public InplaceWidget
 {
 	Q_OBJECT
 public:
-	PropertyRowWidgetComboBox(PropertyRow* row, ComboBoxClientRow* client, QPropertyTree* tree)
-	: PropertyRowWidget(row, tree)
+	InplaceWidgetComboBox(PropertyRow* row, ComboBoxClientRow* client, QPropertyTree* tree)
+	: InplaceWidget(row, tree)
 	, comboBox_(new QComboBox())
 	, client_(client)
+	, tree_(tree)
 	{
 		client_->populateComboBox(comboBox_, tree_);
 		connect(comboBox_, SIGNAL(activated(int)), this, SLOT(onChange(int)));
@@ -190,7 +176,7 @@ public:
 		QApplication::sendEvent(comboBox_, &ev);
 	}
 
-	~PropertyRowWidgetComboBox()
+	~InplaceWidgetComboBox()
 	{
 		comboBox_->hide();
 		comboBox_->setParent(0);
@@ -199,7 +185,7 @@ public:
 	}	
 
 	void commit(){}
-	QWidget* actualWidget() { return comboBox_; }
+	void* actualWidget() { return comboBox_; }
 	public slots:
 	void onChange(int)
 	{
@@ -209,6 +195,7 @@ public:
 protected:
 	QComboBox* comboBox_;
 	ComboBoxClientRow* client_;
+	QPropertyTree* tree_;
 };
 
 

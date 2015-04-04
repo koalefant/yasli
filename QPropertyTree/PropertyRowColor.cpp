@@ -1,6 +1,6 @@
 #include "PropertyRowColor.h"
 #include "PropertyDrawContext.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include <QPainter>
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
@@ -11,7 +11,7 @@ PropertyRowColor::PropertyRowColor()
 {
 }
 
-int PropertyRowColor::widgetSizeMin(const QPropertyTree* tree) const
+int PropertyRowColor::widgetSizeMin(const PropertyTree* tree) const
 {
 	return tree->_defaultRowHeight();
 }

@@ -14,17 +14,16 @@
 class PropertyRowContainer;
 struct ContainerMenuHandler : PropertyRowMenuHandler
 {
-	Q_OBJECT
 public:
 
-	QPropertyTree* tree;
+	PropertyTree* tree;
 	PropertyRowContainer* container;
 	PropertyRow* element;
 	int pointerIndex;
 
-	ContainerMenuHandler(QPropertyTree* tree, PropertyRowContainer* container);
+	ContainerMenuHandler(PropertyTree* tree, PropertyRowContainer* container);
 
-public slots:
+public:
 	void onMenuAppendElement();
 	void onMenuAppendPointerByIndex();
 	void onMenuRemoveAll();
@@ -37,10 +36,10 @@ class PropertyRowContainer : public PropertyRow
 public:
 	PropertyRowContainer();
 	bool isContainer() const override{ return true; }
-	bool onActivate( QPropertyTree* tree, bool force) override;
-	bool onContextMenu(QMenu& item, QPropertyTree* tree) override;
+	bool onActivate( PropertyTree* tree, bool force) override;
+	bool onContextMenu(IMenu& item, PropertyTree* tree) override;
 	void redraw(PropertyDrawContext& context) override;
-	bool onKeyDown(QPropertyTree* tree, const QKeyEvent* key) override;
+	bool onKeyDown(PropertyTree* tree, const KeyEvent* key) override;
 
 	void labelChanged() override;
 	bool isStatic() const override{ return false; }
@@ -55,15 +54,15 @@ public:
 		fixedSize_ = value.isFixedSize();
 		elementTypeName_ = value.elementType().name();
 	}
-	const char* typeNameForFilter(QPropertyTree* tree) const override;
+	const char* typeNameForFilter(PropertyTree* tree) const override;
 	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
     bool isFixedSize() const { return fixedSize_; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_NAME; }
-	int widgetSizeMin(const QPropertyTree*) const override{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
+	int widgetSizeMin(const PropertyTree*) const override{ return userWidgetSize() >=0 ? userWidgetSize() : 42; }
 
 protected:
-	void generateMenu(QMenu& menu, QPropertyTree* tree);
+	void generateMenu(IMenu& menu, PropertyTree* tree);
 
 	bool fixedSize_;
 	const char* elementTypeName_;

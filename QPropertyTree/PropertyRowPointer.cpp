@@ -8,27 +8,18 @@
  */
 
 #include "PropertyRowPointer.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
 #include "Serialization.h"
 #include "Unicode.h"
-#include <QMenu>
+#include "IMenu.h"
+#include "IUIFacade.h"
 #include "Rect.h"
 
 // ---------------------------------------------------------------------------
 
-static QAction* findAction(const QList<QAction*>& actions, const char* withText)
-{
-	for (size_t i = 0; i < size_t(actions.size()); ++i)
-	{
-		if (actions[i]->text() == withText)
-			return actions[i];
-	}
-	return 0;
-}
-
-void ClassMenuItemAdder::generateMenu(QMenu& createItem, const StringList& comboStrings)
+void ClassMenuItemAdder::generateMenu(IMenu& createItem, const StringList& comboStrings)
 {
 	StringList::const_iterator it;
 	int index = 0;
@@ -36,7 +27,7 @@ void ClassMenuItemAdder::generateMenu(QMenu& createItem, const StringList& combo
 		StringList path;
 		splitStringList(&path, it->c_str(), '\\');
 		int level = 0;
-		QMenu* item = &createItem;
+		IMenu* item = &createItem;
 
 		for(int level = 0; level < int(path.size()); ++level){
 			const char* leaf = path[level].c_str();
@@ -44,7 +35,7 @@ void ClassMenuItemAdder::generateMenu(QMenu& createItem, const StringList& combo
 				addAction(*item, leaf, index++);
 			}
 			else{
-				if (QMenu* menu = item->findChild<QMenu*>(leaf))
+				if (IMenu* menu = item->findMenu(leaf))
 					item = menu;
 				else
 					item = addMenu(*item, leaf);
@@ -53,15 +44,14 @@ void ClassMenuItemAdder::generateMenu(QMenu& createItem, const StringList& combo
 	}
 }
 
-void ClassMenuItemAdder::addAction(QMenu& menu, const char* text, int index)
+void ClassMenuItemAdder::addAction(IMenu& menu, const char* text, int index)
 {
-	menu.addAction(text)->setEnabled(false);
+	menu.addAction(text, MENU_DISABLED);
 }
 
-QMenu* ClassMenuItemAdder::addMenu(QMenu& menu, const char* text)
+IMenu* ClassMenuItemAdder::addMenu(IMenu& menu, const char* text)
 {
-	QMenu* result = menu.addMenu(text);
-	result->setObjectName(text);
+	IMenu* result = menu.addMenu(text);
 	return result;
 }
 
@@ -198,8 +188,8 @@ void PropertyRowPointer::redraw(PropertyDrawContext& context)
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
-	ClassMenuItemAdderRowPointer(PropertyRowPointer* row, QPropertyTree* tree) : row_(row), tree_(tree) {}    
-	void addAction(QMenu& menu, const char* text, int index)
+	ClassMenuItemAdderRowPointer(PropertyRowPointer* row, PropertyTree* tree) : row_(row), tree_(tree) {}    
+	void addAction(IMenu& menu, const char* text, int index)
 	{
 		CreatePointerMenuHandler* handler = new CreatePointerMenuHandler;
 		tree_->addMenuHandler(handler);
@@ -208,29 +198,27 @@ struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
 		handler->index = index;
 		handler->useDefaultValue = !tree_->immediateUpdate();
 
-		QAction* action = menu.addAction(text);
-
-		QObject::connect(action, SIGNAL(triggered()), handler, SLOT(onMenuCreateByIndex()));
+		menu.addAction(text, 0, handler, &CreatePointerMenuHandler::onMenuCreateByIndex);
 	}
 protected:
 	PropertyRowPointer* row_;
-	QPropertyTree* tree_;
+	PropertyTree* tree_;
 };
 
 
-bool PropertyRowPointer::onActivate( QPropertyTree* tree, bool force)
+bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
 {
 	if(userReadOnly())
 			return false;
-	QMenu menu;
-	ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu, tree->model()->typeStringList(baseType()));
+	std::auto_ptr<IMenu> menu(tree->ui()->createMenu());
+	ClassMenuItemAdderRowPointer(this, tree).generateMenu(*menu, tree->model()->typeStringList(baseType()));
 	tree->_setPressedRow(this);
-	menu.exec(tree->_toScreen(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
+	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
 	tree->_setPressedRow(0);
 	return true;
 }
 
-bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, Point point, bool& changed) 
+bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Point point, bool& changed) 
 {
 		if(widgetRect(tree).contains(point)){
 				if(onActivate(tree, false))
@@ -239,12 +227,12 @@ bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, Point point, bool& cha
 		return false; 
 }
 
-bool PropertyRowPointer::onContextMenu(QMenu &menu, QPropertyTree* tree)
+bool PropertyRowPointer::onContextMenu(IMenu &menu, PropertyTree* tree)
 {
 	if(!menu.isEmpty())
 		menu.addSeparator();
 		if(!userReadOnly()){
-			QMenu* createItem = menu.addMenu("Set");
+			IMenu* createItem = menu.addMenu("Set");
 			ClassMenuItemAdderRowPointer(this, tree).generateMenu(*createItem, tree->model()->typeStringList(baseType()));
 		}
 	return PropertyRow::onContextMenu(menu, tree);
@@ -255,12 +243,11 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 	ar(derivedTypeName_, "derivedTypeName", "Derived Type Name");
 }
 
-int PropertyRowPointer::widgetSizeMin(const QPropertyTree* tree) const
+int PropertyRowPointer::widgetSizeMin(const PropertyTree* tree) const
 {
-	const QFont* font = derivedTypeName_.empty() ? &tree->font() : &tree->boldFont();
-	QFontMetrics fm(*font);
-    QString str(fromWideChar(generateLabel().c_str()).c_str());
-	return fm.width(str) + 18;
+	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
+	std::string text = fromWideChar(generateLabel().c_str());
+	return tree->ui()->textWidth(text.c_str(), font) + 18;
 }
 
 void PropertyRowPointer::setValueAndContext(const yasli::PointerInterface& ptr, yasli::Archive& ar)

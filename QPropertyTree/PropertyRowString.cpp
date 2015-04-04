@@ -12,12 +12,12 @@
 #include "PropertyRowString.h"
 #include "PropertyTreeModel.h"
 #include "PropertyDrawContext.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
-#include <QMenu>
+#include "IMenu.h"
 #include "Unicode.h"
 
 // ---------------------------------------------------------------------------
@@ -35,9 +35,9 @@ bool PropertyRowString::assignTo(yasli::wstring& str)
     return true;
 }
 
-PropertyRowWidget* PropertyRowString::createWidget(QPropertyTree* tree)
+InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
 {
-	return new PropertyRowWidgetString(this, tree);
+	return new InplaceWidgetString(this, (QPropertyTree*)tree);
 }
 
 yasli::string PropertyRowString::valueAsString() const

@@ -47,9 +47,10 @@ struct PropertyDefaultTypeValue
 
 // ---------------------------------------------------------------------------
 
-class PropertyTreeModel : public QObject
+class PropertyTree;
+
+class PropertyTreeModel
 {
-	Q_OBJECT
 public:
 	class LockedUpdate : public yasli::RefCounter{
 	public:
@@ -81,7 +82,7 @@ public:
 
 	typedef TreeSelection Selection;
 
-	PropertyTreeModel();
+	PropertyTreeModel(PropertyTree* tree);
 	~PropertyTreeModel();
 
 	void clear();
@@ -100,7 +101,7 @@ public:
 	PropertyRow* root() { return root_; }
 	const PropertyRow* root() const { return root_; }
 
-	void serialize(yasli::Archive& ar, QPropertyTree* tree);
+	void serialize(yasli::Archive& ar, PropertyTree* tree);
 
 	UpdateLock lockUpdate();
 	void requestUpdate(const PropertyRows& rows, bool needApply);
@@ -133,10 +134,10 @@ public:
 	const PropertyDefaultTypeValue* defaultType(const yasli::TypeID& baseType, int index) const;
 	ConstStringList* constStrings() { return &constStrings_; }
 
-signals:
+private:
 	void signalUpdated(const PropertyRows& rows, bool needApply);
 	void signalPushUndo(PropertyTreeOperator* op, bool* result);
-private:
+
 	void pushUndo(const PropertyTreeOperator& op);
 	void clearObjectReferences();
 
@@ -168,6 +169,7 @@ private:
 	std::vector<PropertyTreeOperator> redoOperators_;
 
 	ConstStringList constStrings_;
+	PropertyTree* tree_;
 
 	friend class TreeImpl;
 };

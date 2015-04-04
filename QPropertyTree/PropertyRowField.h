@@ -17,7 +17,7 @@ class PropertyRowField : public PropertyRow
 {
 public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-	int widgetSizeMin(const QPropertyTree* tree) const override{ 
+	int widgetSizeMin(const PropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
@@ -25,7 +25,7 @@ public:
 	}
 
 	virtual int buttonCount() const{ return 0; }
-	virtual yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const{ return yasli::IconXPM(); }
+	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const{ return yasli::IconXPM(); }
 	virtual bool usePathEllipsis() const { return false; }
 
 	void redraw(PropertyDrawContext& context) override;

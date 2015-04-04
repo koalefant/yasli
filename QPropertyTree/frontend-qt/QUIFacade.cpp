@@ -2,8 +2,14 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "../QPropertyTree.h"
+#include <QStyleOption>
+#include <QDesktopWidget>
+#include <QApplication>
 
 namespace property_tree {
+
+
+// ---------------------------------------------------------------------------
 
 int QUIFacade::textWidth(const char* text, Font font)
 {
@@ -11,6 +17,30 @@ int QUIFacade::textWidth(const char* text, Font font)
 
 	QFontMetrics fm(*qfont);
 	return fm.width(text);
+}
+
+Point QUIFacade::screenSize()
+{
+	QSize s = QApplication::desktop()->screenGeometry(tree_).size();
+	return Point(s.width(), s.height());
+}
+
+IMenu* QUIFacade::createMenu()
+{
+	return new QtMenu("", tree_);
+}
+
+void QUIFacade::setCursor(Cursor cursor)
+{
+}
+
+void QUIFacade::unsetCursor()
+{
+}
+
+Point QUIFacade::cursorPosition()
+{
+	return tree_->mapFromGlobal(QCursor::pos());
 }
 
 }

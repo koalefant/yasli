@@ -24,17 +24,14 @@
 #include "ConstStringList.h"
 #include "IDrawContext.h"
 #include "Rect.h"
+#include "sigslot.h"
 
-#include <QObject>
-
-class QWidget;
-class QFont;
 class QPainter;
-class QMenu;
-class QKeyEvent;
+class IMenu;
+struct KeyEvent;
 
 using std::vector;
-class QPropertyTree;
+class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
 class PopupMenuItem;
@@ -47,9 +44,8 @@ enum ScanResult {
 	SCAN_CHILDREN_SIBLINGS,
 };
 
-struct PropertyRowMenuHandler : QObject
+struct PropertyRowMenuHandler : sigslot::has_slots
 {
-	Q_OBJECT
 public:
 
 	virtual ~PropertyRowMenuHandler() {}
@@ -58,7 +54,7 @@ public:
 
 struct PropertyDragEvent
 {
-	QPropertyTree* tree;
+	PropertyTree* tree;
 	Point pos;
 	Point start;
 	Point lastDelta;
@@ -70,20 +66,19 @@ enum DragCheckBegin {
 	DRAG_CHECK_UNSET
 };
 
-class PropertyRowWidget : public QObject
+class InplaceWidget
 {
-	Q_OBJECT
 public:
-	PropertyRowWidget(PropertyRow* row, QPropertyTree* tree);
-	virtual ~PropertyRowWidget();
-	virtual QWidget* actualWidget() { return 0; }
+	InplaceWidget(PropertyRow* row, PropertyTree* tree);
+	virtual ~InplaceWidget();
+	virtual void* actualWidget() { return 0; }
 	virtual void showPopup() {}
 	virtual void commit() = 0;
 	PropertyRow* row() { return row_; }
 	PropertyTreeModel* model() { return model_; }
 protected:
 	PropertyRow* row_;
-	QPropertyTree* tree_;
+	PropertyTree* tree_;
 	PropertyTreeModel* model_;
 };
 
@@ -112,8 +107,8 @@ public:
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
 	bool expanded() const{ return expanded_; }
-	void _setExpanded(bool expanded); // use QPropertyTree::expandRow
-	void setExpandedRecursive(QPropertyTree* tree, bool expanded);
+	void _setExpanded(bool expanded); // use PropertyTree::expandRow
+	void setExpandedRecursive(PropertyTree* tree, bool expanded);
 
 	void setMatchFilter(bool matchFilter) { matchFilter_ = matchFilter; }
 	bool matchFilter() const { return matchFilter_; }
@@ -121,11 +116,11 @@ public:
 	void setBelongsToFilteredRow(bool belongs) { belongsToFilteredRow_ = belongs; }
 	bool belongsToFilteredRow() const { return belongsToFilteredRow_; }
 
-	bool visible(const QPropertyTree* tree) const;
-	bool hasVisibleChildren(const QPropertyTree* tree, bool internalCall = false) const;
+	bool visible(const PropertyTree* tree) const;
+	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
-	const PropertyRow* hit(const QPropertyTree* tree, Point point) const;
-	PropertyRow* hit(const QPropertyTree* tree, Point point);
+	const PropertyRow* hit(const PropertyTree* tree, Point point) const;
+	PropertyRow* hit(const PropertyTree* tree, Point point);
 	PropertyRow* parent() { return parent_; }
 	const PropertyRow* parent() const{ return parent_; }
 	void setParent(PropertyRow* row) { parent_ = row; }
@@ -137,9 +132,9 @@ public:
 	void addBefore(PropertyRow* row, PropertyRow* before);
 
 	template<class Op> bool scanChildren(Op& op);
-	template<class Op> bool scanChildren(Op& op, QPropertyTree* tree);
-	template<class Op> bool scanChildrenReverse(Op& op, QPropertyTree* tree);
-	template<class Op> bool scanChildrenBottomUp(Op& op, QPropertyTree* tree);
+	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTree* tree);
 
 	PropertyRow* childByIndex(int index);
 	const PropertyRow* childByIndex(int index) const;
@@ -173,24 +168,24 @@ public:
 	void setLayoutChanged();
 	void setLabelChangedToChildren();
 	void setLayoutChangedToChildren();
-	void updateLabel(const QPropertyTree* tree, int index);
-	void updateTextSizeInitial(const QPropertyTree* tree, int index);
+	void updateLabel(const PropertyTree* tree, int index);
+	void updateTextSizeInitial(const PropertyTree* tree, int index);
 	virtual void labelChanged() {}
 	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
-	virtual const char* typeNameForFilter(QPropertyTree* tree) const;
+	virtual const char* typeNameForFilter(PropertyTree* tree) const;
 	void setTypeName(const char* typeName) { typeName_ = typeName; }
-	const char* rowText(char (&containerLabelBuffer)[16], const QPropertyTree* tree, int rowIndex) const;
+	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
 	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName) const;
 	void intersect(const PropertyRow* row);
 
-	int verticalIndex(QPropertyTree* tree, PropertyRow* row);
-	PropertyRow* rowByVerticalIndex(QPropertyTree* tree, int index);
-	int horizontalIndex(QPropertyTree* tree, PropertyRow* row);
-	PropertyRow* rowByHorizontalIndex(QPropertyTree* tree, int index);
+	int verticalIndex(PropertyTree* tree, PropertyRow* row);
+	PropertyRow* rowByVerticalIndex(PropertyTree* tree, int index);
+	int horizontalIndex(PropertyTree* tree, PropertyRow* row);
+	PropertyRow* rowByHorizontalIndex(PropertyTree* tree, int index);
 
 	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
 	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
@@ -200,32 +195,32 @@ public:
 
 	int height() const{ return size_.y(); }
 
-	virtual int widgetSizeMin(const QPropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
+	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const QPropertyTree* tree, int index);
-	void calculateMinimalSize(const QPropertyTree* tree, int posX, bool force, int* _extraSize, int index);
-	void setTextSize(const QPropertyTree* tree, int rowIndex, float multiplier);
+	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree* tree, int index);
+	void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index);
+	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 	void calculateTotalSizes(int* minTextSize);
-	void adjustVerticalPosition(const QPropertyTree* tree, int& totalHeight);
+	void adjustVerticalPosition(const PropertyTree* tree, int& totalHeight);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	Rect rect() const{ return Rect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
-	Rect textRect(const QPropertyTree* tree) const;
-	Rect widgetRect(const QPropertyTree* tree) const;
-	Rect plusRect(const QPropertyTree* tree) const;
-	Rect floorRect(const QPropertyTree* tree) const;
+	Rect textRect(const PropertyTree* tree) const;
+	Rect widgetRect(const PropertyTree* tree) const;
+	Rect plusRect(const PropertyTree* tree) const;
+	Rect floorRect(const PropertyTree* tree) const;
 	void adjustHoveredRect(Rect& hoveredRect);
-	Font rowFont(const QPropertyTree* tree) const;
+	Font rowFont(const PropertyTree* tree) const;
 
-	void drawRow(PropertyDrawContext& x, const QPropertyTree* tree, int rowIndex, bool selectionPass);
+	void drawRow(PropertyDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
 	void drawStaticText(QPainter& p, const Rect& widgetRect);
 
 	virtual void redraw(PropertyDrawContext& context);
-	virtual PropertyRowWidget* createWidget(QPropertyTree* tree) { return 0; }
+	virtual InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
 
 	virtual bool isContainer() const{ return false; }
 	virtual bool isPointer() const{ return false; }
@@ -237,24 +232,24 @@ public:
 	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!pulledUp() && !pulledBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
 
-	bool canBeToggled(const QPropertyTree* tree) const;
+	bool canBeToggled(const PropertyTree* tree) const;
 	bool canBeDragged() const;
-	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const QPropertyTree* tree) const;
-	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, QPropertyTree* tree, bool before);
+	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const;
+	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
 
-	virtual bool onActivate(QPropertyTree* tree, bool force);
-	virtual bool onActivateRelease(QPropertyTree* tree) { return false; }
-	virtual bool onKeyDown(QPropertyTree* tree, const QKeyEvent* ev);
-	virtual bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) { return false; }
+	virtual bool onActivate(PropertyTree* tree, bool force);
+	virtual bool onActivateRelease(PropertyTree* tree) { return false; }
+	virtual bool onKeyDown(PropertyTree* tree, const KeyEvent* ev);
+	virtual bool onMouseDown(PropertyTree* tree, Point point, bool& changed) { return false; }
     virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseStill(const PropertyDragEvent& e) {}
-	virtual void onMouseUp(QPropertyTree* tree, Point point) {}
+	virtual void onMouseUp(PropertyTree* tree, Point point) {}
 	// "drag check" allows you to "paint" with the mouse through checkboxes to set all values at once
 	virtual DragCheckBegin onMouseDragCheckBegin() { return DRAG_CHECK_IGNORE; }
-	virtual bool onMouseDragCheck(QPropertyTree* tree, bool value) { return false; }
-	virtual bool onContextMenu(QMenu &menu, QPropertyTree* tree);
+	virtual bool onMouseDragCheck(PropertyTree* tree, bool value) { return false; }
+	virtual bool onContextMenu(IMenu &menu, PropertyTree* tree);
 
-	bool isFullRow(const QPropertyTree* tree) const;
+	bool isFullRow(const PropertyTree* tree) const;
 
 	// User states.
 	// Assigned using control codes (characters in the beginning of label)
@@ -371,7 +366,7 @@ bool PropertyRow::scanChildren(Op& op)
 }
 
 template<class Op>
-bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
+bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
 {
 	int numChildren = children_.size();
 	for(int index = 0; index < numChildren; ++index){
@@ -390,7 +385,7 @@ bool PropertyRow::scanChildren(Op& op, QPropertyTree* tree)
 }
 
 template<class Op>
-bool PropertyRow::scanChildrenReverse(Op& op, QPropertyTree* tree)
+bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
 {
 	int numChildren = children_.size();
 	for(int index = numChildren - 1; index >= 0; --index){
@@ -409,7 +404,7 @@ bool PropertyRow::scanChildrenReverse(Op& op, QPropertyTree* tree)
 }
 
 template<class Op>
-bool PropertyRow::scanChildrenBottomUp(Op& op, QPropertyTree* tree)
+bool PropertyRow::scanChildrenBottomUp(Op& op, PropertyTree* tree)
 {
 	size_t numChildren = children_.size();
 	for(size_t i = 0; i < numChildren; ++i)

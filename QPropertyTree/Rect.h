@@ -34,14 +34,19 @@ struct Rect
 
 	int left() const { return x; }
 	int top() const { return y; }
+	void setTop(int top) { y = top; }
 	int right() const { return x + w; }
 	int bottom() const { return y + h; }
+
+	Point topLeft() const { return Point(x, y); }
 
 	int width() const { return w; }
 	int height() const { return h; }
 
 	Rect() : x(0), y(0), w(0), h(0) {}
 	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
+
+	bool isValid() const { return w >= 0 && h >= 0; }
 
 	Rect(const QRect& rect);
 	operator QRect() const;

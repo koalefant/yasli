@@ -11,6 +11,7 @@
 
 #include "PropertyDrawContext.h"
 #include "PropertyRowImpl.h"
+#include "PropertyTree.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
@@ -28,9 +29,9 @@ public:
 
 	bool isLeaf() const override{ return true; }
 
-	bool onActivate(QPropertyTree* tree, bool force) override
+	bool onActivate(PropertyTree* tree, bool force) override
 	{
-		QFileDialog dialog(tree);
+		QFileDialog dialog((QPropertyTree*)tree);
 		dialog.setAcceptMode(QFileDialog::AcceptSave);
 		dialog.setFileMode(QFileDialog::AnyFile);
 		dialog.setDefaultSuffix(extractExtensionFromFilter(value().filter.c_str()).c_str());
@@ -61,7 +62,7 @@ public:
 
 
 	int buttonCount() const override{ return 1; }
-	yasli::IconXPM buttonIcon(const QPropertyTree* tree, int index) const override{ 
+	yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
 		#include "file_save.xpm"
 		return yasli::IconXPM(file_save_xpm);
 	}

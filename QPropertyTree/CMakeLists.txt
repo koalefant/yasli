@@ -2,7 +2,7 @@ project(QPropertyTree)
 set(CMAKE_AUTOMOC TRUE)
 
 if (UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wno-deprecated-declarations")
 endif (UNIX)
 
 if (MSVC)
@@ -16,6 +16,8 @@ if (NOT QT4_FOUND AND NOT Qt5_INCLUDE_DIRS)
 endif()
 
 set(SOURCES
+	PropertyTree.cpp
+	QPropertyTree.cpp
 	frontend-qt/QDrawContext.cpp
 	frontend-qt/QDrawContext.h
 	frontend-qt/QUIFacade.cpp
@@ -43,7 +45,6 @@ set(SOURCES
 	PropertyRowStringListValue.cpp
 	PropertyTreeModel.cpp
 	PropertyTreeOperator.cpp
-	QPropertyTree.cpp
 	Unicode.cpp
 	Color.h
 	ConstStringList.h
@@ -67,6 +68,7 @@ set(SOURCES
 	PropertyTreeMenuHandler.h
 	PropertyTreeModel.h
 	PropertyTreeOperator.h
+	PropertyTree.h
 	QPropertyTree.h
 	Serialization.h
 	Unicode.h
