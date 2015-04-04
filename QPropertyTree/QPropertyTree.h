@@ -103,7 +103,7 @@ protected:
 	PropertyRow* row_;
 	QRect rect_;
 	QPropertyTree* tree_;
-	QPoint offset_;
+	Point offset_;
 };
 
 class QPropertyTree : public QWidget, public TreeConfig, public PropertyTree
@@ -136,7 +136,7 @@ public:
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
 	void setArchiveContext(yasli::Context* lastContext);
 
-	QPoint treeSize() const;
+	Point treeSize() const;
 	const QFont& boldFont() const; 
 	int leftBorder() const { return leftBorder_; }
 	int rightBorder() const { return rightBorder_; }
@@ -165,7 +165,7 @@ public:
 
 	// internal methods:
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
-	QPoint _toScreen(QPoint point) const;
+	QPoint _toScreen(Point point) const;
 	void _cancelWidget(){ widget_.reset(); }
 	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 	QRect _visibleRect() const;
@@ -208,8 +208,8 @@ protected:
 		TREE_HIT_ROW,
 		TREE_HIT_NONE
 	};
-	PropertyRow* rowByPoint(const QPoint& point);
-	HitTest hitTest(PropertyRow* row, const QPoint& pointInWindowSpace, const QRect& rowRect);
+	PropertyRow* rowByPoint(const Point& point);
+	HitTest hitTest(PropertyRow* row, const Point& pointInWindowSpace, const Rect& rowRect);
 	void onRowMenuDecompose(PropertyRow* row);
 
 	QSize sizeHint() const override;
@@ -253,7 +253,7 @@ protected:
 		}
 	};
 
-	QPoint pointToRootSpace(const QPoint& pointInWindowSpace) const;
+	Point pointToRootSpace(const Point& pointInWindowSpace) const;
 	void interruptDrag();
 	void updateHeights();
 	bool updateScrollBar();
@@ -262,10 +262,10 @@ protected:
 	void clearMenuHandlers();
 	bool onRowKeyDown(PropertyRow* row, const QKeyEvent* ev);
 	// points here are specified in root-row space
-	bool onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point, bool controlPressed);
-	void onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint point);
-	void onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point);
-	void onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoint point);
+	bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed);
+	void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point);
+	void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point);
+	void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point);
 
 
 	bool activateRow(PropertyRow* row);
@@ -303,12 +303,12 @@ protected:
 	QRect area_;
 	int leftBorder_;
 	int rightBorder_;
-	QPoint size_;
-	QPoint offset_;
+	Point size_;
+	Point offset_;
 	QSize sizeHint_;
 	DragController* dragController_;
-	QPoint pressPoint_;
-	QPoint lastStillPosition_;
+	Point pressPoint_;
+	Point lastStillPosition_;
 	PropertyRow* capturedRow_;
 	PropertyRow* pressedRow_;
 	QTimer* mouseStillTimer_;

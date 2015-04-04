@@ -300,7 +300,7 @@ void DragWindow::show()
 
 void DragWindow::move(int deltaX, int deltaY)
 {
-	offset_ += QPoint(deltaX, deltaY);
+	offset_ += Point(deltaX, deltaY);
 	setWindowPos(isVisible());
 }
 
@@ -726,7 +726,7 @@ bool QPropertyTree::onRowKeyDown(PropertyRow* row, const QKeyEvent* ev)
 	return false;
 }
 
-bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint point, bool controlPressed)
+bool QPropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
 {
 	pressPoint_ = point;
 	row = model()->root()->hit(this, point);
@@ -770,7 +770,7 @@ bool QPropertyTree::onRowLMBDown(PropertyRow* row, const QRect& rowRect, QPoint 
 	return false;
 }
 
-void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint point)
+void QPropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point)
 {
 	onMouseStill();
 	row->onMouseUp(this, point);
@@ -780,7 +780,7 @@ void QPropertyTree::onRowLMBUp(PropertyRow* row, const QRect& rowRect, QPoint po
 	}
 }
 
-void QPropertyTree::onRowRMBDown(PropertyRow* row, const QRect& rowRect, QPoint point)
+void QPropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point)
 {
 	SharedPtr<PropertyRow> handle = row;
 	PropertyRow* menuRow = 0;
@@ -972,9 +972,9 @@ bool QPropertyTree::updateScrollBar()
 	}
 }
 
-QPoint QPropertyTree::treeSize() const
+Point QPropertyTree::treeSize() const
 {
-	return size_ + (compact() ? QPoint(0,0) : QPoint(8, 8));
+	return size_ + (compact() ? Point(0,0) : Point(8, 8));
 }
 
 const QFont& QPropertyTree::boldFont() const
@@ -1300,7 +1300,7 @@ bool QPropertyTree::onContextMenu(PropertyRow* r, QMenu& menu)
 	return true;
 }
 
-void QPropertyTree::onRowMouseMove(PropertyRow* row, const QRect& rowRect, QPoint point)
+void QPropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point)
 {
 	PropertyDragEvent e;
 	e.tree = this;
@@ -1506,7 +1506,7 @@ bool QPropertyTree::getSelectedObject(yasli::Object* object)
 	}
 }
 
-QPoint QPropertyTree::_toScreen(QPoint point) const
+QPoint QPropertyTree::_toScreen(Point point) const
 {
 	QPoint pt ( point.x() - offset_.x() + area_.left(), 
 				point.y() - offset_.y() + area_.top() );
@@ -2038,7 +2038,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	paintTime_ = timer.elapsed();
 }
 
-QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const QPoint& pointInWindowSpace, const QRect& rowRect)
+QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const Point& pointInWindowSpace, const Rect& rowRect)
 {
 	QPoint point = pointToRootSpace(pointInWindowSpace);
 
@@ -2055,7 +2055,7 @@ QPropertyTree::HitTest QPropertyTree::hitTest(PropertyRow* row, const QPoint& po
 
 }
 
-PropertyRow* QPropertyTree::rowByPoint(const QPoint& pt)
+PropertyRow* QPropertyTree::rowByPoint(const Point& pt)
 {
 	if (!model_->root())
 		return 0;
@@ -2064,9 +2064,9 @@ PropertyRow* QPropertyTree::rowByPoint(const QPoint& pt)
   return model_->root()->hit(this, pointToRootSpace(pt));
 }
 
-QPoint QPropertyTree::pointToRootSpace(const QPoint& point) const
+Point QPropertyTree::pointToRootSpace(const Point& point) const
 {
-	return QPoint(point.x() + offset_.x() - area_.left(), point.y() + offset_.y() - area_.top());
+	return Point(point.x() + offset_.x() - area_.left(), point.y() + offset_.y() - area_.top());
 }
 
 void QPropertyTree::moveEvent(QMoveEvent* ev)

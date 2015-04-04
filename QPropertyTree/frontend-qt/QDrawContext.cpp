@@ -121,11 +121,22 @@ Rect::Rect(const QRect& rect)
 {
 }
 
-Rect::operator const QRect&() const
+Rect::operator QRect() const
 {
-	static QRect result;
-	result = QRect(x, y, w, h);
-	return result;
+	return QRect(x, y, w, h);
+}
+
+// ---------------------------------------------------------------------------
+
+Point::Point(const QPoint& point)
+: x_(point.x())
+, y_(point.y())
+{
+}
+
+Point::operator QPoint() const
+{
+	return QPoint(x_, y_);
 }
 
 }

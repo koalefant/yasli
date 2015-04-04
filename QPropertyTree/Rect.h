@@ -1,8 +1,29 @@
 #pragma once
 
-class QRect;
+#include <QPoint>
+#include <QRect>
 
 namespace property_tree {
+
+struct Point
+{
+	Point() {}
+	Point(int x, int y) : x_(x), y_(y) {}
+
+	Point operator+(const Point& p) const { return Point(x_ + p.x_, y_ + p.y_); }
+	Point& operator+=(const Point& p) { *this = *this + p; return *this; }
+	Point(const QPoint& rect);
+	operator QPoint() const;
+
+	int x_;
+	int y_;
+
+	// weird accessors to mimic QPoint
+	int x() const { return x_; }
+	int y() const { return y_; }
+	void setX(int x) { x_ = x; }
+	void setY(int y) { y_ = y; }
+};
 
 struct Rect
 {
@@ -23,7 +44,7 @@ struct Rect
 	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
 
 	Rect(const QRect& rect);
-	operator const QRect&() const;
+	operator QRect() const;
 
 	template<class TPoint>
 	bool contains(const TPoint& p) const {
@@ -44,3 +65,4 @@ struct Rect
 }
 
 using property_tree::Rect; // temporary
+using property_tree::Point; // temporary

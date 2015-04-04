@@ -82,7 +82,7 @@ bool PropertyRowContainer::onActivate( QPropertyTree* tree, bool force)
 	QMenu menu;
 	generateMenu(menu, tree);
 	tree->_setPressedRow(this);
-	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
+	menu.exec(tree->_toScreen(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
 	tree->_setPressedRow(0);
 	return true;
 }

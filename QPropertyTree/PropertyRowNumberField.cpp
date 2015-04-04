@@ -65,7 +65,7 @@ void PropertyRowNumberField::redraw(PropertyDrawContext& context)
 	}
 }
 
-bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed)
+bool PropertyRowNumberField::onMouseDown(QPropertyTree* tree, Point point, bool& changed)
 {
 	changed = false;
 	if (widgetRect(tree).contains(point) && !userReadOnly()) {
@@ -92,7 +92,7 @@ void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
 	e.tree->apply(true);
 }
 
-void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, QPoint point) 
+void PropertyRowNumberField::onMouseUp(QPropertyTree* tree, Point point) 
 {
 	tree->unsetCursor();
 	endIncrement(tree);

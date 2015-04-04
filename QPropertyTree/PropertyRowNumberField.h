@@ -53,8 +53,8 @@ public:
 	void redraw(PropertyDrawContext& context) override;
 	bool onActivate(QPropertyTree* tree, bool force) override;
 	bool onActivateRelease(QPropertyTree* tree) override;
-	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;
-	void onMouseUp(QPropertyTree* tree, QPoint point) override;
+	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) override;
+	void onMouseUp(QPropertyTree* tree, Point point) override;
 	void onMouseDrag(const PropertyDragEvent& e) override;
 	void onMouseStill(const PropertyDragEvent& e) override;
 

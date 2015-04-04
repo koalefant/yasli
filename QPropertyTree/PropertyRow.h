@@ -26,7 +26,6 @@
 #include "Rect.h"
 
 #include <QObject>
-#include <QPoint>
 
 class QWidget;
 class QFont;
@@ -60,9 +59,9 @@ public:
 struct PropertyDragEvent
 {
 	QPropertyTree* tree;
-	QPoint pos;
-	QPoint start;
-	QPoint lastDelta;
+	Point pos;
+	Point start;
+	Point lastDelta;
 };
 
 enum DragCheckBegin {
@@ -125,8 +124,8 @@ public:
 	bool visible(const QPropertyTree* tree) const;
 	bool hasVisibleChildren(const QPropertyTree* tree, bool internalCall = false) const;
 
-	const PropertyRow* hit(const QPropertyTree* tree, QPoint point) const;
-	PropertyRow* hit(const QPropertyTree* tree, QPoint point);
+	const PropertyRow* hit(const QPropertyTree* tree, Point point) const;
+	PropertyRow* hit(const QPropertyTree* tree, Point point);
 	PropertyRow* parent() { return parent_; }
 	const PropertyRow* parent() const{ return parent_; }
 	void setParent(PropertyRow* row) { parent_ = row; }
@@ -246,10 +245,10 @@ public:
 	virtual bool onActivate(QPropertyTree* tree, bool force);
 	virtual bool onActivateRelease(QPropertyTree* tree) { return false; }
 	virtual bool onKeyDown(QPropertyTree* tree, const QKeyEvent* ev);
-	virtual bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) { return false; }
+	virtual bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) { return false; }
     virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseStill(const PropertyDragEvent& e) {}
-	virtual void onMouseUp(QPropertyTree* tree, QPoint point) {}
+	virtual void onMouseUp(QPropertyTree* tree, Point point) {}
 	// "drag check" allows you to "paint" with the mouse through checkboxes to set all values at once
 	virtual DragCheckBegin onMouseDragCheckBegin() { return DRAG_CHECK_IGNORE; }
 	virtual bool onMouseDragCheck(QPropertyTree* tree, bool value) { return false; }
@@ -303,9 +302,9 @@ protected:
 
 	unsigned int textHash_;
 
-	// do we really need QPoint here? 
-	QPoint pos_;
-	QPoint size_;
+	// do we really need Point here? 
+	Point pos_;
+	Point size_;
 	short int textPos_;
 	short int textSizeInitial_;
 	short int textSize_;

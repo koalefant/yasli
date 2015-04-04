@@ -23,9 +23,9 @@ class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
 	void redraw(PropertyDrawContext& context) override;
-	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed);
-	void onMouseMove(QPropertyTree* tree, QPoint point);
-	void onMouseUp(QPropertyTree* tree, QPoint point);
+	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed);
+	void onMouseMove(QPropertyTree* tree, Point point);
+	void onMouseUp(QPropertyTree* tree, Point point);
 	bool onActivate(QPropertyTree* tree, bool force);
 	int floorHeight() const{ return 3; }
 	string valueAsString() const { return value_ ? value_.text : ""; }
@@ -55,7 +55,7 @@ void PropertyRowButton::redraw(PropertyDrawContext& context)
 					   selected() && context.tree->hasFocus(), true, true, false, rowFont(context.tree));
 }
 
-bool PropertyRowButton::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed)
+bool PropertyRowButton::onMouseDown(QPropertyTree* tree, Point point, bool& changed)
 {
 	if(widgetRect(tree).contains(point)){
 		value().pressed = !value().pressed;
@@ -66,7 +66,7 @@ bool PropertyRowButton::onMouseDown(QPropertyTree* tree, QPoint point, bool& cha
 	return false;
 }
 
-void PropertyRowButton::onMouseMove(QPropertyTree* tree, QPoint point)
+void PropertyRowButton::onMouseMove(QPropertyTree* tree, Point point)
 {
 	bool underMouse = widgetRect(tree).contains(point);
 	if(underMouse != underMouse_){
@@ -75,7 +75,7 @@ void PropertyRowButton::onMouseMove(QPropertyTree* tree, QPoint point)
 	}
 }
 
-void PropertyRowButton::onMouseUp(QPropertyTree* tree, QPoint point)
+void PropertyRowButton::onMouseUp(QPropertyTree* tree, Point point)
 {
 	if(widgetRect(tree).contains(point)){
 		onActivate(tree, false);

@@ -225,12 +225,12 @@ bool PropertyRowPointer::onActivate( QPropertyTree* tree, bool force)
 	QMenu menu;
 	ClassMenuItemAdderRowPointer(this, tree).generateMenu(menu, tree->model()->typeStringList(baseType()));
 	tree->_setPressedRow(this);
-	menu.exec(tree->_toScreen(QPoint(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
+	menu.exec(tree->_toScreen(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight())));
 	tree->_setPressedRow(0);
 	return true;
 }
 
-bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) 
+bool PropertyRowPointer::onMouseDown(QPropertyTree* tree, Point point, bool& changed) 
 {
 		if(widgetRect(tree).contains(point)){
 				if(onActivate(tree, false))

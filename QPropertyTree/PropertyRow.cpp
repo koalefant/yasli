@@ -74,8 +74,8 @@ PropertyRow::PropertyRow()
     belongsToFilteredRow_ = false;
     matchFilter_ = true;
 	
-	pos_ =  QPoint(0, 0);
-	size_ = QPoint(-1, -1);
+	pos_ =  Point(0, 0);
+	size_ = Point(-1, -1);
 	plusSize_ = 0;
 	textPos_ = 0;
 	textSizeInitial_ = 0;
@@ -557,7 +557,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 			pulledBefore_ = false;
 
 		if(!visible(tree) && !(isContainer() && pulledUp())){
-			size_ = QPoint(0, 0);
+			size_ = Point(0, 0);
 			DEBUG_TRACE_ROW("row '%s' got zero size", label());
 			layoutChanged_ = false;
 			return;
@@ -568,7 +568,7 @@ void PropertyRow::calculateMinimalSize(const QPropertyTree* tree, int posX, bool
 
 	updateTextSizeInitial(tree, index);
 
-	size_ = QPoint(textSizeInitial_ + widgetSizeMin(tree), isRoot() ? 0 : tree->_defaultRowHeight() + floorHeight());
+	size_ = Point(textSizeInitial_ + widgetSizeMin(tree), isRoot() ? 0 : tree->_defaultRowHeight() + floorHeight());
 
 	pos_.setX(posX);
 	posX += plusSize_;
@@ -1114,12 +1114,12 @@ bool PropertyRow::hasVisibleChildren(const QPropertyTree* tree, bool internalCal
 	return false;
 }
 
-const PropertyRow* PropertyRow::hit(const QPropertyTree* tree, QPoint point) const
+const PropertyRow* PropertyRow::hit(const QPropertyTree* tree, Point point) const
 {
   return const_cast<PropertyRow*>(this)->hit(tree, point);
 }
 
-PropertyRow* PropertyRow::hit(const QPropertyTree* tree, QPoint point)
+PropertyRow* PropertyRow::hit(const QPropertyTree* tree, Point point)
 {
     bool expanded = this->expanded();
     if(isContainer() && pulledUp())

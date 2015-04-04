@@ -52,7 +52,7 @@ public:
 	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
 	bool onActivate( QPropertyTree* tree, bool force) override;
-	bool onMouseDown(QPropertyTree* tree, QPoint point, bool& changed) override;
+	bool onMouseDown(QPropertyTree* tree, Point point, bool& changed) override;
 	bool onContextMenu(QMenu &root, QPropertyTree* tree) override;
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
