@@ -55,7 +55,7 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 {
 	// TODO: use stack string
 	buf.resize(end-begin);
-	char* ptr = &buf.front();
+	char* ptr = buf.empty() ? 0 : &buf.front();
 	while(begin != end){
 		if(*begin != '\\'){
 			*ptr = *begin;
@@ -89,9 +89,9 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 		}
 		++begin;
 	}
-	buf.resize(ptr - &buf.front());
+	buf.resize(ptr - (buf.empty() ? 0 : &buf.front()));
 	if (!buf.empty())
-		out.assign(&buf.front(), &buf.front() + buf.size());
+		out.assign(buf.begin(), buf.end());
 	else
 		out.clear();
 }

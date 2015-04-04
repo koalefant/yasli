@@ -72,6 +72,11 @@ private:
 
 	std::vector<unsigned int> blockSizeOffsets_;
 	MemoryWriter stream_;
+
+#ifdef YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
+	enum BlockType { UNDEFINED, POD, NON_POD };
+	std::vector<BlockType> blockTypes_;
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////////

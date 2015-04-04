@@ -9,13 +9,15 @@
 
 #pragma once
 #include "yasli/BitVectorImpl.h"
-#include "ww/PropertyRowImpl.h"
+#include "ww/PropertyRowField.h"
 
 namespace ww{
 
-class PropertyRowBitVector : public PropertyRowImpl<BitVectorWrapper, PropertyRowBitVector> {
+class PropertyRowBitVector : public PropertyRowField{
 public:
 	enum{ Custom = true };
+	bool isLeaf() const{ return true; }
+	bool isStatic() const{ return false; }
 	PropertyRowBitVector();
 	const char* value() const{ return valueText_.c_str(); }
 	const char* valueAlt() const{ return valueAlt_.c_str(); }
@@ -23,11 +25,12 @@ public:
 	int flags() const { return flags_; }
 	void serializeValue(Archive& ar);
 	bool assignTo(void* object, size_t size);
-	string valueAsString() const{ return valueAlt_; }
-	void setValue(const Serializer& ser) override;
+	string valueAsString() const { return valueAlt_; }
+	void setValue(const Serializer& ser);
 	//bool isStatic() const{ return false; }
 	const EnumDescription* description() { return description_; }
 	PropertyRowWidget* createWidget(PropertyTree* tree);
+	WidgetPlacement widgetPlacement() const { return WIDGET_VALUE; }
 
 	PropertyRow* clone() const{
 		PropertyRowBitVector* result = new PropertyRowBitVector();
@@ -36,7 +39,7 @@ public:
 		result->valueAlt_ = valueAlt_;
 		result->flags_ = flags_;
 		result->description_ = description_;
-		return result;
+		return cloneChildren(result, this);
 	}
 protected:
 	string valueText_;

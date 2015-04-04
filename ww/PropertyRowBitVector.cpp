@@ -16,6 +16,7 @@
 #include "ww/SafeCast.h"
 #include "yasli/Pointers.h"
 #include "yasli/ClassFactory.h"
+#include "yasli/STL.h"
 
 namespace ww{
 class AutoDropCheckComboBox : public CheckComboBox{
@@ -64,8 +65,11 @@ PropertyRowBitVector::PropertyRowBitVector()
 
 void PropertyRowBitVector::setValue(const Serializer& ser) 
 {
-	__super::setValue(ser);
-	flags_ = value_.value;
+	BitVectorWrapper* wrapper = ser.cast<BitVectorWrapper>();
+	flags_ = wrapper->value;
+	if(!description_)
+		description_ = wrapper->description;
+
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);
 		joinStringList(&valueText_, values, '|');
@@ -73,8 +77,9 @@ void PropertyRowBitVector::setValue(const Serializer& ser)
 		joinStringList(&valueAlt_, labels, '|');
 	}
 	else{
+		YASLI_ASSERT(0);
 		typeName_ = "";
-		//value_ = "";
+		valueText_ = "";
 		valueAlt_ = "";
 	}
 }
@@ -109,6 +114,7 @@ PropertyRowWidget* PropertyRowBitVector::createWidget(PropertyTree* tree)
 
 void PropertyRowBitVector::serializeValue(Archive& ar)
 {
+	ar(valueText_, "valueText", "ValueText");
 	ar(valueAlt_, "valueAlt", "ValueAlt");
 	ar(flags_, "flags", "Flags");
 }

@@ -35,7 +35,11 @@
 #define YASLI_STD_PAIR_FIRST_SECOND 0
 #endif
 
-// BinArchives use short hash of name to compact and speed up. Collision on particular level of hierarchy could cause to wrong result.
+
 #ifdef _DEBUG
+// BinArchives use short hash of name to compact and speed up. Collision on particular level of hierarchy could cause to wrong result.
 //#define YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION 
+
+// Node with empty name hasn't size information. So this block will not be suited for search. Using non-empty names in such a block is dangerous.
+#define YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
 #endif
