@@ -170,7 +170,7 @@ protected:
 
 	bool activateRow(PropertyRow* row);
 
-	void setWidget(InplaceWidget* widget);
+	void setWidget(InplaceWidget* widget, PropertyRow* widgetRow);
 
 	void updateAttachedPropertyTree(bool revert);
 
@@ -183,6 +183,7 @@ private:
 protected:
 	std::auto_ptr<PropertyTreeModel> model_;
 	std::auto_ptr<InplaceWidget> widget_; // in-place widget
+	PropertyRow* widgetRow_;
 	vector<PropertyRowMenuHandler*> menuHandlers_;
 	IUIFacade* ui_;
 

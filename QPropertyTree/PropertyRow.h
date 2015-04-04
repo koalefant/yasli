@@ -9,7 +9,7 @@
 
 #pragma once
 
-#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
+#if !defined(__clang__) && defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
 // GCC got support for override keyword in 4.8
 # define override
 #endif
@@ -36,6 +36,7 @@ class PropertyRow;
 class PropertyTreeModel;
 class PopupMenuItem;
 struct PropertyDrawContext;
+class InplaceWidget;
 
 enum ScanResult {
 	SCAN_FINISHED, 
@@ -64,22 +65,6 @@ enum DragCheckBegin {
 	DRAG_CHECK_IGNORE,
 	DRAG_CHECK_SET,
 	DRAG_CHECK_UNSET
-};
-
-class InplaceWidget
-{
-public:
-	InplaceWidget(PropertyRow* row, PropertyTree* tree);
-	virtual ~InplaceWidget();
-	virtual void* actualWidget() { return 0; }
-	virtual void showPopup() {}
-	virtual void commit() = 0;
-	PropertyRow* row() { return row_; }
-	PropertyTreeModel* model() { return model_; }
-protected:
-	PropertyRow* row_;
-	PropertyTree* tree_;
-	PropertyTreeModel* model_;
 };
 
 class PropertyTreeTransaction;

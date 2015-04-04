@@ -6,6 +6,10 @@
 #include <QDesktopWidget>
 #include <QApplication>
 
+#include "InplaceWidgetComboBox.h"
+#include "InplaceWidgetNumber.h"
+#include "InplaceWidgetString.h"
+
 namespace property_tree {
 
 
@@ -42,5 +46,9 @@ Point QUIFacade::cursorPosition()
 {
 	return tree_->mapFromGlobal(QCursor::pos());
 }
+
+InplaceWidget* QUIFacade::createComboBox(ComboBoxClientRow* client) { return new InplaceWidgetComboBox(client, tree_); }
+InplaceWidget* QUIFacade::createNumberWidget(PropertyRowNumberField* row) { return new InplaceWidgetNumber(row, tree_); }
+InplaceWidget* QUIFacade::createStringWidget(PropertyRowString* row) { return new InplaceWidgetString(row, tree_); }
 
 }

@@ -11,14 +11,13 @@
 #include "PropertyTreeModel.h"
 #include "PropertyRowNumberField.h"
 #include "PropertyDrawContext.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 #include "IUIFacade.h"
 
 InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
 {
-	return new InplaceWidgetNumber(tree->model(), this, (QPropertyTree*)tree);
+	return tree->ui()->createNumberWidget(this);
 }
-
 
 void PropertyRowNumberField::redraw(PropertyDrawContext& context)
 {
@@ -70,34 +69,4 @@ bool PropertyRowNumberField::onActivateRelease(PropertyTree* tree)
 }
 
 // ---------------------------------------------------------------------------
-
-InplaceWidgetNumber::InplaceWidgetNumber(PropertyTreeModel* model, PropertyRowNumberField* row, QPropertyTree* tree)
-: InplaceWidget(row, tree)
-, row_(row)
-, entry_(new QLineEdit(tree))
-, tree_(tree)
-{
-	//entry_->setAlignment(Qt::AlignCenter);
-	entry_->setText(row_->valueAsString().c_str());
-	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
-
-	entry_->selectAll();
-}
-
-
-void InplaceWidgetNumber::onEditingFinished()
-{
-	tree_->model()->rowAboutToBeChanged(row());
-	yasli::string str = entry_->text().toLocal8Bit().data();
-	if(row_->setValueFromString(str.c_str()) || row_->multiValue())
-		tree_->model()->rowChanged(row());
-	else
-		tree_->_cancelWidget();
-}
-
-void InplaceWidgetNumber::commit()
-{
-	if(entry_)
-		onEditingFinished();
-}
 

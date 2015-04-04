@@ -18,6 +18,7 @@
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "IMenu.h"
+#include "IUIFacade.h"
 #include "Unicode.h"
 
 // ---------------------------------------------------------------------------
@@ -37,7 +38,7 @@ bool PropertyRowString::assignTo(yasli::wstring& str)
 
 InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
 {
-	return new InplaceWidgetString(this, (QPropertyTree*)tree);
+	return tree->ui()->createStringWidget(this);
 }
 
 yasli::string PropertyRowString::valueAsString() const

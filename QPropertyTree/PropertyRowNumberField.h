@@ -9,31 +9,8 @@
 
 #pragma once
 #include "PropertyRow.h"
-#include <QLineEdit>
 
-class QPropertyTree;
 class PropertyRowNumberField;
-class InplaceWidgetNumber : public QObject, public InplaceWidget
-{
-	Q_OBJECT
-public:
-	InplaceWidgetNumber(PropertyTreeModel* mode, PropertyRowNumberField* numberField, QPropertyTree* tree);
-	~InplaceWidgetNumber(){
-		if (entry_)
-			entry_->setParent(0);
-		entry_->deleteLater();
-		entry_ = 0;
-	}
-
-	void commit();
-	void* actualWidget() { return entry_; }
-public slots:
-	void onEditingFinished();
-protected:
-	QLineEdit* entry_;
-	PropertyRowNumberField* row_;
-	QPropertyTree* tree_;
-};
 
 // ---------------------------------------------------------------------------
 

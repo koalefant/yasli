@@ -756,7 +756,7 @@ void QPropertyTree::startFilter(const char* filter)
 void QPropertyTree::_arrangeChildren()
 {
 	if(widget_.get()){
-		PropertyRow* row = widget_->row();
+		PropertyRow* row = widgetRow_;
 		if(row->visible(this)){
 			QWidget* w = (QWidget*)widget_->actualWidget();
 			YASLI_ASSERT(w);
@@ -797,7 +797,7 @@ QPoint QPropertyTree::_toScreen(Point point) const
 	return mapToGlobal(pt);
 }
 
-void QPropertyTree::attachPropertyTree(QPropertyTree* propertyTree) 
+void QPropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
 { 
 	if(attachedPropertyTree_)
 		disconnect((QPropertyTree*)attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));

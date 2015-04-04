@@ -1286,19 +1286,6 @@ YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
 
 // ---------------------------------------------------------------------------
 
-InplaceWidget::InplaceWidget(PropertyRow* row, PropertyTree* tree)
-: row_(row)
-, model_(tree->model())
-, tree_(tree)
-{
-}
-
-InplaceWidget::~InplaceWidget()
-{
-	//if(actualWidget())
-	//	actualWidget()->setParent(0);
-	//tree_->setFocus();
-}
 
 FORCE_SEGMENT(PropertyRowNumber)
 FORCE_SEGMENT(PropertyRowStringList)

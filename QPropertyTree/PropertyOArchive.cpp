@@ -13,7 +13,7 @@
 #include "yasli/STL.h"
 #include "PropertyOArchive.h"
 #include "PropertyTreeModel.h"
-#include "QPropertyTree.h"
+#include "PropertyTree.h"
 
 #include "PropertyRowContainer.h"
 #include "PropertyRowBool.h"

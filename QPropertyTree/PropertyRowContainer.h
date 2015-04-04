@@ -10,7 +10,6 @@
 #pragma once
 #include "PropertyRow.h"
 
-
 class PropertyRowContainer;
 struct ContainerMenuHandler : PropertyRowMenuHandler
 {

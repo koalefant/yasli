@@ -122,16 +122,16 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	case Qt::Key_Menu:
 		{
 			if (ev->modifiers() == Qt::NoModifier) {
-			std::auto_ptr<IMenu> menu(ui()->createMenu());
+				std::auto_ptr<IMenu> menu(ui()->createMenu());
 
-			if(onContextMenu(row, *menu)){
-				Rect rect(row->rect());
-				menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
+				if(onContextMenu(row, *menu)){
+					Rect rect(row->rect());
+					menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
+				}
+				return true;
 			}
-			return true;
+			break;
 		}
-		break;
-	}
 	}
 
 	PropertyRow* focusedRow = model()->focusedRow();
@@ -614,13 +614,13 @@ void PropertyTree::apply(bool continuous)
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 {
-	if(!widget_.get() || widget_->row() != row){
+	if(!widget_.get() || widgetRow_ != row){
 		interruptDrag();
-		setWidget(0);
+		setWidget(0, 0);
 		InplaceWidget* newWidget = 0;
 		if ((ignoreReadOnly && row->userReadOnlyRecurse()) || !row->userReadOnly())
 			newWidget = row->createWidget(this);
-		setWidget(newWidget);
+		setWidget(newWidget, row);
 		return newWidget != 0;
 	}
 	return false;
@@ -779,9 +779,10 @@ void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 
 }
 
-void PropertyTree::setWidget(InplaceWidget* widget)
+void PropertyTree::setWidget(InplaceWidget* widget, PropertyRow* widgetRow)
 {
 	widget_.reset(widget);
+	widgetRow_ = widgetRow;
 	model()->dismissUpdate();
 	if(widget_.get()){
 		YASLI_ASSERT(widget_->actualWidget());

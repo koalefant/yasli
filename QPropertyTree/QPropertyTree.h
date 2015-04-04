@@ -61,7 +61,7 @@ public:
 	void onSignalChanged() override { signalChanged(); }
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
 
-	void attachPropertyTree(QPropertyTree* propertyTree) override;
+	void attachPropertyTree(PropertyTree* propertyTree) override;
 
 public slots:
 	void onAttachedTreeChanged();

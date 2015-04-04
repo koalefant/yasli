@@ -30,7 +30,7 @@ public:
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return false; }
 
-	bool onActivate(QPropertyTree* tree, bool force) override
+	bool onActivate(PropertyTree* tree, bool force) override
 	{
 		return false;
 	}
@@ -41,7 +41,7 @@ public:
 	yasli::wstring valueAsWString() const{ return L""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	void serializeValue(Archive& ar) {}
-	int widgetSizeMin(const QPropertyTree*) const{ return 18; }
+	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
 	int height() const{ return 16; }
 protected:
 	IconXPM icon_;
@@ -73,7 +73,7 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return true; }
-	bool onActivate(QPropertyTree* tree, bool force) override
+	bool onActivate(PropertyTree* tree, bool force) override
 	{
 		tree->model()->rowAboutToBeChanged(this);
 		value_ = !value_;
@@ -86,7 +86,7 @@ public:
 			return DRAG_CHECK_IGNORE;
 		return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
 	}
-	bool onMouseDragCheck(QPropertyTree* tree, bool value) override
+	bool onMouseDragCheck(PropertyTree* tree, bool value) override
 	{
 		if (value_ != value) {
 			tree->model()->rowAboutToBeChanged(this);
@@ -99,7 +99,7 @@ public:
 	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
-	int widgetSizeMin(const QPropertyTree*) const override{ return 18; }
+	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
 	int height() const{ return 16; }
 
 	IconXPM iconTrue_;

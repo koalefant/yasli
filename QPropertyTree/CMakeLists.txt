@@ -22,6 +22,9 @@ set(SOURCES
 	frontend-qt/QDrawContext.h
 	frontend-qt/QUIFacade.cpp
 	frontend-qt/QUIFacade.h
+	frontend-qt/InplaceWidgetComboBox.h
+	frontend-qt/InplaceWidgetNumber.h
+	frontend-qt/InplaceWidgetString.h
 	Color.cpp
 	ConstStringList.cpp
 	PropertyDrawContext.cpp

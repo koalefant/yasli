@@ -85,6 +85,10 @@ public:
 
 	Point screenSize() override;
 	int textWidth(const char* text, Font font) override;
+
+	InplaceWidget* createComboBox(ComboBoxClientRow* client) override;
+	InplaceWidget* createNumberWidget(PropertyRowNumberField* row) override;
+	InplaceWidget* createStringWidget(PropertyRowString* row) override;
 private:
 	QPropertyTree* tree_;
 };
