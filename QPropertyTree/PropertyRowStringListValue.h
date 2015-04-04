@@ -156,7 +156,7 @@ class InplaceWidgetComboBox : public QObject, public InplaceWidget
 public:
 	InplaceWidgetComboBox(PropertyRow* row, ComboBoxClientRow* client, QPropertyTree* tree)
 	: InplaceWidget(row, tree)
-	, comboBox_(new QComboBox())
+	, comboBox_(new QComboBox(tree))
 	, client_(client)
 	, tree_(tree)
 	{
@@ -178,10 +178,12 @@ public:
 
 	~InplaceWidgetComboBox()
 	{
-		comboBox_->hide();
-		comboBox_->setParent(0);
-		comboBox_->deleteLater();
-		comboBox_ = 0;
+		if (comboBox_) {
+			comboBox_->hide();
+			comboBox_->setParent(0);
+			comboBox_->deleteLater();
+			comboBox_ = 0;
+		}
 	}	
 
 	void commit(){}

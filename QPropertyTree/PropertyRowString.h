@@ -43,7 +43,7 @@ class InplaceWidgetString : public QObject, public InplaceWidget
 public:
   InplaceWidgetString(PropertyRowString* row, QPropertyTree* tree)
 	: InplaceWidget(row, tree)
-	, entry_(new QLineEdit())
+	, entry_(new QLineEdit(tree))
 	, tree_(tree)
 	{
 #ifdef _MSC_VER

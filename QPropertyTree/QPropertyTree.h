@@ -95,6 +95,7 @@ protected:
 	bool canBePasted(PropertyRow* destination);
 	bool canBePasted(const char* destinationType);
 	void interruptDrag() override;
+	void defocusInplaceEditor() override;
 	class DragController;
 
 	void updateHeights();

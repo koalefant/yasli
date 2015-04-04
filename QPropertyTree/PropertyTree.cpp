@@ -751,8 +751,10 @@ void PropertyTree::onRowMenuDecompose(PropertyRow* row)
 
 void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 {
-	if(widget_.get())
+	if(widget_.get()) {
+		defocusInplaceEditor();
 		widget_.reset();
+	}
 
 	if(immediateUpdate_){
 		if (needApply)
@@ -787,6 +789,7 @@ void PropertyTree::setWidget(InplaceWidget* widget)
 		//	((QWidget*)widget_->actualWidget())->setParent(this);
 		_arrangeChildren();
 		widget_->showPopup();
+		repaint();
 	}
 }
 
@@ -1045,23 +1048,6 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 	return true;
 }
 
-PropertyTree::HitTest PropertyTree::hitTest(PropertyRow* row, const Point& pointInWindowSpace, const Rect& rowRect)
-{
-	Point point = pointToRootSpace(pointInWindowSpace);
-
-	if(!row->hasVisibleChildren(this) && row->plusRect(this).contains(point))
-		return TREE_HIT_PLUS;
-
-	if(row->textRect(this).contains(point))
-		return TREE_HIT_TEXT;
-
-	if(rowRect.contains(point))
-		return TREE_HIT_ROW;
-
-	return TREE_HIT_NONE;
-
-}
-
 PropertyRow* PropertyTree::rowByPoint(const Point& pt)
 {
 	if (!model_->root())
@@ -1104,6 +1090,13 @@ PropertyTree::PropertyTree(const PropertyTree&)
 PropertyTree& PropertyTree::operator=(const PropertyTree&)
 {
 	return *this;
+}
+
+Point PropertyTree::_toWidget(Point point) const
+{
+	Point pt ( point.x() - offset_.x() + area_.left(), 
+		point.y() - offset_.y() + area_.top() );
+	return pt;
 }
 
 // vim:ts=4 sw=4:

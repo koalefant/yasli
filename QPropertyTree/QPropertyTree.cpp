@@ -711,8 +711,17 @@ bool QPropertyTree::hasFocusOrInplaceHasFocus() const
 	if (hasFocus())
 		return true;
 
-	if (widget_.get() && widget_->actualWidget() && ((QWidget*)widget_->actualWidget())->hasFocus())
-		return true;
+	QWidget* inplaceWidget = 0;
+	if (widget_.get() && widget_->actualWidget())
+		inplaceWidget = (QWidget*)widget_->actualWidget();
+
+	if (inplaceWidget) {
+		if (inplaceWidget->hasFocus())
+			return true;
+		if (inplaceWidget->isAncestorOf(QWidget::focusWidget()))
+			return true;
+
+	}
 
 	return false;
 }
@@ -1087,7 +1096,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 		if(row && !row->isSelectable())
 			row = row->parent();
 		if(row){
-			if(onRowLMBDown(row, row->rect(), pointToRootSpace(ev->pos()), ev->modifiers().testFlag(Qt::ControlModifier)))
+			if(onRowLMBDown(row, row->rect(), _toWidget(pointToRootSpace(ev->pos())), ev->modifiers().testFlag(Qt::ControlModifier)))
 				capturedRow_ = row;
 			else if (!dragCheckMode_){
 				row = rowByPoint(ev->pos());
@@ -1109,28 +1118,11 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			model()->setFocusedRow(row);
 			update();
 
-			onRowRMBDown(row, row->rect(), pointToRootSpace(point));
+			onRowRMBDown(row, row->rect(), _toWidget(pointToRootSpace(point)));
 		}
 		else{
 			QRect rect = this->rect();
-			onRowRMBDown(model()->root(), rect, pointToRootSpace(point));
-		}
-	}
-	else if (ev->button() == Qt::MiddleButton)
-	{
-		QPoint point = ev->pos();
-		PropertyRow* row = rowByPoint(point);
-		if(row){
-			switch(hitTest(row, point, row->rect())){
-			case TREE_HIT_PLUS:
-			break;
-			case TREE_HIT_NONE:
-			default:
-			model()->setFocusedRow(row);
-			update();
-			break;
-			}
-
+			onRowRMBDown(model()->root(), rect, _toWidget(pointToRootSpace(point)));
 		}
 	}
 }
@@ -1155,7 +1147,7 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			 PropertyRow* row = rowByPoint(point);
 			 if(capturedRow_){
 				 QRect rowRect = capturedRow_->rect();
-				 onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(ev->pos()));
+				 onRowLMBUp(capturedRow_, rowRect, _toWidget(pointToRootSpace(ev->pos())));
 				 mouseStillTimer_->stop();
 				 capturedRow_ = 0;
 				 update();
@@ -1172,6 +1164,12 @@ void QPropertyTree::focusInEvent(QFocusEvent* ev)
 {
 	QWidget::focusInEvent(ev);
 	widget_.reset();
+}
+
+void QPropertyTree::defocusInplaceEditor()
+{
+	if (hasFocusOrInplaceHasFocus())
+		setFocus();
 }
 
 void QPropertyTree::keyPressEvent(QKeyEvent* ev)

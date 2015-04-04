@@ -94,7 +94,7 @@ public:
 	PropertyTreeModel* model() { return model_.get(); }
 	const PropertyTreeModel* model() const { return model_.get(); }
 	IUIFacade* ui() const { return ui_; }
-	void _cancelWidget(){ widget_.reset(); }
+	void _cancelWidget(){ defocusInplaceEditor(); widget_.reset(); }
 	virtual bool _isDragged(const PropertyRow* row) const = 0;
 	bool _isCapturedRow(const PropertyRow* row) const;
 
@@ -105,9 +105,11 @@ public:
 	virtual bool hasFocusOrInplaceHasFocus() const = 0;
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void clearMenuHandlers();
+	Point _toWidget(Point point) const;
 	IconXPMCache* _iconCache() const{ return iconCache_.get(); }
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
+	virtual void defocusInplaceEditor() = 0;
 
 	virtual void signalAboutToSerialize(yasli::Archive& ar) = 0;
 	virtual void signalChanged() = 0;
@@ -119,14 +121,7 @@ public:
 protected:
 	virtual bool canBePasted(PropertyRow* destination) = 0;
 	virtual bool canBePasted(const char* destinationType) = 0;
-	enum HitTest{
-		TREE_HIT_PLUS,
-		TREE_HIT_TEXT,
-		TREE_HIT_ROW,
-		TREE_HIT_NONE
-	};
 	PropertyRow* rowByPoint(const Point& point);
-	HitTest hitTest(PropertyRow* row, const Point& pointInWindowSpace, const Rect& rowRect);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
 

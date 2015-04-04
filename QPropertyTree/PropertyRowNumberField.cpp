@@ -74,7 +74,7 @@ bool PropertyRowNumberField::onActivateRelease(PropertyTree* tree)
 InplaceWidgetNumber::InplaceWidgetNumber(PropertyTreeModel* model, PropertyRowNumberField* row, QPropertyTree* tree)
 : InplaceWidget(row, tree)
 , row_(row)
-, entry_(new QLineEdit())
+, entry_(new QLineEdit(tree))
 , tree_(tree)
 {
 	//entry_->setAlignment(Qt::AlignCenter);

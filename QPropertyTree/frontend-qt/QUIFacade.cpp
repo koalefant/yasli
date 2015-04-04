@@ -27,7 +27,7 @@ Point QUIFacade::screenSize()
 
 IMenu* QUIFacade::createMenu()
 {
-	return new QtMenu("", tree_);
+	return new QtMenu(new QMenu(), tree_);
 }
 
 void QUIFacade::setCursor(Cursor cursor)
