@@ -99,7 +99,6 @@ public:
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void clearMenuHandlers();
 	Point _toWidget(Point point) const;
-	IconXPMCache* _iconCache() const{ return iconCache_.get(); }
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;

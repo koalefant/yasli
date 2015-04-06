@@ -36,7 +36,6 @@ class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
 class PopupMenuItem;
-struct PropertyDrawContext;
 class InplaceWidget;
 
 enum ScanResult {
@@ -202,10 +201,9 @@ public:
 	void adjustHoveredRect(Rect& hoveredRect);
 	Font rowFont(const PropertyTree* tree) const;
 
-	void drawRow(PropertyDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
-	void drawStaticText(QPainter& p, const Rect& widgetRect);
+	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
 
-	virtual void redraw(PropertyDrawContext& context);
+	virtual void redraw(IDrawContext& context);
 	virtual InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
 
 	virtual bool isContainer() const{ return false; }

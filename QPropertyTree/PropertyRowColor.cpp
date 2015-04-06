@@ -1,7 +1,6 @@
 #include "PropertyRowColor.h"
 #include "PropertyDrawContext.h"
 #include "PropertyTree.h"
-#include <QPainter>
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "Rect.h"
@@ -16,7 +15,7 @@ int PropertyRowColor::widgetSizeMin(const PropertyTree* tree) const
 	return tree->_defaultRowHeight();
 }
 
-void PropertyRowColor::redraw(PropertyDrawContext& context)
+void PropertyRowColor::redraw(IDrawContext& context)
 {
 	context.drawColor(context.widgetRect.adjusted(1,1,-1,-3), value_);
 }

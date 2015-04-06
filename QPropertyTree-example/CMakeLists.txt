@@ -11,9 +11,9 @@ endif (MSVC)
 find_package(Qt5Widgets REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-if (CMAKE_COMPILER_IS_GNUCC)
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-endif (CMAKE_COMPILER_IS_GNUCC)
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif (UNIX)
 
 #file(GLOB SOURCES *.h *.cpp)
 set(SOURCES 

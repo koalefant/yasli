@@ -10,7 +10,7 @@
 #include "PropertyRowPointer.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "Serialization.h"
 #include "Unicode.h"
 #include "IMenu.h"
@@ -178,7 +178,7 @@ yasli::wstring PropertyRowPointer::generateLabel() const
 		return str;
 }
 
-void PropertyRowPointer::redraw(PropertyDrawContext& context)
+void PropertyRowPointer::redraw(IDrawContext& context)
 {
 	Rect widgetRect = context.widgetRect;
 	Rect rt = widgetRect.adjusted(-1, 0, 0, 1);

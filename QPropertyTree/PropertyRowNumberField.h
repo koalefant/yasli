@@ -28,7 +28,7 @@ public:
 	InplaceWidget* createWidget(PropertyTree* tree) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	void redraw(PropertyDrawContext& context) override;
+	void redraw(IDrawContext& context) override;
 	bool onActivate(PropertyTree* tree, bool force) override;
 	bool onActivateRelease(PropertyTree* tree) override;
 	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;

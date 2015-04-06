@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Color.h"
+#include "Rect.h"
 
 namespace yasli { struct IconXPM; }
+
+class PropertyTree;
 
 namespace property_tree {
 
@@ -22,6 +25,19 @@ enum CheckState {
 
 struct IDrawContext
 {
+	const PropertyTree* tree;
+	Rect widgetRect;
+	Rect lineRect;
+	bool captured;
+	bool pressed;
+
+	IDrawContext()
+	: tree(0)
+	, captured(false)
+	, pressed(false)
+	{
+	}
+
 	virtual void drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) = 0;
 	virtual void drawCheck(const Rect& rect, bool disabled, CheckState checked) = 0;
 	virtual void drawColor(const Rect& rect, const Color& color) = 0;

@@ -12,7 +12,7 @@
 #include "yasli/BinArchive.h"
 #include "QPropertyTree.h"
 #include "frontend-qt/QUIFacade.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
 

@@ -12,7 +12,7 @@
 #include "yasli/BinArchive.h"
 #include "yasli/Pointers.h"
 #include "PropertyTree.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
 
@@ -70,7 +70,6 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , lastStillPosition_(-1, -1)
 , pressedRow_(0)
 , capturedRow_(0)
-, iconCache_(new IconXPMCache())
 , dragCheckMode_(false)
 , dragCheckValue_(false)
 , archiveContext_()

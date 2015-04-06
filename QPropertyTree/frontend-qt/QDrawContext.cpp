@@ -10,9 +10,32 @@
 #include <QStyleOption>
 #include <QIcon>
 
-void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& _r, const QColor& border, int radius);
-
 namespace property_tree {
+
+void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width)
+{
+	QRect r = _r;
+	int dia = 2*radius;
+
+	p.setPen(QColor(color));
+	p.drawRoundedRect(r, dia, dia);
+}
+
+void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& _r, const QColor& border, int radius)
+{
+	bool wasAntialisingSet = p.renderHints().testFlag(QPainter::Antialiasing);
+	p.setRenderHints(QPainter::Antialiasing, true);
+
+	p.setBrush(brush);
+	p.setPen(QPen(border, 1.0));
+	QRectF adjustedRect = _r;
+	adjustedRect.adjust(0.5f, 0.5f, -0.5f, -0.5f);
+	p.drawRoundedRect(adjustedRect, radius, radius);
+
+	p.setRenderHints(QPainter::Antialiasing, wasAntialisingSet);
+}
+
+// ---------------------------------------------------------------------------
 
 static QColor interpolate(const QColor& a, const QColor& b, float k)
 {
@@ -146,7 +169,7 @@ void QDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool sele
 
 void QDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
 {
-	QImage* image = tree->_iconCache()->getImageForIcon(icon);
+	QImage* image = iconCache_->getImageForIcon(icon);
 	if (!image)
 		return;
 	int x = rect.left() + (rect.width() - image->width()) / 2;

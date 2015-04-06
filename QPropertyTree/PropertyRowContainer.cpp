@@ -11,7 +11,7 @@
 #include "PropertyRowPointer.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyRowPointer.h"
 
@@ -62,7 +62,7 @@ protected:
 	bool insert_;
 };
 
-void PropertyRowContainer::redraw(PropertyDrawContext& context)
+void PropertyRowContainer::redraw(IDrawContext& context)
 {
 	QRect widgetRect = context.widgetRect;
 	if (widgetRect.width() == 0)

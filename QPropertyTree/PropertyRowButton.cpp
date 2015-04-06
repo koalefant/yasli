@@ -12,7 +12,7 @@
 #include "yasli/ClassFactory.h"
 #include "yasli/decorators/Button.h"
 #include "PropertyTree.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
 
@@ -22,7 +22,7 @@ using yasli::Button;
 class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
-	void redraw(PropertyDrawContext& context) override;
+	void redraw(IDrawContext& context) override;
 	bool onMouseDown(PropertyTree* tree, Point point, bool& changed);
 	void onMouseMove(PropertyTree* tree, Point point);
 	void onMouseUp(PropertyTree* tree, Point point);
@@ -45,7 +45,7 @@ PropertyRowButton::PropertyRowButton()
 }
 	
 
-void PropertyRowButton::redraw(PropertyDrawContext& context)
+void PropertyRowButton::redraw(IDrawContext& context)
 {
 	Rect buttonRect(context.widgetRect.adjusted(-1, 0, 1, 2));
 

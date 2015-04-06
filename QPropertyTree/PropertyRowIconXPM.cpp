@@ -9,7 +9,7 @@
 
 #include "yasli/ClassFactory.h"
 
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyRowImpl.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
@@ -21,7 +21,7 @@ using yasli::IconXPMToggle;
 
 class PropertyRowIconXPM : public PropertyRow{
 public:
-	void redraw(PropertyDrawContext& context) override
+	void redraw(IDrawContext& context) override
 	{
 		context.drawIcon(context.widgetRect, icon_);
 	}
@@ -49,7 +49,7 @@ protected:
 
 class PropertyRowIconToggle : public PropertyRow{
 public:
-	void redraw(PropertyDrawContext& context) override
+	void redraw(IDrawContext& context) override
 	{
 		IconXPM& icon = value_ ? iconTrue_ : iconFalse_;
 		context.drawIcon(context.widgetRect, icon);

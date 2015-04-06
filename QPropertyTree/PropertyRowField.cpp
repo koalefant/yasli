@@ -8,11 +8,10 @@
  */
 
 #include "PropertyRowField.h"
-#include "PropertyDrawContext.h"
-#include <QIcon>
+#include "IDrawContext.h"
 #include "Rect.h"
 
-void PropertyRowField::redraw(PropertyDrawContext& context)
+void PropertyRowField::redraw(IDrawContext& context)
 {
 	int buttonCount = this->buttonCount();
 	int offset = 0;

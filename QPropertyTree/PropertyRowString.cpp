@@ -11,7 +11,7 @@
 
 #include "PropertyRowString.h"
 #include "PropertyTreeModel.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyTree.h"
 
 #include "yasli/STL.h"

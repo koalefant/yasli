@@ -10,7 +10,7 @@
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyRowContainer.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "yasli/ClassFactory.h"
 #include "Unicode.h"
 #include "Serialization.h"
@@ -304,10 +304,6 @@ SharedPtr<PropertyRow> PropertyRow::clone(ConstStringList* constStrings) const
 	ia(clonedRow, "row", "Row");
 	PropertyRow::setConstStrings(0);
 	return clonedRow;
-}
-
-void PropertyRow::drawStaticText(QPainter& p, const Rect& widgetRect)
-{
 }
 
 void PropertyRow::serialize(Archive& ar)
@@ -888,7 +884,7 @@ Font PropertyRow::rowFont(const PropertyTree* tree) const
 	return hasVisibleChildren(tree) || isContainer() ? FONT_BOLD : FONT_NORMAL;
 }
 
-void PropertyRow::drawRow(PropertyDrawContext& context, const PropertyTree* tree, int index, bool selectionPass)
+void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int index, bool selectionPass)
 {
 	Rect rowRect = rect();
 	Rect selectionRect;
@@ -1249,7 +1245,7 @@ PropertyRow* PropertyRow::rowByHorizontalIndex(PropertyTree* tree, int index)
 	return op.row_ ? op.row_ : this;
 }
 
-void PropertyRow::redraw(PropertyDrawContext& context)
+void PropertyRow::redraw(IDrawContext& context)
 {
 
 }

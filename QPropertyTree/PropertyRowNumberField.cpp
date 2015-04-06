@@ -10,7 +10,7 @@
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "PropertyRowNumberField.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyTree.h"
 #include "IUIFacade.h"
 
@@ -19,7 +19,7 @@ InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
 	return tree->ui()->createNumberWidget(this);
 }
 
-void PropertyRowNumberField::redraw(PropertyDrawContext& context)
+void PropertyRowNumberField::redraw(IDrawContext& context)
 {
     if(multiValue())
 		context.drawEntry(L" ... ", false, userReadOnly(), 0);

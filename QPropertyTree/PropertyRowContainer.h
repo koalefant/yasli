@@ -37,7 +37,7 @@ public:
 	bool isContainer() const override{ return true; }
 	bool onActivate( PropertyTree* tree, bool force) override;
 	bool onContextMenu(IMenu& item, PropertyTree* tree) override;
-	void redraw(PropertyDrawContext& context) override;
+	void redraw(IDrawContext& context) override;
 	bool onKeyDown(PropertyTree* tree, const KeyEvent* key) override;
 
 	void labelChanged() override;

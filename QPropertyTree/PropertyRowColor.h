@@ -17,7 +17,7 @@ public:
 	PropertyRowColor();
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_PULLED; }
 	int widgetSizeMin(const PropertyTree* tree) const override;
-	void redraw(PropertyDrawContext& context) override;
+	void redraw(IDrawContext& context) override;
 	void closeNonLeaf(const yasli::Serializer& ser) override;
 
 	bool isLeaf() const override{ return false; }

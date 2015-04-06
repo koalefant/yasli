@@ -7,12 +7,13 @@ class QPainter;
 
 namespace property_tree {
 
-class QDrawContext : public PropertyDrawContext
+class QDrawContext : public IDrawContext
 {
 public:
 	QDrawContext(QPropertyTree* tree, QPainter* painter)
 	: tree_(tree)
 	, painter_(painter)
+	, iconCache_(new IconXPMCache())
 	{
 
 		this->tree = tree;
@@ -34,6 +35,10 @@ public:
 private:
 	QPropertyTree* tree_;
 	QPainter* painter_;
+	std::auto_ptr<IconXPMCache> iconCache_;
 };
+
+void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& r, const QColor& borderColor, int radius);
+void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width);
 
 }

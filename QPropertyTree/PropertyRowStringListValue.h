@@ -11,7 +11,7 @@
 #pragma once
 #include "PropertyRowImpl.h"
 #include "PropertyTreeModel.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyTree.h"
 #include "IUIFacade.h"
 #include "Rect.h"
@@ -57,7 +57,7 @@ public:
 	int widgetSizeMin(const PropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
-	void redraw(PropertyDrawContext& context) override
+	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
 			context.drawEntry(L" ... ", false, true, 0);
@@ -117,7 +117,7 @@ public:
 	int widgetSizeMin(const PropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 
-	void redraw(PropertyDrawContext& context) override
+	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
 			context.drawEntry(L" ... ", false, true, 0);

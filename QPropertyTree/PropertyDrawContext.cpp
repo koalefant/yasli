@@ -176,28 +176,4 @@ QImage* IconXPMCache::getImageForIcon(const yasli::IconXPM& icon)
 
 // ---------------------------------------------------------------------------
 
-void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width)
-{
-	QRect r = _r;
-	int dia = 2*radius;
-
-	p.setPen(QColor(color));
-	p.drawRoundedRect(r, dia, dia);
-}
-
-void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& _r, const QColor& border, int radius)
-{
-	bool wasAntialisingSet = p.renderHints().testFlag(QPainter::Antialiasing);
-	p.setRenderHints(QPainter::Antialiasing, true);
-
-	p.setBrush(brush);
-	p.setPen(QPen(border, 1.0));
-	QRectF adjustedRect = _r;
-	adjustedRect.adjust(0.5f, 0.5f, -0.5f, -0.5f);
-	p.drawRoundedRect(adjustedRect, radius, radius);
-
-	p.setRenderHints(QPainter::Antialiasing, wasAntialisingSet);
-}
-
-// ---------------------------------------------------------------------------
 

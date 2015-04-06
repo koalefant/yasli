@@ -10,7 +10,7 @@
 #include "PropertyRowBool.h"
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "yasli/ClassFactory.h"
 #include "Serialization.h"
 
@@ -28,7 +28,7 @@ bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 	return true;
 }
 
-void PropertyRowBool::redraw(PropertyDrawContext& context)
+void PropertyRowBool::redraw(IDrawContext& context)
 {
 	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }

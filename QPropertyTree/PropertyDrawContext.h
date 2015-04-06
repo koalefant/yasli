@@ -11,7 +11,6 @@
 
 #include <map>
 #include <vector>
-#include <QRect>
 #include "Color.h"
 #include "IDrawContext.h"
 #include "Rect.h"
@@ -44,26 +43,5 @@ private:
 	static bool parseXPM(RGBAImage* out, const yasli::IconXPM& xpm);
 	typedef std::map<const char* const*, BitmapCache> IconToBitmap;
 	IconToBitmap iconToImageMap_;
-};
-
-
-void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& r, const QColor& borderColor, int radius);
-void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width);
-
-
-class PropertyTree;
-struct PropertyDrawContext : property_tree::IDrawContext {
-	const PropertyTree* tree;
-	Rect widgetRect;
-	Rect lineRect;
-	bool captured;
-	bool pressed;
-
-	PropertyDrawContext()
-	: tree(0)
-	, captured(false)
-	, pressed(false)
-	{
-	}
 };
 

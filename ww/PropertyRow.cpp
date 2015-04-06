@@ -306,10 +306,6 @@ PropertyRow* PropertyRow::cloneChildren(PropertyRow* result, const PropertyRow* 
 	return result;
 }
 
-void PropertyRow::drawStaticText(Gdiplus::Graphics* gr, const Gdiplus::Rect& widgetRect)
-{
-}
-
 void PropertyRow::serialize(Archive& ar)
 {
 	serializeValue(ar);

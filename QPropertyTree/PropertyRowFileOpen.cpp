@@ -10,7 +10,7 @@
 #include "yasli/ClassFactory.h"
 
 #include "PropertyRowFileOpen.h"
-#include "PropertyDrawContext.h"
+#include "IDrawContext.h"
 #include "PropertyRowImpl.h"
 #include "QPropertyTree.h"
 #include "PropertyTreeModel.h"

@@ -28,6 +28,6 @@ public:
 	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const{ return yasli::IconXPM(); }
 	virtual bool usePathEllipsis() const { return false; }
 
-	void redraw(PropertyDrawContext& context) override;
+	void redraw(IDrawContext& context) override;
 };
 
