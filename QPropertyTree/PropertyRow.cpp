@@ -803,15 +803,16 @@ const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, cons
 
 bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {
+	using namespace property_tree;
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parent());
 		ContainerMenuHandler menuHandler(tree, container);
 		menuHandler.element = this;
-		if(ev->key() == Qt::Key_Delete && ev->modifiers() == Qt::NoModifier) {
+		if(ev->key() == KEY_DELETE && ev->modifiers() == 0) {
 			menuHandler.onMenuChildRemove();
 			return true;
 		}
-		else if(ev->key() == Qt::Key_Insert && ev->modifiers() == Qt::SHIFT){
+		else if(ev->key() == KEY_INSERT && ev->modifiers() == MODIFIER_SHIFT){
 			menuHandler.onMenuChildInsertBefore();
 			return true;
 		}

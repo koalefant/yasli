@@ -36,10 +36,19 @@ IMenu* QUIFacade::createMenu()
 
 void QUIFacade::setCursor(Cursor cursor)
 {
+	switch (cursor)
+	{
+	case CURSOR_SLIDE:
+	tree_->setCursor(QCursor(Qt::SizeHorCursor));
+	return;
+	}
+
+	tree_->setCursor(QCursor());
 }
 
 void QUIFacade::unsetCursor()
 {
+	tree_->unsetCursor();
 }
 
 Point QUIFacade::cursorPosition()

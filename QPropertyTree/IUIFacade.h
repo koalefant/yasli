@@ -30,6 +30,47 @@ struct ComboBoxClientRow {
 
 namespace property_tree {
 
+enum Key
+{
+	KEY_UNKNOWN = -1,
+	KEY_BACKSPACE,
+	KEY_DELETE,
+	KEY_DOWN,
+	KEY_END,
+	KEY_ESCAPE,
+	KEY_F2,
+	KEY_HOME,
+	KEY_INSERT,
+	KEY_LEFT,
+	KEY_MENU,
+	KEY_RETURN,
+	KEY_RIGHT,
+	KEY_SPACE,
+	KEY_UP,
+	KEY_C,
+	KEY_V,
+	KEY_Z,
+	KEY_COUNT
+};
+
+enum Modifier
+{
+	MODIFIER_CONTROL = 1 << 0,
+	MODIFIER_SHIFT = 1 << 1,
+	MODIFIER_ALT = 1 << 2
+};
+
+struct KeyEvent
+{
+	int key_;
+	int modifiers_;
+
+	KeyEvent() : key_(0), modifiers_(0) {}
+
+	int key() const { return key_; }
+	int modifiers() const { return modifiers_; }
+};
+
 
 enum Cursor
 {

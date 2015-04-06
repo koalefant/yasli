@@ -68,6 +68,31 @@ Output clamp(Input value, Output min, Output max)
 
 template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, std::numeric_limits<Out>::lowest(), std::numeric_limits<Out>::max()); }
 
+static bool isDigit(int ch) 
+{
+	return unsigned(ch - '0') <= 9;
+}
+
+static double parseFloat(const char* s)
+{
+	double res = 0, f = 1, sign = 1;
+	while(*s && (*s == ' ' || *s == '\t')) 
+		s++;
+
+	if(*s == '-') 
+		sign=-1, s++; 
+	else if (*s == '+') 
+		s++;
+
+	for(; isDigit(*s); s++)
+		res = res * 10 + (*s - '0');
+
+	if(*s == '.' || *s == ',')
+		for (s++; isDigit(*s); s++)
+			res += (f *= 0.1)*(*s - '0');
+	return res*sign;
+}
+
 inline void clampedNumberFromString(char* value, const char* str)        { clampToType(value, stringToSignedInteger(str)); }
 inline void clampedNumberFromString(signed char* value, const char* str) { clampToType(value, stringToSignedInteger(str)); }
 inline void clampedNumberFromString(short* value, const char* str)		 { clampToType(value, stringToSignedInteger(str)); }
@@ -81,7 +106,7 @@ inline void clampedNumberFromString(unsigned long* value, const char* str)		{ cl
 inline void clampedNumberFromString(unsigned long long* value, const char* str) { clampToType(value, stringToUnsignedInteger(str)); }
 inline void clampedNumberFromString(float* value, const char* str)
 {
-	double v = atof(str);
+	double v = parseFloat(str);
 	if (v > FLT_MAX)
 		v = FLT_MAX;
 	if (v < -FLT_MAX)
@@ -91,7 +116,7 @@ inline void clampedNumberFromString(float* value, const char* str)
 
 inline void clampedNumberFromString(double* value, const char* str)
 {
-	*value = atof(str);
+	*value = parseFloat(str);
 }
 
 

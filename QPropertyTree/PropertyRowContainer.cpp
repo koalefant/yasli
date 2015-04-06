@@ -280,11 +280,11 @@ const char* PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const
 bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {
 	ContainerMenuHandler handler(tree, this);
-	if(ev->key() == Qt::Key_Delete && ev->modifiers() == Qt::SHIFT){
+	if(ev->key() == KEY_DELETE && ev->modifiers() == MODIFIER_SHIFT){
 		handler.onMenuRemoveAll();
 		return true;
 	}
-	if(ev->key() == Qt::Key_Insert && ev->modifiers() == Qt::NoModifier){
+	if(ev->key() == KEY_INSERT && ev->modifiers() == 0){
 		handler.onMenuAppendElement();
 		return true;
 	}

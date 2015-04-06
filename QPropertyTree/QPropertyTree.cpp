@@ -27,6 +27,7 @@
 #include <QMimeData>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QKeyEvent>
 #include <QScrollBar>
 #include <QLineEdit>
 #include <QPainter>
@@ -44,6 +45,51 @@
 // ^^^
 #include "PropertyRowObject.h"
 #include "frontend-qt/QDrawContext.h"
+
+static int translateKey(int qtKey)
+{
+	switch (qtKey) {
+	case Qt::Key_Backspace: return KEY_BACKSPACE;
+	case Qt::Key_Delete: return KEY_DELETE;
+	case Qt::Key_Down: return KEY_DOWN;
+	case Qt::Key_End: return KEY_END;
+	case Qt::Key_Escape: return KEY_ESCAPE;
+	case Qt::Key_F2: return KEY_F2;
+	case Qt::Key_Home: return KEY_HOME;
+	case Qt::Key_Insert: return KEY_INSERT;
+	case Qt::Key_Left: return KEY_LEFT;
+	case Qt::Key_Menu: return KEY_MENU;
+	case Qt::Key_Return: return KEY_RETURN;
+	case Qt::Key_Right: return KEY_RIGHT;
+	case Qt::Key_Space: return KEY_SPACE;
+	case Qt::Key_Up: return KEY_UP;
+	case Qt::Key_C: return KEY_C;
+	case Qt::Key_V: return KEY_V;
+	case Qt::Key_Z: return KEY_Z;
+	}
+
+	return KEY_UNKNOWN;
+}
+
+static int translateModifiers(int qtModifiers)
+{
+	int result = 0;
+	if (qtModifiers & Qt::ControlModifier)
+		result |= MODIFIER_CONTROL;
+	else if (qtModifiers & Qt::ShiftModifier)
+		result |= MODIFIER_SHIFT;
+	else if (qtModifiers & Qt::AltModifier)
+		result |= MODIFIER_ALT;
+	return result;
+}
+
+static KeyEvent translateKeyEvent(const QKeyEvent& ev)
+{
+	KeyEvent result;
+	result.key_ = translateKey(ev.key());
+	result.modifiers_ = translateModifiers(ev.modifiers());
+	return result;
+}
 
 using yasli::Serializers;
 
@@ -1204,9 +1250,7 @@ void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 	if (!widget_.get()) {
 		PropertyRow* row = model()->focusedRow();
 		if (row) {
-			KeyEvent keyEvent;
-			keyEvent.key_ = ev->key();
-			keyEvent.modifiers_ = ev->modifiers();
+			KeyEvent keyEvent = translateKeyEvent(*ev);
 			onRowKeyDown(row, &keyEvent);
 		}
 	}

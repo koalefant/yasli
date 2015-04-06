@@ -28,7 +28,8 @@
 
 class QPainter;
 class IMenu;
-struct KeyEvent;
+namespace property_tree { struct KeyEvent; }
+using property_tree::KeyEvent;
 
 using std::vector;
 class PropertyTree;

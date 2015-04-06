@@ -24,19 +24,12 @@ struct IconXPMCache;
 namespace yasli { class Object; struct Context; }
 
 
-namespace property_tree{ struct IUIFacade; }
+namespace property_tree{ 
+struct IUIFacade; 
+struct KeyEvent;
+}
 using property_tree::IUIFacade;
-
-struct KeyEvent
-{
-	int key_;
-	int modifiers_;
-
-	KeyEvent() : key_(0), modifiers_(0) {}
-
-	int key() const { return key_; }
-	int modifiers() const { return modifiers_; }
-};
+using property_tree::KeyEvent;
 
 class PropertyTree : public TreeConfig, public sigslot::has_slots
 {

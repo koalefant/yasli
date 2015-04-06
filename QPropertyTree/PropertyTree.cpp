@@ -88,6 +88,7 @@ PropertyTree::~PropertyTree()
 
 bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 {
+	using namespace property_tree;
 	PropertyTreeMenuHandler handler;
 	handler.row = row;
 	handler.tree = this;
@@ -95,43 +96,43 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	if(row->onKeyDown(this, ev))
 		return true;
 
-  switch(ev->key()){
-		case Qt::Key_C:
-			if (ev->modifiers() == Qt::CTRL)
-				handler.onMenuCopy();
-		return true;
-		case Qt::Key_V:
-			if (ev->modifiers() == Qt::CTRL)
-				handler.onMenuPaste();
-		return true;
-		case Qt::Key_Z:
-			if (ev->modifiers() == Qt::CTRL)
-				if(model()->canUndo()){
-					model()->undo();
-					return true;
-				}
-		break;
-	case Qt::Key_F2:
-		if (ev->modifiers() == Qt::NoModifier) {
-			if(selectedRow()) {
-				selectedRow()->onActivate(this, true);
-				selectedRow()->onActivateRelease(this);
-			}
+	switch(ev->key()){
+	case KEY_C:
+	if (ev->modifiers() == MODIFIER_CONTROL)
+		handler.onMenuCopy();
+	return true;
+	case KEY_V:
+	if (ev->modifiers() == MODIFIER_CONTROL)
+		handler.onMenuPaste();
+	return true;
+	case KEY_Z:
+	if (ev->modifiers() == MODIFIER_CONTROL)
+		if(model()->canUndo()){
+			model()->undo();
+			return true;
 		}
-		break;
-	case Qt::Key_Menu:
-		{
-			if (ev->modifiers() == Qt::NoModifier) {
-				std::auto_ptr<IMenu> menu(ui()->createMenu());
+	break;
+	case KEY_F2:
+	if (ev->modifiers() == 0) {
+		if(selectedRow()) {
+			selectedRow()->onActivate(this, true);
+			selectedRow()->onActivateRelease(this);
+		}
+	}
+	break;
+	case KEY_MENU:
+	{
+		if (ev->modifiers() == 0) {
+			std::auto_ptr<IMenu> menu(ui()->createMenu());
 
-				if(onContextMenu(row, *menu)){
-					Rect rect(row->rect());
-					menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
-				}
-				return true;
+			if(onContextMenu(row, *menu)){
+				Rect rect(row->rect());
+				menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
 			}
-			break;
+			return true;
 		}
+		break;
+	}
 	}
 
 	PropertyRow* focusedRow = model()->focusedRow();
@@ -142,36 +143,36 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	int y = model()->root()->verticalIndex(this, parentRow);
 	PropertyRow* selectedRow = 0;
 	switch(ev->key()){
-	case Qt::Key_Up:
+	case KEY_UP:
 		 {
 			selectedRow = model()->root()->rowByVerticalIndex(this, --y);
 			if (selectedRow)
 				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		}
 		break;
-	case Qt::Key_Down:
+	case KEY_DOWN:
 	 {
 		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
 		if (selectedRow)
 			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 	}
 		break;
-	case Qt::Key_Left:
+	case KEY_LEFT:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
 			expandRow(parentRow, false);
 			selectedRow = model()->focusedRow();
 		}
 		break;
-	case Qt::Key_Right:
+	case KEY_RIGHT:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
 			expandRow(parentRow, true);
 			selectedRow = model()->focusedRow();
 		}
 		break;
-	case Qt::Key_Home:
-		if (ev->modifiers() == Qt::CTRL) {
+	case KEY_HOME:
+		if (ev->modifiers() == MODIFIER_CONTROL) {
 			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
 		}
 		else {
@@ -180,8 +181,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		}
 		break;
-	case Qt::Key_End:
-		if (ev->modifiers() == Qt::CTRL) {
+	case KEY_END:
+		if (ev->modifiers() == MODIFIER_CONTROL) {
 			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		}
 		else {
@@ -190,10 +191,10 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		}
 		break;
-	case Qt::Key_Space:
+	case KEY_SPACE:
 		if (filterWhenType_)
 			break;
-	case Qt::Key_Return:
+	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
 		else {

@@ -35,7 +35,6 @@ InplaceWidgetNumber::InplaceWidgetNumber(PropertyRowNumberField* row, QPropertyT
 , entry_(new QLineEdit(tree))
 , tree_(tree)
 {
-	//entry_->setAlignment(Qt::AlignCenter);
 	entry_->setText(row_->valueAsString().c_str());
 	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
 
