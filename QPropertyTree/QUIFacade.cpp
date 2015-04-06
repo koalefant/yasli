@@ -1,10 +1,10 @@
 #include "QUIFacade.h"
 #include <QFont>
 #include <QFontMetrics>
-#include "../QPropertyTree.h"
 #include <QStyleOption>
 #include <QDesktopWidget>
 #include <QApplication>
+#include "QPropertyTree.h"
 #include "QDrawContext.h"
 
 #include "InplaceWidgetComboBox.h"

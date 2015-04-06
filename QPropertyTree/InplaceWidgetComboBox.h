@@ -1,9 +1,12 @@
+#pragma once
 #include <QObject>
 #include <QComboBox>
 #include <QApplication>
 #include <QMouseEvent>
+#include "QPropertyTree.h"
 
-#include "../IUIFacade.h"
+#include "PropertyTree/IUIFacade.h"
+class QPropertyTree;
 
 class InplaceWidgetComboBox : public QObject, public InplaceWidget
 {

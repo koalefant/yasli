@@ -11,8 +11,8 @@
 
 #include "IDrawContext.h"
 #include "PropertyRowImpl.h"
-#include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
+#include "PropertyTree.h"
 #include "Serialization.h"
 #include "Color.h"	
 #include "yasli/decorators/IconXPM.h"

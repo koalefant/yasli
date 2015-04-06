@@ -9,12 +9,12 @@
 
 #include "yasli/ClassFactory.h"
 
-#include "IDrawContext.h"
-#include "PropertyRowImpl.h"
-#include "PropertyTree.h"
-#include "IUIFacade.h"
-#include "PropertyTreeModel.h"
-#include "Serialization.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/PropertyRowImpl.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/Serialization.h"
 #include "yasli/decorators/FileSave.h"
 #include "yasli/decorators/IconXPM.h"
 #include <QFileDialog>
@@ -63,7 +63,7 @@ public:
 
 	int buttonCount() const override{ return 1; }
 	yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
-		#include "file_save.xpm"
+		#include "PropertyTree/file_save.xpm"
 		return yasli::IconXPM(file_save_xpm);
 	}
 	virtual bool usePathEllipsis() const override{ return true; }

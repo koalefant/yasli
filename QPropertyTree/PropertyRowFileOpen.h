@@ -1,6 +1,6 @@
 #pragma once
 #include <QObject>
-#include "PropertyRow.h"
+#include "PropertyTree/PropertyRow.h"
 
 class PropertyRowFileOpen;
 class PropertyTree;

@@ -1,5 +1,4 @@
 #include "PropertyRowColor.h"
-#include "PropertyDrawContext.h"
 #include "PropertyTree.h"
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"

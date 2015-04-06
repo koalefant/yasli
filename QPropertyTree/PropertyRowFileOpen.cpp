@@ -10,17 +10,17 @@
 #include "yasli/ClassFactory.h"
 
 #include "PropertyRowFileOpen.h"
-#include "IDrawContext.h"
-#include "PropertyRowImpl.h"
-#include "PropertyTreeModel.h"
-#include "Serialization.h"
-#include "PropertyTree.h"
-#include "IUIFacade.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/PropertyRowImpl.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/Serialization.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/IMenu.h"
 #include "yasli/decorators/FileOpen.h"
 #include "yasli/decorators/IconXPM.h"
 #include <QFileDialog>
 #include <QIcon>
-#include "IMenu.h"
 
 using std::string;
 
@@ -130,7 +130,7 @@ public:
 
 	int buttonCount() const override{ return 1; }
 	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
-		#include "file_open.xpm"
+		#include "PropertyTree/file_open.xpm"
 		return yasli::IconXPM(file_open_xpm);
 	}
 	virtual bool usePathEllipsis() const override{ return true; }

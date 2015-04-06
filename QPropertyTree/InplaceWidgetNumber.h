@@ -1,9 +1,9 @@
 #pragma once
-#include "../IUIFacade.h"
 #include <QObject>
 #include <QLineEdit>
-#include "../PropertyTreeModel.h"
-#include "../PropertyRowNumberField.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyRowNumberField.h"
 
 class InplaceWidgetNumber : public QObject, public InplaceWidget
 

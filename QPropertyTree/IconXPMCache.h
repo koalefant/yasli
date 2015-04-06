@@ -11,9 +11,9 @@
 
 #include <map>
 #include <vector>
-#include "Color.h"
-#include "IDrawContext.h"
-#include "Rect.h"
+#include "PropertyTree/Color.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/Rect.h"
 
 class QPainter;
 class QImage;

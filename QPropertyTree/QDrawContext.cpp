@@ -1,10 +1,10 @@
 #include "QDrawContext.h"
-#include "../IDrawContext.h"
-#include "../Rect.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/Rect.h"
 
-#include "../QPropertyTree.h"
-#include "../Unicode.h"
-#include "../Color.h"
+#include "QPropertyTree.h"
+#include "PropertyTree/Unicode.h"
+#include "PropertyTree/Color.h"
 #include <QPainter>
 #include <QStyle>
 #include <QStyleOption>

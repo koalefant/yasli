@@ -1,6 +1,6 @@
 #pragma once
-#include "../PropertyDrawContext.h"
-#include "../QPropertyTree.h"
+#include "IconXPMCache.h"
+#include "QPropertyTree.h"
 #include <memory>
 
 class QPropertyTree;

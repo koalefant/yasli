@@ -7,11 +7,11 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "PropertyDrawContext.h"
 #include <memory>
+#include "IconXPMCache.h"
 #include "QPropertyTree.h"
 #include "yasli/decorators/IconXPM.h"
-#include "Unicode.h"
+#include "PropertyTree/Unicode.h"
 #include <QApplication>
 #include <QStyleOption>
 #include <QPainter>

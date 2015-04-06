@@ -14,7 +14,7 @@
 # include <windows.h>
 #else
 # include <vector>
-# include <QtCore/QString>
+# include <QString>
 #endif
 
 yasli::string fromWideChar(const wchar_t* wstr)

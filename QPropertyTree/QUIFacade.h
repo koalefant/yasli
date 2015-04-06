@@ -1,11 +1,11 @@
 #pragma once
 
 #include <memory>
-#include "../IDrawContext.h"
-#include "../IUIFacade.h"
-#include "../IMenu.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/IMenu.h"
 #include <QMenu>
-#include "../QPropertyTree.h"
+#include "QPropertyTree.h"
 
 #ifdef emit
 #undef emit

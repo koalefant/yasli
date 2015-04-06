@@ -11,16 +11,18 @@
 #include "yasli/Archive.h"
 #include "yasli/BinArchive.h"
 #include "QPropertyTree.h"
-#include "frontend-qt/QUIFacade.h"
-#include "IDrawContext.h"
-#include "Serialization.h"
-#include "PropertyTreeModel.h"
+#include "QUIFacade.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/Serialization.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyOArchive.h"
+#include "PropertyTree/PropertyIArchive.h"
+#include "PropertyTree/Unicode.h"
+#include "PropertyTree/PropertyTreeMenuHandler.h"
+#include "PropertyTree/MathUtils.h"
 
 #include "yasli/ClassFactory.h"
 
-#include "PropertyOArchive.h"
-#include "PropertyIArchive.h"
-#include "Unicode.h"
 
 #include <QRect>
 #include <QTimer>
@@ -33,18 +35,15 @@
 #include <QPainter>
 #include <QElapsedTimer>
 #include <QStyle>
-#include "PropertyTreeMenuHandler.h"
-
-#include "MathUtils.h"
 
 // only for clipboard:
 #include <QClipboard>
 #include <QApplication>
-#include "PropertyRowPointer.h"
-#include "PropertyRowContainer.h"
+#include "PropertyTree/PropertyRowPointer.h"
+#include "PropertyTree/PropertyRowContainer.h"
 // ^^^
-#include "PropertyRowObject.h"
-#include "frontend-qt/QDrawContext.h"
+#include "PropertyTree/PropertyRowObject.h"
+#include "QDrawContext.h"
 using property_tree::toQRect;
 using property_tree::toQPoint;
 

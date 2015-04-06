@@ -3,7 +3,7 @@
 #endif
 #undef ERROR
 
-#include "QPropertyTree/Color.h"
+#include "PropertyTree/Color.h"
 
 #include "yasli/decorators/FileOpen.h"
 using yasli::FileOpen;

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Rect.h"
 #include <vector>
+#include "PropertyTree/Rect.h"
+#include "PropertyTree/IDrawContext.h"
 
 struct HWND__;
 typedef HWND__* HWND;

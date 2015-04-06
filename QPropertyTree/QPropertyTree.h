@@ -13,8 +13,8 @@
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
 #include "yasli/Pointers.h"
-#include "PropertyTree.h"
-#include "PropertyRow.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyRow.h"
 #include <QWidget>
 #include <QPainter>
 #include <vector>

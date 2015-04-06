@@ -1,8 +1,8 @@
 #pragma once
 #include <QObject>
 #include <QLineEdit>
-#include "../IUIFacade.h"
-#include "../PropertyRowString.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/PropertyRowString.h"
 
 class InplaceWidgetString : public QObject, public InplaceWidget
 {
