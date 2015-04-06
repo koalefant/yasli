@@ -12,7 +12,7 @@
 #include "IDrawContext.h"
 #include "PropertyRowImpl.h"
 #include "PropertyTree.h"
-#include "QPropertyTree.h"
+#include "IUIFacade.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
 #include "yasli/decorators/FileSave.h"
@@ -31,7 +31,7 @@ public:
 
 	bool onActivate(PropertyTree* tree, bool force) override
 	{
-		QFileDialog dialog((QPropertyTree*)tree);
+		QFileDialog dialog(tree->ui()->qwidget());
 		dialog.setAcceptMode(QFileDialog::AcceptSave);
 		dialog.setFileMode(QFileDialog::AnyFile);
 		dialog.setDefaultSuffix(extractExtensionFromFilter(value().filter.c_str()).c_str());

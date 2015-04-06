@@ -3,6 +3,11 @@
 #include "Rect.h"
 #include <vector>
 
+struct HWND__;
+typedef HWND__* HWND;
+
+class QWidget;
+
 class IMenu;
 
 class PropertyTree;
@@ -78,9 +83,15 @@ enum Cursor
 	CURSOR_SLIDE
 };
 
+
 struct IUIFacade
 {
 	virtual ~IUIFacade() {}
+
+	// only for one-platform property-row usage
+	virtual QWidget* qwidget() { return 0; }
+	virtual HWND hwnd() { return 0; }
+	
 	virtual IMenu* createMenu() = 0;
 	virtual void setCursor(Cursor cursor) = 0;
 	virtual void unsetCursor() = 0;

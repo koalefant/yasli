@@ -12,9 +12,10 @@
 #include "PropertyRowFileOpen.h"
 #include "IDrawContext.h"
 #include "PropertyRowImpl.h"
-#include "QPropertyTree.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
+#include "PropertyTree.h"
+#include "IUIFacade.h"
 #include "yasli/decorators/FileOpen.h"
 #include "yasli/decorators/IconXPM.h"
 #include <QFileDialog>
@@ -70,7 +71,7 @@ public:
 
 	bool onActivate(PropertyTree* tree, bool force) override
 	{
-		QFileDialog dialog((QPropertyTree*)tree);
+		QFileDialog dialog(tree->ui()->qwidget());
 		dialog.setAcceptMode(QFileDialog::AcceptOpen);
 		dialog.setFileMode(QFileDialog::ExistingFile);
 		if (labelUndecorated())

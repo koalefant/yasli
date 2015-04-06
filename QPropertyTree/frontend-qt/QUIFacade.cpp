@@ -57,6 +57,16 @@ Point QUIFacade::cursorPosition()
 	return fromQPoint(tree_->mapFromGlobal(QCursor::pos()));
 }
 
+QWidget* QUIFacade::qwidget()
+{
+	return tree_;
+}
+
+HWND QUIFacade::hwnd()
+{
+	return (HWND)tree_->winId();
+}
+
 InplaceWidget* QUIFacade::createComboBox(ComboBoxClientRow* client) { return new InplaceWidgetComboBox(client, tree_); }
 InplaceWidget* QUIFacade::createNumberWidget(PropertyRowNumberField* row) { return new InplaceWidgetNumber(row, tree_); }
 InplaceWidget* QUIFacade::createStringWidget(PropertyRowString* row) { return new InplaceWidgetString(row, tree_); }

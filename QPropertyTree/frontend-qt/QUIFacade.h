@@ -78,6 +78,9 @@ class QUIFacade : public IUIFacade
 public:
 	QUIFacade(QPropertyTree* tree) : tree_(tree) {}
 
+	QWidget* qwidget() override;
+	HWND hwnd() override;
+
 	IMenu* createMenu() override;
 	void setCursor(Cursor cursor) override;
 	void unsetCursor() override;
