@@ -9,7 +9,7 @@ typedef HWND__* HWND;
 
 class QWidget;
 
-class IMenu;
+namespace property_tree { class IMenu; }
 
 class PropertyTree;
 class PropertyRow;

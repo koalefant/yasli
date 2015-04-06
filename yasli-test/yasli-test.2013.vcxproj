@@ -379,10 +379,10 @@
     <ClCompile Include="TestTextArchive.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UnitTest++\UnitTest++.vsnet2008.vcxproj">
+    <ProjectReference Include="..\UnitTest++\UnitTest++.vsnet2013.vcxproj">
       <Project>{64a4fefe-0461-4e95-8cc1-91ef5f57dbc6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\yasli\yasli.vcxproj">
+    <ProjectReference Include="..\yasli\yasli.2013.vcxproj">
       <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
     </ProjectReference>
   </ItemGroup>

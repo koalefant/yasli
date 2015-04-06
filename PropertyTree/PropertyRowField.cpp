@@ -24,11 +24,11 @@ void PropertyRowField::redraw(IDrawContext& context)
 
 	int iconSpace = offset ? offset + 2 : 0;
     if(multiValue())
-		context.drawEntry(L" ... ", false, userReadOnly(), iconSpace);
+		context.drawEntry(" ... ", false, userReadOnly(), iconSpace);
     else if(userReadOnly())
-		context.drawValueText(pulledSelected(), valueAsWString().c_str());
+		context.drawValueText(pulledSelected(), valueAsString().c_str());
     else
-        context.drawEntry(valueAsWString().c_str(), usePathEllipsis(), false, iconSpace);
+        context.drawEntry(valueAsString().c_str(), usePathEllipsis(), false, iconSpace);
 
 }
 

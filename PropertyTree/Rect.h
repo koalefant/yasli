@@ -38,6 +38,7 @@ struct Rect
 	int bottom() const { return y + h; }
 
 	Point topLeft() const { return Point(x, y); }
+	Point bottomRight() const { return Point(x+w, y+h); }
 
 	int width() const { return w; }
 	int height() const { return h; }

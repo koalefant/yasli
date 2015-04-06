@@ -9,15 +9,15 @@
 
 #include "StdAfx.h"
 #include "yasli/ClassFactory.h"
-#include "ww/PropertyTreeModel.h"
-#include "ww/PropertyRowImpl.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyRowImpl.h"
 
-#include "ww/PropertyTree.h"
-#include "ww/PropertyDrawContext.h"
-#include "ww/PropertyRow.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/PropertyRow.h"
+#include "PropertyTree/Serialization.h"
+#include "PropertyTree/IUIFacade.h"
 #include "ww/ColorChooserDialog.h"
-#include "ww/Serialization.h"
-
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Color.h"	
@@ -40,11 +40,11 @@ void fromColor(Color* out, Color color)
 }
 
 template<class ColorType>
-class PropertyRowColor : public PropertyRowImpl<ColorType, PropertyRowColor<ColorType> >{
+class PropertyRowColor : public PropertyRowImpl<ColorType>{
 public:
 	static const bool Custom = true;
 	PropertyRowColor();
-	void redraw(const PropertyDrawContext& context);
+	void redraw(const IDrawContext& context);
 
 	bool activateOnAdd() const{ return true; }
 	bool onActivate(PropertyTree* tree, bool force);
@@ -53,15 +53,15 @@ public:
 		formatColor(buf, value_);
 		return string(buf);
 	}
-	virtual int widgetSizeMin() const{ 
-		return userWidgetSize() >= 0 ? userWidgetSize() : ICON_SIZE; 
+	virtual int widgetSizeMin(const PropertyTree* tree) const override{ 
+		return userWidgetSize() >= 0 ? userWidgetSize() : tree->_defaultRowHeight(); 
 	}
 };
 
 template<class ColorType>
 bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
 {
-	ColorChooserDialog dialog(tree, Color(toARGB(value())));
+	ColorChooserDialog dialog(tree->ui()->hwnd(), Color(toARGB(value())));
     if(dialog.showModal() == ww::RESPONSE_OK){
         tree->model()->rowAboutToBeChanged(this);
 		fromColor(&value(), dialog.get());
@@ -72,7 +72,7 @@ bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
 }
 
 template<class ColorType>
-void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
+void PropertyRowColor<ColorType>::redraw(const IDrawContext& context)
 {
 	using namespace Gdiplus;
 	using Gdiplus::Color;
@@ -82,30 +82,7 @@ void PropertyRowColor<ColorType>::redraw(const PropertyDrawContext& context)
 		return;
 	}
 
-	Rect rect = context.widgetRect;
-	rect.setLeft(rect.left() + 1);
-	rect.setHeight(rect.height() - 1);
-	Gdiplus::Color color(toARGB(value()));
-	SolidBrush brush(color);
-	Color penColor;
-	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-	
-	HatchBrush hatchBrush(HatchStyleSmallCheckerBoard, Color::Black, Color::White);
-
-	if (rect.width() > ICON_SIZE * 2 + 5){
-		Rect rectb(rect.right() - ICON_SIZE - 3, rect.top(), rect.right(), rect.bottom());
-		fillRoundRectangle(context.graphics, &hatchBrush, gdiplusRect(rectb), Color(0, 0, 0, 0), 6);
-		fillRoundRectangle(context.graphics, &brush, gdiplusRect(rectb), penColor, 6);
-
-		SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
-		Rect recta(rect.left(), rect.top(), rect.right() - ICON_SIZE - 5, rect.bottom());
-		fillRoundRectangle(context.graphics, &brushb, gdiplusRect(recta), penColor, 6);
-	
-	}
-	else{
-		fillRoundRectangle(context.graphics, &hatchBrush, gdiplusRect(rect), Color(0, 0, 0, 0), 6);
-		fillRoundRectangle(context.graphics, &brush, gdiplusRect(rect), penColor, 6);
-	}
+	context.drawColor(context.rect, value());
 }
 
 template<class ColorType>

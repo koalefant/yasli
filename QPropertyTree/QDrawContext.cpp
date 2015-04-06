@@ -256,14 +256,14 @@ void QDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool presse
 }
 
 
-void QDrawContext::drawValueText(bool highlighted, const wchar_t* text)
+void QDrawContext::drawValueText(bool highlighted, const char* text)
 {
 	QColor textColor = highlighted ? tree_->palette().highlightedText().color() : tree_->palette().buttonText().color();
 	QRect textRect(widgetRect.left() + 3, widgetRect.top() + 2, widgetRect.width() - 6, widgetRect.height() - 4);
 	tree_->_drawRowValue(*painter_, text, &tree_->font(), textRect, textColor, false, false);
 }
 
-void QDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
+void QDrawContext::drawEntry(const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
 {
 	QRect rt = toQRect(widgetRect);
 	rt.adjust(0, 0, -trailingOffset, -1);

@@ -18,17 +18,28 @@ namespace ww{
 static string stateFileName = string(getenv("TEMP")) + "\\colorChooserDialog.tmp";
 static const int DIALOG_BORDER = 12;
 
-	ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color& color, bool showColor, bool showAlpha)
+ColorChooserDialog::ColorChooserDialog(ww::Widget* parent, const Color& color, bool showColor, bool showAlpha)
 : Dialog(parent, DIALOG_BORDER )
+{
+	initialize(color, showColor, showAlpha);
+}
+
+ColorChooserDialog::ColorChooserDialog(HWND parent, const Color& color, bool showColor, bool showAlpha)
+	: Dialog(parent, DIALOG_BORDER)
+{
+	initialize(color, showColor, showAlpha);
+}
+
+void ColorChooserDialog::initialize(const Color& color, bool showColor, bool showAlpha)
 {
 	YASLI_ASSERT(showColor || showAlpha);
 
-	if(showColor)
+	if (showColor)
 		setTitle("Choose Color");
 	else
 		setTitle("Choose Alpha");
 
-	if(showColor)
+	if (showColor)
 		setDefaultSize(350, 400);
 	else
 		setDefaultSize(400, 0);
@@ -40,13 +51,13 @@ static const int DIALOG_BORDER = 12;
 	chooser_->setShowAlpha(showAlpha);
 	add(chooser_, PACK_FILL);
 
-	addButton("OK",     RESPONSE_OK);
+	addButton("OK", RESPONSE_OK);
 	addButton("Cancel", RESPONSE_CANCEL);
 
 	set(color);
 
 	BinIArchive ia;
-	if(ia.load(stateFileName.c_str())){
+	if (ia.load(stateFileName.c_str())){
 		ia.setFilter(SERIALIZE_STATE);
 		ia(*this, "window", 0);
 	}

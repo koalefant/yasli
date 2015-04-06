@@ -4,6 +4,8 @@
 #include "yasli/ClassFactory.h"
 #include "Rect.h"
 
+using property_tree::Color;
+
 PropertyRowColor::PropertyRowColor()
 : value_(255, 255, 255, 255)
 {
@@ -21,7 +23,7 @@ void PropertyRowColor::redraw(IDrawContext& context)
 
 void PropertyRowColor::closeNonLeaf(const yasli::Serializer& ser)
 {
-	Color* value = ser.cast<Color>();
+	property_tree::Color* value = ser.cast<property_tree::Color>();
 	if (!value)
 		return;
 	value_ = *value;

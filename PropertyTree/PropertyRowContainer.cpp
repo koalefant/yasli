@@ -47,7 +47,7 @@ struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder
 	, tree_(tree)
 	, insert_(insert) {}    
 
-	void addAction(IMenu& menu, const char* text, int index) override
+	void addAction(property_tree::IMenu& menu, const char* text, int index) override
 	{
 		ContainerMenuHandler* handler = new ContainerMenuHandler(tree_, row_);
 		tree_->addMenuHandler(handler);
@@ -77,7 +77,7 @@ bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 {
 	if(userReadOnly())
 		return false;
-	std::auto_ptr<IMenu> menu(tree->ui()->createMenu());
+	std::auto_ptr<property_tree::IMenu> menu(tree->ui()->createMenu());
 	generateMenu(*menu, tree);
 	tree->_setPressedRow(this);
 	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
@@ -86,7 +86,7 @@ bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
 }
 
 
-void PropertyRowContainer::generateMenu(IMenu& menu, PropertyTree* tree)
+void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree* tree)
 {
 	ContainerMenuHandler* handler = new ContainerMenuHandler(tree, this);
 	tree->addMenuHandler(handler);
@@ -104,7 +104,7 @@ void PropertyRowContainer::generateMenu(IMenu& menu, PropertyTree* tree)
 		PropertyRow* row = defaultRow(tree->model());
 		if (row && row->isPointer())
 		{
-			IMenu* createItem = menu.addMenu("Add");
+			property_tree::IMenu* createItem = menu.addMenu("Add");
 			menu.addSeparator();
 
 			PropertyRowPointer* pointerRow = static_cast<PropertyRowPointer*>(row);

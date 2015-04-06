@@ -816,7 +816,25 @@ bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 	return false;
 }
 
-bool PropertyRow::onContextMenu(IMenu &menu, PropertyTree* tree)
+struct ExpansionMenuHandler : PropertyRowMenuHandler
+{
+	PropertyTree* tree;
+	ExpansionMenuHandler(PropertyTree* tree)
+	: tree(tree)
+	{
+	}
+
+	void onMenuExpand()
+	{
+		tree->expandAll();
+	}
+	void onMenuCollapse()
+	{
+		tree->collapseAll();
+	}
+};
+
+bool PropertyRow::onContextMenu(property_tree::IMenu &menu, PropertyTree* tree)
 {
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parent());
@@ -839,8 +857,10 @@ bool PropertyRow::onContextMenu(IMenu &menu, PropertyTree* tree)
 		if(!menu.isEmpty())
 			menu.addSeparator();
 
-		menu.addAction("Expand", 0, tree, &PropertyTree::expandAll);
-		menu.addAction("Collapse", 0, tree, &PropertyTree::collapseAll);
+		ExpansionMenuHandler* handler = new ExpansionMenuHandler(tree);
+		menu.addAction("Expand", 0, handler, &ExpansionMenuHandler::onMenuExpand);
+		menu.addAction("Collapse", 0, handler, &ExpansionMenuHandler::onMenuCollapse);
+		tree->addMenuHandler(handler);
 	}
 
 	return !menu.isEmpty();

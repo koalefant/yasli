@@ -11,12 +11,12 @@
 #include "yasli/Pointers.h"
 #include "ww/Clipboard.h"
 #include "ww/Widget.h"
-#include "ww/PropertyRow.h"
-#include "ww/PropertyRowContainer.h"
-#include "ww/PropertyRowPointer.h"
-#include "ww/PropertyTreeModel.h"
-#include "ww/PropertyOArchive.h"
-#include "ww/PropertyIArchive.h"
+#include "PropertyTree/PropertyRow.h"
+#include "PropertyTree/PropertyRowContainer.h"
+#include "PropertyTree/PropertyRowPointer.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyOArchive.h"
+#include "PropertyTree/PropertyIArchive.h"
 #include "ww/PropertyEditor.h"
 #include "ww/Win32/Window32.h"
 #include "ww/SafeCast.h"
@@ -80,10 +80,10 @@ Clipboard::~Clipboard()
 
 }
 
-bool Clipboard::copy(Serializer& se)
+bool Clipboard::copy(yasli::Serializer& se)
 {
 	PropertyRow::setConstStrings(constStrings_);
-	PropertyTreeModel model;
+	PropertyTreeModel model(0);
 	PropertyOArchive oa(model_ ? model_ : &model);
     oa.setFilter(filter_);
 	oa(se, "row", "Row");
@@ -92,11 +92,11 @@ bool Clipboard::copy(Serializer& se)
 	return result;
 }
 
-bool Clipboard::paste(Serializer& se)
+bool Clipboard::paste(yasli::Serializer& se)
 {
 	ConstStringList constStrings;
 	PropertyRow::setConstStrings(constStrings_ ? constStrings_ : &constStrings);
-	PropertyTreeModel model;
+	PropertyTreeModel model(0);
 	PropertyOArchive oa(model_ ? model_ : &model);
     oa.setFilter(filter_);
 	se(oa);
@@ -152,9 +152,6 @@ bool Clipboard::empty()
 
 bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 {
-	ConstStringList constStrings;
-	PropertyRow::setConstStrings(constStrings_);
-
 	SharedPtr<PropertyRow> source;
 	if(!pasteFunc(PasteRowFunc(&source)) || !source){
 		PropertyRow::setConstStrings(0);
@@ -173,8 +170,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 
 				const char* derivedName = d->typeName();
 				const char* derivedNameAlt = d->typeName();
-				PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone();
-					// new PropertyRowPointer(d->name(), d->label(), d->baseType(), d->factory(), d->derivedTypeName());
+				SharedPtr<PropertyRow> newSourceRoot = d->clone(constStrings_);
 				source->swapChildren(newSourceRoot);
 				source = newSourceRoot;
 			}
@@ -204,7 +200,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
-						PropertyRowPointer* newSourceRoot = (PropertyRowPointer*)d->clone();
+						SharedPtr<PropertyRow> newSourceRoot = d->clone(constStrings_);
 						source->swapChildren(newSourceRoot);
 						source = newSourceRoot;
 					}
@@ -214,19 +210,16 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 			}
 		}
 	}
-	
-	PropertyRow::setConstStrings(0);
 	return result;
 }
 
 bool Clipboard::copy(PropertyRow* row)
 {
-	PropertyRow::setConstStrings(constStrings_);
 	YASLI_ASSERT(widget_);
 	Win32::Window32* window = ww::_findWindow(widget_);
 	YASLI_ASSERT(window);
 
-    SharedPtr<PropertyRow> clonedRow(row->clone());
+    SharedPtr<PropertyRow> clonedRow(row->clone(constStrings_));
 	BinOArchive oa;
 	if(!oa(clonedRow, "row", "Row")){
 		PropertyRow::setConstStrings(0);
@@ -252,10 +245,8 @@ bool Clipboard::copy(PropertyRow* row)
 
 		WW_VERIFY(::SetClipboardData(clipboardFormat_, memoryHandle));
 		::CloseClipboard();
-		PropertyRow::setConstStrings(0);
 		return true;
 	}
-	PropertyRow::setConstStrings(0);
 	return false;
 }
 

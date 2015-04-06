@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "ww/Strings.h"
 #include <algorithm>
-#include "ww/TreeImpl.h"
+#include "ww/PropertyTree/TreeImpl.h"
 #include "ww/Window.h"
 #include "ww/Entry.h"
 
@@ -27,10 +27,12 @@
 #include <windows.h>
 #include "Win32/CommonControls.h"
 #include "gdiplusUtils.h"
-#include "PropertyDrawContext.h"
-#include "PropertyRow.h"
-#include "PropertyTree.h"
-#include "PropertyTreeModel.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/PropertyRow.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "wwDrawContext.h"
+#include "ww/PropertyTree.h"
 
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
@@ -126,10 +128,14 @@ struct DrawRowVisitor
 {
 	DrawRowVisitor(HDC dc) : dc_(dc) {}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
+	ScanResult operator()(PropertyRow* row, ::PropertyTree* tree, int index)
 	{
-		if(row->pulledUp())
-			row->drawRow(dc_, tree, index);
+		Gdiplus::Graphics graphics(dc_);
+		wwDrawContext context((PropertyTree*)tree, &graphics);
+		if (row->pulledUp()) {
+			row->drawRow(context, tree, index, false);
+			row->drawRow(context, tree, index, true);
+		}
 
 		return SCAN_CHILDREN_SIBLINGS;
 	}
@@ -148,12 +154,15 @@ void DragWindow::drawRow(HDC dc)
 	::SelectObject(dc, oldBrush);
 	::SelectObject(dc, oldPen);
 
-	Vect2 leftTop = row_->rect().leftTop();
+	Vect2 leftTop(row_->rect().left(), row_->rect().top());
 	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
 	int index = 0;
 	if (row_->parent())
 		index = row_->parent()->childIndex(row_);
-	row_->drawRow(dc, treeImpl_->tree(), index);
+	Gdiplus::Graphics graphics(dc);
+	wwDrawContext context(treeImpl_->tree(), &graphics);
+	row_->drawRow(context, treeImpl_->tree(), index, false);
+	row_->drawRow(context, treeImpl_->tree(), index, true);
 	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
 	SetViewportOrgEx(dc, 0, 0, 0);
 }
@@ -235,11 +244,16 @@ bool DragController::dragOn(POINT screenPoint)
 	if(!dragging_ && (Vect2(startPoint_.x, startPoint_.y) - Vect2(screenPoint.x, screenPoint.y)).length2() >= 25)
 		if(row_->canBeDragged()){
 			needCapture = true;
-			Rect rect = row_->rect() + Vect2(0, treeImpl_->area_.top());
-            rect = Rect(rect.leftTop() - treeImpl_->offset_ + Vect2(treeImpl_->tree()->tabSize(), 0), 
-                         rect.rightBottom() - treeImpl_->offset_);
+			property_tree::Rect area = treeImpl_->tree()->area();
+			property_tree::Point offset = treeImpl_->tree()->offset();
+			property_tree::Rect rect = row_->rect();
+			rect.y += area.top();
+			rect = property_tree::Rect(rect.left() - offset.x() + treeImpl_->tree()->tabSize(),
+						rect.top() - offset.y(),
+                         rect.right() - offset.x(),
+						 rect.bottom() - offset.y());
             
-			window_.set(treeImpl_, row_, rect);
+			window_.set(treeImpl_, row_, ww::Rect(rect.left(), rect.top(), rect.right(), rect.bottom()));
 			window_.move(screenPoint.x - startPoint_.x, screenPoint.y - startPoint_.y);
 			window_.show();
 			dragging_ = true;
@@ -267,8 +281,8 @@ void DragController::trackRow(POINT pt)
 	hoveredRow_ = 0;
 	destinationRow_ = 0;
 
-    Vect2 point(pt.x, pt.y);
-	PropertyRow* row = treeImpl_->rowByPoint(point);
+    property_tree::Point point(pt.x, pt.y);
+	PropertyRow* row = treeImpl_->tree()->rowByPoint(point);
 	if(!row || !row_)
 		return;
 
@@ -277,7 +291,7 @@ void DragController::trackRow(POINT pt)
 		return;
 
 	PropertyTree* tree = treeImpl_->tree();
-	float pos = (point.y - row->rect().top() - treeImpl_->area_.top()) / float(row->rect().height());
+	float pos = (point.y() - row->rect().top() - treeImpl_->tree()->area().top()) / float(row->rect().height());
 	if(row_->canBeDroppedOn(row->parent(), row, tree)){
 		if(pos < 0.25f){
 			destinationRow_ = row->parent();
@@ -299,9 +313,9 @@ void DragController::trackRow(POINT pt)
 void DragController::drawUnder(HDC dc)
 {
 	if(dragging_ && destinationRow_ == hoveredRow_ && hoveredRow_){
-		Rect rowRect = hoveredRow_->rect();
-		rowRect.setLeft(rowRect.left() + treeImpl_->tree()->tabSize());
-		FillRect(dc, &Win32::Rect(rowRect), GetSysColorBrush(COLOR_HIGHLIGHT));
+		property_tree::Rect rowRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize(), 0, 0, 0);
+		RECT rt = { rowRect.left(), rowRect.top(), rowRect.right(), rowRect.bottom() };
+		FillRect(dc, &rt, GetSysColorBrush(COLOR_HIGHLIGHT));
 	}
 }
 
@@ -310,12 +324,12 @@ void DragController::drawOver(HDC dc)
 	if(!dragging_)
 		return;
 	
-	Rect rowRect = row_->rect();
+	property_tree::Rect rr = row_->rect();
+	Rect rowRect(rr.left(), rr.top(), rr.right(), rr.bottom());
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
 		const int tickSize = 4;
-		Rect hoveredRect = hoveredRow_->rect();
-		hoveredRect.setLeft(hoveredRect.left() + treeImpl_->tree()->tabSize());
+		property_tree::Rect hoveredRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize(), 0, 0, 0);
 
 		if(!before_){ // previous
 			RECT rect = { hoveredRect.left() - 1 , hoveredRect.bottom() - 1, hoveredRect.right() + 1, hoveredRect.bottom() + 1 };
@@ -362,12 +376,6 @@ void DragController::drop(POINT screenPoint)
 TreeImpl::TreeImpl(PropertyTree* tree)
 : _ContainerWindow(tree)
 , tree_(tree)
-, size_(Vect2::ZERO)
-, offset_(Vect2::ZERO)
-, hoveredRow_(0)
-, capturedRow_(0)
-, drag_(this)
-, area_(0, 0, 0, 0)
 , redrawLock_(false)
 , redrawRequest_(false)
 {
@@ -400,181 +408,43 @@ int TreeImpl::onMessageSetFocus(HWND lastFocusedWindow)
 
 void TreeImpl::onMessageMouseWheel(SHORT delta)
 {
-	offset_.y = offset_.y - delta;
-	updateScrollBar();
-	tree_->_arrangeChildren();
-	RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	tree_->onMouseWheel(delta);
 	__super::onMessageMouseWheel(delta);
 }
 
 void TreeImpl::onMessageLButtonDblClk(int x, int y)
 {
-	::SetFocus(handle_);
-
-	Vect2 point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		YASLI_ASSERT(row->refCount() > 0);
-		if(row->widgetRect().pointInside(pointToRootSpace(point))){
-			if(!row->onActivate(tree_, true))
-				toggleRow(row);	
-		}
-		else if(!toggleRow(row))
-			row->onActivate(tree_, false);
-	}
+	tree_->onLButtonDoubleClick(x, y);
 	__super::onMessageLButtonDblClk(x, y);
 }
 
 void TreeImpl::onMessageLButtonUp(UINT button, int x, int y)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	HWND focusedWindow = GetFocus();
-	if(focusedWindow){
-		YASLI_ASSERT(::IsWindow(focusedWindow));
-		Win32::Window32 wnd(focusedWindow);
-		if(Win32::Window32* window = reinterpret_cast<Win32::Window32*>(wnd.getUserDataLongPtr())){
-			YASLI_ASSERT(window->handle() == focusedWindow);
-		}
-	}
-	//::SetFocus(handle_);
-
-	if(drag_.captured()){
-		POINT pos;
-		GetCursorPos(&pos);
-		if(GetCapture() == handle())
-			ReleaseCapture();
-		drag_.drop(pos);
-		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE);
-	}
-	Vect2 point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		switch(hitTest(row, point, row->rect())){
-		case TREE_HIT_ROW:
-			if(hoveredRow_)
-				RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-		}			
-	}
-	if(capturedRow_){
-		Rect rowRecti = capturedRow_->rect();
-		tree_->onRowLMBUp(capturedRow_, rowRecti, pointToRootSpace(Vect2(x, y)));
-		capturedRow_ = 0;
-	}
-	
-	__super::onMessageLButtonUp(button, x, y);
+	tree_->onLButtonUp(button, x, y);
 }
 
 void TreeImpl::onMessageLButtonDown(UINT button, int x, int y)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	::SetFocus(handle_);
-	PropertyRow* row = rowByPoint(Vect2(x, y));
-	if(row && !row->isSelectable())
-		row = row->parent();
-	if(row){
-		if(tree_->onRowLMBDown(row, row->rect(), pointToRootSpace(Vect2(x, y))))
-			capturedRow_ = row;
-		else{
-			// row могла уже быть пересоздана	
-			row = rowByPoint(Vect2(x, y));
-			PropertyRow* draggedRow = row;
-			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
-				draggedRow = draggedRow->parent();
-			if(draggedRow && !draggedRow->userReadOnly() && !tree_->widget_){
-				POINT cursorPos = { x, y };
-				//GetCursorPos(&cursorPos);
-				ClientToScreen(handle(), &cursorPos);
-				drag_.beginDrag(row, draggedRow, cursorPos);
-            }
-		}
-	}
-	else
-		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	tree_->onLButtonDown(button, x, y);
 }
 
 void TreeImpl::onMessageRButtonDown(UINT button, int x, int y)
 {
 	YASLI_ASSERT(::IsWindow(handle_));
-	::SetFocus(handle_);
-
-	Vect2 point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		model()->setFocusedRow(row);
-		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		tree_->onRowRMBDown(row, row->rect(), pointToRootSpace(point));
-	}
-	else{
-		Win32::Rect rect;
-		GetClientRect(handle(), &rect);
-		if (model()->root())
-			tree_->onRowRMBDown(model()->root(), rect.recti(), pointToRootSpace(point));
-	}
-	__super::onMessageRButtonDown(button, x, y);
+	tree_->onRButtonDown(button, x, y);
 }
 
 void TreeImpl::onMessageMButtonDown(UINT button, int x, int y)
 {
 	::SetFocus(handle_);
-
-	Vect2 point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		switch(hitTest(row, point, row->rect())){
-		case TREE_HIT_PLUS:
-		break;
-		case TREE_HIT_NONE:
-		default:
-		model()->setFocusedRow(row);
-		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-		break;
-		}
-	}
 	__super::onMessageMButtonDown(button, x, y);
 }
 
 void TreeImpl::onMessageMouseMove(UINT button, int x, int y)
 {
-	if(drag_.captured() && !(button & MK_LBUTTON))
-		drag_.interrupt();
-	if(drag_.captured()){
-		POINT pos;
-		GetCursorPos(&pos);
-		if(drag_.dragOn(pos) && GetCapture() != handle())
-			SetCapture(handle());
-		RedrawWindow(handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else{
-		Vect2 point(x, y);
-		PropertyRow* row = rowByPoint(pointToRootSpace(point));
-		if(row){
-			switch(hitTest(row, point, row->rect())){
-			case TREE_HIT_ROW:
-			if(row != hoveredRow_){
-				hoveredRow_ = row;
-				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-			}
-			break;
-			case TREE_HIT_PLUS:
-			case TREE_HIT_TEXT:
-			if(hoveredRow_){
-				hoveredRow_ = 0;
-				//RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-			}
-			break;
-			case TREE_HIT_NONE:
-			default:
-			break;
-			}
-		}
-		if(capturedRow_){
-			Rect rect;
-			getRowRect(capturedRow_, rect);
-			tree_->onRowMouseMove(capturedRow_, rect, point);
-		}
-		__super::onMessageMouseMove(button, x, y);
-	}
+	tree_->onMouseMove(button, x, y);
 }
 
 BOOL TreeImpl::onMessageEraseBkgnd(HDC dc)
@@ -616,40 +486,15 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 	if(message == WM_VSCROLL){
 		::SetScrollInfo(handle_, SB_VERT, &info, TRUE);
 		::GetScrollInfo(handle_, SB_VERT, &info);
-		offset_.y = int(info.nPos);
+		tree_->onScroll(int(info.nPos));
 	}
-	else{
-		::SetScrollInfo(handle_, SB_HORZ, &info, TRUE);
-		::GetScrollInfo(handle_, SB_HORZ, &info);
-		offset_.x = int(info.nPos);
-	}
+
 
 	if(info.nPos != oldPosition){
 		tree_->_arrangeChildren();
 		RedrawWindow(handle_, 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-		updateScrollBar();
+		tree_->updateScrollBar();
 	}
-}
-
-void TreeImpl::updateArea()
-{
-	Win32::Rect clientRect;
-	::GetClientRect(handle_, &clientRect);
-
-	area_ = clientRect.recti();
-	area_.setLeft(area_.left() + 1);
-	area_.setRight(area_.right() - 1);
-	area_.setTop(area_.top() + 1);
-	area_.setBottom(area_.bottom() - 1);
-
-	if (tree_->filterMode_)
-	{
-		int filterAreaHeight = tree_->filterEntry_ ? tree_->filterEntry_->_minimalSize().y : 0;
-		area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
-	}
-
-	tree_->_arrangeChildren();
-	updateScrollBar();
 }
 
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
@@ -672,10 +517,53 @@ void TreeImpl::onMessagePaint()
 	HDC dc = BeginPaint(handle_, &ps);
 	{
 		Win32::MemoryDC memoryDC(dc);
-		redraw(memoryDC);
+		tree_->redraw(memoryDC);
 	}
 	EndPaint(handle_, &ps);
 	__super::onMessagePaint();
+}
+
+static int translateKeyCode(unsigned int keyCode)
+{
+	switch (keyCode) {
+	case VK_BACK: return property_tree::KEY_BACKSPACE;
+	case VK_DELETE: return property_tree::KEY_DELETE;
+	case VK_DOWN: return property_tree::KEY_DOWN;
+	case VK_END: return property_tree::KEY_END;
+	case VK_ESCAPE: return property_tree::KEY_ESCAPE;
+	case VK_F2: return property_tree::KEY_F2;
+	case VK_HOME: return property_tree::KEY_HOME;
+	case VK_INSERT: return property_tree::KEY_INSERT;
+	case VK_LEFT: return property_tree::KEY_LEFT;
+	case VK_MENU: return property_tree::KEY_MENU;
+	case VK_RETURN: return property_tree::KEY_RETURN;
+	case VK_RIGHT: return property_tree::KEY_RIGHT;
+	case VK_SPACE: return property_tree::KEY_SPACE;
+	case VK_UP: return property_tree::KEY_UP;
+	case 'C': return property_tree::KEY_C;
+	case 'V': return property_tree::KEY_V;
+	case 'Z': return property_tree::KEY_Z;
+	}
+
+	return property_tree::KEY_UNKNOWN;
+
+}
+
+static int translateModifiers(unsigned short flags)
+{
+}
+
+static property_tree::KeyEvent translateKeyEvent(unsigned int keyCode, unsigned short flags)
+{
+	property_tree::KeyEvent e;
+	e.key_ = translateKeyCode(keyCode);
+	if (GetKeyState(VK_MENU) >> 15)
+		e.modifiers_ |= MODIFIER_ALT;
+	if (GetKeyState(VK_CONTROL) >> 15)
+		e.modifiers_ |= MODIFIER_CONTROL;
+	if (GetKeyState(VK_SHIFT) >> 15)
+		e.modifiers_ |= MODIFIER_SHIFT;
+	return e;		
 }
 
 int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
@@ -692,8 +580,10 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
         }
     }
 
-	PropertyRow* row = model()->focusedRow();
-	bool result = tree_->onRowKeyDown(row, keyPress);
+	PropertyRow* row = tree_->model()->focusedRow();
+
+	property_tree::KeyEvent keyEvent = translateKeyEvent(keyCode, flags);
+	bool result = tree_->onRowKeyDown(row, &keyEvent);
 	::RedrawWindow(handle(), 0, 0, RDW_INVALIDATE);
 	if(!result)
 		return __super::onMessageKeyDown(keyCode, count, flags);
@@ -751,246 +641,6 @@ LRESULT TreeImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
 		onMessagePaint();
 	
 	return result;
-}
-
-struct DrawVisitor
-{
-	DrawVisitor(HDC dc, const Rect& area, int scrollOffset)
-		: area_(area)
-		, dc_(dc)
-		, offset_(0)
-		, scrollOffset_(scrollOffset)
-		, lastParent_(0)
-	{}
-
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
-	{
-		if(row->visible(tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
-			if(row->rect().top() > scrollOffset_ + area_.height())
-				lastParent_ = row->parent();
-
-			if(row->rect().bottom() > scrollOffset_)
-				row->drawRow(dc_, tree, index);
-
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-		else
-			return SCAN_SIBLINGS;
-	}
-
-protected:
-	HDC dc_;
-	Rect area_;
-	int offset_;
-	int scrollOffset_;
-	PropertyRow* lastParent_;
-};
-
-void TreeImpl::redraw(HDC dc)
-{
-	DebugTimer timer("redraw");
-	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
-    ::GetClientRect(handle_, &clientRect);
-    int clientWidth = clientRect.right - clientRect.left;
-    int clientHeight = clientRect.bottom - clientRect.top;
-
-	PropertyRow::setOffsetY(-offset_.y + area_.top());
-
-	{
-		Graphics gr(dc);
-		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left, 
-			clientRect.top, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
-	}
-
-	if(tree_->filterMode_)
-	{
-		Win32::AutoSelector font(dc, Win32::defaultBoldFont());
-
-		SetBkMode(dc, TRANSPARENT);
-		const wchar_t filterStr[] = L"Filter:";
-		Vect2 size = Win32::calculateTextSize(handle(), Win32::defaultBoldFont(), filterStr);
-		int right = tree_->filterEntry_->_position().left();
-		ExtTextOutW(dc, right - size.x - 6, 6, 0, 0, filterStr, ARRAY_LEN(filterStr) - 1, 0);
-	}
-
-	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
-
-	//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
-	if(drag_.captured())
-		drag_.drawUnder(dc);
-	//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
-
-	if (model()->root())
-		model()->root()->scanChildren(DrawVisitor(dc, area_, 0), tree_);
-
-	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
-
-	if(size_.y > clientHeight)
-	{
-		using namespace Gdiplus;
-		using Gdiplus::Rect;
-		using Gdiplus::Color;
-		Graphics gr(dc);
-		const int shadowHeight = 10;
-		Color color1(0, 0, 0, 0);
-		Color color2(96, 0, 0, 0);
-
-		Rect upperRect(area_.left() - 1, area_.top() - 1, area_.width() + 2, shadowHeight + 1);
-		LinearGradientBrush upperBrush(upperRect, color2, color1, LinearGradientModeVertical);
-		upperRect.Y += 1;
-		upperRect.Height -= 2;
-		gr.FillRectangle(&upperBrush, upperRect);
-
-		Rect lowerRect(area_.left(), area_.bottom() - shadowHeight / 2 - 1, area_.width(), shadowHeight / 2 + 2);
-		LinearGradientBrush lowerBrush(lowerRect, color1, color2, LinearGradientModeVertical);
-		lowerRect.Y += 1;
-		lowerRect.Height -= 2;
-		gr.FillRectangle(&lowerBrush, lowerRect);
-
-		SolidBrush brush(gdiplusSysColor(COLOR_3DDKSHADOW));
-		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), 1, area_.height()));
-		gr.FillRectangle(&brush, Rect(clientRect.left, area_.top(), area_.width(), 1));
-		gr.FillRectangle(&brush, Rect(clientRect.right - 1, area_.top(), 1, area_.height()));
-		gr.FillRectangle(&brush, Rect(clientRect.left, area_.bottom() - 1, area_.width(), 1));
-	}
-
-	if(drag_.captured()){
-		//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
-		drag_.drawOver(dc);
-		//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
-	}
-	else{
-		if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && tree_->hasFocus()){
-			clientRect.left += 2; clientRect.top += 2;
-			clientRect.right -= 2; clientRect.bottom -= 2;
-			DrawFocusRect(dc, &clientRect);
-		}
-	}
-	PropertyRow::setOffsetY(0);
-}
-
-TreeImpl::TreeHitTest TreeImpl::hitTest(PropertyRow* row, Vect2 pointInWindowSpace, const Rect& rowRect)
-{
-	Vect2 point = pointToRootSpace(pointInWindowSpace);
-
-	if(!row->hasVisibleChildren(tree()) && row->plusRect().pointInside(point))
-		return TREE_HIT_PLUS;
-
-	if(row->textRect().pointInside(point))
-		return TREE_HIT_TEXT;
-	
-	if(rowRect.pointInside(point))
-		return TREE_HIT_ROW;
-	
-	return TREE_HIT_NONE;
-}
-
-Vect2 TreeImpl::pointToRootSpace(Vect2 point) const
-{
-	return Vect2(point.x + offset_.x - area_.left(), point.y + offset_.y - area_.top());
-}
-
-PropertyRow* TreeImpl::rowByPoint(Vect2 point)
-{
-	if (!model()->root())
-		return 0;
-	if (!area_.pointInside(point))
-		return 0;
-	return model()->root()->hit(tree_, pointToRootSpace(point));
-}
-
-bool TreeImpl::toggleRow(PropertyRow* row)
-{
-	if(!row->canBeToggled(tree_))
-		return false;
-	tree_->expandRow(row, !row->expanded());
-
-	updateScrollBar();
-	::RedrawWindow(handle_, 0, 0, RDW_INVALIDATE);
-	return true;
-}
-
-struct RowRectObtainer 
-{
-	RowRectObtainer(PropertyRow* row)
-	: offset_(0)
-	, row_(row)
-	{}
-
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
-	{
-		if(row == row_)
-			return SCAN_FINISHED;
-		offset_ += row->height();
-		return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
-	}
-
-	int offset_;
-	PropertyRow* row_;
-};
-
-bool TreeImpl::getRowRect(PropertyRow* row, Rect& outRect, bool onlyVisible)
-{
-    if(!model()->root())
-        return false;
-	RowRectObtainer obtainer(row);
-	model()->root()->scanChildren(obtainer, tree());
-
-	int height = row->pulledUp() ? row->parent()->height() : row->height();
-	int offset = row->pulledUp() ? obtainer.offset_ - height : obtainer.offset_;
-
-	if(!onlyVisible || offset >= offset_.y && offset - offset_.y < area_.bottom()){
-		int top = area_.top() + offset - offset_.y;
-		outRect.set(area_.left(), top, area_.right(), top + height);
-		return true;
-	}
-	return false;
-}
-
-void TreeImpl::ensureVisible(PropertyRow* row, bool update)
-{
-    YASLI_ESCAPE(row != 0, return);
-	if(row->isRoot())
-		return;
-
-	tree_->expandParents(row);
-
-	Rect rect = row->rect();
-	if(rect.top() < area_.top() + offset_.y){
-		offset_.y =  max(rect.top() - area_.top(), 0);
-	}
-	else if(rect.bottom() > area_.bottom() + offset_.y){
-		offset_.y = rect.bottom() - area_.bottom();
-	}
-	if(update)
-		tree_->update();
-}
-
-void TreeImpl::updateScrollBar()
-{
-	int pageSize = area_.height();
-	offset_.x = max(0, min(offset_.x, max(0, size_.x - area_.right() - 1)));
-	offset_.y = max(0, min(offset_.y, max(0, size_.y - pageSize)));
-
-	SCROLLINFO scrollInfo;
-
-	memset((void*)&scrollInfo, 0, sizeof(scrollInfo));
-	scrollInfo.cbSize = sizeof(SCROLLINFO);
-	scrollInfo.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
-	scrollInfo.nMin = 0;
-	scrollInfo.nMax = size_.y;
-	scrollInfo.nPos = offset_.y;
-	scrollInfo.nPage = pageSize;
-	SetScrollInfo(handle_, SB_VERT, &scrollInfo, TRUE);
-
-	memset((void*)&scrollInfo, 0, sizeof(scrollInfo));
-	scrollInfo.cbSize = sizeof(SCROLLINFO);
-	scrollInfo.fMask = SIF_PAGE | SIF_POS | SIF_RANGE;
-	scrollInfo.nMin = 0;
-	scrollInfo.nMax = size_.x;
-	scrollInfo.nPos = offset_.x;
-	scrollInfo.nPage = area_.right() + 1;
-	SetScrollInfo(handle_, SB_HORZ, &scrollInfo, TRUE);
 }
 
 }

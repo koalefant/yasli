@@ -42,6 +42,7 @@ TreeConfig::TreeConfig()
 , filter_(YASLI_DEFAULT_FILTER)
 , compact_(false)
 , fullRowMode_(false)
+, fullRowContainers_(false)
 , showContainerIndices_(true)
 , filterWhenType_(true)
 , sliderUpdateDelay_(25)
@@ -52,6 +53,8 @@ TreeConfig::TreeConfig()
 	defaultRowHeight_ = 22;//max(17, fm.height() + 6); // to fit at least 16x16 icons
 	tabSize_ = defaultRowHeight_;
 }
+
+TreeConfig TreeConfig::defaultConfig;
 
 // ---------------------------------------------------------------------------
 
@@ -122,7 +125,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	case KEY_MENU:
 	{
 		if (ev->modifiers() == 0) {
-			std::auto_ptr<IMenu> menu(ui()->createMenu());
+			std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 
 			if(onContextMenu(row, *menu)){
 				Rect rect(row->rect());
@@ -293,7 +296,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 
 	if (menuRow) {
 		onRowSelected(menuRow, false, true);	
-		std::auto_ptr<IMenu> menu(ui()->createMenu());
+		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
 			menu->exec(point);
@@ -422,8 +425,7 @@ void PropertyTree::serialize(Archive& ar)
 		ensureVisible(model()->focusedRow());
 		updateAttachedPropertyTree(false);
 		updateHeights();
-		// FIXME
-		//signalSelected();
+		onSelected();
 	}
 }
 
@@ -455,7 +457,7 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 	if(adjustCursorPos)
 		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
 	updateAttachedPropertyTree(false);
-	signalSelected();
+	onSelected();
 }
 
 bool PropertyTree::attach(const yasli::Serializers& serializers)
@@ -547,7 +549,7 @@ void PropertyTree::revert()
 		oa.setFilter(filter_);
 
 		Objects::iterator it = attached_.begin();
-		signalAboutToSerialize(oa);
+		onAboutToSerialize(oa);
 		(*it)(oa);
 		
 		PropertyTreeModel model2(this);
@@ -556,7 +558,7 @@ void PropertyTree::revert()
 			oa2.setLastContext(archiveContext_);
 			yasli::Context treeContext(oa2, this);
 			oa2.setFilter(filter_);
-			signalAboutToSerialize(oa2);
+			onAboutToSerialize(oa2);
 			(*it)(oa2);
 			model_->root()->intersect(model2.root());
 		}
@@ -577,7 +579,7 @@ void PropertyTree::revert()
 	repaint();
 	updateAttachedPropertyTree(true);
 
-	signalReverted();
+	onReverted();
 }
 
 void PropertyTree::revertNonInterrupting()
@@ -599,15 +601,15 @@ void PropertyTree::apply(bool continuous)
 			ia.setLastContext(archiveContext_);
  			yasli::Context treeContext(ia, this);
  			ia.setFilter(filter_);
-			signalAboutToSerialize(ia);
+			onAboutToSerialize(ia);
 			(*it)(ia);
 		}
 	}
 
 	if (continuous)
-		signalContinuousChange();
+		onContinuousChange();
 	else
-		signalChanged();
+		onChanged();
 
 	//applyTime_ = timer.elapsed();
 }
@@ -713,10 +715,8 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 		filter->addAction((yasli::string("Type:\t") + typeFilter).c_str(), 0, handler, &PropertyTreeMenuHandler::onMenuFilterByType);
 	}
 
-#if 0
-	menu.addSeparator();
-	menu.addAction(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
-#endif
+	// menu.addSeparator();
+	// menu.addAction(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
 	return true;
 }
 
@@ -766,7 +766,7 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 			updateHeights();
 			updateAttachedPropertyTree(true);
 			if(!immediateUpdate_)
-				onSignalChanged();
+				onChanged();
 		}
 	}
 	else {
@@ -776,7 +776,7 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 
 void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 {
-
+	onPushUndo();
 }
 
 void PropertyTree::setWidget(InplaceWidget* widget, PropertyRow* widgetRow)
@@ -1098,6 +1098,12 @@ Point PropertyTree::_toWidget(Point point) const
 	Point pt ( point.x() - offset_.x() + area_.left(), 
 		point.y() - offset_.y() + area_.top() );
 	return pt;
+}
+
+void PropertyTree::_cancelWidget()
+{
+	defocusInplaceEditor();
+	widget_.reset();
 }
 
 // vim:ts=4 sw=4:

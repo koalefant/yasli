@@ -8,8 +8,6 @@
 #include "sigslot.h"
 using std::vector;
 
-class IMenu;
-struct Color;
 class PropertyTreeModel;
 class PopupMenuItem;
 class PropertyTreeModel;
@@ -19,19 +17,21 @@ class InplaceWidget;
 class PropertyTreeOperator;
 struct PropertyRowMenuHandler;
 class Entry;
-struct IconXPMCache;
 
 namespace yasli { class Object; struct Context; }
 
 
 namespace property_tree{ 
+struct Color;
+
+class IMenu;
 struct IUIFacade; 
 struct KeyEvent;
 }
 using property_tree::IUIFacade;
 using property_tree::KeyEvent;
 
-class PropertyTree : public TreeConfig, public sigslot::has_slots
+class PropertyTree : public TreeConfig/*, public sigslot::has_slots*/
 {
 public:
 	void attach(const yasli::Object& object);
@@ -50,6 +50,7 @@ public:
 
 	void setCompact(bool compact) { compact_ = compact; repaint(); }
 	void setFullRowMode(bool fullRowMode) { fullRowMode_ = fullRowMode; repaint(); }
+	void setFullRowContainers(bool fullRowContainers) { fullRowContainers_ = fullRowContainers; repaint(); }
 	void setExpandLevels(int levels);
 	void setUndoEnabled(bool enabled, bool full = false);
 	void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
@@ -74,8 +75,7 @@ public:
 	void expandChildren(PropertyRow*);
 	void collapseChildren(PropertyRow*);
 
-	virtual void onSignalChanged() = 0;
-	virtual void serialize(yasli::Archive& ar) = 0;
+	virtual void serialize(yasli::Archive& ar);
 
 protected:
 	PropertyTree(IUIFacade* ui);
@@ -87,7 +87,7 @@ public:
 	PropertyTreeModel* model() { return model_.get(); }
 	const PropertyTreeModel* model() const { return model_.get(); }
 	IUIFacade* ui() const { return ui_; }
-	void _cancelWidget(){ defocusInplaceEditor(); widget_.reset(); }
+	void _cancelWidget();
 	virtual bool _isDragged(const PropertyRow* row) const = 0;
 	bool _isCapturedRow(const PropertyRow* row) const;
 
@@ -102,20 +102,6 @@ public:
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;
-
-	virtual void signalAboutToSerialize(yasli::Archive& ar) = 0;
-	virtual void signalChanged() = 0;
-	virtual void signalContinuousChange() = 0;
-	virtual void signalSelected() = 0;
-	virtual void signalReverted() = 0;
-	virtual void signalPushUndo() = 0;
-
-protected:
-	virtual bool canBePasted(PropertyRow* destination) = 0;
-	virtual bool canBePasted(const char* destinationType) = 0;
-	PropertyRow* rowByPoint(const Point& point);
-	void onRowMenuDecompose(PropertyRow* row);
-	bool toggleRow(PropertyRow* row);
 
 	struct RowFilter {
 		enum Type {
@@ -143,13 +129,28 @@ protected:
 		}
 	};
 
+protected:
+	virtual void onAboutToSerialize(yasli::Archive& ar) = 0;
+	virtual void onChanged() = 0;
+	virtual void onContinuousChange() = 0;
+	virtual void onSelected() = 0;
+	virtual void onReverted() = 0;
+	virtual void onPushUndo() = 0;
+
+	virtual bool canBePasted(PropertyRow* destination) = 0;
+	virtual bool canBePasted(const char* destinationType) = 0;
+	PropertyRow* rowByPoint(const Point& point);
+	void onRowMenuDecompose(PropertyRow* row);
+	bool toggleRow(PropertyRow* row);
+
+
 	Point pointToRootSpace(const Point& pointInWindowSpace) const;
 	virtual bool updateScrollBar() = 0;
 	virtual void interruptDrag() = 0;
 	virtual void _arrangeChildren() = 0;
 	virtual void resetFilter() = 0;
 
-	bool onContextMenu(PropertyRow* row, IMenu& menu);
+	bool onContextMenu(PropertyRow* row, property_tree::IMenu& menu);
 
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 	bool onRowKeyDown(PropertyRow* row, const KeyEvent* ev);
@@ -167,7 +168,7 @@ protected:
 	void updateAttachedPropertyTree(bool revert);
 
 	void onModelUpdated(const PropertyRows& rows, bool needApply);
-	virtual void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
+	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
 
 private:
 	PropertyTree(const PropertyTree&);
@@ -183,7 +184,6 @@ protected:
 	Objects attached_;
 	PropertyTree* attachedPropertyTree_;
 	RowFilter rowFilter_;
-	std::auto_ptr<IconXPMCache> iconCache_; 
 	yasli::Context* archiveContext_;
 
 	int leftBorder_;

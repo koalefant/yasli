@@ -23,7 +23,8 @@
 #include "ww/Serialization.h"
 #include "ww/Unicode.h"
 #include "yasli/ClassFactory.h"
-#include "ww/PropertyDrawContext.h"
+#include "ww/Win32/Drawing.h"
+#include "ww/PropertyTree/wwDrawContext.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

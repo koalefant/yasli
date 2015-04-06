@@ -1,5 +1,8 @@
 #pragma once
 #include "sigslot.h"
+#include "Rect.h"
+
+namespace property_tree {
 
 enum
 {
@@ -7,14 +10,15 @@ enum
 	MENU_DEFAULT = 1 << 1
 };
 
-struct IMenuAction
+class IMenuAction
 {
-
+public:
 	sigslot::signal0 signalTriggered;
 };
 
-struct IMenu
+class IMenu
 {
+public:
 	virtual ~IMenu() {}
 	virtual bool isEmpty() = 0;
 	virtual IMenu* addMenu(const char* text) = 0;
@@ -38,3 +42,4 @@ struct IMenu
 	}
 
 };
+}

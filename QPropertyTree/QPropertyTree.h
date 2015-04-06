@@ -66,8 +66,6 @@ public:
 public slots:
 	void onAttachedTreeChanged();
 public:
-	void serialize(yasli::Archive& ar) override;
-
 	// internal methods:
 	QPoint _toScreen(Point point) const;
 	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
@@ -91,7 +89,12 @@ protected slots:
 	void onMouseStillTimer();
 
 protected:
-	void onModelPushUndo(PropertyTreeOperator* op, bool* handled) override;
+	void onAboutToSerialize(yasli::Archive& ar) override { signalAboutToSerialize(ar); }
+	void onChanged() override { signalChanged(): }
+	void onContinuousChange() override { signalContinuousChange(); }
+	void onSelected() override { signalSelected(); }
+	void onReverted() override { signalReverted(); }
+	void onPushUndo() override { signalPushUndo(); }
 	bool canBePasted(PropertyRow* destination);
 	bool canBePasted(const char* destinationType);
 	void interruptDrag() override;
@@ -121,7 +124,7 @@ protected:
 
 	void _arrangeChildren();
 
-	void drawFilteredString(QPainter& p, const wchar_t* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
+	void drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 
 	QScopedPointer<QLineEdit> filterEntry_; 
 	

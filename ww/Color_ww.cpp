@@ -1,13 +1,12 @@
 /**
- *  wWidgets - Lightweight UI Toolkit.
- *  Copyright (C) 2009-2011 Evgeny Andreeshchev <eugene.andreeshchev@gmail.com>
+ *  yasli - Serialization Library.
+ *  Copyright (C) 2007-2013 Evgeny Andreeshchev <eugene.andreeshchev@gmail.com>
  *                          Alexander Kotliar <alexander.kotliar@gmail.com>
  * 
  *  This code is distributed under the MIT License:
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "StdAfx.h"
 #include "Color.h"
 #include "yasli/Archive.h"
 
@@ -113,10 +112,10 @@ void Color::toHSV(float& h,float& s,float& v)
 
 void Color::serialize(yasli::Archive& ar) 
 {
-	ar(r, "", "&r");
-	ar(g, "", "&g");
-	ar(b, "", "&b");
-	ar(a, "", "&a");
+	ar(r, "", "^");
+	ar(g, "", "^");
+	ar(b, "", "^");
+	ar(a, "", "^");
 }
 
 }

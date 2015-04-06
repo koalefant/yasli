@@ -27,12 +27,12 @@ public:
 	void onMenuCreateByIndex();
 };
 
-class IMenu;
+namespace property_tree { class IMenu; }
 struct ClassMenuItemAdder
 {
-	virtual void addAction(IMenu& menu, const char* text, int index);
-	virtual IMenu* addMenu(IMenu& menu, const char* text);
-	void generateMenu(IMenu& createItem, const StringList& comboStrings);
+	virtual void addAction(property_tree::IMenu& menu, const char* text, int index);
+	virtual property_tree::IMenu* addMenu(property_tree::IMenu& menu, const char* text);
+	void generateMenu(property_tree::IMenu& createItem, const StringList& comboStrings);
 };
 
 class PropertyRowPointer : public PropertyRow

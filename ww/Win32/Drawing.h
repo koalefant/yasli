@@ -19,6 +19,9 @@ struct Color4c;
 namespace Gdiplus{
 	class Graphics;
 	class Rect;
+	class Brush;
+	class Color;
+	class Font;
 }
 
 namespace Win32{
@@ -31,7 +34,6 @@ namespace Win32{
 	void drawColorBlend(HDC dc, const ww::Rect& rect, const Color4f& color1, const Color4f& color2, bool alphaOnly = false);
 
 	void drawVerticalBlend(HDC dc, const RECT& rect, COLORREF color1, COLORREF color2);
-
 	void drawGrayedCheck(HDC dc, const RECT& iconRect);
     void drawRadio(Gdiplus::Graphics *gr, const Gdiplus::Rect& checkRect, bool checked);
 	void drawNotCheck(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, bool checked);
@@ -40,5 +42,11 @@ namespace Win32{
 	void drawComboBox(HDC dc, const RECT& rect, const wchar_t* text, HFONT font);
 	void drawSlider(HDC dc, const RECT& rect, float value, bool focused);
 	bool isAppThemed();
+}
+
+namespace ww{
+	void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdiplus::Rect& r, const Gdiplus::Color& border, int radius);
+	Gdiplus::Font* propertyTreeDefaultFont();
+	Gdiplus::Font* propertyTreeDefaultBoldFont();
 }
 

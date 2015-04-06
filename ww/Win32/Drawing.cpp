@@ -13,7 +13,6 @@
 #include "ww/Win32/Window32.h"
 #include "ww/Win32/Handle.h"
 #include "ww/gdiplusUtils.h"
-#include "ww/PropertyDrawContext.h" // FIXME привести в порядок
 #include "ww/Color.h"
 
 #ifdef _MSC_VER
@@ -261,6 +260,56 @@ void drawVerticalBlend(HDC dc, const RECT& rect, COLORREF color1, COLORREF color
 		LineTo(dc, rect.right - 1, y);
 	}
 
+}
+
+void createRoundRectanglePath(Gdiplus::GraphicsPath* path, const Gdiplus::Rect &_rect, int dia)
+{
+	using namespace Gdiplus;
+	Rect r = _rect;
+	if (dia > r.Width)
+		dia = r.Width;
+	if (dia > r.Height)
+		dia = r.Height;
+
+	Rect corner(r.X, r.Y, dia, dia);
+	path->Reset();
+
+	path->AddArc(corner, 180, 90);
+
+	if (dia == 20) {
+		corner.Width += 1;
+		corner.Height += 1;
+		r.Width -= 1; r.Height -= 1;
+	}
+
+	corner.X += (r.Width - dia - 1);
+	path->AddArc(corner, 270, 90);
+
+	corner.Y += (r.Height - dia - 1);
+	path->AddArc(corner, 0, 90);
+
+	corner.X -= (r.Width - dia - 1);
+	path->AddArc(corner, 90, 90);
+	path->CloseFigure();
+}
+
+
+void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdiplus::Rect& r, const Gdiplus::Color& border, int radius)
+{
+	using namespace Gdiplus;
+	int dia = 2 * radius;
+
+	int oldPageUnit = gr->SetPageUnit(UnitPixel);
+
+	Pen pen(border, 1);
+	pen.SetAlignment(PenAlignmentCenter);
+
+	GraphicsPath path;
+	createRoundRectanglePath(&path, r, dia);
+
+	gr->FillPath(brush, &path);
+	gr->DrawPath(&pen, &path);
+	gr->SetPageUnit((Unit)oldPageUnit);
 }
 
 void drawSlider(HDC dc, const RECT& rect, float value, bool focused)

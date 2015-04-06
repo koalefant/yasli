@@ -19,11 +19,13 @@ class ColorChooser;
 class ColorChooserDialog : public ww::Dialog{
 public:
 	ColorChooserDialog(ww::Widget* parent, const Color& color = Color(0, 204, 0, 255), bool showColor = true, bool showAlpha = true);
+	ColorChooserDialog(HWND parent, const Color& color = Color(0, 204, 0, 255), bool showColor = true, bool showAlpha = true);
 	~ColorChooserDialog();
 
 	void set(const Color& color);
 	Color get() const{ return color_; }
 protected:
+	void initialize(const Color& color, bool showColor, bool showAlpha);
 	void onChooserChanged();
 
 	ColorChooser* chooser_;

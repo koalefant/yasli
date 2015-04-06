@@ -35,7 +35,7 @@ void ClassMenuItemAdder::generateMenu(IMenu& createItem, const StringList& combo
 				addAction(*item, leaf, index++);
 			}
 			else{
-				if (IMenu* menu = item->findMenu(leaf))
+				if (property_tree::IMenu* menu = item->findMenu(leaf))
 					item = menu;
 				else
 					item = addMenu(*item, leaf);
@@ -189,7 +189,7 @@ void PropertyRowPointer::redraw(IDrawContext& context)
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
 	ClassMenuItemAdderRowPointer(PropertyRowPointer* row, PropertyTree* tree) : row_(row), tree_(tree) {}    
-	void addAction(IMenu& menu, const char* text, int index)
+	void addAction(property_tree::IMenu& menu, const char* text, int index)
 	{
 		CreatePointerMenuHandler* handler = new CreatePointerMenuHandler;
 		tree_->addMenuHandler(handler);
@@ -210,7 +210,7 @@ bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
 {
 	if(userReadOnly())
 			return false;
-	std::auto_ptr<IMenu> menu(tree->ui()->createMenu());
+	std::auto_ptr<property_tree::IMenu> menu(tree->ui()->createMenu());
 	ClassMenuItemAdderRowPointer(this, tree).generateMenu(*menu, tree->model()->typeStringList(baseType()));
 	tree->_setPressedRow(this);
 	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));

@@ -11,6 +11,8 @@
 
 namespace yasli { class Archive; }
 
+namespace property_tree {
+
 struct Color
 {
     unsigned char b, g, r, a;
@@ -57,3 +59,5 @@ struct Color
 	}
 	void serialize(yasli::Archive& ar);
 };
+
+}

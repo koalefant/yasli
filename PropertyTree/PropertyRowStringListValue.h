@@ -60,9 +60,9 @@ public:
 	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(L" ... ", false, true, 0);
+			context.drawEntry(" ... ", false, true, 0);
 		else if(userReadOnly())
-			context.drawValueText(pulledSelected(), valueAsWString().c_str());
+			context.drawValueText(pulledSelected(), valueAsString().c_str());
 		else
 			context.drawComboBox(context.widgetRect, valueAsString().c_str());
 
@@ -120,9 +120,9 @@ public:
 	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(L" ... ", false, true, 0);
+			context.drawEntry(" ... ", false, true, 0);
 		else if(userReadOnly())
-			context.drawValueText(pulledSelected(), valueAsWString().c_str());
+			context.drawValueText(pulledSelected(), valueAsString().c_str());
 		else
 			context.drawComboBox(context.widgetRect, valueAsString().c_str());
 	}

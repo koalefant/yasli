@@ -18,7 +18,6 @@
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
 #include "gdiplusUtils.h"
-#include "PropertyDrawContext.h" // rename
 #include "yasli/Archive.h"
 #include <algorithm>
 

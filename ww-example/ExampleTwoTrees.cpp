@@ -115,14 +115,21 @@ struct TwoTreesData
 class TwoTreesWidget : public ww::HSplitter
 {
 public:
+	ww::PropertyTree* outlineTree;
+
 	void onGenerate()
 	{
 		twoTreesData.generate();
 	}
 
+	void onDataChanged()
+	{
+		outlineTree->revert();
+	}
+
 	TwoTreesWidget()
 	{
-		ww::PropertyTree* outlineTree = new ww::PropertyTree();
+		outlineTree = new ww::PropertyTree();
 
 		ww::VBox* vbox = new ww::VBox();
 		{
@@ -130,7 +137,7 @@ public:
 			outlineTree->setCompact(true);
 			outlineTree->setUndoEnabled(true, false);
 			outlineTree->setExpandLevels(2);
-			twoTreesData.signalChanged_.connect(outlineTree, &PropertyTree::revert);
+			twoTreesData.signalChanged_.connect(this, &TwoTreesWidget::onDataChanged);
 			vbox->add(outlineTree, PACK_FILL);
 
 			ww::Button* button = new ww::Button("Generate New Tree", 2);

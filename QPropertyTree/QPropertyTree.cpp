@@ -714,19 +714,6 @@ void QPropertyTree::onScroll(int pos)
 	repaint();
 }
 
-void QPropertyTree::serialize(Archive& ar)
-{
-	model()->serialize(ar, this);
-
-	if(ar.isInput()){
-		updateHeights();
-		ensureVisible(model()->focusedRow());
-		updateAttachedPropertyTree(false);
-		updateHeights();
-		signalSelected();
-	}
-}
-
 bool QPropertyTree::canBePasted(PropertyRow* destination)
 {
 	SharedPtr<PropertyRow> source;
@@ -746,11 +733,6 @@ bool QPropertyTree::canBePasted(const char* destinationType)
 
 	bool result = strcmp(source->typeName(), destinationType) == 0;
 	return result;
-}
-
-void QPropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
-{
-	signalPushUndo();
 }
 
 bool QPropertyTree::hasFocusOrInplaceHasFocus() const
@@ -955,20 +937,13 @@ void QPropertyTree::onFilterChanged(const QString& text)
 	updateHeights();
 }
 
-void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
+void QPropertyTree::drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
 {
 	int textLen = (int)wcslen(text);
 
 	if (textLen == 0)
 		return;
 
-	yasli::string textStr(fromWideChar(text));
-#ifdef _MSC_VER
-	// default qt 4.8 builds have 32-bit wchar_t
-	QString str = QString::fromUtf16((const ushort*)text);
-#else
-	QString str = QString::fromWCharArray(text);
-#endif
 	QFontMetrics fm(*font);
 	QRect textRect = rect;
 	int alignment;
@@ -984,9 +959,9 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 	if (filterMode_) {
 		size_t hiStart = 0;
 		size_t hiEnd = 0;
-		bool matched = rowFilter_.match(textStr.c_str(), type, &hiStart, &hiEnd) && hiStart != hiEnd;
+		bool matched = rowFilter_.match(text, type, &hiStart, &hiEnd) && hiStart != hiEnd;
 		if (!matched && (type == RowFilter::NAME || type == RowFilter::VALUE))
-			matched = rowFilter_.match(textStr.c_str(), RowFilter::NAME_VALUE, &hiStart, &hiEnd);
+			matched = rowFilter_.match(text, RowFilter::NAME_VALUE, &hiStart, &hiEnd);
 		if (matched && hiStart != hiEnd) {
 			QRectF boxFull;
 			QRectF boxStart;
@@ -1040,7 +1015,7 @@ void QPropertyTree::drawFilteredString(QPainter& p, const wchar_t* text, RowFilt
 	p.setFont(previousFont);
 }
 
-void QPropertyTree::_drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
+void QPropertyTree::_drawRowValue(QPainter& p, const char* text, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
 {
 	drawFilteredString(p, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }

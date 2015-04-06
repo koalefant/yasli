@@ -27,8 +27,10 @@
 #include "sigslot.h"
 
 class QPainter;
+namespace property_tree { 
+struct KeyEvent; 
 class IMenu;
-namespace property_tree { struct KeyEvent; }
+}
 using property_tree::KeyEvent;
 
 using std::vector;
@@ -55,7 +57,7 @@ public:
 
 struct PropertyDragEvent
 {
-	PropertyTree* tree;
+	::PropertyTree* tree;
 	Point pos;
 	Point start;
 	Point lastDelta;
