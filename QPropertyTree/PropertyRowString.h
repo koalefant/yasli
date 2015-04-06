@@ -14,10 +14,6 @@
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
 
-#include <QObject>
-#include <QWidget>
-#include <QLineEdit>
-
 class PropertyRowString : public PropertyRowField
 {
 public:

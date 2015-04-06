@@ -45,6 +45,8 @@
 // ^^^
 #include "PropertyRowObject.h"
 #include "frontend-qt/QDrawContext.h"
+using property_tree::toQRect;
+using property_tree::toQPoint;
 
 static int translateKey(int qtKey)
 {
@@ -326,7 +328,7 @@ void DragWindow::show()
 
 void DragWindow::move(int deltaX, int deltaY)
 {
-	offset_ += Point(deltaX, deltaY);
+	offset_ += QPoint(deltaX, deltaY);
 	setWindowPos(isVisible());
 }
 
@@ -400,7 +402,7 @@ void DragWindow::drawRow(QPainter& p)
 	p.setPen(QPen(tree_->palette().color(QPalette::WindowText)));
 	p.drawRect(entireRowRect);
 
-	QPoint leftTop = QRect(row_->rect()).topLeft();
+	QPoint leftTop = toQRect(row_->rect()).topLeft();
 	int offsetX = -leftTop.x() - tree_->tabSize() + 3;
 	int offsetY = -leftTop.y() + 3;
 	p.translate(offsetX, offsetY);
@@ -459,9 +461,9 @@ public:
 		if(!dragging_ && (startPoint_ - screenPoint).manhattanLength() >= 5)
 			if(row_->canBeDragged()){
 				needCapture = true;
-				QRect rect = row_->rect();
-				rect = QRect(rect.topLeft() - tree_->offset_ + QPoint(tree_->tabSize(), 0), 
-							 rect.bottomRight() - tree_->offset_);
+				QRect rect = toQRect(row_->rect());
+				rect = QRect(rect.topLeft() - toQPoint(tree_->offset_) + QPoint(tree_->tabSize(), 0), 
+							 rect.bottomRight() - toQPoint(tree_->offset_));
 
 				window_.set(tree_, row_, rect);
 				window_.move(screenPoint.x() - startPoint_.x(), screenPoint.y() - startPoint_.y());
@@ -491,7 +493,7 @@ public:
 		destinationRow_ = 0;
 
 		QPoint point = pt;
-		PropertyRow* row = tree_->rowByPoint(point);
+		PropertyRow* row = tree_->rowByPoint(fromQPoint(point));
 		if(!row || !row_)
 			return;
 
@@ -521,7 +523,7 @@ public:
 	void drawUnder(QPainter& painter)
 	{
 		if(dragging_ && destinationRow_ == hoveredRow_ && hoveredRow_){
-			QRect rowRect = hoveredRow_->rect();
+			QRect rowRect = toQRect(hoveredRow_->rect());
 			rowRect.setLeft(rowRect.left() + tree_->tabSize());
 			QBrush brush(true ? tree_->palette().highlight() : tree_->palette().shadow());
 			QColor brushColor = brush.color();
@@ -535,11 +537,11 @@ public:
 		if(!dragging_)
 			return;
 
-		QRect rowRect = row_->rect();
+		QRect rowRect = toQRect(row_->rect());
 
 		if(destinationRow_ != hoveredRow_ && hoveredRow_){
 			const int tickSize = 4;
-			QRect hoveredRect = hoveredRow_->rect();
+			QRect hoveredRect = toQRect(hoveredRow_->rect());
 			hoveredRect.setLeft(hoveredRect.left() + tree_->tabSize());
 
 			if(!before_){ // previous
@@ -663,7 +665,7 @@ void QPropertyTree::updateHeights()
 
 	bool hasScrollBar = updateScrollBar();
 
-	area_ = widgetRect.adjusted(2, 2, -2 - scrollBarW, -2);
+	area_ = fromQRect(widgetRect.adjusted(2, 2, -2 - scrollBarW, -2));
 	size_.setX(area_.width());
 
 	if (filterMode_)
@@ -807,9 +809,9 @@ void QPropertyTree::_arrangeChildren()
 			QWidget* w = (QWidget*)widget_->actualWidget();
 			YASLI_ASSERT(w);
 			if(w){
-				QRect rect = row->widgetRect(this);
-				rect = QRect(rect.topLeft() - offset_ + area_.topLeft(), 
-							 rect.bottomRight() - offset_ + area_.topLeft());
+				QRect rect = toQRect(row->widgetRect(this));
+				rect = QRect(rect.topLeft() - toQPoint(offset_) + toQPoint(area_.topLeft()), 
+							 rect.bottomRight() - toQPoint(offset_) + toQPoint(area_.topLeft()));
 				w->move(rect.topLeft());
 				w->resize(rect.size());
 				if(!w->isVisible()){
@@ -1068,10 +1070,10 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	painter.translate(area_.left(), area_.top());
 
     if (model()->root()) {
-        DrawVisitor selectionOp(painter, area_, offset_.y(), true);
+        DrawVisitor selectionOp(painter, toQRect(area_), offset_.y(), true);
         model()->root()->scanChildren(selectionOp, this);
 
-        DrawVisitor op(painter, area_, offset_.y(), false);
+        DrawVisitor op(painter, toQRect(area_), offset_.y(), false);
         model()->root()->scanChildren(op, this);
     }
 
@@ -1102,9 +1104,9 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	}
 	
 	if (dragController_->captured()) {
-	 	painter.translate(-offset_);
+	 	painter.translate(-toQPoint(offset_));
 	 	dragController_->drawOver(painter);
-	 	painter.translate(offset_);
+	 	painter.translate(toQPoint(offset_));
 	}
 	else{
 	// 	if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && tree_->hasFocus()){
@@ -1138,14 +1140,14 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 		int x = ev->x();
 		int y = ev->y();
 
-		PropertyRow* row = rowByPoint(ev->pos());
+		PropertyRow* row = rowByPoint(fromQPoint(ev->pos()));
 		if(row && !row->isSelectable())
 			row = row->parent();
 		if(row){
-			if(onRowLMBDown(row, row->rect(), _toWidget(pointToRootSpace(ev->pos())), ev->modifiers().testFlag(Qt::ControlModifier)))
+			if(onRowLMBDown(row, row->rect(), _toWidget(pointToRootSpace(fromQPoint(ev->pos()))), ev->modifiers().testFlag(Qt::ControlModifier)))
 				capturedRow_ = row;
 			else if (!dragCheckMode_){
-				row = rowByPoint(ev->pos());
+				row = rowByPoint(fromQPoint(ev->pos()));
 				PropertyRow* draggedRow = row;
 				while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
 					draggedRow = draggedRow->parent();
@@ -1158,7 +1160,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 	}
 	else if (ev->button() == Qt::RightButton)
 	{
-		QPoint point = ev->pos();
+		Point point = fromQPoint(ev->pos());
 		PropertyRow* row = rowByPoint(point);
 		if(row){
 			model()->setFocusedRow(row);
@@ -1167,7 +1169,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			onRowRMBDown(row, row->rect(), _toWidget(pointToRootSpace(point)));
 		}
 		else{
-			QRect rect = this->rect();
+			Rect rect = fromQRect(this->rect());
 			onRowRMBDown(model()->root(), rect, _toWidget(pointToRootSpace(point)));
 		}
 	}
@@ -1189,11 +1191,11 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			 dragCheckMode_ = false;
 		 }
 		 else {
-			 QPoint point = ev->pos();
+			 Point point = fromQPoint(ev->pos());
 			 PropertyRow* row = rowByPoint(point);
 			 if(capturedRow_){
-				 QRect rowRect = capturedRow_->rect();
-				 onRowLMBUp(capturedRow_, rowRect, _toWidget(pointToRootSpace(ev->pos())));
+				 Rect rowRect = capturedRow_->rect();
+				 onRowLMBUp(capturedRow_, rowRect, _toWidget(pointToRootSpace(point)));
 				 mouseStillTimer_->stop();
 				 capturedRow_ = 0;
 				 update();
@@ -1264,7 +1266,7 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 {
 	QWidget::mouseDoubleClickEvent(ev);
 
-	QPoint point = ev->pos();
+	Point point = fromQPoint(ev->pos());
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		if(row->widgetRect(this).contains(pointToRootSpace(point))){
@@ -1296,13 +1298,13 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 		update();
 	}
 	else{
-		QPoint point = ev->pos();
+		Point point = fromQPoint(ev->pos());
 		PropertyRow* row = rowByPoint(point);
 		if (row && dragCheckMode_ && row->widgetRect(this).contains(pointToRootSpace(point))) {
 			row->onMouseDragCheck(this, dragCheckValue_);
 		}
 		else if(capturedRow_){
-			onRowMouseMove(capturedRow_, QRect(), point);
+			onRowMouseMove(capturedRow_, Rect(), point);
 			if (sliderUpdateDelay_ >= 0)
 				mouseStillTimer_->start(sliderUpdateDelay_);
 		}

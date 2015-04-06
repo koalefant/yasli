@@ -52,12 +52,32 @@ static QColor toQColor(const Color& color)
 }
 
 
+QRect toQRect(const Rect& r)
+{
+	return QRect(r.x, r.y, r.w, r.h);
+}
+
+Rect fromQRect(const QRect& r)
+{
+	return Rect(r.left(), r.top(), r.width(), r.height());
+}
+
+QPoint toQPoint(const Point& p)
+{
+	return QPoint(p.x(), p.y());
+}
+
+Point fromQPoint(const QPoint& p)
+{
+	return Point(p.x(), p.y());
+}
+
 void QDrawContext::drawColor(const Rect& rect, const Color& color)
 {
 	painter_->save();
 	painter_->setBrush(QBrush(toQColor(color)));
 	painter_->setPen(QPen(tree_->palette().color(QPalette::Shadow)));
-	Rect rt = rect.adjusted(1,1,-1,-3);
+	QRect rt = toQRect(rect.adjusted(1,1,-1,-3));
 	painter_->drawRoundedRect(rt, 2, 2);
 	painter_->restore();
 }
@@ -86,13 +106,13 @@ void QDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
 		QColor color1(tree_->palette().button().color());
 		QColor color2(tree_->palette().highlight().color());
 		QColor brushColor = tree_->hasFocusOrInplaceHasFocus() ? interpolate(color1, color2, 0.33f) : tree_->palette().shadow().color();
-		fillRoundRectangle(*painter_, QBrush(brushColor), rect, brushColor, 6);
+		fillRoundRectangle(*painter_, QBrush(brushColor), toQRect(rect), brushColor, 6);
 	}
 	else {
 		QBrush brush(tree_->hasFocusOrInplaceHasFocus() ? tree_->palette().highlight() : tree_->palette().shadow());
 		QColor brushColor = brush.color();
 		QColor borderColor(brushColor.red(), brushColor.green(), brushColor.blue(), brushColor.alpha() / 4);
-		fillRoundRectangle(*painter_, brush, rect, borderColor, 6);
+		fillRoundRectangle(*painter_, brush, toQRect(rect), borderColor, 6);
 	}
 }
 
@@ -104,13 +124,13 @@ void QDrawContext::drawHorizontalLine(const Rect& rect)
 	gradient.setColorAt(0.95f, tree_->palette().color(QPalette::Light));
 	gradient.setColorAt(1.0f, tree_->palette().color(QPalette::Button));
 	QBrush brush(gradient);
-	painter_->fillRect(rect, brush);
+	painter_->fillRect(toQRect(rect), brush);
 }
 
 void QDrawContext::drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed)
 {	
 	QStyleOption option;
-	option.rect = rect;
+	option.rect = toQRect(rect);
 	option.state = QStyle::State_Enabled | QStyle::State_Children;
 	if (expanded)
 		option.state |= QStyle::State_Open;
@@ -125,7 +145,7 @@ void QDrawContext::drawLabel(const wchar_t* text, Font font, const Rect& rect, b
 	QColor textColor = tree_->palette().buttonText().color();
 	if(selected)
 		textColor = tree_->palette().highlightedText().color();
-	tree_->drawFilteredString(*painter_, text, QPropertyTree::RowFilter::NAME, qfont, rect, textColor, false, false);
+	tree_->drawFilteredString(*painter_, text, QPropertyTree::RowFilter::NAME, qfont, toQRect(rect), textColor, false, false);
 }
 
 void QDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed)
@@ -133,7 +153,7 @@ void QDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool sele
 	QPainter* painter = painter_;
 	const QPropertyTree* tree_ = this->tree_;
 
-	QRect rt = rect;
+	QRect rt = toQRect(rect);
 	rt.adjust(0, 0, 0, -1);
 
 	QStyleOptionFrameV2 option;
@@ -190,7 +210,7 @@ void QDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checked
 		option.state |= QStyle::State_Off;
 
 	QSize checkboxSize = tree_->style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option, tree_).size();
-	option.rect = QRect(QRect(rect).center().x() - checkboxSize.width() / 2, QRect(rect).center().y() - checkboxSize.height() / 2, checkboxSize.width(), checkboxSize.height());
+	option.rect = QRect(toQRect(rect).center().x() - checkboxSize.width() / 2, toQRect(rect).center().y() - checkboxSize.height() / 2, checkboxSize.width(), checkboxSize.height());
 
 	tree_->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter_, 0);
 }
@@ -212,7 +232,7 @@ void QDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool presse
 
 	if (focused)
 		option.state |= QStyle::State_HasFocus;
-	option.rect = rect.adjusted(0, 0, -1, -1);
+	option.rect = toQRect(rect.adjusted(0, 0, -1, -1));
 	tree_->style()->drawControl(QStyle::CE_PushButton, &option, painter_);
 	QRect textRect;
 	if (enabled && dropDownArrow)
@@ -221,10 +241,10 @@ void QDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool presse
 		arrowOption.rect = QRect(rect.right() - 11, rect.top(), 8, rect.height());
 		arrowOption.state |= QStyle::State_Enabled;
 		tree_->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &arrowOption, painter_, 0);
-		textRect = rect.adjusted(0, 0, -8, 0);
+		textRect = toQRect(rect.adjusted(0, 0, -8, 0));
 	}
 	else
-		textRect = rect;
+		textRect = toQRect(rect);
 
 	if (pressed)
 		textRect = textRect.adjusted(1, 0, 1, 0);
@@ -245,7 +265,7 @@ void QDrawContext::drawValueText(bool highlighted, const wchar_t* text)
 
 void QDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
 {
-	QRect rt = widgetRect;
+	QRect rt = toQRect(widgetRect);
 	rt.adjust(0, 0, -trailingOffset, -1);
 
 	QStyleOptionFrameV2 option;
@@ -271,34 +291,6 @@ void QDrawContext::drawEntry(const wchar_t* text, bool pathEllipsis, bool grayBa
 	painter_->setBrush(QBrush(tree_->palette().color(QPalette::Base)));
 	tree_->style()->drawPrimitive(QStyle::PE_PanelLineEdit, &option, painter_, 0);
 	tree_->_drawRowValue(*painter_, text, &tree_->font(),  textRect,  tree_->palette().color(QPalette::WindowText), pathEllipsis, false);
-}
-
-// ---------------------------------------------------------------------------
-
-Rect::Rect(const QRect& rect)
-: x(rect.left())
-, y(rect.top())
-, w(rect.width())
-, h(rect.height())
-{
-}
-
-Rect::operator QRect() const
-{
-	return QRect(x, y, w, h);
-}
-
-// ---------------------------------------------------------------------------
-
-Point::Point(const QPoint& point)
-: x_(point.x())
-, y_(point.y())
-{
-}
-
-Point::operator QPoint() const
-{
-	return QPoint(x_, y_);
 }
 
 }

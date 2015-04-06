@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QPoint>
-#include <QRect>
-
 namespace property_tree {
 
 struct Point
@@ -11,9 +8,11 @@ struct Point
 	Point(int x, int y) : x_(x), y_(y) {}
 
 	Point operator+(const Point& p) const { return Point(x_ + p.x_, y_ + p.y_); }
+	Point operator-(const Point& p) const { return Point(x_ - p.x_, y_ - p.y_); }
 	Point& operator+=(const Point& p) { *this = *this + p; return *this; }
-	Point(const QPoint& rect);
-	operator QPoint() const;
+	bool operator!=(const Point& rhs) const { return x_ != rhs.x_ || y_ != rhs.y_; }
+
+	int manhattanLength() const { return x_ + y_; }
 
 	int x_;
 	int y_;
@@ -47,9 +46,6 @@ struct Rect
 	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
 
 	bool isValid() const { return w >= 0 && h >= 0; }
-
-	Rect(const QRect& rect);
-	operator QRect() const;
 
 	template<class TPoint>
 	bool contains(const TPoint& p) const {

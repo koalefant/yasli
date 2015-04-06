@@ -64,7 +64,7 @@ public:
 	}
 	
 	void exec(const Point& point) {
-		menu_->exec(tree_->mapToGlobal(point));
+		menu_->exec(tree_->mapToGlobal(QPoint(point.x(), point.y())));
 	}
 private:
 	std::vector<QtAction*> actions_;

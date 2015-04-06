@@ -5,6 +5,7 @@
 #include <QStyleOption>
 #include <QDesktopWidget>
 #include <QApplication>
+#include "QDrawContext.h"
 
 #include "InplaceWidgetComboBox.h"
 #include "InplaceWidgetNumber.h"
@@ -53,7 +54,7 @@ void QUIFacade::unsetCursor()
 
 Point QUIFacade::cursorPosition()
 {
-	return tree_->mapFromGlobal(QCursor::pos());
+	return fromQPoint(tree_->mapFromGlobal(QCursor::pos()));
 }
 
 InplaceWidget* QUIFacade::createComboBox(ComboBoxClientRow* client) { return new InplaceWidgetComboBox(client, tree_); }

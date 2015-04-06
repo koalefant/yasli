@@ -17,7 +17,6 @@
 
 #include "IMenu.h"
 #include "IUIFacade.h"
-#include <QKeyEvent>
 
 // ---------------------------------------------------------------------------
 
@@ -64,11 +63,10 @@ protected:
 
 void PropertyRowContainer::redraw(IDrawContext& context)
 {
-	QRect widgetRect = context.widgetRect;
+	Rect widgetRect = context.widgetRect;
 	if (widgetRect.width() == 0)
 		return;
-	QRect rt = widgetRect;
-	rt.adjust(0, 1, -1, -1);
+	Rect rt = widgetRect.adjusted(0, 1, -1, -1);
 
 	const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
 	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, FONT_NORMAL);

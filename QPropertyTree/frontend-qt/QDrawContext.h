@@ -1,6 +1,7 @@
 #pragma once
 #include "../PropertyDrawContext.h"
 #include "../QPropertyTree.h"
+#include <memory>
 
 class QPropertyTree;
 class QPainter;
@@ -40,5 +41,9 @@ private:
 
 void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& r, const QColor& borderColor, int radius);
 void drawRoundRectangle(QPainter& p, const QRect &_r, unsigned int color, int radius, int width);
+QRect toQRect(const Rect& r);
+Rect fromQRect(const QRect& r);
+QPoint toQPoint(const Point& p);
+Point fromQPoint(const QPoint& p);
 
 }

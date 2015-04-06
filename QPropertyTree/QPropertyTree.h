@@ -46,7 +46,7 @@ protected:
 	PropertyRow* row_;
 	QRect rect_;
 	QPropertyTree* tree_;
-	Point offset_;
+	QPoint offset_;
 };
 
 class QPropertyTree : public QWidget, public PropertyTree
