@@ -9,7 +9,7 @@
 
 #include "Color.h"
 #include "yasli/Archive.h"
-
+#include "PropertyTree/MathUtils.h"
 namespace ww {
 
 // HSV

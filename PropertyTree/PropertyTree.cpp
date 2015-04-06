@@ -58,6 +58,42 @@ TreeConfig TreeConfig::defaultConfig;
 
 // ---------------------------------------------------------------------------
 
+void PropertyTreeMenuHandler::onMenuFilter()
+{
+	tree->startFilter("");
+}
+
+void PropertyTreeMenuHandler::onMenuFilterByName()
+{
+	tree->startFilter(filterName.c_str());
+}
+
+void PropertyTreeMenuHandler::onMenuFilterByValue()
+{
+	tree->startFilter(filterValue.c_str());
+}
+
+void PropertyTreeMenuHandler::onMenuFilterByType()
+{
+	tree->startFilter(filterType.c_str());
+}
+
+void PropertyTreeMenuHandler::onMenuUndo()
+{
+	tree->model()->undo();
+}
+
+void PropertyTreeMenuHandler::onMenuCopy()
+{
+	tree->copyRow(row);
+}
+
+void PropertyTreeMenuHandler::onMenuPaste()
+{
+	tree->pasteRow(row);
+}
+// ---------------------------------------------------------------------------
+
 PropertyTree::PropertyTree(IUIFacade* uiFacade)
 : attachedPropertyTree_(0)
 , ui_(uiFacade)

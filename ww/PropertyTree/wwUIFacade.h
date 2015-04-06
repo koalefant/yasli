@@ -22,7 +22,7 @@ struct wwMenu : IMenu
 class wwUIFacade : public IUIFacade
 {
 public:
-	wwUIFacade(ww::PropertyTree* tree);
+	wwUIFacade(ww::PropertyTree* tree) : tree_(tree) {}
 
 	HWND hwnd() override;
 	

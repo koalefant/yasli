@@ -512,4 +512,32 @@ void wwDrawContext::drawColor(const Rect& _rect, const Color& _color)
 	}
 }
 
+void wwDrawContext::drawComboBox(const Rect& rect, const char* text)
+{
+}
+
+void wwDrawContext::drawHorizontalLine(const Rect& rect)
+{
+}
+
+void wwDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
+{
+}
+
+void wwDrawContext::drawLabel(const wchar_t* text, Font font, const Rect& rect, bool selected)
+{
+}
+
+void wwDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed)
+{
+}
+
+void wwDrawContext::drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed)
+{
+}
+
+void wwDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
+{
+}
+
 }

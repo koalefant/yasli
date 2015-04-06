@@ -94,31 +94,6 @@ static KeyEvent translateKeyEvent(const QKeyEvent& ev)
 
 using yasli::Serializers;
 
-void PropertyTreeMenuHandler::onMenuFilter()
-{
-	((QPropertyTree*)tree)->startFilter("");
-}
-
-void PropertyTreeMenuHandler::onMenuFilterByName()
-{
-	((QPropertyTree*)tree)->startFilter(filterName.c_str());
-}
-
-void PropertyTreeMenuHandler::onMenuFilterByValue()
-{
-	((QPropertyTree*)tree)->startFilter(filterValue.c_str());
-}
-
-void PropertyTreeMenuHandler::onMenuFilterByType()
-{
-	((QPropertyTree*)tree)->startFilter(filterType.c_str());
-}
-
-void PropertyTreeMenuHandler::onMenuUndo()
-{
-	tree->model()->undo();
-}
-
 static QMimeData* propertyRowToMimeData(PropertyRow* row, ConstStringList* constStrings)
 {
 	PropertyRow::setConstStrings(constStrings);
@@ -237,30 +212,7 @@ bool propertyRowFromClipboard(SharedPtr<PropertyRow>& row, ConstStringList* cons
 	return propertyRowFromMimeData(row, mime, constStrings);
 }
 
-void PropertyTreeMenuHandler::onMenuCopy()
-{
-	QMimeData* mime = propertyRowToMimeData(row, tree->model()->constStrings());
-	if (mime)
-		QApplication::clipboard()->setMimeData(mime);
-}
 
-void PropertyTreeMenuHandler::onMenuPaste()
-{
-	if(!tree->canBePasted(row))
-		return;
-	PropertyRow* parent = row->parent();
-
-	tree->model()->rowAboutToBeChanged(row);
-
-	SharedPtr<PropertyRow> source;
-	if (!propertyRowFromClipboard(source, tree->model()->constStrings()))
-		return;
-
-	if (!smartPaste(row, source, tree->model(), false))
-		return;
-	
-	tree->model()->rowChanged(parent ? parent : tree->model()->root());
-}
 
 class FilterEntry : public QLineEdit
 {
@@ -712,6 +664,31 @@ void QPropertyTree::onScroll(int pos)
 	offset_.setY(scrollBar_->sliderPosition());
 	_arrangeChildren();
 	repaint();
+}
+
+void QPropertyTree::copyRow(PropertyRow* row)
+{
+	QMimeData* mime = propertyRowToMimeData(row, tree->model()->constStrings());
+	if (mime)
+		QApplication::clipboard()->setMimeData(mime);
+}
+
+void QPropertyTree::pasteRow(PropertyRow* row)
+{
+	if(!tree->canBePasted(row))
+		return;
+	PropertyRow* parent = row->parent();
+
+	tree->model()->rowAboutToBeChanged(row);
+
+	SharedPtr<PropertyRow> source;
+	if (!propertyRowFromClipboard(source, tree->model()->constStrings()))
+		return;
+
+	if (!smartPaste(row, source, tree->model(), false))
+		return;
+	
+	tree->model()->rowChanged(parent ? parent : tree->model()->root());
 }
 
 bool QPropertyTree::canBePasted(PropertyRow* destination)

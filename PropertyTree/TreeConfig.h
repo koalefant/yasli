@@ -10,6 +10,8 @@ public:
 	int tabSize() const { return tabSize_; }
 	void setFullRowMode(bool fullRowMode) { fullRowMode_ = fullRowMode; }
 	bool fullRowMode() const { return fullRowMode_; }
+	void setFullRowContainres(bool fullRowContainers) { fullRowContainers_ = fullRowContainers; }
+	bool fullRowContainers() const { return fullRowContainers_; }
 	void setHideUntranslated(bool hideUntranslated) { hideUntranslated_ = hideUntranslated; }
 	bool hideUntranslated() const{ return hideUntranslated_; }
 	void setValueColumnWidth(float valueColumnWidth) { valueColumnWidth_ = valueColumnWidth; }
@@ -30,6 +32,7 @@ public:
 protected:
 	bool compact_;
 	bool fullRowMode_;
+	bool fullRowContainers_;
 	bool immediateUpdate_;
 	bool hideUntranslated_;
 	bool showContainerIndices_;

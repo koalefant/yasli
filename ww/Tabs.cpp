@@ -17,6 +17,7 @@
 #include "ww/Win32/Rectangle.h"
 #include "ww/Win32/Handle.h"
 #include "ww/Win32/Drawing.h"
+#include "ww/PropertyTree/wwDrawContext.h"
 #include "gdiplusUtils.h"
 #include "yasli/Archive.h"
 #include <algorithm>
@@ -186,7 +187,7 @@ void TabsImpl::redraw(HDC dc)
 	Items::iterator it;
     Pen pen(gdiplusSysColor(COLOR_3DHIGHLIGHT), 1);
 
-	Point lineStart;
+	Gdiplus::Point lineStart;
     for( it = items_.begin(); it != items_.end(); ++it ){
 		TabsItem& item = *it;
 		bool selected = selectedTab_ == index;
@@ -211,7 +212,7 @@ void TabsImpl::redraw(HDC dc)
 							   Gdiplus::Rect(rect.X, rect.Y, rect.Width - 1, rect.Height),
                                gdiplusSysColor(COLOR_3DSHADOW), roundness);
 
-			lineStart = Point(item.rect.right - 1, item.rect.bottom - 1);
+			lineStart = Gdiplus::Point(item.rect.right - 1, item.rect.bottom - 1);
 		}
 		else{
 			Gdiplus::Rect rect(gdiplusRect(item.rect));
@@ -220,7 +221,7 @@ void TabsImpl::redraw(HDC dc)
             fillRoundRectangle(&gr, &SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), rect, gdiplusSysColor(COLOR_3DSHADOW), roundness);
 
 			gr.DrawLine(&Pen(gdiplusSysColor(COLOR_3DHIGHLIGHT)), item.rect.left, item.rect.bottom - 1, item.rect.right, item.rect.bottom - 1);
-			lineStart = Point(item.rect.right - 1, item.rect.bottom - 1);
+			lineStart = Gdiplus::Point(item.rect.right - 1, item.rect.bottom - 1);
 		}		
 
 		wstring text(toWideChar(item.text.c_str()));
@@ -233,7 +234,7 @@ void TabsImpl::redraw(HDC dc)
 			textRect.bottom += 1;
 		}
 
-		Font* font = selected ? propertyTreeDefaultBoldFont() : propertyTreeDefaultFont();
+		Gdiplus::Font* font = selected ? property_tree::propertyTreeDefaultBoldFont() : property_tree::propertyTreeDefaultFont();
 		StringFormat format;
 		format.SetAlignment(Gdiplus::StringAlignmentCenter);
 		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);

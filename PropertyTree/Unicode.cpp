@@ -17,6 +17,8 @@
 # include <QString>
 #endif
 
+namespace property_tree {
+
 yasli::string fromWideChar(const wchar_t* wstr)
 {
   // We have different implementation for windows as Qt for windows 
@@ -56,3 +58,4 @@ yasli::wstring toWideChar(const char* str)
 #endif
 }
 
+}

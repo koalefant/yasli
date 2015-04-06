@@ -52,9 +52,6 @@ public:
 	PropertyTree(int border = 0);
 	~PropertyTree();
 
-	void setExpandLevels(int levels);
-	void setUndoEnabled(bool enabled, bool full = false);
-	void setAutoRevert(bool autoRevert) { autoRevert_ = autoRevert; }
 	void attachPropertyTree(::PropertyTree* propertyTree) override;
 
 	void serialize(Archive& ar);
@@ -109,11 +106,13 @@ protected:
 	property_tree::Point offset() const { return offset_; }
 	property_tree::Rect area() const { return area_; }
 
+	void copyRow(PropertyRow* row) override;
+	void pasteRow(PropertyRow* row) override;
 	bool canBePasted(PropertyRow* destination) override;
 	bool canBePasted(const char* destinationType) override;
 
 	void setFilterMode(bool inFilterMode);
-	void startFilter(wstring filter);
+	void startFilter(const char* filter) override;
 	void _arrangeChildren() override;
 	void visitChildren(WidgetVisitor& visitor) const;
 	void resetFilter() override;

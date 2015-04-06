@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "PropertyTreeStyle.h"
+#include "TreeConfig.h"
 #include <vector>
 #include <yasli/Archive.h>
 #include <yasli/Pointers.h>
@@ -31,7 +31,7 @@ struct KeyEvent;
 using property_tree::IUIFacade;
 using property_tree::KeyEvent;
 
-class PropertyTree : public TreeConfig/*, public sigslot::has_slots*/
+class PropertyTree : public TreeConfig
 {
 public:
 	void attach(const yasli::Object& object);
@@ -137,6 +137,8 @@ protected:
 	virtual void onReverted() = 0;
 	virtual void onPushUndo() = 0;
 
+	virtual void copyRow(PropertyRow* row) = 0;
+	virtual void pasteRow(PropertyRow* row) = 0;
 	virtual bool canBePasted(PropertyRow* destination) = 0;
 	virtual bool canBePasted(const char* destinationType) = 0;
 	PropertyRow* rowByPoint(const Point& point);
@@ -148,6 +150,7 @@ protected:
 	virtual bool updateScrollBar() = 0;
 	virtual void interruptDrag() = 0;
 	virtual void _arrangeChildren() = 0;
+	virtual void startFilter(const char* text) = 0;
 	virtual void resetFilter() = 0;
 
 	bool onContextMenu(PropertyRow* row, property_tree::IMenu& menu);

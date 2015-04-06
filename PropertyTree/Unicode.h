@@ -11,8 +11,11 @@
 #include "yasli/Strings.h"
 #include <stdio.h>
 
+namespace property_tree {
+
 yasli::string fromWideChar(const wchar_t* wideCharString);
 yasli::wstring toWideChar(const char* multiByteString);
 yasli::wstring fromANSIToWide(const char* ansiString);
 yasli::string toANSIFromWide(const wchar_t* wstr);
 
+}

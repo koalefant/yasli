@@ -9,6 +9,8 @@
 
 #pragma once
 
+namespace yasli { class Archive;  }
+
 namespace ww {
 
 struct Color

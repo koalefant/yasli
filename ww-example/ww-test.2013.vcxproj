@@ -289,13 +289,13 @@
     <ResourceCompile Include="ww-test.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ww\wWidgets.vcxproj">
+    <ProjectReference Include="..\ww\wWidgets.2013.vcxproj">
       <Project>{18632f7a-290e-b902-7c03-72fb0c12de45}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\XMath\XMath.vcxproj">
+    <ProjectReference Include="..\XMath\XMath.2013.vcxproj">
       <Project>{2a528448-dc07-42a7-bf07-e12cb130145c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\yasli\yasli.vcxproj">
+    <ProjectReference Include="..\yasli\yasli.2013.vcxproj">
       <Project>{894fd61a-7469-4c2d-a9f7-c026f3e458b5}</Project>
     </ProjectReference>
   </ItemGroup>

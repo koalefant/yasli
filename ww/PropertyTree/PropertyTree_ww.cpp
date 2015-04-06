@@ -202,6 +202,28 @@ static wstring quoteIfNeeded(const wchar_t* str)
 	}
 }
 
+void PropertyTree::copyRow(PropertyRow* row)
+{
+	Clipboard clipboard(this, model()->constStrings(), model());
+    clipboard.copy(row);
+}
+
+void PropertyTree::pasteRow(PropertyRow* row)
+{
+	if(!canBePasted(row))
+		return;
+	PropertyRow* parent = row->parent() ? row->parent() : model()->root();
+
+    model()->rowAboutToBeChanged(row);
+	Clipboard clipboard(this, model()->constStrings(), model());
+	if(clipboard.paste(row)){
+		parent->setLabelChanged();
+		parent->setLabelChangedToChildren();
+		model()->rowChanged(parent);
+	}
+	else
+		YASLI_ASSERT(0 && "Unable to paste element!"); 
+}
 
 bool PropertyTree::canBePasted(PropertyRow* destination)
 {
@@ -238,10 +260,10 @@ void PropertyTree::setFilterMode(bool inFilterMode)
     }
 }
 
-void PropertyTree::startFilter(wstring filter)
+void PropertyTree::startFilter(const char* filter)
 {
 	setFilterMode(true);
-	filterEntry_->setText(filter.c_str());
+	filterEntry_->setText(filter);
 	onFilterChanged();
 }
 
@@ -778,6 +800,16 @@ void PropertyTree::resetFilter()
 	if (filterEntry_)
 		filterEntry_->setText("");
 	onFilterChanged();
+}
+
+void PropertyTree::serialize(Archive& ar)
+{
+	::PropertyTree::serialize(ar);
+}
+
+bool PropertyTree::hasFocusOrInplaceHasFocus() const
+{
+	return hasFocus(); // TODO
 }
 
 }

@@ -46,7 +46,5 @@ namespace Win32{
 
 namespace ww{
 	void fillRoundRectangle(Gdiplus::Graphics* gr, Gdiplus::Brush* brush, const Gdiplus::Rect& r, const Gdiplus::Color& border, int radius);
-	Gdiplus::Font* propertyTreeDefaultFont();
-	Gdiplus::Font* propertyTreeDefaultBoldFont();
 }
 

@@ -95,8 +95,12 @@ protected:
 	void onSelected() override { signalSelected(); }
 	void onReverted() override { signalReverted(); }
 	void onPushUndo() override { signalPushUndo(); }
-	bool canBePasted(PropertyRow* destination);
-	bool canBePasted(const char* destinationType);
+
+	void copyRow(PropertyRow* row) override;
+	void pasteRow(PropertyRow* row) override;
+	bool canBePasted(PropertyRow* destination) override;
+	bool canBePasted(const char* destinationType) override;
+
 	void interruptDrag() override;
 	void defocusInplaceEditor() override;
 	class DragController;
