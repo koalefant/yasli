@@ -63,6 +63,10 @@ struct DebugTimer
 	}
 };
 
+
+
+
+
 class FilterEntry : public Entry
 {
 public:
@@ -104,7 +108,7 @@ PropertyTree::PropertyTree(int border)
 : ::PropertyTree(new property_tree::wwUIFacade(this))
 , _ContainerWithWindow(new TreeImpl(this), border)
 {
-	drag_.reset(new DragController(impl()));
+	dragController_.reset(new DragController(impl()));
 
 	DrawingCache::get()->initialize();
 
@@ -121,6 +125,45 @@ PropertyTree::PropertyTree(int border)
 
 }
 #pragma warning(pop)
+
+struct DrawVisitor
+{
+	DrawVisitor(Gdiplus::Graphics* graphics, const property_tree::Rect& area, int scrollOffset, bool selectionPass)
+		: area_(area)
+		, graphics_(graphics)
+		, offset_(0)
+		, scrollOffset_(scrollOffset)
+		, lastParent_(0)
+		, selectionPass_(selectionPass)
+	{}
+
+	ScanResult operator()(PropertyRow* row, ::PropertyTree* _tree, int index)
+	{
+		if(row->visible(_tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
+			if(row->rect().top() > scrollOffset_ + area_.height())
+				lastParent_ = row->parent();
+
+			if(row->rect().bottom() > scrollOffset_)
+			{
+				wwDrawContext context((ww::PropertyTree*)_tree, graphics_);
+				row->drawRow(context, _tree, index, selectionPass_);
+			}
+
+			return SCAN_CHILDREN_SIBLINGS;
+		}
+		else
+			return SCAN_SIBLINGS;
+	}
+
+protected:
+	Gdiplus::Graphics* graphics_;
+	property_tree::Rect area_;
+	int offset_;
+	int scrollOffset_;
+	PropertyRow* lastParent_;
+	bool selectionPass_;
+};
+
 
 PropertyTree::~PropertyTree()
 {
@@ -144,7 +187,7 @@ TreeImpl* PropertyTree::impl() const
 
 void PropertyTree::interruptDrag()
 {
-	drag_->interrupt();
+	dragController_->interrupt();
 }
 
 void PropertyTree::updateHeights()
@@ -188,20 +231,6 @@ void PropertyTree::_setFocus()
 }
 
 
-static wstring quoteIfNeeded(const wchar_t* str)
-{
-	if (wcschr(str, L' ') != 0) {
-		wstring result;
-		result = L"\"";
-		result += str;
-		result += L"\"";
-		return result;
-	}
-	else {
-		return wstring(str);
-	}
-}
-
 void PropertyTree::copyRow(PropertyRow* row)
 {
 	Clipboard clipboard(this, model()->constStrings(), model());
@@ -213,7 +242,6 @@ void PropertyTree::pasteRow(PropertyRow* row)
 	if(!canBePasted(row))
 		return;
 	PropertyRow* parent = row->parent() ? row->parent() : model()->root();
-
     model()->rowAboutToBeChanged(row);
 	Clipboard clipboard(this, model()->constStrings(), model());
 	if(clipboard.paste(row)){
@@ -224,6 +252,7 @@ void PropertyTree::pasteRow(PropertyRow* row)
 	else
 		YASLI_ASSERT(0 && "Unable to paste element!"); 
 }
+
 
 bool PropertyTree::canBePasted(PropertyRow* destination)
 {
@@ -237,6 +266,16 @@ bool PropertyTree::canBePasted(const char* destinationType)
 {
 	Clipboard clipboard(this, model()->constStrings(), model());
 	return clipboard.canBePastedOn(destinationType);
+}
+
+bool PropertyTree::hasFocusOrInplaceHasFocus() const
+{
+	return hasFocus(); // TODO
+}
+bool PropertyTree::hasFocus() const
+{
+	HWND focusedWindow = GetFocus();
+	return focusedWindow == impl()->handle() || IsChild(impl()->handle(), focusedWindow);
 }
 
 void PropertyTree::setFilterMode(bool inFilterMode)
@@ -308,12 +347,6 @@ void PropertyTree::_arrangeChildren()
 		Rect pos(60, padding, size.x - padding - GetSystemMetrics(SM_CXVSCROLL), filterEntry_->_minimalSize().y + padding);
         filterEntry_->_setPosition(pos);
     }
-}
-
-bool PropertyTree::hasFocus() const
-{
-	HWND focusedWindow = GetFocus();
-	return focusedWindow == impl()->handle() || IsChild(impl()->handle(), focusedWindow);
 }
 
 Vect2 PropertyTree::_toScreen(Vect2 point) const
@@ -502,53 +535,6 @@ void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const char* text, Gdiplu
 	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }
 
-bool PropertyTree::_isDragged(const PropertyRow* row) const
-{
-	if (!drag_->isDragging())
-		return false;
-	if (drag_->draggedRow() == row)
-		return true;
-	return false;
-}
-
-struct DrawVisitor
-{
-	DrawVisitor(Gdiplus::Graphics* graphics, const property_tree::Rect& area, int scrollOffset, bool selectionPass)
-		: area_(area)
-		, graphics_(graphics)
-		, offset_(0)
-		, scrollOffset_(scrollOffset)
-		, lastParent_(0)
-		, selectionPass_(selectionPass)
-	{}
-
-	ScanResult operator()(PropertyRow* row, ::PropertyTree* _tree, int index)
-	{
-		if(row->visible(_tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
-			if(row->rect().top() > scrollOffset_ + area_.height())
-				lastParent_ = row->parent();
-
-			if(row->rect().bottom() > scrollOffset_)
-			{
-				wwDrawContext context((ww::PropertyTree*)_tree, graphics_);
-				row->drawRow(context, _tree, index, selectionPass_);
-			}
-
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-		else
-			return SCAN_SIBLINGS;
-	}
-
-protected:
-	Gdiplus::Graphics* graphics_;
-	property_tree::Rect area_;
-	int offset_;
-	int scrollOffset_;
-	PropertyRow* lastParent_;
-	bool selectionPass_;
-};
-
 void PropertyTree::redraw(HDC dc)
 {
 	using namespace Gdiplus;
@@ -579,8 +565,8 @@ void PropertyTree::redraw(HDC dc)
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
 	//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
-	if (drag_->captured())
-		drag_->drawUnder(dc);
+	if (dragController_->captured())
+		dragController_->drawUnder(dc);
 	//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
 	if (model()->root()) {
@@ -618,9 +604,9 @@ void PropertyTree::redraw(HDC dc)
 		gr.FillRectangle(&brush, Rect(clientRect.left, area_.bottom() - 1, area_.width(), 1));
 	}
 
-	if(drag_->captured()){
+	if(dragController_->captured()){
 		//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
-		drag_->drawOver(dc);
+		dragController_->drawOver(dc);
 		//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 	}
 	else{
@@ -630,6 +616,32 @@ void PropertyTree::redraw(HDC dc)
 			DrawFocusRect(dc, &clientRect);
 		}
 	}
+}
+
+
+void PropertyTree::onLButtonDown(int button, int x, int y)
+{
+	::SetFocus(impl()->handle());
+	PropertyRow* row = rowByPoint(property_tree::Point(x, y));
+	if(row && !row->isSelectable())
+		row = row->parent();
+	if (row){
+		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), (GetKeyState(VK_CONTROL) >> 15) != 0))
+			capturedRow_ = row;
+		else if (!dragCheckMode_){
+			row = rowByPoint(property_tree::Point(x, y));
+			PropertyRow* draggedRow = row;
+			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
+				draggedRow = draggedRow->parent();
+			if (draggedRow && !draggedRow->userReadOnly() && !widget_.get()){
+				POINT cursorPos = { x, y };
+				ClientToScreen(impl()->handle(), &cursorPos);
+				dragController_->beginDrag(row, draggedRow, cursorPos);
+			}
+		}
+	}
+	else
+		repaint();
 }
 
 void PropertyTree::onLButtonUp(int button, int x, int y)
@@ -644,63 +656,26 @@ void PropertyTree::onLButtonUp(int button, int x, int y)
 	}
 	//::SetFocus(impl()->handle());
 
-	if(drag_->captured()){
+	if(dragController_->captured()){
 		POINT pos;
 		GetCursorPos(&pos);
 		if(GetCapture() == impl()->handle())
 			ReleaseCapture();
-		drag_->drop(pos);
+		dragController_->drop(pos);
 		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
 	}
-	Vect2 point(x, y);
-	PropertyRow* row = rowByPoint(property_tree::Point(point.x, point.y));
-	if(capturedRow_){
-		onRowLMBUp(capturedRow_, capturedRow_->rect(), pointToRootSpace(Point(x, y)));
-		capturedRow_ = 0;
+	if (dragCheckMode_) {
+		dragCheckMode_ = false;
 	}
-}
+	else {
+		Vect2 point(x, y);
+		PropertyRow* row = rowByPoint(property_tree::Point(point.x, point.y));
+		if(capturedRow_){
 
-void PropertyTree::onLButtonDown(int button, int x, int y)
-{
-	::SetFocus(impl()->handle());
-	PropertyRow* row = rowByPoint(property_tree::Point(x, y));
-	if(row && !row->isSelectable())
-		row = row->parent();
-	if(row){
-		if(onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), (GetKeyState(VK_CONTROL) >> 15) != 0))
-			capturedRow_ = row;
-		else{
-			// row могла уже быть пересоздана	
-			row = rowByPoint(property_tree::Point(x, y));
-			PropertyRow* draggedRow = row;
-			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
-				draggedRow = draggedRow->parent();
-			if(draggedRow && !draggedRow->userReadOnly() && !widget_.get()){
-				POINT cursorPos = { x, y };
-				//GetCursorPos(&cursorPos);
-				ClientToScreen(impl()->handle(), &cursorPos);
-				drag_->beginDrag(row, draggedRow, cursorPos);
-            }
+			onRowLMBUp(capturedRow_, capturedRow_->rect(), pointToRootSpace(Point(x, y)));
+			capturedRow_ = 0;
+			repaint();
 		}
-	}
-	else
-		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-}
-
-void PropertyTree::onLButtonDoubleClick(int x, int y)
-{
-	::SetFocus(impl()->handle());
-
-	Point point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		YASLI_ASSERT(row->refCount() > 0);
-		if(row->widgetRect(this).contains(pointToRootSpace(point))){
-			if(!row->onActivate(this, true))
-				toggleRow(row);	
-		}
-		else if(!toggleRow(row))
-			row->onActivate(this, false);
 	}
 }
 
@@ -722,34 +697,6 @@ void PropertyTree::onRButtonDown(int button, int x, int y)
 		if (model()->root())
 			onRowRMBDown(model()->root(), property_tree::Rect(rect.left, rect.top, rect.width(), rect.height()), pointToRootSpace(point));
 	}
-}
-
-void PropertyTree::onMouseMove(int button, int x, int y)
-{
-	if(drag_->captured() && !(button & MK_LBUTTON))
-		drag_->interrupt();
-	if (drag_->captured()){
-		POINT pos;
-		GetCursorPos(&pos);
-		if (drag_->dragOn(pos) && GetCapture() != impl()->handle())
-			SetCapture(impl()->handle());
-		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else{
-		property_tree::Point point(x, y);
-		PropertyRow* row = rowByPoint(pointToRootSpace(point));
-		if(capturedRow_){
-			onRowMouseMove(capturedRow_, property_tree::Rect(), point);
-		}
-	}
-}
-
-void PropertyTree::onMouseWheel(int delta)
-{
-	offset_.y_ = offset_.y() - delta;
-	updateScrollBar();
-	_arrangeChildren();
-	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 bool PropertyTree::updateScrollBar()
@@ -780,15 +727,12 @@ bool PropertyTree::updateScrollBar()
 	return true;
 }
 
-void PropertyTree::onAttachedTreeChanged()
-{
-	revert();
-}
 
 void PropertyTree::onScroll(int y)
 {
 	offset_.setY(y);
 }
+
 
 void PropertyTree::defocusInplaceEditor()
 {
@@ -802,14 +746,76 @@ void PropertyTree::resetFilter()
 	onFilterChanged();
 }
 
+
+void PropertyTree::onLButtonDoubleClick(int x, int y)
+{
+	::SetFocus(impl()->handle());
+
+	Point point(x, y);
+	PropertyRow* row = rowByPoint(point);
+	if(row){
+		YASLI_ASSERT(row->refCount() > 0);
+		if(row->widgetRect(this).contains(pointToRootSpace(point))){
+			if(!row->onActivate(this, true) &&
+				!row->onActivateRelease(this))
+				toggleRow(row);	
+		}
+		else if(!toggleRow(row)) {
+			row->onActivate(this, false);
+			row->onActivateRelease(this);
+		}
+	}
+}
+
+
+void PropertyTree::onMouseMove(int button, int x, int y)
+{
+	if(dragController_->captured() && !(button & MK_LBUTTON))
+		dragController_->interrupt();
+	if (dragController_->captured()){
+		POINT pos;
+		GetCursorPos(&pos);
+		if (dragController_->dragOn(pos) && GetCapture() != impl()->handle())
+			SetCapture(impl()->handle());
+		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+	}
+	else{
+		property_tree::Point point(x, y);
+		PropertyRow* row = rowByPoint(pointToRootSpace(point));
+		if (row && dragCheckMode_ && row->widgetRect(this).contains(pointToRootSpace(point))) {
+			row->onMouseDragCheck(this, dragCheckValue_);
+		}
+		else if(capturedRow_){
+			onRowMouseMove(capturedRow_, property_tree::Rect(), point);
+		}
+	}
+}
+
+void PropertyTree::onMouseWheel(int delta)
+{
+	offset_.y_ = offset_.y() - delta;
+	updateScrollBar();
+	_arrangeChildren();
+	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
+}
+
+bool PropertyTree::_isDragged(const PropertyRow* row) const
+{
+	if (!dragController_->isDragging())
+		return false;
+	if (dragController_->draggedRow() == row)
+		return true;
+	return false;
+}
+
+void PropertyTree::onAttachedTreeChanged()
+{
+	revert();
+}
+
 void PropertyTree::serialize(Archive& ar)
 {
 	::PropertyTree::serialize(ar);
-}
-
-bool PropertyTree::hasFocusOrInplaceHasFocus() const
-{
-	return hasFocus(); // TODO
 }
 
 }

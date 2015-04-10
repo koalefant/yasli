@@ -130,7 +130,7 @@ protected:
 
 	Vect2 pressPoint_;
 
-	std::auto_ptr<DragController> drag_;
+	std::auto_ptr<DragController> dragController_;
 
 	PolyPtr<Entry> filterEntry_; 
 	Gdiplus::Graphics* graphics_;
