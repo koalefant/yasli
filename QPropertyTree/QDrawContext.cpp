@@ -263,9 +263,9 @@ void QDrawContext::drawValueText(bool highlighted, const char* text)
 	tree_->_drawRowValue(*painter_, text, &tree_->font(), textRect, textColor, false, false);
 }
 
-void QDrawContext::drawEntry(const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
+void QDrawContext::drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
 {
-	QRect rt = toQRect(widgetRect);
+	QRect rt = toQRect(rect);
 	rt.adjust(0, 0, -trailingOffset, -1);
 
 	QStyleOptionFrameV2 option;

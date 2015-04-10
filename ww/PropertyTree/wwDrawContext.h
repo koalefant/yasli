@@ -80,7 +80,7 @@ public:
 	virtual void drawCheck(const Rect& rect, bool disabled, CheckState checked) override;
 	virtual void drawColor(const Rect& rect, const Color& color) override;
 	virtual void drawComboBox(const Rect& rect, const char* text) override;
-	virtual void drawEntry(const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
+	virtual void drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
 	virtual void drawHorizontalLine(const Rect& rect) override;
 	virtual void drawIcon(const Rect& rect, const yasli::IconXPM& icon) override;
 	virtual void drawLabel(const wchar_t* text, Font font, const Rect& rect, bool selected) override;
@@ -90,6 +90,8 @@ public:
 	virtual void drawValueText(bool highlighted, const char* text) override;
 
 private:
+	Gdiplus::Font* convertFont(Font font);
+
 	ww::PropertyTree* tree_;
 	Gdiplus::Graphics* graphics;
 };

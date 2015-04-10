@@ -57,6 +57,8 @@ struct Rect
 		return true;
 	}
 
+	Point center() const { return Point(x + w / 2, y + h / 2); }
+
 	Rect adjusted(int l, int t, int r, int b) const {
 		return Rect(x + l, y + t,
 			x + w + r - (x + l),

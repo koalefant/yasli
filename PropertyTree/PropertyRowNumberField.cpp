@@ -22,7 +22,7 @@ InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
 void PropertyRowNumberField::redraw(IDrawContext& context)
 {
     if(multiValue())
-		context.drawEntry(" ... ", false, userReadOnly(), 0);
+		context.drawEntry(context.widgetRect, " ... ", false, userReadOnly(), 0);
     else 
 		context.drawNumberEntry(valueAsString().c_str(), context.widgetRect, context.captured, userReadOnly());
 }

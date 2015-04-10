@@ -584,8 +584,8 @@ void PropertyTree::redraw(HDC dc)
 	//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 
 	if (model()->root()) {
-		model()->root()->scanChildren(DrawVisitor(&gr, area_, 0, false), this);
 		model()->root()->scanChildren(DrawVisitor(&gr, area_, 0, true), this);
+		model()->root()->scanChildren(DrawVisitor(&gr, area_, 0, false), this);
 	}
 	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
 

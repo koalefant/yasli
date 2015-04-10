@@ -20,7 +20,7 @@
 #include "PropertyTree/Color.h"
 #include "Color.h"
 #include "ww/Icon.h"
-
+#include "ww/Unicode.h"
 #include <uxtheme.h>
 #include <vssym32.h>
 
@@ -32,6 +32,12 @@ static RECT toRECT(const property_tree::Rect& r)
 {
 	RECT result = { r.x, r.y, r.x + r.w, r.y + r.h };
 	return result;
+}
+
+
+static ww::Rect toWWRect(const property_tree::Rect& r)
+{
+	return ww::Rect(r.x, r.y, r.right(), r.bottom());
 }
 
 static Gdiplus::Rect gdiplusRect(const property_tree::Rect& r)
@@ -456,10 +462,10 @@ void wwDrawContext::drawValueText(bool highlighted, const char* text)
 	tree_->_drawRowValue(graphics, text, propertyTreeDefaultFont(), textRect, textColor, false, false);
 }
 
-void wwDrawContext::drawEntry(const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
+void wwDrawContext::drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset)
 {
 	using Gdiplus::Color;
-    Gdiplus::Rect rt = gdiplusRect(widgetRect.adjusted(0, 0, -trailingOffset, 0));
+    Gdiplus::Rect rt = gdiplusRect(rect.adjusted(0, 0, -trailingOffset, 0));
 	Gdiplus::Font* font = propertyTreeDefaultFont();
     rt.Inflate( -1, -1 );
 	
@@ -514,30 +520,95 @@ void wwDrawContext::drawColor(const Rect& _rect, const Color& _color)
 
 void wwDrawContext::drawComboBox(const Rect& rect, const char* text)
 {
+	drawEntry(rect, text, false, false, 0);
 }
 
-void wwDrawContext::drawHorizontalLine(const Rect& rect)
+void wwDrawContext::drawHorizontalLine(const Rect& _rect)
 {
+	Gdiplus::Color color1;
+	color1.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
+	Gdiplus::Color color2;
+	color2.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
+	Gdiplus::Rect rect = gdiplusRect(_rect);
+	Gdiplus::LinearGradientBrush gradientBrush(rect, color1, color2, Gdiplus::LinearGradientModeHorizontal);
+	gradientBrush.SetWrapMode(Gdiplus::WrapModeClamp);
+	graphics->FillRectangle(&gradientBrush, rect);
 }
 
 void wwDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
 {
 }
 
-void wwDrawContext::drawLabel(const wchar_t* text, Font font, const Rect& rect, bool selected)
+void wwDrawContext::drawLabel(const wchar_t* text, Font _font, const Rect& rect, bool selected)
 {
+	Gdiplus::Font* font = convertFont(_font);
+
+	ww::Color textColor;
+	if (selected)
+		textColor.setGDI(GetSysColor(COLOR_HIGHLIGHTTEXT));
+	else
+		textColor.setGDI(GetSysColor(COLOR_BTNTEXT));
+
+	tree_->_drawRowLabel(graphics, ww::fromWideChar(text).c_str(), font, toWWRect(rect), textColor);
 }
 
 void wwDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed)
 {
+	drawEntry(rect, text, false, grayed, 0);
 }
 
 void wwDrawContext::drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed)
 {
+	using namespace Gdiplus;
+	Point size(9, 9);
+	Point center(rect.center());
+	Gdiplus::Rect r(gdiplusRect(Rect(center.x() - 4, center.y() - 4,  size.x(), size.y())));
+
+	fillRoundRectangle(graphics, &SolidBrush(gdiplusSysColor(/*grayed ? COLOR_BTNFACE : */COLOR_WINDOW)), r, gdiplusSysColor(COLOR_3DDKSHADOW), 3);
+
+	graphics->DrawLine(&Pen(gdiplusSysColor(COLOR_3DDKSHADOW)), center.x() - 2, center.y(), center.x() + 2, center.y());
+	if(!expanded)
+		graphics->DrawLine(&Pen(gdiplusSysColor(COLOR_3DDKSHADOW)), center.x(), center.y() - 2, center.x(), center.y() + 2);
 }
 
 void wwDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
 {
+	Gdiplus::Graphics& gr = *graphics;
+	gr.SetSmoothingMode(SmoothingModeAntiAlias);
+	gr.SetTextRenderingHint(TextRenderingHintSystemDefault);
+
+	if (inlinedRow) {
+		Rect selectionRect = rect.adjusted(-(tree_->compact() ? 1 : 2), 0, 0, 2);
+		ww::Color color1(GetSysColor(COLOR_3DFACE));
+		ww::Color color2(tree->hasFocusOrInplaceHasFocus() ? GetSysColor(COLOR_HIGHLIGHT) : GetSysColor(COLOR_3DDKSHADOW));
+		Gdiplus::Color brushColor;
+		brushColor.SetFromCOLORREF(color1.interpolate(color2, 0.22f).argb());
+		SolidBrush brush(brushColor);
+		Gdiplus::Color borderColor(brushColor.GetA() / 8, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
+		fillRoundRectangle( &gr, &brush, gdiplusRect(selectionRect), borderColor, 6 );
+	}
+	else {
+		Rect selectionRect = rect.adjusted(-1, 0, 1, 1);
+		Gdiplus::Color brushColor;
+		if (tree->hasFocusOrInplaceHasFocus())
+			brushColor.SetFromCOLORREF(GetSysColor(COLOR_HIGHLIGHT));
+		else
+			brushColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
+		SolidBrush brush(brushColor);
+		Gdiplus::Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
+		fillRoundRectangle(&gr, &brush, gdiplusRect(selectionRect), borderColor, 6);
+	}
+}
+
+Gdiplus::Font* wwDrawContext::convertFont(Font font)
+{
+	switch (font) {
+	case FONT_BOLD:
+		return propertyTreeDefaultBoldFont();
+	case FONT_NORMAL:
+	default:
+		return propertyTreeDefaultFont();
+	}
 }
 
 }

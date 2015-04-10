@@ -60,7 +60,7 @@ public:
 	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(" ... ", false, true, 0);
+			context.drawEntry(context.widgetRect, " ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsString().c_str());
 		else
@@ -120,7 +120,7 @@ public:
 	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(" ... ", false, true, 0);
+			context.drawEntry(context.widgetRect, " ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsString().c_str());
 		else
