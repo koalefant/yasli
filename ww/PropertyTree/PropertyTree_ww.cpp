@@ -626,8 +626,10 @@ void PropertyTree::onLButtonDown(int button, int x, int y)
 	if(row && !row->isSelectable())
 		row = row->parent();
 	if (row){
-		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), (GetKeyState(VK_CONTROL) >> 15) != 0))
+		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), (GetKeyState(VK_CONTROL) >> 15) != 0)) {
+			SetCapture(impl()->handle());
 			capturedRow_ = row;
+		}
 		else if (!dragCheckMode_){
 			row = rowByPoint(property_tree::Point(x, y));
 			PropertyRow* draggedRow = row;
@@ -638,6 +640,9 @@ void PropertyTree::onLButtonDown(int button, int x, int y)
 				ClientToScreen(impl()->handle(), &cursorPos);
 				dragController_->beginDrag(row, draggedRow, cursorPos);
 			}
+		}
+		else {
+			SetCapture(impl()->handle());
 		}
 	}
 	else
@@ -654,13 +659,13 @@ void PropertyTree::onLButtonUp(int button, int x, int y)
 			YASLI_ASSERT(window->handle() == focusedWindow);
 		}
 	}
-	//::SetFocus(impl()->handle());
+
+	if(GetCapture() == impl()->handle())
+		ReleaseCapture();
 
 	if(dragController_->captured()){
 		POINT pos;
 		GetCursorPos(&pos);
-		if(GetCapture() == impl()->handle())
-			ReleaseCapture();
 		dragController_->drop(pos);
 		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE);
 	}
