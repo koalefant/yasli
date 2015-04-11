@@ -49,7 +49,7 @@ void PropertyRowButton::redraw(IDrawContext& context)
 {
 	Rect buttonRect(context.widgetRect.adjusted(-1, 0, 1, 2));
 
-	wstring text(toWideChar(value().text ? value().text : labelUndecorated()));
+	string text(value().text ? value().text : labelUndecorated());
 	bool pressed = underMouse_ && value();
 	context.drawButton(buttonRect, text.c_str(), pressed, 
 					   selected() && context.tree->hasFocusOrInplaceHasFocus(), true, true, false, rowFont(context.tree));

@@ -65,5 +65,5 @@ protected:
 
 	bool fixedSize_;
 	const char* elementTypeName_;
-	wchar_t buttonLabel_[8];
+	char buttonLabel_[8];
 };

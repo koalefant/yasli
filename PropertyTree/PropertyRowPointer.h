@@ -56,7 +56,7 @@ public:
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
 	int widgetSizeMin(const PropertyTree*) const override;
-    yasli::wstring generateLabel() const;
+    yasli::string generateLabel() const;
 	yasli::string valueAsString() const override;
     const char* typeNameForFilter(PropertyTree* tree) const override { return baseType_.name(); }
 	void redraw(IDrawContext& context) override;

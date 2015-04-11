@@ -668,27 +668,27 @@ void QPropertyTree::onScroll(int pos)
 
 void QPropertyTree::copyRow(PropertyRow* row)
 {
-	QMimeData* mime = propertyRowToMimeData(row, tree->model()->constStrings());
+	QMimeData* mime = propertyRowToMimeData(row, model()->constStrings());
 	if (mime)
 		QApplication::clipboard()->setMimeData(mime);
 }
 
 void QPropertyTree::pasteRow(PropertyRow* row)
 {
-	if(!tree->canBePasted(row))
+	if(!canBePasted(row))
 		return;
 	PropertyRow* parent = row->parent();
 
-	tree->model()->rowAboutToBeChanged(row);
+	model()->rowAboutToBeChanged(row);
 
 	SharedPtr<PropertyRow> source;
-	if (!propertyRowFromClipboard(source, tree->model()->constStrings()))
+	if (!propertyRowFromClipboard(source, model()->constStrings()))
 		return;
 
-	if (!smartPaste(row, source, tree->model(), false))
+	if (!smartPaste(row, source, model(), false))
 		return;
 	
-	tree->model()->rowChanged(parent ? parent : tree->model()->root());
+	model()->rowChanged(parent ? parent : model()->root());
 }
 
 bool QPropertyTree::canBePasted(PropertyRow* destination)
@@ -916,12 +916,13 @@ void QPropertyTree::onFilterChanged(const QString& text)
 
 void QPropertyTree::drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
 {
-	int textLen = (int)wcslen(text);
+	int textLen = (int)strlen(text);
 
 	if (textLen == 0)
 		return;
 
 	QFontMetrics fm(*font);
+	QString str(text);
 	QRect textRect = rect;
 	int alignment;
 	if (center)

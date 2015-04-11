@@ -20,14 +20,14 @@ public:
 		this->tree = tree;
 	}
 
-	void drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) override;
+	void drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) override;
 	void drawCheck(const Rect& rect, bool disabled, CheckState checked) override;
 	void drawColor(const Rect& rect, const Color& color) override;
 	void drawComboBox(const Rect& rect, const char* text) override;
 	void drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
 	void drawHorizontalLine(const Rect& rect) override;
 	void drawIcon(const Rect& rect, const yasli::IconXPM& icon) override;
-	void drawLabel(const wchar_t* text, Font font, const Rect& rect, bool selected) override;
+	void drawLabel(const char* text, Font font, const Rect& rect, bool selected) override;
 	void drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed) override;
 	void drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed) override;
 	void drawSelection(const Rect& rect, bool inlinedRow) override;

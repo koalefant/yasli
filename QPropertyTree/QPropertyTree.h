@@ -19,12 +19,14 @@
 #include <QPainter>
 #include <vector>
 
-class IMenu;
 class QLineEdit;
 class QScrollBar;
 class QPropertyTree;
 
-namespace property_tree { class QDrawContext; }
+namespace property_tree { 
+class QDrawContext; 
+class IMenu;
+}
 
 class DragWindow : public QWidget
 {
@@ -58,7 +60,6 @@ public:
 
 	const QFont& boldFont() const; 
 	
-	void onSignalChanged() override { signalChanged(); }
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
 
 	void attachPropertyTree(PropertyTree* propertyTree) override;
@@ -68,7 +69,7 @@ public slots:
 public:
 	// internal methods:
 	QPoint _toScreen(Point point) const;
-	void _drawRowValue(QPainter& p, const wchar_t* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
+	void _drawRowValue(QPainter& p, const char* text, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 	int _updateHeightsTime() const{ return updateHeightsTime_; }
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const override;
@@ -90,7 +91,7 @@ protected slots:
 
 protected:
 	void onAboutToSerialize(yasli::Archive& ar) override { signalAboutToSerialize(ar); }
-	void onChanged() override { signalChanged(): }
+	void onChanged() override { signalChanged(); }
 	void onContinuousChange() override { signalContinuousChange(); }
 	void onSelected() override { signalSelected(); }
 	void onReverted() override { signalReverted(); }

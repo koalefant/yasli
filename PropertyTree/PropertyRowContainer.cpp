@@ -17,6 +17,7 @@
 
 #include "IMenu.h"
 #include "IUIFacade.h"
+#include <stdlib.h>
 
 // ---------------------------------------------------------------------------
 
@@ -68,7 +69,7 @@ void PropertyRowContainer::redraw(IDrawContext& context)
 		return;
 	Rect rt = widgetRect.adjusted(0, 1, -1, -1);
 
-	const wchar_t* text = multiValue() ? L"..." : buttonLabel_;
+	const char* text = multiValue() ? "..." : buttonLabel_;
 	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, FONT_NORMAL);
 }
 
@@ -250,7 +251,7 @@ void ContainerMenuHandler::onMenuChildRemove()
 
 void PropertyRowContainer::labelChanged()
 {
-    swprintf(buttonLabel_, sizeof(buttonLabel_)/sizeof(buttonLabel_[0]), L"%i", count());
+    sprintf(buttonLabel_, "%i", (int)count());
 }
 
 void PropertyRowContainer::serializeValue(yasli::Archive& ar)

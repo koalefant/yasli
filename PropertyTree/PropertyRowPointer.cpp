@@ -141,48 +141,48 @@ yasli::string PropertyRowPointer::valueAsString() const
 	return result;
 }
 
-yasli::wstring PropertyRowPointer::generateLabel() const
+yasli::string PropertyRowPointer::generateLabel() const
 {
 	if(multiValue())
-		return L"...";
+		return "...";
 
-		yasli::wstring str;
-		if(!derivedTypeName_.empty()){
-			const char* textStart = derivedTypeName_.c_str();
-			if (factory_) {
-				const yasli::TypeDescription* desc = factory_->descriptionByType(getDerivedType(factory_));
-				if (desc)
-					textStart = desc->label();
-			}
-			const char* p = textStart + strlen(textStart);
-			while(p > textStart){
-				if(*(p - 1) == '\\')
-					break;
-				--p;
-			}
-			str = toWideChar(p);
-			if(p != textStart){
-				str += L" (";
-				str += toWideChar(yasli::string(textStart, p - 1).c_str());
-				str += L")";
-			}
+	yasli::string str;
+	if(!derivedTypeName_.empty()){
+		const char* textStart = derivedTypeName_.c_str();
+		if (factory_) {
+			const yasli::TypeDescription* desc = factory_->descriptionByType(getDerivedType(factory_));
+			if (desc)
+				textStart = desc->label();
 		}
+		const char* p = textStart + strlen(textStart);
+		while(p > textStart){
+			if(*(p - 1) == '\\')
+				break;
+			--p;
+		}
+		str = p;
+		if(p != textStart){
+			str += " (";
+			str.append(textStart, p - 1);
+			str += ")";
+		}
+	}
 	else
-		{
-				if (factory_)
-					str = toWideChar(factory_->nullLabel() ? factory_->nullLabel() : "[ null ]");
-				else
-					str = L"[ null ]";
+	{
+		if (factory_)
+			str = factory_->nullLabel() ? factory_->nullLabel() : "[ null ]";
+		else
+			str = "[ null ]";
 
-		}
-		return str;
+	}
+	return str;
 }
 
 void PropertyRowPointer::redraw(IDrawContext& context)
 {
 	Rect widgetRect = context.widgetRect;
 	Rect rt = widgetRect.adjusted(-1, 0, 0, 1);
-	yasli::wstring str = generateLabel();
+	yasli::string str = generateLabel();
 	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
 	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, true, font);
 }
@@ -246,7 +246,7 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 int PropertyRowPointer::widgetSizeMin(const PropertyTree* tree) const
 {
 	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
-	std::string text = fromWideChar(generateLabel().c_str());
+	std::string text = generateLabel();
 	return tree->ui()->textWidth(text.c_str(), font) + 18;
 }
 

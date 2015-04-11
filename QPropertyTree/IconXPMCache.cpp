@@ -23,6 +23,8 @@
 
 // ---------------------------------------------------------------------------
 
+namespace property_tree {
+
 IconXPMCache::~IconXPMCache()
 {
 	flush();
@@ -177,3 +179,4 @@ QImage* IconXPMCache::getImageForIcon(const yasli::IconXPM& icon)
 // ---------------------------------------------------------------------------
 
 
+}

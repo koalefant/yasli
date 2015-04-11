@@ -945,7 +945,6 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 
 		// drawing a horizontal line
 		char containerLabel[16] = "";
-		yasli::wstring text = toWideChar(rowText(containerLabel, tree, index));
 
 		if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
@@ -967,6 +966,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 			redraw(context);
 
 		if(textSize_ > 0){
+			yasli::string text = rowText(containerLabel, tree, index);
 			context.drawLabel(text.c_str(), FONT_NORMAL, textRect(tree), pulledSelected());
 		}
 	}

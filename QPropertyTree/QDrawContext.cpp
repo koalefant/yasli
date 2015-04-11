@@ -96,7 +96,7 @@ void QDrawContext::drawComboBox(const Rect& rect, const char* text)
 	painter_->setPen(QPen(tree_->palette().color(QPalette::WindowText)));
 	QRect textRect = tree_->style()->subControlRect(QStyle::CC_ComboBox, &option, QStyle::SC_ComboBoxEditField, 0);
 	textRect.adjust(1, 0, -1, 0);
-	tree_->_drawRowValue(*painter_, toWideChar(text).c_str(), &tree_->font(), textRect, tree_->palette().color(QPalette::WindowText), false, false);
+	tree_->_drawRowValue(*painter_, text, &tree_->font(), textRect, tree_->palette().color(QPalette::WindowText), false, false);
 	painter_->translate(-rect.left(), -rect.top());
 }
 
@@ -139,7 +139,7 @@ void QDrawContext::drawPlus(const Rect& rect, bool expanded, bool selected, bool
 	tree_->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &option, painter_, tree_);
 }
 
-void QDrawContext::drawLabel(const wchar_t* text, Font font, const Rect& rect, bool selected)
+void QDrawContext::drawLabel(const char* text, Font font, const Rect& rect, bool selected)
 {
 	const QFont* qfont = font == FONT_NORMAL ? &tree_->font() : &tree_->boldFont();
 	QColor textColor = tree_->palette().buttonText().color();
@@ -215,7 +215,7 @@ void QDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checked
 	tree_->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter_, 0);
 }
 
-void QDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font_name)
+void QDrawContext::drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font_name)
 {
 	const QFont* font = font_name == property_tree::FONT_NORMAL ? &tree_->font() : &tree_->boldFont();
 	QStyleOptionButton option;

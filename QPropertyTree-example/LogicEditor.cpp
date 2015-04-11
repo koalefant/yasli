@@ -205,9 +205,9 @@ public:
 		// look outside!
 	}
 private:
-	Color zenithColor_;
-	Color horizonColor_;
-	Color sunColor_;
+	property_tree::Color zenithColor_;
+	property_tree::Color horizonColor_;
+	property_tree::Color sunColor_;
 	bool showSun_;
 };
 YASLI_CLASS(ActionBase, ActionPaintSky, "Paint Sky");

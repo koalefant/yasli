@@ -38,7 +38,7 @@ public:
 	bool isStatic() const{ return false; }
 	bool isPointer() const{ return true; }
     int widgetSizeMin() const;
-    wstring generateLabel() const;
+    string generateLabel() const;
 	string valueAsString() const;
 	PropertyRow* clone() const{
 		PropertyRowPointer* result = new PropertyRowPointer();

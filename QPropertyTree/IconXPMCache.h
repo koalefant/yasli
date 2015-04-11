@@ -21,8 +21,10 @@ class QBrush;
 class QRect;
 class QColor;
 class QFont;
-struct RGBAImage;
 namespace yasli { struct IconXPM; }
+
+namespace property_tree {
+struct RGBAImage;
 struct Color;
 
 struct IconXPMCache
@@ -45,3 +47,4 @@ private:
 	IconToBitmap iconToImageMap_;
 };
 
+}
