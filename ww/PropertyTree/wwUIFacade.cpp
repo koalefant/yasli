@@ -15,7 +15,7 @@ HWND wwUIFacade::hwnd()
 
 IMenu* wwUIFacade::createMenu()
 {
-	return new wwMenu();
+	return new wwMenu(tree_);
 }
 
 void wwUIFacade::setCursor(Cursor cursor)

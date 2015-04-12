@@ -9,7 +9,6 @@
 using std::vector;
 
 class PropertyTreeModel;
-class PopupMenuItem;
 class PropertyTreeModel;
 class PropertyRow;
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;

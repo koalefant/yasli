@@ -335,7 +335,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
-			menu->exec(point);
+			menu->exec(point - offset_);
 	}
 }
 

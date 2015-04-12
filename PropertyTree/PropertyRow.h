@@ -37,7 +37,6 @@ using std::vector;
 class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
-class PopupMenuItem;
 class InplaceWidget;
 
 enum ScanResult {
