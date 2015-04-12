@@ -402,7 +402,7 @@ void wwDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checke
 	}
 }
 
-void wwDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font)
+void wwDrawContext::drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font)
 {
 	using Gdiplus::Color;
 	using Gdiplus::Rect;
@@ -448,7 +448,8 @@ void wwDrawContext::drawButton(const Rect& rect, const wchar_t* text, bool press
 		textRect.Y += 1;
 	}
 
-	graphics->DrawString( text, (int)wcslen(text), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
+	std::wstring wstr = ww::toWideChar(text);
+	graphics->DrawString( wstr.c_str(), wstr.size(), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
 
 
@@ -539,7 +540,7 @@ void wwDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
 {
 }
 
-void wwDrawContext::drawLabel(const wchar_t* text, Font _font, const Rect& rect, bool selected)
+void wwDrawContext::drawLabel(const char* text, Font _font, const Rect& rect, bool selected)
 {
 	Gdiplus::Font* font = convertFont(_font);
 
@@ -549,7 +550,7 @@ void wwDrawContext::drawLabel(const wchar_t* text, Font _font, const Rect& rect,
 	else
 		textColor.setGDI(GetSysColor(COLOR_BTNTEXT));
 
-	tree_->_drawRowLabel(graphics, ww::fromWideChar(text).c_str(), font, toWWRect(rect), textColor);
+	tree_->_drawRowLabel(graphics, text, font, toWWRect(rect), textColor);
 }
 
 void wwDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed)
