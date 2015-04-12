@@ -517,7 +517,7 @@ void TreeImpl::onMessagePaint()
 	HDC dc = BeginPaint(handle_, &ps);
 	{
 		Win32::MemoryDC memoryDC(dc);
-		tree_->redraw(memoryDC);
+		tree_->onPaint(memoryDC);
 	}
 	EndPaint(handle_, &ps);
 	__super::onMessagePaint();

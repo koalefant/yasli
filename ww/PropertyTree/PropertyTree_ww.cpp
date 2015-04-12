@@ -131,7 +131,6 @@ struct DrawVisitor
 	DrawVisitor(Gdiplus::Graphics* graphics, const property_tree::Rect& area, int scrollOffset, bool selectionPass)
 		: area_(area)
 		, graphics_(graphics)
-		, offset_(0)
 		, scrollOffset_(scrollOffset)
 		, lastParent_(0)
 		, selectionPass_(selectionPass)
@@ -158,7 +157,6 @@ struct DrawVisitor
 protected:
 	Gdiplus::Graphics* graphics_;
 	property_tree::Rect area_;
-	int offset_;
 	int scrollOffset_;
 	PropertyRow* lastParent_;
 	bool selectionPass_;
@@ -535,17 +533,17 @@ void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const char* text, Gdiplu
 	drawFilteredString(gr, text, RowFilter::VALUE, font, rect, textColor, pathEllipsis, center);
 }
 
-void PropertyTree::redraw(HDC dc)
+void PropertyTree::onPaint(HDC dc)
 {
 	using namespace Gdiplus;
 	DebugTimer timer("redraw");
-	Graphics gr(dc);
 
 	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
 	::GetClientRect(impl()->handle(), &clientRect);
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 
+	Graphics gr(dc);
 	{
 		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left,
 			clientRect.top, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
@@ -564,16 +562,21 @@ void PropertyTree::redraw(HDC dc)
 
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
-	//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
+	//OffsetViewportOrgEx(dc, -offset_.x(), -offset_.y(), 0);
 	if (dragController_->captured())
 		dragController_->drawUnder(dc);
-	//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
+	//OffsetViewportOrgEx(dc, offset_.x(), offset_.y(), 0);
 
+
+	OffsetViewportOrgEx(dc, -offset_.x(), -offset_.y(), 0);
 	if (model()->root()) {
-		model()->root()->scanChildren(DrawVisitor(&gr, area_, 0, true), this);
-		model()->root()->scanChildren(DrawVisitor(&gr, area_, 0, false), this);
+		Gdiplus::Graphics gr(dc);
+		model()->root()->scanChildren(DrawVisitor(&gr, area_, offset_.y(), true), this);
+		model()->root()->scanChildren(DrawVisitor(&gr, area_, offset_.y(), false), this);
 	}
-	::IntersectClipRect(dc, area_.left() - 1, area_.top() - 1, area_.right() + 1, area_.bottom() + 1);
+	OffsetViewportOrgEx(dc, offset_.x(), offset_.y(), 0);
+
+	::SelectClipRgn(dc, NULL);
 
 	if(size_.y() > clientHeight)
 	{

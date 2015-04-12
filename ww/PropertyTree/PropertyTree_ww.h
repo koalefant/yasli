@@ -85,8 +85,8 @@ protected:
 	void onSelected() override { signalSelected_.emit(); }
 	void onReverted() override { signalReverted_.emit(); }
 	void onPushUndo() override { signalPushUndo_.emit(); }
-	void redraw(HDC dc);
 
+	void onPaint(HDC dc);
 	void onLButtonUp(int button, int x, int y);
 	void onLButtonDoubleClick(int x, int y);
 	void onLButtonDown(int button, int x, int y);
