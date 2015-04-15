@@ -361,6 +361,9 @@
     <ClInclude Include="PropertyTree\PropertyTree_ww.h">
       <Filter>PropertyTree</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyTree\InplaceWidgetString.h">
+      <Filter>PropertyTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">

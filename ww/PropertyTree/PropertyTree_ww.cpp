@@ -321,8 +321,8 @@ void PropertyTree::_arrangeChildren()
 				property_tree::Rect rect = widgetRow_->widgetRect(this);
 				ww::Rect r(rect.left() - offset_.x() + area_.left(),
 					rect.top() - offset_.y() + area_.top(),
-					rect.right() - offset_.x() + area_.left(),
-					rect.bottom() - offset_.y() + area_.right()
+					rect.right() - offset_.x(),
+					rect.bottom() - offset_.y()
 					);
 				w->_setPosition(r);
 				if(!w->isVisible()){

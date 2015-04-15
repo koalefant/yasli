@@ -455,6 +455,7 @@
     <ClInclude Include="..\PropertyTree\Unicode.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="gdiplusUtils.h" />
+    <ClInclude Include="PropertyTree\InplaceWidgetString.h" />
     <ClInclude Include="PropertyTree\PropertyTree_ww.h" />
     <ClInclude Include="PropertyTree\wwDrawContext.h" />
     <ClInclude Include="PropertyTree\PropertyRowBitVector.h" />

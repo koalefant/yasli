@@ -4,6 +4,8 @@
 #include "wwDrawContext.h"
 #include "ww/Unicode.h"
 #include "gdiplusUtils.h"
+#include "InplaceWidgetString.h"
+#include "InplaceWidgetComboBox.h"
 
 namespace property_tree {
 
@@ -51,7 +53,7 @@ Point wwUIFacade::screenSize()
 
 InplaceWidget* wwUIFacade::createComboBox(ComboBoxClientRow* client)
 {
-	return 0;
+	return new InplaceWidgetComboBox(client, tree_);
 }
 
 InplaceWidget* wwUIFacade::createNumberWidget(PropertyRowNumberField* row)
@@ -61,7 +63,7 @@ InplaceWidget* wwUIFacade::createNumberWidget(PropertyRowNumberField* row)
 
 InplaceWidget* wwUIFacade::createStringWidget(PropertyRowString* row)
 {
-	return 0;
+	return new InplaceWidgetString(row, tree_);
 }
 
 }
