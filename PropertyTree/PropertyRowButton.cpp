@@ -23,13 +23,13 @@ class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
 	void redraw(IDrawContext& context) override;
-	bool onMouseDown(PropertyTree* tree, Point point, bool& changed);
-	void onMouseMove(PropertyTree* tree, Point point);
-	void onMouseUp(PropertyTree* tree, Point point);
-	bool onActivate(PropertyTree* tree, bool force);
-	int floorHeight() const{ return 3; }
-	string valueAsString() const { return value_ ? value_.text : ""; }
-	int widgetSizeMin() const{ 
+	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
+	void onMouseDrag(const PropertyDragEvent& e) override;
+	void onMouseUp(PropertyTree* tree, Point point) override;
+	bool onActivate(PropertyTree* tree, bool force) override;
+	int floorHeight() const override{ return 3; }
+	string valueAsString() const override{ return value_ ? value_.text : ""; }
+	int widgetSizeMin(const PropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
@@ -69,12 +69,12 @@ bool PropertyRowButton::onMouseDown(PropertyTree* tree, Point point, bool& chang
 	return false;
 }
 
-void PropertyRowButton::onMouseMove(PropertyTree* tree, Point point)
+void PropertyRowButton::onMouseDrag(const PropertyDragEvent& e)
 {
-	bool underMouse = widgetRect(tree).contains(point);
+	bool underMouse = widgetRect(e.tree).contains(e.pos);
 	if(underMouse != underMouse_){
 		underMouse_ = underMouse;
-		tree->repaint();
+		e.tree->repaint();
 	}
 }
 

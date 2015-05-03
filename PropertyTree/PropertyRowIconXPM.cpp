@@ -26,9 +26,9 @@ public:
 		context.drawIcon(context.widgetRect, icon_);
 	}
 
-	bool isLeaf() const{ return true; }
-	bool isStatic() const{ return false; }
-	bool isSelectable() const{ return false; }
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
+	bool isSelectable() const override{ return false; }
 
 	bool onActivate(PropertyTree* tree, bool force) override
 	{
@@ -38,11 +38,10 @@ public:
 		YASLI_ESCAPE(ser.size() == sizeof(IconXPM), return);
 		icon_ = *(IconXPM*)(ser.pointer());
 	}
-	yasli::wstring valueAsWString() const{ return L""; }
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	void serializeValue(Archive& ar) {}
+	yasli::wstring valueAsWString() const override{ return L""; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
+	void serializeValue(Archive& ar) override{}
 	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
-	int height() const{ return 16; }
 protected:
 	IconXPM icon_;
 };
@@ -96,11 +95,10 @@ public:
 		}
 		return false;
 	}
-	yasli::wstring valueAsWString() const{ return value_ ? L"true" : L"false"; }
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
+	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 
 	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
-	int height() const{ return 16; }
 
 	IconXPM iconTrue_;
 	IconXPM iconFalse_;

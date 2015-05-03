@@ -54,7 +54,6 @@ public:
     }
     StringListStaticValue& operator=(int value){
 		YASLI_ASSERT(value >= 0 && std::size_t(value) < stringList_->size());
-        YASLI_ASSERT(this != 0);
         index_ = value;
 		return *this;
     }
@@ -139,7 +138,6 @@ public:
     }
     StringListValue& operator=(int value){
 		YASLI_ASSERT(value >= 0 && std::size_t(value) < stringList_.size());
-        YASLI_ASSERT(this != 0);
         index_ = value;
 		return *this;
     }

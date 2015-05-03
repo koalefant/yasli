@@ -33,10 +33,10 @@ public:
 		value_ = *(Type*)(ser.pointer());
 	}
 
-	void serializeValue(yasli::Archive& ar){
+	void serializeValue(yasli::Archive& ar) override{
 		ar(value_, "value", "Value");
 	}
-	WidgetPlacement widgetPlacement() const{ return WIDGET_VALUE; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 protected:
 	Type value_; 
 };

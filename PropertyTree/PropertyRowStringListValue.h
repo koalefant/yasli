@@ -68,8 +68,7 @@ public:
 
 	}
 
-
-	void serializeValue(yasli::Archive& ar){
+	void serializeValue(yasli::Archive& ar) override{
 		ar(value_, "value", "Value");
 		ar(stringList_, "stringList", "String List");
 	}
@@ -128,7 +127,7 @@ public:
 	}
 
 
-	void serializeValue(yasli::Archive& ar){
+	void serializeValue(yasli::Archive& ar) override{
 		ar(value_, "value", "Value");
 		ar(stringList_, "stringList", "String List");
 	}

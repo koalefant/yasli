@@ -164,7 +164,7 @@ public:
         return true;
 	}
 
-	void serializeValue(yasli::Archive& ar){
+	void serializeValue(yasli::Archive& ar) override{
 		ar(value_, "value", "Value");
 		ar(softMin_, "softMin", "SoftMin");
 		ar(softMax_, "softMax", "SoftMax");
@@ -188,7 +188,7 @@ public:
 		}
 	}
 
-	void incrementLog(float screenFraction)
+	void incrementLog(float screenFraction) override
 	{
 		bool bothSoftLimitsSet = (std::numeric_limits<Type>::lowest() == 0 || softMin_ != std::numeric_limits<Type>::lowest()) && softMax_ != std::numeric_limits<Type>::max();
 

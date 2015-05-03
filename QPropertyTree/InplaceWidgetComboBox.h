@@ -49,9 +49,9 @@ public:
 		}
 	}	
 
-	void commit(){}
-	void* actualWidget() { return comboBox_; }
-	public slots:
+	void commit() override{}
+	void* actualWidget() override{ return comboBox_; }
+public slots:
 	void onChange(int)
 	{
 		if (!client_->onComboBoxSelected(comboBox_->currentText().toUtf8().data(), tree_))

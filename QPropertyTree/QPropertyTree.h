@@ -106,7 +106,7 @@ protected:
 	void defocusInplaceEditor() override;
 	class DragController;
 
-	void updateHeights();
+	void updateHeights() override;
 	void repaint() override { update(); }
 	void resetFilter() override { onFilterChanged(QString()); }
 
@@ -125,9 +125,9 @@ protected:
 	bool updateScrollBar() override;
 
 	void setFilterMode(bool inFilterMode);
-	void startFilter(const char* filter);
+	void startFilter(const char* filter) override;
 
-	void _arrangeChildren();
+	void _arrangeChildren() override;
 
 	void drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
 

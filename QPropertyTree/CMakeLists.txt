@@ -2,7 +2,7 @@ project(QPropertyTree)
 set(CMAKE_AUTOMOC TRUE)
 
 if (UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wno-deprecated-declarations")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wno-deprecated-declarations -Werror")
 endif (UNIX)
 
 if (MSVC)
@@ -37,6 +37,7 @@ set(SOURCES
 	../PropertyTree/PropertyRowContainer.h
 	../PropertyTree/PropertyRowField.cpp
 	../PropertyTree/PropertyRowField.h
+	../PropertyTree/PropertyRowHorizontalLine.cpp
 	../PropertyTree/PropertyRowIconXPM.cpp
 	../PropertyTree/PropertyRowImpl.h
 	../PropertyTree/PropertyRowNumber.cpp

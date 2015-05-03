@@ -47,23 +47,23 @@ public:
 	}
 
 	bool isEmpty() override { return !menu_.get() || menu_->isEmpty(); }
-	IMenu* addMenu(const char* text) { 
+	IMenu* addMenu(const char* text) override{ 
 		QMenu* qmenu = menu_->addMenu(text);
 		menus_.push_back(new QtMenu(qmenu, tree_));
 		return menus_.back();
 	}
-	IMenu* findMenu(const char* text) {
+	IMenu* findMenu(const char* text) override{
 		return 0;
 	}
-	void addSeparator() { menu_->addSeparator(); }
-	IMenuAction* addAction(const char* text, int flags = 0) {
+	void addSeparator() override{ menu_->addSeparator(); }
+	IMenuAction* addAction(const char* text, int flags = 0) override{
 		QAction* qaction = menu_->addAction(text);
 		QtAction* action = new QtAction(qaction);
 		actions_.push_back(action);
 		return action;
 	}
 	
-	void exec(const Point& point) {
+	void exec(const Point& point) override{
 		menu_->exec(tree_->mapToGlobal(QPoint(point.x(), point.y())));
 	}
 private:

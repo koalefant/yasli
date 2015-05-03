@@ -46,7 +46,7 @@ public:
 
 	PropertyRow* defaultRow(PropertyTreeModel* model);
 	const PropertyRow* defaultRow(const PropertyTreeModel* model) const;
-	void serializeValue(yasli::Archive& ar);
+	void serializeValue(yasli::Archive& ar) override;
 
 	const char* elementTypeName() const{ return elementTypeName_; }
 	virtual void setValueAndContext(const yasli::ContainerInterface& value, yasli::Archive& ar) {

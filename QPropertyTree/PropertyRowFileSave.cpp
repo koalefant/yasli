@@ -68,7 +68,7 @@ public:
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 
-	yasli::string valueAsString() const{ return value().path; }
+	yasli::string valueAsString() const override{ return value().path; }
 };
 
 REGISTER_PROPERTY_ROW(FileSave, PropertyRowFileSave); 

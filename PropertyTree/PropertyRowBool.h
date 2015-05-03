@@ -30,7 +30,7 @@ public:
 	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
 	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
-	void serializeValue(yasli::Archive& ar);
+	void serializeValue(yasli::Archive& ar) override;
 	int widgetSizeMin(const PropertyTree* tree) const override;
 protected:
 	bool value_;
