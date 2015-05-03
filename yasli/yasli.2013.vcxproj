@@ -302,6 +302,7 @@
     <ClInclude Include="ClassFactory.h" />
     <ClInclude Include="ClassFactoryBase.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="decorators\Button.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="JSONIArchive.h" />
     <ClInclude Include="JSONOArchive.h" />

@@ -183,8 +183,11 @@ void PropertyRowPointer::redraw(IDrawContext& context)
 	Rect widgetRect = context.widgetRect;
 	Rect rt = widgetRect.adjusted(-1, 0, 0, 1);
 	yasli::string str = generateLabel();
-	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
-	context.drawButton(rt, str.c_str(), context.pressed, false, !userReadOnly(), false, true, font);
+	using namespace property_tree;
+	property_tree::Font font = derivedTypeName_.empty() ? FONT_NORMAL : FONT_BOLD;
+	context.drawControlButton(rt, str.c_str(),
+		(context.pressed ? BUTTON_PRESSED : 0) | (userReadOnly() ? BUTTON_DISABLED : 0) | BUTTON_DROP_DOWN,
+		font);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{

@@ -19,6 +19,9 @@
     <Filter Include="archives\JSON">
       <UniqueIdentifier>{b197661a-58b5-472b-aa61-814b30f3d5cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="decorators">
+      <UniqueIdentifier>{106622a0-620f-4c8f-8028-e19d04779467}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assert.cpp">
@@ -111,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="JSONOArchive.h">
       <Filter>archives\JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="decorators\Button.h">
+      <Filter>decorators</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

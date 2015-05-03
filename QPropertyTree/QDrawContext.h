@@ -20,7 +20,8 @@ public:
 		this->tree = tree;
 	}
 
-	void drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) override;
+	void drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) override;
+	void drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) override;
 	void drawCheck(const Rect& rect, bool disabled, CheckState checked) override;
 	void drawColor(const Rect& rect, const Color& color) override;
 	void drawComboBox(const Rect& rect, const char* text) override;

@@ -215,8 +215,18 @@ void QDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checked
 	tree_->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter_, 0);
 }
 
-void QDrawContext::drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font_name)
+void QDrawContext::drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font_name)
 {
+	drawButton(rect, text, buttonFlags, font_name);
+}
+
+void QDrawContext::drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font_name)
+{
+	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
+	bool focused = (buttonFlags & BUTTON_FOCUSED) != 0;
+	bool center = (buttonFlags & BUTTON_CENTER_TEXT) != 0;
+	bool dropDownArrow = (buttonFlags & BUTTON_DROP_DOWN) != 0;
+	bool enabled = (buttonFlags & BUTTON_DISABLED) == 0;
 	const QFont* font = font_name == property_tree::FONT_NORMAL ? &tree_->font() : &tree_->boldFont();
 	QStyleOptionButton option;
 	if (enabled)

@@ -9,25 +9,15 @@
 
 #pragma once
 
+#include <yasli/decorators/Button.h>
+
 namespace yasli{
 class Archive;
 }
 
 namespace ww{ 
 
-struct ButtonDecorator{
-	ButtonDecorator(const char* _text = 0)
-	: pressed(false)
-	, text(_text) {}
-
-	operator bool() const{
-		return pressed;
-	}
-	void serialize(yasli::Archive& ar) {}
-
-	bool pressed;
-	const char* text;
-};
+typedef yasli::Button ButtonDecorator;
 
 struct HLineDecorator{
 	void serialize(yasli::Archive& ar) {}

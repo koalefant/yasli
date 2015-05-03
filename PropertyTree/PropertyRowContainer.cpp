@@ -70,7 +70,10 @@ void PropertyRowContainer::redraw(IDrawContext& context)
 	Rect rt = widgetRect.adjusted(0, 1, -1, -1);
 
 	const char* text = multiValue() ? "..." : buttonLabel_;
-	context.drawButton(rt, text, context.pressed, false, !userReadOnly(), true, true, FONT_NORMAL);
+	using namespace property_tree; // BUTTON_
+	int buttonFlags = (context.pressed ? BUTTON_PRESSED : 0) |
+					  (userReadOnly() ? BUTTON_DISABLED : 0) | BUTTON_DROP_DOWN | BUTTON_CENTER_TEXT;
+	context.drawControlButton(rt, text, buttonFlags, FONT_NORMAL);
 }
 
 

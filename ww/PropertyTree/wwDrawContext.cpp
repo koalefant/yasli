@@ -402,8 +402,52 @@ void wwDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checke
 	}
 }
 
-void wwDrawContext::drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font)
+void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font fontName)
 {
+	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
+	bool focused = (buttonFlags & BUTTON_FOCUSED) != 0;
+	bool center = (buttonFlags & BUTTON_CENTER_TEXT) != 0;
+	bool dropDownArrow = (buttonFlags & BUTTON_DROP_DOWN) != 0;
+	bool enabled = (buttonFlags & BUTTON_DISABLED) == 0;
+	Gdiplus::Font* font = convertFont(fontName);
+
+	Gdiplus::Rect widgetRect = gdiplusRect(rect);
+	if (widgetRect.Width == 0)
+		return;
+	Gdiplus::Rect rt(widgetRect.X, widgetRect.Y + 1, widgetRect.Width - 2, widgetRect.Height - 2);
+	Gdiplus::Color brushColor = gdiplusSysColor(COLOR_BTNFACE);
+	LinearGradientBrush brush(Gdiplus::Rect(rt.X, rt.Y, rt.Width, rt.Height + 3), Gdiplus::Color(255, 0, 0, 0), brushColor, LinearGradientModeVertical);
+
+	Gdiplus::Color colors[3] = { brushColor, brushColor, gdiplusSysColor(COLOR_3DSHADOW) };
+	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };
+	brush.SetInterpolationColors(colors, positions, 3);
+
+	fillRoundRectangle(graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
+
+	Gdiplus::Color textColor;
+	textColor.SetFromCOLORREF(!enabled ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+	Gdiplus::SolidBrush textBrush(textColor);
+	RectF textRect( float(widgetRect.X), float(widgetRect.Y), float(widgetRect.Width), float(widgetRect.Height) );
+	if (!center) {
+		textRect.X += 4;
+		textRect.Width -= 5;
+	}		
+	StringFormat format;
+	format.SetAlignment(center ? StringAlignmentCenter : StringAlignmentNear);
+	format.SetLineAlignment(StringAlignmentCenter);
+	format.SetFormatFlags(StringFormatFlagsNoWrap);
+	format.SetTrimming(StringTrimmingNone);
+	std::wstring wstr = ww::toWideChar(text);
+	graphics->DrawString(wstr.c_str(), wstr.size(), font, textRect, &format, &textBrush);
+}
+
+void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font)
+{
+	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
+	bool focused = (buttonFlags & BUTTON_FOCUSED) != 0;
+	bool center = (buttonFlags & BUTTON_CENTER_TEXT) != 0;
+	bool dropDownArrow = (buttonFlags & BUTTON_DROP_DOWN) != 0;
+	bool enabled = (buttonFlags & BUTTON_DISABLED) == 0;
 	using Gdiplus::Color;
 	using Gdiplus::Rect;
 

@@ -23,6 +23,15 @@ enum CheckState {
 	CHECK_IN_BETWEEN
 };
 
+
+enum {
+	BUTTON_PRESSED = 1 << 0,
+	BUTTON_FOCUSED = 1 << 1,
+	BUTTON_DISABLED = 1 << 2,
+	BUTTON_DROP_DOWN = 1 << 3,
+	BUTTON_CENTER_TEXT = 1 << 4
+};
+
 struct IDrawContext
 {
 	const PropertyTree* tree;
@@ -38,7 +47,8 @@ struct IDrawContext
 	{
 	}
 
-	virtual void drawButton(const Rect& rect, const char* text, bool pressed, bool focused, bool enabled, bool center, bool dropDownArrow, property_tree::Font font) = 0;
+	virtual void drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) = 0;
+	virtual void drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) = 0;
 	virtual void drawCheck(const Rect& rect, bool disabled, CheckState checked) = 0;
 	virtual void drawColor(const Rect& rect, const Color& color) = 0;
 	virtual void drawComboBox(const Rect& rect, const char* text) = 0;
