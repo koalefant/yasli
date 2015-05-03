@@ -28,24 +28,6 @@ DECLARE_SEGMENT(PropertyRowDecorators)
 
 // ------------------------------------------------------------------------------------------
 
-class PropertyRowHLine : public PropertyRowImpl<HLineDecorator, PropertyRowHLine>{
-public:
-	void redraw(const PropertyDrawContext& context);
-	bool isSelectable() const{ return false; }
-};
-
-void PropertyRowHLine::redraw(const IDrawContext& context)
-{
-	int halfHeight = context.widgetRect.top() + (context.widgetRect.height()) / 2;
-	RECT hlineRect = { context.widgetRect.left(), halfHeight - 1, context.widgetRect.right(), halfHeight + 1 };
-
-	HDC dc = context.graphics->GetHDC();
-	DrawEdge(dc, &hlineRect, BDR_SUNKENOUTER, BF_RECT);
-	context.graphics->ReleaseHDC(dc);
-}
-
-REGISTER_PROPERTY_ROW(HLineDecorator, PropertyRowHLine);
-
 // ------------------------------------------------------------------------------------------
 
 class PropertyRowNot : public PropertyRowImpl<NotDecorator, PropertyRowNot>{

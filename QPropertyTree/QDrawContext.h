@@ -26,6 +26,7 @@ public:
 	void drawColor(const Rect& rect, const Color& color) override;
 	void drawComboBox(const Rect& rect, const char* text) override;
 	void drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
+	void drawRowLine(const Rect& rect) override;
 	void drawHorizontalLine(const Rect& rect) override;
 	void drawIcon(const Rect& rect, const yasli::IconXPM& icon) override;
 	void drawLabel(const char* text, Font font, const Rect& rect, bool selected) override;

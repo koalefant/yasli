@@ -116,7 +116,7 @@ void QDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
 	}
 }
 
-void QDrawContext::drawHorizontalLine(const Rect& rect)
+void QDrawContext::drawRowLine(const Rect& rect)
 {
 	QLinearGradient gradient(rect.left(), rect.top(), rect.right(), rect.top());
 	gradient.setColorAt(0.0f, tree_->palette().color(QPalette::Button));
@@ -125,6 +125,10 @@ void QDrawContext::drawHorizontalLine(const Rect& rect)
 	gradient.setColorAt(1.0f, tree_->palette().color(QPalette::Button));
 	QBrush brush(gradient);
 	painter_->fillRect(toQRect(rect), brush);
+}
+
+void QDrawContext::drawHorizontalLine(const Rect& rect)
+{
 }
 
 void QDrawContext::drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed)

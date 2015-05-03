@@ -951,7 +951,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 		{
 			Rect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
 
-			context.drawHorizontalLine(rect);
+			context.drawRowLine(rect);
 		}
 
 
@@ -1307,6 +1307,7 @@ YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
 FORCE_SEGMENT(PropertyRowNumber)
 FORCE_SEGMENT(PropertyRowStringList)
 FORCE_SEGMENT(PropertyRowButton)
+FORCE_SEGMENT(PropertyRowHorizontalLine)
 /*
 FORCE_SEGMENT(PropertyRowIconXPM)
 FORCE_SEGMENT(PropertyRowFileOpen)

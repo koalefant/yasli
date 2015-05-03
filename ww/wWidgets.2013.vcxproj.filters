@@ -25,13 +25,13 @@
     <Filter Include="PropertyTree">
       <UniqueIdentifier>{1e5b3958-7889-44d2-87ea-c79aa6b21ef1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PropertyTree\PropertyRows-ww">
+    <Filter Include="PropertyTree\wWidgets PropertyRows">
       <UniqueIdentifier>{32d48272-173e-4280-aa8d-fa4bc21f4694}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PropertyTree\PropertyRows-shared">
+    <Filter Include="PropertyTree\Shared Rows">
       <UniqueIdentifier>{f8c0cd70-4d01-4bc9-814e-62e1f0f964b4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PropertyTree\PropertyTree-shared">
+    <Filter Include="PropertyTree\Shared Tree">
       <UniqueIdentifier>{f1983872-babd-42ca-828a-2d1640a53e2f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -254,106 +254,106 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRow.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowBool.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowColor.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowContainer.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowField.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowImpl.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowNumber.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowNumberField.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowObject.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowPointer.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowString.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyRowStringListValue.h">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClInclude>
     <ClInclude Include="PropertyTree\TreeImpl.h">
       <Filter>PropertyTree</Filter>
     </ClInclude>
     <ClInclude Include="PropertyTree\PropertyRowBitVector.h">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\Color.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\ConstStringList.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\Factory.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\IDrawContext.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\IMenu.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\IUIFacade.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\MathUtils.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyIArchive.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyOArchive.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyTreeMenuHandler.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyTreeModel.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyTreeOperator.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyTreeStyle.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\Rect.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\Serialization.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\sigslot.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\Unicode.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\PropertyTree.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="PropertyTree\wwDrawContext.h">
       <Filter>PropertyTree</Filter>
     </ClInclude>
     <ClInclude Include="..\PropertyTree\TreeConfig.h">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClInclude>
     <ClInclude Include="PropertyTree\wwUIFacade.h">
       <Filter>PropertyTree</Filter>
@@ -521,85 +521,85 @@
       <Filter>Win32</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRow.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowBool.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowButton.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowColor.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowContainer.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowField.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowIconXPM.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowNumber.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowNumberField.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowObject.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowPointer.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowString.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowStringListValue.cpp">
-      <Filter>PropertyTree\PropertyRows-shared</Filter>
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\TreeImpl.cpp">
       <Filter>PropertyTree</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowIcon.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowDecorators.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowFileSelector.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowHotkey.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowBitVector.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\Color.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\ConstStringList.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyIArchive.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyOArchive.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyTreeModel.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyTreeOperator.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\Unicode.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyTree.cpp">
-      <Filter>PropertyTree\PropertyTree-shared</Filter>
+      <Filter>PropertyTree\Shared Tree</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyTree_ww.cpp">
       <Filter>PropertyTree</Filter>
@@ -617,7 +617,10 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowColor_ww.cpp">
-      <Filter>PropertyTree\PropertyRows-ww</Filter>
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PropertyTree\PropertyRowHorizontalLine.cpp">
+      <Filter>PropertyTree\Shared Rows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -330,7 +330,7 @@ void drawEdit(Gdiplus::Graphics* gr, const Gdiplus::Rect& rect, const wchar_t* t
 
 	Color penColor;
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-    fillRoundRectangle(gr, &brush, rt, penColor, 5);
+    fillRoundRectangle(gr, &brush, rt, penColor, 4);
 
 	rt.Inflate(-3, -1);
 	rt.Height -= 1;
@@ -404,6 +404,7 @@ void wwDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checke
 
 void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font fontName)
 {
+	graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
 	bool focused = (buttonFlags & BUTTON_FOCUSED) != 0;
 	bool center = (buttonFlags & BUTTON_CENTER_TEXT) != 0;
@@ -422,7 +423,7 @@ void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int bu
 	Gdiplus::REAL positions[3] = { 0.0f, 0.6f, 1.0f };
 	brush.SetInterpolationColors(colors, positions, 3);
 
-	fillRoundRectangle(graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 6);
+	fillRoundRectangle(graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 4);
 
 	Gdiplus::Color textColor;
 	textColor.SetFromCOLORREF(!enabled ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
@@ -524,7 +525,7 @@ void wwDrawContext::drawEntry(const Rect& rect, const char* text, bool pathEllip
 
 	Color penColor;
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
-    fillRoundRectangle(graphics, &brush, rt, penColor, 5);
+    fillRoundRectangle(graphics, &brush, rt, penColor, 4);
 
 	rt.Inflate(-3, -1);
 	rt.Height -= 1;
@@ -568,13 +569,13 @@ void wwDrawContext::drawComboBox(const Rect& rect, const char* text)
 	drawEntry(rect, text, false, false, 0);
 }
 
-void wwDrawContext::drawHorizontalLine(const Rect& _rect)
+void wwDrawContext::drawRowLine(const Rect& _rect)
 {
 	Gdiplus::Color color1;
 	color1.SetFromCOLORREF(GetSysColor(COLOR_BTNFACE));
 	Gdiplus::Color color2;
 	color2.SetFromCOLORREF(GetSysColor(COLOR_3DDKSHADOW));
-	Gdiplus::Rect rect = gdiplusRect(_rect);
+	Gdiplus::Rect rect = gdiplusRect(_rect.adjusted(0, -1, 0, -1));
 	Gdiplus::LinearGradientBrush gradientBrush(rect, color1, color2, Gdiplus::LinearGradientModeHorizontal);
 	gradientBrush.SetWrapMode(Gdiplus::WrapModeClamp);
 	graphics->FillRectangle(&gradientBrush, rect);
@@ -643,6 +644,16 @@ void wwDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
 		Gdiplus::Color borderColor(brushColor.GetA() / 4, brushColor.GetR(), brushColor.GetG(), brushColor.GetB());
 		fillRoundRectangle(&gr, &brush, gdiplusRect(selectionRect), borderColor, 6);
 	}
+}
+
+void wwDrawContext::drawHorizontalLine(const Rect& rect)
+{
+	int halfHeight = rect.top() + (rect.height()) / 2;
+	RECT hlineRect = { rect.left(), halfHeight - 1, rect.right(), halfHeight + 1 };
+
+	HDC dc = graphics->GetHDC();
+	DrawEdge(dc, &hlineRect, BDR_SUNKENOUTER, BF_RECT);
+	graphics->ReleaseHDC(dc);
 }
 
 Gdiplus::Font* wwDrawContext::convertFont(Font font)

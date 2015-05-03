@@ -550,6 +550,7 @@
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowContainer.cpp" />
     <ClCompile Include="..\PropertyTree\PropertyRowField.cpp" />
+    <ClCompile Include="..\PropertyTree\PropertyRowHorizontalLine.cpp" />
     <ClCompile Include="..\PropertyTree\PropertyRowIconXPM.cpp" />
     <ClCompile Include="..\PropertyTree\PropertyRowNumber.cpp" />
     <ClCompile Include="..\PropertyTree\PropertyRowNumberField.cpp" />

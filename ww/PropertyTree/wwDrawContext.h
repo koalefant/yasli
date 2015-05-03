@@ -82,6 +82,7 @@ public:
 	virtual void drawColor(const Rect& rect, const Color& color) override;
 	virtual void drawComboBox(const Rect& rect, const char* text) override;
 	virtual void drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
+	virtual void drawRowLine(const Rect& rect) override;
 	virtual void drawHorizontalLine(const Rect& rect) override;
 	virtual void drawIcon(const Rect& rect, const yasli::IconXPM& icon) override;
 	virtual void drawLabel(const char* text, Font font, const Rect& rect, bool selected) override;

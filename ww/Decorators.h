@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include <yasli/decorators/Button.h>
+#include "yasli/decorators/Button.h"
+#include "yasli/decorators/HorizontalLine.h"
 
 namespace yasli{
 class Archive;
@@ -17,11 +18,10 @@ class Archive;
 
 namespace ww{ 
 
+// OBSOLETE, should not be used in the new code
 typedef yasli::Button ButtonDecorator;
-
-struct HLineDecorator{
-	void serialize(yasli::Archive& ar) {}
-};
+typedef yasli::HorizontalLine HLineDecorator;
+// ^^^
 
 struct RadioDecorator{
 	RadioDecorator()
@@ -117,12 +117,6 @@ struct OptionalPtr : PointerType{
 		}
 	}
 };
-
-inline bool serialize(yasli::Archive& ar, ww::HLineDecorator& value, const char* name, const char* label){		
-    if(ar.isEdit())
-        return ar(yasli::Serializer(value), name, label);
-    return false;
-}
 
 inline bool serialize(yasli::Archive& ar, ww::RadioDecorator& value, const char* name, const char* label){		
     if(ar.isEdit())
