@@ -9,10 +9,12 @@
 
 #include "StdAfx.h"
 #include "PropertyRowBitVector.h"
-#include "PropertyRow.h"
-#include "PropertyTree.h"
+#include "PropertyTree/PropertyRow.h"
+#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/IUIFacade.h"
 #include "ww/CheckComboBox.h"
-#include "ww/PropertyTreeModel.h"
+#include "ww/PropertyTree.h"
 #include "ww/SafeCast.h"
 #include "yasli/Pointers.h"
 #include "yasli/ClassFactory.h"
@@ -27,31 +29,31 @@ public:
 	}
 };
 
-class PropertyRowWidgetBitVector : public PropertyRowWidget, public has_slots{
+class InplaceWidgetBitVector : public property_tree::InplaceWidget, public has_slots{
 public:
-	PropertyRowWidgetBitVector(PropertyRowBitVector* row, PropertyTreeModel* model)
-	: PropertyRowWidget(row, model)
+	InplaceWidgetBitVector(PropertyRowBitVector* row, ::PropertyTree* tree)
+	: InplaceWidget(tree)
 	, comboBox_(new AutoDropCheckComboBox())
+	, row_(row)
 	{
+		comboBox_->_setParent(safe_cast<ww::PropertyTree*>(tree));
 		comboBox_->set( row->description()->labels(), row->valueAlt() );
 		comboBox_->setDropDownHeight(50);
-		comboBox_->signalEdited().connect(this, &PropertyRowWidgetBitVector::onChange);
-		//comboBox_->showDropDown();
+		comboBox_->signalEdited().connect(this, &InplaceWidgetBitVector::onChange);
 	}
-	~PropertyRowWidgetBitVector() {}
+	~InplaceWidgetBitVector() {}
 
 	void onChange(){
-		PropertyRowBitVector* row = safe_cast<PropertyRowBitVector*>(this->row());
-        model()->rowAboutToBeChanged(row);
-		row->setValueAlt(comboBox_->value());
-		//row->setIndex(comboBox_->selectedIndex());
-		model()->rowChanged(row);
+        tree()->model()->rowAboutToBeChanged(row_);
+		row_->setValueAlt(comboBox_->value());
+		tree()->model()->rowChanged(row_);
 	}
 	void commit(){
 	}
-	Widget* actualWidget() { return comboBox_; }
+	void* actualWidget() { return comboBox_; }
 protected:
 	SharedPtr<CheckComboBox> comboBox_;
+	SharedPtr<PropertyRowBitVector> row_;
 };
 
 //YASLI_CLASS(PropertyRow, PropertyRowBitVector, "BitVector");
@@ -63,7 +65,7 @@ PropertyRowBitVector::PropertyRowBitVector()
 	//YASLI_ASSERT(description_)
 }
 
-void PropertyRowBitVector::setValue(const Serializer& ser) 
+void PropertyRowBitVector::setValue(const yasli::Serializer& ser) 
 {
 	BitVectorWrapper* wrapper = ser.cast<BitVectorWrapper>();
 	flags_ = wrapper->value;
@@ -85,11 +87,13 @@ void PropertyRowBitVector::setValue(const Serializer& ser)
 }
 
 
-bool PropertyRowBitVector::assignTo(void* object, size_t size)
+bool PropertyRowBitVector::assignTo(const yasli::Serializer& ser) const
 {
-	YASLI_ASSERT(size == sizeof(BitVectorWrapper));
-	reinterpret_cast<BitVectorWrapper*>(object)->value = flags();
-	return true;
+	if (BitVectorWrapper* wrapper = ser.cast<BitVectorWrapper>()) {
+		wrapper->value = flags();
+		return true;
+	}
+	return false;
 }
 
 void PropertyRowBitVector::setValueAlt(const char* value)
@@ -107,12 +111,12 @@ void PropertyRowBitVector::setValueAlt(const char* value)
 }
 
 
-PropertyRowWidget* PropertyRowBitVector::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowBitVector::createWidget(::PropertyTree* tree)
 {
-	return new PropertyRowWidgetBitVector(this, tree->model());
+	return new InplaceWidgetBitVector(this, tree);
 }
 
-void PropertyRowBitVector::serializeValue(Archive& ar)
+void PropertyRowBitVector::serializeValue(yasli::Archive& ar)
 {
 	ar(valueText_, "valueText", "ValueText");
 	ar(valueAlt_, "valueAlt", "ValueAlt");

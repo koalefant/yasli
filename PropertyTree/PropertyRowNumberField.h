@@ -25,7 +25,7 @@ public:
 			return 40;
 	}
 
-	InplaceWidget* createWidget(PropertyTree* tree) override;
+	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	void redraw(IDrawContext& context) override;

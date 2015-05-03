@@ -655,7 +655,7 @@ bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 	if(!widget_.get() || widgetRow_ != row){
 		interruptDrag();
 		setWidget(0, 0);
-		InplaceWidget* newWidget = 0;
+		property_tree::InplaceWidget* newWidget = 0;
 		if ((ignoreReadOnly && row->userReadOnlyRecurse()) || !row->userReadOnly())
 			newWidget = row->createWidget(this);
 		setWidget(newWidget, row);
@@ -815,7 +815,7 @@ void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 	onPushUndo();
 }
 
-void PropertyTree::setWidget(InplaceWidget* widget, PropertyRow* widgetRow)
+void PropertyTree::setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow)
 {
 	widget_.reset(widget);
 	widgetRow_ = widgetRow;

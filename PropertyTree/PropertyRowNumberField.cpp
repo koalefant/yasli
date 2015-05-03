@@ -14,7 +14,7 @@
 #include "PropertyTree.h"
 #include "IUIFacade.h"
 
-InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
 {
 	return tree->ui()->createNumberWidget(this);
 }

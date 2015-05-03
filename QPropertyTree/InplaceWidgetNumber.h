@@ -5,7 +5,7 @@
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/PropertyRowNumberField.h"
 
-class InplaceWidgetNumber : public QObject, public InplaceWidget
+class InplaceWidgetNumber : public QObject, public property_tree::InplaceWidget
 
 {
 	Q_OBJECT

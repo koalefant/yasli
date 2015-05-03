@@ -8,7 +8,7 @@
 #include "PropertyTree/IUIFacade.h"
 class QPropertyTree;
 
-class InplaceWidgetComboBox : public QObject, public InplaceWidget
+class InplaceWidgetComboBox : public QObject, public property_tree::InplaceWidget
 {
 	Q_OBJECT
 public:

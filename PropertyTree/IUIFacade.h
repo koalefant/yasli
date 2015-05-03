@@ -9,14 +9,15 @@ typedef HWND__* HWND;
 
 class QWidget;
 
-namespace property_tree { class IMenu; }
-
 class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
 class PropertyRowNumberField;
 class PropertyRowString;
 
+namespace property_tree {
+
+class IMenu;
 class InplaceWidget
 {
 public:
@@ -34,8 +35,6 @@ struct ComboBoxClientRow {
 	virtual void populateComboBox(std::vector<std::string>* strings, int* selectedIndex, PropertyTree* tree) = 0;
 	virtual bool onComboBoxSelected(const char* text, PropertyTree* tree) = 0;
 };
-
-namespace property_tree {
 
 enum Key
 {

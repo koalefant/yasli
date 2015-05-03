@@ -4,7 +4,7 @@
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyRowString.h"
 
-class InplaceWidgetString : public QObject, public InplaceWidget
+class InplaceWidgetString : public QObject, public property_tree::InplaceWidget
 {
 	Q_OBJECT
 public:

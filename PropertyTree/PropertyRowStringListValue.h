@@ -21,7 +21,7 @@
 using yasli::StringListValue;
 class PropertyRowStringListValue : public PropertyRow, public ComboBoxClientRow {
 public:
-	InplaceWidget* createWidget(PropertyTree* tree) override;
+	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 
 	void populateComboBox(std::vector<std::string>* values, int* selectedIndex, PropertyTree* tree) override
 	{

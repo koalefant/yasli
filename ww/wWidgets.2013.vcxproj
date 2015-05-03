@@ -455,6 +455,7 @@
     <ClInclude Include="..\PropertyTree\Unicode.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="gdiplusUtils.h" />
+    <ClInclude Include="PropertyTree\InplaceWidgetComboBox.h" />
     <ClInclude Include="PropertyTree\InplaceWidgetString.h" />
     <ClInclude Include="PropertyTree\PropertyTree_ww.h" />
     <ClInclude Include="PropertyTree\wwDrawContext.h" />
@@ -587,7 +588,6 @@
     <ClCompile Include="ProgressBar.cpp" />
     <ClCompile Include="PropertyTree\wwDrawContext.cpp" />
     <ClCompile Include="PropertyTree\PropertyRowBitVector.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DLLRelease|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">true</ExcludedFromBuild>

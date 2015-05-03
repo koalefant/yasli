@@ -826,5 +826,9 @@ void PropertyTree::serialize(Archive& ar)
 	::PropertyTree::serialize(ar);
 }
 
+FORCE_SEGMENT(PropertyRowBitVector)
+
 }
+
+
 // vim:ts=4 sw=4:

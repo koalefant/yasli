@@ -30,6 +30,7 @@ class QPainter;
 namespace property_tree { 
 struct KeyEvent; 
 class IMenu;
+class InplaceWidget;
 }
 using property_tree::KeyEvent;
 
@@ -37,7 +38,6 @@ using std::vector;
 class PropertyTree;
 class PropertyRow;
 class PropertyTreeModel;
-class InplaceWidget;
 
 enum ScanResult {
 	SCAN_FINISHED, 
@@ -205,7 +205,7 @@ public:
 	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
 
 	virtual void redraw(IDrawContext& context);
-	virtual InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
+	virtual property_tree::InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
 
 	virtual bool isContainer() const{ return false; }
 	virtual bool isPointer() const{ return false; }

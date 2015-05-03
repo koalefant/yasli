@@ -36,7 +36,7 @@ bool PropertyRowString::assignTo(yasli::wstring& str)
     return true;
 }
 
-InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
 {
 	return tree->ui()->createStringWidget(this);
 }

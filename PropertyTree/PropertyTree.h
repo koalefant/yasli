@@ -12,7 +12,6 @@ class PropertyTreeModel;
 class PropertyTreeModel;
 class PropertyRow;
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
-class InplaceWidget;
 class PropertyTreeOperator;
 struct PropertyRowMenuHandler;
 class Entry;
@@ -21,6 +20,7 @@ namespace yasli { class Object; struct Context; }
 
 
 namespace property_tree{ 
+class InplaceWidget;
 struct Color;
 
 class IMenu;
@@ -165,7 +165,7 @@ protected:
 
 	bool activateRow(PropertyRow* row);
 
-	void setWidget(InplaceWidget* widget, PropertyRow* widgetRow);
+	void setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow);
 
 	void updateAttachedPropertyTree(bool revert);
 
@@ -177,7 +177,7 @@ private:
 	PropertyTree& operator=(const PropertyTree&);
 protected:
 	std::auto_ptr<PropertyTreeModel> model_;
-	std::auto_ptr<InplaceWidget> widget_; // in-place widget
+	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
 	PropertyRow* widgetRow_;
 	vector<PropertyRowMenuHandler*> menuHandlers_;
 	IUIFacade* ui_;

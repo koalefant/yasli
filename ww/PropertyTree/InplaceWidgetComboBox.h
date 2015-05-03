@@ -13,7 +13,7 @@ public:
 	}
 };
 
-class InplaceWidgetComboBox : public InplaceWidget, public sigslot::has_slots{
+class InplaceWidgetComboBox : public property_tree::InplaceWidget, public sigslot::has_slots{
 public:
 	InplaceWidgetComboBox(ComboBoxClientRow* client, ww::PropertyTree* tree)
 	: InplaceWidget(tree)

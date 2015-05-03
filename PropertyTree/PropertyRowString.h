@@ -23,7 +23,7 @@ public:
 	bool assignTo(yasli::wstring& str);
 	void setValue(const char* str);
 	void setValue(const wchar_t* str);
-	InplaceWidget* createWidget(PropertyTree* tree);
+	property_tree::InplaceWidget* createWidget(PropertyTree* tree);
 	yasli::string valueAsString() const override;
 	yasli::wstring valueAsWString() const override { return value_; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }

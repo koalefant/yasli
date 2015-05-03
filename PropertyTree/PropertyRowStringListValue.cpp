@@ -26,7 +26,7 @@ using yasli::StringListValue;
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
 
-InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
 {
 	return tree->ui()->createComboBox(this);
 }
@@ -34,7 +34,7 @@ InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 
-InplaceWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
 {
 	return tree->ui()->createComboBox(this);
 }

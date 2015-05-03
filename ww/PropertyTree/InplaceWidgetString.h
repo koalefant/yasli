@@ -7,7 +7,7 @@
 #include "ww/PropertyTree.h"
 #include "yasli/Pointers.h"
 
-class InplaceWidgetString : public InplaceWidget, public sigslot::has_slots{
+class InplaceWidgetString : public property_tree::InplaceWidget, public sigslot::has_slots{
 public:
 	InplaceWidgetString(PropertyRowString* row, ww::PropertyTree* tree)
 	: InplaceWidget(tree)
