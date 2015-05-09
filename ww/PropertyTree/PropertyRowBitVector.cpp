@@ -65,7 +65,7 @@ PropertyRowBitVector::PropertyRowBitVector()
 	//YASLI_ASSERT(description_)
 }
 
-void PropertyRowBitVector::setValue(const yasli::Serializer& ser) 
+void PropertyRowBitVector::setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) 
 {
 	BitVectorWrapper* wrapper = ser.cast<BitVectorWrapper>();
 	flags_ = wrapper->value;

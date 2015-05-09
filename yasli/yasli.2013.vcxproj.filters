@@ -55,6 +55,9 @@
     <ClCompile Include="JSONOArchive.cpp">
       <Filter>archives\JSON</Filter>
     </ClCompile>
+    <ClCompile Include="decorators\BitFlags.cpp">
+      <Filter>decorators</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.h">
@@ -116,6 +119,9 @@
       <Filter>archives\JSON</Filter>
     </ClInclude>
     <ClInclude Include="decorators\Button.h">
+      <Filter>decorators</Filter>
+    </ClInclude>
+    <ClInclude Include="decorators\BitFlags.h">
       <Filter>decorators</Filter>
     </ClInclude>
   </ItemGroup>

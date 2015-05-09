@@ -52,6 +52,9 @@ MainWindow::MainWindow(ww::Application& app)
 	ww::Widget* createLogicEditor();
 	pages->add("Logic Editor", createLogicEditor());
 
+	ww::Widget* createCustomRows();
+	pages->add("Custom Rows & Decorators", createCustomRows());
+
 	ww::Widget* createDigestSample();
 	pages->add("Digests", createDigestSample());
 

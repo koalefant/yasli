@@ -272,6 +272,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Example.cpp" />
+    <ClCompile Include="ExampleCustomRows.cpp" />
     <ClCompile Include="ExampleDigest.cpp" />
     <ClCompile Include="ExampleLogicEditor.cpp" />
     <ClCompile Include="ExampleTable.cpp" />

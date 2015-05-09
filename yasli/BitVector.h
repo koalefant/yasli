@@ -31,7 +31,7 @@ private:
 };
 
 template<class Enum>
-bool serialize(yasli::Archive& ar, yasli::BitVector<Enum>& value, const char* name, const char* label);
+bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label);
 
 }
 

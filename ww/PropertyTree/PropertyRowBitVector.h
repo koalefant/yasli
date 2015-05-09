@@ -25,7 +25,7 @@ public:
 	void serializeValue(yasli::Archive& ar) override;
 	bool assignTo(const yasli::Serializer& ser) const override;
 	yasli::string valueAsString() const override{ return valueAlt_; }
-	void setValue(const yasli::Serializer& ser);
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override;
 	const yasli::EnumDescription* description() { return description_; }
 	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
