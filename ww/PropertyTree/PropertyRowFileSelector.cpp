@@ -10,9 +10,11 @@
 #include "StdAfx.h"
 #include "ww/Serialization.h"
 #include "ww/PropertyTree.h"
-#include "ww/PropertyTreeModel.h"
-#include "ww/PropertyDrawContext.h"
-#include "ww/PropertyRowImpl.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/IDrawContext.h"
+#include "PropertyTree/IUIFacade.h"
+#include "PropertyTree/IMenu.h"
+#include "PropertyTree/PropertyRowImpl.h"
 #include "ww/FileDialog.h"
 #include "ww/PopupMenu.h"
 #include "ww/Files.h"
@@ -25,29 +27,29 @@
 
 namespace ww{
 
-class PropertyRowFileSelector : public PropertyRowImpl<FileSelector, PropertyRowFileSelector>, public has_slots{
+class PropertyRowFileSelector : public PropertyRowImpl<FileSelector>, public has_slots{
 	bool locked_;
 public:
 	PropertyRowFileSelector() : locked_(false) {}
 	bool activateOnAdd() const{ return true; }
-	bool onActivate(PropertyTree* tree, bool force);
-	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);
+	bool onActivate(::PropertyTree* tree, bool force) override;
+	bool onContextMenu(property_tree::IMenu& root, PropertyTree* tree);
 	void onMenuClear(PropertyTreeModel* model);
 
-	void redraw(const PropertyDrawContext& context)
+	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
-			context.drawEntry(" ... ", false, true);
+			context.drawEntry(context.widgetRect, " ... ", false, true, 0);
 		else if(userReadOnly())
 			context.drawValueText(pulledSelected(), valueAsString().c_str());
 		else
-			context.drawEntry(valueAsString().c_str(), true, false);
+			context.drawEntry(context.widgetRect, valueAsString().c_str(), true, false, 0);
 	}
 
 
-	string valueAsString() const{ return value().c_str(); }
+	yasli::string valueAsString() const override{ return value().c_str(); }
 
-	void serializeValue(yasli::Archive& ar){
+	void serializeValue(yasli::Archive& ar) override{
 		string fileName = value_.c_str();
 		ar(fileName, "value", "Value");
 		if(ar.isInput())
@@ -55,7 +57,7 @@ public:
 	}
 };
 
-bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowFileSelector::onActivate(::PropertyTree* tree, bool force)
 {
 	if(locked_)
 		return false;
@@ -76,7 +78,8 @@ bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 		    fileName = root[root.size() - 1] == '\\' ? root + fileName : root + '\\' + fileName;
     }
 
-	ww::FileDialog fileDialog(tree, options->save, masks, root.c_str(), fileName.c_str());
+	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(tree);
+	ww::FileDialog fileDialog(wwTree, options->save, masks, root.c_str(), fileName.c_str());
 	if(fileDialog.showModal()){
         tree->model()->rowAboutToBeChanged(this);
 		if(!root.empty()){
@@ -98,11 +101,27 @@ bool PropertyRowFileSelector::onActivate(PropertyTree* tree, bool force)
 	}
 }
 
-bool PropertyRowFileSelector::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
+struct FileSelectorMenuHandler : PropertyRowMenuHandler
 {
-	if(!root.empty())
+	FileSelectorMenuHandler(PropertyRowFileSelector* row, PropertyTreeModel* model) : row(row), model(model) {}
+	
+	void onMenuClear()
+	{
+		row->onMenuClear(model);
+	}
+
+	PropertyRowFileSelector* row;
+	PropertyTreeModel* model;
+};
+
+bool PropertyRowFileSelector::onContextMenu(property_tree::IMenu& root, PropertyTree* tree)
+{
+	if(!root.isEmpty())
 		root.addSeparator();
-	root.add(TRANSLATE("Clear"), tree->model()).connect(this, &PropertyRowFileSelector::onMenuClear);
+
+	FileSelectorMenuHandler* handler = new FileSelectorMenuHandler(this, tree->model());
+	root.addAction(TRANSLATE("Clear"))->signalTriggered.connect(handler, &FileSelectorMenuHandler::onMenuClear);
+	tree->addMenuHandler(handler);
 	return __super::onContextMenu(root, tree);
 }
 

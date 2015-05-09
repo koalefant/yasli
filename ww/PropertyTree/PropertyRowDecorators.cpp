@@ -14,29 +14,37 @@
 #include "ww/Decorators.h"
 #include "PropertyTree/PropertyTree.h"
 #include "PropertyTree/IDrawContext.h"
-#include "PropetryTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyTreeModel.h"
 #include "ww/Win32/Window32.h"
 #include "ww/Win32/Drawing.h"
 #include "ww/Win32/Rectangle.h"
 #include "ww/Unicode.h"
+#include "ww/PropertyTree/wwDrawContext.h"
+#include "ww/SafeCast.h"
 #include "gdiplusUtils.h"
 #include "yasli/decorators/Button.h"
 
+
+namespace ww {
+	DECLARE_SEGMENT(PropertyRowDecorators)
+}
+
 namespace property_tree{
 
-DECLARE_SEGMENT(PropertyRowDecorators)
+using ww::NotDecorator;
+
 
 // ------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------
 
-class PropertyRowNot : public PropertyRowImpl<NotDecorator, PropertyRowNot>{
+class PropertyRowNot : public PropertyRowImpl<NotDecorator>{
 public:
-	bool onActivate(PropertyTree* tree, bool force);
-	void redraw(const IDrawContext& context);
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	string valueAsString() const { return value_ ? label() : ""; }
-	virtual int widgetSizeMin() const{ return ICON_SIZE; }
+	bool onActivate(PropertyTree* tree, bool force) override;
+	void redraw(IDrawContext& context) override;
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
+	yasli::string valueAsString() const override{ return value_ ? label() : ""; }
+	int widgetSizeMin(const PropertyTree* tree) const override{ return 16; }
 };
 
 bool PropertyRowNot::onActivate(PropertyTree* tree, bool force)
@@ -47,22 +55,25 @@ bool PropertyRowNot::onActivate(PropertyTree* tree, bool force)
 	return true;
 }
 
-void PropertyRowNot::redraw(const IDrawContext& context)
-{
-	Win32::drawNotCheck(context.graphics, gdiplusRect(context.widgetRect), value());
+void PropertyRowNot::redraw(IDrawContext& context)
+{	
+	if (property_tree::wwDrawContext* x = ww::safe_cast<property_tree::wwDrawContext*>(&context))
+		Win32::drawNotCheck(x->graphics, Gdiplus::Rect(context.widgetRect.x, context.widgetRect.y, context.widgetRect.width(), context.widgetRect.height()), value());
 }
 
 REGISTER_PROPERTY_ROW(NotDecorator, PropertyRowNot);
 
 // ---------------------------------------------------------------------------
-//
-class PropertyRowRadio : public PropertyRowImpl<RadioDecorator, PropertyRowRadio>{
+
+using ww::RadioDecorator;
+
+class PropertyRowRadio : public PropertyRowImpl<RadioDecorator>{
 public:
-	bool onActivate(PropertyTree* tree, bool force);
-	void redraw(const IDrawContext& context);
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	string valueAsString() const { return value() ? label() : ""; }
-	int widgetSizeMin() const{ return ICON_SIZE; }
+	bool onActivate(PropertyTree* tree, bool force) override;
+	void redraw(IDrawContext& context) override;
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
+	yasli::string valueAsString() const override{ return value() ? label() : ""; }
+	int widgetSizeMin(const PropertyTree*) const override{ return 16; }
 };
 
 bool PropertyRowRadio::onActivate(PropertyTree* tree, bool force)
@@ -73,9 +84,10 @@ bool PropertyRowRadio::onActivate(PropertyTree* tree, bool force)
 	return true;
 }
 
-void PropertyRowRadio::redraw(const IDrawContext& context)
+void PropertyRowRadio::redraw(IDrawContext& context)
 {
-	Win32::drawRadio(context.graphics, gdiplusRect(context.widgetRect), value());
+	if (property_tree::wwDrawContext* x = ww::safe_cast<property_tree::wwDrawContext*>(&context))
+		Win32::drawRadio(x->graphics, Gdiplus::Rect(context.widgetRect.x, context.widgetRect.y, context.widgetRect.width(), context.widgetRect.height()), value());
 }
 
 REGISTER_PROPERTY_ROW(RadioDecorator, PropertyRowRadio);

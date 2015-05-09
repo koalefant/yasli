@@ -91,11 +91,11 @@ public:
 	virtual void drawSelection(const Rect& rect, bool inlinedRow) override;
 	virtual void drawValueText(bool highlighted, const char* text) override;
 
+	Gdiplus::Graphics* graphics;
 private:
 	Gdiplus::Font* convertFont(Font font);
 
 	ww::PropertyTree* tree_;
-	Gdiplus::Graphics* graphics;
 };
 
 }
