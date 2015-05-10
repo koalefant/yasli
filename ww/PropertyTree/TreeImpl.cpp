@@ -302,7 +302,10 @@ void DragController::drawOver(HDC dc)
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
 		const int tickSize = 4;
-		property_tree::Rect hoveredRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize(), 0, 0, 0);
+		property_tree::Point offset = treeImpl_->tree()->pointToRootSpace(property_tree::Point(0, 0));
+		int ox = offset.x();
+		int oy = offset.y();
+		property_tree::Rect hoveredRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize() - ox, -oy, -ox, -oy);
 
 		if(!before_){ // previous
 			RECT rect = { hoveredRect.left() - 1 , hoveredRect.bottom() - 1, hoveredRect.right() + 1, hoveredRect.bottom() + 1 };
