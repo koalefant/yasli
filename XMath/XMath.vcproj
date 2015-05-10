@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="8,00"
 	Name="XMath"
 	ProjectGUID="{2A528448-DC07-42A7-BF07-E12CB130145C}"
 	RootNamespace="XMath1"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -173,7 +172,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(ProjectDir)..\;$(ProjectDir)..\..\Yasli"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -211,6 +210,133 @@
 			Name="Release|x64"
 			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
 			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			ConfigurationType="4"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(ProjectDir)..\;$(ProjectDir)..\..\Yasli"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseStatic|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(ProjectDir)..\;$(ProjectDir)..\..\Yasli"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseStatic|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -297,6 +423,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\BugslayerUtil.h"
@@ -315,6 +449,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -349,6 +491,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\DiagAssert.h"
@@ -367,6 +517,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -397,6 +555,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\MemDumperValidator.h"
@@ -419,6 +585,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -457,6 +631,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\WarningsOff.h"
@@ -479,6 +661,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -604,6 +794,22 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleaseStatic|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleaseStatic|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

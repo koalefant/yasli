@@ -46,6 +46,7 @@ FEB '99 - Updated the CrashHandler code to work on Win9x.
 //////////////////////////////////////////////////////////////////////*/
 // If windows.h has not yet been included, include it now.
 #ifndef _INC_WINDOWS
+#define _WIN32_WINNT 0x0400
 #include <windows.h>
 #endif
 

@@ -46,7 +46,7 @@ public:
 	int height() const{ return height_; }
 
 	const char* const* source() const { return source_;  }
-	int lineCount() const { return lineCount_;  }
+	int lineCount() const { return (int)lineCount_;  }
 
 	void set(const char* const* source, size_t lineCount)
 	{

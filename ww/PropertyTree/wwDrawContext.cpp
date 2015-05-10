@@ -486,7 +486,7 @@ void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFla
 	}
 
 	std::wstring wstr = ww::toWideChar(text);
-	graphics->DrawString( wstr.c_str(), wstr.size(), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
+	graphics->DrawString( wstr.c_str(), (int)wstr.size(), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
 
 

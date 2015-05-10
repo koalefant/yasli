@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="8,00"
 	Name="wWidgets"
 	ProjectGUID="{18632F7A-290E-B902-7C03-72FB0C12DE45}"
 	RootNamespace="wWidgets"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -45,13 +44,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				AssemblerOutput="0"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
@@ -76,8 +75,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/wWidgetsDbg.pdb"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/wWidgetsDllDbg.lib"
 				TargetMachine="1"
 			/>
@@ -98,6 +95,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -130,13 +130,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				AssemblerOutput="0"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
@@ -161,8 +161,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/wWidgetsDbg.pdb"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/wWidgetsDllDbg.lib"
 				TargetMachine="17"
 			/>
@@ -183,6 +181,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -213,11 +214,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -243,8 +244,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -264,6 +263,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -295,11 +297,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WW_DLL;WW_EXPORTED"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -325,8 +327,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -346,6 +346,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -377,13 +380,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -449,13 +452,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -519,11 +522,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -587,11 +590,146 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="gdiplus.lib"
+				OutputFile="$(OutDir)/wWidgets.lib"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
+				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="gdiplus.lib"
+				OutputFile="$(OutDir)/wWidgets.lib"
+				AdditionalLibraryDirectories=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)..;$(ProjectDir)..\..\yasli;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(IntDir)/$(ProjectName)/$(TargetName).pch"
 				ProgramDataBaseFileName="$(OutDir)\$(ProjectName).pdb"
 				WarningLevel="3"
@@ -767,6 +905,22 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\HLine.h"
@@ -930,183 +1084,27 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\Workspace.h"
 					>
 				</File>
-			</Filter>
-			<Filter
-				Name="PropertyTree"
-				>
-				<File
-					RelativePath=".\PropertyDrawContext.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyDrawContext.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyIArchive.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyIArchive.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyOArchive.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyOArchive.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyRow.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyRowField.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyRowField.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyRowIcon.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTree.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTree.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTreeModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTreeModel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTreeOperator.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyTreeOperator.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TreeImpl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TreeImpl.h"
-					>
-				</File>
-				<Filter
-					Name="PropertyRows"
-					>
-					<File
-						RelativePath=".\PropertyRow.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowBitVector.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowBitVector.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowBool.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowBool.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowColor.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowContainer.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowContainer.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowDecorators.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowFileSelector.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowHotkey.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowImpl.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowNumeric.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowNumeric.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowObject.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowObject.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowPointer.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowPointer.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowSlider.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowString.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowString.h"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowStringListValue.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\PropertyRowStringListValue.h"
-						>
-					</File>
-				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1237,19 +1235,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Color.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Color.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ConstStringList.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ConstStringList.h"
+				RelativePath=".\Color_ww.cpp"
 				>
 			</File>
 			<File
@@ -1325,11 +1315,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Unicode.cpp"
+				RelativePath=".\Unicode.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Unicode.h"
+				RelativePath=".\Unicode_ww.cpp"
 				>
 			</File>
 			<File
@@ -1495,6 +1485,22 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Window.h"
@@ -1556,6 +1562,568 @@
 				RelativePath=".\VSplitter.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="PropertyTree"
+			>
+			<File
+				RelativePath=".\PropertyTree\InplaceWidgetComboBox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\InplaceWidgetString.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\PropertyTree_ww.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\PropertyTree_ww.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\TreeImpl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\TreeImpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\wwDrawContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\wwDrawContext.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\wwUIFacade.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyTree\wwUIFacade.h"
+				>
+			</File>
+			<Filter
+				Name="ww-specific Rows"
+				>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowBitVector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowBitVector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowColor_ww.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowDecorators.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowFileSelector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowHotkey.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyTree\PropertyRowIcon_ww.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Shared Rows"
+				>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowBool.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowBool.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowColor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowColor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowContainer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowContainer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowField.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowField.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowHorizontalLine.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowIconXPM.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowImpl.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowNumber.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowNumber.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowNumberField.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowNumberField.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowObject.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowObject.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowPointer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowPointer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowString.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowString.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowStringListValue.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRowStringListValue.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Shared"
+				>
+				<File
+					RelativePath="..\PropertyTree\Color.cpp"
+					>
+					<FileConfiguration
+						Name="DLLDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLDebug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Color.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\ConstStringList.cpp"
+					>
+					<FileConfiguration
+						Name="DLLDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLDebug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\ConstStringList.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Factory.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\IDrawContext.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\IMenu.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\IUIFacade.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\MathUtils.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyIArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyIArchive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyOArchive.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyOArchive.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRow.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyRow.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTree.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTree.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTreeMenuHandler.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTreeModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTreeModel.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTreeOperator.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\PropertyTreeOperator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Rect.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Serialization.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\sigslot.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\TreeConfig.h"
+					>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Unicode.cpp"
+					>
+					<FileConfiguration
+						Name="DLLDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLDebug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DLLRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseStatic|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\PropertyTree\Unicode.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\labels.txt"
@@ -1626,6 +2194,22 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="ReleaseStatic|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

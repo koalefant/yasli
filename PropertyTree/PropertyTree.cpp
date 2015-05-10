@@ -1119,7 +1119,6 @@ void PropertyTree::setArchiveContext(yasli::Context* lastContext)
 }
 
 PropertyTree::PropertyTree(const PropertyTree&)
-: PropertyTree(0)
 {
 }
 

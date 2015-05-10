@@ -66,7 +66,15 @@ Output clamp(Input value, Output min, Output max)
 	return Output(value);
 }
 
-template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, std::numeric_limits<Out>::lowest(), std::numeric_limits<Out>::max()); }
+// workaround for VS2005 missing numeric_limits<>::lowest()
+inline float limit_min(float) { return -FLT_MAX; }
+inline float limit_max(float) { return FLT_MAX; }
+inline double limit_min(double) { return -DBL_MAX; }
+inline double limit_max(double) { return DBL_MAX; }
+template<class T> T limit_min(T) { return std::numeric_limits<T>::min(); }
+template<class T> T limit_max(T) { return std::numeric_limits<T>::max(); }
+
+template<class Out, class In> void clampToType(Out* out, In value) { *out = clamp(value, limit_min((Out)value), limit_max((Out)value)); }
 
 static bool isDigit(int ch) 
 {
@@ -125,10 +133,10 @@ class PropertyRowNumber : public PropertyRowNumberField{
 public:
 	PropertyRowNumber()
 	{
-		softMin_ = std::numeric_limits<Type>::lowest();
-		softMax_ = std::numeric_limits<Type>::max();
-		hardMin_ = std::numeric_limits<Type>::lowest();
-		hardMax_ = std::numeric_limits<Type>::max();
+		softMin_ = limit_min((Type)0);
+		softMax_ = limit_max((Type)0);
+		hardMin_ = limit_min((Type)0);
+		hardMax_ = limit_max((Type)0);
 	}
 
 	void setValue(Type value)
@@ -190,7 +198,7 @@ public:
 
 	void incrementLog(float screenFraction) override
 	{
-		bool bothSoftLimitsSet = (std::numeric_limits<Type>::lowest() == 0 || softMin_ != std::numeric_limits<Type>::lowest()) && softMax_ != std::numeric_limits<Type>::max();
+		bool bothSoftLimitsSet = (limit_min((Type)0) == 0 || softMin_ != limit_min((Type)0)) && softMax_ != limit_max((Type)0);
 
 		if (bothSoftLimitsSet)
 		{

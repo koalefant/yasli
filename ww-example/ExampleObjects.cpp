@@ -192,7 +192,7 @@ public:
 			outlineTree_->setUndoEnabled(true, false);
 			outlineTree_->setShowContainerIndices(false);
 			outlineTree_->setExpandLevels(2);
-			objectsData.signalChanged_.connect(outlineTree_, &PropertyTree::revert);
+			objectsData.signalChanged_.connect(this, &ObjectsWidget::onDataChanged);
 			vbox->add(outlineTree_, PACK_FILL);
 
 			ww::Button* button = new ww::Button("Generate New Tree", 2);
@@ -210,6 +210,11 @@ public:
 
 		outlineTree_->attachPropertyTree(propertyTree);
 		outlineTree_->attach(yasli::Serializer(objectsData));
+	}
+
+	void onDataChanged()
+	{
+		outlineTree_->revert();
 	}
 
 	void onPropertyChanged(const yasli::Object& object)
