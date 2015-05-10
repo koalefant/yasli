@@ -49,8 +49,8 @@ MainWindow::MainWindow(ww::Application& app)
 
 	ww::TabPages* pages = new ww::TabPages();
 
-	ww::Widget* createLogicEditor();
-	pages->add("Logic Editor", createLogicEditor());
+	ww::Widget* createPolymorphicTree();
+	pages->add("Polymorphic Tree", createPolymorphicTree());
 
 	ww::Widget* createCustomRows();
 	pages->add("Custom Rows & Decorators", createCustomRows());

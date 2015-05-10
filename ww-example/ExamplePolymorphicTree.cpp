@@ -223,7 +223,7 @@ private:
 };
 YASLI_CLASS(ActionBase, ActionSmile, "Smile");
 
-struct LogicEditorData
+struct PolymorphicTreeData
 {
 	void serialize(Archive& ar)
 	{
@@ -232,7 +232,7 @@ struct LogicEditorData
 		ar(action_, "action", "<Action");
 	}
 
-	LogicEditorData()
+	PolymorphicTreeData()
 	{
 		ConditionSwitch* cond = new ConditionSwitch();
 		cond->children_.push_back(new ConditionCheckFileAttributes());
@@ -250,7 +250,7 @@ struct LogicEditorData
 	SharedPtr<ActionBase> action_;
 	} conditionEditorData;
 
-ww::Widget* createLogicEditor()
+ww::Widget* createPolymorphicTree()
 {
 	ww::PropertyTree* propertyTree = new ww::PropertyTree();
 
