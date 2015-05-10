@@ -16,6 +16,7 @@
 #include "yasli/Assert.h"
 #include "Win32/Drawing.h"
 #include "Win32/Window32.h"
+#include "yasli/decorators/IconXPM.h"
 #include "PropertyTree.h"
 #include "PropertyTree/Color.h"
 #include "Color.h"
@@ -539,22 +540,23 @@ void wwDrawContext::drawEntry(const Rect& rect, const char* text, bool pathEllip
 void wwDrawContext::drawColor(const Rect& _rect, const Color& _color)
 {
 	using Gdiplus::Color;
-	Rect rect = _rect.adjusted(1, 0, -1, 0);
+	Rect rect = _rect.adjusted(1, 0, -1, -1);
 
-	Color color(_color.r, _color.g, _color.b, _color.a);
+	Color color(_color.a, _color.r, _color.g, _color.b);
 	SolidBrush brush(color);
 	Color penColor;
 	penColor.SetFromCOLORREF(GetSysColor(COLOR_3DSHADOW));
 
 	HatchBrush hatchBrush(HatchStyleSmallCheckerBoard, Color::Black, Color::White);
 
-	if (rect.width() > ICON_SIZE * 2 + 5){
-		Rect rectb(rect.right() - ICON_SIZE - 3, rect.top(), rect.right(), rect.bottom());
+	enum { CHECKBOARD_RECT_WIDTH = 22 };
+	if (rect.width() > CHECKBOARD_RECT_WIDTH * 2 + 5){
+		Rect rectb(rect.right() - CHECKBOARD_RECT_WIDTH - 3, rect.top(), CHECKBOARD_RECT_WIDTH + 3, rect.height());
 		fillRoundRectangle(graphics, &hatchBrush, gdiplusRect(rectb), Color(0, 0, 0, 0), 6);
 		fillRoundRectangle(graphics, &brush, gdiplusRect(rectb), penColor, 6);
 
 		SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
-		Rect recta(rect.left(), rect.top(), rect.right() - ICON_SIZE - 5, rect.bottom());
+		Rect recta(rect.left(), rect.top(), rect.width() - CHECKBOARD_RECT_WIDTH - 5, rect.height());
 		fillRoundRectangle(graphics, &brushb, gdiplusRect(recta), penColor, 6);
 
 	}
@@ -583,6 +585,13 @@ void wwDrawContext::drawRowLine(const Rect& _rect)
 
 void wwDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
 {
+	ww::Icon wwIcon;
+	wwIcon.set(icon.source, icon.lineCount);
+	Gdiplus::Bitmap* bitmap = DrawingCache::get()->getBitmapForIcon(wwIcon);
+	YASLI_ESCAPE(bitmap != 0, return);
+	int x = rect.left() + (rect.width() - wwIcon.width()) / 2;
+	int y = rect.top() + (rect.height() - wwIcon.height()) / 2;
+	graphics->DrawImage(bitmap, x, y);
 }
 
 void wwDrawContext::drawLabel(const char* text, Font _font, const Rect& rect, bool selected)

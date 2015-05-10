@@ -830,6 +830,8 @@ FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)
 FORCE_SEGMENT(PropertyRowFileSelector)
 FORCE_SEGMENT(PropertyRowHotkey)
+FORCE_SEGMENT(PropertyRowIconWW)
+FORCE_SEGMENT(PropertyRowColorWW)
 
 }
 

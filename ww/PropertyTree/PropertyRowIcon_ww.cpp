@@ -20,9 +20,9 @@
 #include "ww/Color.h"	
 #include "ww/Icon.h"
 #include "gdiplusUtils.h"
+#include "yasli/decorators/IconXPM.h"
 
-namespace property_tree {
-
+namespace ww {
 class PropertyRowIcon : public PropertyRow{
 public:
 	static const bool Custom = true;
@@ -32,68 +32,61 @@ public:
 		return false;
 	}
 
-	void redraw(const IDrawContext& context)
+	void redraw(IDrawContext& context)
 	{
-		Rect rect = context.widgetRect;
+		property_tree::Rect rect = context.widgetRect;
 		context.drawIcon(rect, icon_);
 	}
 
-	bool isLeaf() const{ return true; }
-	bool isStatic() const{ return false; }
-	bool isSelectable() const{ return false; }
+	bool isLeaf() const override{ return true; }
+	bool isStatic() const override{ return false; }
+	bool isSelectable() const override{ return false; }
 
-	bool onActivate(PropertyTree* tree, bool force)
+	bool onActivate(::PropertyTree* tree, bool force) override
 	{
-
 		return false;
 	}
-	void setValue(const Serializer& ser) override {
-		YASLI_ESCAPE(ser.size() == sizeof(Icon), return);
-		icon_ = *(Icon*)(ser.pointer());
+	void setValueAndContext(const Serializer& ser, yasli::Archive& ar) override {
+		if (Icon* icon = ser.cast<Icon>()) {
+			icon_ = yasli::IconXPM(icon->source(), icon->lineCount());
+		}
 	}
-	wstring valueAsWString() const{ return L""; }
+	yasli::string valueAsString() const override{ return ""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
-	PropertyRow* clone() const{
-		PropertyRowIcon* result = new PropertyRowIcon();
-		result->setNames(name_, label_, typeName_);
-		result->icon_ = icon_;
-		return cloneChildren(result, this);
-	}
-	void serializeValue(Archive& ar) {}
-	int widgetSizeMin() const{ return icon_.width() + 2; }
-	int height() const{ return icon_.height(); }
+	void serializeValue(Archive& ar) override{}
+	int widgetSizeMin(const ::PropertyTree* tree) const override{ return 16 + 2; }
+	int height() const{ return 16; }
 protected:
-	Icon icon_;
+	yasli::IconXPM icon_;
 };
 
-class PropertyRowIconToggle : public PropertyRowImpl<IconToggle, PropertyRowIconToggle>{
+class PropertyRowIconToggle : public PropertyRowImpl<IconToggle>{
 public:
-	static const bool Custom = true;
-
-	void redraw(const IDrawContext& context)
+	void redraw(IDrawContext& context)
 	{
 		Icon& icon = value().value_ ? value().iconTrue_ : value().iconFalse_;
-		context.drawIcon(context.widgetRect, icon);
+		yasli::IconXPM xpmIcon(icon.source(), icon.lineCount());
+		context.drawIcon(context.widgetRect, xpmIcon);
 	}
 
 	bool isLeaf() const{ return true; }
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return true; }
-	bool onActivate(PropertyTree* tree, bool force)
+	bool onActivate(::PropertyTree* tree, bool force)
 	{
 		tree->model()->rowAboutToBeChanged(this);
 		value().value_ = !value().value_;
 		tree->model()->rowChanged(this);
 		return true;
 	}
-	wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
-	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
+	yasli::string valueAsString() const override{ return value().value_ ? "true" : "false"; }
+	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 
-	int widgetSizeMin() const{ return value().iconFalse_.width() + 1; }
+	int widgetSizeMin(const ::PropertyTree* tree) const override{ return value().iconFalse_.width() + 1; }
 	int height() const{ return value().iconFalse_.height(); }
 };
 
 REGISTER_PROPERTY_ROW(Icon, PropertyRowIcon); 
 REGISTER_PROPERTY_ROW(IconToggle, PropertyRowIconToggle); 
-DECLARE_SEGMENT(PropertyRowIcon)
+DECLARE_SEGMENT(PropertyRowIconWW)
 }

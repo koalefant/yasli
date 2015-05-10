@@ -35,8 +35,8 @@ public:
 	, height_(0)
 	{
 		set(xpm, Size);
-		YASLI_ESCAPE(sscanf_s(xpm[0], "%d %d", &width_, &height_) == 2, return);
 	}
+
 
 	bool getImage(RGBAImage* out) const;
 	void serialize(yasli::Archive& ar) {}
@@ -44,12 +44,20 @@ public:
 
 	int width() const{ return width_; }
 	int height() const{ return height_; }
-private:
+
+	const char* const* source() const { return source_;  }
+	int lineCount() const { return lineCount_;  }
+
 	void set(const char* const* source, size_t lineCount)
 	{
 		source_ = source;
 		lineCount_ = lineCount;
+		if (!source_ || sscanf_s(source[0], "%d %d", &width_, &height_) != 2) {
+			width_ = 0;
+			height_ = 0;
+		}
 	}
+private:
 
 	const char* const* source_;
 	size_t lineCount_;

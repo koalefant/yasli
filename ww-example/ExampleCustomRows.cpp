@@ -10,6 +10,7 @@ using std::vector;
 #include "ww/Decorators.h"
 #include "ww/FileSelector.h"
 #include "ww/KeyPress.h"
+#include "PropertyTree/Color.h"
 
 #include "yasli/BitVector.h" 
 #include "yasli/decorators/BitFlags.h"
@@ -43,61 +44,53 @@ struct CustomRows
 	int bitFlags;
 	bool notDecorator;
 	ww::KeyPress hotkey;
+	ww::Color wwColor;
 
-	bool radio1;
-	bool radio2;
-	bool radio3;
+	bool radio;
+	bool wwIconToggle;
 
 	yasli::string fileSelector;
 	bool buttonState;
+	property_tree::Color propertyTreeColor;
 
 	CustomRows()
 	: bitFlags(FLAG_FIRST | FLAG_THIRD)
 	, bitVector(FLAG_FIRST | FLAG_THIRD)
 	, notDecorator(true)
-	, radio1(false)
-	, radio2(true)
-	, radio3(false)
+	, radio(true)
 	, fileSelector("test_file.txt")
 	, buttonState(false)
+	, wwIconToggle(false)
+	, wwColor(0, 255, 0, 128)
+	, propertyTreeColor(255, 0, 0, 128)
 	{
 
 	}
 
 	void serialize(Archive& ar)
 	{
-		if (ar.openBlock("wwSpecific", "Rows and Decorators specific to wWidgets")) {
-			// old way of serializing bit flags
-			ar(bitVector, "bitVector", "Bit Vector");
+		// old way of serializing bit flags
+		ar(bitVector, "bitVector", "BitVector<>");
 
-			ar(ww::NotDecorator(notDecorator), "notDecorator", "Not Decorator");
+		ar(ww::NotDecorator(notDecorator), "notDecorator", "ww::NotDecorator");
 
-			if (ar.openBlock("radioGroup", "+Radio Group")) {
-				ar(ww::RadioDecorator(radio1), "radio1", "Option 1");
-				ar(ww::RadioDecorator(radio2), "radio2", "Option 2");
-				ar(ww::RadioDecorator(radio3), "radio3", "Option 3");
-				ar.closeBlock();
-			}
+		ar(ww::RadioDecorator(radio), "radio1", "ww::RadioDecorator");
 
-			static ww::FileSelector::Options options("*.txt", false, ".");
-			ar(ww::FileSelector(fileSelector, options), "fileSelector", "File Selector");
-			ar(hotkey, "hotkey", "Hotkey");
+		static ww::FileSelector::Options options("*.txt", false, ".");
+		ar(ww::FileSelector(fileSelector, options), "fileSelector", "ww::FileSelector");
+		ar(hotkey, "hotkey", "ww::KeyPress");
+		ar(wwColor, "wwColor", "ww::Color");
+		ar(ww::Icon(iconFavourite), "wwIcon", "ww::Icon");
+		ar(ww::IconToggle(wwIconToggle, iconFavourite, iconFavouriteDisabled), "wwIconToggle", "ww::IconToggle");
 
-			ar.closeBlock();
-		}
+		ar(yasli::HorizontalLine(), "yasliHline", "<yasli::HorizontalLine");
 
+		// new way to serialize bit flags, less intrusive
+		ar(yasli::BitFlags<Flags>(bitFlags), "bitFlags", "yasli::BitFlags");
+			
+		ar(propertyTreeColor, "propertyTreeColor", "property_tree::Color");
 
-		ar(yasli::HorizontalLine(), "hline", "<");
-
-		if (ar.openBlock("shared", "Shared")) {
-			// new way to serialize bit flags, less intrusive
-			ar(yasli::BitFlags<Flags>(bitFlags), "bitFlags", "Bit Flags");
-
-			yasli::Button button(buttonState ? "Button: Play" : "Button: Pause");
-			ar(button, "button", "<");
-			if (button.pressed)
-				buttonState = !buttonState;
-		}
+		ar(yasli::Button("yasli::Button"), "yasliButton", "<");
 	}
 } customRows;
 

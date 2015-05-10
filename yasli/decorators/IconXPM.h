@@ -28,6 +28,12 @@ struct IconXPM
 		lineCount = Size;
 	}
 
+	IconXPM(const char* const* source, int lineCount)
+	: source(source)
+	, lineCount(lineCount)
+	{
+	}
+
 	void serialize(Archive& ar) 	{}
 	bool operator<(const IconXPM& rhs) const { return source < rhs.source; }
 

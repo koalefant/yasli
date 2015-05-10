@@ -565,9 +565,6 @@
     <ClCompile Include="PropertyTree\TreeImpl.cpp">
       <Filter>PropertyTree</Filter>
     </ClCompile>
-    <ClCompile Include="PropertyTree\PropertyRowIcon.cpp">
-      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
-    </ClCompile>
     <ClCompile Include="PropertyTree\PropertyRowDecorators.cpp">
       <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
@@ -624,6 +621,9 @@
     </ClCompile>
     <ClCompile Include="..\PropertyTree\PropertyRowHorizontalLine.cpp">
       <Filter>PropertyTree\Shared Rows</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyTree\PropertyRowIcon_ww.cpp">
+      <Filter>PropertyTree\wWidgets PropertyRows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

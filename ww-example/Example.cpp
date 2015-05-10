@@ -37,7 +37,7 @@ TestData testData1;
 MainWindow::MainWindow(ww::Application& app)
 : app_(&app)
 {
-	setTitle("wWidgets: Example");
+	setTitle("wWidgets: PropertyTree Example");
 	setBorder(0);
 	setMinimizeable(true);
 	setResizeable(true);

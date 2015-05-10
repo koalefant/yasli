@@ -42,12 +42,11 @@ void fromColor(Color* out, Color color)
 template<class ColorType>
 class PropertyRowColor : public PropertyRowImpl<ColorType>{
 public:
-	static const bool Custom = true;
 	PropertyRowColor();
-	void redraw(const IDrawContext& context);
+	void redraw(IDrawContext& context) override;
 
-	bool activateOnAdd() const{ return true; }
-	bool onActivate(PropertyTree* tree, bool force);
+	bool activateOnAdd() const override{ return true; }
+	bool onActivate(PropertyTree* tree, bool force) override;
 	string valueAsString() const { 
 		char buf[64];
 		formatColor(buf, value_);
@@ -72,7 +71,7 @@ bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
 }
 
 template<class ColorType>
-void PropertyRowColor<ColorType>::redraw(const IDrawContext& context)
+void PropertyRowColor<ColorType>::redraw(IDrawContext& context)
 {
 	using namespace Gdiplus;
 	using Gdiplus::Color;
@@ -82,7 +81,7 @@ void PropertyRowColor<ColorType>::redraw(const IDrawContext& context)
 		return;
 	}
 
-	context.drawColor(context.rect, value());
+	context.drawColor(context.widgetRect, property_tree::Color(value().r, value().g, value().b, value().a));
 }
 
 template<class ColorType>
@@ -90,7 +89,7 @@ PropertyRowColor<ColorType>::PropertyRowColor()
 {
 }
 
-DECLARE_SEGMENT(PropertyRowColor)
+DECLARE_SEGMENT(PropertyRowColorWW)
 typedef PropertyRowColor<Color> PropertyRowWWColor;
 REGISTER_PROPERTY_ROW(Color, PropertyRowWWColor); 
 }
