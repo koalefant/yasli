@@ -9,9 +9,10 @@
 
 #include "StdAfx.h"
 
-#include "ww/PropertyRowImpl.h"
 #include "ww/PropertyTree.h"
-#include "ww/PropertyTreeModel.h"
+#include "PropertyTree/PropertyRowImpl.h"
+#include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/IMenu.h"
 
 #include "ww/HotkeyDialog.h"
 #include "ww/PopupMenu.h"
@@ -25,20 +26,21 @@
 
 namespace ww{
 
-class PropertyRowHotkey : public PropertyRowImpl<KeyPress, PropertyRowHotkey>, public has_slots{
+class PropertyRowHotkey : public PropertyRowImpl<KeyPress>{
 public:
-	bool onActivate(PropertyTree* tree, bool force);
-	bool onContextMenu(PopupMenuItem& root, PropertyTree* tree);
+	bool onActivate(::PropertyTree* tree, bool force) override;
+	bool onContextMenu(property_tree::IMenu& root, ::PropertyTree* tree) override;
 	void onMenuClear(PropertyTreeModel* model);
-	std::string valueAsString() const{ return value().toString(false); }
+	std::string valueAsString() const override{ return value().toString(false); }
 protected:
 };
 
-bool PropertyRowHotkey::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowHotkey::onActivate(::PropertyTree* tree, bool force)
 {
 	KeyPress& key = value();
 
-	ww::HotkeyDialog hotkeyDialog(tree, key);
+	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(tree);
+	ww::HotkeyDialog hotkeyDialog(wwTree, key);
 	if(hotkeyDialog.showModal() == RESPONSE_OK){
         tree->model()->rowAboutToBeChanged(this);
 		key = hotkeyDialog.get();
@@ -49,11 +51,24 @@ bool PropertyRowHotkey::onActivate(PropertyTree* tree, bool force)
 		return false;
 }
 
-bool PropertyRowHotkey::onContextMenu(PopupMenuItem& root, PropertyTree* tree)
+struct HotkeyMenuHandler : PropertyRowMenuHandler
 {
-	if(!root.empty())
+	PropertyRowHotkey* row;
+	::PropertyTree* tree;
+	HotkeyMenuHandler(PropertyRowHotkey* row, ::PropertyTree* tree) : tree(tree), row(row) {}
+
+	void onMenuClear()
+	{
+		row->onMenuClear(tree->model());
+	}
+};
+
+bool PropertyRowHotkey::onContextMenu(property_tree::IMenu& root, ::PropertyTree* tree)
+{
+	if(!root.isEmpty())
 		root.addSeparator();
-	root.add(TRANSLATE("Clear"), tree->model()).connect(this, &PropertyRowHotkey::onMenuClear);
+	HotkeyMenuHandler* handler = new HotkeyMenuHandler(this, tree);
+	root.addAction(TRANSLATE("Clear"))->signalTriggered.connect(handler, &HotkeyMenuHandler::onMenuClear);
 	return __super::onContextMenu(root, tree);
 }
 

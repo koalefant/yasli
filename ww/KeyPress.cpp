@@ -25,6 +25,7 @@ const char* toHex(unsigned char byte)
 }
 
 YASLI_ENUM_BEGIN(Key, "Key")
+YASLI_ENUM_VALUE(KEY_NONE				 , "None")
 YASLI_ENUM_VALUE(KEY_LBUTTON             , "LButton")
 YASLI_ENUM_VALUE(KEY_RBUTTON             , "RButton")
 YASLI_ENUM_VALUE(KEY_CANCEL              , "Cancel")

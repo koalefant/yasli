@@ -2,12 +2,14 @@
 #include <vector>
 using std::vector;
 
+#include "PropertyTree/IMenu.h"
 #include "ww/PropertyTree.h"
 #include "ww/Serialization.h"
 #include "ww/Color.h"
 #include "ww/Icon.h"
 #include "ww/Decorators.h"
 #include "ww/FileSelector.h"
+#include "ww/KeyPress.h"
 
 #include "yasli/BitVector.h" 
 #include "yasli/decorators/BitFlags.h"
@@ -40,12 +42,14 @@ struct CustomRows
 	yasli::BitVector<Flags> bitVector;
 	int bitFlags;
 	bool notDecorator;
+	ww::KeyPress hotkey;
 
 	bool radio1;
 	bool radio2;
 	bool radio3;
 
 	yasli::string fileSelector;
+	bool buttonState;
 
 	CustomRows()
 	: bitFlags(FLAG_FIRST | FLAG_THIRD)
@@ -55,6 +59,7 @@ struct CustomRows
 	, radio2(true)
 	, radio3(false)
 	, fileSelector("test_file.txt")
+	, buttonState(false)
 	{
 
 	}
@@ -76,6 +81,7 @@ struct CustomRows
 
 			static ww::FileSelector::Options options("*.txt", false, ".");
 			ar(ww::FileSelector(fileSelector, options), "fileSelector", "File Selector");
+			ar(hotkey, "hotkey", "Hotkey");
 
 			ar.closeBlock();
 		}
@@ -86,6 +92,11 @@ struct CustomRows
 		if (ar.openBlock("shared", "Shared")) {
 			// new way to serialize bit flags, less intrusive
 			ar(yasli::BitFlags<Flags>(bitFlags), "bitFlags", "Bit Flags");
+
+			yasli::Button button(buttonState ? "Button: Play" : "Button: Pause");
+			ar(button, "button", "<");
+			if (button.pressed)
+				buttonState = !buttonState;
 		}
 	}
 } customRows;

@@ -829,6 +829,7 @@ void PropertyTree::serialize(Archive& ar)
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)
 FORCE_SEGMENT(PropertyRowFileSelector)
+FORCE_SEGMENT(PropertyRowHotkey)
 
 }
 
