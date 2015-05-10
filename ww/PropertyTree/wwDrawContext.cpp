@@ -426,21 +426,12 @@ void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int bu
 
 	fillRoundRectangle(graphics, &brush, rt, gdiplusSysColor(COLOR_3DSHADOW), 4);
 
-	Gdiplus::Color textColor;
-	textColor.SetFromCOLORREF(!enabled ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
-	Gdiplus::SolidBrush textBrush(textColor);
-	RectF textRect( float(widgetRect.X), float(widgetRect.Y), float(widgetRect.Width), float(widgetRect.Height) );
-	if (!center) {
-		textRect.X += 4;
-		textRect.Width -= 5;
-	}		
-	StringFormat format;
-	format.SetAlignment(center ? StringAlignmentCenter : StringAlignmentNear);
-	format.SetLineAlignment(StringAlignmentCenter);
-	format.SetFormatFlags(StringFormatFlagsNoWrap);
-	format.SetTrimming(StringTrimmingNone);
-	std::wstring wstr = ww::toWideChar(text);
-	graphics->DrawString(wstr.c_str(), wstr.size(), font, textRect, &format, &textBrush);
+	ww::Color textColor;
+	textColor.setGDI(!enabled ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+	ww::Rect textRect = toWWRect(rect);
+	if (!center)
+		textRect.setLeft(textRect.left() + 4);
+	tree_->_drawRowValue(graphics, text, font, textRect, textColor, false, center);
 }
 
 void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font)
@@ -558,7 +549,6 @@ void wwDrawContext::drawColor(const Rect& _rect, const Color& _color)
 		SolidBrush brushb(Color(255, color.GetR(), color.GetG(), color.GetB()));
 		Rect recta(rect.left(), rect.top(), rect.width() - CHECKBOARD_RECT_WIDTH - 5, rect.height());
 		fillRoundRectangle(graphics, &brushb, gdiplusRect(recta), penColor, 6);
-
 	}
 	else{
 		fillRoundRectangle(graphics, &hatchBrush, gdiplusRect(rect), Color(0, 0, 0, 0), 6);

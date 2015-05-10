@@ -121,7 +121,7 @@ PropertyTree::PropertyTree(int border)
 
 	filterEntry_ = new FilterEntry(this);
 	filterEntry_->_setParent(this);
-	//filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
+	filterEntry_->signalChanged().connect(this, &PropertyTree::onFilterChanged);
 
 }
 #pragma warning(pop)
@@ -215,7 +215,7 @@ void PropertyTree::updateHeights()
 		rightBorder_ = rb;
 		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
 
-		size_.y_ = 0;
+		size_.y_ = area_.top();
 		model()->root()->adjustVerticalPosition(this, size_.y_);
 	}
 	updateScrollBar();

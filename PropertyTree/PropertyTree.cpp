@@ -1096,7 +1096,7 @@ PropertyRow* PropertyTree::rowByPoint(const Point& pt)
 
 Point PropertyTree::pointToRootSpace(const Point& point) const
 {
-	return Point(point.x() + offset_.x() - area_.left(), point.y() + offset_.y() - area_.top());
+	return Point(point.x() + offset_.x(), point.y() + offset_.y());
 }
 
 bool PropertyTree::toggleRow(PropertyRow* row)
