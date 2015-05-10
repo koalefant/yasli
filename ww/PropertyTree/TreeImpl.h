@@ -36,7 +36,6 @@ protected:
 	void drawRow(HDC dc);
 	void updateLayeredWindow();
 
-	bool useLayeredWindows_;
 	PropertyRow* row_;
 	Rect rect_;
 	TreeImpl* treeImpl_;

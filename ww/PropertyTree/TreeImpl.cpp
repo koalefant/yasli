@@ -63,19 +63,11 @@ namespace ww{
 #pragma warning(push)
 #pragma warning(disable: 4355) // 'this' : used in base member initializer list
 DragWindow::DragWindow(TreeImpl* treeImpl)
-: useLayeredWindows_(true)
-, treeImpl_(treeImpl)
+: treeImpl_(treeImpl)
 , offset_(0, 0)
 {
-	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
-	if(useLayeredWindows_){
-		exStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
-		WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
-	}
-	else{
-		Rect treeRect(0, 0, 100, 100);
-		WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, treeRect, 0, exStyle));
-	}
+	DWORD exStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT;
+	WW_VERIFY(create(L"", WS_POPUP | WS_DISABLED, Rect(0, 0, 320, 320), 0, exStyle));
 
 }
 #pragma warning(pop)
@@ -103,14 +95,9 @@ void DragWindow::setWindowPos(bool visible)
 
 void DragWindow::show()
 {
-	if(useLayeredWindows_){
-		updateLayeredWindow();
-		setWindowPos(true);
-		updateLayeredWindow();
-	}
-	else{
-		setWindowPos(true);
-	}
+	updateLayeredWindow();
+	setWindowPos(true);
+	updateLayeredWindow();
 }
 
 void DragWindow::move(int deltaX, int deltaY)
@@ -126,22 +113,21 @@ void DragWindow::hide()
 
 struct DrawRowVisitor
 {
-	DrawRowVisitor(HDC dc) : dc_(dc) {}
+	DrawRowVisitor(Gdiplus::Graphics* graphics) : graphics(graphics) {}
 
 	ScanResult operator()(PropertyRow* row, ::PropertyTree* tree, int index)
 	{
-		Gdiplus::Graphics graphics(dc_);
-		wwDrawContext context((PropertyTree*)tree, &graphics);
-		if (row->pulledUp()) {
-			row->drawRow(context, tree, index, false);
+		wwDrawContext context((PropertyTree*)tree, graphics);
+		if (row->pulledUp() || (row->parent() && row->parent()->pulledUp())) {
 			row->drawRow(context, tree, index, true);
+			row->drawRow(context, tree, index, false);
 		}
 
 		return SCAN_CHILDREN_SIBLINGS;
 	}
 
 protected:
-	HDC dc_;
+	Gdiplus::Graphics* graphics;
 };
 
 void DragWindow::drawRow(HDC dc)
@@ -149,28 +135,27 @@ void DragWindow::drawRow(HDC dc)
 	Rect entireRowRect(0, 0, rect_.width(), rect_.height());
 
 	HGDIOBJ oldBrush = ::SelectObject(dc, GetSysColorBrush(COLOR_BTNFACE));
-	HGDIOBJ oldPen = ::SelectObject(dc, GetStockObject(BLACK_PEN));
+	HGDIOBJ oldPen = ::SelectObject(dc, GetStockObject(WHITE_PEN));
 	Rectangle(dc, entireRowRect.left(), entireRowRect.top(), entireRowRect.right(), entireRowRect.bottom());
 	::SelectObject(dc, oldBrush);
 	::SelectObject(dc, oldPen);
 
 	Vect2 leftTop(row_->rect().left(), row_->rect().top());
-	SetViewportOrgEx(dc, -leftTop.x - treeImpl_->tree()->tabSize(), -leftTop.y, 0);
+	Gdiplus::Graphics graphics(dc);
+	SetViewportOrgEx(dc, (leftTop.x + treeImpl_->tree()->tabSize()), leftTop.y, 0);
 	int index = 0;
 	if (row_->parent())
 		index = row_->parent()->childIndex(row_);
-	Gdiplus::Graphics graphics(dc);
 	wwDrawContext context(treeImpl_->tree(), &graphics);
-	row_->drawRow(context, treeImpl_->tree(), index, false);
 	row_->drawRow(context, treeImpl_->tree(), index, true);
-	row_->scanChildren(DrawRowVisitor(dc), treeImpl_->tree());
+	row_->drawRow(context, treeImpl_->tree(), index, false);
+	row_->scanChildren(DrawRowVisitor(&graphics), treeImpl_->tree());
 	SetViewportOrgEx(dc, 0, 0, 0);
 }
 
 BOOL DragWindow::onMessageEraseBkgnd(HDC dc)
 {
-	return useLayeredWindows_ ? TRUE : FALSE;
-	return FALSE;
+	return TRUE;
 }
 
 void DragWindow::updateLayeredWindow()
@@ -178,7 +163,7 @@ void DragWindow::updateLayeredWindow()
 	BLENDFUNCTION blendFunction;
 	blendFunction.BlendOp = AC_SRC_OVER;
 	blendFunction.BlendFlags = 0;
-	blendFunction.SourceConstantAlpha = 192;
+	blendFunction.SourceConstantAlpha = 255;
 	blendFunction.AlphaFormat = 0;	
 
 	PAINTSTRUCT ps;
@@ -191,23 +176,13 @@ void DragWindow::updateLayeredWindow()
 		SIZE size = { rect_.width(), rect_.height() };
 		POINT point = { 0, 0 };
 		UpdateLayeredWindow(handle(), realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
-		SetLayeredWindowAttributes(handle(), 0, 64, ULW_ALPHA);
+		SetLayeredWindowAttributes(handle(), 0, 192, ULW_ALPHA);
 	}
 	EndPaint(handle(), &ps);
 }
 
 void DragWindow::onMessagePaint()
 {
-	if(useLayeredWindows_)
-		return;
-
-	PAINTSTRUCT ps;
-	HDC dc = BeginPaint(handle_, &ps);
-	{
-		Win32::MemoryDC memoryDC(dc);
-		drawRow(memoryDC);
-	}
-	EndPaint(handle_, &ps);
 }
 
 // ---------------------------------------------------------------------------
@@ -249,9 +224,7 @@ bool DragController::dragOn(POINT screenPoint)
 			property_tree::Rect rect = row_->rect();
 			rect.y += area.top();
 			rect = property_tree::Rect(rect.left() - offset.x() + treeImpl_->tree()->tabSize(),
-						rect.top() - offset.y(),
-                         rect.right() - offset.x(),
-						 rect.bottom() - offset.y());
+				rect.top() - offset.y(), rect.width() - +treeImpl_->tree()->tabSize(), rect.height() + 1);
             
 			window_.set(treeImpl_, row_, ww::Rect(rect.left(), rect.top(), rect.right(), rect.bottom()));
 			window_.move(screenPoint.x - startPoint_.x, screenPoint.y - startPoint_.y);
