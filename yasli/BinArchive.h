@@ -157,7 +157,7 @@ private:
 					  break;
 				  strEnd += sizeof(wchar_t);
 			  }
-			  int len = (strEnd - curr_) / sizeof(wchar_t);
+			  int len = int((strEnd - curr_) / sizeof(wchar_t));
 
 			  s.resize(len);
 			  if (len)

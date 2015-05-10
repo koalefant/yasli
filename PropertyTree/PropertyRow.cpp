@@ -122,7 +122,7 @@ const PropertyRow* PropertyRow::childByIndex(int index) const
 void PropertyRow::_setExpanded(bool expanded)
 {
     expanded_ = expanded;
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* child = children_[i];
@@ -160,7 +160,7 @@ int PropertyRow::childIndex(PropertyRow* row)
 	YASLI_ASSERT(row);
 	Rows::iterator it = std::find(children_.begin(), children_.end(), row);
 	YASLI_ESCAPE(it != children_.end(), return -1);
-	return std::distance(children_.begin(), it);
+	return (int)std::distance(children_.begin(), it);
 }
 
 bool PropertyRow::isChildOf(const PropertyRow* row) const
@@ -199,7 +199,7 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
 	expanded_ = row.expanded_;
 	selected_ = row.selected_;
     if(recurse){
-		int numChildren = children_.size();
+		int numChildren = (int)children_.size();
 		for (int i = 0; i < numChildren; ++i) {
             PropertyRow* child = children_[i].get();
             YASLI_ESCAPE(child, continue);
@@ -386,7 +386,7 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 
 	hasPulled_ = false;
 
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
 		row->updateLabel(tree, i);
@@ -598,7 +598,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		posX += textSize_;
 	}
 
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 	if (hasPulled_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = children_[i];
@@ -767,7 +767,7 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 
 PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
 {
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 
 	for (int i = startIndex; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];

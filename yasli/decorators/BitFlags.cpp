@@ -11,7 +11,7 @@ void BitFlagsWrapper::serialize(yasli::Archive& ar)
 		//*variable = 0;
 		int previousValue = *variable;
 		for (size_t i = 0; i < (size_t)count; ++i) {
-			int flagValue = desc.valueByIndex(i);
+			int flagValue = desc.valueByIndex((int)i);
 			bool flag = (previousValue & flagValue) == flagValue;
 			bool previousFlag = flag;
 			ar(flag, desc.nameByIndex(i), desc.labelByIndex(i));

@@ -353,7 +353,7 @@ bool PropertyRow::scanChildren(Op& op)
 template<class Op>
 bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
 {
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 	for(int index = 0; index < numChildren; ++index){
 		PropertyRow* child = children_[index];
 		ScanResult result = op(child, tree, index);
@@ -372,7 +372,7 @@ bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
 template<class Op>
 bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
 {
-	int numChildren = children_.size();
+	int numChildren = (int)children_.size();
 	for(int index = numChildren - 1; index >= 0; --index){
 		PropertyRow* child = children_[index];
 		ScanResult result = op(child, tree, index);
