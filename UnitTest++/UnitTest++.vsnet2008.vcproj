@@ -6,7 +6,6 @@
 	ProjectGUID="{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}"
 	RootNamespace="UnitTestvsnet2005"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -21,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -83,8 +82,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -146,8 +145,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -207,8 +206,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -269,8 +268,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugStatic|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -331,8 +330,8 @@
 		</Configuration>
 		<Configuration
 			Name="DebugStatic|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -394,8 +393,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseStatic|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -455,8 +454,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseStatic|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"

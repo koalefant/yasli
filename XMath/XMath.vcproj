@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -47,7 +47,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -82,8 +82,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -110,7 +110,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -145,8 +145,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -208,8 +208,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)"
-			IntermediateDirectory="$(SolutionDir)\.$(ConfigurationName)\$(PlatformName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -272,8 +272,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseStatic|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -335,8 +335,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseStatic|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
 			ConfigurationType="4"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -365,6 +365,131 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugStatic|Win32"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="$(ProjectDir)..\;$(ProjectDir)..\..\Yasli"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugStatic|x64"
+			OutputDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\"
+			IntermediateDirectory="$(SolutionDir).garbage\$(ConfigurationName)\$(PlatformName)\$(ProjectName)\"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="$(ProjectDir)..\;$(ProjectDir)..\..\Yasli"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -431,6 +556,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\BugslayerUtil.h"
@@ -457,6 +590,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -499,6 +640,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\DiagAssert.h"
@@ -525,6 +674,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -563,6 +720,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\MemDumperValidator.h"
@@ -593,6 +758,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -639,6 +812,14 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XErrHand\WarningsOff.h"
@@ -669,6 +850,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseStatic|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugStatic|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -810,6 +999,22 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="ReleaseStatic|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DebugStatic|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DebugStatic|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

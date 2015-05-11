@@ -20,3 +20,4 @@ qpropertytree-example-*
 example-*
 .garbage/*
 .tmp/*
+.garbage*
