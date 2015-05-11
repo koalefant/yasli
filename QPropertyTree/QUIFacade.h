@@ -64,7 +64,8 @@ public:
 	}
 	
 	void exec(const Point& point) override{
-		menu_->exec(tree_->mapToGlobal(QPoint(point.x(), point.y())));
+		Point widgetPoint = tree_->_toWidget(point);
+		menu_->exec(tree_->mapToGlobal(QPoint(widgetPoint.x(), widgetPoint.y())));
 	}
 private:
 	std::vector<QtAction*> actions_;

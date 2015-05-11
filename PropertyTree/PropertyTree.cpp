@@ -335,7 +335,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
-			menu->exec(point - offset_);
+			menu->exec(point);
 	}
 }
 
@@ -1130,9 +1130,7 @@ PropertyTree& PropertyTree::operator=(const PropertyTree&)
 
 Point PropertyTree::_toWidget(Point point) const
 {
-	Point pt ( point.x() - offset_.x() + area_.left(), 
-		point.y() - offset_.y() + area_.top() );
-	return pt;
+	return Point(point.x() - offset_.x(), point.y() - offset_.y());
 }
 
 void PropertyTree::_cancelWidget()
