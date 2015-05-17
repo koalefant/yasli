@@ -22,6 +22,7 @@ namespace yasli { class Object; struct Context; }
 namespace property_tree{ 
 class InplaceWidget;
 struct Color;
+struct Layout;
 
 class IMenu;
 struct IUIFacade; 
@@ -98,6 +99,7 @@ public:
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void clearMenuHandlers();
 	Point _toWidget(Point point) const;
+	void updateLayout();
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;
@@ -187,6 +189,7 @@ protected:
 	PropertyTree* attachedPropertyTree_;
 	RowFilter rowFilter_;
 	yasli::Context* archiveContext_;
+	property_tree::Layout* layout_;
 
 	int leftBorder_;
 	int rightBorder_;

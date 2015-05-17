@@ -259,6 +259,7 @@ public:
 	void setPulledContainer(PropertyRow* container){ pulledContainer_ = container; }
 	PropertyRow* pulledContainer() { return pulledContainer_; }
 	const PropertyRow* pulledContainer() const{ return pulledContainer_; }
+	int textSizeInitial() const { return textSizeInitial_; }
 
 	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
 

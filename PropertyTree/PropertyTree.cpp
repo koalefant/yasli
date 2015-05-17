@@ -21,6 +21,7 @@
 #include "PropertyOArchive.h"
 #include "PropertyIArchive.h"
 #include "Unicode.h"
+#include "Layout.h"
 
 #include <limits.h>
 #include "PropertyTreeMenuHandler.h"
@@ -32,13 +33,14 @@
 #include "PropertyRowObject.h"
 
 using yasli::Serializers;
+using namespace property_tree;
 
 // ---------------------------------------------------------------------------
 
 TreeConfig::TreeConfig()
 : immediateUpdate_(true)
 , hideUntranslated_(true)
-, valueColumnWidth_(.5f)
+, valueColumnWidth_(.63f)
 , filter_(YASLI_DEFAULT_FILTER)
 , compact_(false)
 , fullRowMode_(false)
@@ -112,6 +114,7 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , dragCheckMode_(false)
 , dragCheckValue_(false)
 , archiveContext_()
+, layout_(new property_tree::Layout())
 {
 	model_.reset(new PropertyTreeModel(this));
 	model_->setExpandLevels(expandLevels_);
@@ -121,6 +124,8 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 
 PropertyTree::~PropertyTree()
 {
+	delete layout_;
+	layout_ = 0;
 	clearMenuHandlers();
 }
 
@@ -463,6 +468,216 @@ void PropertyTree::serialize(Archive& ar)
 		updateHeights();
 		onSelected();
 	}
+}
+
+static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree)
+{
+	int count = (int)row->count();
+
+	for (size_t j = 0; j < count; ++j) {
+		PropertyRow* child = row->childByIndex(j);
+		if (!child->visible(tree))
+			continue;
+		if (child->pulledBefore()) {
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
+		}
+	}
+
+	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
+	int widgetSizeMin = row->widgetSizeMin(tree);
+	int labelMin = row->textSizeInitial();
+	ElementType labelElementType = (row->isFullRow(tree) || row->pulledUp()) ? FIXED_SIZE : EXPANDING_MAGNET;
+	switch (placement) {
+	case PropertyRow::WIDGET_ICON:
+	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+	if (row->labelUndecorated()[0])
+		l->add(rowArea, EXPANDING, row, PART_LABEL, labelMin);
+	break;
+	case PropertyRow::WIDGET_VALUE:
+	{
+		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
+										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
+		if (row->labelUndecorated()[0])
+			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+		l->add(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
+	}
+	break;
+	case PropertyRow::WIDGET_NONE:
+	if (row->labelUndecorated()[0])
+		l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+	break;
+	case PropertyRow::WIDGET_AFTER_NAME:
+	if (row->labelUndecorated()[0])
+		l->add(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin);
+	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+	break;
+	case PropertyRow::WIDGET_AFTER_PULLED:
+	{
+		if (row->labelUndecorated()[0])
+			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+		// add value later
+	}
+	break;
+	}
+
+	for (size_t j = 0; j < count; ++j) {
+		PropertyRow* child = row->childByIndex(j);
+		if (!child->visible(tree))
+			continue;
+		if (child->pulledUp()) {
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
+		}
+		else if (!child->pulledBefore())
+			*hasNonPulledChildren = true;
+	}
+
+	if (placement == PropertyRow::WIDGET_AFTER_PULLED) {
+		l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+	}
+
+}
+
+
+static void populateContentArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
+{
+	int rowHeight = tree->_defaultRowHeight();
+	// assuming that parentRow is expanded
+	int count = (int)parentRow->count();
+	for (int i = 0 ; i < count; ++i) {
+		PropertyRow* child = parentRow->childByIndex(i);
+		if (!child->visible(tree))
+			continue;
+
+		if (child->pulledUp() || child->pulledBefore()) {
+			populateContentArea(l, parentElement, child, tree);
+			continue;
+		}
+
+		int rowArea = l->add(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight);
+		bool showPlus = !(tree->compact() && parentRow->isRoot());
+		if (showPlus)
+			l->add(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0);
+
+		bool hasNonPulledChildren = false;
+		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree);
+
+		if (child->expanded()/* && hasNonPulledChildren*/) {
+			int indentationAndContent = l->add(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
+			if (showPlus)
+				l->add(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0);
+			int contentArea = l->add(indentationAndContent, VERTICAL, child, PART_CONTENT_AREA);
+			populateContentArea(l, contentArea, child, tree);
+		}
+	}
+}
+
+void calculateMinimalSizes(int* minWidth, int* minHeight, Layout* l, int element)
+{
+	LayoutElement& e = l->elements[element];
+	if (e.type == FIXED_SIZE || e.type == EXPANDING || e.type == EXPANDING_MAGNET) {
+		*minWidth = e.minWidth;
+		*minHeight = e.minHeight;
+	}
+	else {
+		int w = 0, h = 0;
+		if (e.childrenList != -1) {
+			const vector<int>& children = l->childrenLists[e.childrenList].children;
+			int count = (int)children.size();
+			for (int i = 0; i < count; ++i) {
+				int childrenWidth = 0;
+				int childrenHeight = 0;
+				calculateMinimalSizes(&childrenWidth, &childrenHeight, l, children[i]);
+				if (e.type == HORIZONTAL) {
+					w += childrenWidth;
+					h = max(h, childrenHeight);
+				}
+				else if (e.type == VERTICAL) {
+					w = max(w, childrenWidth);
+					h += childrenHeight;
+				}
+			}
+		}
+		*minWidth = max(w, e.minWidth);
+		*minHeight = max(h, e.minHeight);
+	}
+	l->minimalWidths[element] = *minWidth;
+	l->minimalHeights[element] = *minHeight;
+}
+
+static void calculateRectangles(Layout* l, int element, int width, int height, int left, int top)
+{
+	LayoutElement& e = l->elements[element];
+	l->rectangles[element] = Rect(left, top, width, height);
+	if (e.type == HORIZONTAL || e.type == VERTICAL) {
+		int length = e.type == HORIZONTAL ? width : height;
+		int fixedLength = e.type == HORIZONTAL ? l->minimalWidths[element] : l->minimalHeights[element];
+		int freeLength = max(0, length - fixedLength);
+		int freeSpaceLeft = freeLength;
+		if (e.childrenList != -1) {
+			const vector<int>& children = l->childrenLists[e.childrenList].children;
+			int count = (int)children.size();
+			int expandingCount = 0;
+			for (int i = 0; i < count; ++i) {
+				LayoutElement& child = l->elements[children[i]];
+				if (child.type != FIXED_SIZE)
+					++expandingCount;
+			}
+
+
+			int expandingLeft = expandingCount;
+			int position = 0;
+			for (int i = 0; i < count; ++i) {
+				LayoutElement& child = l->elements[children[i]];
+				int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
+				int childLength = childFixedLength;
+				if (child.type == EXPANDING_MAGNET) {
+					int magnetLeft = max(0, l->magnetPoint - (left + position + childLength));
+					int freeDelta = min(magnetLeft, freeSpaceLeft);
+					childLength += freeDelta;
+					freeSpaceLeft -= freeDelta;
+					--expandingLeft;
+				}
+				else if (child.type != FIXED_SIZE) {
+					int freeDelta = expandingLeft ? freeSpaceLeft / expandingLeft : 0;
+					childLength += freeDelta;
+					freeSpaceLeft -= freeDelta;
+					--expandingLeft;
+				}
+				Rect r = e.type == HORIZONTAL ? Rect(left + position, top, childLength, height)
+							                  : Rect(left, top + position, width, childLength);
+				calculateRectangles(l, children[i], r.width(), r.height(), r.left(), r.top());
+				position += childLength;
+			}
+
+		}
+	}
+}
+
+void PropertyTree::updateLayout()
+{
+	Layout& l = *layout_;
+	l.clear();
+
+	int width = area_.width();
+	l.magnetPoint = int(width * (1.0f - valueColumnWidth()));
+
+	l.elements.push_back(LayoutElement());
+	PropertyRow* root = model_->root();
+
+	int lroot = l.add(-1, VERTICAL, root, PART_CONTENT_AREA);
+
+	populateContentArea(&l, lroot, root, this);
+
+	l.minimalWidths.resize(l.elements.size());
+	l.minimalHeights.resize(l.elements.size());
+
+	int minWidth = 0;
+	int minHeight = 0;
+	calculateMinimalSizes(&minWidth, &minHeight, &l, lroot);
+
+	l.rectangles.resize(l.elements.size());
+	calculateRectangles(&l, lroot, width, minHeight, 0, 0);
+	printf("Minimal size: %d %d\n", minWidth, minHeight);
 }
 
 void PropertyTree::ensureVisible(PropertyRow* row, bool update)

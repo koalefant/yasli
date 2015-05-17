@@ -2,7 +2,7 @@
 
 BUILD_ROOT=$(dirname $(readlink -f $0))
 
-CONFIGURATION=Debug
+CONFIGURATION=RelWithDebInfo
 TEMP_DIR=${BUILD_ROOT}/.tmp/linux-${CONFIGURATION}
 
 mkdir -p ${TEMP_DIR} 

@@ -30,7 +30,7 @@ bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 
 void PropertyRowBool::redraw(IDrawContext& context)
 {
-	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
+	context.drawCheck(context.widgetRect, userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
 bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
