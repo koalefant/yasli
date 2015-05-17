@@ -18,8 +18,13 @@ endif (UNIX)
 #file(GLOB SOURCES *.h *.cpp)
 set(SOURCES 
 	main.cpp
-	mainwindow.cpp mainwindow.h
-	LogicEditor.cpp LogicEditor.h
+	ExampleControlCharacters.cpp
+	ExampleCustomRows.cpp
+	ExamplePolymorphicTree.cpp
+	ExampleTable.cpp
+	ExampleTwoTrees.h
+	ExampleTwoTrees.cpp
+	MainWindow.cpp MainWindow.h
   )
 source_group("" FILES ${SOURCES})
 

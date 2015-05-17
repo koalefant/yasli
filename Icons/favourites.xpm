@@ -1,5 +1,5 @@
 /* XPM */
-static char * favourites_xpm[] = {
+static const char * favourites_xpm[] = {
 "16 16 32 1",
 " 	c None",
 ".	c #FFEE98",

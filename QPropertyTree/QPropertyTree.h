@@ -55,7 +55,7 @@ class QPropertyTree : public QWidget, public PropertyTree
 {
 	Q_OBJECT
 public:
-	QPropertyTree(QWidget* parent);
+	explicit QPropertyTree(QWidget* parent = 0);
 	~QPropertyTree();
 
 	const QFont& boldFont() const; 

@@ -12,10 +12,5 @@ public:
     ~MainWindow();
 
 public slots:
-
-	void onPropertyChanged();
-private:
-	QPropertyTree* tree_;
-	QPropertyTree* attachedTree_;
 };
 
