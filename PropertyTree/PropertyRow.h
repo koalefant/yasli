@@ -14,6 +14,7 @@
 # define override
 #endif
 
+
 #include <typeinfo>
 #include <algorithm>
 #include "yasli/Serializer.h"
@@ -24,6 +25,7 @@
 #include "ConstStringList.h"
 #include "IDrawContext.h"
 #include "Rect.h"
+#include "Layout.h"
 #include "sigslot.h"
 
 class QPainter;
@@ -203,6 +205,7 @@ public:
 	Font rowFont(const PropertyTree* tree) const;
 
 	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
+	void drawElement(IDrawContext& x, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex);
 
 	virtual void redraw(IDrawContext& context);
 	virtual property_tree::InplaceWidget* createWidget(PropertyTree* tree) { return 0; }

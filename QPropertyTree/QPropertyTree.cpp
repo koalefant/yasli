@@ -1032,6 +1032,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	if(dragController_->captured())
 	 	dragController_->drawUnder(painter);
 
+	/*
     if (model()->root()) {
         DrawVisitor selectionOp(painter, toQRect(area_), offset_.y(), true);
         model()->root()->scanChildren(selectionOp, this);
@@ -1039,6 +1040,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
         DrawVisitor op(painter, toQRect(area_), offset_.y(), false);
         model()->root()->scanChildren(op, this);
     }
+	*/
 
 	painter.translate(offset_.x(), offset_.y());
 
@@ -1079,6 +1081,8 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	}
 
 	if (layout_) {
+		painter.translate(-offset_.x(), -offset_.y());
+
 		int num = layout_->rectangles.size();
 		for (int i = 0; i < num; ++i) {
 			QRect r = toQRect(layout_->rectangles[i]);
@@ -1097,6 +1101,39 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 			}
 			painter.drawRect(r);
 		}
+
+		QDrawContext context(this, &painter);
+		int numElements = layout_->rectangles.size();
+		int h = height();
+		for (size_t i = 0; i < numElements; ++i) {
+			const Rect& rect = layout_->rectangles[i];
+			if (rect.bottom() - offset_.y() < 0)
+				continue;
+			if (rect.top() - offset_.y() > h)
+				continue;
+			const LayoutElement& e = layout_->elements[i];
+			if (e.rowPart != PART_ROW_AREA)
+				continue;
+			PropertyRow* row = layout_->rows[i];
+			if (!row)
+				continue;
+			row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+		}
+		for (size_t i = 0; i < numElements; ++i) {
+			const Rect& rect = layout_->rectangles[i];
+			if (rect.bottom() - offset_.y() < 0)
+				continue;
+			if (rect.top() - offset_.y() > h)
+				continue;
+			const LayoutElement& e = layout_->elements[i];
+			if (e.rowPart == PART_ROW_AREA)
+				continue;
+			PropertyRow* row = layout_->rows[i];
+			if (!row)
+				continue;
+			row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+		}
+		painter.translate(offset_.x(), offset_.y());
 	}
 	paintTime_ = timer.elapsed();
 }

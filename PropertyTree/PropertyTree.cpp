@@ -525,7 +525,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
-		if (child->pulledUp()) {
+		if (child->pulledUp() && !child->pulledBefore()) {
 			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
 		}
 		else if (!child->pulledBefore())
@@ -557,7 +557,7 @@ static void populateContentArea(Layout* l, int parentElement, PropertyRow* paren
 		int rowArea = l->add(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight);
 		bool showPlus = !(tree->compact() && parentRow->isRoot());
 		if (showPlus)
-			l->add(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0);
+			l->add(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
 
 		bool hasNonPulledChildren = false;
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree);
@@ -700,6 +700,7 @@ void PropertyTree::updateLayout()
 
 	l.elements.push_back(LayoutElement());
 	PropertyRow* root = model_->root();
+	l.rows.push_back(root);
 
 	int lroot = l.add(-1, VERTICAL, root, PART_CONTENT_AREA);
 

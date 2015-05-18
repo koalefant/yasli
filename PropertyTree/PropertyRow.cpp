@@ -937,38 +937,69 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 	}
 	else{
 		context.widgetRect = widgetRect(tree);
-		context.lineRect = floorRect(tree);
 		context.captured = tree->_isCapturedRow(this);
 		context.pressed = tree->_pressedRow() == this;
 
-
-
 		// drawing a horizontal line
-		char containerLabel[16] = "";
 
 		if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
 		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
 		{
-			Rect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
+			Rect lineRect = floorRect(tree);
+			Rect rect(textPos_ - 1, rowRect.bottom() - 2, lineRect.width() - (textPos_ - 1), 1);
 
 			context.drawRowLine(rect);
 		}
+	}
+}
 
-
-		if(!tree->compact() || !parent()->isRoot()){
-			if(hasVisibleChildren(tree)){
-				context.drawPlus(plusRect(tree), expanded(), selected(), expanded());
+void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex)
+{
+	switch (part)
+	{
+	case PART_ROW_AREA:
+		if (selected())
+			context.drawSelection(rect, true);
+		else
+		{
+			bool pulledChildrenSelected = false;
+			for (size_t i = 0; i < children_.size(); ++i) {
+				PropertyRow* child = children_[i];
+				if (!child)
+					continue;
+				if ((child->pulledBefore() || child->pulledUp()) && child->selected())
+					pulledChildrenSelected = true;
+			}
+			if (pulledChildrenSelected)
+				context.drawSelection(rect, true);
+		}
+		break;
+	case PART_LABEL:
+		if (textSize_ > 0){
+			char containerLabel[16] = "";
+			int index = 0;
+			yasli::string text = rowText(containerLabel, context.tree, index);
+			context.drawLabel(text.c_str(), FONT_NORMAL, rect, pulledSelected());
+		}
+		break;
+	case PART_PLUS:
+		if(!context.tree->compact() || !parent()->isRoot()){
+			if(hasVisibleChildren(context.tree)){
+				context.drawPlus(rect, expanded(), selected(), expanded());
 			}
 		}
-
-		// custom drawing
-		if(!isStatic() && context.widgetRect.isValid())
+		break;
+	case PART_WIDGET:
+	case PART_ARRAY_BUTTON:
+		{
+			context.widgetRect = rect;
+			context.captured = context.tree->_isCapturedRow(this);
+			context.pressed = context.tree->_pressedRow() == this;
 			redraw(context);
-
-		if(textSize_ > 0){
-			yasli::string text = rowText(containerLabel, tree, index);
-			context.drawLabel(text.c_str(), FONT_NORMAL, textRect(tree), pulledSelected());
 		}
+		break;
+	default:
+		break;
 	}
 }
 
