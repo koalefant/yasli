@@ -20,6 +20,7 @@
 #include "PropertyTree/Unicode.h"
 #include "PropertyTree/PropertyTreeMenuHandler.h"
 #include "PropertyTree/MathUtils.h"
+#include "PropertyTree/Layout.h"
 
 #include "yasli/ClassFactory.h"
 
@@ -627,6 +628,17 @@ void QPropertyTree::updateHeights()
 		updateHeightsTime_ = timer.elapsed();
 	}
 
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		updateLayout();
+
+		updateLayoutTime_ = timer.elapsed();
+	}
+
+	printf("updateLayout/Heights: %d %d\n", updateLayoutTime_, updateHeightsTime_);
+
 	_arrangeChildren();
 
 	update();
@@ -1064,6 +1076,27 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	// 		clientRect.right -= 2; clientRect.bottom -= 2;
 	// 		DrawFocusRect(dc, &clientRect);
 	// 	}
+	}
+
+	if (layout_) {
+		int num = layout_->rectangles.size();
+		for (int i = 0; i < num; ++i) {
+			QRect r = toQRect(layout_->rectangles[i]);
+			switch (layout_->elements[i].rowPart) {
+			case property_tree::PART_WIDGET:
+			painter.setPen(QColor(0,0,0));
+			painter.setBrush(QColor(0,255,0,128));
+			break;
+			case property_tree::PART_LABEL:
+			painter.setPen(Qt::NoPen);
+			painter.setBrush(QColor(255,255,0,128));
+			break;
+			default:
+			painter.setPen(QColor(0,0,0));
+			painter.setBrush(Qt::NoBrush);
+			}
+			painter.drawRect(r);
+		}
 	}
 	paintTime_ = timer.elapsed();
 }

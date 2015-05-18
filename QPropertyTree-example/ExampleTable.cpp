@@ -47,7 +47,7 @@ struct TableData
 
 	TableData()
 	{
-		items_.resize(100);
+		items_.resize(10000);
 
 		for (size_t i = 0; i < items_.size(); ++i)
 		{

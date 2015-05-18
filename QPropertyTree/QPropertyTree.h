@@ -140,6 +140,7 @@ protected:
 	QTimer* mouseStillTimer_;
 
 	int updateHeightsTime_;
+	int updateLayoutTime_;
 	int paintTime_;
 
 	friend class property_tree::QDrawContext;

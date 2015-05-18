@@ -487,34 +487,35 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	int widgetSizeMin = row->widgetSizeMin(tree);
 	int labelMin = row->textSizeInitial();
 	ElementType labelElementType = (row->isFullRow(tree) || row->pulledUp()) ? FIXED_SIZE : EXPANDING_MAGNET;
+	int labelPriority = 1;
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
 	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, EXPANDING, row, PART_LABEL, labelMin);
+		l->add(rowArea, EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_VALUE:
 	{
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
 		if (row->labelUndecorated()[0])
-			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		l->add(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+		l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin);
+		l->add(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
 	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	break;
 	case PropertyRow::WIDGET_AFTER_PULLED:
 	{
 		if (row->labelUndecorated()[0])
-			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin);
+			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		// add value later
 	}
 	break;
@@ -586,14 +587,22 @@ void calculateMinimalSizes(int* minWidth, int* minHeight, Layout* l, int element
 			for (int i = 0; i < count; ++i) {
 				int childrenWidth = 0;
 				int childrenHeight = 0;
+				LayoutElement& child = l->elements[children[i]];
 				calculateMinimalSizes(&childrenWidth, &childrenHeight, l, children[i]);
 				if (e.type == HORIZONTAL) {
-					w += childrenWidth;
+					if (child.priority == 0)
+						w += childrenWidth;
 					h = max(h, childrenHeight);
 				}
 				else if (e.type == VERTICAL) {
-					w = max(w, childrenWidth);
-					h += childrenHeight;
+					// Exception for vertical layouts, so only individual rows
+					// are getting outside of window, when it is too narrow.
+					//
+					// May cause problesm with multiple columns.
+					//
+					// w = max(w, childrenWidth);
+					if (child.priority == 0)
+						h += childrenHeight;
 				}
 			}
 		}
@@ -609,20 +618,38 @@ static void calculateRectangles(Layout* l, int element, int width, int height, i
 	LayoutElement& e = l->elements[element];
 	l->rectangles[element] = Rect(left, top, width, height);
 	if (e.type == HORIZONTAL || e.type == VERTICAL) {
-		int length = e.type == HORIZONTAL ? width : height;
-		int fixedLength = e.type == HORIZONTAL ? l->minimalWidths[element] : l->minimalHeights[element];
-		int freeLength = max(0, length - fixedLength);
-		int freeSpaceLeft = freeLength;
+		int availableLength = e.type == HORIZONTAL ? width : height;
 		if (e.childrenList != -1) {
+
 			const vector<int>& children = l->childrenLists[e.childrenList].children;
 			int count = (int)children.size();
 			int expandingCount = 0;
+			int countByPriority[MAX_PRIORITY] = { 0 };
+			int lengthByPriority[MAX_PRIORITY+1] = { 0 };
+			int totalFixedLength = 0;;
 			for (int i = 0; i < count; ++i) {
 				LayoutElement& child = l->elements[children[i]];
 				if (child.type != FIXED_SIZE)
 					++expandingCount;
+				countByPriority[child.priority] += 1;
+				int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
+				lengthByPriority[child.priority] += childFixedLength;
+				totalFixedLength += childFixedLength;
 			}
 
+
+			int discardedPriority = MAX_PRIORITY;
+			int itemsToDiscardPartially = 0;
+			int fixedLength = 0;;//e.type == HORIZONTAL ? l->minimalWidths[element] : l->minimalHeights[element];
+			for (int i = 0; i < MAX_PRIORITY; ++i) {
+				if (i && fixedLength + lengthByPriority[i] > availableLength) {
+					itemsToDiscardPartially = countByPriority[i];
+					discardedPriority = i;
+					break;
+				}
+				fixedLength += lengthByPriority[i];
+			}
+			int freeSpaceLeft = max(0, availableLength - fixedLength);
 
 			int expandingLeft = expandingCount;
 			int position = 0;
@@ -630,19 +657,29 @@ static void calculateRectangles(Layout* l, int element, int width, int height, i
 				LayoutElement& child = l->elements[children[i]];
 				int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
 				int childLength = childFixedLength;
-				if (child.type == EXPANDING_MAGNET) {
-					int magnetLeft = max(0, l->magnetPoint - (left + position + childLength));
-					int freeDelta = min(magnetLeft, freeSpaceLeft);
-					childLength += freeDelta;
-					freeSpaceLeft -= freeDelta;
-					--expandingLeft;
+				if (child.priority > discardedPriority) {
+					childLength = 0;
 				}
-				else if (child.type != FIXED_SIZE) {
-					int freeDelta = expandingLeft ? freeSpaceLeft / expandingLeft : 0;
-					childLength += freeDelta;
-					freeSpaceLeft -= freeDelta;
-					--expandingLeft;
+				else if (child.priority == discardedPriority) {
+					childLength = min(childLength, freeSpaceLeft / itemsToDiscardPartially);
+					freeSpaceLeft -= childLength;
+					--itemsToDiscardPartially;
 				}
+				else if(discardedPriority == MAX_PRIORITY) { 
+					if (child.type == EXPANDING_MAGNET) {
+						int magnetLeft = max(0, l->magnetPoint - (left + position + childLength));
+						int freeDelta = min(magnetLeft, freeSpaceLeft);
+						childLength += freeDelta;
+						freeSpaceLeft -= freeDelta;
+					}
+					else if (child.type != FIXED_SIZE) {
+						int freeDelta = expandingLeft ? freeSpaceLeft / expandingLeft : 0;
+						childLength += freeDelta;
+						freeSpaceLeft -= freeDelta;
+					}
+				}
+				if (child.type != FIXED_SIZE)
+					--expandingLeft;
 				Rect r = e.type == HORIZONTAL ? Rect(left + position, top, childLength, height)
 							                  : Rect(left, top + position, width, childLength);
 				calculateRectangles(l, children[i], r.width(), r.height(), r.left(), r.top());
