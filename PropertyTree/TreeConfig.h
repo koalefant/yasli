@@ -12,8 +12,6 @@ public:
 	bool fullRowMode() const { return fullRowMode_; }
 	void setFullRowContainres(bool fullRowContainers) { fullRowContainers_ = fullRowContainers; }
 	bool fullRowContainers() const { return fullRowContainers_; }
-	void setHideUntranslated(bool hideUntranslated) { hideUntranslated_ = hideUntranslated; }
-	bool hideUntranslated() const{ return hideUntranslated_; }
 	void setValueColumnWidth(float valueColumnWidth) { valueColumnWidth_ = valueColumnWidth; }
 	float valueColumnWidth() const { return valueColumnWidth_; }
 	void setImmediateUpdate(bool immediateUpdate) { immediateUpdate_ = immediateUpdate; }

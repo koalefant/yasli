@@ -30,7 +30,7 @@ public:
 	void onMenuChildRemove();
 };
 
-class PropertyRowContainer : public PropertyRow
+class PropertyRowContainer : public PropertyRowStruct
 {
 public:
 	PropertyRowContainer();

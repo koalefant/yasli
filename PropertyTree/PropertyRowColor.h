@@ -11,7 +11,7 @@
 #include "Color.h"
 #include "PropertyRow.h"
 
-class PropertyRowColor : public PropertyRow
+class PropertyRowColor : public PropertyRowStruct
 {
 public:
 	PropertyRowColor();

@@ -39,13 +39,13 @@ enum RowPart
 
 struct LayoutElement
 {
+	int childrenList;
+	unsigned short minWidth;
+	unsigned short minHeight;
 	unsigned char type;
 	unsigned char rowPart: 4;
 	unsigned char rowPartSubindex: 4;
 	unsigned char priority : 4;
-	int childrenList;
-	unsigned short minWidth;
-	unsigned short minHeight;
 
 	LayoutElement()
 	: type(FIXED_SIZE)
@@ -85,7 +85,7 @@ struct Layout
 	: nextChildrenList(0)
 	, magnetPoint(0) {}
 
-	int add(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth = 0, int minHeight = 0, int priority = 0)
+	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth = 0, int minHeight = 0, int priority = 0)
 	{
 		LayoutElement e;
 		e.type = type;

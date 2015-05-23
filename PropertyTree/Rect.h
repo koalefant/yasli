@@ -26,9 +26,9 @@ struct Point
 
 struct Rect
 {
-	int x;
+	short x;
+	short w;
 	int y;
-	int w;
 	int h;
 
 	int left() const { return x; }

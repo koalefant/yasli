@@ -42,8 +42,8 @@ public:
 	void detach();
 	bool attached() const { return !attached_.empty(); }
 
-	void apply(bool continuous = false);
-	void revert();
+	virtual void apply(bool continuous = false);
+	virtual void revert();
 	void revertNonInterrupting();
 	int revertObjects(vector<void*> objectAddresses);
 	bool revertObject(void* objectAddress);
@@ -100,6 +100,7 @@ public:
 	void clearMenuHandlers();
 	Point _toWidget(Point point) const;
 	void updateLayout();
+	Rect findRowRect(const PropertyRow* row, int part, int subindex) const;
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;
@@ -142,7 +143,8 @@ protected:
 	virtual void pasteRow(PropertyRow* row) = 0;
 	virtual bool canBePasted(PropertyRow* destination) = 0;
 	virtual bool canBePasted(const char* destinationType) = 0;
-	PropertyRow* rowByPoint(const Point& point);
+	PropertyRow* rowByPoint(const Point& widgetPoint);
+	PropertyRow* hitRow(const Point& rootSpacePoint);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
 

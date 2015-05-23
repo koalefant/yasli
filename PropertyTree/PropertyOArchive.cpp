@@ -30,7 +30,7 @@
 using yasli::TypeID;
 
 
-PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
+PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* root)
 : Archive(OUTPUT | EDIT)
 , model_(model)
 , currentNode_(root)
@@ -58,7 +58,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 , defaultValueCreationMode_(forDefaultType)
 , rootNode_(0)
 {
-	rootNode_ = new PropertyRow();
+	rootNode_ = new PropertyRowStruct();
 	rootNode_->setName("root");
 	currentNode_ = rootNode_.get();
 	stack_.push_back(Level());
@@ -75,8 +75,12 @@ PropertyRow* PropertyOArchive::defaultValueRootNode()
 	return rootNode_->childByIndex(0);
 }
 
-void PropertyOArchive::enterNode(PropertyRow* row)
+void PropertyOArchive::enterNode(PropertyRowStruct* row)
 {
+	if (!row->isStruct()) {
+		YASLI_ASSERT(0);
+		return;
+	}
 	currentNode_ = row;
 
 	stack_.push_back(Level());
@@ -225,7 +229,7 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
     size_t size = ser.size();
 
 	lastNode_ = currentNode_;
-	PropertyRow* row = updateRow<PropertyRow>(name, label, typeName, ser);
+	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, typeName, ser);
 	PropertyRow* nonLeaf = 0;
 	if(!row->isLeaf() || currentNode_ == 0){
 		enterNode(row);
@@ -383,7 +387,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name, const char *label)
 {
 	lastNode_ = currentNode_;
-	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
+	PropertyRowPointer* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
 	enterNode(row);
 	{
 		TypeID baseType = ptr.baseType();
@@ -446,7 +450,7 @@ bool PropertyOArchive::operator()(yasli::Object& obj, const char *name, const ch
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
-	PropertyRow* row = updateRow<PropertyRow>(name, label, "block", Serializer());
+	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, "block", Serializer());
 	lastNode_ = currentNode_;
 	enterNode(row);
 	return true;

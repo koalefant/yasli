@@ -216,7 +216,8 @@ bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
 	std::auto_ptr<property_tree::IMenu> menu(tree->ui()->createMenu());
 	ClassMenuItemAdderRowPointer(this, tree).generateMenu(*menu, tree->model()->typeStringList(baseType()));
 	tree->_setPressedRow(this);
-	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
+	Rect widgetRect = this->widgetRect(tree);
+	menu->exec(Point(widgetRect.left(), widgetRect.bottom()));
 	tree->_setPressedRow(0);
 	return true;
 }

@@ -97,9 +97,9 @@ public:
 	const Selection& selection() const{ return selection_; }
 	void setSelection(const Selection& selection);
 
-	void setRoot(PropertyRow* root) { root_ = root; }
-	PropertyRow* root() { return root_; }
-	const PropertyRow* root() const { return root_; }
+	void setRoot(PropertyRowStruct* root) { root_ = root; }
+	PropertyRowStruct* root() { return root_; }
+	const PropertyRowStruct* root() const { return root_; }
 
 	void serialize(yasli::Archive& ar, PropertyTree* tree);
 
@@ -144,7 +144,7 @@ private:
 	TreePath focusedRow_;
 	Selection selection_;
 
-	yasli::SharedPtr<PropertyRow> root_;
+	yasli::SharedPtr<PropertyRowStruct> root_;
 	UpdateLock updateLock_;
 
 	typedef std::map<yasli::string, yasli::SharedPtr<PropertyRow> > DefaultTypes;

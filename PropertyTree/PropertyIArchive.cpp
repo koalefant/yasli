@@ -360,8 +360,8 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if (level.rowIndex < int(currentNode_->children_.size()))
-			node = currentNode_->children_[level.rowIndex];
+		if (level.rowIndex < int(currentNode_->count()))
+			node = currentNode_->childByIndex(level.rowIndex);
 		++level.rowIndex;
 	}
 	else {

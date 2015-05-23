@@ -20,7 +20,7 @@
 namespace yasli {
 
 template<class Container, class Element>
-class ContainerSTL : public ContainerInterface/*{{{*/
+class ContainerSTL final : public ContainerInterface/*{{{*/
 {
 public:
 	explicit ContainerSTL(Container* container = 0)
@@ -120,7 +120,7 @@ bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* n
 // ---------------------------------------------------------------------------
 namespace yasli {
 
-class StringSTL : public StringInterface
+class StringSTL final : public StringInterface
 {
 public:
 	StringSTL(std::string& str) : str_(str) { }
@@ -163,7 +163,7 @@ bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const ch
 
 namespace yasli {
 
-class WStringSTL : public WStringInterface
+class WStringSTL final : public WStringInterface
 {
 public:
 	WStringSTL(std::wstring& str) : str_(str) { }
@@ -191,7 +191,7 @@ inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name,
 namespace yasli {
 
 template<class V>
-struct StdStringPair : yasli::KeyValueInterface
+struct StdStringPair final : yasli::KeyValueInterface
 {
 	const char* get() const { return pair_.first.c_str(); }
 	void set(const char* key) { pair_.first.assign(key); }
@@ -210,7 +210,7 @@ struct StdStringPair : yasli::KeyValueInterface
 };
 
 template<class K, class V>
-struct StdPair : std::pair<K, V>
+struct StdPair final : std::pair<K, V>
 {
 	void serialize(yasli::Archive& ar) 
 	{

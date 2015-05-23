@@ -24,7 +24,7 @@ using yasli::Object;
 using yasli::Archive;
 using yasli::MemoryWriter;
 
-class PropertyRowObject : public PropertyRow {
+class PropertyRowObject : public PropertyRowStruct {
 public:
 	PropertyRowObject();
 	~PropertyRowObject();

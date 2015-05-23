@@ -64,6 +64,9 @@ public:
 
 	void attachPropertyTree(PropertyTree* propertyTree) override;
 
+	void apply(bool continuous) override;
+	void revert() override;
+
 public slots:
 	void onAttachedTreeChanged();
 public:

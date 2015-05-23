@@ -109,7 +109,7 @@ void PropertyTreeModel::clear()
 	if(root_)
 		root_->clear();
 	root_ = 0;
-	setRoot(new PropertyRow());
+	setRoot(new PropertyRowStruct());
 	root_->setNames("", "root", "");
 	selection_.clear();
 }
@@ -131,7 +131,7 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
         dest->parent()->replaceAndPreserveState(dest, op->row_, false);
     else{
         op->row_->assignRowProperties(root_);
-        root_ = op->row_;
+        root_ = static_cast<PropertyRowStruct*>(op->row_.get());
     }
     PropertyRow* newRow = op->row_;
     op->row_ = 0;

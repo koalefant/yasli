@@ -14,12 +14,13 @@
 #include "yasli/Pointers.h"
 
 class PropertyRow;
+class PropertyRowStruct;
 class PropertyTreeModel;
 using yasli::SharedPtr;
 
-class PropertyOArchive : public yasli::Archive{
+class PropertyOArchive final : public yasli::Archive{
 public:
-	PropertyOArchive(PropertyTreeModel* model, PropertyRow* rootNode = 0);
+	PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* rootNode = 0);
 	~PropertyOArchive();
 
 	bool operator()(yasli::StringInterface& value, const char* name, const char* label);
@@ -67,18 +68,18 @@ private:
 	template<class RowType, class ValueType>
 	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value);
 
-	void enterNode(PropertyRow* row); // sets currentNode
+	void enterNode(PropertyRowStruct* row); // sets currentNode
 	void closeStruct(const char* name);
 	PropertyRow* defaultValueRootNode();
 
 	bool updateMode_;
 	bool defaultValueCreationMode_;
 	PropertyTreeModel* model_;
-	SharedPtr<PropertyRow> currentNode_;
+	SharedPtr<PropertyRowStruct> currentNode_;
 	SharedPtr<PropertyRow> lastNode_;
 
 	// for defaultArchive
-	SharedPtr<PropertyRow> rootNode_;
+	SharedPtr<PropertyRowStruct> rootNode_;
 	yasli::string typeName_;
 	const char* derivedTypeName_;
 	yasli::string derivedTypeNameAlt_;

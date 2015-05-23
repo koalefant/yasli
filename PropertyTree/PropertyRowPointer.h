@@ -35,7 +35,7 @@ struct ClassMenuItemAdder
 	void generateMenu(property_tree::IMenu& createItem, const StringList& comboStrings);
 };
 
-class PropertyRowPointer : public PropertyRow
+class PropertyRowPointer : public PropertyRowStruct
 {
 public:
 	PropertyRowPointer();

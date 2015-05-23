@@ -169,7 +169,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 
 			if(onContextMenu(row, *menu)){
-				Rect rect(row->rect());
+				Rect rect(row->rect(this));
 				menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
 			}
 			return true;
@@ -256,7 +256,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
 {
 	pressPoint_ = point;
-	row = model()->root()->hit(this, point);
+	row = hitRow(point);
 	if(row){
 		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
 			return true;
@@ -268,7 +268,7 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
-	row = model()->root()->hit(this, point);
+	row = hitRow(point);
 	if(row && !row->isRoot()){
 		bool changed = false;
 		if (row->widgetRect(this).contains(point)) {
@@ -376,9 +376,9 @@ void PropertyTree::expandChildren(PropertyRow* root)
 {
 	if(!root){
 		root = model()->root();
-		PropertyRow::iterator it;
-		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
-			PropertyRow* row = *it;
+		int count = root->count();
+		for (int i = 0; i < count; ++i){
+			PropertyRow* row = root->childByIndex(i);
 			row->setExpandedRecursive(this, true);
 		}
 		root->setLayoutChanged();
@@ -402,9 +402,9 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 	if(!root){
 		root = model()->root();
 
-		PropertyRow::iterator it;
-		for (PropertyRows::iterator it = root->begin(); it != root->end(); ++it){
-			PropertyRow* row = *it;
+		int count = root->count();
+		for (int i = 0; i < count; ++i){
+			PropertyRow* row = root->childByIndex(i);
 			row->setExpandedRecursive(this, false);
 		}
 	}
@@ -488,34 +488,35 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	int labelMin = row->textSizeInitial();
 	ElementType labelElementType = (row->isFullRow(tree) || row->pulledUp()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
+	unsigned int widgetElement = 0xffffffff;
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
-	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
+		l->addElement(rowArea, EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_VALUE:
 	{
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
 		if (row->labelUndecorated()[0])
-			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
-		l->add(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
+			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+		l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
 	if (row->labelUndecorated()[0])
-		l->add(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
-	l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+		l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	break;
 	case PropertyRow::WIDGET_AFTER_PULLED:
 	{
 		if (row->labelUndecorated()[0])
-			l->add(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		// add value later
 	}
 	break;
@@ -533,9 +534,10 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	}
 
 	if (placement == PropertyRow::WIDGET_AFTER_PULLED) {
-		l->add(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	}
-
+	if (widgetElement != 0xffffffff)
+		row->setLayoutElement(rowArea);
 }
 
 
@@ -554,19 +556,19 @@ static void populateContentArea(Layout* l, int parentElement, PropertyRow* paren
 			continue;
 		}
 
-		int rowArea = l->add(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight);
+		int rowArea = l->addElement(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight);
 		bool showPlus = !(tree->compact() && parentRow->isRoot());
 		if (showPlus)
-			l->add(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
+			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
 
 		bool hasNonPulledChildren = false;
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree);
 
 		if (child->expanded()/* && hasNonPulledChildren*/) {
-			int indentationAndContent = l->add(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
+			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
 			if (showPlus)
-				l->add(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0);
-			int contentArea = l->add(indentationAndContent, VERTICAL, child, PART_CONTENT_AREA);
+				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0);
+			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CONTENT_AREA);
 			populateContentArea(l, contentArea, child, tree);
 		}
 	}
@@ -690,6 +692,28 @@ static void calculateRectangles(Layout* l, int element, int width, int height, i
 	}
 }
 
+Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) const
+{
+	Layout& l = *layout_;
+	unsigned int index = row->layoutElement();
+	if (index >= l.elements.size())
+		return Rect();
+	PropertyRow* startRow = 0;
+	for (; index < l.elements.size(); ++index)
+	{
+		const LayoutElement& element = l.elements[index];
+		if (part == element.rowPart && element.rowPartSubindex == subindex && l.rows[index] == row)
+				return l.rectangles[index];
+		if (element.rowPart == PART_ROW_AREA) {
+			if (!startRow)
+				startRow = l.rows[index];
+			else if (l.rows[index] != startRow)
+				break;
+		}
+	}
+	return Rect();
+}
+
 void PropertyTree::updateLayout()
 {
 	Layout& l = *layout_;
@@ -702,8 +726,8 @@ void PropertyTree::updateLayout()
 	PropertyRow* root = model_->root();
 	l.rows.push_back(root);
 
-	int lroot = l.add(-1, VERTICAL, root, PART_CONTENT_AREA);
-
+	int lroot = l.addElement(-1, VERTICAL, root, PART_CONTENT_AREA);
+	root->setLayoutElement(lroot);
 	populateContentArea(&l, lroot, root, this);
 
 	l.minimalWidths.resize(l.elements.size());
@@ -727,12 +751,14 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 
 	expandParents(row);
 
-	Rect rect = row->rect();
-	if(rect.top() < offset_.y()){
-		offset_.setY(max(0, rect.top()));
+	Rect rowRect = row->rect(this);
+	Rect contentRect = row->contentRect(this);
+	if(rowRect.top() < offset_.y()){
+		offset_.setY(max(0, rowRect.top()));
 	}
-	else if(rect.bottom() > size_.y() + offset_.y()){
-		offset_.setY(max(0, rect.bottom() - size_.y()));
+	else if(contentRect.bottom() > size_.y() + offset_.y()){
+		printf("size_.y: %d\n", size_.y());
+		offset_.setY(max(0, contentRect.bottom() - size_.y()));
 	}
 	if(update)
 		repaint();
@@ -962,9 +988,9 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 	handler->tree = this;
 	handler->row = row;
 
-	PropertyRow::iterator it;
-	for(it = row->begin(); it != row->end(); ++it){
-		PropertyRow* child = *it;
+	int num = row->count();
+	for(int i = 0; i < num; ++i){
+		PropertyRow* child = row->childByIndex(i);
 		if(child->isContainer() && child->pulledUp())
 			child->onContextMenu(menu, this);
 	}
@@ -1338,13 +1364,23 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 	return true;
 }
 
+PropertyRow* PropertyTree::hitRow(const Point& pt)
+{
+	const Layout& l = *layout_;
+	int count = (int)l.rectangles.size();
+	for (int i = (int)l.rectangles.size() - 1; i >= 0; --i)
+		if (l.rectangles[i].contains(pt))
+			return l.rows[i];
+	return model()->root();
+}
+
 PropertyRow* PropertyTree::rowByPoint(const Point& pt)
 {
 	if (!model_->root())
 		return 0;
 	if (!area_.contains(pt))
 		return 0;
-  return model_->root()->hit(this, pointToRootSpace(pt));
+  return hitRow(pointToRootSpace(pt));
 }
 
 Point PropertyTree::pointToRootSpace(const Point& point) const

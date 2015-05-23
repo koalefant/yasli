@@ -18,7 +18,7 @@ namespace yasli{
 class PropertyRow;
 class PropertyTreeModel;
 
-class PropertyIArchive : public yasli::Archive{
+class PropertyIArchive final : public yasli::Archive{
 public:
 	PropertyIArchive(PropertyTreeModel* model, PropertyRow* root = 0);
 
