@@ -150,6 +150,12 @@ inline void cutRightZeros(const char* str)
 
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
+	appendAsString(value, true);
+	return *this;
+}
+
+void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
+{
 #ifdef ANDROID_NDK
 	char buf[64] = { 0 };
 	sprintf(buf, "%f", value);
@@ -186,11 +192,13 @@ MemoryWriter& MemoryWriter::operator<<(double value)
     else{
         write(buf, point);
         write(".");
-		cutRightZeros(buf + point);
+		if (allowTrailingPoint)
+			cutRightZeros(buf + point);
+		else if (buf[point] != '\0')
+			cutRightZeros(buf + point + 1);
 		operator<<(buf + point);
     }
 #endif
-	return *this;
 }
 
 MemoryWriter& MemoryWriter::operator<<(const char* value)

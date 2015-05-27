@@ -520,7 +520,7 @@ bool JSONOArchive::operator()(float& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
-    (*buffer_) << value;
+    buffer_->appendAsString(value, false);
     return true;
 }
 
@@ -528,7 +528,7 @@ bool JSONOArchive::operator()(double& value, const char* name, const char* label
 {
     placeIndentCompact();
     placeName(name);
-    (*buffer_) << value;
+    buffer_->appendAsString(value, false);
     return true;
 }
 

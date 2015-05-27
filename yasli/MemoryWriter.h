@@ -44,6 +44,7 @@ public:
 	MemoryWriter& operator<<(char value);
 	MemoryWriter& operator<<(const char* value);
 	MemoryWriter& operator<<(const wchar_t* value);
+	void appendAsString(double, bool allowTrailingPoint);
 
 	// Binary interface (does not writes trailing '\0')
 	template<class T>

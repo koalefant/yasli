@@ -201,6 +201,59 @@ SUITE(JSONArchive)
 
 		CHECK(instance.value == "\"\"");
 	}
-	
+
+	struct FloatFormatting
+	{
+		float zero;
+		float one;
+
+		FloatFormatting()
+		: zero(0.0f)
+		, one(1.0f)
+		{
+		}
+
+		void serialize(Archive& ar)
+		{
+			ar(zero, "zero");
+			ar(one, "one");
+		}
+	};
+
+	static bool FollowingNumberEndsWithPoint(const char* str)
+	{
+		const char* p = str;
+		while(*p && !isdigit(*p))
+			++p;
+		CHECK(*p != '\0');
+		if (!*p)
+			return false;
+		const char* intStart = p;
+		while (isdigit(*p))
+			++p;
+		if (*p != '.' && *p != ',')
+			return false;
+		++p;
+		return !isdigit(*p);
+	}
+
+	// According to RFC 4627 https://www.ietf.org/rfc/rfc4627.txt
+	// floating point numbers should not end with a point.
+	TEST(FloatEndsWithDigit)
+	{
+		FloatFormatting f;
+		JSONOArchive oa;
+		oa(f);
+
+		CHECK(FollowingNumberEndsWithDot("0."));
+		CHECK(!FollowingNumberEndsWithDot("0.0"));
+
+		const char* str = oa.c_str();
+		const char* zero = strstr(str, "\"zero\""); CHECK(zero != 0);
+		CHECK(!FollowingNumberEndsWithDot(zero));
+		const char* one = strstr(str, "\"one\""); CHECK(one != 0);
+		CHECK(!FollowingNumberEndsWithDot(one));
+	}
+
 }
 
