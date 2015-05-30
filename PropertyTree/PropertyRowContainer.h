@@ -34,7 +34,6 @@ class PropertyRowContainer : public PropertyRowStruct
 {
 public:
 	PropertyRowContainer();
-	bool isContainer() const override{ return true; }
 	bool onActivate( PropertyTree* tree, bool force) override;
 	bool onContextMenu(IMenu& item, PropertyTree* tree) override;
 	void redraw(IDrawContext& context) override;

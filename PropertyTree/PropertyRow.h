@@ -85,7 +85,7 @@ public:
 	};
 
 
-	PropertyRow(bool isStruct = false);
+	PropertyRow(bool isStruct = false, bool isContainer = false);
 	virtual ~PropertyRow();
 
 	void setNames(const char* name, const char* label, const char* typeName);
@@ -129,12 +129,10 @@ public:
 	const char* name() const{ return name_; }
 	void setName(const char* name) { name_ = name; }
 	const char* label() const { return label_; }
-	const char* labelUndecorated() const { return labelUndecorated_; }
+	const char* labelUndecorated() const { return label_ + controlCharacterCount_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
-	void setLayoutChanged();
 	void setLabelChangedToChildren();
-	void setLayoutChangedToChildren();
 	void updateLabel(const PropertyTree* tree, int index);
 	void updateTextSizeInitial(const PropertyTree* tree, int index);
 	virtual void labelChanged() {}
@@ -159,8 +157,6 @@ public:
 	virtual void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) {}
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
-
-	//int height() const{ return size_.y(); }
 
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
@@ -190,7 +186,7 @@ public:
 	virtual void redraw(IDrawContext& context);
 	virtual property_tree::InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
 
-	virtual bool isContainer() const{ return false; }
+	bool isContainer() const{ return isContainer_; }
 	virtual bool isPointer() const{ return false; }
 	virtual bool isObject() const{ return false; }
 
@@ -261,11 +257,9 @@ public:
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
-
 	const char* name_;
-	const char* label_;
-	const char* labelUndecorated_;
 	const char* typeName_;
+	const char* label_;
 	PropertyRowStruct* parent_;
 
 	unsigned int layoutElement_;
@@ -274,14 +268,15 @@ protected:
 	// do we really need Point here? 
 	short int textSizeInitial_;
 	short int userWidgetSize_;
+	unsigned char controlCharacterCount_;
 	bool isStruct_ : 1;
+	bool isContainer_ : 1;
 	bool visible_ : 1;
 	bool matchFilter_ : 1;
 	bool belongsToFilteredRow_ : 1;
 	bool expanded_ : 1;
 	bool selected_ : 1;
 	bool labelChanged_ : 1;
-	bool layoutChanged_ : 1;
 	bool userReadOnly_ : 1;
 	bool userReadOnlyRecurse_ : 1;
 	bool userFixedWidget_ : 1;
@@ -303,7 +298,7 @@ class PropertyRowStruct : public PropertyRow
 public:
 	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
 
-	PropertyRowStruct() : PropertyRow(true) {}
+	PropertyRowStruct(bool isContainer = false) : PropertyRow(true, isContainer) { children_.reserve(8); }
 	~PropertyRowStruct();
 
 	yasli::Serializer serializer() const{ return serializer_; }

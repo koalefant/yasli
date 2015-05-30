@@ -894,7 +894,6 @@ struct FilterVisitor
 			else {
 				markChildrenAsBelonging(row, true);
 				row->setBelongsToFilteredRow(false);
-				row->setLayoutChanged();
 				row->setLabelChanged();
 			}
 		}
@@ -911,7 +910,6 @@ struct FilterVisitor
 			}
 			else {
 				row->_setExpanded(false);
-				row->setLayoutChanged();
 			}
 		}
 
@@ -1363,24 +1361,12 @@ void QPropertyTree::onAttachedTreeChanged()
 
 void QPropertyTree::apply(bool continuous)
 {
-	QElapsedTimer timer;
-	timer.start();
-
 	PropertyTree::apply(continuous);
-
-	applyTime_ = timer.elapsed();
-	printf("apply: %d\n", int(applyTime_));
 }
 
 void QPropertyTree::revert()
 {
-	QElapsedTimer timer;
-	timer.start();
-
 	PropertyTree::revert();
-
-	revertTime_ = timer.elapsed();
-	printf("revert: %d\n", int(revertTime_));
 }
 
 FORCE_SEGMENT(PropertyRowColor)

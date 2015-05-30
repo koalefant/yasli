@@ -222,8 +222,6 @@ void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 			setSelection(sel);
 			RowExpander op(expanded);
 			root()->scanChildren(op, tree);
-			root()->setLayoutChanged();
-			root()->setLayoutChangedToChildren();
 		}
 	}
 }
@@ -266,7 +264,6 @@ void PropertyTreeModel::rowChanged(PropertyRow* row, bool apply)
 {
 	YASLI_ESCAPE(row, return);
 	row->setLabelChanged();
-	row->setLayoutChanged();
 
 	PropertyRow* parentObj = row;
 	while (parentObj->parent() && !parentObj->isObject())

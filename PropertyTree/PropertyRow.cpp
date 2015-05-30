@@ -49,13 +49,13 @@ inline unsigned calcHash(const T& t, unsigned hash = 5381)
 
 ConstStringList* PropertyRow::constStrings_ = 0;
 
-PropertyRow::PropertyRow(bool isStruct)
+PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 : parent_(0)
 , isStruct_(isStruct)
+, isContainer_(isContainer)
 , expanded_(false)
 , selected_(false)
 , visible_(true)
-, labelUndecorated_(0)
 , belongsToFilteredRow_(false)
 , matchFilter_(true)
 , textSizeInitial_(0)
@@ -73,8 +73,8 @@ PropertyRow::PropertyRow(bool isStruct)
 , userHideChildren_(false)
 , label_("")
 , labelChanged_(false)
-, layoutChanged_(true)
 , layoutElement_(0xffffffff)
+, controlCharacterCount_(0)
 {
 }
 
@@ -99,9 +99,7 @@ void PropertyRow::setNames(const char* name, const char* label, const char* type
 
 PropertyRow* PropertyRow::childByIndex(int index)
 {
-	if (isStruct_)
-		return asStruct()->childByIndex(index);
-	return 0;
+	return static_cast<PropertyRowStruct*>(this)->childByIndex(index);
 }
 
 PropertyRow* PropertyRowStruct::childByIndex(int index)
@@ -137,9 +135,6 @@ void PropertyRow::_setExpanded(bool expanded)
 		if(child->pulledUp())
 			child->_setExpanded(expanded);
 	}
-
-	layoutChanged_ = true;
-	setLayoutChangedToChildren();
 }
 
 struct SetExpandedOp {
@@ -346,7 +341,6 @@ void PropertyRowStruct::serialize(Archive& ar)
 	ar(reinterpret_cast<std::vector<SharedPtr<PropertyRow> >&>(children_), "children", "!^children");	
 	if(ar.isInput()){
 		labelChanged_ = true;
-		layoutChanged_ = true;
 		Rows::iterator it;
 		for(it = children_.begin(); it != children_.end(); ){
 			PropertyRow* row = *it;
@@ -373,26 +367,12 @@ void PropertyRow::setLabelChanged()
 		row->labelChanged_ = true;
 }
 
-void PropertyRow::setLayoutChanged()
-{
-	layoutChanged_ = true;
-}
-
 void PropertyRow::setLabelChangedToChildren()
 {
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
 		childByIndex(i)->labelChanged_ = true;
 		childByIndex(i)->setLabelChangedToChildren();
-	}
-}
-
-void PropertyRow::setLayoutChangedToChildren()
-{
-	size_t numChildren = count();
-	for (size_t i = 0; i < numChildren; ++i) {
-		childByIndex(i)->layoutChanged_ = true;
-		childByIndex(i)->setLayoutChangedToChildren();
 	}
 }
 
@@ -423,7 +403,7 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 	}
 
 	parseControlCodes(label_, true);
-	visible_ = *labelUndecorated_ != '\0' || userFullRow_ || pulledUp_ || isRoot();
+	visible_ = labelUndecorated()[0] != '\0' || userFullRow_ || pulledUp_ || isRoot();
 	if (userHideChildren_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = childByIndex(i);
@@ -436,7 +416,6 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());
 
-	layoutChanged_ = true;
 	labelChanged_ = false;
 }
 
@@ -450,6 +429,7 @@ struct ResetSerializerOp{
 
 void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 {
+	const char* startPtr = ptr;
 	if (changeLabel) {
 		userFullRow_ = false;
 		pulledUp_ = false;
@@ -521,7 +501,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	}
 
 	if (changeLabel)
-		labelUndecorated_ = ptr;
+		controlCharacterCount_ = min(255, ptr - startPtr);
 
 	labelChanged();
 }
@@ -552,10 +532,6 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
 	PropertyRow* nonPulled = nonPulledParent();
-	if (!layoutChanged_ && !force && !nonPulled->layoutChanged_) {
-		DEBUG_TRACE_ROW("... skipping size for %s", label());
-		return;
-	}
 
 	if(isRoot())
 		expanded_ = true;
@@ -568,7 +544,6 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 
 		if(!visible(tree) && !(isContainer() && pulledUp())){
 			DEBUG_TRACE_ROW("row '%s' got zero size", label());
-			layoutChanged_ = false;
 			return;
 		}
 	}
@@ -582,13 +557,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		int minTextSize = 0;
 		int minimalWidth = 0;
 		calcPulledRows(&minTextSize, &freePulledChildren, &minimalWidth, tree, index);
-
-		float textScale = 1.0f;
-		setTextSize(tree, index, textScale);
-
 	}
-
-	WidgetPlacement widgetPlace = widgetPlacement();
 
 	int numChildren = count();
 	if (hasPulled_) {
@@ -606,7 +575,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 			DEBUG_TRACE_ROW("skipping invisible child: %s", row->label());
 			continue;
 		}
-		if(row->pulledUp()){
+		if(row->pulledUp() || row->pulledBefore()){
 			if(!row->pulledBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 			}
@@ -614,7 +583,6 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		else if(expanded())
 			row->calculateMinimalSize(tree, nonPulled->plusRect(tree).right(), force, &extraSize, i);
 	}
-	layoutChanged_ = false;
 }
 
 void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHeight)
@@ -687,14 +655,18 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
 {
 	int numChildren = count();
+	int iterations = 1;
 
 	for (int i = startIndex; i < numChildren; ++i) {
 		PropertyRow* row = (PropertyRow*)childByIndex(i);
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
 			*outIndex = i;
+			if (iterations > 1) 
+				printf("searching for \"%s\" with %d iterations!\n", name, iterations);
 			return row;
 		}
+		++iterations;
 	}
 
 	for (int i = 0; i < startIndex; ++i) {
@@ -702,8 +674,11 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
 			*outIndex = i;
+			if (iterations > 1) 
+				printf("searching for \"%s\" with %d iterations!\n", name, iterations);
 			return row;
 		}
+		++iterations;
 	}
 
 	*outIndex = -1;

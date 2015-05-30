@@ -14,11 +14,7 @@ public:
 	, tree_(tree)
 	, row_(row)
 	{
-#ifdef _MSC_VER
-		initialValue_ = QString::fromUtf16((const ushort*)row->value().c_str());
-#else
-		initialValue_ = QString::fromWCharArray(row->value().c_str());
-#endif
+		initialValue_ = row->value().c_str();
 		entry_->setText(initialValue_);
 		entry_->selectAll();
 		QObject::connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
@@ -39,16 +35,8 @@ public:
 	void onEditingFinished(){
 		if(initialValue_ != entry_->text() || row_->multiValue()){
 			tree()->model()->rowAboutToBeChanged(row_);
-			vector<wchar_t> str;
 			QString text = entry_->text();
-#ifdef _MSC_VER
-			str.assign((const wchar_t*)text.utf16(), (const wchar_t*)(text.utf16() + text.size() + 1));
-#else
-			str.resize(text.size() + 1, L'\0');
-			if (!text.isEmpty())
-				text.toWCharArray(&str[0]);
-#endif
-			row_->setValue(&str[0]);
+			row_->setValue(text.toUtf8().data());
 			tree()->model()->rowChanged(row_);
 		}
 		else

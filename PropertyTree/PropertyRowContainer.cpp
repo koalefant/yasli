@@ -34,7 +34,8 @@ ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContai
 YASLI_CLASS(PropertyRow, PropertyRowContainer, "Container");
 
 PropertyRowContainer::PropertyRowContainer()
-: fixedSize_(false)
+: PropertyRowStruct(true)
+, fixedSize_(false)
 , elementTypeName_("")
 {
 	buttonLabel_[0] = '\0';

@@ -14,14 +14,39 @@
 namespace property_tree {
 
 
+inline unsigned calcHash(const char* str, unsigned hash = 5381)
+{
+	while(*str)
+		hash = hash*33 + (unsigned char)*str++;
+	return hash;
+}
+
+template<class T>
+inline unsigned calcHash(const T& t, unsigned hash = 5381)
+{
+	for (int i = 0; i < sizeof(T); i++)
+		hash = hash * 33 + ((unsigned char*)&t)[i];
+	return hash;
+}
 // ---------------------------------------------------------------------------
 
 int QUIFacade::textWidth(const char* text, Font font)
 {
+	static std::map<unsigned int, int> cache;
+
+	unsigned int hash = calcHash(text);
+	hash = calcHash(font, hash);
+
+	auto it = cache.find(hash);
+	if (it != cache.end())
+		return it->second;
+
 	const QFont* qfont = font == FONT_BOLD ? &tree_->boldFont() : &tree_->font();
 
 	QFontMetrics fm(*qfont);
-	return fm.width(text);
+	int width = fm.width(text);;
+	cache[hash] = width;
+	return width;
 }
 
 Point QUIFacade::screenSize()

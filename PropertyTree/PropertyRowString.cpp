@@ -26,13 +26,13 @@ YASLI_CLASS(PropertyRow, PropertyRowString, "string");
 
 bool PropertyRowString::assignTo(yasli::string& str)
 {
-    str = fromWideChar(value_.c_str());
+    str = value_.c_str();
     return true;
 }
 
 bool PropertyRowString::assignTo(yasli::wstring& str)
 {
-    str = value_;
+    str = toWideChar(value_.c_str());
     return true;
 }
 
@@ -43,17 +43,17 @@ property_tree::InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree
 
 yasli::string PropertyRowString::valueAsString() const
 {
-	return fromWideChar(value_.c_str());
+	return value_.c_str();
 }
 
 void PropertyRowString::setValue(const wchar_t* str)
 {
-	value_ = str;
+	value_ = fromWideChar(str);
 }
 
 void PropertyRowString::setValue(const char* str)
 {
-	value_ = toWideChar(str);
+	value_ = str;
 }
 
 void PropertyRowString::serializeValue(yasli::Archive& ar)

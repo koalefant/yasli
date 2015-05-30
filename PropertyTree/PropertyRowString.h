@@ -25,11 +25,10 @@ public:
 	void setValue(const wchar_t* str);
 	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 	yasli::string valueAsString() const override;
-	yasli::wstring valueAsWString() const override { return value_; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;
-	const yasli::wstring& value() const{ return value_; }
+	const yasli::string& value() const{ return value_; }
 private:
-	yasli::wstring value_;
+	yasli::string value_;
 };
 

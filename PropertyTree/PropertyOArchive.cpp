@@ -102,6 +102,7 @@ void PropertyOArchive::closeStruct(const char* name)
 static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, const char* typeName, int startIndex)
 {
 	int count = int(rows.size());
+	int iterations = 1;
 	for(int i = startIndex; i < count; ++i){
 		PropertyRow* row = rows[i];
 		if (!row)
@@ -109,8 +110,11 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
 			*index = (int)i;
+			if (iterations > 1)
+				printf("Searching %d times for \"%s\"\n", iterations, name);
 			return row;
 		}
+		++iterations;
 	}
 	for(int i = 0; i < startIndex; ++i){
 		PropertyRow* row = rows[i];
@@ -119,8 +123,11 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
 			*index = (int)i;
+			if (iterations > 1)
+				printf("Searching %d times for \"%s\"\n", iterations, name);
 			return row;
 		}
+		++iterations;
 	}
 	return 0;
 }

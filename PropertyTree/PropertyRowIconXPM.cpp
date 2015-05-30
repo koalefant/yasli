@@ -38,7 +38,7 @@ public:
 		YASLI_ESCAPE(ser.size() == sizeof(IconXPM), return);
 		icon_ = *(IconXPM*)(ser.pointer());
 	}
-	yasli::wstring valueAsWString() const override{ return L""; }
+	yasli::string valueAsString() const override{ return ""; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(Archive& ar) override{}
 	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
@@ -95,7 +95,7 @@ public:
 		}
 		return false;
 	}
-	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
+	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 
 	int widgetSizeMin(const PropertyTree*) const override{ return 18; }

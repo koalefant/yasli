@@ -381,13 +381,9 @@ void PropertyTree::expandChildren(PropertyRow* root)
 			PropertyRow* row = root->childByIndex(i);
 			row->setExpandedRecursive(this, true);
 		}
-		root->setLayoutChanged();
 	}
 	else
 		root->setExpandedRecursive(this, true);
-
-	for (PropertyRow* r = root; r != 0; r = r->parent())
-		r->setLayoutChanged();
 
 	updateHeights();
 }
@@ -420,9 +416,6 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 		}
 	}
 
-	for (PropertyRow* r = root; r != 0; r = r->parent())
-		r->setLayoutChanged();
-
 	updateHeights();
 }
 
@@ -433,9 +426,6 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights
 		row->_setExpanded(expanded);
 		hasChanges = true;
 	}
-
-	for (PropertyRow* r = row; r != 0; r = r->parent())
-		r->setLayoutChanged();
 
     if(!row->expanded()){
 		PropertyRow* f = model()->focusedRow();
