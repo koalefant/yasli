@@ -63,9 +63,9 @@ PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 , userWidgetSize_(-1)
 , name_("")
 , typeName_("")
-, pulledUp_(false)
-, pulledBefore_(false)
-, hasPulled_(false)
+, inlined_(false)
+, inlinedBefore_(false)
+, hasInlinedChildren_(false)
 , userReadOnly_(false)
 , userReadOnlyRecurse_(false)
 , userFullRow_(false)
@@ -132,7 +132,7 @@ void PropertyRow::_setExpanded(bool expanded)
 
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* child = childByIndex(i);
-		if(child->pulledUp())
+		if(child->inlined())
 			child->_setExpanded(expanded);
 	}
 }
@@ -230,8 +230,8 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	userReadOnly_ = row->userReadOnly_;
 	userReadOnlyRecurse_ = row->userReadOnlyRecurse_;
 	userFixedWidget_ = row->userFixedWidget_;
-	pulledUp_ = row->pulledUp_;
-	pulledBefore_ = row->pulledBefore_;
+	inlined_ = row->inlined_;
+	inlinedBefore_ = row->inlinedBefore_;
 	textSizeInitial_ = row->textSizeInitial_;
 	textHash_ = row->textHash_;
 	userWidgetSize_ = row->userWidgetSize_;
@@ -389,12 +389,12 @@ void PropertyRow::setLabel(const char* label)
 void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 {
 	if (!labelChanged_) {
-		if (pulledUp_)
-		parent()->hasPulled_ = true;
+		if (inlined_)
+		parent()->hasInlinedChildren_ = true;
 		return;
 	}
 
-	hasPulled_ = false;
+	hasInlinedChildren_ = false;
 
 	int numChildren = count();
 	for (int i = 0; i < numChildren; ++i) {
@@ -403,18 +403,18 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 	}
 
 	parseControlCodes(label_, true);
-	visible_ = labelUndecorated()[0] != '\0' || userFullRow_ || pulledUp_ || isRoot();
+	visible_ = labelUndecorated()[0] != '\0' || userFullRow_ || inlined_ || isRoot();
 	if (userHideChildren_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = childByIndex(i);
-			if (row->pulledUp())
+			if (row->inlined())
 				continue;
 			row->visible_ = false;
 		}
 	}
 
-	if(pulledContainer())
-		pulledContainer()->_setExpanded(expanded());
+	if(inlinedContainer())
+		inlinedContainer()->_setExpanded(expanded());
 
 	labelChanged_ = false;
 }
@@ -432,8 +432,8 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	const char* startPtr = ptr;
 	if (changeLabel) {
 		userFullRow_ = false;
-		pulledUp_ = false;
-		pulledBefore_ = false;
+		inlined_ = false;
+		inlinedBefore_ = false;
 		userReadOnly_ = false;
 		userReadOnlyRecurse_ = false;
 		userFixedWidget_ = false;
@@ -444,13 +444,13 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 	while(true){
 		if(*ptr == '^'){
 			if(parent() && !parent()->isRoot()){
-				if(pulledUp_)
-					pulledBefore_ = true;
-				pulledUp_ = true;
-				parent()->hasPulled_ = true;
+				if(inlined_)
+					inlinedBefore_ = true;
+				inlined_ = true;
+				parent()->hasInlinedChildren_ = true;
 
-				if(pulledUp() && isContainer())
-					parent()->setPulledContainer(asStruct());
+				if(inlined() && isContainer())
+					parent()->setInlinedContainer(asStruct());
 			}
 		}
 		else if(*ptr == '+')
@@ -531,18 +531,18 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 
 void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index)
 {
-	PropertyRow* nonPulled = nonPulledParent();
+	PropertyRow* nonInlined = findNonInlinedParent();
 
 	if(isRoot())
 		expanded_ = true;
 	else{
-		if(nonPulled->isRoot() || (tree->compact() && nonPulled->parent()->isRoot()))
+		if(nonInlined->isRoot() || (tree->compact() && nonInlined->parent()->isRoot()))
 			_setExpanded(true);
 
-		if(parent()->pulledUp())
-			pulledBefore_ = false;
+		if(parent()->inlined())
+			inlinedBefore_ = false;
 
-		if(!visible(tree) && !(isContainer() && pulledUp())){
+		if(!visible(tree) && !(isContainer() && inlined())){
 			DEBUG_TRACE_ROW("row '%s' got zero size", label());
 			return;
 		}
@@ -550,20 +550,20 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 
 	updateTextSizeInitial(tree, index);
 
-	int freePulledChildren = 0;
+	int freeInlinedChildren = 0;
 	int extraSizeStorage = 0;
-	int& extraSize = !pulledUp() || !_extraSize ? extraSizeStorage : *_extraSize;
-	if(!pulledUp()){
+	int& extraSize = !inlined() || !_extraSize ? extraSizeStorage : *_extraSize;
+	if(!inlined()){
 		int minTextSize = 0;
 		int minimalWidth = 0;
-		calcPulledRows(&minTextSize, &freePulledChildren, &minimalWidth, tree, index);
+		calcInlinedRows(&minTextSize, &freeInlinedChildren, &minimalWidth, tree, index);
 	}
 
 	int numChildren = count();
-	if (hasPulled_) {
+	if (hasInlinedChildren_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = childByIndex(i);
-			if(row->visible(tree) && row->pulledBefore()){
+			if(row->visible(tree) && row->inlinedBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 			}
 		}
@@ -575,28 +575,28 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 			DEBUG_TRACE_ROW("skipping invisible child: %s", row->label());
 			continue;
 		}
-		if(row->pulledUp() || row->pulledBefore()){
-			if(!row->pulledBefore()){
+		if(row->inlined() || row->inlinedBefore()){
+			if(!row->inlinedBefore()){
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 			}
 		}
 		else if(expanded())
-			row->calculateMinimalSize(tree, nonPulled->plusRect(tree).right(), force, &extraSize, i);
+			row->calculateMinimalSize(tree, nonInlined->plusRect(tree).right(), force, &extraSize, i);
 	}
 }
 
 void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHeight)
 {
-	if(pulledUp()) {
+	if(inlined()) {
 		expanded_ = parent()->expanded();
 	}
-	PropertyRow* nonPulled = nonPulledParent();
+	PropertyRow* nonInlined = findNonInlinedParent();
 
-	if (expanded_ || hasPulled_) {
+	if (expanded_ || hasInlinedChildren_) {
 		int num = count();
 		for(int i = 0; i < num; ++i){
 			PropertyRow* row = childByIndex(i);
-			if(row->visible(tree) && (nonPulled->expanded() || row->pulledUp()))
+			if(row->visible(tree) && (nonInlined->expanded() || row->inlined()))
 				row->adjustVerticalPosition(tree, totalHeight);
 		}
 	}
@@ -609,20 +609,20 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
 		PropertyRow* row = childByIndex(i);
-		if(row->pulledUp())
+		if(row->inlined())
 			row->setTextSize(tree, 0, mult);
 	}
 }
 
-void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
+void PropertyRow::calcInlinedRows(int* minTextSize, int* freeInlinedChildren, int* minimalWidth, const PropertyTree *tree, int index) 
 {
 	updateTextSizeInitial(tree, index);
 
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
 		PropertyRow* row = childByIndex(i);
-		if(row->pulledUp())
-			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+		if(row->inlined())
+			row->calcInlinedRows(minTextSize, freeInlinedChildren, minimalWidth, tree, index);
 	}
 }
 
@@ -771,25 +771,25 @@ int PropertyRow::level() const
     return result;
 }
 
-PropertyRow* PropertyRow::nonPulledParent()
+PropertyRow* PropertyRow::findNonInlinedParent()
 {
 	PropertyRow* row = this;
-	while(row->pulledUp())
+	while(row->inlined())
 		row = row->parent();
 	return row;
 }
 
-PropertyRow* PropertyRow::pulledContainer()
+PropertyRow* PropertyRow::inlinedContainer()
 {
 	if (isStruct_)
-		return asStruct()->pulledContainer();
+		return asStruct()->inlinedContainer();
 	return 0;
 }
 
-const PropertyRow* PropertyRow::pulledContainer() const
+const PropertyRow* PropertyRow::inlinedContainer() const
 {
 	if (isStruct_)
-		return asStruct()->pulledContainer();
+		return asStruct()->inlinedContainer();
 	return 0;
 }
 
@@ -798,7 +798,7 @@ bool PropertyRow::pulledSelected() const
 	if(selected())
 		return true;
 	const PropertyRow* row = this;
-	while(row->pulledUp()){
+	while(row->inlined()){
 		row = row->parent();
 		if(row->selected())
 			return true;
@@ -816,7 +816,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 {
 	Rect rowRect = rect(tree);
 	Rect selectionRect;
-	if(!pulledUp())
+	if(!inlined())
 		selectionRect = rowRect.adjusted(/*plusSize_ - */(tree->compact() ? 1 : 2), -2, 1, 1);
 	else
 		selectionRect = rowRect.adjusted(-1, 0, 1, -1);
@@ -834,7 +834,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 				PropertyRow* child = childByIndex(i);
 				if (!child)
 					continue;
-				if ((child->pulledBefore() || child->pulledUp()) && child->selected())
+				if ((child->inlinedBefore() || child->inlined()) && child->selected())
 					pulledChildrenSelected = true;
 			}
 
@@ -852,7 +852,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 		// drawing a horizontal line
 
 		if(textSizeInitial_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
+		   !inlined() && !isFullRow(tree) && !hasInlinedChildren() && floorHeight() == 0)
 		{
 			Rect lineRect = floorRect(tree);
 			Rect textRect = this->textRect(tree);
@@ -878,7 +878,7 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 				PropertyRow* child = childByIndex(i);
 				if (!child)
 					continue;
-				if ((child->pulledBefore() || child->pulledUp()) && child->selected())
+				if ((child->inlinedBefore() || child->inlined()) && child->selected())
 					pulledChildrenSelected = true;
 			}
 			if (pulledChildrenSelected)
@@ -925,7 +925,7 @@ bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 {
 	if(!visible(tree))
 		return false;
-	if((tree->compact() && (parent() && parent()->isRoot())) || (isContainer() && pulledUp()) || !hasVisibleChildren(tree))
+	if((tree->compact() && (parent() && parent()->isRoot())) || (isContainer() && inlined()) || !hasVisibleChildren(tree))
 		return false;
 	return !empty();
 }
@@ -943,8 +943,8 @@ bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow
 {
 	YASLI_ASSERT(parentRow);
 
-	if(parentRow->pulledContainer())
-		parentRow = parentRow->pulledContainer();
+	if(parentRow->inlinedContainer())
+		parentRow = parentRow->inlinedContainer();
 
 	if(parentRow->isContainer()){
 		const PropertyRowContainer* container = static_cast<const PropertyRowContainer*>(parentRow);
@@ -968,8 +968,8 @@ void PropertyRow::dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow,
 
 	PropertyTreeModel* model = tree->model();
 	PropertyTreeModel::UpdateLock lock = model->lockUpdate();
-	if(parentRow->pulledContainer())
-		parentRow = parentRow->pulledContainer();
+	if(parentRow->inlinedContainer())
+		parentRow = parentRow->inlinedContainer();
 	if(parentRow->isContainer()){
 		tree->model()->rowAboutToBeChanged(tree->model()->root()); // FIXME: select optimal row
 		setSelected(false);
@@ -1039,13 +1039,13 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const Propert
 
 bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall) const
 {
-	if(empty() || (!internalCall && pulledUp()))
+	if(empty() || (!internalCall && inlined()))
 		return false;
 
 	int num = count();
 	for(int i = 0; i < num; ++i){
 		const PropertyRow* child = childByIndex(i);
-		if(child->pulledUp()){
+		if(child->inlined()){
             if(child->hasVisibleChildren(tree, true))
                 return true;
         }
@@ -1097,7 +1097,7 @@ struct GetVerticalIndexOp{
 	{
 		if(row == row_)
 			return SCAN_FINISHED;
-		if(row->visible(tree) && row->isSelectable() && !row->pulledUp())
+		if(row->visible(tree) && row->isSelectable() && !row->inlined())
 			++index_;
 		return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
 	}
@@ -1123,7 +1123,7 @@ struct RowByVerticalIndexOp{
 
     ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
-        if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
+        if(row->visible(tree) && !row->inlined() && row->isSelectable()){
             row_ = row;
             if(index_-- <= 0)
                 return SCAN_FINISHED;
@@ -1146,16 +1146,16 @@ PropertyRow* PropertyRow::rowByVerticalIndex(PropertyTree* tree, int index)
 struct HorizontalIndexOp{
     int index_;
     PropertyRow* row_;
-    bool pulledBefore_;
+    bool inlinedBefore_;
 
-    HorizontalIndexOp(PropertyRow* row) : row_(row), index_(0), pulledBefore_(row->pulledBefore()) {}
+    HorizontalIndexOp(PropertyRow* row) : row_(row), index_(0), inlinedBefore_(row->inlinedBefore()) {}
 
     ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
-        if(!row->pulledUp())
+        if(!row->inlined())
             return SCAN_SIBLINGS;
-        if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
-            index_ += pulledBefore_ ? -1 : 1;
+        if(row->visible(tree) && row->isSelectable() && row->inlined() && row->inlinedBefore() == inlinedBefore_){
+            index_ += inlinedBefore_ ? -1 : 1;
             if(row == row_)
                 return SCAN_FINISHED;
         }
@@ -1169,7 +1169,7 @@ int PropertyRow::horizontalIndex(PropertyTree* tree, PropertyRow* row)
 		return 0;
     HorizontalIndexOp op(row);
 	if (isStruct_) {
-		if(row->pulledBefore())
+		if(row->inlinedBefore())
 			asStruct()->scanChildrenReverse(op, tree);
 		else
 			asStruct()->scanChildren(op, tree);
@@ -1180,17 +1180,17 @@ int PropertyRow::horizontalIndex(PropertyTree* tree, PropertyRow* row)
 struct RowByHorizontalIndexOp{
     int index_;
     PropertyRow* row_;
-    bool pulledBefore_;
+    bool inlinedBefore_;
 
-    RowByHorizontalIndexOp(int index) : row_(0), index_(index), pulledBefore_(index < 0) {}
+    RowByHorizontalIndexOp(int index) : row_(0), index_(index), inlinedBefore_(index < 0) {}
 
     ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
     {
-        if(!row->pulledUp())
+        if(!row->inlined())
             return SCAN_SIBLINGS;
-        if(row->visible(tree) && row->isSelectable() && row->pulledUp() && row->pulledBefore() == pulledBefore_){
+        if(row->visible(tree) && row->isSelectable() && row->inlined() && row->inlinedBefore() == inlinedBefore_){
             row_ = row;
-            if(pulledBefore_ ? ++index_ >= 0 : --index_ <= 0)
+            if(inlinedBefore_ ? ++index_ >= 0 : --index_ <= 0)
                 return SCAN_FINISHED;
         }
         return SCAN_CHILDREN_SIBLINGS;

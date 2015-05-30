@@ -138,7 +138,7 @@ struct DrawVisitor
 
 	ScanResult operator()(PropertyRow* row, ::PropertyTree* _tree, int index)
 	{
-		if(row->visible(_tree) && (row->parent()->expanded() && !lastParent_ || row->pulledUp())){
+		if(row->visible(_tree) && (row->parent()->expanded() && !lastParent_ || row->inlined())){
 			if(row->rect().top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
@@ -415,7 +415,7 @@ struct FilterVisitor
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {
-			if (row->pulledBefore() || row->pulledUp()) {
+			if (row->inlinedBefore() || row->inlined()) {
 				// treat pulled rows as part of parent
 				PropertyRow* parent = row->parent();
 				parent->setMatchFilter(true);
@@ -436,7 +436,7 @@ struct FilterVisitor
 				tree->expandRow(row, true, false);
 				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
-					if (child->pulledUp())
+					if (child->inlined())
 						child->setBelongsToFilteredRow(true);
 				}
 			}
@@ -636,7 +636,7 @@ void PropertyTree::onLButtonDown(int button, int x, int y)
 		else if (!dragCheckMode_){
 			row = rowByPoint(property_tree::Point(x, y));
 			PropertyRow* draggedRow = row;
-			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
+			while (draggedRow && (!draggedRow->isSelectable() || draggedRow->inlined() || draggedRow->inlinedBefore()))
 				draggedRow = draggedRow->parent();
 			if (draggedRow && !draggedRow->userReadOnly() && !widget_.get()){
 				POINT cursorPos = { x, y };

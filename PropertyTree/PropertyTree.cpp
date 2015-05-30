@@ -181,7 +181,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	PropertyRow* focusedRow = model()->focusedRow();
 	if(!focusedRow)
 		return false;
-	PropertyRow* parentRow = focusedRow->nonPulledParent();
+	PropertyRow* parentRow = focusedRow->findNonInlinedParent();
 	int x = parentRow->horizontalIndex(this, focusedRow);
 	int y = model()->root()->verticalIndex(this, parentRow);
 	PropertyRow* selectedRow = 0;
@@ -349,7 +349,7 @@ void PropertyTree::expandParents(PropertyRow* row)
 	bool hasChanges = false;
 	typedef std::vector<PropertyRow*> Parents;
 	Parents parents;
-	PropertyRow* p = row->nonPulledParent()->parent();
+	PropertyRow* p = row->findNonInlinedParent()->parent();
 	while(p){
 		parents.push_back(p);
 		p = p->parent();
@@ -468,7 +468,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
-		if (child->pulledBefore()) {
+		if (child->inlinedBefore()) {
 			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
 		}
 	}
@@ -476,7 +476,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
 	int labelMin = row->textSizeInitial();
-	ElementType labelElementType = (row->isFullRow(tree) || row->pulledUp()) ? FIXED_SIZE : EXPANDING_MAGNET;
+	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
 	unsigned int widgetElement = 0xffffffff;
 	switch (placement) {
@@ -503,7 +503,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	break;
-	case PropertyRow::WIDGET_AFTER_PULLED:
+	case PropertyRow::WIDGET_AFTER_INLINED:
 	{
 		if (row->labelUndecorated()[0])
 			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
@@ -516,14 +516,14 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
-		if (child->pulledUp() && !child->pulledBefore()) {
+		if (child->inlined() && !child->inlinedBefore()) {
 			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
 		}
-		else if (!child->pulledBefore())
+		else if (!child->inlinedBefore())
 			*hasNonPulledChildren = true;
 	}
 
-	if (placement == PropertyRow::WIDGET_AFTER_PULLED) {
+	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
 		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	}
 	if (widgetElement != 0xffffffff)
@@ -541,7 +541,7 @@ static void populateContentArea(Layout* l, int parentElement, PropertyRow* paren
 		if (!child->visible(tree))
 			continue;
 
-		if (child->pulledUp() || child->pulledBefore()) {
+		if (child->inlined() || child->inlinedBefore()) {
 			populateContentArea(l, parentElement, child, tree);
 			continue;
 		}
@@ -760,7 +760,7 @@ void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjus
 		model()->selectRow(row, !(addSelection && row->selected() && model()->selection().size() > 1), !addSelection);
 	ensureVisible(row);
 	if(adjustCursorPos)
-		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
+		cursorX_ = row->findNonInlinedParent()->horizontalIndex(this, row);
 	updateAttachedPropertyTree(false);
 	onSelected();
 }
@@ -915,8 +915,6 @@ void PropertyTree::apply(bool continuous)
 		onContinuousChange();
 	else
 		onChanged();
-
-	//applyTime_ = timer.elapsed();
 }
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -981,7 +979,7 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 	int num = row->count();
 	for(int i = 0; i < num; ++i){
 		PropertyRow* child = row->childByIndex(i);
-		if(child->isContainer() && child->pulledUp())
+		if(child->isContainer() && child->inlined())
 			child->onContextMenu(menu, this);
 	}
 	row->onContextMenu(menu, this);
@@ -1202,7 +1200,7 @@ void PropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 			continue;
 
 
-		while(row && ((row->pulledUp() || row->pulledBefore()) || row->isLeaf())) {
+		while(row && ((row->inlined() || row->inlinedBefore()) || row->isLeaf())) {
 			row = row->parent();
 		}
 		Serializer ser = row->serializer();

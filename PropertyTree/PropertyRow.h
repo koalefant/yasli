@@ -81,7 +81,7 @@ public:
 		WIDGET_ICON,
 		WIDGET_AFTER_NAME,
 		WIDGET_VALUE,
-		WIDGET_AFTER_PULLED
+		WIDGET_AFTER_INLINED
 	};
 
 
@@ -161,7 +161,7 @@ public:
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree* tree, int index);
+	void calcInlinedRows(int* minTextSize, int* freeInlinedChildren, int* minimalWidth, const PropertyTree* tree, int index);
 	void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index);
 	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 	void calculateTotalSizes(int* minTextSize);
@@ -193,7 +193,7 @@ public:
 	virtual bool isLeaf() const{ return false; }
 	virtual void closeNonLeaf(const yasli::Serializer& ser) {}
 	virtual bool isStatic() const{ return true; }
-	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!pulledUp() && !pulledBefore()); }
+	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!inlined() && !inlinedBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
 
 	bool canBeToggled(const PropertyTree* tree) const;
@@ -230,13 +230,13 @@ public:
 
 	// pulledRow - is the one that is pulled up to the parents row
 	// (created with ^ in the beginning of label)
-	bool pulledUp() const { return pulledUp_; }
-	bool pulledBefore() const { return pulledBefore_; }
-	bool hasPulled() const { return hasPulled_; }
+	bool inlined() const { return inlined_; }
+	bool inlinedBefore() const { return inlinedBefore_; }
+	bool hasInlinedChildren() const { return hasInlinedChildren_; }
 	bool pulledSelected() const;
-	PropertyRow* nonPulledParent();
-	PropertyRow* pulledContainer();
-	const PropertyRow* pulledContainer() const;
+	PropertyRow* findNonInlinedParent();
+	PropertyRow* inlinedContainer();
+	const PropertyRow* inlinedContainer() const;
 	int textSizeInitial() const { return textSizeInitial_; }
 
 	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
@@ -282,9 +282,9 @@ protected:
 	bool userFixedWidget_ : 1;
 	bool userFullRow_ : 1;
 	bool userHideChildren_ : 1;
-	bool pulledUp_ : 1;
-	bool pulledBefore_ : 1;
-	bool hasPulled_ : 1;
+	bool inlined_ : 1;
+	bool inlinedBefore_ : 1;
+	bool hasInlinedChildren_ : 1;
 	bool multiValue_ : 1;
 
 	static ConstStringList* constStrings_;
@@ -310,7 +310,7 @@ public:
 	const PropertyRow* childByIndex(int index) const;
 	int childIndex(PropertyRow* row);
 
-	bool isStatic() const override { return pulledContainer_ == 0; }
+	bool isStatic() const override { return inlinedContainer_ == 0; }
 	void add(PropertyRow* row);
 	void addAfter(PropertyRow* row, PropertyRow* after);
 	void addBefore(PropertyRow* row, PropertyRow* before);
@@ -320,9 +320,9 @@ public:
 	
 	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, bool preserveChildren = true);
 
-	const PropertyRowStruct* pulledContainer() const{ return pulledContainer_; }
-	void setPulledContainer(PropertyRowStruct* container){ pulledContainer_ = container; }
-	PropertyRowStruct* pulledContainer() { return pulledContainer_; }
+	const PropertyRowStruct* inlinedContainer() const{ return inlinedContainer_; }
+	void setInlinedContainer(PropertyRowStruct* container){ inlinedContainer_ = container; }
+	PropertyRowStruct* inlinedContainer() { return inlinedContainer_; }
 
 	void swapChildren(PropertyRow* row) override;
 
@@ -335,7 +335,7 @@ public:
 protected:
 	Rows children_;
 	yasli::Serializer serializer_;
-	yasli::SharedPtr<PropertyRowStruct> pulledContainer_;
+	yasli::SharedPtr<PropertyRowStruct> inlinedContainer_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;
 };

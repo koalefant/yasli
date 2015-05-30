@@ -117,7 +117,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 {
 	bool result = false;
 	// content of the pulled container has a priority over the node itself
-	PropertyRowContainer* destPulledContainer = static_cast<PropertyRowContainer*>(dest->pulledContainer());
+	PropertyRowContainer* destPulledContainer = static_cast<PropertyRowContainer*>(dest->inlinedContainer());
 	if((destPulledContainer && strcmp(destPulledContainer->elementTypeName(), source->typeName()) == 0)) {
 		PropertyRow* elementRow = model->defaultType(destPulledContainer->elementTypeName());
 		YASLI_ESCAPE(elementRow, return false);
@@ -305,7 +305,7 @@ struct DrawVisitor
 
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
-		if(row->visible(tree) && ((row->parent()->expanded() && !lastParent_) || row->pulledUp())){
+		if(row->visible(tree) && ((row->parent()->expanded() && !lastParent_) || row->inlined())){
 			if(row->rect(tree).top() > scrollOffset_ + area_.height())
 				lastParent_ = row->parent();
 
@@ -334,7 +334,7 @@ struct DrawRowVisitor
 
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
-		if(row->pulledUp() && row->visible(tree)) {
+		if(row->inlined() && row->visible(tree)) {
 			QDrawContext context((QPropertyTree*)tree, &painter_);
 			row->drawRow(context, tree, index, true);
 			row->drawRow(context, tree, index, false);
@@ -452,7 +452,7 @@ public:
 		if(!row || !row_)
 			return;
 
-		row = row->nonPulledParent();
+		row = row->findNonInlinedParent();
 		if(!row->parent() || row->isChildOf(row_) || row == row_)
 			return;
 
@@ -884,7 +884,7 @@ struct FilterVisitor
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {
-			if (row->pulledBefore() || row->pulledUp()) {
+			if (row->inlinedBefore() || row->inlined()) {
 				// treat pulled rows as part of parent
 				PropertyRow* parent = row->parent();
 				parent->setMatchFilter(true);
@@ -904,7 +904,7 @@ struct FilterVisitor
 				tree->expandRow(row, true, false);
 				for (int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = row->childByIndex(i);
-					if (child->pulledUp())
+					if (child->inlined())
 						child->setBelongsToFilteredRow(true);
 				}
 			}
@@ -1175,7 +1175,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			else if (!dragCheckMode_){
 				row = rowByPoint(fromQPoint(ev->pos()));
 				PropertyRow* draggedRow = row;
-				while (draggedRow && (!draggedRow->isSelectable() || draggedRow->pulledUp() || draggedRow->pulledBefore()))
+				while (draggedRow && (!draggedRow->isSelectable() || draggedRow->inlined() || draggedRow->inlinedBefore()))
 					draggedRow = draggedRow->parent();
 				if(draggedRow && !draggedRow->userReadOnly() && !widget_.get()){
 					dragController_->beginDrag(row, draggedRow, ev->globalPos());

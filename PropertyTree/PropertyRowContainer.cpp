@@ -123,7 +123,7 @@ void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree
 			menu.addSeparator();
 		}
 
-		menu.addAction(pulledUp() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
+		menu.addAction(inlined() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
 			handler, &ContainerMenuHandler::onMenuRemoveAll);
 	}
 }
@@ -135,7 +135,7 @@ bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTree* tree)
 
 	generateMenu(menu, tree);
 
-	if(pulledUp())
+	if(inlined())
 		return !menu.isEmpty();
 
 	return PropertyRow::onContextMenu(menu, tree);
