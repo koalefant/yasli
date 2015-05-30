@@ -812,57 +812,6 @@ Font PropertyRow::rowFont(const PropertyTree* tree) const
 	return hasVisibleChildren(tree) || isContainer() ? FONT_BOLD : FONT_NORMAL;
 }
 
-void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int index, bool selectionPass)
-{
-	Rect rowRect = rect(tree);
-	Rect selectionRect;
-	if(!inlined())
-		selectionRect = rowRect.adjusted(/*plusSize_ - */(tree->compact() ? 1 : 2), -2, 1, 1);
-	else
-		selectionRect = rowRect.adjusted(-1, 0, 1, -1);
-
-	if (selectionPass) {
-		if (selected()) {
-			// drawing a selection rectangle
-			context.drawSelection(selectionRect, false);
-		}
-		else{
-			bool pulledChildrenSelected = false;
-
-			int num = count();
-			for (int i = 0; i < num; ++i) {
-				PropertyRow* child = childByIndex(i);
-				if (!child)
-					continue;
-				if ((child->inlinedBefore() || child->inlined()) && child->selected())
-					pulledChildrenSelected = true;
-			}
-
-			if (pulledChildrenSelected) {
-				context.drawSelection(selectionRect, true);
-				// draw rectangle around parent of selected pulled row
-			}
-		}
-	}
-	else{
-		context.widgetRect = widgetRect(tree);
-		context.captured = tree->_isCapturedRow(this);
-		context.pressed = tree->_pressedRow() == this;
-
-		// drawing a horizontal line
-
-		if(textSizeInitial_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-		   !inlined() && !isFullRow(tree) && !hasInlinedChildren() && floorHeight() == 0)
-		{
-			Rect lineRect = floorRect(tree);
-			Rect textRect = this->textRect(tree);
-			Rect rect(textRect.left() - 1, rowRect.bottom() - 2, lineRect.width() - (textRect.left() - 1), 1);
-
-			context.drawRowLine(rect);
-		}
-	}
-}
-
 void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex)
 {
 	switch (part)
@@ -916,8 +865,6 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 
 bool PropertyRow::visible(const PropertyTree* tree) const
 {
-	if (tree->_isDragged(this))
-		return false;
 	return (visible_ && (matchFilter_ || belongsToFilteredRow_));
 }
 

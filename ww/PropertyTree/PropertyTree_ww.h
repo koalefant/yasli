@@ -66,7 +66,6 @@ public:
 	void _setFocus();
 	void _drawRowLabel(Gdiplus::Graphics* gr, const char* text, Gdiplus::Font* font, const Rect& rect, const Color& color) const;
 	void _drawRowValue(Gdiplus::Graphics* gr, const char* text, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
-	bool _isDragged(const PropertyRow* row) const;
 	Rect _visibleRect() const;
 	Gdiplus::Graphics* _graphics() const { return graphics_; }
 	TreeImpl* impl() const;

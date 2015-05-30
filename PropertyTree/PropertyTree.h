@@ -21,6 +21,7 @@ namespace yasli { class Object; struct Context; }
 
 namespace property_tree{ 
 class InplaceWidget;
+struct IDrawContext;
 struct Color;
 struct Layout;
 
@@ -88,7 +89,6 @@ public:
 	const PropertyTreeModel* model() const { return model_.get(); }
 	IUIFacade* ui() const { return ui_; }
 	void _cancelWidget();
-	virtual bool _isDragged(const PropertyRow* row) const = 0;
 	bool _isCapturedRow(const PropertyRow* row) const;
 
 	PropertyRow* _pressedRow() const { return pressedRow_; }
@@ -101,6 +101,9 @@ public:
 	Point _toWidget(Point point) const;
 	void updateLayout();
 	Rect findRowRect(const PropertyRow* row, int part, int subindex) const;
+	void drawLayout(property_tree::IDrawContext& context, int height);
+	void drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row);
+
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;
@@ -180,6 +183,8 @@ private:
 	PropertyTree(const PropertyTree&);
 	PropertyTree& operator=(const PropertyTree&);
 protected:
+	void setDraggedRow(PropertyRow* row);
+
 	std::auto_ptr<PropertyTreeModel> model_;
 	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
 	PropertyRow* widgetRow_;
@@ -191,6 +196,7 @@ protected:
 	PropertyTree* attachedPropertyTree_;
 	RowFilter rowFilter_;
 	yasli::Context* archiveContext_;
+	std::vector<int> hiddenLayoutElements_;
 	property_tree::Layout* layout_;
 
 	int leftBorder_;

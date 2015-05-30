@@ -76,7 +76,6 @@ public:
 	int _updateHeightsTime() const{ return updateHeightsTime_; }
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const override;
-	bool _isDragged(const PropertyRow* row) const override;
 
 signals:
 	void signalAboutToSerialize(yasli::Archive& ar);

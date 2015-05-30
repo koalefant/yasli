@@ -180,7 +180,6 @@ public:
 	void adjustHoveredRect(Rect& hoveredRect);
 	Font rowFont(const PropertyTree* tree) const;
 
-	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
 	void drawElement(IDrawContext& x, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex);
 
 	virtual void redraw(IDrawContext& context);
@@ -251,8 +250,8 @@ public:
 	void serialize(yasli::Archive& ar);
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
-	void setLayoutElement(unsigned int layoutElement) { layoutElement_ = layoutElement; }
-	unsigned int layoutElement() const { return layoutElement_; }
+	void setLayoutElement(int layoutElement) { layoutElement_ = layoutElement; }
+	int layoutElement() const { return layoutElement_; }
 
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
@@ -262,7 +261,7 @@ protected:
 	const char* label_;
 	PropertyRowStruct* parent_;
 
-	unsigned int layoutElement_;
+	int layoutElement_;
 	unsigned int textHash_;
 
 	// do we really need Point here? 

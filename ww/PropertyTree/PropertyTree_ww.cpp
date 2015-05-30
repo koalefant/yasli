@@ -807,15 +807,6 @@ void PropertyTree::onMouseWheel(int delta)
 	RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
-bool PropertyTree::_isDragged(const PropertyRow* row) const
-{
-	if (!dragController_->isDragging())
-		return false;
-	if (dragController_->draggedRow() == row)
-		return true;
-	return false;
-}
-
 void PropertyTree::onAttachedTreeChanged()
 {
 	revert();

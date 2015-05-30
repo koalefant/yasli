@@ -32,8 +32,24 @@
 
 #include "PropertyRowObject.h"
 
+// #define PROFILE
+#ifdef PROFILE
+#include <QElapsedTimer>
+#endif
+
 using yasli::Serializers;
 using namespace property_tree;
+
+template<class T>
+static bool findInSortedVector(const std::vector<T>& vec, const T& value)
+{
+	typename std::vector<T>::const_iterator it = std::lower_bound(vec.begin(), vec.end(), value);
+	if (it == vec.end())
+		return false;
+	if (*it != value)
+		return false;
+	return true;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -478,7 +494,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	int labelMin = row->textSizeInitial();
 	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
-	unsigned int widgetElement = 0xffffffff;
+	int widgetElement = -1;
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
@@ -685,8 +701,8 @@ static void calculateRectangles(Layout* l, int element, int width, int height, i
 Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) const
 {
 	Layout& l = *layout_;
-	unsigned int index = row->layoutElement();
-	if (index >= l.elements.size())
+	int index = row->layoutElement();
+	if (size_t(index) >= l.elements.size())
 		return Rect();
 	PropertyRow* startRow = 0;
 	for (; index < l.elements.size(); ++index)
@@ -845,9 +861,11 @@ void PropertyTree::revert()
 	widget_.reset();
 	capturedRow_ = 0;
 
+#ifdef PROFILE
+	QElapsedTimer timer;
+	timer.start();
+#endif
 	if (!attached_.empty()) {
-		//QElapsedTimer timer;
-		//timer.start();
 
 		PropertyOArchive oa(model_.get(), model_->root());
 		oa.setLastContext(archiveContext_);
@@ -856,7 +874,7 @@ void PropertyTree::revert()
 		Objects::iterator it = attached_.begin();
 		onAboutToSerialize(oa);
 		(*it)(oa);
-		
+
 		PropertyTreeModel model2(this);
 		while(++it != attached_.end()){
 			PropertyOArchive oa2(&model2, model2.root());
@@ -867,10 +885,13 @@ void PropertyTree::revert()
 			(*it)(oa2);
 			model_->root()->intersect(model2.root());
 		}
-		//revertTime_ = int(timer.elapsed());
 	}
 	else
 		model_->clear();
+#ifdef PROFILE
+	revertTime_ = int(timer.elapsed());
+	printf("Revert time: %d\n", revertTime_);
+#endif
 
 	if (filterMode_) {
 		if (model_->root())
@@ -896,20 +917,25 @@ void PropertyTree::revertNonInterrupting()
 
 void PropertyTree::apply(bool continuous)
 {
-	//QElapsedTimer timer;
-	//timer.start();
-
+#ifdef PROFILE
+	QElapsedTimer timer;
+	timer.start();
+#endif
 	if (!attached_.empty()) {
 		Objects::iterator it;
 		for(it = attached_.begin(); it != attached_.end(); ++it) {
 			PropertyIArchive ia(model_.get(), model_->root());
 			ia.setLastContext(archiveContext_);
- 			yasli::Context treeContext(ia, this);
- 			ia.setFilter(filter_);
+			yasli::Context treeContext(ia, this);
+			ia.setFilter(filter_);
 			onAboutToSerialize(ia);
 			(*it)(ia);
 		}
 	}
+#ifdef PROFILE
+	applyTime_ = int(timer.elapsed());
+	printf("Apply time: %d\n", applyTime_);
+#endif
 
 	if (continuous)
 		onContinuousChange();
@@ -1414,6 +1440,96 @@ void PropertyTree::_cancelWidget()
 {
 	defocusInplaceEditor();
 	widget_.reset();
+}
+
+void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
+{
+	int numElements = layout_->rectangles.size();
+	for (size_t i = 0; i < numElements; ++i) {
+		if (findInSortedVector(hiddenLayoutElements_, (int)i))
+			continue;
+		const Rect& rect = layout_->rectangles[i];
+		if (rect.bottom() - offset_.y() < 0)
+			continue;
+		if (rect.top() - offset_.y() > h)
+			continue;
+		const LayoutElement& e = layout_->elements[i];
+		if (e.rowPart != PART_ROW_AREA)
+			continue;
+		PropertyRow* row = layout_->rows[i];
+		if (!row)
+			continue;
+		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+	}
+	for (size_t i = 0; i < numElements; ++i) {
+		if (findInSortedVector(hiddenLayoutElements_, (int)i))
+			continue;
+		const Rect& rect = layout_->rectangles[i];
+		if (rect.bottom() - offset_.y() < 0)
+			continue;
+		if (rect.top() - offset_.y() > h)
+			continue;
+		const LayoutElement& e = layout_->elements[i];
+		if (e.rowPart == PART_ROW_AREA)
+			continue;
+		PropertyRow* row = layout_->rows[i];
+		if (!row)
+			continue;
+		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+	}
+}
+
+static void findLayoutChildren(vector<int>* elements, const property_tree::Layout& layout, int element)
+{
+	elements->push_back(element);
+	const LayoutElement& e = layout.elements[element];
+	if (e.childrenList >= 0) {
+		const vector<int>& children = layout.childrenLists[e.childrenList].children;
+		for (size_t i = 0; i < children.size(); ++i) {
+			findLayoutChildren(elements, layout, children[i]);
+		}
+	}
+}
+
+void PropertyTree::drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row)
+{
+	int elementIndex = row->layoutElement();
+
+	vector<int> elements;
+	findLayoutChildren(&elements, *layout_, elementIndex);
+
+	for (size_t j = 0; j < elements.size(); ++j) {
+		int i = elements[j];
+		const Rect& rect = layout_->rectangles[i];
+		const LayoutElement& e = layout_->elements[i];
+		if (e.rowPart != PART_ROW_AREA)
+			continue;
+		PropertyRow* row = layout_->rows[i];
+		if (!row)
+			continue;
+		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+	}
+
+	for (size_t j = 0; j < elements.size(); ++j) {
+		int i = elements[j];
+		const Rect& rect = layout_->rectangles[i];
+		const LayoutElement& e = layout_->elements[i];
+		if (e.rowPart == PART_ROW_AREA)
+			continue;
+		PropertyRow* row = layout_->rows[i];
+		if (!row)
+			continue;
+		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
+	}
+}
+
+void PropertyTree::setDraggedRow(PropertyRow* row)
+{
+	hiddenLayoutElements_.clear();
+	if (row && row->layoutElement() >= 0) {
+		findLayoutChildren(&hiddenLayoutElements_, *layout_, row->layoutElement());
+		std::sort(hiddenLayoutElements_.begin(), hiddenLayoutElements_.end());
+	}
 }
 
 // vim:ts=4 sw=4:
