@@ -172,7 +172,7 @@ public:
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	Rect rect(const PropertyTree* tree) const;
-	Rect contentRect(const PropertyTree* tree) const;
+	Rect childrenRect(const PropertyTree* tree) const;
 	Rect textRect(const PropertyTree* tree) const;
 	Rect widgetRect(const PropertyTree* tree) const;
 	Rect plusRect(const PropertyTree* tree) const;

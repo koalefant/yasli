@@ -578,7 +578,7 @@ void QPropertyTree::updateHeights()
 		timer.start();
 
 		updateLayout();
-		size_.setY(model()->root()->contentRect(this).height());
+		size_.setY(model()->root()->childrenRect(this).height());
 		printf("totalHeight: %d\n", size_.y());
 		printf("rect size: %d\n", (int)sizeof(Rect));
 

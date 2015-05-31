@@ -837,7 +837,7 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 	case PART_LABEL:
 		if (textSizeInitial_ > 0){
 			char containerLabel[16] = "";
-			int index = 0;
+			int index = parent() ? parent()->childIndex(this) : 0;
 			yasli::string text = rowText(containerLabel, context.tree, index);
 			context.drawLabel(text.c_str(), FONT_NORMAL, rect, pulledSelected());
 		}
@@ -974,7 +974,7 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const Propert
 {
 	if(parent() && parent()->isContainer()){
 		if (tree->showContainerIndices()) {
-            sprintf(containerLabelBuffer, " %i.", index);
+            sprintf(containerLabelBuffer, "%i.", index);
 			return containerLabelBuffer;
 		}
 		else
@@ -1178,9 +1178,9 @@ Rect PropertyRow::rect(const PropertyTree* tree) const
 	return tree->findRowRect(this, PART_ROW_AREA, 0);
 }
 
-Rect PropertyRow::contentRect(const PropertyTree* tree) const
+Rect PropertyRow::childrenRect(const PropertyTree* tree) const
 {
-	Rect r = tree->findRowRect(this, PART_CONTENT_AREA, 0);
+	Rect r = tree->findRowRect(this, PART_CHILDREN_AREA, 0);
 	if (r.height() == 0) {
 		Rect rowRect = rect(tree);
 		r = Rect(rowRect.left(), rowRect.top(), rowRect.width(), 0);

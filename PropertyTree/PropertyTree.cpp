@@ -476,7 +476,7 @@ void PropertyTree::serialize(Archive& ar)
 	}
 }
 
-static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree)
+static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement)
 {
 	int count = (int)row->count();
 
@@ -485,43 +485,45 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		if (!child->visible(tree))
 			continue;
 		if (child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0);
 		}
 	}
 
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
 	int labelMin = row->textSizeInitial();
+	char labelBuffer[16] = ""; 
+	const char* label = row->rowText(labelBuffer, tree, indexForContainerElement);
 	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
 	int widgetElement = -1;
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
-	if (row->labelUndecorated()[0])
+	if (label[0])
 		l->addElement(rowArea, EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_VALUE:
 	{
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
-		if (row->labelUndecorated()[0])
+		if (label[0])
 			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
-	if (row->labelUndecorated()[0])
+	if (label[0])
 		l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
-	if (row->labelUndecorated()[0])
+	if (label[0])
 		l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	break;
 	case PropertyRow::WIDGET_AFTER_INLINED:
 	{
-		if (row->labelUndecorated()[0])
+		if (label[0])
 			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		// add value later
 	}
@@ -533,7 +535,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		if (!child->visible(tree))
 			continue;
 		if (child->inlined() && !child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree);
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0);
 		}
 		else if (!child->inlinedBefore())
 			*hasNonPulledChildren = true;
@@ -547,7 +549,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 }
 
 
-static void populateContentArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
+static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
 {
 	int rowHeight = tree->_defaultRowHeight();
 	// assuming that parentRow is expanded
@@ -558,7 +560,7 @@ static void populateContentArea(Layout* l, int parentElement, PropertyRow* paren
 			continue;
 
 		if (child->inlined() || child->inlinedBefore()) {
-			populateContentArea(l, parentElement, child, tree);
+			populateChildrenArea(l, parentElement, child, tree);
 			continue;
 		}
 
@@ -568,14 +570,14 @@ static void populateContentArea(Layout* l, int parentElement, PropertyRow* paren
 			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
 
 		bool hasNonPulledChildren = false;
-		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree);
+		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i);
 
 		if (child->expanded()/* && hasNonPulledChildren*/) {
 			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
 			if (showPlus)
 				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0);
-			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CONTENT_AREA);
-			populateContentArea(l, contentArea, child, tree);
+			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CHILDREN_AREA);
+			populateChildrenArea(l, contentArea, child, tree);
 		}
 	}
 }
@@ -732,9 +734,9 @@ void PropertyTree::updateLayout()
 	PropertyRow* root = model_->root();
 	l.rows.push_back(root);
 
-	int lroot = l.addElement(-1, VERTICAL, root, PART_CONTENT_AREA);
+	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA);
 	root->setLayoutElement(lroot);
-	populateContentArea(&l, lroot, root, this);
+	populateChildrenArea(&l, lroot, root, this);
 
 	l.minimalWidths.resize(l.elements.size());
 	l.minimalHeights.resize(l.elements.size());
@@ -758,13 +760,13 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 	expandParents(row);
 
 	Rect rowRect = row->rect(this);
-	Rect contentRect = row->contentRect(this);
+	Rect childrenRect = row->childrenRect(this);
 	if(rowRect.top() < offset_.y()){
 		offset_.setY(max(0, rowRect.top()));
 	}
-	else if(contentRect.bottom() > size_.y() + offset_.y()){
+	else if(childrenRect.bottom() > size_.y() + offset_.y()){
 		printf("size_.y: %d\n", size_.y());
-		offset_.setY(max(0, contentRect.bottom() - size_.y()));
+		offset_.setY(max(0, childrenRect.bottom() - size_.y()));
 	}
 	if(update)
 		repaint();
