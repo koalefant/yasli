@@ -395,24 +395,35 @@ public:
 		if(!row->parent() || row->isChildOf(row_) || row == row_)
 			return;
 
-		Rect rowRect = row->rect(tree_);
-		float pos = (point.y() - rowRect.top()) / float(rowRect.height());
-		if(row_->canBeDroppedOn(row->parent(), row, tree_)){
-			if(pos < 0.25f){
-				destinationRow_ = row->parent();
-				hoveredRow_ = row;
-				before_ = true;
-				return;
+		do {
+			Rect rowRect = row->rect(tree_);
+			if (row->expanded() && row->hasVisibleChildren(tree_)) {
+				Rect childrenRect = row->childrenRect(tree_);
+				if (childrenRect.height() > 0)
+					rowRect.h = childrenRect.bottom() - rowRect.top();
 			}
-			if(pos > 0.75f){
-				destinationRow_ = row->parent();
-				hoveredRow_ = row;
-				before_ = false;
-				return;
+			float pos = (point.y() - rowRect.top());
+			if(row_->canBeDroppedOn(row->parent(), row, tree_)){
+				if(pos < tree_->_defaultRowHeight() * 0.25f){
+					destinationRow_ = row->parent();
+					hoveredRow_ = row;
+					before_ = true;
+					return;
+				}
+				if(pos > tree_->_defaultRowHeight() * 0.75f){
+					destinationRow_ = row->parent();
+					hoveredRow_ = row;
+					before_ = false;
+					return;
+				}
 			}
-		}
-		if(row_->canBeDroppedOn(row, 0, tree_))
-			hoveredRow_ = destinationRow_ = row;
+			if(row_->canBeDroppedOn(row, 0, tree_))
+				hoveredRow_ = destinationRow_ = row;
+			row = row->parent();
+			if (!row->parent())
+				break;
+		} while (hoveredRow_ == 0);
+
 	}
 
 	void drawUnder(QPainter& painter)
@@ -436,25 +447,35 @@ public:
 
 		if(destinationRow_ != hoveredRow_ && hoveredRow_){
 			const int tickSize = 4;
-			QRect hoveredRect = toQRect(hoveredRow_->rect(tree_));
-			hoveredRect.setLeft(hoveredRect.left() + tree_->tabSize());
 
-			if(!before_){ // previous
-				QRect rect(hoveredRect.left() - 1 , hoveredRect.bottom() - 1, hoveredRect.width(), 2);
-				QRect rectLeft(hoveredRect.left() - 1 , hoveredRect.bottom() - tickSize, 2, tickSize * 2);
-				QRect rectRight(hoveredRect.right() - 1 , hoveredRect.bottom() - tickSize, 2, tickSize * 2);
-				painter.fillRect(rect, tree_->palette().highlight());
-				painter.fillRect(rectLeft, tree_->palette().highlight());
-				painter.fillRect(rectRight, tree_->palette().highlight());
+			QPoint lineStart;
+			QPoint lineEnd;
+
+			if(before_){ 
+				QRect hoveredRect = toQRect(hoveredRow_->rect(tree_));
+				hoveredRect.setLeft(hoveredRect.left() + tree_->tabSize());
+				lineStart = QPoint(hoveredRect.left(), hoveredRect.top());
+				lineEnd = QPoint(hoveredRect.right(), hoveredRect.top());
 			}
-			else{ // next
-				QRect rect(hoveredRect.left() - 1 , hoveredRect.top() - 1, hoveredRect.width(), 2);
-				QRect rectLeft(hoveredRect.left() - 1 , hoveredRect.top() - tickSize, 2, tickSize * 2);
-				QRect rectRight(hoveredRect.right() - 1 , hoveredRect.top() - tickSize, 2, tickSize * 2);
-				painter.fillRect(rect, tree_->palette().highlight());
-				painter.fillRect(rectLeft, tree_->palette().highlight());
-				painter.fillRect(rectRight, tree_->palette().highlight());
+			else{
+				Rect r = hoveredRow_->rect(tree_);
+				if (hoveredRow_->expanded() && hoveredRow_->hasVisibleChildren(tree_)) {
+					Rect childrenRect = hoveredRow_->childrenRect(tree_);
+					if (childrenRect.height() > 0)
+						r.h = childrenRect.bottom() - r.top();
+				}
+				QRect hoveredRect = toQRect(r);
+				hoveredRect.setLeft(hoveredRect.left() + tree_->tabSize());
+				lineStart = QPoint(hoveredRect.left(), hoveredRect.bottom());
+				lineEnd = QPoint(hoveredRect.right(), hoveredRect.bottom());
 			}
+
+			QRect rect(lineStart.x() - 1 , lineStart.y() - 1, lineEnd.x() - lineStart.x(), 2);
+			QRect rectLeft(lineStart.x() - 1 , lineStart.y() - tickSize, 2, tickSize * 2);
+			QRect rectRight(lineEnd.x() - 1 , lineStart.y() - tickSize, 2, tickSize * 2);
+			painter.fillRect(rect, tree_->palette().highlight());
+			painter.fillRect(rectLeft, tree_->palette().highlight());
+			painter.fillRect(rectRight, tree_->palette().highlight());
 		}
 	}
 
