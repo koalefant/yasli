@@ -391,12 +391,12 @@ public:
 		PropertyRow* row = tree_->rowByPoint(fromQPoint(point));
 		if(!row || !row_)
 			return;
-
 		row = row->findNonInlinedParent();
 		if(!row->parent() || row->isChildOf(row_) || row == row_)
 			return;
 
-		float pos = (point.y() - row->rect(tree_).top()) / float(row->rect(tree_).height());
+		Rect rowRect = row->rect(tree_);
+		float pos = (point.y() - rowRect.top()) / float(rowRect.height());
 		if(row_->canBeDroppedOn(row->parent(), row, tree_)){
 			if(pos < 0.25f){
 				destinationRow_ = row->parent();

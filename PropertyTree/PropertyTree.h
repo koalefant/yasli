@@ -146,8 +146,7 @@ protected:
 	virtual void pasteRow(PropertyRow* row) = 0;
 	virtual bool canBePasted(PropertyRow* destination) = 0;
 	virtual bool canBePasted(const char* destinationType) = 0;
-	PropertyRow* rowByPoint(const Point& widgetPoint);
-	PropertyRow* hitRow(const Point& rootSpacePoint);
+	PropertyRow* rowByPoint(const Point& rootSpacePoint);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
 

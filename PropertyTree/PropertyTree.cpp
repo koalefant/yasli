@@ -272,7 +272,6 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
 {
 	pressPoint_ = point;
-	row = hitRow(point);
 	if(row){
 		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
 			return true;
@@ -284,7 +283,6 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
-	row = hitRow(point);
 	if(row && !row->isRoot()){
 		bool changed = false;
 		if (row->widgetRect(this).contains(point)) {
@@ -544,7 +542,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
 		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	}
-	if (widgetElement != 0xffffffff)
+	//if (widgetElement != 0xffffffff)
 		row->setLayoutElement(rowArea);
 }
 
@@ -706,18 +704,11 @@ Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) c
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
 		return Rect();
-	PropertyRow* startRow = 0;
 	for (; index < l.elements.size(); ++index)
 	{
 		const LayoutElement& element = l.elements[index];
-		if (part == element.rowPart && element.rowPartSubindex == subindex && l.rows[index] == row)
-				return l.rectangles[index];
-		if (element.rowPart == PART_ROW_AREA) {
-			if (!startRow)
-				startRow = l.rows[index];
-			else if (l.rows[index] != startRow)
-				break;
-		}
+		if (element.rowPart == part && element.rowPartSubindex == subindex && l.rows[index] == row)
+			return l.rectangles[index];
 	}
 	return Rect();
 }
@@ -1380,23 +1371,15 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 	return true;
 }
 
-PropertyRow* PropertyTree::hitRow(const Point& pt)
+PropertyRow* PropertyTree::rowByPoint(const Point& pointInWidgetSpace)
 {
+	Point pt = pointToRootSpace(pointInWidgetSpace);
 	const Layout& l = *layout_;
 	int count = (int)l.rectangles.size();
 	for (int i = (int)l.rectangles.size() - 1; i >= 0; --i)
 		if (l.rectangles[i].contains(pt))
 			return l.rows[i];
 	return model()->root();
-}
-
-PropertyRow* PropertyTree::rowByPoint(const Point& pt)
-{
-	if (!model_->root())
-		return 0;
-	if (!area_.contains(pt))
-		return 0;
-  return hitRow(pointToRootSpace(pt));
 }
 
 Point PropertyTree::pointToRootSpace(const Point& point) const
