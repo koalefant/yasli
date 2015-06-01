@@ -574,11 +574,9 @@ void QPropertyTree::updateHeights()
 		int scrollBarW = style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 		area_ = fromQRect(widgetRect.adjusted(2, 2, -2 - scrollBarW, -2));
 
+		int filterAreaHeight = this->filterAreaHeight();
 		if (filterMode_)
-		{
-			int filterAreaHeight = filterEntry_ ? filterEntry_->height() : 0;
 			area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
-		}
 
 		updateScrollBar();
 
@@ -744,6 +742,13 @@ void QPropertyTree::startFilter(const char* filter)
 	setFilterMode(true);
 	filterEntry_->setText(filter);
     onFilterChanged(filter);
+}
+
+int QPropertyTree::filterAreaHeight() const
+{
+	if (!filterMode_)
+		return 0;
+	return filterEntry_ ? filterEntry_->height() + 4 : 0;
 }
 
 void QPropertyTree::_arrangeChildren()
@@ -993,11 +998,12 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	QElapsedTimer timer;
 	timer.start();
 	QPainter painter(this);
-	QRect clientRect = this->rect();
+	QRect clientRect = this->rect().adjusted(0, filterAreaHeight(), 0, 0);
 
 	int clientWidth = clientRect.width();
 	int clientHeight = clientRect.height();
 	painter.fillRect(clientRect, palette().window());
+	painter.setClipRect(clientRect);
 
 	painter.translate(-offset_.x(), -offset_.y());
 
@@ -1006,28 +1012,6 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 	painter.translate(offset_.x(), offset_.y());
 
-	//painter.setClipRect(rect());
-
-	if (size_.y() > clientHeight)
-	{
- 	  const int shadowHeight = 10;
-		QColor color1(0, 0, 0, 0);
-		QColor color2(0, 0, 0, 96);
-
-		QRect upperRect(rect().left(), rect().top(), area_.width(), shadowHeight);
-		QLinearGradient upperGradient(upperRect.left(), upperRect.top(), upperRect.left(), upperRect.bottom());
-		upperGradient.setColorAt(0.0f, color2);
-		upperGradient.setColorAt(1.0f, color1);
-		QBrush upperBrush(upperGradient);
-		painter.fillRect(upperRect, upperBrush);
-
-		QRect lowerRect(rect().left(), rect().bottom() - shadowHeight / 2, rect().width(), shadowHeight / 2 + 1);
-		QLinearGradient lowerGradient(lowerRect.left(), lowerRect.top(), lowerRect.left(), lowerRect.bottom());		
-		lowerGradient.setColorAt(0.0f, color1);
-		lowerGradient.setColorAt(1.0f, color2);
-		QBrush lowerBrush(lowerGradient);
-		painter.fillRect(lowerRect, lowerGradient);
-	}
 	
 	if (dragController_->captured()) {
 	 	painter.translate(-toQPoint(offset_));
@@ -1072,6 +1056,28 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 		painter.translate(offset_.x(), offset_.y());
 	}
+
+	if (size_.y() > clientHeight)
+	{
+		const int shadowHeight = 10;
+		QColor color1(0, 0, 0, 0);
+		QColor color2(0, 0, 0, 96);
+
+		QRect upperRect(clientRect.left(), clientRect.top(), area_.width(), shadowHeight);
+		QLinearGradient upperGradient(upperRect.left(), upperRect.top(), upperRect.left(), upperRect.bottom());
+		upperGradient.setColorAt(0.0f, color2);
+		upperGradient.setColorAt(1.0f, color1);
+		QBrush upperBrush(upperGradient);
+		painter.fillRect(upperRect, upperBrush);
+
+		QRect lowerRect(clientRect.left(), clientRect.bottom() - shadowHeight / 2, clientRect.width(), shadowHeight / 2 + 1);
+		QLinearGradient lowerGradient(lowerRect.left(), lowerRect.top(), lowerRect.left(), lowerRect.bottom());		
+		lowerGradient.setColorAt(0.0f, color1);
+		lowerGradient.setColorAt(1.0f, color2);
+		QBrush lowerBrush(lowerGradient);
+		painter.fillRect(lowerRect, lowerGradient);
+	}
+
 	paintTime_ = timer.elapsed();
 }
 

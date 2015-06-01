@@ -68,7 +68,7 @@ public:
 	bool getSelectedObject(yasli::Object* object);
 	bool selectByAddress(const void*, bool keepSelectionIfChildSelected = false);
 	bool selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected);
-	void ensureVisible(PropertyRow* row, bool update = true);
+	void ensureVisible(PropertyRow* row, bool considerChildren);
 	void expandParents(PropertyRow* row);
 	void expandRow(PropertyRow* row, bool expanded = true, bool updateHeights = true);
 	void expandAll();
@@ -155,6 +155,7 @@ protected:
 	virtual bool updateScrollBar() = 0;
 	virtual void interruptDrag() = 0;
 	virtual void _arrangeChildren() = 0;
+	virtual int filterAreaHeight() const { return 0; }
 	virtual void startFilter(const char* text) = 0;
 	virtual void resetFilter() = 0;
 

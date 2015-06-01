@@ -185,8 +185,10 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 
 			if(onContextMenu(row, *menu)){
-				Rect rect(row->rect(this));
-				menu->exec(Point(rect.left() + rect.height(), rect.bottom()));
+				Rect rect(row->widgetRect(this));
+				if (rect.height() == 0)
+					rect = row->textRect(this);
+				menu->exec(Point(rect.left(), rect.bottom()));
 			}
 			return true;
 		}
@@ -467,7 +469,7 @@ void PropertyTree::serialize(Archive& ar)
 
 	if(ar.isInput()){
 		updateHeights();
-		ensureVisible(model()->focusedRow());
+		ensureVisible(model()->focusedRow(), false);
 		updateAttachedPropertyTree(false);
 		updateHeights();
 		onSelected();
@@ -748,11 +750,11 @@ void PropertyTree::updateLayout()
 	calculateMinimalSizes(&minWidth, &minHeight, &l, lroot);
 
 	l.rectangles.resize(l.elements.size());
-	calculateRectangles(&l, lroot, width, minHeight, 0, 0);
+	calculateRectangles(&l, lroot, width, minHeight, 0, filterAreaHeight());
 	printf("Minimal size: %d %d\n", minWidth, minHeight);
 }
 
-void PropertyTree::ensureVisible(PropertyRow* row, bool update)
+void PropertyTree::ensureVisible(PropertyRow* row, bool considerChildren)
 {
 	if(row == 0)
 		return;
@@ -763,25 +765,29 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 
 	PropertyRow* nonInlinedParent = row->findNonInlinedParent();
 	Rect rowRect = nonInlinedParent->rect(this);
-	Rect childrenRect = nonInlinedParent->childrenRect(this);
-	if (childrenRect.height() > 0)
-		rowRect.h = childrenRect.bottom() - rowRect.top();
+	if (considerChildren) {
+		Rect childrenRect = nonInlinedParent->childrenRect(this);
+		if (childrenRect.height() > 0)
+			rowRect.h = childrenRect.bottom() - rowRect.top();
+	}
 
-	if(rowRect.top() < offset_.y()){
-		offset_.setY(max(0, rowRect.top()));
+	int topBorder = filterAreaHeight();
+	int clientHeight = area_.height() - topBorder;
+	if(offset_.y() > rowRect.top() - topBorder){
+		offset_.setY(max(0, rowRect.top() - topBorder));
 	}
-	else if(rowRect.bottom() > size_.y() + offset_.y()){
-		offset_.setY(max(0, rowRect.bottom() - size_.y()));
+	else if(offset_.y() < rowRect.bottom() - clientHeight){
+		offset_.setY(max(0, rowRect.bottom() - clientHeight));
 	}
-	if(update)
-		repaint();
+	updateScrollBar();
+	repaint();
 }
 
 void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos)
 {
 	if(!row->isRoot())
 		model()->selectRow(row, !(addSelection && row->selected() && model()->selection().size() > 1), !addSelection);
-	ensureVisible(row);
+	ensureVisible(row, false);
 	if(adjustCursorPos)
 		cursorX_ = row->findNonInlinedParent()->horizontalIndex(this, row);
 	updateAttachedPropertyTree(false);
@@ -1196,7 +1202,7 @@ bool PropertyTree::selectByAddresses(const vector<const void*>& addresses, bool 
 			if (!keepSelection) {
 				if(row) {
 					sel.push_back(model()->pathFromRow(row));
-					ensureVisible(row);
+					ensureVisible(row, true);
 				}
 			}
 		}

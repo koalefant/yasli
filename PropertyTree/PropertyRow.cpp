@@ -940,7 +940,7 @@ void PropertyRow::dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow,
 			model->setSelection(selection);
 
 			// we use path to obtain new row
-			tree->ensureVisible(newThis);
+			tree->ensureVisible(newThis, true);
 			model->rowChanged(newThis); // after this call row pointers are invalidated
 		}
 		parentRow = (PropertyRowStruct*)tree->model()->rowFromPath(parentRowPath);

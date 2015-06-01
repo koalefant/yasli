@@ -128,6 +128,7 @@ protected:
 
 	void setFilterMode(bool inFilterMode);
 	void startFilter(const char* filter) override;
+	int filterAreaHeight() const override;
 
 	void _arrangeChildren() override;
 
