@@ -474,18 +474,8 @@ void PropertyTree::serialize(Archive& ar)
 	}
 }
 
-static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement)
+static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
 {
-	int count = (int)row->count();
-
-	for (size_t j = 0; j < count; ++j) {
-		PropertyRow* child = row->childByIndex(j);
-		if (!child->visible(tree))
-			continue;
-		if (child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0);
-		}
-	}
 
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
@@ -495,23 +485,43 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
 	int widgetElement = -1;
+
+	bool labelBeforeInlined = false;
+	if (row->parent() && row->parent()->isContainer() && 
+		(placement == PropertyRow::WIDGET_VALUE || placement == PropertyRow::WIDGET_NONE)) {
+		labelBeforeInlined = true;
+		if (label[0])
+			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+	}
+
+	int count = (int)row->count();
+	for (size_t j = 0; j < count; ++j) {
+		PropertyRow* child = row->childByIndex(j);
+		if (!child->visible(tree))
+			continue;
+		if (child->inlinedBefore()) {
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0, true);
+		}
+	}
+
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
 	if (label[0])
-		l->addElement(rowArea, EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
+		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_VALUE:
 	{
+		if (!labelBeforeInlined && label[0])
+			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
-		if (label[0])
-			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
-	if (label[0])
+	if (!labelBeforeInlined && label[0])
 		l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
@@ -533,7 +543,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		if (!child->visible(tree))
 			continue;
 		if (child->inlined() && !child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0);
+			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0, true);
 		}
 		else if (!child->inlinedBefore())
 			*hasNonPulledChildren = true;
@@ -557,6 +567,7 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 		if (!child->visible(tree))
 			continue;
 
+		// children of inlined elements here
 		if (child->inlined() || child->inlinedBefore()) {
 			populateChildrenArea(l, parentElement, child, tree);
 			continue;
@@ -568,7 +579,7 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
 
 		bool hasNonPulledChildren = false;
-		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i);
+		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
 
 		if (child->expanded()/* && hasNonPulledChildren*/) {
 			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
@@ -606,7 +617,7 @@ void calculateMinimalSizes(int* minWidth, int* minHeight, Layout* l, int element
 					// Exception for vertical layouts, so only individual rows
 					// are getting outside of window, when it is too narrow.
 					//
-					// May cause problesm with multiple columns.
+					// May cause problems with multiple columns.
 					//
 					// w = max(w, childrenWidth);
 					if (child.priority == 0)
