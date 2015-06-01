@@ -395,6 +395,7 @@ public:
 		if(!row->parent() || row->isChildOf(row_) || row == row_)
 			return;
 
+		int rowHeight = tree_->_defaultRowHeight();
 		do {
 			Rect rowRect = row->rect(tree_);
 			if (row->expanded() && row->hasVisibleChildren(tree_)) {
@@ -402,23 +403,27 @@ public:
 				if (childrenRect.height() > 0)
 					rowRect.h = childrenRect.bottom() - rowRect.top();
 			}
-			float pos = (point.y() - rowRect.top());
-			if(row_->canBeDroppedOn(row->parent(), row, tree_)){
-				if(pos < tree_->_defaultRowHeight() * 0.25f){
+			float pos = point.y() - rowRect.top();
+			bool canBeDroppedNextTo = row_->canBeDroppedOn(row->parent(), row, tree_);
+			if(row_->canBeDroppedOn(row, 0, tree_) && (!canBeDroppedNextTo || 
+				(pos > rowHeight * 0.25f && pos < rowHeight * 0.75f))){
+				hoveredRow_ = destinationRow_ = row;
+				return;
+			}
+			else if(canBeDroppedNextTo){
+				if(pos < rowHeight * 0.5f){
 					destinationRow_ = row->parent();
 					hoveredRow_ = row;
 					before_ = true;
 					return;
 				}
-				if(pos > tree_->_defaultRowHeight() * 0.75f){
+				if(pos >= rowHeight * 0.5f){
 					destinationRow_ = row->parent();
 					hoveredRow_ = row;
 					before_ = false;
 					return;
 				}
 			}
-			if(row_->canBeDroppedOn(row, 0, tree_))
-				hoveredRow_ = destinationRow_ = row;
 			row = row->parent();
 			if (!row->parent())
 				break;
