@@ -754,21 +754,24 @@ void PropertyTree::updateLayout()
 
 void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 {
-	if (row == 0)
+	if(row == 0)
 		return;
 	if(row->isRoot())
 		return;
 
 	expandParents(row);
 
-	Rect rowRect = row->rect(this);
-	Rect childrenRect = row->childrenRect(this);
+	PropertyRow* nonInlinedParent = row->findNonInlinedParent();
+	Rect rowRect = nonInlinedParent->rect(this);
+	Rect childrenRect = nonInlinedParent->childrenRect(this);
+	if (childrenRect.height() > 0)
+		rowRect.h = childrenRect.bottom() - rowRect.top();
+
 	if(rowRect.top() < offset_.y()){
 		offset_.setY(max(0, rowRect.top()));
 	}
-	else if(childrenRect.bottom() > size_.y() + offset_.y()){
-		printf("size_.y: %d\n", size_.y());
-		offset_.setY(max(0, childrenRect.bottom() - size_.y()));
+	else if(rowRect.bottom() > size_.y() + offset_.y()){
+		offset_.setY(max(0, rowRect.bottom() - size_.y()));
 	}
 	if(update)
 		repaint();
