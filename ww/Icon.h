@@ -29,10 +29,19 @@ public:
 	, height_(0)
 	{
 	}
+
 	template<size_t Size>
 	explicit Icon(char* (&xpm)[Size])
 	: width_(0)
 	, height_(0)
+	{
+		set(xpm, Size);
+	}
+
+	template<size_t Size>
+	explicit Icon(const char* (&xpm)[Size])
+		: width_(0)
+		, height_(0)
 	{
 		set(xpm, Size);
 	}
@@ -78,6 +87,15 @@ struct IconToggle
 	, iconFalse_(xpmFalse)
 	, variable_(&variable)
 	, value_(variable)
+	{
+	}
+
+	template<size_t Size1, size_t Size2>
+	IconToggle(bool& variable, const char* (&xpmTrue)[Size1], const char* (&xpmFalse)[Size2])
+		: iconTrue_(xpmTrue)
+		, iconFalse_(xpmFalse)
+		, variable_(&variable)
+		, value_(variable)
 	{
 	}
 
