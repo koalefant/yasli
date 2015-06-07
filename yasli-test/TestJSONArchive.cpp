@@ -6,11 +6,17 @@
 #include "yasli/JSONIArchive.h"
 #include "yasli/JSONOArchive.h"
 
+#include <limits>
 #include <vector>
 using std::vector;
 
 #ifndef _MSC_VER
 # include <wchar.h>
+#endif
+
+#ifndef NAN
+static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
+#define NAN (*(double*)g_nan)
 #endif
 
 using std::string;
@@ -231,7 +237,7 @@ SUITE(JSONArchive)
 		const char* intStart = p;
 		while (isdigit(*p))
 			++p;
-		if (*p != '.' && *p != ',')
+		if (*p != '.')
 			return false;
 		++p;
 		return !isdigit(*p);
@@ -253,6 +259,102 @@ SUITE(JSONArchive)
 		CHECK(!FollowingNumberEndsWithDot(zero));
 		const char* one = strstr(str, "\"one\""); CHECK(one != 0);
 		CHECK(!FollowingNumberEndsWithDot(one));
+	}
+
+	struct FloatZero
+	{
+		float fzero;
+		double dzero;
+
+		FloatZero() : fzero(0.0f), dzero(0.0) {}
+
+		void serialize(Archive& ar) {
+			ar(fzero, "fzero");
+			ar(dzero, "dzero");
+		}
+	};
+
+	TEST(FloatZero)
+	{
+		FloatZero f;
+		JSONOArchive oa;
+		oa(f, "");
+		const char* str = oa.c_str();
+		const char* fzero = strstr(str, "\"fzero\""); CHECK(fzero != 0);
+		fzero = strchr(fzero, '0');
+		CHECK(fzero != 0);
+		CHECK(strncmp(fzero, "0.0", 3) == 0);
+
+		const char* dzero = strstr(str, "\"dzero\""); CHECK(dzero != 0);
+		dzero = strchr(dzero, '0');
+		CHECK(dzero != 0);
+		CHECK(strncmp(dzero, "0.0", 3) == 0);
+	}
+
+	template<class T>
+	struct FloatInfinityNan
+	{
+		T positiveInfValue;
+		T negativeInfValue;
+		T nanValue;
+
+		FloatInfinityNan()
+		: positiveInfValue(1.0)
+		, negativeInfValue(2.0)
+		, nanValue(3.0)
+		{
+
+		}
+
+		void set()
+		{
+			positiveInfValue = std::numeric_limits<T>::infinity();
+			negativeInfValue = -std::numeric_limits<T>::infinity();
+			nanValue = (T)NAN;
+		}
+
+		bool operator==(const FloatInfinityNan& rhs)
+		{
+			if (positiveInfValue != rhs.positiveInfValue)
+				return false;
+			if (negativeInfValue != rhs.negativeInfValue)
+				return false;
+			if (memcmp(&nanValue, &rhs.nanValue, sizeof(nanValue)) != 0)
+				return false;
+			return true;
+		}
+
+		void serialize(Archive& ar)
+		{
+			ar(positiveInfValue, "positiveInfValue");
+			ar(negativeInfValue, "negativeInfValue");
+			ar(nanValue, "nanValue");
+		}
+	};
+
+	TEST(FloatInfinityNan)
+	{
+		FloatInfinityNan<float> floatTest, floatTestRef;
+		floatTestRef.set();
+		{
+			JSONOArchive oa;
+			CHECK(oa(floatTestRef, ""));
+			JSONIArchive ia;
+			CHECK(ia.open(oa.c_str(), oa.length()));
+			ia(floatTest, "");
+			CHECK(floatTest == floatTestRef);
+		}
+
+		FloatInfinityNan<double> doubleTest, doubleTestRef;
+		doubleTestRef.set();
+		{
+			JSONOArchive oa;
+			CHECK(oa(doubleTestRef, ""));
+			JSONIArchive ia;
+			CHECK(ia.open(oa.c_str(), oa.length()));
+			ia(doubleTest, "");
+			CHECK(doubleTest == doubleTestRef);
+		}
 	}
 
 }

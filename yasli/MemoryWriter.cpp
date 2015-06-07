@@ -177,17 +177,17 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
         write("-");
     if(point <= 0){
 		cutRightZeros(buf);
-		if(strlen(buf)){
-	        write("0.");
-			while(point < 0){
+		if (strlen(buf)){
+			write("0.");
+			while (point < 0){
 				write("0");
 				++point;
 			}
 			write(buf);
 		}
 		else
-			write("0");
-        *position_ = '\0';
+			write("0.0");
+		*position_ = '\0';
     }
     else{
         write(buf, point);

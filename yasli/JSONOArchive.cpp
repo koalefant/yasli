@@ -13,6 +13,12 @@
 #include "yasli/KeyValue.h"
 #include "yasli/ClassFactory.h"
 #include <float.h>
+#include <limits>
+
+#ifndef NAN
+static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
+#define NAN (*(double*)g_nan)
+#endif
 
 namespace yasli{
 
@@ -520,7 +526,14 @@ bool JSONOArchive::operator()(float& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
-    buffer_->appendAsString(value, false);
+	if (!(value < 0.0f) && !(value >= 0.0f))
+		(*buffer_) << "\"NaN\"";
+	else if (value == std::numeric_limits<float>::infinity())
+		(*buffer_) << "\"Infinity\"";
+	else if (value == -std::numeric_limits<float>::infinity())
+		(*buffer_) << "\"-Infinity\"";
+	else
+		buffer_->appendAsString(value, false);
     return true;
 }
 
@@ -528,7 +541,14 @@ bool JSONOArchive::operator()(double& value, const char* name, const char* label
 {
     placeIndentCompact();
     placeName(name);
-    buffer_->appendAsString(value, false);
+	if (!(value < 0.0) && !(value >= 0.0))
+		(*buffer_) << "\"NaN\"";
+	else if (value == std::numeric_limits<double>::infinity())
+		(*buffer_) << "\"Infinity\"";
+	else if (value == -std::numeric_limits<double>::infinity())
+		(*buffer_) << "\"-Infinity\"";
+	else
+		buffer_->appendAsString(value, false);
     return true;
 }
 

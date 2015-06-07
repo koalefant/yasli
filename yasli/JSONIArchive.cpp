@@ -11,10 +11,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <limits>
+#include <math.h> // NAN
 #include "yasli/STL.h"
 #include "JSONIArchive.h"
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
+
+#ifndef NAN
+	static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
+	#define NAN (*(double*)g_nan)
+#endif
 
 #if 0
 # define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
@@ -1074,8 +1081,16 @@ bool JSONIArchive::operator()(float& value, const char* name, const char* label)
     if(findName(name)){
         readToken();
         checkValueToken();
-		value = (float)parseFloat(token_.start);
-        return true;
+		if (*token_.start != '\"')
+			value = (float)parseFloat(token_.start);
+		else if (strncmp(token_.start, "\"Infinity\"", 10) == 0)
+			value = std::numeric_limits<float>::infinity();
+		else if (strncmp(token_.start, "\"-Infinity\"", 11) == 0)
+			value = -std::numeric_limits<float>::infinity();
+		else if (strncmp(token_.start, "\"NaN\"", 5) == 0)
+			value = (float)NAN;
+		else
+			return false;
     }
     return false;
 }
@@ -1085,8 +1100,16 @@ bool JSONIArchive::operator()(double& value, const char* name, const char* label
     if(findName(name)){
         readToken();
         checkValueToken();
-		value = parseFloat(token_.start);
-        return true;
+		if (*token_.start != '\"')
+			value = (float)parseFloat(token_.start);
+		else if (strncmp(token_.start, "\"Infinity\"", 10) == 0)
+			value = std::numeric_limits<double>::infinity();
+		else if (strncmp(token_.start, "\"-Infinity\"", 11) == 0)
+			value = -std::numeric_limits<double>::infinity();
+		else if (strncmp(token_.start, "\"NaN\"", 5) == 0)
+			value = NAN;
+		else
+			return false;
     }
     return false;
 }
