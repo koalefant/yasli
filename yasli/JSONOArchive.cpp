@@ -12,12 +12,15 @@
 #include "MemoryWriter.h"
 #include "yasli/KeyValue.h"
 #include "yasli/ClassFactory.h"
+#include <math.h>
 #include <float.h>
 #include <limits>
 
+#ifdef _MSC_VER
 #ifndef NAN
 static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
 #define NAN (*(double*)g_nan)
+#endif
 #endif
 
 namespace yasli{

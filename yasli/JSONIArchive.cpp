@@ -12,15 +12,18 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <limits>
-#include <math.h> // NAN
+#include <math.h>
+#include <float.h>
 #include "yasli/STL.h"
 #include "JSONIArchive.h"
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
 
+#ifdef _MSC_VER
 #ifndef NAN
 	static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
 	#define NAN (*(double*)g_nan)
+#endif
 #endif
 
 #if 0

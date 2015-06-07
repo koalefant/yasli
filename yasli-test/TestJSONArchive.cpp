@@ -8,15 +8,17 @@
 
 #include <limits>
 #include <vector>
+#include <math.h>
+#include <float.h>
 using std::vector;
 
 #ifndef _MSC_VER
 # include <wchar.h>
-#endif
-
+#else
 #ifndef NAN
 static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
 #define NAN (*(double*)g_nan)
+#endif
 #endif
 
 using std::string;
@@ -313,7 +315,7 @@ SUITE(JSONArchive)
 			nanValue = (T)NAN;
 		}
 
-		bool operator==(const FloatInfinityNan& rhs)
+		bool operator==(const FloatInfinityNan& rhs) const
 		{
 			if (positiveInfValue != rhs.positiveInfValue)
 				return false;
