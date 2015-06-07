@@ -220,7 +220,7 @@ SUITE(JSONArchive)
 		}
 	};
 
-	static bool FollowingNumberEndsWithPoint(const char* str)
+	static bool FollowingNumberEndsWithDot(const char* str)
 	{
 		const char* p = str;
 		while(*p && !isdigit(*p))
