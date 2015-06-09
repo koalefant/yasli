@@ -122,6 +122,7 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 PropertyTree::~PropertyTree()
 {
 	clearMenuHandlers();
+	delete ui_;
 }
 
 bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
