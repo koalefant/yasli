@@ -322,14 +322,14 @@ struct StaticBool{
 	enum { Value = value };
 };
 
-struct LessStrCmp
+struct LessStrCmpPR
 {
 	bool operator()(const char* a, const char* b) const {
 		return strcmp(a, b) < 0;
 	}
 };
 
-typedef Factory<const char*, PropertyRow, Constructor0<PropertyRow>, LessStrCmp> PropertyRowFactory;
+typedef Factory<const char*, PropertyRow, Constructor0<PropertyRow>, LessStrCmpPR> PropertyRowFactory;
 
 template<class Op>
 bool PropertyRow::scanChildren(Op& op)
