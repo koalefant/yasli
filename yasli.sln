@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wWidgets", "ww\wWidgets.vcproj", "{18632F7A-290E-B902-7C03-72FB0C12DE45}"
 	ProjectSection(ProjectDependencies) = postProject
 		{894FD61A-7469-4C2D-A9F7-C026F3E458B5} = {894FD61A-7469-4C2D-A9F7-C026F3E458B5}
