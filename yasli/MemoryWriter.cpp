@@ -56,7 +56,6 @@ void MemoryWriter::realloc(size_t newSize)
 
 MemoryWriter& MemoryWriter::operator<<(int value)
 {
-    // TODO: optimize
     char buffer[12];
     sprintf(buffer, "%i", value);
     return operator<<((const char*)buffer);
@@ -64,7 +63,6 @@ MemoryWriter& MemoryWriter::operator<<(int value)
 
 MemoryWriter& MemoryWriter::operator<<(long value)
 {
-    // TODO: optimize
     char buffer[12];
 #ifdef _MSC_VER
     sprintf(buffer, "%i", value);
@@ -76,7 +74,6 @@ MemoryWriter& MemoryWriter::operator<<(long value)
 
 MemoryWriter& MemoryWriter::operator<<(unsigned long value)
 {
-    // TODO: optimize
     char buffer[12];
 #ifdef _MSC_VER
     sprintf(buffer, "%u", value);
@@ -88,7 +85,6 @@ MemoryWriter& MemoryWriter::operator<<(unsigned long value)
 
 MemoryWriter& MemoryWriter::operator<<(long long value)
 {
-    // TODO: optimize
     char buffer[24];
 #ifdef _MSC_VER
     sprintf(buffer, "%I64i", value);
@@ -100,7 +96,6 @@ MemoryWriter& MemoryWriter::operator<<(long long value)
 
 MemoryWriter& MemoryWriter::operator<<(unsigned long long value)
 {
-    // TODO: optimize
     char buffer[24];
 #ifdef _MSC_VER
     sprintf(buffer, "%I64u", value);
@@ -112,7 +107,6 @@ MemoryWriter& MemoryWriter::operator<<(unsigned long long value)
 
 MemoryWriter& MemoryWriter::operator<<(unsigned int value)
 {
-    // TODO: optimize
     char buffer[12];
     sprintf(buffer, "%u", value);
     return operator<<((const char*)buffer);
@@ -186,7 +180,7 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 			write(buf);
 		}
 		else
-			write("0.0");
+			write(allowTrailingPoint ? "0" : "0.0");
 		*position_ = '\0';
     }
     else{
