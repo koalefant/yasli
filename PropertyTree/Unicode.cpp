@@ -25,7 +25,11 @@ yasli::string fromWideChar(const wchar_t* wstr)
   // is built with wchar_t of diferent size (4 bytes, as on linux).
   // Therefore we avoid calling any wchar_t functions in Qt.
 #ifdef _WIN32
+#ifdef WW_DISABLE_UTF8
 	const unsigned int codepage = CP_ACP;
+#else
+	const unsigned int codepage = CP_UTF8;
+#endif
 	int len = WideCharToMultiByte(codepage, 0, wstr, -1, NULL, 0, 0, 0);
 	char* buf = (char*)alloca(len);
 	if(len > 1){
@@ -41,7 +45,11 @@ yasli::string fromWideChar(const wchar_t* wstr)
 yasli::wstring toWideChar(const char* str)
 {
 #ifdef _WIN32
+#ifdef WW_DISABLE_UTF8
 	const unsigned int codepage = CP_ACP;
+#else
+	const unsigned int codepage = CP_UTF8;
+#endif
     int len = MultiByteToWideChar(codepage, 0, str, -1, NULL, 0);
 	wchar_t* buf = (wchar_t*)alloca(len * sizeof(wchar_t));
     if(len > 1){ 

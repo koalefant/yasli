@@ -520,7 +520,7 @@ void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const char* text, R
 	}
 
 	Gdiplus::SolidBrush brush(textColor.argb());
-	gr->DrawString(wtext.c_str(), textLen, font, textRect, &format, &brush); 
+	gr->DrawString(wtext.c_str(), wtext.size(), font, textRect, &format, &brush); 
 }
 
 void PropertyTree::_drawRowLabel(Gdiplus::Graphics* gr, const char* text, Gdiplus::Font* font, const Rect& rect, const Color& textColor) const
