@@ -12,7 +12,7 @@ struct Point
 	Point& operator+=(const Point& p) { *this = *this + p; return *this; }
 	bool operator!=(const Point& rhs) const { return x_ != rhs.x_ || y_ != rhs.y_; }
 
-	int manhattanLength() const { return x_ + y_; }
+	int manhattanLength() const { return abs(x_) + abs(y_); }
 
 	int x_;
 	int y_;

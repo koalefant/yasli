@@ -313,7 +313,7 @@ void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point
 	onMouseStill();
 	row->onMouseUp(this, point);
 
-	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect(this).contains(point)) {
+	if ((pressPoint_ - point).manhattanLength() < 2 && row->widgetRect(this).contains(point)) {
 		row->onActivateRelease(this);
 	}
 }
