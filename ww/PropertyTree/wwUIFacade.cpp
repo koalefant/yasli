@@ -6,6 +6,7 @@
 #include "gdiplusUtils.h"
 #include "InplaceWidgetString.h"
 #include "InplaceWidgetComboBox.h"
+#include "InplaceWidgetNumber.h"
 
 namespace property_tree {
 
@@ -58,7 +59,7 @@ InplaceWidget* wwUIFacade::createComboBox(ComboBoxClientRow* client)
 
 InplaceWidget* wwUIFacade::createNumberWidget(PropertyRowNumberField* row)
 {
-	return 0;
+	return new InplaceWidgetNumber(row, tree_);
 }
 
 InplaceWidget* wwUIFacade::createStringWidget(PropertyRowString* row)
