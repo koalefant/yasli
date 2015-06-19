@@ -255,6 +255,48 @@ struct TestData
 	std::vector<Color4c> Colors;
 	std::vector<int> ints;
 
+	struct Influence 
+	{
+		string label;
+		float value;
+		float percent;
+		Influence() : label("label"), value(1), percent(100) {}
+		void serialize(Archive& ar)
+		{
+			ar(label, "label", ">100>^");
+			ar(value, "value", ">100>^=");
+			ar(percent, "percent", ">100>^%");
+		}
+	};
+
+	struct LogicTechnology
+	{
+		EnumType type;
+		EnumType type1;
+		Influence influence;
+
+		LogicTechnology() : type(ENUM_INTEGERS), type1(ENUM_INTEGERS) {}
+		void serialize(Archive& ar)
+		{
+			ar(type, "type", ">100>^type");
+			ar(type1, "type1", ">100>^type1");
+			ar(influence, "influence", "^influence");
+		}
+	};
+
+	struct TechnologySet {
+		int reqExp;
+		TechnologySet() : reqExp(0) {}
+		LogicTechnology technologies[2];
+		void serialize(Archive& ar)
+		{
+			ar(reqExp, "reqExp", ">100>^reqExp");
+			ar(technologies, "technologies", "^");
+		}
+	};
+	TechnologySet technologyTree[4];
+
+
 	TestData () : cells(5000, Cell()) {
 		enableSerialization_ = true;
 		type = ENUM_FLOATS;
@@ -361,6 +403,8 @@ struct TestData
                 ar(double_value, "double_value", "С плавающей запятой, двойной точности");
             }
 		}
+
+		ar(technologyTree, "technologyTree", "technologyTree");
 	}
 };
 
