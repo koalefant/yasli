@@ -11,8 +11,15 @@ struct Point
 	Point operator-(const Point& p) const { return Point(x_ - p.x_, y_ - p.y_); }
 	Point& operator+=(const Point& p) { *this = *this + p; return *this; }
 	bool operator!=(const Point& rhs) const { return x_ != rhs.x_ || y_ != rhs.y_; }
+	bool operator<(const Point& rhs) const { 
+		if (x_ == rhs.x_)
+			return y_ < rhs.y_;
+		else
+			return x_ < rhs.x_;
+	}
 
 	int manhattanLength() const { return x_ + y_; }
+	int dot(const Point& rhs) const { return x_ * rhs.x_ + y_ * rhs.y_; }
 
 	int x_;
 	int y_;

@@ -119,6 +119,7 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , leftBorder_(0)
 , rightBorder_(0)
 , cursorX_(0)
+, focusedLayoutElement_(-1)
 , filterMode_(false)
 
 , applyTime_(0)
@@ -205,33 +206,53 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	PropertyRow* selectedRow = 0;
 	switch(ev->key()){
 	case KEY_UP:
-		 {
-			selectedRow = model()->root()->rowByVerticalIndex(this, --y);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-		}
+	{
+		int element = findNextLayoutElement(focusedLayoutElement_, Point(0,-1));
+		if (element > 0)
+			focusedLayoutElement_ = element;
+
+		selectedRow = model()->root()->rowByVerticalIndex(this, --y);
+		if (selectedRow)
+			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
+	}
 	case KEY_DOWN:
-	 {
+	{
+		int element = findNextLayoutElement(focusedLayoutElement_, Point(0,1));
+		if (element > 0)
+			focusedLayoutElement_ = element;
+
 		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
 		if (selectedRow)
 			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-	}
 		break;
+	}
 	case KEY_LEFT:
+	{
+		int element = findNextLayoutElement(focusedLayoutElement_, Point(-1,0));
+		if (element > 0)
+			focusedLayoutElement_ = element;
+
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
 			expandRow(parentRow, false);
 			selectedRow = model()->focusedRow();
 		}
 		break;
+	}
 	case KEY_RIGHT:
+	{
+		int element = findNextLayoutElement(focusedLayoutElement_, Point(1,0));
+		if (element > 0)
+			focusedLayoutElement_ = element;
+
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
 		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
 			expandRow(parentRow, true);
 			selectedRow = model()->focusedRow();
 		}
 		break;
+	}
 	case KEY_HOME:
 		if (ev->modifiers() == MODIFIER_CONTROL) {
 			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
@@ -1482,6 +1503,85 @@ void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
 			continue;
 		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
 	}
+}
+
+static int findLayoutElementByFocusIndex(Layout& layout,
+	int* currentX, int* currentY,
+	int element, int x, int y)
+{
+	int startX = *currentX;
+	int startY = *currentY;
+	const LayoutElement& e = layout.elements[element];
+	if (e.childrenList >= 0) {
+		const vector<int>& children = layout.childrenLists[e.childrenList].children;
+		for (size_t i = 0; i < children.size(); ++i) {
+			int childrenElement = children[i];
+			if (*currentX == x && *currentY == y)
+				return childrenElement;
+			if (e.type == HORIZONTAL)
+				++*currentX;
+			else if (e.type == VERTICAL)
+				++*currentY;
+			int childrenResult = findLayoutElementByFocusIndex(layout, &*currentX, &*currentY, childrenElement, x, y);
+			if (childrenResult != -1)
+				return childrenResult;
+		}
+	}
+	*currentX = startX;
+	*currentY = startY;
+	return -1;
+}
+
+Point distanceInDirection(const Rect& a, const Rect& b, Point direction)
+{
+	int maxAlong = max(a.topLeft().dot(direction), a.bottomRight().dot(direction));
+	int minAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
+	Point perp(direction.y(), -direction.x());
+	int distPerp = abs((a.center() - b.center()).dot(perp));
+	return Point(minAlong - maxAlong, distPerp);
+}
+
+int PropertyTree::findNextLayoutElement(int element, Point direction)
+{
+	const vector<Rect>& rectangles = layout_->rectangles;
+	const Rect& ref = rectangles[element];
+
+	if (element == -1) {
+		for (size_t i = 0; i < layout_->elements.size(); ++i) {
+			int part = layout_->elements[i].rowPart;
+			if (part != PART_LABEL && part != PART_WIDGET)
+				continue;
+			return (int)i;
+		}
+	}
+
+	Point minDistance(INT_MAX, INT_MAX);
+	int bestElement = -1;
+
+	for (size_t i = 0; i < rectangles.size(); ++i) {
+		if (i == element)
+			continue;
+		int part = layout_->elements[i].rowPart;
+		if (part != PART_LABEL && part != PART_WIDGET)
+			continue;
+		const Rect& r = rectangles[i];
+		Point distance = distanceInDirection(ref, r, direction);
+		if (distance.x() < 0)
+			continue;
+		if (distance < minDistance) {
+			bestElement = i;
+			minDistance = distance;
+		}
+	}
+	return bestElement;
+}
+
+int PropertyTree::layoutElementByFocusIndex(int x, int y)
+{
+	int currentX = 0;
+	int currentY = 0;
+	int rootElement = 0;
+	return findLayoutElementByFocusIndex(*layout_, &currentX, &currentY, rootElement, x, y);
 }
 
 static void findLayoutChildren(vector<int>* elements, const property_tree::Layout& layout, int element)

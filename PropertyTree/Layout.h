@@ -59,11 +59,6 @@ struct LayoutElement
 	}
 };
 
-struct LayoutOutput
-{
-
-};
-
 struct ChildrenList
 {
 	vector<int> children;

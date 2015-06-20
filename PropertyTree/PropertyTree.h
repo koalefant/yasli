@@ -103,6 +103,8 @@ public:
 	Rect findRowRect(const PropertyRow* row, int part, int subindex) const;
 	void drawLayout(property_tree::IDrawContext& context, int height);
 	void drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row);
+	int layoutElementByFocusIndex(int x, int y);
+	int findNextLayoutElement(int element, Point direction);
 
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
@@ -206,6 +208,7 @@ protected:
 	Rect area_;
 
 	int cursorX_;
+	int focusedLayoutElement_;
 	bool filterMode_;
 	Point pressPoint_;
 	Point lastStillPosition_;

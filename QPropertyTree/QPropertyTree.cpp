@@ -1031,6 +1031,11 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 		painter.translate(-offset_.x(), -offset_.y());
 
+		//int focusedElement = layoutElementByFocusIndex(cursorX_, cursorY_);
+
+		int h = height();
+		drawLayout(context, h);
+
 		int num = layout_->rectangles.size();
 #if 0
 		for (int i = 0; i < num; ++i) {
@@ -1038,21 +1043,26 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 			switch (layout_->elements[i].rowPart) {
 			case property_tree::PART_WIDGET:
 			painter.setPen(QColor(0,0,0));
-			painter.setBrush(QColor(0,255,0,128));
+			painter.setBrush(QColor(0,255,0,64));
 			break;
 			case property_tree::PART_LABEL:
 			painter.setPen(Qt::NoPen);
-			painter.setBrush(QColor(255,255,0,128));
+			painter.setBrush(QColor(255,255,0,64));
 			break;
 			default:
-			painter.setPen(QColor(0,0,0));
+			painter.setPen(QColor(0,0,0, focusedLayoutElement_ ? 255 : 16));
 			painter.setBrush(Qt::NoBrush);
 			}
 			painter.drawRect(r);
 		}
 #endif
-		int h = height();
-		drawLayout(context, h);
+
+		{
+			QRect r = toQRect(layout_->rectangles[focusedLayoutElement_]);
+			painter.setPen(QColor(255,0,0));
+			painter.setBrush(QColor(255,0,0,64));
+			painter.drawRect(r);
+		}
 
 		painter.translate(offset_.x(), offset_.y());
 	}
