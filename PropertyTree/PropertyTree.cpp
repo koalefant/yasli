@@ -106,14 +106,27 @@ static int findNextChildLayoutElement(const Layout& layout, int startElement)
 
 static Point distanceInDirection(const Rect& a, const Rect& b, Point direction)
 {
-	int maxAlong = max(a.topLeft().dot(direction), a.bottomRight().dot(direction));
-	int minAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
+	int aAlong = min(a.topLeft().dot(direction), a.bottomRight().dot(direction));
+	int bAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
 	Point perp(direction.y(), -direction.x());
 	int distPerp = abs((a.center() - b.center()).dot(perp));
-	return Point(minAlong - maxAlong, distPerp);
+	return Point(bAlong - aAlong, distPerp);
 }
 
-static int findNextLayoutElementInDirection(const Layout& layout, int element, Point direction)
+static bool overlapsOnAxis(const Rect& a, const Rect& b, Point axis)
+{
+	int aTopLeftProj = a.topLeft().dot(axis); 
+	int aBottomRightProj = a.bottomRight().dot(axis);
+	int minA = min(aTopLeftProj, aBottomRightProj);
+	int maxA = max(aTopLeftProj, aBottomRightProj);
+	int bTopLeftProj = b.topLeft().dot(axis); 
+	int bBottomRightProj = b.bottomRight().dot(axis);
+	int minB = min(bTopLeftProj, bBottomRightProj);
+	int maxB = max(bTopLeftProj, bBottomRightProj);
+	return !(maxB <= minA || maxA <= minB);
+}
+
+static int findNextLayoutElementInDirection(const Layout& layout, int element, Point direction, bool onlyOverlapping)
 {
 	const vector<Rect>& rectangles = layout.rectangles;
 	const Rect& ref = rectangles[element];
@@ -126,21 +139,25 @@ static int findNextLayoutElementInDirection(const Layout& layout, int element, P
 		}
 	}
 
-	Point minDistance(INT_MAX, INT_MAX);
-	int bestElement = -1;
+	long long minDistance = LLONG_MAX;
 
+	int bestElement = -1;
 	for (size_t i = 0; i < rectangles.size(); ++i) {
 		if (i == element)
 			continue;
 		if (!layout.elements[i].focusable)
 			continue;
 		const Rect& r = rectangles[i];
-		Point distance = distanceInDirection(ref, r, direction);
-		if (distance.x() < 0)
+
+		if (onlyOverlapping && !overlapsOnAxis(ref, r, Point(-direction.y(), direction.x())))
 			continue;
-		if (distance < minDistance) {
+		Point distance = distanceInDirection(ref, r, direction);
+		if (distance.x() <= 0)
+			continue;
+		long long distanceValue = abs(distance.x()) * 0xffffffffull + abs(distance.y());
+		if (distanceValue < minDistance) {
 			bestElement = i;
-			minDistance = distance;
+			minDistance = distanceValue;
 		}
 	}
 	return bestElement;
@@ -296,34 +313,39 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	if(!focusedRow)
 		return false;
 	PropertyRow* parentRow = focusedRow->findNonInlinedParent();
-	int x = parentRow->horizontalIndex(this, focusedRow);
-	int y = model()->root()->verticalIndex(this, parentRow);
 	PropertyRow* selectedRow = 0;
 	int previousFocusedElement = focusedLayoutElement_;
 	switch(ev->key()){
 	case KEY_UP:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,-1));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,-1), false);
 		if (element > 0)
 			focusedLayoutElement_ = element;
 		break;
 	}
 	case KEY_DOWN:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,1));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,1), false);
 		if (element > 0)
 			focusedLayoutElement_ = element;
 		break;
 	}
 	case KEY_LEFT:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(-1,0));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(-1,0), true);
 		if (element > 0)
 			focusedLayoutElement_ = element;
 		else {
 			element = findParentLayoutElement(*layout_, focusedLayoutElement_);
 			if (element > 0)
 				focusedLayoutElement_ = element;
+			else {
+				PropertyRow* nonInlinedParent = 0;
+				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
+					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
+				if(nonInlinedParent && nonInlinedParent->canBeToggled(this) && nonInlinedParent->expanded())
+					expandRow(nonInlinedParent, false);
+			}
 		}
 		break;
 	}
@@ -334,9 +356,16 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			focusedLayoutElement_ = element;
 		}
 		else {
-			element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(1,0));
+			element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(1,0), true);
 			if (element > 0)
 				focusedLayoutElement_ = element;
+			else {
+				PropertyRow* nonInlinedParent = 0;
+				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
+					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
+				if (nonInlinedParent && nonInlinedParent->canBeToggled(this) && !nonInlinedParent->expanded())
+					expandRow(nonInlinedParent, true);
+			}
 		}
 		break;
 	}
@@ -668,7 +697,6 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
 		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
-	//if (widgetElement != 0xffffffff)
 		row->setLayoutElement(rowArea);
 	if (labelElement > 0 && *hasNonPulledChildren)
 		l->elements[labelElement].focusable = true;
