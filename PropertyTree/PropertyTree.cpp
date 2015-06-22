@@ -51,6 +51,101 @@ static bool findInSortedVector(const std::vector<T>& vec, const T& value)
 	return true;
 }
 
+static int findParentLayoutElement(const Layout& layout, int startElement)
+{
+	int element = -1;
+	do 
+	{
+		size_t num = layout.elements.size();
+		for (size_t i = 0; i < num; ++i)
+		{
+			int childrenListIndex = layout.elements[i].childrenList;
+			if (childrenListIndex < 0)
+				continue;
+			const ChildrenList& l = layout.childrenLists[childrenListIndex];
+			size_t numChildren = l.children.size();
+			for (size_t j = 0; j < numChildren; ++j) {
+				if (l.children[j] == element) {
+					element = i;
+					break;
+				}
+			}
+		}
+	} while (element > 0 && !layout.elements[element].focusable);
+	return element;
+}
+
+static int findNextChildLayoutElement(const Layout& layout, int startElement)
+{
+	int element = startElement;
+	do {
+		if (element > 0 && element < layout.elements.size() && layout.elements[element].childrenList >= 0)
+			return layout.childrenLists[layout.elements[element].childrenList].children.front();
+		size_t num = layout.elements.size();
+		for (size_t i = 0; i < num; ++i)
+		{
+			int childrenListIndex = layout.elements[i].childrenList;
+			if (childrenListIndex < 0)
+				continue;
+			const ChildrenList& l = layout.childrenLists[childrenListIndex];
+			size_t numChildren = l.children.size();
+			for (size_t j = 0; j < numChildren; ++j) {
+				if (l.children[j] == element)
+				{
+					if (j + 1 < l.children.size())
+						element = l.children[j+1];
+					else
+						element = -1;
+					continue;
+				}
+			}
+		}
+	} while (element > 0 && !layout.elements[element].focusable);
+	return element;
+}
+
+static Point distanceInDirection(const Rect& a, const Rect& b, Point direction)
+{
+	int maxAlong = max(a.topLeft().dot(direction), a.bottomRight().dot(direction));
+	int minAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
+	Point perp(direction.y(), -direction.x());
+	int distPerp = abs((a.center() - b.center()).dot(perp));
+	return Point(minAlong - maxAlong, distPerp);
+}
+
+static int findNextLayoutElementInDirection(const Layout& layout, int element, Point direction)
+{
+	const vector<Rect>& rectangles = layout.rectangles;
+	const Rect& ref = rectangles[element];
+
+	if (element == -1) {
+		for (size_t i = 0; i < layout.elements.size(); ++i) {
+			if (!layout.elements[i].focusable)
+				continue;
+			return (int)i;
+		}
+	}
+
+	Point minDistance(INT_MAX, INT_MAX);
+	int bestElement = -1;
+
+	for (size_t i = 0; i < rectangles.size(); ++i) {
+		if (i == element)
+			continue;
+		if (!layout.elements[i].focusable)
+			continue;
+		const Rect& r = rectangles[i];
+		Point distance = distanceInDirection(ref, r, direction);
+		if (distance.x() < 0)
+			continue;
+		if (distance < minDistance) {
+			bestElement = i;
+			minDistance = distance;
+		}
+	}
+	return bestElement;
+}
+
 // ---------------------------------------------------------------------------
 
 TreeConfig::TreeConfig()
@@ -204,52 +299,44 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	int x = parentRow->horizontalIndex(this, focusedRow);
 	int y = model()->root()->verticalIndex(this, parentRow);
 	PropertyRow* selectedRow = 0;
+	int previousFocusedElement = focusedLayoutElement_;
 	switch(ev->key()){
 	case KEY_UP:
 	{
-		int element = findNextLayoutElement(focusedLayoutElement_, Point(0,-1));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,-1));
 		if (element > 0)
 			focusedLayoutElement_ = element;
-
-		selectedRow = model()->root()->rowByVerticalIndex(this, --y);
-		if (selectedRow)
-			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	}
 	case KEY_DOWN:
 	{
-		int element = findNextLayoutElement(focusedLayoutElement_, Point(0,1));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,1));
 		if (element > 0)
 			focusedLayoutElement_ = element;
-
-		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
-		if (selectedRow)
-			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		break;
 	}
 	case KEY_LEFT:
 	{
-		int element = findNextLayoutElement(focusedLayoutElement_, Point(-1,0));
+		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(-1,0));
 		if (element > 0)
 			focusedLayoutElement_ = element;
-
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
-		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && parentRow->expanded()){
-			expandRow(parentRow, false);
-			selectedRow = model()->focusedRow();
+		else {
+			element = findParentLayoutElement(*layout_, focusedLayoutElement_);
+			if (element > 0)
+				focusedLayoutElement_ = element;
 		}
 		break;
 	}
 	case KEY_RIGHT:
 	{
-		int element = findNextLayoutElement(focusedLayoutElement_, Point(1,0));
-		if (element > 0)
+		int element = findNextChildLayoutElement(*layout_, focusedLayoutElement_);
+		if (element > 0) {
 			focusedLayoutElement_ = element;
-
-		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = ++x);
-		if(selectedRow == focusedRow && parentRow->canBeToggled(this) && !parentRow->expanded()){
-			expandRow(parentRow, true);
-			selectedRow = model()->focusedRow();
+		}
+		else {
+			element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(1,0));
+			if (element > 0)
+				focusedLayoutElement_ = element;
 		}
 		break;
 	}
@@ -276,6 +363,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	case KEY_SPACE:
 		if (filterWhenType_)
 			break;
+		// fall through
 	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
@@ -284,6 +372,9 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			focusedRow->onActivateRelease(this);
 		}
 		break;
+	}
+	if (focusedLayoutElement_ != previousFocusedElement && focusedLayoutElement_ > 0) {
+		selectedRow = layout_->rows[focusedLayoutElement_];
 	}
 	if(selectedRow){
 		onRowSelected(selectedRow, false, false);	
@@ -507,14 +598,16 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	const char* label = row->rowText(labelBuffer, tree, indexForContainerElement);
 	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
+	int labelElement = -1;
 	int widgetElement = -1;
 
+	bool widgetFocusable = row->isSelectable();
 	bool labelBeforeInlined = false;
 	if (row->parent() && row->parent()->isContainer() && 
 		(placement == PropertyRow::WIDGET_VALUE || placement == PropertyRow::WIDGET_NONE)) {
 		labelBeforeInlined = true;
 		if (label[0])
-			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	}
 
 	int count = (int)row->count();
@@ -529,33 +622,33 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
-	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	if (label[0])
-		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority);
+		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	break;
 	case PropertyRow::WIDGET_VALUE:
 	{
 		if (!labelBeforeInlined && label[0])
-			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
-		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0);
+		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
 	if (!labelBeforeInlined && label[0])
-		l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+		labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
 	if (label[0])
-		l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority);
-	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+		labelElement = l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority, false);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	break;
 	case PropertyRow::WIDGET_AFTER_INLINED:
 	{
 		if (label[0])
-			l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 		// add value later
 	}
 	break;
@@ -573,10 +666,12 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	}
 
 	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
-		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0);
+		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
 	//if (widgetElement != 0xffffffff)
 		row->setLayoutElement(rowArea);
+	if (labelElement > 0 && *hasNonPulledChildren)
+		l->elements[labelElement].focusable = true;
 }
 
 
@@ -596,19 +691,19 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 			continue;
 		}
 
-		int rowArea = l->addElement(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight);
+		int rowArea = l->addElement(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, false);
 		bool showPlus = !(tree->compact() && parentRow->isRoot());
 		if (showPlus)
-			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0);
+			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0, false);
 
 		bool hasNonPulledChildren = false;
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
 
-		if (child->expanded()/* && hasNonPulledChildren*/) {
-			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA);
+		if (child->expanded()) {
+			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
 			if (showPlus)
-				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0);
-			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CHILDREN_AREA);
+				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0, 0, false);
+			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
 			populateChildrenArea(l, contentArea, child, tree);
 		}
 	}
@@ -759,7 +854,7 @@ void PropertyTree::updateLayout()
 	PropertyRow* root = model_->root();
 	l.rows.push_back(root);
 
-	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA);
+	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA, 0, 0, 0, false);
 	root->setLayoutElement(lroot);
 	populateChildrenArea(&l, lroot, root, this);
 
@@ -1530,50 +1625,6 @@ static int findLayoutElementByFocusIndex(Layout& layout,
 	*currentX = startX;
 	*currentY = startY;
 	return -1;
-}
-
-Point distanceInDirection(const Rect& a, const Rect& b, Point direction)
-{
-	int maxAlong = max(a.topLeft().dot(direction), a.bottomRight().dot(direction));
-	int minAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
-	Point perp(direction.y(), -direction.x());
-	int distPerp = abs((a.center() - b.center()).dot(perp));
-	return Point(minAlong - maxAlong, distPerp);
-}
-
-int PropertyTree::findNextLayoutElement(int element, Point direction)
-{
-	const vector<Rect>& rectangles = layout_->rectangles;
-	const Rect& ref = rectangles[element];
-
-	if (element == -1) {
-		for (size_t i = 0; i < layout_->elements.size(); ++i) {
-			int part = layout_->elements[i].rowPart;
-			if (part != PART_LABEL && part != PART_WIDGET)
-				continue;
-			return (int)i;
-		}
-	}
-
-	Point minDistance(INT_MAX, INT_MAX);
-	int bestElement = -1;
-
-	for (size_t i = 0; i < rectangles.size(); ++i) {
-		if (i == element)
-			continue;
-		int part = layout_->elements[i].rowPart;
-		if (part != PART_LABEL && part != PART_WIDGET)
-			continue;
-		const Rect& r = rectangles[i];
-		Point distance = distanceInDirection(ref, r, direction);
-		if (distance.x() < 0)
-			continue;
-		if (distance < minDistance) {
-			bestElement = i;
-			minDistance = distance;
-		}
-	}
-	return bestElement;
 }
 
 int PropertyTree::layoutElementByFocusIndex(int x, int y)

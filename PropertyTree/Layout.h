@@ -45,7 +45,8 @@ struct LayoutElement
 	unsigned char type;
 	unsigned char rowPart: 4;
 	unsigned char rowPartSubindex: 4;
-	unsigned char priority : 4;
+	unsigned char priority : 3;
+	bool focusable : 1;
 
 	LayoutElement()
 	: type(FIXED_SIZE)
@@ -55,6 +56,7 @@ struct LayoutElement
 	, childrenList(-1)
 	, minWidth(0)
 	, minHeight(0)
+	, focusable(false)
 	{
 	}
 };
@@ -80,7 +82,7 @@ struct Layout
 	: nextChildrenList(0)
 	, magnetPoint(0) {}
 
-	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth = 0, int minHeight = 0, int priority = 0)
+	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, bool focusable)
 	{
 		LayoutElement e;
 		e.type = type;
@@ -88,6 +90,7 @@ struct Layout
 		e.minWidth = minWidth;
 		e.minHeight = minHeight;
 		e.priority = priority;
+		e.focusable = focusable;
 		int index = (int)elements.size();
 		elements.push_back(e);
 		rows.push_back(row);

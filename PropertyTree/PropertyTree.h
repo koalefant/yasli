@@ -104,7 +104,6 @@ public:
 	void drawLayout(property_tree::IDrawContext& context, int height);
 	void drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row);
 	int layoutElementByFocusIndex(int x, int y);
-	int findNextLayoutElement(int element, Point direction);
 
 	virtual void repaint() = 0;
 	virtual void updateHeights() = 0;
