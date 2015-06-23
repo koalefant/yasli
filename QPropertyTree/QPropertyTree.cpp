@@ -36,6 +36,8 @@
 #include <QPainter>
 #include <QElapsedTimer>
 #include <QStyle>
+#include <QStylePainter>
+#include <QStyleOptionFocusRect>
 
 // only for clipboard:
 #include <QClipboard>
@@ -1057,11 +1059,14 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 		}
 #endif
 
-		{
+		if (size_t(focusedLayoutElement_) < layout_->rectangles.size()) {
 			QRect r = toQRect(layout_->rectangles[focusedLayoutElement_]);
-			painter.setPen(QColor(255,0,0));
-			painter.setBrush(QColor(255,0,0,64));
-			painter.drawRect(r);
+
+			QStyleOptionFocusRect option;
+			option.initFrom(this);
+			option.rect = r.adjusted(-1, -1, 1, 1);
+			option.backgroundColor = palette().color(QPalette::Background);
+			style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
 		}
 
 		painter.translate(offset_.x(), offset_.y());

@@ -314,6 +314,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		return false;
 	PropertyRow* parentRow = focusedRow->findNonInlinedParent();
 	PropertyRow* selectedRow = 0;
+	bool addToSelection = false;
 	int previousFocusedElement = focusedLayoutElement_;
 	switch(ev->key()){
 	case KEY_UP:
@@ -390,9 +391,18 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		}
 		break;
 	case KEY_SPACE:
-		if (filterWhenType_)
+		if (ev->modifiers() == MODIFIER_CONTROL) {
+			if (size_t(focusedLayoutElement_) <  layout_->rows.size()) {
+				selectedRow = layout_->rows[focusedLayoutElement_];
+				addToSelection = true;
+			}
 			break;
-		// fall through
+		}
+		else {
+			if (filterWhenType_)
+				break;
+			// fall through
+		}
 	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
@@ -402,11 +412,12 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		}
 		break;
 	}
-	if (focusedLayoutElement_ != previousFocusedElement && focusedLayoutElement_ > 0) {
+	if ((ev->modifiers() != MODIFIER_CONTROL && ev->key() != KEY_SPACE) &&
+		focusedLayoutElement_ != previousFocusedElement && focusedLayoutElement_ > 0) {
 		selectedRow = layout_->rows[focusedLayoutElement_];
 	}
 	if(selectedRow){
-		onRowSelected(selectedRow, false, false);	
+		onRowSelected(selectedRow, addToSelection, false);	
 		return true;
 	}
 	return false;
