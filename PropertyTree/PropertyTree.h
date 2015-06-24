@@ -63,7 +63,7 @@ public:
 	int leftBorder() const { return leftBorder_; }
 	int rightBorder() const { return rightBorder_; }
 
-	bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
+	bool spawnWidget(PropertyRow* row, bool rename);
 	PropertyRow* selectedRow();
 	bool getSelectedObject(yasli::Object* object);
 	bool selectByAddress(const void*, bool keepSelectionIfChildSelected = false);

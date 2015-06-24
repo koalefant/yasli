@@ -67,7 +67,7 @@ PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 , inlinedBefore_(false)
 , hasInlinedChildren_(false)
 , userReadOnly_(false)
-, userReadOnlyRecurse_(false)
+, userRenamable_(false)
 , userFullRow_(false)
 , multiValue_(false)
 , userHideChildren_(false)
@@ -228,7 +228,7 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	parent_ = row->parent_;
 	
 	userReadOnly_ = row->userReadOnly_;
-	userReadOnlyRecurse_ = row->userReadOnlyRecurse_;
+	userRenamable_ = row->userRenamable_;
 	userFixedWidget_ = row->userFixedWidget_;
 	inlined_ = row->inlined_;
 	inlinedBefore_ = row->inlinedBefore_;
@@ -356,9 +356,9 @@ void PropertyRowStruct::serialize(Archive& ar)
 	}
 }
 
-bool PropertyRow::onActivate(PropertyTree* tree, bool force)
+bool PropertyRow::onActivate(PropertyTree* tree, bool rename)
 {
-    return tree->spawnWidget(this, force);
+    return tree->spawnWidget(this, rename);
 }
 
 void PropertyRow::setLabelChanged() 
@@ -435,7 +435,7 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 		inlined_ = false;
 		inlinedBefore_ = false;
 		userReadOnly_ = false;
-		userReadOnlyRecurse_ = false;
+		userRenamable_ = false;
 		userFixedWidget_ = false;
 		userWidgetSize_ = -1;
 		userHideChildren_ = false;
@@ -476,9 +476,12 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 				asStruct()->scanChildren(op);
 		}
 		else if(*ptr == '!'){
-			if(userReadOnly_)
-				userReadOnlyRecurse_ = true;
-			userReadOnly_ = true;
+			if(userReadOnly_) {
+				userRenamable_ = true;
+				userReadOnly_ = false;
+			}
+			else
+				userReadOnly_ = true;
 		}
 		else if(*ptr == '['){
 			++ptr;

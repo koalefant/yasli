@@ -192,7 +192,7 @@ public:
 	virtual bool isLeaf() const{ return false; }
 	virtual void closeNonLeaf(const yasli::Serializer& ser) {}
 	virtual bool isStatic() const{ return true; }
-	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!inlined() && !inlinedBefore()); }
+	virtual bool isSelectable() const{ return !userReadOnly() || (!inlined() && !inlinedBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
 
 	bool canBeToggled(const PropertyTree* tree) const;
@@ -220,7 +220,7 @@ public:
 	bool userFixedWidget() const{ return userFixedWidget_; }
 	bool userFullRow() const { return userFullRow_; }
 	bool userReadOnly() const { return userReadOnly_; }
-	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
+	bool userRenamable() const { return userRenamable_; }
 	int userWidgetSize() const{ return userWidgetSize_; }
 
 	// multiValue is used to edit properties of multiple objects simulateneously
@@ -277,7 +277,7 @@ protected:
 	bool selected_ : 1;
 	bool labelChanged_ : 1;
 	bool userReadOnly_ : 1;
-	bool userReadOnlyRecurse_ : 1;
+	bool userRenamable_ : 1;
 	bool userFixedWidget_ : 1;
 	bool userFullRow_ : 1;
 	bool userHideChildren_ : 1;

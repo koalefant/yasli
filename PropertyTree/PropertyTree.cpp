@@ -723,7 +723,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
 		row->setLayoutElement(rowArea);
-	if (labelElement > 0 && *hasNonPulledChildren)
+	if (labelElement > 0 && (*hasNonPulledChildren || (row->parent() && row->parent()->isContainer())))
 		l->elements[labelElement].focusable = true;
 }
 
@@ -1125,14 +1125,16 @@ void PropertyTree::apply(bool continuous)
 		onChanged();
 }
 
-bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
+bool PropertyTree::spawnWidget(PropertyRow* row, bool rename)
 {
 	if(!widget_.get() || widgetRow_ != row){
 		interruptDrag();
 		setWidget(0, 0);
 		property_tree::InplaceWidget* newWidget = 0;
-		if ((ignoreReadOnly && row->userReadOnlyRecurse()) || !row->userReadOnly())
-			newWidget = row->createWidget(this);
+		if (!row->userReadOnly()) {
+			if (((rename && row->userRenamable())) || (!rename && !row->userRenamable()))
+				newWidget = row->createWidget(this);
+		}
 		setWidget(newWidget, row);
 		return newWidget != 0;
 	}

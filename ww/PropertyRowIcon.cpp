@@ -43,7 +43,7 @@ public:
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return false; }
 
-	bool onActivate(PropertyTree* tree, bool force)
+	bool onActivate(PropertyTree* tree, bool rename)
 	{
 
 		return false;
