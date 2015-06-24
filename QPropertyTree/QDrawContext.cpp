@@ -40,10 +40,10 @@ void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& _r, const
 static QColor interpolate(const QColor& a, const QColor& b, float k)
 {
 	float mk = 1.0f - k;
-	return QColor(a.red() * k  + b.red() * mk,
-				  a.green() * k + b.green() * mk,
-				  a.blue() * k + b.blue() * mk,
-				  a.alpha() * k + b.alpha() * mk);
+	return QColor(a.red() * mk  + b.red() * k,
+				  a.green() * mk + b.green() * k,
+				  a.blue() * mk + b.blue() * k,
+				  a.alpha() * mk + b.alpha() * k);
 }
 
 static QColor toQColor(const Color& color)
@@ -105,7 +105,7 @@ void QDrawContext::drawSelection(const Rect& rect, bool inlinedRow)
 	if (inlinedRow) {
 		QColor color1(tree_->palette().button().color());
 		QColor color2(tree_->palette().highlight().color());
-		QColor brushColor = tree_->hasFocusOrInplaceHasFocus() ? interpolate(color1, color2, 0.33f) : tree_->palette().shadow().color();
+		QColor brushColor = tree_->hasFocusOrInplaceHasFocus() ? interpolate(color1, color2, 0.3f) : tree_->palette().shadow().color();
 		fillRoundRectangle(*painter_, QBrush(brushColor), toQRect(rect), brushColor, 6);
 	}
 	else {

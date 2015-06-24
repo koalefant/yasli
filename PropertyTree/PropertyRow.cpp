@@ -818,7 +818,7 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 	{
 	case PART_ROW_AREA:
 		if (selected())
-			context.drawSelection(rect, true);
+			context.drawSelection(rect, false);
 		else
 		{
 			bool pulledChildrenSelected = false;
