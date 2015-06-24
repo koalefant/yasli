@@ -104,12 +104,12 @@ static int findNextChildLayoutElement(const Layout& layout, int startElement)
 	return element;
 }
 
-static Point distanceInDirection(const Rect& a, const Rect& b, Point direction)
+static Point distanceInDirection(const Rect& a, Point aCursor, const Rect& b, Point direction)
 {
 	int aAlong = min(a.topLeft().dot(direction), a.bottomRight().dot(direction));
 	int bAlong = min(b.topLeft().dot(direction), b.bottomRight().dot(direction));
 	Point perp(direction.y(), -direction.x());
-	int distPerp = abs((a.center() - b.center()).dot(perp));
+	int distPerp = abs((aCursor - b.clamp(aCursor)).dot(perp));
 	return Point(bAlong - aAlong, distPerp);
 }
 
@@ -126,10 +126,11 @@ static bool overlapsOnAxis(const Rect& a, const Rect& b, Point axis)
 	return !(maxB <= minA || maxA <= minB);
 }
 
-static int findNextLayoutElementInDirection(const Layout& layout, int element, Point direction, bool onlyOverlapping)
+static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layout, int element, Point cursorPos, Point direction, bool onlyOverlapping)
 {
 	const vector<Rect>& rectangles = layout.rectangles;
 	const Rect& ref = rectangles[element];
+	Point cursor = ref.clamp(cursorPos);
 
 	if (element == -1) {
 		for (size_t i = 0; i < layout.elements.size(); ++i) {
@@ -151,7 +152,7 @@ static int findNextLayoutElementInDirection(const Layout& layout, int element, P
 
 		if (onlyOverlapping && !overlapsOnAxis(ref, r, Point(-direction.y(), direction.x())))
 			continue;
-		Point distance = distanceInDirection(ref, r, direction);
+		Point distance = distanceInDirection(ref, cursor, r, direction);
 		if (distance.x() <= 0)
 			continue;
 		long long distanceValue = abs(distance.x()) * 0xffffffffull + abs(distance.y());
@@ -159,6 +160,9 @@ static int findNextLayoutElementInDirection(const Layout& layout, int element, P
 			bestElement = i;
 			minDistance = distanceValue;
 		}
+	}
+	if (bestElement > 0) {
+		*newCursor = rectangles[bestElement].clamp(cursor);
 	}
 	return bestElement;
 }
@@ -316,26 +320,33 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	PropertyRow* selectedRow = 0;
 	bool addToSelection = false;
 	int previousFocusedElement = focusedLayoutElement_;
+	Point focusCursor;
 	switch(ev->key()){
 	case KEY_UP:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,-1), false);
-		if (element > 0)
+		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
+		if (element > 0) {
 			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
+		}
 		break;
 	}
 	case KEY_DOWN:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(0,1), false);
-		if (element > 0)
+		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,1), false);
+		if (element > 0) {
 			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
+		}
 		break;
 	}
 	case KEY_LEFT:
 	{
-		int element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(-1,0), true);
-		if (element > 0)
+		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(-1,0), true);
+		if (element > 0) {
 			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
+		}
 		else {
 			element = findParentLayoutElement(*layout_, focusedLayoutElement_);
 			if (element > 0)
@@ -355,11 +366,14 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		int element = findNextChildLayoutElement(*layout_, focusedLayoutElement_);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
 		}
 		else {
-			element = findNextLayoutElementInDirection(*layout_, focusedLayoutElement_, Point(1,0), true);
-			if (element > 0)
+			element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(1,0), true);
+			if (element > 0) {
 				focusedLayoutElement_ = element;
+				focusCursor_ = focusCursor;
+			}
 			else {
 				PropertyRow* nonInlinedParent = 0;
 				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 

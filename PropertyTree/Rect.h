@@ -64,6 +64,17 @@ struct Rect
 		return true;
 	}
 
+	template<class TPoint>
+	TPoint clamp(const TPoint& point) const
+	{
+		TPoint r = point;
+		if (r.x() < x) r.setX(x);
+		if (r.x() >= x + w) r.setX(x + w -1);
+		if (r.y() < y) r.setY(y);
+		if (r.y() >= y + h) r.setY(y + h -1);
+		return r;
+	}
+
 	Point center() const { return Point(x + w / 2, y + h / 2); }
 
 	Rect adjusted(int l, int t, int r, int b) const {

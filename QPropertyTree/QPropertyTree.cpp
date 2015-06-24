@@ -1061,11 +1061,12 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 		if (size_t(focusedLayoutElement_) < layout_->rectangles.size()) {
 			QRect r = toQRect(layout_->rectangles[focusedLayoutElement_]);
+			bool focusedSelected = layout_->rows[focusedLayoutElement_] ? layout_->rows[focusedLayoutElement_]->selected() : false;
 
 			QStyleOptionFocusRect option;
 			option.initFrom(this);
 			option.rect = r.adjusted(-1, -1, 1, 1);
-			option.backgroundColor = palette().color(QPalette::Background);
+			option.backgroundColor = focusedSelected ? palette().color(QPalette::Highlight) : palette().color(QPalette::Background);
 			style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
 		}
 

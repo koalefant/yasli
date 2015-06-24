@@ -208,6 +208,8 @@ protected:
 
 	int cursorX_;
 	int focusedLayoutElement_;
+	Point focusCursor_;
+
 	bool filterMode_;
 	Point pressPoint_;
 	Point lastStillPosition_;
