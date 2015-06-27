@@ -24,6 +24,7 @@ class InplaceWidget;
 struct IDrawContext;
 struct Color;
 struct Layout;
+struct HitResult;
 
 class IMenu;
 struct IUIFacade; 
@@ -151,6 +152,8 @@ protected:
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
 
+	void hitTest(property_tree::HitResult* result, const Point& point);
+
 
 	Point pointToRootSpace(const Point& pointInWindowSpace) const;
 	virtual bool updateScrollBar() = 0;
@@ -165,10 +168,10 @@ protected:
 	void onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos);
 	bool onRowKeyDown(PropertyRow* row, const KeyEvent* ev);
 	// points here are specified in root-row space
-	bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed);
-	void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point);
-	void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point);
-	void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point);
+	bool onRowLMBDown(const property_tree::HitResult& hit, bool controlPressed);
+	void onRowLMBUp(const property_tree::HitResult& hit);
+	void onRowRMBDown(const property_tree::HitResult& hit);
+	void onRowMouseMove(PropertyRow* row, Point point);
 	void onMouseStill();
 
 	bool activateRow(PropertyRow* row);

@@ -1113,15 +1113,16 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 {
 	setFocus(Qt::MouseFocusReason);
 
+	HitResult hit;
+	hitTest(&hit, pointToRootSpace(fromQPoint(ev->pos())));
+	PropertyRow* row = hit.row;
+
 	if (ev->button() == Qt::LeftButton)
 	{
-		int x = ev->x();
-		int y = ev->y();
-		PropertyRow* row = rowByPoint(fromQPoint(ev->pos()));
 		if(row && !row->isSelectable())
 			row = row->parent();
 		if(row){
-			if(onRowLMBDown(row, row->rect(this), pointToRootSpace(fromQPoint(ev->pos())), ev->modifiers().testFlag(Qt::ControlModifier))){
+			if(onRowLMBDown(hit, ev->modifiers().testFlag(Qt::ControlModifier))){
 				capturedRow_ = row;
 			}
 			else if (!dragCheckMode_){
@@ -1143,13 +1144,8 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 		if(row){
 			model()->setFocusedRow(row);
 			update();
-
-			onRowRMBDown(row, row->rect(this), pointToRootSpace(point));
 		}
-		else{
-			Rect rect = fromQRect(this->rect());
-			onRowRMBDown(model()->root(), rect, _toWidget(pointToRootSpace(point)));
-		}
+		onRowRMBDown(hit);
 	}
 }
 
@@ -1159,6 +1155,9 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 
 	if (ev->button() == Qt::LeftButton)
 	{
+		HitResult hit;
+		hitTest(&hit, pointToRootSpace(fromQPoint(ev->pos())));
+
 		 if(dragController_->captured()){
 		 	if (dragController_->drop(QCursor::pos()))
 				updateHeights();
@@ -1173,7 +1172,7 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			 PropertyRow* row = rowByPoint(point);
 			 if(capturedRow_){
 				 Rect rowRect = capturedRow_->rect(this);
-				 onRowLMBUp(capturedRow_, rowRect, _toWidget(pointToRootSpace(point)));
+				 onRowLMBUp(hit);
 				 mouseStillTimer_->stop();
 				 capturedRow_ = 0;
 				 update();
@@ -1277,13 +1276,14 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 		update();
 	}
 	else{
-		Point point = fromQPoint(ev->pos());
-		PropertyRow* row = rowByPoint(point);
-		if (row && dragCheckMode_ && row->widgetRect(this).contains(pointToRootSpace(point))) {
+		HitResult hit;
+		hitTest(&hit, pointToRootSpace(fromQPoint(ev->pos())));
+		PropertyRow* row = hit.row;
+		if (row && dragCheckMode_ && hit.part == PART_WIDGET) {
 			row->onMouseDragCheck(this, dragCheckValue_);
 		}
 		else if(capturedRow_){
-			onRowMouseMove(capturedRow_, Rect(), point);
+			onRowMouseMove(capturedRow_, hit.point);
 			if (sliderUpdateDelay_ >= 0)
 				mouseStillTimer_->start(sliderUpdateDelay_);
 		}

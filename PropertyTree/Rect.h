@@ -18,7 +18,7 @@ struct Point
 			return x_ < rhs.x_;
 	}
 
-	int manhattanLength() const { return x_ + y_; }
+	int manhattanLength() const { return abs(x_) + abs(y_); }
 	int dot(const Point& rhs) const { return x_ * rhs.x_ + y_ * rhs.y_; }
 
 	int x_;

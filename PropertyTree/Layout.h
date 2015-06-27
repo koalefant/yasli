@@ -129,4 +129,16 @@ struct Layout
 		minimalHeights.clear();
 	}
 };
+
+struct HitResult
+{
+	Point point;
+	int elementIndex;
+	int focusableElementIndex;
+	RowPart part;
+	int partIndex;
+	Rect rect;
+	PropertyRow* row;
+};
+
 };

@@ -437,42 +437,116 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	return false;
 }
 
-bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
+struct LevelHit
 {
+    int hit;
+    int focusable;
+    int focusableAlternative;
+};
+
+static LevelHit hitLayoutElementRecurse(const Layout& layout, int element, Point point)
+{
+    LevelHit r = { 0 };
+	if (size_t(element) >= layout.elements.size())
+        return r;
+	const LayoutElement& e = layout.elements[element]; 
+	if (element == 0 || layout.rectangles[element].contains(point)) {
+        r.hit = element;
+        if (e.focusable)
+            r.focusable = element;
+        if (e.childrenList >= 0) {
+			const ChildrenList& children = layout.childrenLists[e.childrenList];
+			int firstFocusableChild = 0;
+			int firstChildHit = 0;
+			int focusableChild = 0;
+
+			for (size_t i = 0; i < children.children.size(); ++i)
+			{
+				int childIndex = children.children[i];
+				const LayoutElement& ce = layout.elements[childIndex];
+                LevelHit childHit = hitLayoutElementRecurse(layout, childIndex, point);
+                if (childHit.hit > 0)
+                    r.hit = childHit.hit;
+                if (childHit.focusable > 0)
+                    r.focusable = childHit.focusable;
+                if (childHit.focusableAlternative > 0)
+                    r.focusableAlternative = childHit.focusableAlternative;
+                else if (ce.focusable)
+                    r.focusableAlternative = childIndex;
+			}
+            return r;
+		}
+        return r;
+    }
+    return r;
+}
+
+void PropertyTree::hitTest(property_tree::HitResult* r, const Point& point)
+{
+	r->point = point;
+    r->focusableElementIndex = 0;
+    LevelHit hit = hitLayoutElementRecurse(*layout_, 1, point);;
+    r->elementIndex = hit.hit;
+    if (hit.focusable > 0)
+        r->focusableElementIndex = hit.focusable;
+    else if (hit.focusableAlternative > 0)
+        r->focusableElementIndex = hit.focusableAlternative;
+	const LayoutElement& element = layout_->elements[r->elementIndex];
+	r->row = layout_->rows[r->elementIndex];
+	r->part = (RowPart)element.rowPart;
+	r->partIndex = element.rowPartSubindex;
+}
+
+bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed)
+{
+	PropertyRow* row = hit.row;
+	Point point = hit.point;
 	pressPoint_ = point;
-	if(row){
-		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
-			return true;
-		PropertyRow* rowToSelect = row;
-		while (rowToSelect && !rowToSelect->isSelectable())
-			rowToSelect = rowToSelect->parent();
-		if (rowToSelect)
-			onRowSelected(rowToSelect, multiSelectable() && controlPressed, true);	
-	}
+
+	bool changed = false;
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
-	if(row && !row->isRoot()){
-		bool changed = false;
-		if (row->widgetRect(this).contains(point)) {
-			DragCheckBegin dragCheck = row->onMouseDragCheckBegin();
-			if (dragCheck != DRAG_CHECK_IGNORE) {
-				dragCheckValue_ = dragCheck == DRAG_CHECK_SET;
-				dragCheckMode_ = true;
-				changed = row->onMouseDragCheck(this, dragCheckValue_);
-			}
+
+	switch (hit.part)
+	{
+	case PART_PLUS:
+	{
+		if (toggleRow(row))
+			return true;
+		break;
+	}
+	case PART_WIDGET:
+	{
+		DragCheckBegin dragCheck = row->onMouseDragCheckBegin();
+		if (dragCheck != DRAG_CHECK_IGNORE) {
+			dragCheckValue_ = dragCheck == DRAG_CHECK_SET;
+			dragCheckMode_ = true;
+			changed = row->onMouseDragCheck(this, dragCheckValue_);
 		}
-		
-		if (!dragCheckMode_) {
-			bool capture = row->onMouseDown(this, point, changed);
-			if(!changed && !widget_.get()){ // FIXME: осмысленный метод для проверки
-				if(capture)
-					return true;
-				else if(row->widgetRect(this).contains(point)){
-					if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
-						interruptDrag();
-					row->onActivate(this, false);
-					return false;
-				}
+		break;
+	}
+	default:
+	break;
+	}
+
+	focusedLayoutElement_ = hit.focusableElementIndex;
+
+	PropertyRow* rowToSelect = row;
+	while (rowToSelect && !rowToSelect->isSelectable())
+		rowToSelect = rowToSelect->parent();
+	if (rowToSelect)
+		onRowSelected(rowToSelect, multiSelectable() && controlPressed, true);	
+
+	if (!dragCheckMode_) {
+		bool capture = row->onMouseDown(this, point, changed);
+		if(!changed && !widget_.get()){
+			if(capture)
+				return true;
+			else if(hit.part == PART_WIDGET){
+				if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
+					interruptDrag();
+				row->onActivate(this, false);
+				return false;
 			}
 		}
 	}
@@ -494,20 +568,32 @@ void PropertyTree::onMouseStill()
 	}
 }
 
-void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point)
+void PropertyTree::onRowLMBUp(const HitResult& hit)
 {
 	onMouseStill();
-	row->onMouseUp(this, point);
+	if (capturedRow_)
+		capturedRow_->onMouseUp(this, hit.point);
 
-	if ((pressPoint_ - point).manhattanLength() < 1 && row->widgetRect(this).contains(point)) {
-		row->onActivateRelease(this);
+	if ((!capturedRow_ || capturedRow_ == hit.row) &&
+		(pressPoint_ - hit.point).manhattanLength() < 1 &&
+		hit.part == PART_WIDGET) {
+		hit.row->onActivateRelease(this);
 	}
 }
 
-void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point)
+void PropertyTree::onRowRMBDown(const HitResult& hit)
 {
-	SharedPtr<PropertyRow> handle = row;
+	SharedPtr<PropertyRow> handle = hit.row;
 	PropertyRow* menuRow = 0;
+	PropertyRow* row = hit.row;
+	
+	focusedLayoutElement_ = hit.focusableElementIndex;
+
+	PropertyRow* rowToSelect = row;
+	while (rowToSelect && !rowToSelect->isSelectable())
+		rowToSelect = rowToSelect->parent();
+	if (rowToSelect)
+		onRowSelected(rowToSelect, multiSelectable(), true);	
 
 	if (row->isSelectable()){
 		menuRow = row;
@@ -522,7 +608,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
-			menu->exec(point);
+			menu->exec(_toWidget(hit.point));
 	}
 }
 
@@ -1233,7 +1319,7 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 	return true;
 }
 
-void PropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point)
+void PropertyTree::onRowMouseMove(PropertyRow* row, Point point)
 {
 	PropertyDragEvent e;
 	e.tree = this;
