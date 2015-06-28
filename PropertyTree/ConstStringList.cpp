@@ -36,7 +36,7 @@ ConstStringWrapper::ConstStringWrapper(ConstStringList* list, const char*& strin
 }
 
 
-bool serialize(yasli::Archive& ar, ConstStringWrapper& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, ConstStringWrapper& value, const char* name, const char* label)
 {
 	using yasli::string;
 	if(ar.isOutput()){

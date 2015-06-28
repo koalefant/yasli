@@ -22,7 +22,7 @@ inline bool Serializer::operator()(Archive& ar) const{
 	return serializeFunc_(object_, ar);
 }
 
-inline void PointerInterface::serialize(Archive& ar) const
+inline void PointerInterface::YASLI_SERIALIZE_METHOD(Archive& ar) const
 {
 	TypeID oldTypeID = type();
 	ClassFactoryBase* factory = this->factory();

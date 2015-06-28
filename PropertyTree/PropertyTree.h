@@ -74,7 +74,7 @@ public:
 	void expandChildren(PropertyRow*);
 	void collapseChildren(PropertyRow*);
 
-	virtual void serialize(yasli::Archive& ar);
+	virtual void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 
 protected:
 	PropertyTree(IUIFacade* ui);

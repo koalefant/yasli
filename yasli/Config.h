@@ -10,6 +10,9 @@
 
 #pragma once
 
+// Use ConfigLocal.h to redefine any of the options below.
+#include "ConfigLocal.h"
+
 // Disable C++ RTTI use (e.g. typeid())
 #ifndef YASLI_NO_RTTI
 #define YASLI_NO_RTTI 1
@@ -35,7 +38,6 @@
 #define YASLI_STD_PAIR_FIRST_SECOND 0
 #endif
 
-
 #ifdef _DEBUG
 // BinArchives use short hash of name to compact and speed up. Collision on particular level of hierarchy could cause to wrong result.
 //#define YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION 
@@ -44,10 +46,22 @@
 #define YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
 #endif
 
+// This allows to change the name of global serialization function and
+// serialization method to match the coding conventions of the codebase.
+#ifndef YASLI_SERIALIZE_OVERRIDE
+#define YASLI_SERIALIZE_OVERRIDE serialize
+#endif
+
+#ifndef YASLI_SERIALIZE_METHOD
+#define YASLI_SERIALIZE_METHOD serialize
+#endif
+
+// Allows to override default integer typedefs
+// See note at CastInteger in Archive.h for details.
+#ifndef YASLI_INTS_DEFINED
 #include <stdint.h>
 namespace yasli
 {
-	// See note at CastInteger in Archive.h for details.
 	typedef int8_t i8;
 	typedef int16_t i16;
 	typedef int32_t i32;
@@ -57,3 +71,25 @@ namespace yasli
 	typedef uint32_t u32;
 	typedef uint64_t u64;
 };
+#endif
+
+// Allows to override default string implementation (should be STL-compatible)
+#ifndef YASLI_STRINGS_DEFINED
+#include <string>
+namespace yasli {
+	using std::string;
+	using std::wstring;
+}
+#endif
+
+#ifndef YASLI_STRING_LIST_BASE_DEFINED
+#include <vector>
+namespace yasli {
+	typedef std::vector<const char*> StringListStaticBase;
+	typedef std::vector<string> StringListBase;
+}
+#endif
+
+// Can be used to override YASLI_ASSERT and YASLI_CHECK, see yasli/Assert.h
+#ifndef YASLI_ASSERT_DEFINED
+#endif

@@ -102,14 +102,14 @@ protected:
 namespace std{
 
 template<class T, class Alloc>
-bool serialize(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label)
 {
 	yasli::ContainerSTL<std::vector<T, Alloc>, T> ser(&container);
 	return ar(static_cast<yasli::ContainerInterface&>(ser), name, label);
 }
 
 template<class T, class Alloc>
-bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label)
 {
 	yasli::ContainerSTL<std::list<T, Alloc>, T> ser(&container);
 	return ar(static_cast<yasli::ContainerInterface&>(ser), name, label);
@@ -135,7 +135,7 @@ private:
 
 namespace std {
 
-inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label)
+inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::string& value, const char* name, const char* label)
 {
 	yasli::StringSTL str(value);
 	return ar(static_cast<yasli::StringInterface&>(str), name, label);
@@ -147,7 +147,7 @@ inline bool serialize(yasli::Archive& ar, std::string& value, const char* name, 
 namespace std {
 
 template<class K, class V, class C, class Alloc>
-bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label)
 {
 	std::vector<std::pair<K, V> > temp(container.begin(), container.end());
 	if (!ar(temp, name, label))
@@ -178,7 +178,7 @@ private:
 
 namespace std {
 
-inline bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
+inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
 {
 	yasli::WStringSTL str(value);
 	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
@@ -212,7 +212,7 @@ struct StdStringPair : yasli::KeyValueInterface
 template<class K, class V>
 struct StdPair : std::pair<K, V>
 {
-	void serialize(yasli::Archive& ar) 
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar) 
 	{
 #if YASLI_STD_PAIR_FIRST_SECOND
 		ar(this->first, "first", "^");
@@ -229,14 +229,14 @@ struct StdPair : std::pair<K, V>
 namespace std{
 
 template<class V>
-bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
 {
 	yasli::StdStringPair<V> keyValue(pair);
 	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
 }
 
 template<class K, class V>
-bool serialize(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label)
 {
 	return ar(static_cast<yasli::StdPair<K, V>&>(pair), name, label);
 }

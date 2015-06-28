@@ -39,7 +39,7 @@ PropertyTreeOperator::~PropertyTreeOperator()
 {
 }
 
-void PropertyTreeOperator::serialize(yasli::Archive& ar)
+void PropertyTreeOperator::YASLI_SERIALIZE_METHOD(yasli::Archive& ar)
 {
     ar(type_, "type", "Type");
     ar(path_, "path", "Path");

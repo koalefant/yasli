@@ -30,8 +30,8 @@ PropertyRowObject::~PropertyRowObject()
 	object_ = Object();
 }
 
-void PropertyRowObject::serialize(Archive& ar)
+void PropertyRowObject::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
-    PropertyRow::serialize(ar);
+    PropertyRow::YASLI_SERIALIZE_METHOD(ar);
 }
 

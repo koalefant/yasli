@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 #include "yasli/Archive.h"
 #include "yasli/Pointers.h"
 

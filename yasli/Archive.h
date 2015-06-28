@@ -10,6 +10,7 @@
 #pragma once
 #pragma warning (disable : 4100) 
 
+#include "yasli/Config.h"
 #include "yasli/Helpers.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
@@ -20,7 +21,7 @@ namespace yasli{
 class Archive;
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T& object, const char* name, const char* label);
 
 class Object;
 class KeyValueInterface;
@@ -218,23 +219,24 @@ inline Context::~Context() {
 
 template<class T>
 bool Archive::operator()(const T& value, const char* name, const char* label){
-    return serialize(*this, const_cast<T&>(value), name, label);
+    return YASLI_SERIALIZE_OVERRIDE(*this, const_cast<T&>(value), name, label);
 }
 
 inline bool Archive::operator()(PointerInterface& ptr, const char* name, const char* label)
 {
-	return (*this)(Serializer(const_cast<PointerInterface&>(ptr)), name, label);
+	Serializer ser(ptr);
+	return operator()(ser, name, label);
 }
 
 template<class T, int Size>
-bool serialize(Archive& ar, T object[Size], const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T object[Size], const char* name, const char* label)
 {
 	YASLI_ASSERT(0);
 	return false;
 }
 
 template<class T>
-bool serialize(Archive& ar, const T& object, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, const T& object, const char* name, const char* label)
 {
 	T::unable_to_serialize_CONST_object();
 	YASLI_ASSERT(0);
@@ -278,23 +280,23 @@ bool castInteger(Archive& ar, T& v, const char* name, const char* label)
 			>
 		>::type::invoke(ar, v, name, label);
 }
-inline bool serialize(Archive& ar, unsigned char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, unsigned short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, unsigned int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, unsigned long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, unsigned long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, signed char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, signed short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, signed int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, signed long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
-inline bool serialize(Archive& ar, signed long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, unsigned char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, unsigned short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, unsigned int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, unsigned long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, unsigned long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, signed char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, signed short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, signed int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, signed long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, signed long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
 #ifdef _NATIVE_WCHAR_T_DEFINED // MSVC
-inline bool serialize(Archive& ar, wchar_t& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, wchar_t& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
 #endif
 
 
 template<class T>
-bool serialize(Archive& ar, T& object, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T& object, const char* name, const char* label)
 {
 	using namespace Helpers;
 

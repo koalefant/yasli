@@ -62,7 +62,7 @@ SUITE(JSONArchive)
     {
         bool enabled;
         string name;
-        void serialize(Archive& ar)
+        void YASLI_SERIALIZE_METHOD(Archive& ar)
         {
             ar(enabled, "enabled");
             ar(name, "name");
@@ -71,7 +71,7 @@ SUITE(JSONArchive)
     struct Root
     {
         vector<Element> elements;
-        void serialize(Archive& ar)
+        void YASLI_SERIALIZE_METHOD(Archive& ar)
         {
             ar(elements, "elements");
         }
@@ -97,7 +97,7 @@ SUITE(JSONArchive)
 	struct SimpleElement
 	{
 		string value;
-		void serialize(Archive& ar)
+		void YASLI_SERIALIZE_METHOD(Archive& ar)
 		{
 			ar(value, "value");
 		}
@@ -195,7 +195,7 @@ SUITE(JSONArchive)
 	{
 		string value;
 
-		void serialize(Archive& ar) { ar(value, "value"); }
+		void YASLI_SERIALIZE_METHOD(Archive& ar) { ar(value, "value"); }
 	};
 
 	TEST(RegressionEscapedDoubleQuotes)
@@ -221,7 +221,7 @@ SUITE(JSONArchive)
 		{
 		}
 
-		void serialize(Archive& ar)
+		void YASLI_SERIALIZE_METHOD(Archive& ar)
 		{
 			ar(zero, "zero");
 			ar(one, "one");
@@ -270,7 +270,7 @@ SUITE(JSONArchive)
 
 		FloatZero() : fzero(0.0f), dzero(0.0) {}
 
-		void serialize(Archive& ar) {
+		void YASLI_SERIALIZE_METHOD(Archive& ar) {
 			ar(fzero, "fzero");
 			ar(dzero, "dzero");
 		}
@@ -326,7 +326,7 @@ SUITE(JSONArchive)
 			return true;
 		}
 
-		void serialize(Archive& ar)
+		void YASLI_SERIALIZE_METHOD(Archive& ar)
 		{
 			ar(positiveInfValue, "positiveInfValue");
 			ar(negativeInfValue, "negativeInfValue");

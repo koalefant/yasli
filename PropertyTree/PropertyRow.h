@@ -19,7 +19,7 @@
 #include "yasli/Serializer.h"
 #include "yasli/StringList.h"
 #include "yasli/Pointers.h"
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 #include "Factory.h"
 #include "ConstStringList.h"
 #include "IDrawContext.h"
@@ -265,7 +265,7 @@ public:
 	yasli::Serializer serializer() const{ return serializer_; }
     void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual void serializeValue(yasli::Archive& ar) {}
-	void serialize(yasli::Archive& ar);
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
 

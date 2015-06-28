@@ -22,21 +22,21 @@ namespace yasli{ class Archive; }
 namespace std{ // not nice, but needed for argument-dependent lookup to work
 
 template<class T, class Alloc>
-bool serialize(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label);
 
 template<class T, class Alloc>
-bool serialize(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label);
 
 template<class K, class V, class C, class Alloc>
-bool serialize(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label);
 
-bool serialize(yasli::Archive& ar, std::string& value, const char* name, const char* label);
-bool serialize(yasli::Archive& ar, std::wstring& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::string& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::wstring& value, const char* name, const char* label);
 
 template<class V>
-bool serialize(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label);
 template<class K, class V>
-bool serialize(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label);
 
 }
 

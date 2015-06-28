@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "yasli/Config.h"
+
 namespace yasli { class Archive; }
 
 namespace property_tree {
@@ -57,7 +59,7 @@ struct Color
 					 int(b+int(v.b-b)*f),
 					 int(a+(v.a-a)*f));
 	}
-	void serialize(yasli::Archive& ar);
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 };
 
 }

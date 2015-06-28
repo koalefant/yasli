@@ -19,7 +19,7 @@ public:
 	virtual const char* get() const = 0;
 	virtual void set(const char* key) = 0;
 	virtual bool serializeValue(Archive& ar, const char* name, const char* label) = 0;
-	template<class TArchive> void serialize(TArchive& ar)
+	template<class TArchive> void YASLI_SERIALIZE_METHOD(TArchive& ar)
 	{
 		ar(*(StringInterface*)this, "", "^");
 		serializeValue(ar, "", "^");

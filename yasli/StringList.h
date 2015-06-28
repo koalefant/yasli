@@ -9,15 +9,14 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include <string.h>
 #include "yasli/Assert.h"
+#include "yasli/Config.h"
 
 namespace yasli{
 
 class Archive;
-class StringListStatic : public std::vector<const char*>{
+class StringListStatic : public StringListStaticBase{
 public:
     int find(const char* value) const{
 		int numItems = int(size());
@@ -71,7 +70,7 @@ public:
     int index() const{ return index_; }
     const StringListStatic& stringList() const{ return *stringList_; }
     template<class Archive>
-    void serialize(Archive& ar) {
+    void YASLI_SERIALIZE_METHOD(Archive& ar) {
         ar(index_, "index");
     }
 protected:
@@ -79,7 +78,7 @@ protected:
     int index_;
 };
 
-class StringList: public std::vector<std::string>{
+class StringList: public StringListBase{
 public:
     StringList() {}
     StringList(const StringList& rhs){
@@ -150,7 +149,7 @@ public:
     int index() const{ return index_; }
     const StringList& stringList() const{ return stringList_; }
     template<class Archive>
-    void serialize(Archive& ar) {
+    void YASLI_SERIALIZE_METHOD(Archive& ar) {
         ar(index_, "index");
 		ar(stringList_, "stringList");
     }
@@ -165,8 +164,8 @@ void splitStringList(StringList* result, const char *str, char sep);
 void joinStringList(std::string* result, const StringList& stringList, char sep);
 void joinStringList(std::string* result, const StringListStatic& stringList, char sep);
 
-bool serialize(Archive& ar, StringList& value, const char* name, const char* label);
-bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label);
-bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
 
 }

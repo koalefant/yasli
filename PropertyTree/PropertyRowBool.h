@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 #include "PropertyRow.h"
 #include "Unicode.h"
 

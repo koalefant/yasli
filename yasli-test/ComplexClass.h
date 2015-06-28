@@ -43,7 +43,7 @@ struct Member
 		weight = float(index);
 	}
 
-	void serialize(Archive& ar)
+	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{
 		ar(name, "name");
 		ar(wname, "wname");
@@ -64,7 +64,7 @@ public:
 		baseMember_ = "Changed base member";
 	}
 
-	virtual void serialize(Archive& ar)
+	virtual void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{		
 		ar(baseMember_, "baseMember");
 	}
@@ -80,9 +80,9 @@ protected:
 class PolyDerivedA : public PolyBase
 {
 public:
-	void serialize(Archive& ar)
+	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{		
-		PolyBase::serialize(ar);
+		PolyBase::YASLI_SERIALIZE_METHOD(ar);
 		ar(derivedMember_, "derivedMember");
 	}
 
@@ -106,9 +106,9 @@ public:
 	{
 	}
 
-	void serialize(Archive& ar)
+	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{		
-		PolyBase::serialize(ar);
+		PolyBase::YASLI_SERIALIZE_METHOD(ar);
 		ar(derivedMember_, "derivedMember");
 		ar(derivedWMember_, "derivedWMember");
 	}
@@ -161,7 +161,7 @@ struct NumericTypes
     double_ = -11.0;
   }
 
-  void serialize(Archive& ar)
+  void YASLI_SERIALIZE_METHOD(Archive& ar)
   {
     ar(bool_, "bool");
     ar(char_, "char");
@@ -286,7 +286,7 @@ public:
 		stringToInt_.push_back(std::make_pair("four", 4));
 	}
 
-	void serialize(Archive& ar)
+	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{
 		ar(name_, "name");
 		ar(wname_, "wname");

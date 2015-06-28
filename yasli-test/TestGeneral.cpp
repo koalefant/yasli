@@ -25,7 +25,7 @@ SUITE(General)
 	struct TestBaseA
 	{
 		virtual void testA() {}
-		void serialize(Archive& ar) {}
+		void YASLI_SERIALIZE_METHOD(Archive& ar) {}
 	};
 
 	struct TestBaseB : TestBaseA

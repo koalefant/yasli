@@ -33,7 +33,7 @@ public:
 	void setValueAndContext(const Object& obj, yasli::Archive& ar) { object_ = obj; }
 	void setModel(PropertyTreeModel* model) { model_ = model; }
 	bool assignTo(Object* obj);
-	void serialize(Archive& ar);
+	void YASLI_SERIALIZE_METHOD(Archive& ar);
 	const Object& object() const{ return object_; }
 protected:
 	Object object_;

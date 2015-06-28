@@ -453,9 +453,9 @@ Point PropertyTree::treeSize() const
 	return size_ + (compact() ? Point(0,0) : Point(8, 8));
 }
 
-void PropertyTree::serialize(Archive& ar)
+void PropertyTree::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
-	model()->serialize(ar, this);
+	model()->YASLI_SERIALIZE_METHOD(ar, this);
 
 	if(ar.isInput()){
 		updateHeights();
@@ -771,7 +771,7 @@ struct DecomposeProxy
 {
 	DecomposeProxy(SharedPtr<PropertyRow>& row) : row(row) {}
 	
-	void serialize(yasli::Archive& ar)
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar)
 	{
 		ar(row, "row", "Row");
 	}

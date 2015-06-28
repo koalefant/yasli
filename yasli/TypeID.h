@@ -12,7 +12,6 @@
 #include <typeinfo>
 #include "yasli/Config.h"
 #include "yasli/Assert.h"
-#include "yasli/Strings.h"
 #include <string.h>
 
 #if !YASLI_NO_RTTI

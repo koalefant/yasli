@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 #include <stdio.h>
 
 namespace property_tree {

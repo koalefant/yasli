@@ -14,7 +14,7 @@
 #include "yasli/Archive.h"
 #include "MemoryWriter.h"
 
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 
 namespace yasli{
 
@@ -43,7 +43,7 @@ size_t TypeID::sizeOf() const{
 #endif
 }
 
-bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label)
 {
 	std::string typeName;
 	if(ar.isOutput()){

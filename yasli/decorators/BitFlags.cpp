@@ -3,7 +3,7 @@
 
 namespace yasli {
 
-void BitFlagsWrapper::serialize(yasli::Archive& ar)
+void BitFlagsWrapper::YASLI_SERIALIZE_METHOD(yasli::Archive& ar)
 {
 	const yasli::EnumDescription& desc = *description;
 	int count = desc.count();

@@ -9,6 +9,7 @@
 
 #pragma once
 #include "yasli/Assert.h"
+#include "yasli/Config.h"
 
 namespace yasli{
 
@@ -314,13 +315,13 @@ private:
 };
 
 template<class T>
-bool serialize(Archive& ar, SharedPtr<T>& ptr, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, SharedPtr<T>& ptr, const char* name, const char* label);
 
 template<class T>
-bool serialize(Archive& ar, PolyPtr<T>& ptr, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, PolyPtr<T>& ptr, const char* name, const char* label);
 
 template<class T>
-bool serialize(Archive& ar, AsObjectWrapper<SharedPtr<T> >& ptr, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, AsObjectWrapper<SharedPtr<T> >& ptr, const char* name, const char* label);
 
 }
 

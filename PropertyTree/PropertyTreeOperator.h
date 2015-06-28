@@ -29,7 +29,7 @@ struct TreePathLeaf
 	bool operator!=(const TreePathLeaf& rhs) const{
 		return index != rhs.index;
 	}
-	void serialize(yasli::Archive& ar);
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 };
 typedef std::vector<TreePathLeaf> TreePath;
 typedef std::vector<TreePath> TreePathes;
@@ -47,7 +47,7 @@ public:
     PropertyTreeOperator();
     ~PropertyTreeOperator();
     PropertyTreeOperator(const TreePath& path, PropertyRow* row);
-    void serialize(yasli::Archive& ar);
+    void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 private:
     Type type_;
     TreePath path_;

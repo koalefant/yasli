@@ -50,20 +50,20 @@ struct BitVectorWrapper
 	}
 
 
-    void serialize(Archive& ar)
+    void YASLI_SERIALIZE_METHOD(Archive& ar)
     {
 		ar(value, "value", "Value");
     }
 };
 
 template<class Enum>
-void BitVector<Enum>::serialize(Archive& ar)
+void BitVector<Enum>::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
     ar(value_, "value", "Value");
 }
 
 template<class Enum>
-bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, BitVector<Enum>& value, const char* name, const char* label)
 {
     using namespace yasli;
     EnumDescription &desc = getEnumDescription<Enum>();

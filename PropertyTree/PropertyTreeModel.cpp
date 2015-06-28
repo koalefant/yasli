@@ -205,7 +205,7 @@ protected:
 	const std::vector<char>& states_;
 };
 
-void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
+void PropertyTreeModel::YASLI_SERIALIZE_METHOD(Archive& ar, PropertyTree* tree)
 {
 	ar(focusedRow_, "focusedRow", 0);		
 	ar(selection_, "selection", 0);
@@ -362,12 +362,12 @@ void PropertyTreeModel::signalPushUndo(PropertyTreeOperator* op, bool* result)
 
 // ----------------------------------------------------------------------------------
 
-void TreePathLeaf::serialize(Archive& ar)
+void TreePathLeaf::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
 	ar(index, "", 0);
 }
 
-bool serialize(yasli::Archive& ar, TreeSelection& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, TreeSelection& value, const char* name, const char* label)
 {
 	return ar(static_cast<std::vector<TreePath>&>(value), name, label);
 }

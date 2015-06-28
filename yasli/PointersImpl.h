@@ -105,14 +105,14 @@ int releaseByVoidPtr(void* ptr) {
 }
 
 template<class T>
-bool serialize(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::SharedPtr<T>& ptr, const char* name, const char* label)
 {
 	yasli::SharedPtrSerializer<T> serializer(ptr);
 	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
 }
 
 template<class T>
-bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, const char* label)
 {
 	yasli::PolyPtrSerializer<T> serializer(ptr);
 	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
@@ -120,7 +120,7 @@ bool serialize(yasli::Archive& ar, yasli::PolyPtr<T>& ptr, const char* name, con
 
 
 template<class T>
-bool serialize(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >& ptr, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::SharedPtr<T> >& ptr, const char* name, const char* label)
 {
 	yasli::Object obj(ptr.ptr_.get(), yasli::TypeID::get<T>(),
 					  &yasli::acquireByVoidPtr<T>, 

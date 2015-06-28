@@ -316,7 +316,7 @@
     <ClInclude Include="SerializerImpl.h" />
     <ClInclude Include="StringList.h" />
     <ClInclude Include="BinArchive.h" />
-    <ClInclude Include="Strings.h" />
+    <ClInclude Include="ConfigLocal.h" />
     <ClInclude Include="TextIArchive.h" />
     <ClInclude Include="TextOArchive.h" />
     <ClInclude Include="STL.h" />

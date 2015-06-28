@@ -8,6 +8,9 @@
  */
 
 #pragma once 
+#include "yasli/Config.h"
+
+#ifndef YASLI_ASSERT_DEFINED
 #include <stdio.h>
 
 #ifdef _MSC_VER
@@ -49,3 +52,4 @@ inline bool assertionDialog(const char* function, const char* fileName, int line
 #define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; } 
 
 #pragma warning(disable:4127)
+#endif

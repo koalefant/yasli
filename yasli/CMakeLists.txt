@@ -15,7 +15,7 @@ set(SOURCES
 	BinArchive.cpp BinArchive.h
 	BitVector.h BitVectorImpl.h
 	ClassFactory.cpp ClassFactory.h ClassFactoryBase.h
-	Config.h
+	Config.h ConfigLocal.h
 	Enum.cpp Enum.h
 	Helpers.h
 	JSONIArchive.cpp JSONIArchive.h
@@ -29,7 +29,6 @@ set(SOURCES
 	StdAfx.cpp StdAfx.h
 	STL.h STLImpl.h
 	StringList.cpp StringList.h
-	Strings.h
 	TextIArchive.cpp TextIArchive.h
 	TextOArchive.cpp TextOArchive.h
 	Token.h

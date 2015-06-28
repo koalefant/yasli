@@ -586,7 +586,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Strings.h"
+				RelativePath=".\ConfigLocal.h"
 				>
 			</File>
 		</Filter>

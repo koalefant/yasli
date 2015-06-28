@@ -14,7 +14,7 @@ struct RangeDecorator
 	T hardMin;
 	T hardMax;
 
-	void serialize(Archive& ar) {}
+	void YASLI_SERIALIZE_METHOD(Archive& ar) {}
 };
 
 template<class T>
@@ -42,7 +42,7 @@ RangeDecorator<T> Range(T& value, float softMin, float softMax, float hardMin, f
 }
 
 template<class T>
-bool serialize(Archive& ar, RangeDecorator<T>& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, RangeDecorator<T>& value, const char* name, const char* label)
 {
 	if (ar.isEdit())
 		return ar(Serializer(value), name, label);

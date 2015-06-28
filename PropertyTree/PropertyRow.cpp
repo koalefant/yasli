@@ -306,7 +306,7 @@ SharedPtr<PropertyRow> PropertyRow::clone(ConstStringList* constStrings) const
 	return clonedRow;
 }
 
-void PropertyRow::serialize(Archive& ar)
+void PropertyRow::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
 	serializeValue(ar);
 

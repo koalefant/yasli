@@ -34,7 +34,7 @@ struct IconXPM
 	{
 	}
 
-	void serialize(Archive& ar) 	{}
+	void YASLI_SERIALIZE_METHOD(Archive& ar) 	{}
 	bool operator<(const IconXPM& rhs) const { return source < rhs.source; }
 
 };
@@ -95,7 +95,7 @@ struct IconXPMToggle
 	}
 
 	template<class TArchive>
-	void serialize(TArchive& ar)
+	void YASLI_SERIALIZE_METHOD(TArchive& ar)
 	{
 		ar(value_, "value", "Value");
 	}

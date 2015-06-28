@@ -25,13 +25,13 @@ public:
     BitVector& operator|= (int value) { value_ |= value; return *this; }
     BitVector& operator&= (int value) { value_ &= value; return *this; }
 
-    void serialize(Archive& ar);
+    void YASLI_SERIALIZE_METHOD(Archive& ar);
 private:
     int value_;
 };
 
 template<class Enum>
-bool serialize(Archive& ar, BitVector<Enum>& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, BitVector<Enum>& value, const char* name, const char* label);
 
 }
 

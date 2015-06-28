@@ -59,15 +59,16 @@ void joinStringList(std::string* result, const StringListStatic& stringList, cha
     }
 }
 
-bool serialize(Archive& ar, StringList& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const char* name, const char* label)
 {
 	return ar(static_cast<std::vector<std::string>&>(value), name, label);
 }
 
-bool serialize(Archive& ar, StringListValue& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label)
 {
     if(ar.isEdit()){
-        return ar(Serializer(value), name, label);
+		Serializer ser(value);
+        return ar(ser, name, label);
     }
     else{
         std::string str;
@@ -81,7 +82,7 @@ bool serialize(Archive& ar, StringListValue& value, const char* name, const char
     }
 }
 
-bool serialize(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
 {
     if(ar.isEdit())
         return ar(Serializer(value), name, label);

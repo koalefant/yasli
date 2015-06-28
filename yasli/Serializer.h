@@ -12,6 +12,7 @@
 #include <vector>
 #include "yasli/Assert.h"
 #include "yasli/TypeID.h"
+#include "yasli/Config.h"
 
 namespace yasli{
 
@@ -82,7 +83,7 @@ public:
 	template<class T>
 	static bool serializeRaw(void* rawPointer, Archive& ar){
 		YASLI_ESCAPE(rawPointer, return false);
-		((T*)(rawPointer))->serialize(ar);
+		((T*)(rawPointer))->YASLI_SERIALIZE_METHOD(ar);
 		return true;
 	}
 
@@ -168,7 +169,7 @@ public:
 	virtual void* get() const = 0;
 	virtual ClassFactoryBase* factory() const = 0;
 	
-	void serialize(Archive& ar) const;
+	void YASLI_SERIALIZE_METHOD(Archive& ar) const;
 };
 
 class StringInterface

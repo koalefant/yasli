@@ -10,13 +10,13 @@
 #pragma once
 
 #include <list>
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 
 class ConstStringWrapper;
 
 namespace yasli { class Archive; }
 
-bool serialize(yasli::Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
 
 class ConstStringList{
 public:
@@ -32,7 +32,7 @@ public:
 protected:
 	ConstStringList* list_;
 	const char*& string_;
-	friend bool ::serialize(yasli::Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
+	friend bool ::YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, ConstStringWrapper &wrapper, const char* name, const char* label);
 };
 
 extern ConstStringList globalConstStringList;

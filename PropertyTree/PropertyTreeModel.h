@@ -13,6 +13,7 @@
 #include "PropertyRow.h"
 #include "PropertyTreeOperator.h"
 #include "yasli/Pointers.h"
+#include "yasli/Config.h"
 #include "ConstStringList.h"
 
 using std::vector;
@@ -101,7 +102,7 @@ public:
 	PropertyRow* root() { return root_; }
 	const PropertyRow* root() const { return root_; }
 
-	void serialize(yasli::Archive& ar, PropertyTree* tree);
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar, PropertyTree* tree);
 
 	UpdateLock lockUpdate();
 	void requestUpdate(const PropertyRows& rows, bool needApply);
@@ -175,6 +176,6 @@ private:
 };
 
 
-bool serialize(yasli::Archive& ar, TreeSelection &selection, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, TreeSelection &selection, const char* name, const char* label);
 
 // vim:ts=4 sw=4:

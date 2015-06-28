@@ -10,7 +10,7 @@ struct BitFlagsWrapper{
 	int* variable;
 	const EnumDescription* description;
 
-	void serialize(Archive& ar);
+	void YASLI_SERIALIZE_METHOD(Archive& ar);
 };
 
 template<class Enum>

@@ -103,7 +103,7 @@
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="SerializerImpl.h" />
-    <ClInclude Include="Strings.h" />
+    <ClInclude Include="ConfigLocal.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="JSONIArchive.h">

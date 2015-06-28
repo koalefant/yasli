@@ -12,6 +12,7 @@
 
 #include "yasli/Assert.h"
 #include "yasli/TypeID.h"
+#include "yasli/Config.h"
 
 namespace yasli{
 
@@ -53,7 +54,7 @@ struct TypeIDWithFactory
 	}
 };
 
-bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label);
 
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yasli/Strings.h"
+#include "yasli/Config.h"
 
 namespace yasli {
 
@@ -48,9 +48,9 @@ struct FileOpen
 			*pathPointer = path;
 	}
 
-	void serialize(Archive& ar);
+	void YASLI_SERIALIZE_METHOD(Archive& ar);
 };
 
-bool serialize(Archive& ar, FileOpen& value, const char* name, const char* label);
+bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileOpen& value, const char* name, const char* label);
 
 }
