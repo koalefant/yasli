@@ -83,9 +83,9 @@ bool PropertyIArchive::operator()(char& value, const char* name, const char* lab
 }
 
 // Signed types
-bool PropertyIArchive::operator()(signed char& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::i8& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "signed char")){
+	if(openRow(name, label, "int8")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -94,9 +94,9 @@ bool PropertyIArchive::operator()(signed char& value, const char* name, const ch
 		return false;
 }
 
-bool PropertyIArchive::operator()(signed short& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::i16& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "short")){
+	if(openRow(name, label, "int16")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -105,9 +105,9 @@ bool PropertyIArchive::operator()(signed short& value, const char* name, const c
 		return false;
 }
 
-bool PropertyIArchive::operator()(signed int& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::i32& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "int")){
+	if(openRow(name, label, "int32")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -116,20 +116,9 @@ bool PropertyIArchive::operator()(signed int& value, const char* name, const cha
 		return false;
 }
 
-bool PropertyIArchive::operator()(signed long& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::i64& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "long")){
-		currentNode_->assignToPrimitive(&value, sizeof(value));
-		closeRow(name);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool PropertyIArchive::operator()(long long& value, const char* name, const char* label)
-{
-	if(openRow(name, label, "long long")){
+	if(openRow(name, label, "int64")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -139,9 +128,9 @@ bool PropertyIArchive::operator()(long long& value, const char* name, const char
 }
 
 // Unsigned types
-bool PropertyIArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::u8& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "unsigned char")){
+	if(openRow(name, label, "uint8")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -150,9 +139,9 @@ bool PropertyIArchive::operator()(unsigned char& value, const char* name, const 
 		return false;
 }
 
-bool PropertyIArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::u16& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "unsigned short")){
+	if(openRow(name, label, "uint16")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -161,9 +150,9 @@ bool PropertyIArchive::operator()(unsigned short& value, const char* name, const
 		return false;
 }
 
-bool PropertyIArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::u32& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "unsigned int")){
+	if(openRow(name, label, "uint32")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;
@@ -172,20 +161,9 @@ bool PropertyIArchive::operator()(unsigned int& value, const char* name, const c
 		return false;
 }
 
-bool PropertyIArchive::operator()(unsigned long& value, const char* name, const char* label)
+bool PropertyIArchive::operator()(yasli::u64& value, const char* name, const char* label)
 {
-	if(openRow(name, label, "unsigned long")){
-		currentNode_->assignToPrimitive(&value, sizeof(value));
-		closeRow(name);
-		return true;
-	}
-	else
-		return false;
-}
-
-bool PropertyIArchive::operator()(unsigned long long& value, const char* name, const char* label)
-{
-	if(openRow(name, label, "unsigned long long")){
+	if(openRow(name, label, "uint64")){
 		currentNode_->assignToPrimitive(&value, sizeof(value));
 		closeRow(name);
 		return true;

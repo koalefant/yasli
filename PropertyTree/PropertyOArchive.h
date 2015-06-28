@@ -22,33 +22,31 @@ public:
 	PropertyOArchive(PropertyTreeModel* model, PropertyRow* rootNode = 0);
 	~PropertyOArchive();
 
-	bool operator()(yasli::StringInterface& value, const char* name, const char* label);
-	bool operator()(yasli::WStringInterface& value, const char* name, const char* label);
-	bool operator()(bool& value, const char* name, const char* label);
-	bool operator()(char& value, const char* name, const char* label);
+	bool operator()(yasli::StringInterface& value, const char* name, const char* label) override;
+	bool operator()(yasli::WStringInterface& value, const char* name, const char* label) override;
+	bool operator()(bool& value, const char* name, const char* label) override;
+	bool operator()(char& value, const char* name, const char* label) override;
 
-	bool operator()(signed char& value, const char* name, const char* label);
-	bool operator()(signed short& value, const char* name, const char* label);
-	bool operator()(signed int& value, const char* name, const char* label);
-	bool operator()(signed long& value, const char* name, const char* label);
-	bool operator()(long long& value, const char* name, const char* label);
+	bool operator()(yasli::i8& value, const char* name, const char* label) override;
+	bool operator()(yasli::i16& value, const char* name, const char* label) override;
+	bool operator()(yasli::i32& value, const char* name, const char* label) override;
+	bool operator()(yasli::i64& value, const char* name, const char* label) override;
 
-	bool operator()(unsigned char& value, const char* name, const char* label);
-	bool operator()(unsigned short& value, const char* name, const char* label);
-	bool operator()(unsigned int& value, const char* name, const char* label);
-	bool operator()(unsigned long& value, const char* name, const char* label);
-	bool operator()(unsigned long long& value, const char* name, const char* label);
+	bool operator()(yasli::u8& value, const char* name, const char* label) override;
+	bool operator()(yasli::u16& value, const char* name, const char* label) override;
+	bool operator()(yasli::u32& value, const char* name, const char* label) override;
+	bool operator()(yasli::u64& value, const char* name, const char* label) override;
 
-	bool operator()(float& value, const char* name, const char* label);
-	bool operator()(double& value, const char* name, const char* label);
+	bool operator()(float& value, const char* name, const char* label) override;
+	bool operator()(double& value, const char* name, const char* label) override;
 
-	bool operator()(const yasli::Serializer& ser, const char* name, const char* label);
-	bool operator()(yasli::PointerInterface& ptr, const char *name, const char *label);
-	bool operator()(yasli::ContainerInterface& ser, const char *name, const char *label);
-	bool operator()(yasli::Object& obj, const char *name, const char *label);
+	bool operator()(const yasli::Serializer& ser, const char* name, const char* label) override;
+	bool operator()(yasli::PointerInterface& ptr, const char *name, const char *label) override;
+	bool operator()(yasli::ContainerInterface& ser, const char *name, const char *label) override;
+	bool operator()(yasli::Object& obj, const char *name, const char *label) override;
 
-	bool openBlock(const char* name, const char* label);
-	void closeBlock();
+	bool openBlock(const char* name, const char* label) override;
+	void closeBlock() override;
 
 protected:
 	PropertyOArchive(PropertyTreeModel* model, bool forDefaultType);

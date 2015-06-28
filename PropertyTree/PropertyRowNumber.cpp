@@ -19,22 +19,26 @@
 	YASLI_CLASS(PropertyRow, PropertyRow##postfix, #TypeName);
 
 using yasli::string;
+using yasli::i8;
+using yasli::i16;
+using yasli::i32;
+using yasli::i64;
+using yasli::u8;
+using yasli::u16;
+using yasli::u32;
+using yasli::u64;
 
 REGISTER_NUMBER_ROW(float, Float)
 REGISTER_NUMBER_ROW(double , Double)
-
 REGISTER_NUMBER_ROW(char, Char)
-REGISTER_NUMBER_ROW(signed char, SignedChar)
-REGISTER_NUMBER_ROW(unsigned char, UnsignedChar)
-
-REGISTER_NUMBER_ROW(short, Short)
-REGISTER_NUMBER_ROW(int, Int)
-REGISTER_NUMBER_ROW(long, Long)
-REGISTER_NUMBER_ROW(long long, LongLong)
-REGISTER_NUMBER_ROW(unsigned short, UnsignedShort)
-REGISTER_NUMBER_ROW(unsigned int, UnsignedInt)
-REGISTER_NUMBER_ROW(unsigned long, UnsignedLong)
-REGISTER_NUMBER_ROW(unsigned long long, UnsignedLongLong)
+REGISTER_NUMBER_ROW(i8, I8)
+REGISTER_NUMBER_ROW(i16, I16)
+REGISTER_NUMBER_ROW(i32, I32)
+REGISTER_NUMBER_ROW(i64, I64)
+REGISTER_NUMBER_ROW(u8, U8)
+REGISTER_NUMBER_ROW(u16, U16)
+REGISTER_NUMBER_ROW(u32, U32)
+REGISTER_NUMBER_ROW(u64, U64)
 
 DECLARE_SEGMENT(PropertyRowNumber)
 

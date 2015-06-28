@@ -31,16 +31,14 @@ public:
 	void clear() { position_ = memory_; }
 
 	// String interface (after this calls '\0' is always written)
-	MemoryWriter& operator<<(int value);
-	MemoryWriter& operator<<(long value);
-	MemoryWriter& operator<<(unsigned long value);
-	MemoryWriter& operator<<(unsigned int value);
-	MemoryWriter& operator<<(long long value);
-	MemoryWriter& operator<<(unsigned long long value);
+	MemoryWriter& operator<<(i8 value);
+	MemoryWriter& operator<<(u8 value);
+	MemoryWriter& operator<<(i32 value);
+	MemoryWriter& operator<<(u32 value);
+	MemoryWriter& operator<<(i64 value);
+	MemoryWriter& operator<<(u64 value);
 	MemoryWriter& operator<<(float value) { return (*this) << double(value); }
 	MemoryWriter& operator<<(double value);
-	MemoryWriter& operator<<(signed char value);
-	MemoryWriter& operator<<(unsigned char value);
 	MemoryWriter& operator<<(char value);
 	MemoryWriter& operator<<(const char* value);
 	MemoryWriter& operator<<(const wchar_t* value);
@@ -49,7 +47,7 @@ public:
 	// Binary interface (does not writes trailing '\0')
 	template<class T>
 	void write(const T& value){
-		write(reinterpret_cast<const T*>(&value), sizeof(value));
+		write(&value, sizeof(value));
 	}
 	void write(char c);
 	void write(const char* str);

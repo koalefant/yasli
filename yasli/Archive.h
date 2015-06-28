@@ -100,18 +100,18 @@ public:
 	}
 
 	virtual void warning(const char* message) {}
-	virtual bool operator()(bool& value, const char* name = "", const char* label = 0)           { notImplemented(); return false; }
-	virtual bool operator()(unsigned char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(signed char& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
-	virtual bool operator()(char& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
-	virtual bool operator()(short& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
-	virtual bool operator()(unsigned short& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(int& value, const char* name = "", const char* label = 0)            { notImplemented(); return false; }
-	virtual bool operator()(unsigned int& value, const char* name = "", const char* label = 0)   { notImplemented(); return false; }
-	virtual bool operator()(long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
-	virtual bool operator()(unsigned long long& value, const char* name = "", const char* label = 0)        { notImplemented(); return false; }
-	virtual bool operator()(float& value, const char* name = "", const char* label = 0)          { notImplemented(); return false; }
-	virtual bool operator()(double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+	virtual bool operator()(bool& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(u8& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(i8& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(i16& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(u16& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(i32& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(u32& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(i64& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(u64& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(float& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(double& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 
 	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
 	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
@@ -123,16 +123,6 @@ public:
 
 	// No point in supporting long double since it is represented as double on MSVC
 	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
-
-	// Fall back to int/long long implementation for long, depending on the platform.
-	// Note that serialization of long is not portable with some archives.
-#if !defined(_WIN32) && defined(__x86_64__) // ILP64
-	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<long long*>(&value), name, label); }
-	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned long long*>(&value), name, label); }
-#else // LLP64
-	bool operator()(long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<int*>(&value), name, label); }
-	bool operator()(unsigned long& value, const char* name = "", const char* label = 0) { return operator()(*reinterpret_cast<unsigned int*>(&value), name, label); }
-#endif
 
 	// block call are osbolete, please do not use
 	virtual bool openBlock(const char* name, const char* label) { return true; }
@@ -250,6 +240,58 @@ bool serialize(Archive& ar, const T& object, const char* name, const char* label
 	YASLI_ASSERT(0);
 	return false;
 }
+
+// Archives are using yasli integer typedefs (taken from stdint.h). These
+// types will be selected directly by Archive::operator() overloads. Those,
+// however, do not cover all C++ integer types, as compilers usually have
+// multiple integer types of the same type (like int and long in MSVC/x86). We
+// would like to handle handle all C++ standard types, but not add duplicated
+// and unportable methods to each archive implementations. The remaining types
+// are cast to types of the same in functions below. E.g. long will be cast to
+// int on MSVC/x86 and long long will be cast to long on GCC/x64.
+template<class T, class CastTo>
+struct CastInteger
+{
+	static bool invoke(Archive& ar, T& value, const char* name, const char* label)
+	{
+		return ar(reinterpret_cast<CastTo&>(value), name, label);
+	}
+};
+
+template<class T>
+bool castInteger(Archive& ar, T& v, const char* name, const char* label)
+{
+	using namespace Helpers;
+	return 
+		Select< IsSigned<T>,
+			SelectIntSize< sizeof(T),
+				CastInteger<T, i8>,
+				CastInteger<T, i16>,
+				CastInteger<T, i32>,
+				CastInteger<T, i64>
+			>,
+			SelectIntSize< sizeof(T),
+				CastInteger<T, u8>,
+				CastInteger<T, u16>,
+				CastInteger<T, u32>,
+				CastInteger<T, u64>
+			>
+		>::type::invoke(ar, v, name, label);
+}
+inline bool serialize(Archive& ar, unsigned char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, unsigned short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, unsigned int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, unsigned long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, unsigned long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, signed char& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, signed short& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, signed int& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, signed long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+inline bool serialize(Archive& ar, signed long long& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+#ifdef _NATIVE_WCHAR_T_DEFINED // MSVC
+inline bool serialize(Archive& ar, wchar_t& v, const char* name, const char* label) { return castInteger(ar, v, name, label); }
+#endif
+
 
 template<class T>
 bool serialize(Archive& ar, T& object, const char* name, const char* label)

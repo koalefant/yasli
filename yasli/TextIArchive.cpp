@@ -917,7 +917,7 @@ bool TextIArchive::checkStringValueToken()
     return true;
 }
 
-bool TextIArchive::operator()(int& value, const char* name, const char* label)
+bool TextIArchive::operator()(i32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -928,7 +928,7 @@ bool TextIArchive::operator()(int& value, const char* name, const char* label)
     return false;
 }
 
-bool TextIArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool TextIArchive::operator()(u32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -940,7 +940,7 @@ bool TextIArchive::operator()(unsigned int& value, const char* name, const char*
 }
 
 
-bool TextIArchive::operator()(short& value, const char* name, const char* label)
+bool TextIArchive::operator()(i16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -951,7 +951,7 @@ bool TextIArchive::operator()(short& value, const char* name, const char* label)
     return false;
 }
 
-bool TextIArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool TextIArchive::operator()(u16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -962,7 +962,7 @@ bool TextIArchive::operator()(unsigned short& value, const char* name, const cha
     return false;
 }
 
-bool TextIArchive::operator()(long long& value, const char* name, const char* label)
+bool TextIArchive::operator()(i64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -977,7 +977,7 @@ bool TextIArchive::operator()(long long& value, const char* name, const char* la
     return false;
 }
 
-bool TextIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool TextIArchive::operator()(u64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1174,7 +1174,7 @@ bool TextIArchive::operator()(bool& value, const char* name, const char* label)
     return false;
 }
 
-bool TextIArchive::operator()(signed char& value, const char* name, const char* label)
+bool TextIArchive::operator()(i8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1185,7 +1185,7 @@ bool TextIArchive::operator()(signed char& value, const char* name, const char* 
     return false;
 }
 
-bool TextIArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool TextIArchive::operator()(u8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();

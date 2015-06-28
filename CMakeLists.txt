@@ -3,9 +3,16 @@ project("yasli")
 
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-else (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-value")
-endif (MSVC)
+else()
+endif()
+
+if (CMAKE_CXX_COMPILER MATCHES "clang")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-unused-value")
+endif()
+
+if (UNIX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
 
 mark_as_advanced(CMAKE_INSTALL_PREFIX)
 mark_as_advanced(QT_QMAKE_EXECUTABLE)

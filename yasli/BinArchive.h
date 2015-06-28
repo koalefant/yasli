@@ -14,6 +14,7 @@
 
 #include "yasli/Archive.h"
 #include "yasli/MemoryWriter.h" 
+#include <vector>
 
 namespace yasli{
 
@@ -43,25 +44,25 @@ public:
 	const char* buffer() const { return stream_.buffer(); }
 	bool save(const char* fileName);
 
-	bool operator()(bool& value, const char* name, const char* label);
-	bool operator()(StringInterface& value, const char* name, const char* label);
-	bool operator()(WStringInterface& value, const char* name, const char* label);
-	bool operator()(float& value, const char* name, const char* label);
-	bool operator()(double& value, const char* name, const char* label);
-	bool operator()(int& value, const char* name, const char* label);
-	bool operator()(unsigned int& value, const char* name, const char* label);
-	bool operator()(short& value, const char* name, const char* label);
-	bool operator()(unsigned short& value, const char* name, const char* label);
-	bool operator()(long long& value, const char* name, const char* label);
-	bool operator()(unsigned long long& value, const char* name, const char* label);
+	bool operator()(bool& value, const char* name, const char* label) override;
+	bool operator()(StringInterface& value, const char* name, const char* label) override;
+	bool operator()(WStringInterface& value, const char* name, const char* label) override;
+	bool operator()(float& value, const char* name, const char* label) override;
+	bool operator()(double& value, const char* name, const char* label) override;
+	bool operator()(i8& value, const char* name, const char* label) override;
+	bool operator()(i16& value, const char* name, const char* label) override;
+	bool operator()(i32& value, const char* name, const char* label) override;
+	bool operator()(i64& value, const char* name, const char* label) override;
+	bool operator()(u8& value, const char* name, const char* label) override;
+	bool operator()(u16& value, const char* name, const char* label) override;
+	bool operator()(u32& value, const char* name, const char* label) override;
+	bool operator()(u64& value, const char* name, const char* label) override;
 
-	bool operator()(signed char& value, const char* name, const char* label);
-	bool operator()(unsigned char& value, const char* name, const char* label);
-	bool operator()(char& value, const char* name, const char* label);
+	bool operator()(char& value, const char* name, const char* label) override;
 
-	bool operator()(const Serializer &ser, const char* name, const char* label);
-	bool operator()(ContainerInterface &ser, const char* name, const char* label);
-	bool operator()(PointerInterface &ptr, const char* name, const char* label);
+	bool operator()(const Serializer &ser, const char* name, const char* label) override;
+	bool operator()(ContainerInterface &ser, const char* name, const char* label) override;
+	bool operator()(PointerInterface &ptr, const char* name, const char* label) override;
 
 	using Archive::operator();
 
@@ -92,25 +93,25 @@ public:
 	bool open(const BinOArchive& ar) { return open(ar.buffer(), ar.length()); }
 	void close();
 
-	bool operator()(bool& value, const char* name, const char* label);
-	bool operator()(StringInterface& value, const char* name, const char* label);
-	bool operator()(WStringInterface& value, const char* name, const char* label);
-	bool operator()(float& value, const char* name, const char* label);
-	bool operator()(double& value, const char* name, const char* label);
-	bool operator()(short& value, const char* name, const char* label);
-	bool operator()(unsigned short& value, const char* name, const char* label);
-	bool operator()(int& value, const char* name, const char* label);
-	bool operator()(unsigned int& value, const char* name, const char* label);
-	bool operator()(long long& value, const char* name, const char* label);
-	bool operator()(unsigned long long& value, const char* name, const char* label);
+	bool operator()(bool& value, const char* name, const char* label) override;
+	bool operator()(char& value, const char* name, const char* label) override;
+	bool operator()(float& value, const char* name, const char* label) override;
+	bool operator()(double& value, const char* name, const char* label) override;
+	bool operator()(i8& value, const char* name, const char* label) override;
+	bool operator()(u8& value, const char* name, const char* label) override;
+	bool operator()(i16& value, const char* name, const char* label) override;
+	bool operator()(u16& value, const char* name, const char* label) override;
+	bool operator()(i32& value, const char* name, const char* label) override;
+	bool operator()(u32& value, const char* name, const char* label) override;
+	bool operator()(i64& value, const char* name, const char* label) override;
+	bool operator()(u64& value, const char* name, const char* label) override;
 
-	bool operator()(signed char& value, const char* name, const char* label);
-	bool operator()(unsigned char& value, const char* name, const char* label);
-	bool operator()(char& value, const char* name, const char* label);
 
-	bool operator()(const Serializer& ser, const char* name, const char* label);
-	bool operator()(ContainerInterface& ser, const char* name, const char* label);
-	bool operator()(PointerInterface& ptr, const char* name, const char* label);
+	bool operator()(StringInterface& value, const char* name, const char* label) override;
+	bool operator()(WStringInterface& value, const char* name, const char* label) override;
+	bool operator()(const Serializer& ser, const char* name, const char* label) override;
+	bool operator()(ContainerInterface& ser, const char* name, const char* label) override;
+	bool operator()(PointerInterface& ptr, const char* name, const char* label) override;
 
 	using Archive::operator();
 

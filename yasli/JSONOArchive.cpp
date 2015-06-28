@@ -555,7 +555,7 @@ bool JSONOArchive::operator()(double& value, const char* name, const char* label
     return true;
 }
 
-bool JSONOArchive::operator()(int& value, const char* name, const char* label)
+bool JSONOArchive::operator()(i32& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -563,7 +563,7 @@ bool JSONOArchive::operator()(int& value, const char* name, const char* label)
     return true;
 }
 
-bool JSONOArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool JSONOArchive::operator()(u32& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -571,7 +571,7 @@ bool JSONOArchive::operator()(unsigned int& value, const char* name, const char*
     return true;
 }
 
-bool JSONOArchive::operator()(short& value, const char* name, const char* label)
+bool JSONOArchive::operator()(i16& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -579,7 +579,7 @@ bool JSONOArchive::operator()(short& value, const char* name, const char* label)
     return true;
 }
 
-bool JSONOArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool JSONOArchive::operator()(u16& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -587,7 +587,7 @@ bool JSONOArchive::operator()(unsigned short& value, const char* name, const cha
     return true;
 }
 
-bool JSONOArchive::operator()(long long& value, const char* name, const char* label)
+bool JSONOArchive::operator()(i64& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -595,7 +595,7 @@ bool JSONOArchive::operator()(long long& value, const char* name, const char* la
     return true;
 }
 
-bool JSONOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool JSONOArchive::operator()(u64& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -603,7 +603,7 @@ bool JSONOArchive::operator()(unsigned long long& value, const char* name, const
     return true;
 }
 
-bool JSONOArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool JSONOArchive::operator()(u8& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -611,7 +611,7 @@ bool JSONOArchive::operator()(unsigned char& value, const char* name, const char
     return true;
 }
 
-bool JSONOArchive::operator()(signed char& value, const char* name, const char* label)
+bool JSONOArchive::operator()(i8& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);

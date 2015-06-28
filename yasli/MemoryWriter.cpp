@@ -54,61 +54,39 @@ void MemoryWriter::realloc(size_t newSize)
     size_ = newSize;
 }
 
-MemoryWriter& MemoryWriter::operator<<(int value)
+MemoryWriter& MemoryWriter::operator<<(i32 value)
 {
     char buffer[12];
     sprintf(buffer, "%i", value);
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(long value)
+MemoryWriter& MemoryWriter::operator<<(u32 value)
 {
     char buffer[12];
-#ifdef _MSC_VER
-    sprintf(buffer, "%i", value);
-#else
-    sprintf(buffer, "%li", value);
-#endif
-    return operator<<((const char*)buffer);
-}
-
-MemoryWriter& MemoryWriter::operator<<(unsigned long value)
-{
-    char buffer[12];
-#ifdef _MSC_VER
     sprintf(buffer, "%u", value);
-#else
-    sprintf(buffer, "%lu", value);
-#endif
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(long long value)
+MemoryWriter& MemoryWriter::operator<<(i64 value)
 {
     char buffer[24];
 #ifdef _MSC_VER
     sprintf(buffer, "%I64i", value);
 #else
-    sprintf(buffer, "%lli", value);
+    sprintf(buffer, "%lli", (long long)value);
 #endif
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(unsigned long long value)
+MemoryWriter& MemoryWriter::operator<<(u64 value)
 {
     char buffer[24];
 #ifdef _MSC_VER
     sprintf(buffer, "%I64u", value);
 #else
-    sprintf(buffer, "%llu", value);
+    sprintf(buffer, "%llu", (unsigned long long)value);
 #endif
-    return operator<<((const char*)buffer);
-}
-
-MemoryWriter& MemoryWriter::operator<<(unsigned int value)
-{
-    char buffer[12];
-    sprintf(buffer, "%u", value);
     return operator<<((const char*)buffer);
 }
 
@@ -119,14 +97,14 @@ MemoryWriter& MemoryWriter::operator<<(char value)
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(unsigned char value)
+MemoryWriter& MemoryWriter::operator<<(u8 value)
 {
     char buffer[12];
     sprintf(buffer, "%i", int(value));
     return operator<<((const char*)buffer);
 }
 
-MemoryWriter& MemoryWriter::operator<<(signed char value)
+MemoryWriter& MemoryWriter::operator<<(i8 value)
 {
     char buffer[12];
     sprintf(buffer, "%i", int(value));

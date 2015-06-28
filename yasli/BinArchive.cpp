@@ -161,7 +161,7 @@ bool BinOArchive::operator()(double& value, const char* name, const char* label)
     return true;
 }
 
-bool BinOArchive::operator()(short& value, const char* name, const char* label)
+bool BinOArchive::operator()(i16& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -169,7 +169,7 @@ bool BinOArchive::operator()(short& value, const char* name, const char* label)
     return true;
 }
 
-bool BinOArchive::operator()(signed char& value, const char* name, const char* label)
+bool BinOArchive::operator()(i8& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -177,7 +177,7 @@ bool BinOArchive::operator()(signed char& value, const char* name, const char* l
     return true;
 }
 
-bool BinOArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool BinOArchive::operator()(u8& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -193,7 +193,7 @@ bool BinOArchive::operator()(char& value, const char* name, const char* label)
     return true;
 }
 
-bool BinOArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool BinOArchive::operator()(u16& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -201,7 +201,7 @@ bool BinOArchive::operator()(unsigned short& value, const char* name, const char
     return true;
 }
 
-bool BinOArchive::operator()(int& value, const char* name, const char* label)
+bool BinOArchive::operator()(i32& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -209,7 +209,7 @@ bool BinOArchive::operator()(int& value, const char* name, const char* label)
     return true;
 }
 
-bool BinOArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool BinOArchive::operator()(u32& value, const char* name, const char* label)
 {
     openNode(name);
 	stream_.write(value);
@@ -217,7 +217,7 @@ bool BinOArchive::operator()(unsigned int& value, const char* name, const char* 
     return true;
 }
 
-bool BinOArchive::operator()(long long& value, const char* name, const char* label)
+bool BinOArchive::operator()(i64& value, const char* name, const char* label)
 {
     openNode(name);
     stream_.write(value);
@@ -225,7 +225,7 @@ bool BinOArchive::operator()(long long& value, const char* name, const char* lab
     return true;
 }
 
-bool BinOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool BinOArchive::operator()(u64& value, const char* name, const char* label)
 {
     openNode(name);
     stream_.write(value);
@@ -470,7 +470,7 @@ bool BinIArchive::operator()(double& value, const char* name, const char* label)
 	return true;
 }
 
-bool BinIArchive::operator()(short& value, const char* name, const char* label)
+bool BinIArchive::operator()(i16& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -485,7 +485,7 @@ bool BinIArchive::operator()(short& value, const char* name, const char* label)
 	return true;
 }
 
-bool BinIArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool BinIArchive::operator()(u16& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -501,7 +501,7 @@ bool BinIArchive::operator()(unsigned short& value, const char* name, const char
 }
 
 
-bool BinIArchive::operator()(int& value, const char* name, const char* label)
+bool BinIArchive::operator()(i32& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -516,7 +516,7 @@ bool BinIArchive::operator()(int& value, const char* name, const char* label)
 	return true;
 }
 
-bool BinIArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool BinIArchive::operator()(u32& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -531,7 +531,7 @@ bool BinIArchive::operator()(unsigned int& value, const char* name, const char* 
 	return true;
 }
 
-bool BinIArchive::operator()(long long& value, const char* name, const char* label)
+bool BinIArchive::operator()(i64& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -546,7 +546,7 @@ bool BinIArchive::operator()(long long& value, const char* name, const char* lab
 	return true;
 }
 
-bool BinIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool BinIArchive::operator()(u64& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -561,7 +561,7 @@ bool BinIArchive::operator()(unsigned long long& value, const char* name, const 
 	return true;
 }
 
-bool BinIArchive::operator()(signed char& value, const char* name, const char* label)
+bool BinIArchive::operator()(i8& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);
@@ -576,7 +576,7 @@ bool BinIArchive::operator()(signed char& value, const char* name, const char* l
 	return true;
 }
 
-bool BinIArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool BinIArchive::operator()(u8& value, const char* name, const char* label)
 {
 	if(!strlen(name)){
 		read(value);

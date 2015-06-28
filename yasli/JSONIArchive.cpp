@@ -1004,7 +1004,7 @@ bool JSONIArchive::checkStringValueToken()
     return true;
 }
 
-bool JSONIArchive::operator()(int& value, const char* name, const char* label)
+bool JSONIArchive::operator()(i32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1015,7 +1015,7 @@ bool JSONIArchive::operator()(int& value, const char* name, const char* label)
     return false;
 }
 
-bool JSONIArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool JSONIArchive::operator()(u32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1027,7 +1027,7 @@ bool JSONIArchive::operator()(unsigned int& value, const char* name, const char*
 }
 
 
-bool JSONIArchive::operator()(short& value, const char* name, const char* label)
+bool JSONIArchive::operator()(i16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1038,7 +1038,7 @@ bool JSONIArchive::operator()(short& value, const char* name, const char* label)
     return false;
 }
 
-bool JSONIArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool JSONIArchive::operator()(u16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1049,7 +1049,7 @@ bool JSONIArchive::operator()(unsigned short& value, const char* name, const cha
     return false;
 }
 
-bool JSONIArchive::operator()(long long& value, const char* name, const char* label)
+bool JSONIArchive::operator()(i64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1064,7 +1064,7 @@ bool JSONIArchive::operator()(long long& value, const char* name, const char* la
     return false;
 }
 
-bool JSONIArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool JSONIArchive::operator()(u64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1252,7 +1252,7 @@ bool JSONIArchive::operator()(bool& value, const char* name, const char* label)
     return false;
 }
 
-bool JSONIArchive::operator()(signed char& value, const char* name, const char* label)
+bool JSONIArchive::operator()(i8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
@@ -1263,7 +1263,7 @@ bool JSONIArchive::operator()(signed char& value, const char* name, const char* 
     return false;
 }
 
-bool JSONIArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool JSONIArchive::operator()(u8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();

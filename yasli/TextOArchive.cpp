@@ -514,7 +514,7 @@ bool TextOArchive::operator()(double& value, const char* name, const char* label
     return true;
 }
 
-bool TextOArchive::operator()(int& value, const char* name, const char* label)
+bool TextOArchive::operator()(i32& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -522,7 +522,7 @@ bool TextOArchive::operator()(int& value, const char* name, const char* label)
     return true;
 }
 
-bool TextOArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool TextOArchive::operator()(u32& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -530,7 +530,7 @@ bool TextOArchive::operator()(unsigned int& value, const char* name, const char*
     return true;
 }
 
-bool TextOArchive::operator()(short& value, const char* name, const char* label)
+bool TextOArchive::operator()(i16& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -538,7 +538,7 @@ bool TextOArchive::operator()(short& value, const char* name, const char* label)
     return true;
 }
 
-bool TextOArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool TextOArchive::operator()(u16& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -546,7 +546,7 @@ bool TextOArchive::operator()(unsigned short& value, const char* name, const cha
     return true;
 }
 
-bool TextOArchive::operator()(long long& value, const char* name, const char* label)
+bool TextOArchive::operator()(i64& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -554,7 +554,7 @@ bool TextOArchive::operator()(long long& value, const char* name, const char* la
     return true;
 }
 
-bool TextOArchive::operator()(unsigned long long& value, const char* name, const char* label)
+bool TextOArchive::operator()(u64& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -562,7 +562,7 @@ bool TextOArchive::operator()(unsigned long long& value, const char* name, const
     return true;
 }
 
-bool TextOArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool TextOArchive::operator()(u8& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);
@@ -570,7 +570,7 @@ bool TextOArchive::operator()(unsigned char& value, const char* name, const char
     return true;
 }
 
-bool TextOArchive::operator()(signed char& value, const char* name, const char* label)
+bool TextOArchive::operator()(i8& value, const char* name, const char* label)
 {
     placeIndentCompact();
     placeName(name);

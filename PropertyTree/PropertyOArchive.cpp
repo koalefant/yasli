@@ -276,65 +276,53 @@ bool PropertyOArchive::operator()(char& value, const char* name, const char* lab
 
 // ---
 
-bool PropertyOArchive::operator()(signed char& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::i8& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<signed char> >(name, label, "signed char", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i8> >(name, label, "int8", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(signed short& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::i16& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<signed short> >(name, label, "short", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i16> >(name, label, "int16", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(signed int& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::i32& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<signed int> >(name, label, "int", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i32> >(name, label, "int32", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(signed long& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::i64& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<signed long> >(name, label, "long", value);
-	return true;
-}
-
-bool PropertyOArchive::operator()(long long& value, const char* name, const char* label)
-{
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<long long> >(name, label, "long long", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i64> >(name, label, "int64", value);
 	return true;
 }
 
 // ---
 
-bool PropertyOArchive::operator()(unsigned char& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::u8& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<unsigned char> >(name, label, "unsigned char", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u8> >(name, label, "uint8", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(unsigned short& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::u16& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<unsigned short> >(name, label, "unsigned short", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u16> >(name, label, "uint16", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(unsigned int& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::u32& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<unsigned int> >(name, label, "unsigned int", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u32> >(name, label, "uint32", value);
 	return true;
 }
 
-bool PropertyOArchive::operator()(unsigned long& value, const char* name, const char* label)
+bool PropertyOArchive::operator()(yasli::u64& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<unsigned long> >(name, label, "unsigned long", value);
-	return true;
-}
-
-bool PropertyOArchive::operator()(unsigned long long& value, const char* name, const char* label)
-{
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<unsigned long long> >(name, label, "unsigned long long", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u64> >(name, label, "uint64", value);
 	return true;
 }
 

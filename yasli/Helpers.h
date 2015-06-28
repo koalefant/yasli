@@ -69,6 +69,20 @@ public:
     enum{ value = (sizeof(function_helper<T>(0)) == sizeof(YesType))};
 };
 
+template<int Size, class S8, class S16, class S32, class S64>
+struct SelectIntSize {};
+template<class S8, class S16, class S32, class S64> struct SelectIntSize<1, S8, S16, S32, S64> { typedef S8 type; };
+template<class S8, class S16, class S32, class S64> struct SelectIntSize<2, S8, S16, S32, S64> { typedef S16 type; };
+template<class S8, class S16, class S32, class S64> struct SelectIntSize<4, S8, S16, S32, S64> { typedef S32 type; };
+template<class S8, class S16, class S32, class S64> struct SelectIntSize<8, S8, S16, S32, S64> { typedef S64 type; };
+
+template<class T> struct IsSigned { enum { value = false }; };
+template<> struct IsSigned<signed char> { enum { value = true }; };
+template<> struct IsSigned<signed short> { enum { value = true }; };
+template<> struct IsSigned<signed int> { enum { value = true }; };
+template<> struct IsSigned<signed long> { enum { value = true }; };
+template<> struct IsSigned<signed long long> { enum { value = true }; };
+
 }
 }
 
