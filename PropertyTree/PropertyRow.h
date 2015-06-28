@@ -92,7 +92,7 @@ public:
 
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
-	bool expanded() const{ return expanded_; }
+	bool expanded() const{ return expanded_ || inlined_ || inlinedBefore_; }
 	void _setExpanded(bool expanded); // use PropertyTree::expandRow
 	void setExpandedRecursive(PropertyTree* tree, bool expanded);
 

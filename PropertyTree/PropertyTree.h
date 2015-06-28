@@ -29,6 +29,7 @@ struct HitResult;
 class IMenu;
 struct IUIFacade; 
 struct KeyEvent;
+struct PersistentLayoutElement;
 }
 using property_tree::IUIFacade;
 using property_tree::KeyEvent;
@@ -151,6 +152,7 @@ protected:
 	PropertyRow* rowByPoint(const Point& rootSpacePoint);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
+	PropertyRow* focusedRow() const;
 
 	void hitTest(property_tree::HitResult* result, const Point& point);
 
@@ -188,6 +190,8 @@ private:
 	PropertyTree& operator=(const PropertyTree&);
 protected:
 	void setDraggedRow(PropertyRow* row);
+	void storePersistentFocusElement();
+	void restorePersistentFocusElement();
 
 	std::auto_ptr<PropertyTreeModel> model_;
 	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
@@ -211,6 +215,7 @@ protected:
 
 	int cursorX_;
 	int focusedLayoutElement_;
+	std::auto_ptr<property_tree::PersistentLayoutElement> persistentFocusedLayoutElement_;
 	Point focusCursor_;
 
 	bool filterMode_;

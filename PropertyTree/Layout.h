@@ -2,6 +2,7 @@
 
 #include "yasli/Assert.h"
 #include <vector>
+#include "PropertyTreeOperator.h"
 
 class PropertyRow;
 
@@ -139,6 +140,19 @@ struct HitResult
 	int partIndex;
 	Rect rect;
 	PropertyRow* row;
+};
+
+struct PersistentLayoutElement
+{
+	TreePath row;
+	RowPart part;
+	int partIndex;
+
+	PersistentLayoutElement()
+	: part(PART_INVALID)
+	, partIndex(-1)
+	{
+	}
 };
 
 };

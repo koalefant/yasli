@@ -588,23 +588,6 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	}
 }
 
-void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHeight)
-{
-	if(inlined()) {
-		expanded_ = parent()->expanded();
-	}
-	PropertyRow* nonInlined = findNonInlinedParent();
-
-	if (expanded_ || hasInlinedChildren_) {
-		int num = count();
-		for(int i = 0; i < num; ++i){
-			PropertyRow* row = childByIndex(i);
-			if(row->visible(tree) && (nonInlined->expanded() || row->inlined()))
-				row->adjustVerticalPosition(tree, totalHeight);
-		}
-	}
-}
-
 void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 {
 	updateTextSizeInitial(tree, index);

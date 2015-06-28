@@ -91,8 +91,6 @@ public:
 
 	TreePath pathFromRow(PropertyRow* node);
 	PropertyRow* rowFromPath(const TreePath& path);
-	void setFocusedRow(PropertyRow* row) { focusedRow_ = pathFromRow(row); }
-	PropertyRow* focusedRow() { return rowFromPath(focusedRow_); }
 
 	const Selection& selection() const{ return selection_; }
 	void setSelection(const Selection& selection);
@@ -141,7 +139,6 @@ private:
 	void pushUndo(const PropertyTreeOperator& op);
 	void clearObjectReferences();
 
-	TreePath focusedRow_;
 	Selection selection_;
 
 	yasli::SharedPtr<PropertyRowStruct> root_;

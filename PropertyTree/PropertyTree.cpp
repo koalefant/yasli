@@ -248,6 +248,7 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , dragCheckValue_(false)
 , archiveContext_()
 , layout_(new property_tree::Layout())
+, persistentFocusedLayoutElement_(new PersistentLayoutElement())
 {
 	model_.reset(new PropertyTreeModel(this));
 	model_->setExpandLevels(expandLevels_);
@@ -268,9 +269,10 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	PropertyTreeMenuHandler handler;
 	handler.row = row;
 	handler.tree = this;
-
-	if(row->onKeyDown(this, ev))
-		return true;
+    if (row) {
+        if(row->onKeyDown(this, ev))
+            return true;
+    }
 
 	switch(ev->key()){
 	case KEY_C:
@@ -313,10 +315,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	}
 	}
 
-	PropertyRow* focusedRow = model()->focusedRow();
-	if(!focusedRow)
-		return false;
-	PropertyRow* parentRow = focusedRow->findNonInlinedParent();
+	PropertyRow* focusedRow = this->focusedRow();
+	PropertyRow* parentRow = focusedRow ? focusedRow->findNonInlinedParent() : 0;
 	PropertyRow* selectedRow = 0;
 	bool addToSelection = false;
 	int previousFocusedElement = focusedLayoutElement_;
@@ -385,6 +385,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		break;
 	}
 	case KEY_HOME:
+		if (!parentRow)
+			break;
 		if (ev->modifiers() == MODIFIER_CONTROL) {
 			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
 		}
@@ -395,6 +397,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		}
 		break;
 	case KEY_END:
+		if (!parentRow)
+			break;
 		if (ev->modifiers() == MODIFIER_CONTROL) {
 			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
 		}
@@ -614,6 +618,7 @@ void PropertyTree::onRowRMBDown(const HitResult& hit)
 
 void PropertyTree::expandParents(PropertyRow* row)
 {
+	storePersistentFocusElement();
 	bool hasChanges = false;
 	typedef std::vector<PropertyRow*> Parents;
 	Parents parents;
@@ -630,8 +635,10 @@ void PropertyTree::expandParents(PropertyRow* row)
 			hasChanges = true;
 		}
 	}
-	if (hasChanges)
+	if (hasChanges) {
 		updateHeights();
+		restorePersistentFocusElement();
+	}
 }
 
 void PropertyTree::expandAll()
@@ -653,7 +660,9 @@ void PropertyTree::expandChildren(PropertyRow* root)
 	else
 		root->setExpandedRecursive(this, true);
 
+	storePersistentFocusElement();
 	updateHeights();
+	restorePersistentFocusElement();
 }
 
 void PropertyTree::collapseAll()
@@ -672,19 +681,12 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 			row->setExpandedRecursive(this, false);
 		}
 	}
-	else{
+	else
 		root->setExpandedRecursive(this, false);
-		PropertyRow* row = model()->focusedRow();
-		while(row){
-			if(root == row){
-				model()->selectRow(row, true);
-				break;
-			}
-			row = row->parent();
-		}
-	}
 
+	storePersistentFocusElement();
 	updateHeights();
+	restorePersistentFocusElement();
 }
 
 void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
@@ -695,19 +697,11 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights
 		hasChanges = true;
 	}
 
-    if(!row->expanded()){
-		PropertyRow* f = model()->focusedRow();
-		while(f){
-			if(row == f){
-				model()->selectRow(row, true);
-				break;
-			}
-			f = f->parent();
-		}
-	}
-
-	if (hasChanges && updateHeights)
+	if (hasChanges && updateHeights) {
+		storePersistentFocusElement();
 		this->updateHeights();
+		restorePersistentFocusElement();
+	}
 }
 
 Point PropertyTree::treeSize() const
@@ -720,8 +714,6 @@ void PropertyTree::serialize(Archive& ar)
 	model()->serialize(ar, this);
 
 	if(ar.isInput()){
-		updateHeights();
-		ensureVisible(model()->focusedRow(), false);
 		updateAttachedPropertyTree(false);
 		updateHeights();
 		onSelected();
@@ -966,18 +958,37 @@ static void calculateRectangles(Layout* l, int element, int width, int height, i
 	}
 }
 
-Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) const
+static int findRowElement(const Layout& l, const PropertyRow* row, int part, int subindex)
 {
-	Layout& l = *layout_;
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
-		return Rect();
-	for (; index < l.elements.size(); ++index)
-	{
+		return 0;
+	for (; index < l.elements.size(); ++index) {
 		const LayoutElement& element = l.elements[index];
 		if (element.rowPart == part && element.rowPartSubindex == subindex && l.rows[index] == row)
-			return l.rectangles[index];
+			return index;
 	}
+	return 0;
+}
+
+static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
+{
+	int index = row->layoutElement();
+	if (size_t(index) >= l.elements.size())
+		return 0;
+	for (; index < l.elements.size(); ++index) {
+		const LayoutElement& element = l.elements[index];
+		if (l.rows[index] == row && element.focusable)
+			return index;
+	}
+	return 0;
+}
+
+Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) const
+{
+	int element = findRowElement(*layout_, row, part, subindex);
+	if (element > 0)
+		return layout_->rectangles[element];
 	return Rect();
 }
 
@@ -1128,6 +1139,7 @@ void PropertyTree::revert()
 	interruptDrag();
 	widget_.reset();
 	capturedRow_ = 0;
+	storePersistentFocusElement();
 
 #ifdef PROFILE
 	QElapsedTimer timer;
@@ -1170,6 +1182,7 @@ void PropertyTree::revert()
 		updateHeights();
 	}
 
+	restorePersistentFocusElement();
 	repaint();
 	updateAttachedPropertyTree(true);
 
@@ -1669,7 +1682,6 @@ bool PropertyTree::toggleRow(PropertyRow* row)
 	if(!row->canBeToggled(this))
 		return false;
 	expandRow(row, !row->expanded());
-	updateHeights();
 	return true;
 }
 
@@ -1827,6 +1839,48 @@ void PropertyTree::setDraggedRow(PropertyRow* row)
 		findLayoutChildren(&hiddenLayoutElements_, *layout_, row->layoutElement());
 		std::sort(hiddenLayoutElements_.begin(), hiddenLayoutElements_.end());
 	}
+}
+
+void PropertyTree::storePersistentFocusElement()
+{
+	LayoutElement* element = 0;
+	if (size_t(focusedLayoutElement_) < layout_->elements.size()) {
+		element = &layout_->elements[focusedLayoutElement_];
+	}
+	if (element) {
+		PersistentLayoutElement& pe = *persistentFocusedLayoutElement_;
+		PropertyRow* row = layout_->rows[focusedLayoutElement_];
+		pe.row = model()->pathFromRow(row);
+		pe.part = (RowPart)element->rowPart;
+		pe.partIndex = element->rowPartSubindex;
+	}
+
+}
+
+void PropertyTree::restorePersistentFocusElement()
+{
+	const PersistentLayoutElement& pe = *persistentFocusedLayoutElement_;
+	PropertyRow* row = model()->rowFromPath(pe.row);
+	focusedLayoutElement_ = findRowElement(*layout_, row, pe.part, pe.partIndex);
+	if (focusedLayoutElement_ == 0 && !pe.row.empty()) {
+		while (row) {
+			focusedLayoutElement_ = findFocusableRowElement(*layout_, row);
+            if (focusedLayoutElement_ != 0)
+                break;
+			row = row->parent();
+		}
+	}
+	if (row)
+		model()->selectRow(row, true);
+}
+
+PropertyRow* PropertyTree::focusedRow() const
+{
+	if (focusedLayoutElement_ == 0)
+		return 0;
+	if (size_t(focusedLayoutElement_) >= layout_->rows.size())
+		return 0;
+	return layout_->rows[focusedLayoutElement_];
 }
 
 // vim:ts=4 sw=4:

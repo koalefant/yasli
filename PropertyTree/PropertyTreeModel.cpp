@@ -52,7 +52,6 @@ void PropertyTreeModel::selectRow(PropertyRow* row, bool select, bool exclusive)
 	if(select){
 		if(it == selection_.end())
 			selection_.push_back(pathFromRow(row));
-		setFocusedRow(row);
 	}
 	else if(it != selection_.end()){
 		PropertyRow* it_row = rowFromPath(*it);
@@ -207,7 +206,6 @@ protected:
 
 void PropertyTreeModel::serialize(Archive& ar, PropertyTree* tree)
 {
-	ar(focusedRow_, "focusedRow", 0);		
 	ar(selection_, "selection", 0);
 
 	if (root()) {

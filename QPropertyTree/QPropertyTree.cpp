@@ -591,10 +591,7 @@ void QPropertyTree::updateHeights()
 		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
 
 		size_.setX(area_.width());
-
-		int totalHeight = area_.top();
-		model()->root()->adjustVerticalPosition(this, totalHeight);
-		size_.setY(totalHeight - area_.top());
+		size_.setY(0);
 
 		updateHeightsTime_ = timer.elapsed();
 	}
@@ -1139,12 +1136,6 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 	}
 	else if (ev->button() == Qt::RightButton)
 	{
-		Point point = fromQPoint(ev->pos());
-		PropertyRow* row = rowByPoint(point);
-		if(row){
-			model()->setFocusedRow(row);
-			update();
-		}
 		onRowRMBDown(hit);
 	}
 }
@@ -1204,7 +1195,7 @@ void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 	}
 
 	if (ev->key() == Qt::Key_Up){
-		int y = model()->root()->verticalIndex(this, model()->focusedRow());
+		int y = model()->root()->verticalIndex(this, focusedRow());
 		if (filterMode_ && y == 0) {
 			setFilterMode(true);
 			update();
@@ -1227,11 +1218,9 @@ void QPropertyTree::keyPressEvent(QKeyEvent* ev)
 
 	bool result = false;
 	if (!widget_.get()) {
-		PropertyRow* row = model()->focusedRow();
-		if (row) {
-			KeyEvent keyEvent = translateKeyEvent(*ev);
-			onRowKeyDown(row, &keyEvent);
-		}
+		PropertyRow* row = focusedRow();
+		KeyEvent keyEvent = translateKeyEvent(*ev);
+		onRowKeyDown(row, &keyEvent);
 	}
 	update();
 	if(!result)
