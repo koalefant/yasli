@@ -107,3 +107,4 @@ namespace yasli {
 // Can be used to override YASLI_ASSERT and YASLI_CHECK, see yasli/Assert.h
 #ifndef YASLI_ASSERT_DEFINED
 #endif
+

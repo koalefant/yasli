@@ -86,9 +86,17 @@ public:
 			return ar(*it_, name, label);
 	}
 	operator bool() const{ return container_ != 0; }
+
+	struct ElementInitializer
+	{
+		Element value;
+		// Important to call brackets on constructed value to initialize
+		// built-in types to zeros/false.
+		ElementInitializer() : value() {}
+	};
 	void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const{
-		Element element;
-		ar(element, name, label);
+		ElementInitializer element;
+		ar(element.value, name, label);
 	}
 	// ^^^
 protected:

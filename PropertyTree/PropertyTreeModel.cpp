@@ -110,7 +110,7 @@ void PropertyTreeModel::clear()
 		root_->clear();
 	root_ = 0;
 	setRoot(new PropertyRow());
-	root_->setNames("", "root", "");
+	root_->setNames("", "root", "rootType");
 	selection_.clear();
 }
 
