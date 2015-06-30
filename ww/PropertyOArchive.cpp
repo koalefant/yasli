@@ -189,8 +189,25 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 {
 	SharedPtr<RowType> newRow;
 
-	if(currentNode_ == 0)
-		return 0;
+	if(currentNode_ == 0){
+		if (rootNode_)
+			newRow = static_cast<RowType*>(rootNode_.get());
+		else		
+			newRow.reset(new RowType());
+		newRow->setNames(name, label, typeName);
+		if(updateMode_){
+			model_->setRoot(newRow);
+			return newRow;
+		}
+		else{
+			if(defaultValueCreationMode_)
+				rootNode_ = newRow;
+			else
+				model_->setRoot(newRow);
+			newRow->setValue((ValueType)0); // To fix Element element; 
+			return newRow;
+		}
+	}
 
 	int rowIndex;
 	Level& level = *currentLevel_;

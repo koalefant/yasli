@@ -158,7 +158,7 @@ public:
 	void parseControlCodes(const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
 	const char* typeNameForFilter() const;
-	void setTypeName(const char* typeName) { typeName_ = typeName; }
+	void setTypeName(const char* typeName) { YASLI_ASSERT(strlen(typeName)); typeName_ = typeName; }
 	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
