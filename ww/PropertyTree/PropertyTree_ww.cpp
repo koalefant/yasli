@@ -465,6 +465,8 @@ void PropertyTree::onFilterChanged()
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const char* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
 {
+	if (rect.width() <= 0 || rect.height() <= 0)
+		return;
 	int textLen = (int)strlen(text);
 
 	Gdiplus::StringFormat format;
