@@ -12,7 +12,7 @@
 
 // Disable C++ RTTI use (e.g. typeid())
 #ifndef YASLI_NO_RTTI
-#define YASLI_NO_RTTI 1
+#define YASLI_NO_RTTI 0
 #endif
 
 // Disable extra struct-level for polymorphic pointer serialization
@@ -22,7 +22,7 @@
 
 // Default filter for Archive: 0 - strict mode, -1 - silent mode.
 #ifndef YASLI_DEFAULT_FILTER
-#define YASLI_DEFAULT_FILTER 0
+#define YASLI_DEFAULT_FILTER -1
 #endif
 
 // Toggles between russian and english serialization labels 
@@ -32,7 +32,7 @@
 
 // Serialize std::pair: 1 - ("first", "second") or 0 - ("key", "value")
 #ifndef YASLI_STD_PAIR_FIRST_SECOND
-#define YASLI_STD_PAIR_FIRST_SECOND 0
+#define YASLI_STD_PAIR_FIRST_SECOND 1
 #endif
 
 // BinArchives use short hash of name to compact and speed up. Collision on particular level of hierarchy could cause to wrong result.
