@@ -53,6 +53,7 @@ SUITE(General)
 		CHECK(b != 0);
 	}
 
+#if YASLI_NO_RTTI
 	TEST(TypeIDNameParsing)
 	{
 		CHECK_EQUAL("int", string(TypeID::get<int>().name()));
@@ -62,5 +63,6 @@ SUITE(General)
 		CHECK_EQUAL("GlobalPrefix", string(TypeID::get<SGlobalPrefix>().name()));
 		CHECK_EQUAL("basic_string<char>", string(TypeID::get<string>().name()));
 	}
+#endif
 }
 

@@ -249,7 +249,9 @@ public:
 		CreatorBase* current = head;
 		while (current) {
 			typeToCreatorMap_.erase(current->description().typeID());
+#if YASLI_NO_RTTI
 			vptrToCreatorMap_.erase(current->vptr());
+#endif
 			for (size_t i = 0; i < creators_.size(); ++i) {
 				if (creators_[i] == current) {
 					creators_.erase(creators_.begin() + i);
