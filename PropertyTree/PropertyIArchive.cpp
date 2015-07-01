@@ -214,7 +214,7 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
     if(ser.size() > 0)
         while(index < size)
         {
-            ser(*this, "", "<");
+            ser(*this, "", "xxx");
             ser.next();
 			++index;
         }

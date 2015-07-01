@@ -254,7 +254,8 @@ void ContainerMenuHandler::onMenuChildRemove()
 
 void PropertyRowContainer::labelChanged()
 {
-    sprintf(buttonLabel_, "%i", (int)count());
+	sprintf(buttonLabel_, "%i", (int)count());
+	userFixedWidget_ = true;
 }
 
 void PropertyRowContainer::serializeValue(yasli::Archive& ar)

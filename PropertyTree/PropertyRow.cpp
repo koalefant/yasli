@@ -592,6 +592,8 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	DEBUG_TRACE_ROW("%s extraSize 1: %i", label(), extraSize);
 
 	WidgetPlacement widgetPlace = widgetPlacement();
+	if(widgetPlace == WIDGET_AFTER_NAME && !tree->fullRowContainers())
+		widgetPlace = WIDGET_VALUE;
 
 	if(widgetPlace == WIDGET_ICON){
 		widgetPos_ = widgetSize_ ? posX : -1000;
@@ -621,24 +623,18 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		posX += widgetSize_;
 	}
 
-	if(widgetPlace == WIDGET_VALUE || freePulledChildren > 0){
-		if(!pulledUp() && extraSize > 0){
-			// align widget value to value column
-			if(!isFullRow(tree))
-			{
-				int oldX = posX;
-				int newX = max(tree->leftBorder() + xround((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth())), posX);
-				int xDelta = newX - oldX;
-				if (xDelta <= extraSize)
-				{
-					extraSize -= xDelta;
-					posX = newX;
-				}
-				else
-				{
-					posX += extraSize;
-					extraSize = 0;
-				}
+	if(!pulledUp() && extraSize > 0){ // align widget value to value column
+		if(!isFullRow(tree)){
+			int oldX = posX;
+			int newX = max(int(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth()))), posX);
+			int xDelta = newX - oldX;
+			if (xDelta <= extraSize){
+				extraSize -= xDelta;
+				posX = newX;
+			}
+			else{
+				posX += extraSize;
+				extraSize = 0;
 			}
 		}
 	}
@@ -669,6 +665,8 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		}
 		if(row->pulledUp()){
 			if(!row->pulledBefore()){
+				if(!widgetPos_)
+					widgetPos_ = posX;
 				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
 				posX += row->size_.x();
 			}
@@ -945,16 +943,13 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 
 
 
-		// drawing a horizontal line
-		char containerLabel[16] = "";
+	// drawing a horizontal line
+	int lineSize = widgetPos_ - textPos_ - 2;
+	if(lineSize > textSize_){
+		Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
 
-		if(textSize_ && !isStatic() && widgetPlacement() == WIDGET_VALUE &&
-		   !pulledUp() && !isFullRow(tree) && !hasPulled() && floorHeight() == 0)
-		{
-			Rect rect(textPos_ - 1, rowRect.bottom() - 2, context.lineRect.width() - (textPos_ - 1), 1);
-
-			context.drawRowLine(rect);
-		}
+		context.drawRowLine(rect);
+	}
 
 
 		if(!tree->compact() || !parent()->isRoot()){
@@ -968,6 +963,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 			redraw(context);
 
 		if(textSize_ > 0){
+			char containerLabel[16] = "";
 			yasli::string text = rowText(containerLabel, tree, index);
 			context.drawLabel(text.c_str(), FONT_NORMAL, textRect(tree), pulledSelected());
 		}
@@ -1276,7 +1272,7 @@ bool PropertyRow::isFullRow(const PropertyTree* tree) const
 {
     if (tree->fullRowMode())
 		return true;
-	if (parent() && parent()->isContainer())
+	if (parent() && parent()->isContainer() && tree->fullRowContainers())
 		return true;
 	return userFullRow();
 }

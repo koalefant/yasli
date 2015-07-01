@@ -375,7 +375,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 	}
 	if ( ser.size() > 0 )
 		while( true ) {
-			ser(*this, "", "<");
+			ser(*this, "", "xxx");
 			if ( !ser.next() )
 				break;
 		}
