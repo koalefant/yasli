@@ -1,5 +1,5 @@
-#include "PropertyRowColor.h"
-#include "PropertyTree.h"
+#include "PropertyTree/PropertyRowColor.h"
+#include "PropertyTree/PropertyTree.h"
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "Rect.h"
@@ -21,7 +21,7 @@ void PropertyRowColor::redraw(IDrawContext& context)
 	context.drawColor(context.widgetRect.adjusted(1,1,-1,-3), value_);
 }
 
-void PropertyRowColor::closeNonLeaf(const yasli::Serializer& ser)
+void PropertyRowColor::closeNonLeaf(const yasli::Serializer& ser, yasli::Archive& ar)
 {
 	property_tree::Color* value = ser.cast<property_tree::Color>();
 	if (!value)

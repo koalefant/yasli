@@ -15,6 +15,8 @@
 #include <math.h>
 #include <float.h>
 #include "yasli/STL.h"
+#include "yasli/BlackBox.h"
+#include "yasli/Config.h"
 #include "JSONIArchive.h"
 #include "MemoryReader.h"
 #include "MemoryWriter.h"
@@ -36,8 +38,31 @@
 
 namespace yasli{
 
-using std::string;
-using std::wstring;
+inline bool isDigit(int ch) 
+{
+	return unsigned(ch - '0') <= 9;
+}
+
+double parseFloat(const char* s)
+{
+	double res = 0, f = 1, sign = 1;
+	while(*s && (*s == ' ' || *s == '\t')) 
+		s++;
+
+	if(*s == '-') 
+		sign=-1, s++; 
+	else if (*s == '+') 
+		s++;
+
+	for(; isDigit(*s); s++)
+		res = res * 10 + (*s - '0');
+
+	if(*s == '.')
+		for (s++; isDigit(*s); s++)
+			res += (f *= 0.1)*(*s - '0');
+	return res*sign;
+}
+
 
 static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -63,6 +88,10 @@ static char hexValueTable[256] = {
 
 static void unescapeString(std::vector<char>& buf, string& out, const char* begin, const char* end)
 {
+	if(begin >= end) {
+		out.clear();
+		return;
+	}
 	// TODO: use stack string
 	buf.resize(end-begin);
 	char* ptr = buf.empty() ? 0 : &buf.front();
@@ -101,7 +130,7 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 	}
 	buf.resize(ptr - (buf.empty() ? 0 : &buf.front()));
 	if (!buf.empty())
-		out.assign(buf.begin(), buf.end());
+		out.assign(&buf[0], &buf[0] + buf.size());
 	else
 		out.clear();
 }
@@ -506,11 +535,16 @@ Token JSONTokenizer::operator()(const char* ptr) const
 
 JSONIArchive::JSONIArchive()
 : Archive(INPUT | TEXT)
+, buffer_(0)
 {
 }
 
 JSONIArchive::~JSONIArchive()
 {
+	if (buffer_) {
+		free(buffer_);
+		buffer_ = 0;
+	}
 	stack_.clear();
 	reader_.reset();
 }
@@ -522,6 +556,7 @@ bool JSONIArchive::open(const char* buffer, size_t length, bool free)
 
 	if(buffer)
 		reader_.reset(new MemoryReader(buffer, length, free));
+	buffer_ = 0;
 
 	token_ = Token(reader_->begin(), reader_->begin());
 	stack_.clear();
@@ -558,6 +593,7 @@ bool JSONIArchive::load(const char* filename)
 		fclose(file);
 
 		filename_ = filename;
+		buffer_ = buffer;
 		if (fileSize > 0)
 			return open((char*)buffer, fileSize, true);
 		else
@@ -606,8 +642,8 @@ bool JSONIArchive::expect(char token)
 
 		MemoryWriter msg;
 		msg << "Error parsing file, expected ':' at line " << line(token_.start) << ":\n"
-		<< std::string(token_.start, lineEnd).c_str();
-		YASLI_ASSERT(0, msg.c_str());
+		<< string(token_.start, lineEnd).c_str();
+		YASLI_ASSERT_STR(0, msg.c_str());
 		return false;
 	}
 	return true;
@@ -770,7 +806,7 @@ bool JSONIArchive::closeBracket()
             const char* start = stack_.back().start;
             msg << filename_.c_str() << ": " << line(start) << " line";
             msg << ": End of file while no matching bracket found";
-			YASLI_ASSERT(0, msg.c_str());
+			YASLI_ASSERT_STR(0, msg.c_str());
 			return false;
         }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
@@ -835,6 +871,34 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
     return false;
 }
 
+bool JSONIArchive::operator()(const BlackBox& box, const char* name, const char* label)
+{
+	if(findName(name)){
+		if(openBracket() || openContainerBracket()){
+			const char* start = token_.start;
+			putToken();
+			skipBlock();
+			const char* end = token_.start;
+			if (end < start) {
+				YASLI_ASSERT(0);
+				return false;
+			}
+			while (end > start && 
+				(*(end - 1) == ' '
+				|| *(end - 1) == '\r'
+				|| *(end - 1) == '\n'
+				|| *(end - 1) == '\t'))
+				--end;
+			// box has to be const in the interface so we can serialize
+			// temporary variables (i.e. function call result or structures
+			// constructed on the stack)
+			const_cast<BlackBox&>(box).set("json", (void*)start, end - start);
+			return true;
+		}
+	}
+    return false;
+}
+
 bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
 {
 	Token nextName;
@@ -889,9 +953,8 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 					string typeName;
 					unescapeString(unescapeBuffer_, typeName, token_.start + 1, token_.end - 1);
 
-					TypeID type = ser.factory()->findTypeByName(typeName.c_str());
-					if (ser.type() != type)
-						ser.create(type);
+					if (typeName != ser.registeredTypeName())
+						ser.create(typeName.c_str());
 					readToken();
 					expect(':');
 					operator()(ser.serializer(), "", 0);
@@ -900,7 +963,7 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 			else {
 				putToken();
 
-				ser.create(TypeID());				
+				ser.create("");				
 			}
 			closeBracket();
 			stack_.pop_back();
@@ -931,11 +994,7 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 				if (token_ == ',')
 					readToken();
 				if(token_ == '}')
-				{
 					break;
-					//YASLI_ASSERT(0 && "Syntax error: closing container with '}'");
-					//	return false;
-				}
 				if(token_ == ']')
 					break;
 				else if(!token_)
@@ -948,8 +1007,11 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 					size = index + 1;
 				if(index < size){
 					if (!ser(*this, "", "")) {
-						stack_.pop_back();
-						return false;
+						// We've got a named item within a container, 
+						// i.e. looks like a dictionary but not a container.
+						// Bail out, it is nothing we can do here.
+						closeBracket();
+						break;
 					}
 				}
 				else{
@@ -977,7 +1039,7 @@ void JSONIArchive::checkValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        YASLI_ASSERT(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
     }
 }
 
@@ -989,7 +1051,7 @@ bool JSONIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": End of file while reading element's value";
-        YASLI_ASSERT(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
 		return false;
     }
     if(token_.start[0] != '"' || token_.end[-1] != '"'){
@@ -998,7 +1060,7 @@ bool JSONIArchive::checkStringValueToken()
         const char* start = stack_.back().start;
         msg << filename_.c_str() << ": " << line(start) << " line";
         msg << ": Expected string";
-        YASLI_ASSERT(0, msg.c_str());
+        YASLI_ASSERT_STR(0, msg.c_str());
 		return false;
     }
     return true;
@@ -1084,8 +1146,13 @@ bool JSONIArchive::operator()(float& value, const char* name, const char* label)
     if(findName(name)){
         readToken();
         checkValueToken();
-		if (*token_.start != '\"')
-			value = (float)parseFloat(token_.start);
+		if (*token_.start != '\"') {
+#ifdef _MSC_VER
+			value = (float)std::atof(token_.start);
+#else
+			value = strtof(token_.start, 0);
+#endif
+		}
 		else if (strncmp(token_.start, "\"Infinity\"", 10) == 0)
 			value = std::numeric_limits<float>::infinity();
 		else if (strncmp(token_.start, "\"-Infinity\"", 11) == 0)
@@ -1103,8 +1170,13 @@ bool JSONIArchive::operator()(double& value, const char* name, const char* label
     if(findName(name)){
         readToken();
         checkValueToken();
-		if (*token_.start != '\"')
-			value = (float)parseFloat(token_.start);
+		if (*token_.start != '\"') {
+#ifdef _MSC_VER
+			value = std::atof(token_.start);
+#else
+			value = strtod(token_.start, 0);
+#endif
+		}
 		else if (strncmp(token_.start, "\"Infinity\"", 10) == 0)
 			value = std::numeric_limits<double>::infinity();
 		else if (strncmp(token_.start, "\"-Infinity\"", 11) == 0)
@@ -1203,7 +1275,7 @@ inline const char* readUtf16FromUtf8(unsigned int* ch, const char* s)
 }
 
 
-inline void utf8ToUtf16(std::wstring* out, const char* in)
+inline void utf8ToUtf16(wstring* out, const char* in)
 {
   out->clear();
   out->reserve(utf8InUtf16Len(in));
@@ -1257,7 +1329,7 @@ bool JSONIArchive::operator()(i8& value, const char* name, const char* label)
     if(findName(name)){
         readToken();
         checkValueToken();
-        value = (signed char)strtol(token_.start, 0, 10);
+        value = (i8)strtol(token_.start, 0, 10);
         return true;
     }
     return false;
@@ -1268,7 +1340,7 @@ bool JSONIArchive::operator()(u8& value, const char* name, const char* label)
     if(findName(name)){
         readToken();
         checkValueToken();
-        value = (unsigned char)strtol(token_.start, 0, 10);
+        value = (u8)strtol(token_.start, 0, 10);
         return true;
     }
     return false;

@@ -18,7 +18,7 @@ public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_PULLED; }
 	int widgetSizeMin(const PropertyTree* tree) const override;
 	void redraw(IDrawContext& context) override;
-	void closeNonLeaf(const yasli::Serializer& ser) override;
+	void closeNonLeaf(const yasli::Serializer& ser, yasli::Archive& ar) override;
 
 	bool isLeaf() const override{ return false; }
 	bool isStatic() const override{ return false; }

@@ -50,12 +50,23 @@ public:
 		const StringListValue& stringListValue = *((StringListValue*)(ser.pointer()));
 		stringList_ = stringListValue.stringList();
 		value_ = stringListValue.c_str();
+		handle_ = stringListValue.handle();
+		type_ = stringListValue.type();
 	}
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin(const PropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin(const PropertyTree* tree) const override
+	{
+		if (userWidgetToContent())
+			return widthCache_.getOrUpdate(tree, this, tree->_defaultRowHeight());
+		else
+			return 80;
+	}
+
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
+	const void* searchHandle() const override { return handle_; }
+	yasli::TypeID typeId() const override{ return type_; }
 
 	void redraw(IDrawContext& context) override
 	{
@@ -75,6 +86,9 @@ public:
 private:
 	yasli::StringList stringList_;
 	yasli::string value_;
+	const void* handle_;
+	yasli::TypeID type_;
+	mutable RowWidthCache widthCache_;
 	friend class InplaceWidgetStringListValue;
 };
 
@@ -107,15 +121,26 @@ public:
 	void setValueAndContext(const Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(StringListStaticValue), return);
 		const StringListStaticValue& stringListValue = *((StringListStaticValue*)(ser.pointer()));
-		stringList_.assign(stringListValue.stringList().begin(), stringListValue.stringList().end());
+		stringList_.resize(stringListValue.stringList().size());
+		for (size_t i = 0; i < stringList_.size(); ++i)
+			stringList_[i] = stringListValue.stringList()[i];
 		value_ = stringListValue.c_str();
+		handle_ = stringListValue.handle();
+		type_ = stringListValue.type();
 	}
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin(const PropertyTree*) const override { return userWidgetSize() ? userWidgetSize() : 80; }
+	int widgetSizeMin(const PropertyTree* tree) const override
+	{
+		if (userWidgetToContent())
+			return widthCache_.getOrUpdate(tree, this, tree->_defaultRowHeight());
+		else
+			return 80;
+	}
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-
+	const void* searchHandle() const override { return handle_; }
+	yasli::TypeID typeId() const override{ return type_; }
 	void redraw(IDrawContext& context) override
 	{
 		if(multiValue())
@@ -135,5 +160,9 @@ private:
 	yasli::StringList stringList_;
 	yasli::string value_;
 	friend class InplaceWidgetStringListValue;
+	const void* handle_;
+	yasli::TypeID type_;
+	mutable RowWidthCache widthCache_;
+	friend class PropertyRowWidgetStringListValue;
 };
 	

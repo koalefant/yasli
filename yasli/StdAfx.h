@@ -16,6 +16,7 @@
 # define WIN32_LEAN_AND_MEAN
 #endif
 
+#include <yasli/Config.h>
 #include <typeinfo>
 #include <vector>
 #include <list>

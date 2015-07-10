@@ -126,3 +126,7 @@ inline bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, 
         };                                                                          \
     };
 // vim:ts=4 sw=4:
+//
+#if YASLI_INLINE_IMPLEMENTATION
+#include "Enum.cpp"
+#endif

@@ -42,26 +42,28 @@ public:
 
 	bool assignTo(yasli::PointerInterface &ptr);
 	void setValueAndContext(const yasli::PointerInterface& ptr, yasli::Archive& ar);
+	using PropertyRow::assignTo;
 
 	yasli::TypeID baseType() const{ return baseType_; }
 	void setBaseType(const yasli::TypeID& baseType) { baseType_ = baseType; }
 	const char* derivedTypeName() const{ return derivedTypeName_.c_str(); }
-	yasli::TypeID getDerivedType(yasli::ClassFactoryBase* factory) const;
-	void setDerivedType(const yasli::TypeID& typeID, yasli::ClassFactoryBase* factory);
+	void setDerivedType(const char* typeName, yasli::ClassFactoryBase* factory);
 	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
-	bool onActivate( PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent& ev) override;
 	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
 	bool onContextMenu(IMenu &root, PropertyTree* tree) override;
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
 	int widgetSizeMin(const PropertyTree*) const override;
-    yasli::string generateLabel() const;
+	yasli::string generateLabel() const;
 	yasli::string valueAsString() const override;
-    const char* typeNameForFilter(PropertyTree* tree) const override { return baseType_.name(); }
+	const char* typeNameForFilter(PropertyTree* tree) const override { return baseType_.name(); }
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;
+	const void* searchHandle() const override { return searchHandle_; }
+	yasli::TypeID typeId() const override{ return pointerType_; }
 protected:
 
 	yasli::TypeID baseType_;
@@ -70,5 +72,8 @@ protected:
 
 	// this member is available for instances deserialized from clipboard:
 	yasli::ClassFactoryBase* factory_;
+	const void* searchHandle_;
+	yasli::TypeID  pointerType_;
+	Color colorOverride_;
 };
 

@@ -7,7 +7,10 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
+#include "yasli/Config.h"
+#if !YASLI_YASLI_INLINE_IMPLEMENTATION
 #include "StdAfx.h"
+#endif
 
 #include "yasli/STL.h"
 #include "ClassFactory.h"
@@ -18,7 +21,7 @@
 
 namespace yasli{
 
-const char* TypeID::name() const{
+YASLI_INLINE const char* TypeID::name() const{
 #if YASLI_NO_RTTI
 	if (typeInfo_)
 		return typeInfo_->name;
@@ -32,7 +35,7 @@ const char* TypeID::name() const{
 #endif
 }
 
-size_t TypeID::sizeOf() const{
+YASLI_INLINE size_t TypeID::sizeOf() const{
 #if YASLI_NO_RTTI
 	if (typeInfo_)
 		return typeInfo_->size;
@@ -43,36 +46,20 @@ size_t TypeID::sizeOf() const{
 #endif
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::TypeNameWithFactory& value, const char* name, const char* label)
 {
-	std::string typeName;
-	if(ar.isOutput()){
-		typeName = value.factory->descriptionByType(value.type)->name();
-		return ar(typeName, name);
-	}
-	else{
-		if(ar(typeName, name)){
-			if(!typeName.empty())
-				value.type = value.factory->findTypeByName(typeName.c_str());
-			else
-				value.type = TypeID();
-			if(!value.type){
-				char msg[128];
-#ifdef _MSC_VER
-				_snprintf_s(msg, sizeof(msg), _TRUNCATE, "Unable to read TypeID: unregistered type name: \'%s\'", typeName.c_str());
-#else
-                snprintf(msg, sizeof(msg), "Unable to read TypeID: unregistered type name: \'%s\'", typeName.c_str());
-                msg[sizeof(msg)-1] = '\0';
-#endif
-				ar.warning(msg);
-				return false;
-			}
-			else
-				return true;
-		}
-		else
+	if(!ar(value.registeredName, name))
+		return false;
+
+	if (ar.isInput()){
+		const TypeDescription* desc = value.factory->descriptionByRegisteredName(value.registeredName.c_str());
+		if(!desc){
+			ar.error(value, "Unable to read TypeID: unregistered type name: \'%s\'", value.registeredName.c_str());
+			value.registeredName.clear();
 			return false;
+		}
 	}
+	return true;
 }
 
 }

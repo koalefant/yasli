@@ -25,7 +25,8 @@ public:
 
 	bool save(const char* fileName);
 
-	const char* c_str() const;    
+	const char* c_str() const;
+	const char* buffer() const { return c_str(); }
 	size_t length() const;    
 
 	bool operator()(bool& value, const char* name = "", const char* label = 0) override;
@@ -84,7 +85,7 @@ private:
 	std::auto_ptr<MemoryWriter> buffer_;
 	const char* header_;
 	int textWidth_;
-	std::string fileName_;
+	string fileName_;
 	int compactOffset_;
 	bool isKeyValue_;
 };

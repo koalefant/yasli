@@ -11,6 +11,7 @@
 #include "PropertyTree.h"
 #include "Serialization.h"
 #include "yasli/ClassFactory.h"
+#include "yasli/Callback.h"
 
 PropertyTreeModel::PropertyTreeModel(PropertyTree* tree)
 : tree_(tree)
@@ -128,7 +129,7 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
         return;
     YASLI_ESCAPE(op->row_, return);
     if(dest->parent())
-        dest->parent()->replaceAndPreserveState(dest, op->row_, false);
+        dest->parent()->replaceAndPreserveState(dest, op->row_, this);
     else{
         op->row_->assignRowProperties(root_);
         root_ = op->row_;
@@ -144,6 +145,11 @@ void PropertyTreeModel::undo()
     YASLI_ESCAPE(!undoOperators_.empty(), return);
     applyOperator(&undoOperators_.back(), true);
     undoOperators_.pop_back();
+}
+
+void PropertyTreeModel::clearUndo()
+{
+	undoOperators_.clear();
 }
 
 PropertyTreeModel::UpdateLock PropertyTreeModel::lockUpdate()
@@ -262,8 +268,30 @@ void PropertyTreeModel::rowAboutToBeChanged(PropertyRow* row)
     }
 }
 
+void PropertyTreeModel::callRowCallback(PropertyRow* row)
+{
+	PropertyRow* current = row;
+	while (true) {
+		yasli::CallbackInterface* callback = current->callback();
+		if (callback) {
+			auto applyFunc = [=](void* arg, const TypeID& type) {
+				current->assignToByPointer(arg, callback->type());
+			};
+			callback->call(applyFunc);
+			return;
+		}
+		current = current->parent();
+		if (current)
+			current->handleChildrenChange();
+		else
+			break;
+	}
+}
+
 void PropertyTreeModel::rowChanged(PropertyRow* row, bool apply)
 {
+	callRowCallback(row);
+
 	YASLI_ESCAPE(row, return);
 	row->setLabelChanged();
 	row->setLayoutChanged();
@@ -297,13 +325,13 @@ PropertyRow* PropertyTreeModel::defaultType(const char* typeName) const
 	return it->second;
 }
 
-void PropertyTreeModel::addDefaultType(const TypeID& type, const PropertyDefaultTypeValue& value)
+void PropertyTreeModel::addDefaultType(const TypeID& type, const PropertyDefaultDerivedTypeValue& value)
 {
 	YASLI_ASSERT(type != TypeID());
 
 	BaseClass& base = defaultTypesPoly_[type];
 	for (DerivedTypes::iterator it = base.types.begin(); it != base.types.end(); ++it){
-		if (it->type == value.type) {
+		if (it->registeredName == value.registeredName) {
 			YASLI_ASSERT(it->root == 0);
 			*it = value;
 			return;
@@ -314,7 +342,7 @@ void PropertyTreeModel::addDefaultType(const TypeID& type, const PropertyDefault
 	base.strings.push_back(value.label.c_str());
 }
 
-const PropertyDefaultTypeValue* PropertyTreeModel::defaultType(const TypeID& baseType, int derivedIndex) const
+const PropertyDefaultDerivedTypeValue* PropertyTreeModel::defaultType(const TypeID& baseType, int derivedIndex) const
 {
 	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseType);
 	YASLI_ESCAPE(it != defaultTypesPoly_.end(), return 0);
@@ -323,8 +351,10 @@ const PropertyDefaultTypeValue* PropertyTreeModel::defaultType(const TypeID& bas
 	return &base.types[derivedIndex];
 }
 
-bool PropertyTreeModel::defaultTypeRegistered(const TypeID& baseType, const TypeID& derivedType) const
+bool PropertyTreeModel::defaultTypeRegistered(const TypeID& baseType, const char* derivedRegisteredName) const
 {
+	if (!derivedRegisteredName)
+		derivedRegisteredName = "";
 	DefaultTypesPoly::const_iterator it = defaultTypesPoly_.find(baseType);
 
 	if (it == defaultTypesPoly_.end())
@@ -333,7 +363,7 @@ bool PropertyTreeModel::defaultTypeRegistered(const TypeID& baseType, const Type
 	const BaseClass& base = it->second;
 	DerivedTypes::const_iterator dit;
 	for (dit = base.types.begin(); dit != base.types.end(); ++dit){
-		if (dit->type == derivedType)
+		if (dit->registeredName == derivedRegisteredName)
 			return true;
 	}
 	return false;
@@ -362,9 +392,9 @@ void PropertyTreeModel::signalPushUndo(PropertyTreeOperator* op, bool* result)
 
 // ----------------------------------------------------------------------------------
 
-void TreePathLeaf::YASLI_SERIALIZE_METHOD(Archive& ar)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, TreePathLeaf& value, const char* name, const char* label)
 {
-	ar(index, "", 0);
+	return ar(value.index, name, label);
 }
 
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, TreeSelection& value, const char* name, const char* label)

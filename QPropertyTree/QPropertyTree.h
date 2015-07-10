@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include "yasli/Config.h"
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
 #include "yasli/Pointers.h"
@@ -25,6 +26,7 @@ class QPropertyTree;
 
 namespace property_tree { 
 class QDrawContext; 
+class QUIFacade;
 class IMenu;
 }
 
@@ -51,7 +53,7 @@ protected:
 	QPoint offset_;
 };
 
-class QPropertyTree : public QWidget, public PropertyTree
+class PROPERTY_TREE_API QPropertyTree : public QWidget, public PropertyTree
 {
 	Q_OBJECT
 public:
@@ -59,8 +61,19 @@ public:
 	~QPropertyTree();
 
 	const QFont& boldFont() const; 
-	
+
+	// Limit number of mouse-movement updates per-frame. Used to prevent large tree updates
+	// from draining all the idle time.
+	void setAggregateMouseEvents(bool aggregate) { aggregateMouseEvents_ = aggregate; }
+	void flushAggregatedMouseEvents();
+
+	// Default size.
 	void setSizeHint(const QSize& size) { sizeHint_ = size; }
+	// Sets minimal size of the widget to the size of the visible content of the tree.
+	void setSizeToContent(bool sizeToContent);
+	bool sizeToContent() const{ return sizeToContent_; }
+	// Retrieves size of the content, doesn't require sizeToContent to be set.
+	QSize contentSize() const{ return contentSize_; }
 
 	void attachPropertyTree(PropertyTree* propertyTree) override;
 
@@ -74,15 +87,30 @@ public:
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const override;
 	bool _isDragged(const PropertyRow* row) const override;
+	void _cancelWidget() override;
 
 signals:
-	void signalAboutToSerialize(yasli::Archive& ar);
+	// Emited for every finished changed of the value.  E.g. when you drag a slider,
+	// signalChanged will be invoked when you release a mouse button.
 	void signalChanged();
+	// Used fast-pace changes, like movement of the slider before mouse gets released.
 	void signalContinuousChange();
+	// Called before and after serialization is invoked. Can be used to update context list
+	// in archive.
+	void signalAboutToSerialize(yasli::Archive& ar);
+	void signalSerialized(yasli::Archive& ar);
+	// OBSOLETE: do not use
 	void signalObjectChanged(const yasli::Object& obj);
+	// Invoked whenever selection changed.
 	void signalSelected();
+	// Invoked after each revert() call (can be caused by user intput).
 	void signalReverted();
+	// Invoked before any change is going to occur and can be used to store current version
+	// of data for own undo stack.
 	void signalPushUndo();
+	// Called when visual size of the tree changes, i.e. when things are deserialized and
+	// and when rows are expanded/collapsed.
+	void signalSizeChanged();
 public slots:
     void onFilterChanged(const QString& str);
 protected slots:
@@ -91,6 +119,7 @@ protected slots:
 
 protected:
 	void onAboutToSerialize(yasli::Archive& ar) override { signalAboutToSerialize(ar); }
+	void onSerialized(yasli::Archive& ar) override { signalSerialized(ar); }
 	void onChanged() override { signalChanged(); }
 	void onContinuousChange() override { signalContinuousChange(); }
 	void onSelected() override { signalSelected(); }
@@ -106,7 +135,7 @@ protected:
 	void defocusInplaceEditor() override;
 	class DragController;
 
-	void updateHeights() override;
+	void updateHeights(bool recalculateText = false) override;
 	void repaint() override { update(); }
 	void resetFilter() override { onFilterChanged(QString()); }
 
@@ -127,6 +156,11 @@ protected:
 	void setFilterMode(bool inFilterMode);
 	void startFilter(const char* filter) override;
 
+	using PropertyTree::pointToRootSpace;
+	using PropertyTree::pointFromRootSpace;
+	QPoint pointToRootSpace(const QPoint& pointInWindowSpace) const;
+	QPoint pointFromRootSpace(const QPoint& point) const;
+
 	void _arrangeChildren() override;
 
 	void drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& color, bool pathEllipsis, bool center) const;
@@ -139,11 +173,17 @@ protected:
 	DragController* dragController_;
 	QTimer* mouseStillTimer_;
 
+	bool aggregateMouseEvents_;
+	int aggregatedMouseEventCount_;
+	QScopedPointer<QMouseEvent> lastMouseMoveEvent_;
+
 	int updateHeightsTime_;
 	int paintTime_;
+	bool sizeToContent_;
+	QSize contentSize_;
 
 	friend class property_tree::QDrawContext;
-	friend class QUIFacade;
+	friend class property_tree::QUIFacade;
 	friend struct PropertyTreeMenuHandler;
 	friend class FilterEntry;
 	friend class DragWindow;

@@ -15,6 +15,8 @@
 #include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
+#include "PropertyTreeStyle.h"
+#include "ValidatorBlock.h"
 
 #include "yasli/ClassFactory.h"
 
@@ -36,22 +38,19 @@ using yasli::Serializers;
 // ---------------------------------------------------------------------------
 
 TreeConfig::TreeConfig()
-: immediateUpdate_(true)
-, hideUntranslated_(true)
-, valueColumnWidth_(.5f)
-, filter_(YASLI_DEFAULT_FILTER)
-, compact_(false)
-, fullRowMode_(false)
-, fullRowContainers_(true)
-, showContainerIndices_(true)
-, filterWhenType_(true)
-, sliderUpdateDelay_(25)
-, undoEnabled_(true)
+: immediateUpdate(true)
+, hideUntranslated(true)
+, valueColumnWidth(.5f)
+, filter(YASLI_DEFAULT_FILTER)
+, fullRowContainers(true)
+, showContainerIndices(true)
+, filterWhenType(true)
+, sliderUpdateDelay(25)
+, undoEnabled(true)
+, multiSelection(false)
 {
-	//QFont font;
-	//QFontMetrics fm(font);
-	defaultRowHeight_ = 22;//max(17, fm.height() + 6); // to fit at least 16x16 icons
-	tabSize_ = defaultRowHeight_;
+	defaultRowHeight = 22;
+	tabSize = defaultRowHeight;
 }
 
 TreeConfig TreeConfig::defaultConfig;
@@ -94,6 +93,8 @@ void PropertyTreeMenuHandler::onMenuPaste()
 }
 // ---------------------------------------------------------------------------
 
+PropertyTreeStyle PropertyTree::defaultTreeStyle_;
+
 PropertyTree::PropertyTree(IUIFacade* uiFacade)
 : attachedPropertyTree_(0)
 , ui_(uiFacade)
@@ -106,17 +107,25 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , applyTime_(0)
 , revertTime_(0)
 , pressPoint_(-1, -1)
+, pressDelta_(0, 0)
+, pointerMovedSincePress_(false)
 , lastStillPosition_(-1, -1)
 , pressedRow_(0)
 , capturedRow_(0)
 , dragCheckMode_(false)
 , dragCheckValue_(false)
 , archiveContext_()
+, outlineMode_(false)
+, hideSelection_(false)
+, zoomLevel_(10)
+, validatorBlock_(new ValidatorBlock)
+, style_(new PropertyTreeStyle(defaultTreeStyle_))
+, defaultRowHeight_(22)
 {
 	model_.reset(new PropertyTreeModel(this));
-	model_->setExpandLevels(expandLevels_);
-	model_->setUndoEnabled(undoEnabled_);
-	model_->setFullUndo(fullUndo_);
+	model_->setExpandLevels(config_.expandLevels);
+	model_->setUndoEnabled(config_.undoEnabled);
+	model_->setFullUndo(config_.fullUndo);
 }
 
 PropertyTree::~PropertyTree()
@@ -154,8 +163,11 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	case KEY_F2:
 	if (ev->modifiers() == 0) {
 		if(selectedRow()) {
-			selectedRow()->onActivate(this, true);
-			selectedRow()->onActivateRelease(this);
+			PropertyActivationEvent ev;
+			ev.tree = this;
+			ev.reason = ev.REASON_KEYBOARD;
+			ev.force = true;
+			selectedRow()->onActivate(ev);
 		}
 	}
 	break;
@@ -183,18 +195,26 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	PropertyRow* selectedRow = 0;
 	switch(ev->key()){
 	case KEY_UP:
-		 {
+		//if (filterMode_ && y == 0) {
+		//	startFilter("");
+		//}
+		//else 
+		{
 			selectedRow = model()->root()->rowByVerticalIndex(this, --y);
 			if (selectedRow)
 				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
 		}
 		break;
 	case KEY_DOWN:
-	 {
-		selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
-		if (selectedRow)
-			selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
-	}
+		//if (filterMode_) {
+		//	setFocus();
+		//}
+		//else 
+		{
+			selectedRow = model()->root()->rowByVerticalIndex(this, ++y);
+			if (selectedRow)
+				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+		}
 		break;
 	case KEY_LEFT:
 		selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = --x);
@@ -231,36 +251,161 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		}
 		break;
 	case KEY_SPACE:
-		if (filterWhenType_)
+		if (config_.filterWhenType)
 			break;
+	case KEY_ENTER:
 	case KEY_RETURN:
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
 		else {
-			focusedRow->onActivate(this, false);
-			focusedRow->onActivateRelease(this);
+			PropertyActivationEvent e;
+			e.tree = this;
+			e.reason = e.REASON_KEYBOARD;
+			e.force = false;
+			focusedRow->onActivate(e);
 		}
 		break;
 	}
 	if(selectedRow){
-		onRowSelected(selectedRow, false, false);	
+		onRowSelected(std::vector<PropertyRow*>(1, selectedRow), false, false);	
 		return true;
 	}
 	return false;
 }
 
-bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed)
+struct FirstIssueVisitor
+{
+	ValidatorEntryType entryType_;
+	PropertyRow* startRow_;
+	PropertyRow* result;
+
+	FirstIssueVisitor(ValidatorEntryType type, PropertyRow* startRow)
+	: entryType_(type)
+	, startRow_(startRow)
+	, result()
+	{
+	}
+
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	{
+		if ((row->pulledUp() || row->pulledBefore()) && row->nonPulledParent() == startRow_)
+			return SCAN_SIBLINGS;
+		if (row->validatorCount()) {
+			if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
+				for (int i = 0; i < row->validatorCount(); ++i) {
+					const ValidatorEntry* validatorEntry = validatorEntries + i;
+					if (validatorEntry->type == entryType_) {
+						result = row;
+						return SCAN_FINISHED;
+					}
+				}
+			}
+		}
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+};
+
+void PropertyTree::jumpToNextHiddenValidatorIssue(bool isError, PropertyRow* start)
+{
+	FirstIssueVisitor op(isError ? VALIDATOR_ENTRY_ERROR : VALIDATOR_ENTRY_WARNING, start);
+	start->scanChildren(op, this);
+
+	PropertyRow* row = op.result;
+
+	vector<PropertyRow*> parents;
+	while (row && row->parent())  {
+		parents.push_back(row);
+		row = row->parent();
+	}
+	for (int i = (int)parents.size()-1; i >= 0; --i) {
+		if (!parents[i]->visible(this))
+			break;
+		row = parents[i];
+	}
+	if (row)
+		setSelectedRow(row);
+
+	updateValidatorIcons();
+	updateHeights();
+}
+
+static void rowsInBetween(vector<PropertyRow*>* rows, PropertyRow* a, PropertyRow* b)
+{
+	if (!a)
+		return;
+	if (!b)
+		return;
+	vector<PropertyRow*> pathA;
+	PropertyRow* rootA = a;
+	while (rootA->parent()) {
+		pathA.push_back(rootA);
+		rootA = rootA->parent();
+	}
+
+	vector<PropertyRow*> pathB;
+	PropertyRow* rootB = b;
+	while (rootB->parent()) {
+		pathB.push_back(rootB);
+		rootB = rootB->parent();
+	}
+
+	if (rootA != rootB)
+		return;
+
+	const PropertyRow* commonParent = rootA;
+	int maxDepth = min((int)pathA.size(), (int)pathB.size());
+	for (int i = 0; i < maxDepth; ++i) {
+		PropertyRow* parentA = pathA[(int)pathA.size() - 1 - i];
+		PropertyRow* parentB = pathB[(int)pathB.size() - 1 - i];
+		if (parentA != parentB) {
+			int indexA = commonParent->childIndex(parentA);
+			int indexB = commonParent->childIndex(parentB);
+			int minIndex = min(indexA, indexB);
+			int maxIndex = max(indexA, indexB);
+			for (int j = minIndex; j <= maxIndex; ++j)
+				rows->push_back((PropertyRow*)commonParent->childByIndex(j));
+			return;
+		}
+		commonParent = parentA;
+	}
+}
+
+bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed, bool shiftPressed)
 {
 	pressPoint_ = point;
+	pressDelta_ = Point(0, 0);
+	pointerMovedSincePress_ = false;
 	row = model()->root()->hit(this, point);
 	if(row){
-		if(!row->isRoot() && row->plusRect(this).contains(point) && toggleRow(row))
-			return true;
+		if (!row->isRoot()) {
+			if(row->plusRect(this).contains(point) && toggleRow(row))
+				return true;
+			if (row->validatorWarningIconRect(this).contains(point)) {
+				jumpToNextHiddenValidatorIssue(false, row);
+				return true;
+			}
+			if (row->validatorErrorIconRect(this).contains(point)) {
+				jumpToNextHiddenValidatorIssue(true, row);
+				return true;
+			}
+		}
+
 		PropertyRow* rowToSelect = row;
 		while (rowToSelect && !rowToSelect->isSelectable())
 			rowToSelect = rowToSelect->parent();
-		if (rowToSelect)
-			onRowSelected(rowToSelect, multiSelectable() && controlPressed, true);	
+
+		if (rowToSelect) {
+			if (!shiftPressed || !multiSelectable()) {
+				onRowSelected(std::vector<PropertyRow*>(1, rowToSelect), multiSelectable() && controlPressed, true);	
+				lastSelectedRow_ = rowToSelect;
+			}
+			else {
+				vector<PropertyRow*> rowsToSelect;
+
+				rowsInBetween(&rowsToSelect, lastSelectedRow_, rowToSelect);
+				onRowSelected(rowsToSelect, false, true);
+			}
+		}
 	}
 
 	PropertyTreeModel::UpdateLock lock = model()->lockUpdate();
@@ -278,13 +423,17 @@ bool PropertyTree::onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 		
 		if (!dragCheckMode_) {
 			bool capture = row->onMouseDown(this, point, changed);
-			if(!changed && !widget_.get()){ // FIXME: осмысленный метод для проверки
+			if(!changed){
 				if(capture)
 					return true;
 				else if(row->widgetRect(this).contains(point)){
 					if(row->widgetPlacement() != PropertyRow::WIDGET_ICON)
 						interruptDrag();
-					row->onActivate(this, false);
+					PropertyActivationEvent e;
+					e.force = false;
+					e.tree = this;
+					e.clickPoint = point;
+					row->onActivate(e);
 					return false;
 				}
 			}
@@ -301,10 +450,8 @@ void PropertyTree::onMouseStill()
 		e.pos = ui()->cursorPosition();
 		e.start = pressPoint_;
 
-		if (e.pos != lastStillPosition_) {
-			capturedRow_->onMouseStill(e);
-			lastStillPosition_ = e.pos;
-		}
+		capturedRow_->onMouseStill(e);
+		lastStillPosition_ = e.pos;
 	}
 }
 
@@ -313,8 +460,12 @@ void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point
 	onMouseStill();
 	row->onMouseUp(this, point);
 
-	if ((pressPoint_ - point).manhattanLength() < 2 && row->widgetRect(this).contains(point)) {
-		row->onActivateRelease(this);
+	if (!pointerMovedSincePress_ && (pressPoint_ - point).manhattanLength() < 1 && row->widgetRect(this).contains(point)) {
+		PropertyActivationEvent e;
+		e.tree = this;
+		e.clickPoint = point;
+		e.reason = e.REASON_RELEASE;
+		row->onActivate(e);
 	}
 }
 
@@ -332,7 +483,7 @@ void PropertyTree::onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point poi
 	}
 
 	if (menuRow) {
-		onRowSelected(menuRow, false, true);	
+		onRowSelected(std::vector<PropertyRow*>(1, menuRow), false, true);	
 		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
@@ -358,8 +509,10 @@ void PropertyTree::expandParents(PropertyRow* row)
 			hasChanges = true;
 		}
 	}
-	if (hasChanges)
+	if (hasChanges) {
+		updateValidatorIcons();
 		updateHeights();
+	}
 }
 
 void PropertyTree::expandAll()
@@ -422,6 +575,7 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 	updateHeights();
 }
 
+
 void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
 {
 	bool hasChanges = false;
@@ -444,6 +598,8 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights
 		}
 	}
 
+	if (hasChanges)
+		updateValidatorIcons();
 	if (hasChanges && updateHeights)
 		this->updateHeights();
 }
@@ -466,7 +622,7 @@ void PropertyTree::YASLI_SERIALIZE_METHOD(Archive& ar)
 	}
 }
 
-void PropertyTree::ensureVisible(PropertyRow* row, bool update)
+void PropertyTree::ensureVisible(PropertyRow* row, bool update, bool considerChildren)
 {
 	if (row == 0)
 		return;
@@ -476,23 +632,32 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update)
 	expandParents(row);
 
 	Rect rect = row->rect();
-	if(rect.top() < offset_.y()){
-		offset_.setY(max(0, rect.top()));
+	if(rect.bottom() > area_.bottom() + offset_.y()){
+		offset_.setY(max(0, rect.bottom() - area_.bottom()));
 	}
-	else if(rect.bottom() > size_.y() + offset_.y()){
-		offset_.setY(max(0, rect.bottom() - size_.y()));
+	if(rect.top() < area_.top() + offset_.y()){
+		offset_.setY(max(0, rect.top() - area_.top()));
 	}
+	updateScrollBar();
 	if(update)
 		repaint();
 }
 
-void PropertyTree::onRowSelected(PropertyRow* row, bool addSelection, bool adjustCursorPos)
+void PropertyTree::onRowSelected(const std::vector<PropertyRow*>& rows, bool addSelection, bool adjustCursorPos)
 {
-	if(!row->isRoot())
-		model()->selectRow(row, !(addSelection && row->selected() && model()->selection().size() > 1), !addSelection);
-	ensureVisible(row);
-	if(adjustCursorPos)
-		cursorX_ = row->nonPulledParent()->horizontalIndex(this, row);
+	for (size_t i = 0; i < rows.size(); ++i) {
+		PropertyRow* row = rows[i];
+		if(!row->isRoot()) {
+			bool addRowToSelection = !(addSelection && row->selected() && model()->selection().size() > 1) || i > 0;
+			bool exclusiveSelection = !addSelection && i == 0;
+			model()->selectRow(row, addRowToSelection, exclusiveSelection);
+		}
+	}
+	if (!rows.empty()) {
+		ensureVisible(rows.back(), true, false);
+		if(adjustCursorPos)
+			cursorX_ = rows.back()->nonPulledParent()->horizontalIndex(this, rows.back());
+	}
 	updateAttachedPropertyTree(false);
 	onSelected();
 }
@@ -517,8 +682,10 @@ bool PropertyTree::attach(const yasli::Serializers& serializers)
 	// which invokes second templated constructor of Serializer, which is not what we need.
 	if (changed) {
 		attached_.assign(serializers.begin(), serializers.end());
-		revert();
+		model_->clearUndo();
 	}
+
+	revertNoninterrupting();
 
 	return changed;
 }
@@ -528,8 +695,9 @@ void PropertyTree::attach(const yasli::Serializer& serializer)
 	if (attached_.size() != 1 || attached_[0].serializer() != serializer) {
 		attached_.clear();
 		attached_.push_back(yasli::Object(serializer));
-		revert();
+		model_->clearUndo();
 	}
+	revert();
 }
 
 void PropertyTree::attach(const yasli::Object& object)
@@ -542,11 +710,17 @@ void PropertyTree::attach(const yasli::Object& object)
 
 void PropertyTree::detach()
 {
-	if(widget_.get())
-		widget_.reset();
+	_cancelWidget();
 	attached_.clear();
 	model()->root()->clear();
 	repaint();
+}
+
+void PropertyTree::_cancelWidget()
+{
+	// make sure that widget_ is null the moment widget is destroyed, so we
+	// don't get focus callbacks to act on destroyed widget.
+	std::auto_ptr<property_tree::InplaceWidget> widget(widget_.release());
 }
 
 int PropertyTree::revertObjects(vector<void*> objectAddresses)
@@ -574,39 +748,50 @@ bool PropertyTree::revertObject(void* objectAddress)
 void PropertyTree::revert()
 {
 	interruptDrag();
-	widget_.reset();
+	_cancelWidget();
 	capturedRow_ = 0;
 
 	if (!attached_.empty()) {
+		validatorBlock_->clear();
+
 		//QElapsedTimer timer;
 		//timer.start();
 
-		PropertyOArchive oa(model_.get(), model_->root());
-		oa.setLastContext(archiveContext_);
-		oa.setFilter(filter_);
+		PropertyOArchive oa(model_.get(), model_->root(), validatorBlock_.get());
+		oa.setOutlineMode(outlineMode_);
+		if (archiveContext_)
+			oa.setLastContext(archiveContext_);
+		oa.setFilter(config_.filter);
 
 		Objects::iterator it = attached_.begin();
 		onAboutToSerialize(oa);
 		(*it)(oa);
+		onSerialized(oa);
 		
 		PropertyTreeModel model2(this);
 		while(++it != attached_.end()){
-			PropertyOArchive oa2(&model2, model2.root());
+			PropertyOArchive oa2(&model2, model2.root(), validatorBlock_.get());
+			oa2.setOutlineMode(outlineMode_);
 			oa2.setLastContext(archiveContext_);
 			yasli::Context treeContext(oa2, this);
-			oa2.setFilter(filter_);
+			oa2.setFilter(config_.filter);
 			onAboutToSerialize(oa2);
 			(*it)(oa2);
+			onSerialized(oa2);
 			model_->root()->intersect(model2.root());
 		}
 		//revertTime_ = int(timer.elapsed());
+
+		if (attached_.size() != 1)
+			validatorBlock_->clear();
+		applyValidation();
 	}
 	else
 		model_->clear();
 
 	if (filterMode_) {
 		if (model_->root())
-			model_->root()->updateLabel(this, 0);
+			model_->root()->updateLabel(this, 0, false);
 		resetFilter();
 	}
 	else {
@@ -619,11 +804,57 @@ void PropertyTree::revert()
 	onReverted();
 }
 
-void PropertyTree::revertNonInterrupting()
+struct ValidatorVisitor
 {
-	if (!capturedRow_) {
-		revert();
+	ValidatorVisitor(ValidatorBlock* validator)
+	: validator_(validator)
+	{
 	}
+
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	{
+		const void* rowHandle = row->searchHandle();
+		int index = 0;
+		int count = 0;
+		if (validator_->findHandleEntries(&index, &count, rowHandle, row->typeId()))
+		{
+			validator_->markAsUsed(index, count);
+			if (row->setValidatorEntry(index, count))
+				row->setLabelChanged();
+		}
+		else
+		{
+			if (row->setValidatorEntry(0, 0))
+				row->setLabelChanged();
+		}
+
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+
+protected:
+	ValidatorBlock* validator_;
+};
+
+void PropertyTree::applyValidation()
+{
+	if (!validatorBlock_->isEnabled())
+		return;
+
+	ValidatorVisitor visitor(validatorBlock_.get());
+	model()->root()->scanChildren(visitor, this);
+
+	int rootFirst = 0;
+	int rootCount = 0;
+	// Gather all the items with unknown handle/type pair at root level.
+	validatorBlock_->mergeUnusedItemsWithRootItems(&rootFirst, &rootCount, model()->root()->searchHandle(), model()->root()->typeId());
+	model()->root()->setValidatorEntry(rootFirst, rootCount);
+	model()->root()->setLabelChanged();
+}
+
+void PropertyTree::revertNoninterrupting()
+{
+	if (!capturedRow_)
+		revert();
 }
 
 void PropertyTree::apply(bool continuous)
@@ -637,9 +868,10 @@ void PropertyTree::apply(bool continuous)
 			PropertyIArchive ia(model_.get(), model_->root());
 			ia.setLastContext(archiveContext_);
  			yasli::Context treeContext(ia, this);
- 			ia.setFilter(filter_);
+ 			ia.setFilter(config_.filter);
 			onAboutToSerialize(ia);
 			(*it)(ia);
+			onSerialized(ia);
 		}
 	}
 
@@ -647,8 +879,13 @@ void PropertyTree::apply(bool continuous)
 		onContinuousChange();
 	else
 		onChanged();
-
 	//applyTime_ = timer.elapsed();
+}
+
+void PropertyTree::applyInplaceEditor()
+{
+	if (widget_.get())
+		widget_->commit();
 }
 
 bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
@@ -663,12 +900,6 @@ bool PropertyTree::spawnWidget(PropertyRow* row, bool ignoreReadOnly)
 		return newWidget != 0;
 	}
 	return false;
-}
-
-bool PropertyTree::activateRow(PropertyRow* row)
-{
-	interruptDrag();
-	return row->onActivate(this, false);
 }
 
 void PropertyTree::addMenuHandler(PropertyRowMenuHandler* handler)
@@ -717,7 +948,7 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 			child->onContextMenu(menu, this);
 	}
 	row->onContextMenu(menu, this);
-	if(undoEnabled_){
+	if(config_.undoEnabled){
 		if(!menu.isEmpty())
 			menu.addSeparator();
 		menu.addAction("Undo", "Ctrl+Z", model()->canUndo() ? 0 : MENU_DISABLED, handler, &PropertyTreeMenuHandler::onMenuUndo);
@@ -731,6 +962,15 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 		menu.addAction("Paste", "Ctrl+V", canBePasted(row) ? 0 : MENU_DISABLED, handler, &PropertyTreeMenuHandler::onMenuPaste);
 	}
 
+	if (model()->root() && !model()->root()->userReadOnly()) {
+		PropertyTreeMenuHandler* rootHandler = new PropertyTreeMenuHandler();
+		rootHandler->tree = this;
+		rootHandler->row = model()->root();
+		menu.addSeparator();
+		menu.addAction("Copy All", "", 0, rootHandler, &PropertyTreeMenuHandler::onMenuCopy);
+		menu.addAction("Paste All", "", canBePasted(model()->root()) ? 0 : MENU_DISABLED, rootHandler, &PropertyTreeMenuHandler::onMenuPaste);
+		addMenuHandler(rootHandler);
+	}
 	menu.addSeparator();
 
 	menu.addAction("Filter...", "Ctrl+F", 0, handler, &PropertyTreeMenuHandler::onMenuFilter);
@@ -763,6 +1003,7 @@ void PropertyTree::onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point p
 	e.tree = this;
 	e.pos = point;
 	e.start = pressPoint_;
+	e.totalDelta = pressDelta_;
 	row->onMouseDrag(e);
 	repaint();
 }
@@ -783,17 +1024,14 @@ void PropertyTree::onRowMenuDecompose(PropertyRow* row)
 {
   // SharedPtr<PropertyRow> clonedRow = row->clone();
   // DecomposeProxy proxy(clonedRow);
-  // edit(SStruct(proxy), 0, IMMEDIATE_UPDATE, this);
+  // edit(Serializer(proxy), 0, IMMEDIATE_UPDATE, this);
 }
 
 void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 {
-	if(widget_.get()) {
-		defocusInplaceEditor();
-		widget_.reset();
-	}
+	_cancelWidget();
 
-	if(immediateUpdate_){
+	if(config_.immediateUpdate){
 		if (needApply)
 			apply();
 
@@ -802,8 +1040,6 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 		else {
 			updateHeights();
 			updateAttachedPropertyTree(true);
-			if(!immediateUpdate_)
-				onChanged();
 		}
 	}
 	else {
@@ -818,13 +1054,12 @@ void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 
 void PropertyTree::setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow)
 {
+	_cancelWidget();
 	widget_.reset(widget);
 	widgetRow_ = widgetRow;
 	model()->dismissUpdate();
 	if(widget_.get()){
 		YASLI_ASSERT(widget_->actualWidget());
-		//if(widget_->actualWidget())
-		//	((QWidget*)widget_->actualWidget())->setParent(this);
 		_arrangeChildren();
 		widget_->showPopup();
 		repaint();
@@ -833,7 +1068,7 @@ void PropertyTree::setWidget(property_tree::InplaceWidget* widget, PropertyRow* 
 
 void PropertyTree::setExpandLevels(int levels)
 {
-	expandLevels_ = levels;
+	config_.expandLevels = levels;
     model()->setExpandLevels(levels);
 }
 
@@ -856,14 +1091,45 @@ bool PropertyTree::getSelectedObject(yasli::Object* object)
 	if (!row)
 		return false;
 
-	if (PropertyRowObject* obj = dynamic_cast<PropertyRowObject*>(row)) {
-		*object = obj->object();
+	if (row->isObject()) {
+		if (PropertyRowObject* obj = static_cast<PropertyRowObject*>(row)) {
+			*object = obj->object();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool PropertyTree::setSelectedRow(PropertyRow* row)
+{
+	TreeSelection sel;
+	if(row)
+		sel.push_back(model()->pathFromRow(row));
+	if (model()->selection() != sel) {
+		model()->setSelection(sel);
+		if (row)
+			ensureVisible(row);
+		updateAttachedPropertyTree(false);
+		repaint();
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
+
+int PropertyTree::selectedRowCount() const
+{
+	return (int)model()->selection().size();
+}
+
+PropertyRow* PropertyTree::selectedRowByIndex(int index)
+{
+	const PropertyTreeModel::Selection &sel = model()->selection();
+	if (size_t(index) >= sel.size())
+		return 0;
+
+	return model()->rowFromPath(sel[index]);
+}
+
 
 bool PropertyTree::selectByAddress(const void* addr, bool keepSelectionIfChildSelected)
 {
@@ -872,11 +1138,18 @@ bool PropertyTree::selectByAddress(const void* addr, bool keepSelectionIfChildSe
 
 bool PropertyTree::selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected)
 {
-	if (model()->root()) {
-		TreeSelection sel;
+	return selectByAddresses(&addresses.front(), addresses.size(), keepSelectionIfChildSelected);
+}
 
+
+
+bool PropertyTree::selectByAddresses(const void* const* addresses, size_t addressCount, bool keepSelectionIfChildSelected)
+{
+	bool result = false;
+	if (model()->root()) {
 		bool keepSelection = false;
-		for (size_t i = 0; i < addresses.size(); ++i) {
+		vector<PropertyRow*> rows;
+		for (size_t i = 0; i < addressCount; ++i) {
 			const void* addr = addresses[i];
 			PropertyRow* row = model()->root()->findByAddress(addr);
 
@@ -894,35 +1167,58 @@ bool PropertyTree::selectByAddresses(const vector<const void*>& addresses, bool 
 				}
 			}
 
-			if (!keepSelection) {
-				if(row) {
-					sel.push_back(model()->pathFromRow(row));
-					ensureVisible(row);
-				}
-			}
+			if (row)
+				rows.push_back(row);
 		}
 
-		if (model()->selection() != sel) {
-			model()->setSelection(sel);
-			updateAttachedPropertyTree(true); 
-			repaint();
-			return true;
+		if (!keepSelection) {
+			TreeSelection sel;
+			for (size_t j = 0; j < rows.size(); ++j) {
+				PropertyRow* row = rows[j];
+				if(row)
+					sel.push_back(model()->pathFromRow(row));
+			}
+			if (model()->selection() != sel) {
+				model()->setSelection(sel);
+				if (!rows.empty())
+					ensureVisible(rows.back());
+				repaint();
+				result = true;
+				if (attachedPropertyTree_)
+					updateAttachedPropertyTree(false);
+			}
 		}
 	}
-	return false;
+	return result;
 }
 
 void PropertyTree::setUndoEnabled(bool enabled, bool full)
 {
-	undoEnabled_ = enabled; fullUndo_ = full;
+	config_.undoEnabled = enabled;
+	config_.fullUndo = full;
     model()->setUndoEnabled(enabled);
     model()->setFullUndo(full);
 }
 
 void PropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
 { 
+	// TODO:
+	// if(attachedPropertyTree_)
+	// 	disconnect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
 	attachedPropertyTree_ = propertyTree; 
+	//if (attachedPropertyTree_)
+	//	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
 	updateAttachedPropertyTree(true); 
+}
+
+void PropertyTree::detachPropertyTree()
+{
+	attachPropertyTree(0);
+}
+
+void PropertyTree::setAutoHideAttachedPropertyTree(bool autoHide)
+{
+	autoHideAttachedPropertyTree_ = autoHide;
 }
 
 void PropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
@@ -936,6 +1232,17 @@ void PropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 
 		while(row && ((row->pulledUp() || row->pulledBefore()) || row->isLeaf())) {
 			row = row->parent();
+		}
+		if (outlineMode_) {
+			PropertyRow* topmostContainerElement = 0;
+			PropertyRow* r = row;
+			while (r && r->parent()) {
+				if (r->parent()->isContainer())
+					topmostContainerElement = r;
+				r = r->parent();
+			}
+			if (topmostContainerElement != 0)
+				row = topmostContainerElement;
 		}
 		Serializer ser = row->serializer();
 
@@ -1100,6 +1407,11 @@ Point PropertyTree::pointToRootSpace(const Point& point) const
 	return Point(point.x() + offset_.x(), point.y() + offset_.y());
 }
 
+Point PropertyTree::pointFromRootSpace(const Point& point) const
+{
+	return Point(point.x() - offset_.x() + area_.left(), point.y() - offset_.y() + area_.top());
+}
+
 bool PropertyTree::toggleRow(PropertyRow* row)
 {
 	if(!row->canBeToggled(this))
@@ -1112,6 +1424,16 @@ bool PropertyTree::toggleRow(PropertyRow* row)
 bool PropertyTree::_isCapturedRow(const PropertyRow* row) const
 {
 	return capturedRow_ == row;
+}
+
+void PropertyTree::setValueColumnWidth(float valueColumnWidth) 
+{
+	if (style_->valueColumnWidth != valueColumnWidth)
+	{
+		style_->valueColumnWidth = valueColumnWidth; 
+		updateHeights(false);
+		repaint();
+	}
 }
 
 void PropertyTree::setArchiveContext(yasli::Context* lastContext)
@@ -1129,15 +1451,129 @@ PropertyTree& PropertyTree::operator=(const PropertyTree&)
 	return *this;
 }
 
+void PropertyTree::onAttachedTreeChanged()
+{
+	revert();
+}
+
 Point PropertyTree::_toWidget(Point point) const
 {
 	return Point(point.x() - offset_.x(), point.y() - offset_.y());
 }
 
-void PropertyTree::_cancelWidget()
+struct ValidatorIconVisitor
 {
-	defocusInplaceEditor();
-	widget_.reset();
+	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	{
+		row->resetValidatorIcons();
+		if (row->validatorCount()) {
+			bool hasErrors = false;
+			bool hasWarnings = false;
+			if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
+				for (int i = 0; i < row->validatorCount(); ++i) {
+					const ValidatorEntry* validatorEntry = validatorEntries + i;
+					if (validatorEntry->type == VALIDATOR_ENTRY_ERROR)
+						hasErrors = true;
+					else if (validatorEntry->type == VALIDATOR_ENTRY_WARNING)
+						hasWarnings = true;
+				}
+			}
+
+			if (hasErrors || hasWarnings)
+			{
+				PropertyRow* lastClosedParent = 0;
+				PropertyRow* current = row->parent();
+				bool lastWasPulled = row->pulledUp() || row->pulledBefore();
+				while (current && current->parent()) {
+					if (!current->expanded() && !lastWasPulled && current->visible(tree))
+						lastClosedParent = current;
+					lastWasPulled = current->pulledUp() || current->pulledBefore();
+					current = current->parent();
+				}
+				if (lastClosedParent)
+					lastClosedParent->addValidatorIcons(hasWarnings, hasErrors);
+			}
+		}
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+};
+
+void PropertyTree::updateValidatorIcons()
+{
+	if (!validatorBlock_->isEnabled())
+		return;
+	ValidatorIconVisitor op;
+	model()->root()->scanChildren(op, this);
+	model()->root()->setLabelChangedToChildren();
+}
+
+void PropertyTree::setDefaultTreeStyle(const PropertyTreeStyle& treeStyle)
+{
+	defaultTreeStyle_ = treeStyle;
+}
+
+void PropertyTree::setTreeStyle(const PropertyTreeStyle& style)
+{
+	*style_ = style;
+	updateHeights(true);
+}
+
+void PropertyTree::setPackCheckboxes(bool pack)
+{
+	style_->packCheckboxes = pack;
+	updateHeights(true);
+}
+
+bool PropertyTree::packCheckboxes() const
+{
+	return style_->packCheckboxes;
+}
+
+void PropertyTree::setCompact(bool compact)
+{
+	style_->compact = compact;
+	repaint();
+}
+
+bool PropertyTree::compact() const
+{
+	return style_->compact;
+}
+
+void PropertyTree::setRowSpacing(float rowSpacing)
+{
+	style_->rowSpacing = rowSpacing;
+}
+
+float PropertyTree::rowSpacing() const
+{
+	return style_->rowSpacing;
+}
+
+float PropertyTree::valueColumnWidth() const
+{
+	return style_->valueColumnWidth;
+}
+
+void PropertyTree::setFullRowMode(bool fullRowMode)
+{
+	style_->fullRowMode = fullRowMode;
+	repaint();
+}
+
+bool PropertyTree::fullRowMode() const
+{
+	return style_->fullRowMode;
+}
+
+bool PropertyTree::containsErrors() const
+{
+	return validatorBlock_->containsErrors();
+}
+
+void PropertyTree::focusFirstError()
+{
+	jumpToNextHiddenValidatorIssue(true, model()->root());
 }
 
 // vim:ts=4 sw=4:

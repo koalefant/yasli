@@ -17,6 +17,7 @@
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/PropertyOArchive.h"
 #include "PropertyTree/PropertyIArchive.h"
+#include "PropertyTree/PropertyTreeStyle.h"
 #include "PropertyTree/Unicode.h"
 #include "PropertyTree/PropertyTreeMenuHandler.h"
 #include "PropertyTree/MathUtils.h"
@@ -35,6 +36,7 @@
 #include <QPainter>
 #include <QElapsedTimer>
 #include <QStyle>
+#include <QToolTip>
 
 // only for clipboard:
 #include <QClipboard>
@@ -61,6 +63,7 @@ static int translateKey(int qtKey)
 	case Qt::Key_Left: return KEY_LEFT;
 	case Qt::Key_Menu: return KEY_MENU;
 	case Qt::Key_Return: return KEY_RETURN;
+	case Qt::Key_Enter: return KEY_ENTER;
 	case Qt::Key_Right: return KEY_RIGHT;
 	case Qt::Key_Space: return KEY_SPACE;
 	case Qt::Key_Up: return KEY_UP;
@@ -90,6 +93,23 @@ static KeyEvent translateKeyEvent(const QKeyEvent& ev)
 	result.key_ = translateKey(ev.key());
 	result.modifiers_ = translateModifiers(ev.modifiers());
 	return result;
+}
+
+QCursor translateCursor(property_tree::Cursor cursor)
+{
+	switch (cursor)
+	{
+	case property_tree::CURSOR_ARROW:
+		return QCursor(Qt::ArrowCursor);
+	case property_tree::CURSOR_BLANK:
+		return QCursor(Qt::BlankCursor);
+	case property_tree::CURSOR_SLIDE:
+		return QCursor(Qt::ArrowCursor); // TODO
+	case property_tree::CURSOR_HAND:
+		return QCursor(Qt::PointingHandCursor);
+	default:
+		return QCursor();
+	}
 }
 
 using yasli::Serializers;
@@ -127,7 +147,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 				if(dest->isPointer() && !source->isPointer()){
 					PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
 					SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
-					source->swapChildren(newSourceRoot);
+					source->swapChildren(newSourceRoot, model);
 					source = newSourceRoot;
 				}
 				destPulledContainer->add(source.get());
@@ -143,7 +163,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 			if(dest->isPointer() && !source->isPointer()){
 				PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
 				SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
-				source->swapChildren(newSourceRoot);
+				source->swapChildren(newSourceRoot, model);
 				source = newSourceRoot;
 			}
 			const char* name = dest->name();
@@ -151,10 +171,10 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 			source->setName(name);
 			source->setLabel(nameAlt);
 			if(dest->parent())
-				dest->parent()->replaceAndPreserveState(dest, source, false);
+				dest->parent()->replaceAndPreserveState(dest, source, model);
 			else{
 				dest->clear();
-				dest->swapChildren(source);
+				dest->swapChildren(source, model);
 			}
 			source->setLabelChanged();
 		}
@@ -171,7 +191,7 @@ static bool smartPaste(PropertyRow* dest, SharedPtr<PropertyRow>& source, Proper
 					if(dest->isPointer() && !source->isPointer()){
 						PropertyRowPointer* d = static_cast<PropertyRowPointer*>(dest);
 						SharedPtr<PropertyRowPointer> newSourceRoot = static_cast<PropertyRowPointer*>(d->clone(model->constStrings()).get());
-						source->swapChildren(newSourceRoot);
+						source->swapChildren(newSourceRoot, model);
 						source = newSourceRoot;
 					}
 
@@ -226,7 +246,7 @@ protected:
 
     void keyPressEvent(QKeyEvent * ev)
     {
-        if (ev->key() == Qt::Key_Escape || ev->key() == Qt::Key_Return)
+        if (ev->key() == Qt::Key_Escape || ev->key() == Qt::Key_Return || ev->key() == Qt::Key_Enter)
         {
             ev->accept();
             tree_->setFocus();
@@ -354,7 +374,7 @@ void DragWindow::drawRow(QPainter& p)
 	p.drawRect(entireRowRect);
 
 	QPoint leftTop = toQRect(row_->rect()).topLeft();
-	int offsetX = -leftTop.x() - tree_->tabSize() + 3;
+	int offsetX = -leftTop.x() - tree_->config().tabSize + 3;
 	int offsetY = -leftTop.y() + 3;
 	p.translate(offsetX, offsetY);
 	int rowIndex = 0;
@@ -413,7 +433,7 @@ public:
 			if(row_->canBeDragged()){
 				needCapture = true;
 				QRect rect = toQRect(row_->rect());
-				rect = QRect(rect.topLeft() - toQPoint(tree_->offset_) + QPoint(tree_->tabSize(), 0), 
+				rect = QRect(rect.topLeft() - toQPoint(tree_->offset_) + QPoint(tree_->config().tabSize, 0), 
 							 rect.bottomRight() - toQPoint(tree_->offset_));
 
 				window_.set(tree_, row_, rect);
@@ -475,8 +495,8 @@ public:
 	{
 		if(dragging_ && destinationRow_ == hoveredRow_ && hoveredRow_){
 			QRect rowRect = toQRect(hoveredRow_->rect());
-			rowRect.setLeft(rowRect.left() + tree_->tabSize());
-			QBrush brush(true ? tree_->palette().highlight() : tree_->palette().shadow());
+			rowRect.setLeft(rowRect.left() + tree_->config().tabSize);
+			QBrush brush(tree_->palette().highlight());
 			QColor brushColor = brush.color();
 			QColor borderColor(brushColor.alpha() / 4, brushColor.red(), brushColor.green(), brushColor.blue());
 			fillRoundRectangle(painter, brush, rowRect, borderColor, 6);
@@ -493,7 +513,7 @@ public:
 		if(destinationRow_ != hoveredRow_ && hoveredRow_){
 			const int tickSize = 4;
 			QRect hoveredRect = toQRect(hoveredRow_->rect());
-			hoveredRect.setLeft(hoveredRect.left() + tree_->tabSize());
+			hoveredRect.setLeft(hoveredRect.left() + tree_->config().tabSize);
 
 			if(!before_){ // previous
 				QRect rect(hoveredRect.left() - 1 , hoveredRect.bottom() - 1, hoveredRect.width(), 2);
@@ -560,11 +580,14 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , PropertyTree(new QUIFacade(this))
 , sizeHint_(180, 180)
 , dragController_(new DragController(this))
+, sizeToContent_(false)
 
 , updateHeightsTime_(0)
 , paintTime_(0)
 {
 	setFocusPolicy(Qt::WheelFocus);
+	setMouseTracking(true); // need to receive mouseMoveEvent to update mouse cursor and tooltip
+
 	scrollBar_ = new QScrollBar(Qt::Vertical, this);
 	connect(scrollBar_, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));
 
@@ -591,40 +614,62 @@ void QPropertyTree::interruptDrag()
 	dragController_->interrupt();
 }
 
-void QPropertyTree::updateHeights()
+void QPropertyTree::updateHeights(bool recalculateTextSize)
 {
+	QFontMetrics fm(font());
+	defaultRowHeight_ = max(16, int(fm.lineSpacing() * 1.666f)); // to fit at least 16x16 icons
+
+	QElapsedTimer timer;
+	timer.start();
+
+	QRect widgetRect = rect();
+
+	int scrollBarW = style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+	area_ = fromQRect(widgetRect.adjusted(2, 2, -2 - scrollBarW, -2));
+
+	int filterAreaHeight = 0;
+	if (filterMode_)
 	{
-		QElapsedTimer timer;
-		timer.start();
+		filterAreaHeight = filterEntry_ ? filterEntry_->height() : 0;
+		area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
+	}
 
-		QRect widgetRect = rect();
+	updateScrollBar();
 
-		int scrollBarW = style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-		area_ = fromQRect(widgetRect.adjusted(2, 2, -2 - scrollBarW, -2));
+	model()->root()->updateLabel(this, 0, false);
+	int lb = style_->compact ? 0 : 4;
+	int rb = widgetRect.right() - lb - scrollBarW - 2;
+	int availableWidth = widgetRect.width() - 4 - scrollBarW;
+	bool force = lb != leftBorder_ || rb != rightBorder_ || recalculateTextSize;
+	leftBorder_ = lb;
+	rightBorder_ = rb;
+	model()->root()->calculateMinimalSize(this, leftBorder_, availableWidth, force, 0, 0, 0);
 
-		if (filterMode_)
-		{
-			int filterAreaHeight = filterEntry_ ? filterEntry_->height() : 0;
-			area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
-		}
+	size_.setX(area_.width());
 
-		updateScrollBar();
+	int totalHeight = area_.top();
+	model()->root()->adjustVerticalPosition(this, totalHeight);
+	size_.setY(totalHeight - area_.top());
 
-		model()->root()->updateLabel(this, 0);
-		int lb = compact_ ? 0 : 4;
-		int rb = widgetRect.right() - lb - scrollBarW - 2;
-		bool force = lb != leftBorder_ || rb != rightBorder_;
-		leftBorder_ = lb;
-		rightBorder_ = rb;
-		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
+	updateHeightsTime_ = timer.elapsed();
 
-		size_.setX(area_.width());
+	int	contentHeight = totalHeight + filterAreaHeight + 4;
+	if (sizeToContent_) {
+		setMaximumHeight(contentHeight);
+		setMinimumHeight(contentHeight);
+	}
+	else {
+		setMaximumHeight(QWIDGETSIZE_MAX);
+		setMinimumHeight(0);
+	}
 
-		int totalHeight = area_.top();
-		model()->root()->adjustVerticalPosition(this, totalHeight);
-		size_.setY(totalHeight - area_.top());
-
-		updateHeightsTime_ = timer.elapsed();
+	QSize contentSize = QSize(area_.width(), contentHeight);
+	if (contentSize_.height() != contentHeight) {
+		contentSize_ = contentSize;
+		signalSizeChanged();
+	}
+	else {
+		contentSize_ = contentSize;
 	}
 
 	_arrangeChildren();
@@ -912,7 +957,7 @@ void QPropertyTree::onFilterChanged(const QString& text)
 	rowFilter_.parse(filterStr);
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
-	updateHeights();
+	updateHeights(false);
 }
 
 void QPropertyTree::drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
@@ -1001,7 +1046,10 @@ void QPropertyTree::_drawRowValue(QPainter& p, const char* text, const QFont* fo
 
 QSize QPropertyTree::sizeHint() const
 {
-	return sizeHint_;
+	if (sizeToContent_)
+		return minimumSize();
+	else
+		return sizeHint_;
 }
 
 void QPropertyTree::paintEvent(QPaintEvent* ev)
@@ -1068,6 +1116,16 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	paintTime_ = timer.elapsed();
 }
 
+QPoint QPropertyTree::pointToRootSpace(const QPoint& point) const
+{
+	return toQPoint(PropertyTree::pointToRootSpace(fromQPoint(point)));
+}
+
+QPoint QPropertyTree::pointFromRootSpace(const QPoint& point) const
+{
+	return toQPoint(PropertyTree::pointFromRootSpace(fromQPoint(point)));
+}
+
 void QPropertyTree::moveEvent(QMoveEvent* ev)
 {
 	QWidget::moveEvent(ev);
@@ -1088,12 +1146,14 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 	{
 		int x = ev->x();
 		int y = ev->y();
+
 		PropertyRow* row = rowByPoint(fromQPoint(ev->pos()));
 		if(row && !row->isSelectable())
 			row = row->parent();
 		if(row){
-			if(onRowLMBDown(row, row->rect(), pointToRootSpace(fromQPoint(ev->pos())), ev->modifiers().testFlag(Qt::ControlModifier))){
+			if(onRowLMBDown(row, row->rect(), fromQPoint(pointToRootSpace(ev->pos())), ev->modifiers().testFlag(Qt::ControlModifier), ev->modifiers().testFlag(Qt::ShiftModifier))) {
 				capturedRow_ = row;
+				lastStillPosition_ = fromQPoint(pointToRootSpace(ev->pos()));
 			}
 			else if (!dragCheckMode_){
 				row = rowByPoint(fromQPoint(ev->pos()));
@@ -1115,11 +1175,11 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 			model()->setFocusedRow(row);
 			update();
 
-			onRowRMBDown(row, row->rect(), pointToRootSpace(point));
+			onRowRMBDown(row, row->rect(), fromQPoint(pointToRootSpace(ev->pos())));
 		}
 		else{
 			Rect rect = fromQRect(this->rect());
-			onRowRMBDown(model()->root(), rect, _toWidget(pointToRootSpace(point)));
+			onRowRMBDown(model()->root(), rect, _toWidget(fromQPoint(pointToRootSpace(ev->pos()))));
 		}
 	}
 }
@@ -1144,7 +1204,7 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 			 PropertyRow* row = rowByPoint(point);
 			 if(capturedRow_){
 				 Rect rowRect = capturedRow_->rect();
-				 onRowLMBUp(capturedRow_, rowRect, _toWidget(pointToRootSpace(point)));
+				 onRowLMBUp(capturedRow_, rowRect, pointToRootSpace(point));
 				 mouseStillTimer_->stop();
 				 capturedRow_ = 0;
 				 update();
@@ -1155,6 +1215,8 @@ void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 	{
 
 	}
+
+	unsetCursor();
 }
 
 void QPropertyTree::focusInEvent(QFocusEvent* ev)
@@ -1218,14 +1280,30 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	Point point = fromQPoint(ev->pos());
 	PropertyRow* row = rowByPoint(point);
 	if(row){
+		PropertyActivationEvent e;
+		e.tree = this;
+		e.force = true;
+		e.reason = e.REASON_DOUBLECLICK;
+		PropertyRow* nonPulledParent = row;
+		while (nonPulledParent && nonPulledParent->pulledUp())
+			nonPulledParent = nonPulledParent->parent();
+
 		if(row->widgetRect(this).contains(pointToRootSpace(point))){
-			if(!row->onActivate(this, true) &&
-				!row->onActivateRelease(this))
-				toggleRow(row);	
+			if(!row->onActivate(e))
+				toggleRow(nonPulledParent);	
 		}
 		else if(!toggleRow(row)) {
-			row->onActivate(this, false);
-			row->onActivateRelease(this);
+			if (!row->onActivate(e))
+				if(!toggleRow(nonPulledParent)) {
+					// activate first visible inline row
+					for (size_t i = 0; i < row->count(); ++i) {
+						PropertyRow* child = row->childByIndex(i);
+						if (child && child->pulledUp() && child->visible(this)) {
+							child->onActivate(e);
+							break;
+						}
+					}
+				}
 		}
 	}
 }
@@ -1235,8 +1313,28 @@ void QPropertyTree::onMouseStillTimer()
 	onMouseStill();
 }
 
+void QPropertyTree::flushAggregatedMouseEvents()
+{
+	if (aggregatedMouseEventCount_ > 0) {
+		bool gotPendingEvent = aggregatedMouseEventCount_ > 1;
+		aggregatedMouseEventCount_ = 0;
+		if (gotPendingEvent && lastMouseMoveEvent_.data())
+			mouseMoveEvent(lastMouseMoveEvent_.data());
+	}
+}
+
 void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 {
+	if (ev->type() == QEvent::MouseMove && aggregateMouseEvents_) {
+		lastMouseMoveEvent_.reset(new QMouseEvent(QEvent::MouseMove, ev->localPos(), ev->windowPos(), ev->screenPos(), ev->button(), ev->buttons(), ev->modifiers()));
+		ev = lastMouseMoveEvent_.data();
+		++aggregatedMouseEventCount_;
+		if (aggregatedMouseEventCount_ > 1)
+			return;
+	}
+
+	QCursor newCursor = QCursor(Qt::ArrowCursor);
+	QString newToolTip;
 	if(dragController_->captured() && !ev->buttons().testFlag(Qt::LeftButton))
 		dragController_->interrupt();
 	if(dragController_->captured()){
@@ -1254,18 +1352,86 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 		}
 		else if(capturedRow_){
 			onRowMouseMove(capturedRow_, Rect(), point);
-			if (sliderUpdateDelay_ >= 0)
-				mouseStillTimer_->start(sliderUpdateDelay_);
+			if (config_.sliderUpdateDelay >= 0)
+				mouseStillTimer_->start(config_.sliderUpdateDelay);
+
+			/*
+			if (cursor().shape() == Qt::BlankCursor)
+			{
+				pressDelta_ += pointToRootSpace(fromQPoint(ev->pos())) - pressPoint_;
+				pointerMovedSincePress_ = true;
+				QCursor::setPos(mapToGlobal(toQPoint(PropertyTree::pointFromRootSpace(pressPoint_))));
+			}
+			else
+			*/
+			{
+				pressDelta_ = pointToRootSpace(fromQPoint(ev->pos())) - pressPoint_;
+			}
+		}
+
+		PropertyRow* hoverRow = row;
+		if (capturedRow_)
+			hoverRow = capturedRow_;
+		PropertyHoverInfo hover;
+		if (hoverRow) {
+			Point pointInRootSpace = pointToRootSpace(point);
+			if (hoverRow->getHoverInfo(&hover, pointInRootSpace, this)) {
+				newCursor = translateCursor(hover.cursor);
+				newToolTip = QString::fromUtf8(hover.toolTip.c_str());
+
+				PropertyRow* tooltipRow = hoverRow;
+				while (newToolTip.isEmpty() && tooltipRow->parent() && (tooltipRow->pulledUp() || tooltipRow->pulledBefore())) {
+					// check if parent of inlined property has a tooltip instead
+					tooltipRow = tooltipRow->parent();
+					if (tooltipRow->getHoverInfo(&hover, pointInRootSpace, this))
+						newToolTip = QString::fromUtf8(hover.toolTip.c_str());
+				}
+			}
+			
+			if (hoverRow->validatorWarningIconRect(this).contains(pointToRootSpace(point))) {
+				newCursor = QCursor(Qt::PointingHandCursor);
+				newToolTip = "Jump to next warning";
+			}
+			if (hoverRow->validatorErrorIconRect(this).contains(pointToRootSpace(point))) {
+				newCursor = QCursor(Qt::PointingHandCursor);
+				newToolTip = "Jump to next error";
+			}
 		}
 	}
+	setCursor(newCursor);
+	if (toolTip() != newToolTip)
+		setToolTip(newToolTip);
+		if (newToolTip.isEmpty())
+			QToolTip::hideText();
 }
 
 void QPropertyTree::wheelEvent(QWheelEvent* ev) 
 {
 	QWidget::wheelEvent(ev);
 	
-	if (scrollBar_->isVisible() && scrollBar_->isEnabled())
- 		scrollBar_->setValue(scrollBar_->value() + -ev->delta());
+	float delta = ev->angleDelta().ry() / 360.0f;
+	if (ev->modifiers() & Qt::CTRL)	{
+		if (delta > 0)
+			zoomLevel_ += 1;
+		else
+			zoomLevel_ -= 1;
+		if (zoomLevel_ < 8)
+			zoomLevel_ = 8;
+		if (zoomLevel_ > 30)
+			zoomLevel_ = 30;
+		float scale = zoomLevel_ * 0.1f;
+		QFont font;
+		font.setPointSizeF(font.pointSizeF() * scale);		
+		setFont(font);
+		font.setBold(true);
+		boldFont_ = font;
+
+		updateHeights(true);
+	}
+	else {
+		if (scrollBar_->isVisible() && scrollBar_->isEnabled())
+			scrollBar_->setValue(scrollBar_->value() + -ev->delta());
+	}
 }
 
 bool QPropertyTree::_isDragged(const PropertyRow* row) const
@@ -1282,7 +1448,36 @@ void QPropertyTree::onAttachedTreeChanged()
 	revert();
 }
 
-FORCE_SEGMENT(PropertyRowColor)
+void QPropertyTree::setSizeToContent(bool sizeToContent)
+{
+	if (sizeToContent != sizeToContent_)
+	{
+		sizeToContent_ = sizeToContent;
+		updateHeights(false);
+	}
+}
+
+void QPropertyTree::_cancelWidget()
+{
+	QWidget* inplaceWidget = 0;
+	if (widget_.get() && widget_->actualWidget())
+		inplaceWidget = (QWidget*)widget_->actualWidget();
+
+	bool inplaceWidgetHasFocus = false;
+
+	if (inplaceWidget) {
+		if (inplaceWidget->hasFocus())
+			inplaceWidgetHasFocus = true;
+		else if (inplaceWidget->isAncestorOf(QWidget::focusWidget()))
+			inplaceWidgetHasFocus = true;
+	}
+
+	if (inplaceWidgetHasFocus)
+		setFocus();
+
+	PropertyTree::_cancelWidget();
+}
+
 FORCE_SEGMENT(PropertyRowIconXPM)
 FORCE_SEGMENT(PropertyRowFileSave)
 

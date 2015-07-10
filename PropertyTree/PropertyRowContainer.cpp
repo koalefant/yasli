@@ -22,7 +22,8 @@
 // ---------------------------------------------------------------------------
 
 ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContainer* container)
-: container(container)
+: element()
+, container(container)
 , tree(tree)
 , pointerIndex(-1)
 {
@@ -31,11 +32,12 @@ ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContai
 
 
 // ---------------------------------------------------------------------------
-YASLI_CLASS(PropertyRow, PropertyRowContainer, "Container");
+YASLI_CLASS_NAME(PropertyRow, PropertyRowContainer, "PropertyRowContainer", "Container");
 
 PropertyRowContainer::PropertyRowContainer()
 : fixedSize_(false)
 , elementTypeName_("")
+, inlined_(false)
 {
 	buttonLabel_[0] = '\0';
 
@@ -65,7 +67,7 @@ protected:
 void PropertyRowContainer::redraw(IDrawContext& context)
 {
 	Rect widgetRect = context.widgetRect;
-	if (widgetRect.width() == 0)
+	if (widgetRect.width() == 0 || inlined_)
 		return;
 	Rect rt = widgetRect.adjusted(0, 1, -1, -1);
 
@@ -77,49 +79,55 @@ void PropertyRowContainer::redraw(IDrawContext& context)
 }
 
 
-bool PropertyRowContainer::onActivate( PropertyTree* tree, bool force)
+bool PropertyRowContainer::onActivate(const PropertyActivationEvent& e)
 {
+	if (e.reason == e.REASON_RELEASE)
+		return false;
 	if(userReadOnly())
 		return false;
-	std::auto_ptr<property_tree::IMenu> menu(tree->ui()->createMenu());
-	generateMenu(*menu, tree);
-	tree->_setPressedRow(this);
-	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
-	tree->_setPressedRow(0);
+	if (inlined_)
+		return false;
+	std::auto_ptr<property_tree::IMenu> menu(e.tree->ui()->createMenu());
+	generateMenu(*menu, e.tree, true);
+	e.tree->_setPressedRow(this);
+	menu->exec(Point(widgetPos_, pos_.y() + e.tree->_defaultRowHeight()));
+	e.tree->_setPressedRow(0);
 	return true;
 }
 
 
-void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree* tree)
+void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree* tree, bool addActions)
 {
 	ContainerMenuHandler* handler = new ContainerMenuHandler(tree, this);
 	tree->addMenuHandler(handler);
 
-	if (fixedSize_)
-	{
-		menu.addAction("[ Fixed Size Container ]", MENU_DISABLED);
+	if (fixedSize_) {
+		if (!inlined_)
+			menu.addAction("[ Fixed Size Container ]", MENU_DISABLED);
 	}
-	else if(userReadOnly())
-	{
+	else if(userReadOnly()) {
 		menu.addAction("[ Read Only Container ]", MENU_DISABLED);
 	}
 	else
 	{
-		PropertyRow* row = defaultRow(tree->model());
-		if (row && row->isPointer())
-		{
-			property_tree::IMenu* createItem = menu.addMenu("Add");
-			menu.addSeparator();
+		if (addActions) {
+			PropertyRow* row = defaultRow(tree->model());
+			if (row && row->isPointer()) {
+				property_tree::IMenu* createItem = menu.addMenu("Add");
+				menu.addSeparator();
 
-			PropertyRowPointer* pointerRow = static_cast<PropertyRowPointer*>(row);
-			ClassMenuItemAdderRowContainer(this, tree).generateMenu(*createItem, tree->model()->typeStringList(pointerRow->baseType()));
-		}
-		else
-		{
+				PropertyRowPointer* pointerRow = static_cast<PropertyRowPointer*>(row);
+				ClassMenuItemAdderRowContainer(this, tree).generateMenu(*createItem, tree->model()->typeStringList(pointerRow->baseType()));
+			}
+			else {
 
-			menu.addAction("Add", "Insert", 0, handler, &ContainerMenuHandler::onMenuAppendElement);
-			menu.addSeparator();
+				menu.addAction("Insert", "Insert", 0, handler, &ContainerMenuHandler::onMenuInsertElement);
+				menu.addAction("Add", "", 0, handler, &ContainerMenuHandler::onMenuAppendElement);
+			}
 		}
+
+		if (!menu.isEmpty())
+			menu.addSeparator();
 
 		menu.addAction(pulledUp() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
 			handler, &ContainerMenuHandler::onMenuRemoveAll);
@@ -131,7 +139,7 @@ bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTree* tree)
 	if(!menu.isEmpty())
 		menu.addSeparator();
 
-	generateMenu(menu, tree);
+	generateMenu(menu, tree, true);
 
 	if(pulledUp())
 		return !menu.isEmpty();
@@ -161,28 +169,53 @@ const PropertyRow* PropertyRowContainer::defaultRow(const PropertyTreeModel* mod
 	return defaultType;
 }
 
+void ContainerMenuHandler::onMenuInsertElement()
+{
+	container->addElement(tree, false);
+}
+
 void ContainerMenuHandler::onMenuAppendElement()
 {
-	tree->model()->rowAboutToBeChanged(container);
-	SharedPtr<PropertyRow> defaultType = container->defaultRow(tree->model());
-	YASLI_ESCAPE(defaultType != 0, return);
+	container->addElement(tree, true);
+}
+
+PropertyRow* PropertyRowContainer::addElement(PropertyTree* tree, bool append)
+{
+	tree->model()->rowAboutToBeChanged(this);
+	PropertyRow* defaultType = defaultRow(tree->model());
+	YASLI_ESCAPE(defaultType != 0, return 0);
 	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
-	if(container->count() == 0)
-		tree->expandRow(container);
-	container->add(clonedRow);
+	if(count() == 0)
+		tree->expandRow(this);
+	if (append)
+		add(clonedRow);
+	else
+		addBefore(clonedRow, 0);
+	clonedRow->setHideChildren(tree->outlineMode());
 	clonedRow->setLabelChanged();
 	clonedRow->setLabelChangedToChildren();
-	container->setMultiValue(false);
-	if(container->expanded())
+	setMultiValue(false);
+	if(expanded())
 		tree->model()->selectRow(clonedRow, true);
 	tree->expandRow(clonedRow);
-	PropertyTreeModel::Selection sel = tree->model()->selection();
+	TreePath path = tree->model()->pathFromRow(clonedRow);
 	tree->model()->rowChanged(clonedRow);
-	tree->model()->setSelection(sel);
+	clonedRow = tree->model()->rowFromPath(path);
 	tree->repaint(); 
-	clonedRow = tree->selectedRow();
-	if(clonedRow->activateOnAdd())
-		clonedRow->onActivate(tree, false);
+	clonedRow = tree->model()->rowFromPath(path);
+	if (clonedRow) {
+		PropertyTreeModel::Selection sel;
+		sel.push_back(path);
+		tree->model()->setSelection(sel);
+		if(clonedRow->activateOnAdd())
+		{
+			PropertyActivationEvent e;
+			e.tree = tree;
+			e.reason = e.REASON_NEW_ELEMENT;
+			clonedRow->onActivate(e);
+		}
+	}
+	return clonedRow;
 }
 
 void ContainerMenuHandler::onMenuAppendPointerByIndex()
@@ -190,15 +223,15 @@ void ContainerMenuHandler::onMenuAppendPointerByIndex()
 	PropertyRow* defaultType = container->defaultRow(tree->model());
 	PropertyRowPointer* defaultTypePointer = static_cast<PropertyRowPointer*>(defaultType);
 	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
-	// clonedRow->setFullRow(true); TODO
 	if(container->count() == 0)
 		tree->expandRow(container);
 	container->add(clonedRow);
 	clonedRow->setLabelChanged();
 	clonedRow->setLabelChangedToChildren();
+	clonedRow->setHideChildren(tree->outlineMode());
 	container->setMultiValue(false);
 	PropertyRowPointer* clonedRowPointer = static_cast<PropertyRowPointer*>(clonedRow.get());
-	clonedRowPointer->setDerivedType(defaultTypePointer->getDerivedType(defaultTypePointer->factory()), defaultTypePointer->factory());
+	clonedRowPointer->setDerivedType(defaultTypePointer->derivedTypeName(), defaultTypePointer->factory());
 	clonedRowPointer->setBaseType(defaultTypePointer->baseType());
 	clonedRowPointer->setFactory(defaultTypePointer->factory());
 	if(container->expanded())
@@ -222,6 +255,7 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	if(!defaultType)
 		return;
 	SharedPtr<PropertyRow> clonedRow = defaultType->clone(tree->model()->constStrings());
+	clonedRow->setHideChildren(tree->outlineMode());
 	element->setSelected(false);
 	container->addBefore(clonedRow, element);
 	container->setMultiValue(false);
@@ -232,23 +266,28 @@ void ContainerMenuHandler::onMenuChildInsertBefore()
 	tree->repaint(); 
 	clonedRow = tree->selectedRow();
 	if(clonedRow->activateOnAdd())
-		clonedRow->onActivate(tree, false);
+	{
+		PropertyActivationEvent e;
+		e.tree = tree;
+		e.reason = PropertyActivationEvent::REASON_NEW_ELEMENT;
+		clonedRow->onActivate(e);
+	}
 }
 
 void ContainerMenuHandler::onMenuChildRemove()
 {
 	tree->model()->rowAboutToBeChanged(container);
-    int index = container->childIndex(element);
+	int index = container->childIndex(element);
 	container->erase(element);
 	container->setMultiValue(false);
-    tree->model()->deselectAll();
-    tree->updateAttachedPropertyTree(false);
+	tree->model()->deselectAll();
+	tree->updateAttachedPropertyTree(false);
 	tree->model()->rowChanged(container);
-    PropertyRow* newSelectedRow = container->childByIndex(index);
-    if (newSelectedRow == 0)
-        newSelectedRow = container;
-    tree->model()->selectRow(newSelectedRow, true, true);
-    tree->updateAttachedPropertyTree(false);
+	PropertyRow* newSelectedRow = container->childByIndex(index);
+	if (newSelectedRow == 0)
+		newSelectedRow = container;
+	tree->model()->selectRow(newSelectedRow, true, true);
+	tree->updateAttachedPropertyTree(false);
 }
 
 
@@ -267,7 +306,7 @@ void PropertyRowContainer::serializeValue(yasli::Archive& ar)
 yasli::string PropertyRowContainer::valueAsString() const
 {
 	char buf[32] = { 0 };
-    sprintf(buf, "%d", (int)children_.size());
+	sprintf(buf, "%d", (int)children_.size());
 	return yasli::string(buf);
 }
 
@@ -293,3 +332,9 @@ bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 	}
     return PropertyRow::onKeyDown(tree, ev);
 }
+
+int PropertyRowContainer::widgetSizeMin(const PropertyTree* tree) const
+{
+	return inlined_ ? 0 : (userWidgetSize() >=0 ? userWidgetSize() : int(tree->_defaultRowHeight() * 1.7f));
+}
+

@@ -10,11 +10,8 @@
 #pragma once
 
 #include <cstddef>
+#include <yasli/Config.h>
 #include "Pointers.h"
-
-#ifdef realloc
-#undef realloc
-#endif
 
 namespace yasli{
 
@@ -60,7 +57,7 @@ public:
 
 private:
 	void alloc(std::size_t initialSize);
-	void realloc(std::size_t newSize);
+	void reallocate(std::size_t newSize);
 
 	std::size_t size_;
 	char* position_;

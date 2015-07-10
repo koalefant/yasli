@@ -1,8 +1,10 @@
 #pragma once
 #include <QObject>
 #include <QLineEdit>
+#include "QPropertyTree/QPropertyTree.h"
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyRowString.h"
+#include "PropertyTree/MathUtils.h"
 
 class InplaceWidgetString : public QObject, public property_tree::InplaceWidget
 {
@@ -22,6 +24,12 @@ public:
 		entry_->setText(initialValue_);
 		entry_->selectAll();
 		QObject::connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
+		connect(entry_.data(), &QLineEdit::textChanged, this, [this,tree]{
+			QFontMetrics fm(entry_->font());
+			int contentWidth = min((int)fm.width(entry_->text()) + 8, tree->width() - entry_->x());
+			if (contentWidth > entry_->width())
+				entry_->resize(contentWidth, entry_->height());
+		});
 	}
 	~InplaceWidgetString()
 	{
@@ -48,7 +56,7 @@ public:
 			if (!text.isEmpty())
 				text.toWCharArray(&str[0]);
 #endif
-			row_->setValue(&str[0]);
+			row_->setValue(&str[0], row_->searchHandle(), row_->typeId());
 			tree()->model()->rowChanged(row_);
 		}
 		else

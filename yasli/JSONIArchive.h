@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Config.h"
-#include "Pointers.h"
 #include "yasli/Archive.h"
 #include "Token.h"
 #include <memory>
@@ -43,6 +42,7 @@ public:
 	bool operator()(StringInterface& value, const char* name = "", const char* label = 0) override;
 	bool operator()(WStringInterface& value, const char* name = "", const char* label = 0) override;
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) override;
+	bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(KeyValueInterface& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(PointerInterface& ser, const char* name = "", const char* label = 0) override;
@@ -79,7 +79,8 @@ private:
 	std::auto_ptr<MemoryReader> reader_;
 	Token token_;
 	std::vector<char> unescapeBuffer_;
-	std::string filename_;
+	string filename_;
+	void* buffer_;
 };
 
 double parseFloat(const char* s);

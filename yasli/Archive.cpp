@@ -9,4 +9,3 @@
 
 #include "StdAfx.h"
 #include "yasli/Archive.h"
-#include <string>

@@ -64,6 +64,21 @@ struct Rect
 			x + w + r - (x + l),
 			y + h + b - (y + t));
 	}
+
+	Rect translated(int x, int y) const	{
+		Rect r = *this;
+		r.x += x;
+		r.y += y;
+		return r;
+	}
+
+	Rect united(const Rect& rhs) const {
+		int newLeft = x < rhs.x ? x :rhs.x;
+		int newTop = y < rhs.y ? y : rhs.y;
+		int newRight = x + w > rhs.x + rhs.w ? x + w : rhs.x + rhs.w;
+		int newBottom = y + h > rhs.y + rhs.h ? y + h : rhs.y + rhs.h;
+		return Rect(newLeft, newTop, newRight - newLeft, newBottom - newTop);
+	}
 };
 
 }

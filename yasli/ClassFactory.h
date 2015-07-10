@@ -24,31 +24,7 @@ namespace yasli{
 
 class Archive;
 
-class TypeDescription{
-public:
-	TypeDescription(TypeID typeID, const char* name, const char *label, std::size_t size)
-	: name_(name)
-	, label_(label)
-	, size_(size)
-	, typeID_(typeID)
-	{
-#if YASLI_NO_RTTI
-		const size_t bufLen = sizeof(typeID.typeInfo_->name);
-		strncpy(typeID.typeInfo_->name, name, bufLen - 1);
-		typeID.typeInfo_->name[bufLen - 1] = '\0';
-#endif
-	}
-	const char* name() const{ return name_; }
-	const char* label() const{ return label_; }
-	std::size_t size() const{ return size_; }
-	TypeID typeID() const{ return typeID_; }
 
-protected:
-	const char* name_;
-	const char* label_;
-	std::size_t size_;
-	TypeID typeID_;
-};
 
 class ClassFactoryManager{
 public:
@@ -109,6 +85,7 @@ public:
 			}
 		}
 		virtual BaseType* create() const = 0;
+		virtual TypeID typeID() const = 0;
 		const TypeDescription& description() const{ return *description_; }
 #if YASLI_NO_RTTI
 		void* vptr() const{ return vptr_; }
@@ -132,20 +109,27 @@ public:
 #endif
 
 	template<class Derived>
+	struct Annotation
+	{
+		Annotation(ClassFactoryBase* factory, const char* name, const char* value) { static_cast<ClassFactory<BaseType>*>(factory)->addAnnotation<Derived>(name, value); }
+	};
+
+	template<class Derived>
 	class Creator : public CreatorBase{
 	public:
-		Creator(const TypeDescription* description){
+		Creator(const TypeDescription* description, ClassFactory* factory = 0){
 			this->description_ = description;
 #if YASLI_NO_RTTI
 			// TODO: remove unnecessary static initialisation
 			Derived vptrProbe;
             CreatorBase::vptr_ = extractVPtr(&vptrProbe);
 #endif
-			ClassFactory::the().registerCreator(this);
+			if (!factory)
+				factory = &ClassFactory::the();
+			factory->registerCreator(this);
 		}
-		BaseType* create() const{
-			return new Derived();
-		}
+		BaseType* create() const override { return new Derived(); }
+		TypeID typeID() const override{ return yasli::TypeID::get<Derived>(); }
 	};
 
 	ClassFactory()
@@ -154,41 +138,30 @@ public:
 		ClassFactoryManager::the().registerFactory(baseType_, this);
 	}
 
-	typedef std::map<TypeID, CreatorBase*> TypeToCreatorMap;
+	typedef std::map<string, CreatorBase*> TypeToCreatorMap;
 
-	BaseType* create(TypeID derivedType) const
+	BaseType* create(const char* registeredName) const
 	{
-		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.find(derivedType);
+		if (!registeredName)
+			return 0;
+		if (registeredName[0] == '\0')
+			return 0;
+		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.find(registeredName);
 		if(it != typeToCreatorMap_.end())
 			return it->second->create();
-		else{
-			YASLI_ASSERT(!strlen(derivedType.name()), "ClassFactory::create: undefined type %s", derivedType.name());
-			return 0;
-		}
-	}
-
-	TypeID getTypeID(BaseType* ptr) const
-	{
-#if YASLI_NO_RTTI
-		if (ptr == 0)
-			return TypeID();
-		void* vptr = extractVPtr(ptr);
-        typename VPtrToCreatorMap::const_iterator it = vptrToCreatorMap_.find(vptr);
-		if (it == vptrToCreatorMap_.end())
-			return TypeID();
-		return it->second->description().typeID();
-#else
-		return TypeID(typeid(*ptr));
-#endif
-	}
-
-	size_t sizeOf(TypeID derivedType) const
-	{
-		typename TypeToCreatorMap::const_iterator it = typeToCreatorMap_.find(derivedType);
-		if(it != typeToCreatorMap_.end())
-			return it->second->description().size();
 		else
 			return 0;
+	}
+
+	virtual const char* getRegisteredTypeName(BaseType* ptr) const
+	{
+		if (ptr == 0)
+			return "";
+		void* vptr = extractVPtr(ptr);
+		typename VPtrToCreatorMap::const_iterator it = vptrToCreatorMap_.find(vptr);
+		if (it == vptrToCreatorMap_.end())
+			return "";
+		return it->second->description().name();
 	}
 
 	BaseType* createByIndex(int index) const
@@ -197,7 +170,7 @@ public:
 		return creators_[index]->create();
 	}
 
-	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label)
+	void serializeNewByIndex(Archive& ar, int index, const char* name, const char* label) override
 	{
 		YASLI_ESCAPE(size_t(index) < creators_.size(), return);
 		BaseType* ptr = creators_[index]->create();
@@ -205,31 +178,28 @@ public:
 		delete ptr;
 	}
 	// from ClassFactoryInterface:
-	size_t size() const{ return creators_.size(); }
-	const TypeDescription* descriptionByIndex(int index) const{
+	size_t size() const override{ return creators_.size(); }
+	const TypeDescription* descriptionByIndex(int index) const override{
 		if(size_t(index) >= int(creators_.size()))
 			return 0;
 		return &creators_[index]->description();
 	}
 
-	const TypeDescription* descriptionByType(TypeID type) const{
+	const TypeDescription* descriptionByRegisteredName(const char* name) const override{
 		const size_t numCreators = creators_.size();
 		for (size_t i = 0; i < numCreators; ++i) {
-			if (type == creators_[i]->description().typeID())
+			if (strcmp(creators_[i]->description().name(), name) == 0)
 				return &creators_[i]->description();
 		}
 		return 0;
 	}
+	// ^^^
 
-	TypeID findTypeByName(const char* name) const {
-		const size_t numCreators = creators_.size();
-		for (size_t i = 0; i < numCreators; ++i) {
-			const TypeDescription& description = creators_[i]->description();
-			if (strcmp(name, description.name()) == 0)
-				return description.typeID();
-		}
-		YASLI_ASSERT(!strlen(name), "ClassFactory::findTypeByName: undefined type %s", name);
-		return TypeID();
+	TypeID typeIDByRegisteredName(const char* registeredTypeName) const {
+		RegisteredNameToTypeID::const_iterator it = registeredNameToTypeID_.find(registeredTypeName);
+		if (it == registeredNameToTypeID_.end())
+			return TypeID();
+		return it->second;
 	}
 	// ^^^
 	
@@ -261,22 +231,49 @@ public:
 			current = current->next;
 		}
 	}
+
+	const char* findAnnotation(const char* registeredTypeName, const char* name) const override {
+		TypeID typeID = typeIDByRegisteredName(registeredTypeName);
+		AnnotationMap::const_iterator it = annotations_.find(typeID);
+		if (it == annotations_.end())
+			return "";
+		for (size_t i = 0; i < it->second.size(); ++i) {
+			if (strcmp(it->second[i].first, name) == 0)
+				return it->second[i].second;
+		}
+		return "";
+	}
+
 protected:
-	void registerCreator(CreatorBase* creator){
-		typeToCreatorMap_[creator->description().typeID()] = creator;
+	virtual void registerCreator(CreatorBase* creator){
+		if (!typeToCreatorMap_.insert(std::make_pair(creator->description().name(), creator)).second) {
+			YASLI_ASSERT(0 && "Type registered twice in the same factory. Was YASLI_CLASS_NAME put into header file by mistake");
+		}
 		creators_.push_back(creator);
-#if YASLI_NO_RTTI
+		registeredNameToTypeID_[creator->description().name()] = creator->typeID();
 		vptrToCreatorMap_[creator->vptr()] =  creator;
-#endif
+	}
+
+	template<class T>
+	void addAnnotation(const char* name, const char* value) {
+		addAnnotation(yasli::TypeID::get<T>(), name, value);
+	}
+
+	virtual void addAnnotation(const yasli::TypeID& id, const char* name, const char* value) {
+		annotations_[id].push_back(std::make_pair(name, value));
 	}
 
 	TypeToCreatorMap typeToCreatorMap_;
 	std::vector<CreatorBase*> creators_;
 
-#if YASLI_NO_RTTI
 	typedef std::map<void*, CreatorBase*> VPtrToCreatorMap;
 	VPtrToCreatorMap vptrToCreatorMap_;
-#endif
+
+	typedef std::map<string, TypeID> RegisteredNameToTypeID;
+	RegisteredNameToTypeID registeredNameToTypeID_;
+
+	typedef std::map<TypeID, std::vector<std::pair<const char*, const char*> > > AnnotationMap;
+	AnnotationMap annotations_;
 };
 
 }
@@ -287,24 +284,36 @@ protected:
 #define YASLI_CLASS_NULL_HELPER(Counter, BaseType, name) \
 	static bool YASLI_JOIN(baseType, _NullRegistered_, _,Counter) = yasli::ClassFactory<BaseType>::the().setNullLabel(name); \
 
-
 #define YASLI_CLASS_NULL(BaseType, name) \
 	YASLI_CLASS_NULL_HELPER(__COUNTER__, BaseType, name)
 
 #define YASLI_CLASS(BaseType, Type, label) \
-	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label, sizeof(Type)); \
+	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label); \
 	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(&Type##BaseType##_DerivedDescription); \
 	int dummyForType_##Type##BaseType;
 
 #define YASLI_CLASS_NAME_HELPER(Counter, BaseType, Type, name, label) \
-	static yasli::TypeDescription YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \
+	static yasli::TypeDescription YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)(yasli::TypeID::get<Type>(), name, label); \
 	static const yasli::ClassFactory<BaseType>::Creator<Type> YASLI_JOIN(globalCreator,__LINE__,_,Counter)(&YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)); \
 
 #define YASLI_CLASS_NAME(BaseType, Type, name, label) \
 	YASLI_CLASS_NAME_HELPER(__COUNTER__, BaseType, Type, name, label)
 
+#define YASLI_CLASS_NAME_FOR_FACTORY(Factory, BaseType, Type, name, label) \
+	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), name, label); \
+	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(&Type##BaseType##_DerivedDescription, &(Factory));
+
+#define YASLI_CLASS_ANNOTATION(BaseType, Type, attributeName, attributeValue) \
+	static yasli::ClassFactory<BaseType>::Annotation<Type> Type##BaseType##_Annotation(&yasli::ClassFactory<BaseType>::the(), attributeName, attributeValue);
+
+#define YASLI_CLASS_ANNOTATION_FOR_FACTORY(factory, BaseType, Type, attributeName, attributeValue) \
+	static yasli::ClassFactory<BaseType>::Annotation<Type> Type##BaseType##_Annotation(&factory, attributeName, attributeValue);
+
 #define YASLI_FORCE_CLASS(BaseType, Type) \
 	extern int dummyForType_##Type##BaseType; \
 	int* dummyForTypePtr_##Type##BaseType = &dummyForType_##Type##BaseType + 1;
 
+#if YASLI_INLINE_IMPLEMENTATION
+#include "ClassFactory.cpp"
+#endif
 

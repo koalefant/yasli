@@ -22,8 +22,6 @@
 #include <QFileDialog>
 #include <QIcon>
 
-using std::string;
-
 static const char* getExtension(const char* path)
 {
 	const char* ext = strrchr(path, '.');
@@ -32,34 +30,34 @@ static const char* getExtension(const char* path)
 	return ext;
 }
 
-static string removeExtension(const char* filename)
+static yasli::string removeExtension(const char* filename)
 {
 	const char* ext = getExtension(filename);
-	return string(filename, ext);
+	return yasli::string(filename, ext);
 }
 
-string extractExtensionFromFilter(const char* mask)
+yasli::string extractExtensionFromFilter(const char* mask)
 {
 	const char* start = strchr(mask, '(');
 	const char* end = strchr(mask, ')');
 	if (!start || !end)
-		return string();
+		return yasli::string();
 	++start;
 	const char* ext = strchr(mask, '.');
 	if (!ext)
-		return string();
+		return yasli::string();
 	if (ext > end)
-		return string();
+		return yasli::string();
 	++ext;
 	const char* ext_end = ext;
 	while (*ext_end && *ext_end != ' ' && *ext_end != ')' && ext_end < end) {
 		if (*ext_end == '*' || *ext_end == '?')
-			return string();
+			return yasli::string();
 		++ext_end;
 	}
 	if (ext_end != end)
 		++ext_end;
-	return string(ext, ext_end);
+	return yasli::string(ext, ext_end);
 }
 
 using yasli::FileOpen;
@@ -69,9 +67,9 @@ public:
 
 	bool isLeaf() const override{ return true; }
 
-	bool onActivate(PropertyTree* tree, bool force) override
+	bool onActivate(const PropertyActivationEvent& e) override
 	{
-		QFileDialog dialog(tree->ui()->qwidget());
+		QFileDialog dialog(e.tree->ui()->qwidget());
 		dialog.setAcceptMode(QFileDialog::AcceptOpen);
 		dialog.setFileMode(QFileDialog::ExistingFile);
 		if (labelUndecorated())
@@ -99,13 +97,13 @@ public:
             dialog.selectFile(existingFile);
 
 		if (dialog.exec() && !dialog.selectedFiles().isEmpty()) {
-			tree->model()->rowAboutToBeChanged(this);
+			e.tree->model()->rowAboutToBeChanged(this);
 			QString filename = dialog.selectedFiles()[0];
 			QString relativeFilename = directory.relativeFilePath(filename);
 			value().path = relativeFilename.toLocal8Bit().data();
 			if (value().flags & FileOpen::STRIP_EXTENSION)
 				value().path = removeExtension(value().path.c_str());
-			tree->model()->rowChanged(this);
+			e.tree->model()->rowChanged(this);
 		}
 		return true;
 	}
@@ -129,9 +127,9 @@ public:
 	}
 
 	int buttonCount() const override{ return 1; }
-	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
+	virtual property_tree::Icon buttonIcon(const PropertyTree* tree, int index) const override{ 
 		#include "PropertyTree/file_open.xpm"
-		return yasli::IconXPM(file_open_xpm);
+		return property_tree::Icon(yasli::IconXPM(file_open_xpm));
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 
@@ -145,7 +143,10 @@ DECLARE_SEGMENT(PropertyRowFileOpen)
 
 void FileOpenMenuHandler::onMenuActivate()
 {
-	self->onActivate(tree, false);
+	PropertyActivationEvent e;
+	e.reason = e.REASON_CONTEXT_MENU;
+	e.tree = tree;
+	self->onActivate(e);
 }
 
 void FileOpenMenuHandler::onMenuClear()

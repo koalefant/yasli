@@ -25,6 +25,12 @@ typedef size_t(*ContainerResizeFunc)(void*, size_t size);
 typedef size_t(*ContainerSizeFunc)(void*);
 
 // Struct serializer. 
+//
+// This type is used to pass needed struct/class type information through abstract interface.
+// Most importantly it captures:
+// - pointer to object
+// - reference to serialize method (indirectly through pointer to static func.)
+// - TypeID
 class Serializer{/*{{{*/
 	friend class Archive;
 public:
@@ -69,20 +75,40 @@ public:
 		serializeFunc_ = &Serializer::serializeRaw<T>;
 	}
 
+	// This constructs Serializer from an object that doesn't have Serialize method. 
+	// Such Serializer can not be serialized but conveys object reference and type 
+	// information that is needed for Property-archives. Used for decorators.
+	template<class T>
+	static Serializer forEdit(const T& object)
+	{
+		Serializer r;
+		r.type_ = TypeID::get<T>();
+		r.object_ = (void*)&object;
+		r.size_ = sizeof(T);
+		r.serializeFunc_ = 0;
+		return r;
+	}
+
 	template<class T>
 	T* cast() const{ return type_ == TypeID::get<T>() ? (T*)object_ : 0; }
 	bool operator()(Archive& ar) const;
+	bool operator()(Archive& ar, const char* name, const char* label) const;
 	operator bool() const{ return object_ && serializeFunc_; }
 	bool operator==(const Serializer& rhs) { return object_ == rhs.object_ && serializeFunc_ == rhs.serializeFunc_; }
 	bool operator!=(const Serializer& rhs) { return !operator==(rhs); }
 	void* pointer() const{ return object_; }
+	void setPointer(void* p) { object_ = p; }
 	TypeID type() const{ return type_; }
+	void setType(const TypeID& type) { type_ = type; }
 	size_t size() const{ return size_; }
 	SerializeStructFunc serializeFunc() const{ return serializeFunc_; }
 
 	template<class T>
 	static bool serializeRaw(void* rawPointer, Archive& ar){
 		YASLI_ESCAPE(rawPointer, return false);
+		// If you're getting compile error here, most likely, you have one of the following situations:
+		// - The type you're trying to serialize doesn't have "serialize" _method_ implemented.
+		// - Type is supposed to be serialized with non-member serialize override function and this function is out of scope.
 		((T*)(rawPointer))->YASLI_SERIALIZE_METHOD(ar);
 		return true;
 	}
@@ -97,8 +123,12 @@ typedef std::vector<Serializer> Serializers;
 
 // ---------------------------------------------------------------------------
 
+// This type is used to generalize access to specific container types.
+// It is used by concrete Archive implementations.
 class ContainerInterface{
 public:
+	virtual ~ContainerInterface() {}
+
 	virtual size_t size() const = 0;
 	virtual size_t resize(size_t size) = 0;
 	virtual bool isFixedSize() const{ return false; }
@@ -159,14 +189,20 @@ private:
 };
 
 class ClassFactoryBase;
+// Generialized interface over owning polymorphic pointers.
+// Used by concrete Archive implementations.
 class PointerInterface
 {
 public:
-	virtual TypeID type() const = 0;
-	virtual void create(TypeID type) const = 0;
+	virtual ~PointerInterface() {}
+
+	virtual const char* registeredTypeName() const = 0;
+	virtual void create(const char* registeredTypeName) const = 0;
 	virtual TypeID baseType() const = 0;
 	virtual Serializer serializer() const = 0;
 	virtual void* get() const = 0;
+	virtual const void* handle() const = 0;
+	virtual TypeID pointerType() const = 0;
 	virtual ClassFactoryBase* factory() const = 0;
 	
 	void YASLI_SERIALIZE_METHOD(Archive& ar) const;
@@ -175,20 +211,26 @@ public:
 class StringInterface
 {
 public:
+	virtual ~StringInterface() {}
+
 	virtual void set(const char* value) = 0;
 	virtual const char* get() const = 0;
+	virtual const void* handle() const = 0;
+	virtual TypeID type() const = 0;
 };
 class WStringInterface
 {
 public:
+	virtual ~WStringInterface() {}
+
 	virtual void set(const wchar_t* value) = 0;
 	virtual const wchar_t* get() const = 0;
+	virtual const void* handle() const = 0;
+	virtual TypeID type() const = 0;
 };
 
 struct TypeIDWithFactory;
 bool serialize(Archive& ar, TypeIDWithFactory& value, const char* name, const char* label);
 
 }
-
-
 // vim:ts=4 sw=4:

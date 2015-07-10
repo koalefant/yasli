@@ -18,13 +18,15 @@ class PropertyRowBool : public PropertyRow
 public:
 	PropertyRowBool();
 	bool assignToPrimitive(void* val, size_t size) const override;
-	void setValue(bool value) { value_ = value; }
+	bool assignToByPointer(void* instance, const yasli::TypeID& type) const override;
+	void setValue(bool value, const void* handle, const yasli::TypeID& typeId) { value_ = value; serializer_.setPointer((void*)handle); serializer_.setType(yasli::TypeID::get<bool>()); }
 
 	void redraw(IDrawContext& context) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 
-	bool onActivate(PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent& ev) override;
+	bool onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev) override;
 	DragCheckBegin onMouseDragCheckBegin() override;
 	bool onMouseDragCheck(PropertyTree* tree, bool value) override;
 	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }

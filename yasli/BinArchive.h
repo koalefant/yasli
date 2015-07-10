@@ -137,7 +137,7 @@ private:
 		  template<class T>
 		  void read(T& x){ read(&x, sizeof(x)); }
 
-		  void read(std::string& s)
+		  void read(string& s)
 		  {
 			  if(curr_ + strlen(curr_) < end_){
 				s = curr_;
@@ -148,7 +148,7 @@ private:
 				  curr_ = end_;
 			  }
 		  }
-		  void read(std::wstring& s)
+		  void read(wstring& s)
 		  {
 			  // make sure that accessed wchar_t is always aligned
 			  const char* strEnd = curr_;
@@ -162,7 +162,7 @@ private:
 
 			  s.resize(len);
 			  if (len)
-				  memcpy(&s[0], curr_, len * sizeof(wchar_t));
+				  memcpy((void*)&s[0], curr_, len * sizeof(wchar_t));
 
 			  curr_ = curr_ + (len + 1) * sizeof(wchar_t);
 			  if (curr_ > end_){

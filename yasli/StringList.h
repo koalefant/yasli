@@ -12,39 +12,62 @@
 #include <string.h>
 #include "yasli/Assert.h"
 #include "yasli/Config.h"
+#include "yasli/TypeID.h"
 
 namespace yasli{
 
 class Archive;
 class StringListStatic : public StringListStaticBase{
 public:
-    int find(const char* value) const{
+	static StringListStatic& emptyValue()
+	{
+		static StringListStatic e;
+		return e;
+	}
+
+	int find(const char* value) const{
 		int numItems = int(size());
 		for(int i = 0; i < numItems; ++i){
-            if(strcmp((*this)[i], value) == 0)
-                return i;
-        }
-		YASLI_ASSERT(0, "Value not found: %s", value);
-        return 0;
-    }
-    static StringListStatic EMPTY;
+			if(strcmp((*this)[i], value) == 0)
+				return i;
+		}
+		YASLI_ASSERT_STR(0 && "Value not found", value);
+		return 0;
+	}
 };
 
 class StringListStaticValue{
 public:
+	StringListStaticValue()
+	: stringList_(&StringListStatic::emptyValue())
+	, index_(-1)
+	{
+        handle_ = this;
+	}
+
 	StringListStaticValue(const StringListStaticValue& original)
 	: stringList_(original.stringList_)
 	, index_(original.index_)
 	{
 	}
-    explicit StringListStaticValue(const StringListStatic& stringList = StringListStatic::EMPTY, int value = 0)
+    StringListStaticValue(const StringListStatic& stringList, int value)
     : stringList_(&stringList)
     , index_(value)
     {
+        handle_ = this;
     }
-    StringListStaticValue(const StringListStatic& stringList, const char* value)
+    StringListStaticValue(const StringListStatic& stringList, int value, const void* handle, const yasli::TypeID& type)
+    : stringList_(&stringList)
+    , index_(value)
+    , handle_(handle)
+    , type_(type)
+    {
+    }
+    StringListStaticValue(const StringListStatic& stringList, const char* value, const void* handle, const yasli::TypeID& type)
     : stringList_(&stringList)
     , index_(stringList.find(value))
+    , handle_(handle)
+    , type_(type)
     {
     }
     StringListStaticValue& operator=(const char* value){
@@ -68,6 +91,8 @@ public:
 			return "";
     }
     int index() const{ return index_; }
+    const void* handle() const{ return handle_; }
+    yasli::TypeID type() const { return type_; }
     const StringListStatic& stringList() const{ return *stringList_; }
     template<class Archive>
     void YASLI_SERIALIZE_METHOD(Archive& ar) {
@@ -76,6 +101,8 @@ public:
 protected:
     const StringListStatic* stringList_;
     int index_;
+    const void* handle_;
+    yasli::TypeID type_;
 };
 
 class StringList: public StringListBase{
@@ -84,6 +111,16 @@ public:
     StringList(const StringList& rhs){
         *this  = rhs;
     }
+	StringList& operator=(const StringList& rhs)
+	{
+		// As StringList crosses dll boundaries it is important to copy strings
+		// rather than reference count them to be sure that stored CryString uses
+		// proper allocator.
+		resize(rhs.size());
+		for (size_t i = 0; i < size_t(size()); ++i)
+			(*this)[i] = rhs[i].c_str();
+		return *this;
+	}
     StringList(const StringListStatic& rhs){
         const int size = int(rhs.size());
         resize(size);
@@ -99,73 +136,105 @@ public:
         }
         return npos;
     }
-    static StringList EMPTY;
 };
 
 class StringListValue{
 public:
-    explicit StringListValue(const StringListStaticValue &value)
+	explicit StringListValue(const StringListStaticValue &value)
 	{
-        stringList_.insert( stringList_.end(), value.stringList().begin(), value.stringList().end() );
-        index_ = value.index();
+		stringList_.resize(value.stringList().size());
+		for (size_t i = 0; i < size_t(stringList_.size()); ++i)
+			stringList_[i] = value.stringList()[i];
+		index_ = value.index();
 	}
-    StringListValue(const StringListValue &value)
+	StringListValue(const StringListValue &value)
 	{
 		stringList_ = value.stringList_;
-        index_ = value.index_;
+		index_ = value.index_;
 	}
-    explicit StringListValue(const StringList& stringList = StringList::EMPTY, int value = StringList::npos)
-    : stringList_(stringList)
-    , index_(value)
-    {
-    }
-    StringListValue(const StringList& stringList, const char* value)
-    : stringList_(stringList)
-    , index_(stringList.find(value))
-    {
-        YASLI_ASSERT(index_ != StringList::npos);
-    }
-    StringListValue(const StringListStatic& stringList, const char* value)
-    : stringList_(stringList)
-    , index_(stringList.find(value))
-    {
-        YASLI_ASSERT(index_ != StringList::npos);
-    }
-    StringListValue& operator=(const char* value){
-        index_ = stringList_.find(value);
+	StringListValue()
+	: index_(StringList::npos)
+	{
+		handle_ = this;
+	}
+	StringListValue(const StringList& stringList, int value)
+	: stringList_(stringList)
+	, index_(value)
+	{
+		handle_ = this;
+	}
+	StringListValue(const StringList& stringList, int value, const void* handle, const yasli::TypeID& typeId)
+	: stringList_(stringList)
+	, index_(value)
+	, handle_(handle)
+	, type_(typeId)
+	{
+	}
+	StringListValue(const StringList& stringList, const char* value)
+	: stringList_(stringList)
+	, index_(stringList.find(value))
+	{
+		handle_ = this;
+		YASLI_ASSERT(index_ != StringList::npos);
+	}
+	StringListValue(const StringList& stringList, const char* value, const void* handle, const yasli::TypeID& typeId)
+	: stringList_(stringList)
+	, index_(stringList.find(value))
+	, handle_(handle)
+	, type_(typeId)
+	{
+		YASLI_ASSERT(index_ != StringList::npos);
+	}
+	StringListValue(const StringListStatic& stringList, const char* value)
+	: stringList_(stringList)
+	, index_(stringList.find(value))
+	{
+		handle_ = this;
+		YASLI_ASSERT(index_ != StringList::npos);
+	}
+	StringListValue& operator=(const char* value){
+		index_ = stringList_.find(value);
 		return *this;
-    }
-    StringListValue& operator=(int value){
-		YASLI_ASSERT(value >= 0 && std::size_t(value) < stringList_.size());
-        index_ = value;
+	}
+	StringListValue& operator=(int value){
+		YASLI_ASSERT(value >= 0 && size_t(value) < size_t(stringList_.size()));
+		index_ = value;
 		return *this;
-    }
-    const char* c_str() const{
-        if(index_ >= 0 && std::size_t(index_) < stringList_.size())
+	}
+	const char* c_str() const{
+		if(index_ >= 0 && size_t(index_) < size_t(stringList_.size()))
 			return stringList_[index_].c_str();
 		else
 			return "";
-    }
-    int index() const{ return index_; }
-    const StringList& stringList() const{ return stringList_; }
-    template<class Archive>
-    void YASLI_SERIALIZE_METHOD(Archive& ar) {
-        ar(index_, "index");
+	}
+	int index() const{ return index_; }
+	const void* handle() const { return handle_; }
+	yasli::TypeID type() const { return type_; }
+	const StringList& stringList() const{ return stringList_; }
+	template<class Archive>
+	void Serialize(Archive& ar) {
+		ar(index_, "index");
 		ar(stringList_, "stringList");
-    }
+	}
 protected:
-    StringList stringList_;
-    int index_;
+	StringList stringList_;
+	int index_;
+	const void* handle_;
+	yasli::TypeID type_;
 };
 
 class Archive;
 
 void splitStringList(StringList* result, const char *str, char sep);
-void joinStringList(std::string* result, const StringList& stringList, char sep);
-void joinStringList(std::string* result, const StringListStatic& stringList, char sep);
+void joinStringList(string* result, const StringList& stringList, char sep);
+void joinStringList(string* result, const StringListStatic& stringList, char sep);
 
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const char* name, const char* label);
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label);
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label);
 
 }
+
+#if YASLI_INLINE_IMPLEMENTATION
+#include "StringList.cpp"
+#endif

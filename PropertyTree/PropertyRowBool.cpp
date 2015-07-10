@@ -14,7 +14,7 @@
 #include "yasli/ClassFactory.h"
 #include "Serialization.h"
 
-YASLI_CLASS(PropertyRow, PropertyRowBool, "bool");
+YASLI_CLASS_NAME(PropertyRow, PropertyRowBool, "PropertyRowBool", "bool");
 
 PropertyRowBool::PropertyRowBool()
 : value_(false)
@@ -28,21 +28,42 @@ bool PropertyRowBool::assignToPrimitive(void* object, size_t size) const
 	return true;
 }
 
+bool PropertyRowBool::assignToByPointer(void* instance, const yasli::TypeID& type) const
+{
+	return assignToPrimitive(instance, type.sizeOf()); 
+}
+
 void PropertyRowBool::redraw(IDrawContext& context)
 {
 	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
-bool PropertyRowBool::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowBool::onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev)
 {
-	if (!this->userReadOnly()) {
-		tree->model()->rowAboutToBeChanged(this);
-		value_ = !value_;
-		tree->model()->rowChanged(this);
+	if (ev->key() == property_tree::KEY_SPACE)
+	{
+		PropertyActivationEvent e;
+		e.tree = tree;
+		e.reason = e.REASON_KEYBOARD;
+		onActivate(e);
 		return true;
 	}
-	else
-		return false;
+
+	return PropertyRow::onKeyDown(tree, ev);
+}
+
+bool PropertyRowBool::onActivate(const PropertyActivationEvent& e)
+{
+	if (e.reason != e.REASON_RELEASE)
+	{
+		if (!this->userReadOnly()) {
+			e.tree->model()->rowAboutToBeChanged(this);
+			value_ = !value_;
+			e.tree->model()->rowChanged(this);
+			return true;
+		}
+	}
+	return false;
 }
 
 DragCheckBegin PropertyRowBool::onMouseDragCheckBegin() 
@@ -70,5 +91,5 @@ void PropertyRowBool::serializeValue(yasli::Archive& ar)
 
 int PropertyRowBool::widgetSizeMin(const PropertyTree* tree) const
 {
-	return tree->_defaultRowHeight();
+	return int(tree->_defaultRowHeight() * 0.9f);
 }

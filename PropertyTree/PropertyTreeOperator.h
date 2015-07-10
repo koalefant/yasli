@@ -29,8 +29,9 @@ struct TreePathLeaf
 	bool operator!=(const TreePathLeaf& rhs) const{
 		return index != rhs.index;
 	}
-	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 };
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, TreePathLeaf& value, const char* name, const char* label);
+
 typedef std::vector<TreePathLeaf> TreePath;
 typedef std::vector<TreePath> TreePathes;
 

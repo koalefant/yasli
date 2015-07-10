@@ -5,10 +5,8 @@
 class PropertyRowFileOpen;
 class PropertyTree;
 
-struct FileOpenMenuHandler : QObject, PropertyRowMenuHandler
+struct FileOpenMenuHandler : PropertyRowMenuHandler
 {
-Q_OBJECT
-public:
 	PropertyRowFileOpen* self;
 	PropertyTree* tree;
 
@@ -18,9 +16,8 @@ public:
 	{
 	}
 
-public slots:
 	void onMenuActivate();
 	void onMenuClear();
 };
 
-std::string extractExtensionFromFilter(const char* fileSelectorFilter);
+yasli::string extractExtensionFromFilter(const char* fileSelectorFilter);

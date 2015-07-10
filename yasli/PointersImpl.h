@@ -28,16 +28,16 @@ public:
 	: ptr_(ptr)
 	{}
 
-	TypeID type() const{
+	const char* registeredTypeName() const{
 		if(ptr_)
-			return ClassFactory<T>::the().getTypeID(ptr_.get());
+			return ClassFactory<T>::the().getRegisteredTypeName(ptr_.get());
 		else
-			return TypeID();
+			return "";
 	}
-	void create(TypeID type) const{
+	void create(const char* typeName) const{
 		YASLI_ASSERT(!ptr_ || ptr_->refCount() == 1);
-		if(type)
-			ptr_.reset(ClassFactory<T>::the().create(type));
+		if(typeName && typeName[0] != '\0')
+			ptr_.reset(factory()->create(typeName));
 		else
 			ptr_.reset((T*)0);
 	}
@@ -48,7 +48,13 @@ public:
 	void* get() const{
 		return reinterpret_cast<void*>(ptr_.get());
 	}
-	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
+	const void* handle() const{
+		return &ptr_;
+	}
+	TypeID pointerType() const{
+		return TypeID::get<SharedPtr<T>>();
+	}
+	virtual ClassFactory<T>* factory() const{ return &ClassFactory<T>::the(); }
 protected:
 	SharedPtr<T>& ptr_;
 };

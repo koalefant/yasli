@@ -8,26 +8,27 @@
  */
 
 #pragma once
-#include "PropertyRow.h"
-class QIcon;
-
-#include "yasli/decorators/IconXPM.h"
+#include <PropertyTree/PropertyRow.h>
+#include <PropertyTree/IDrawContext.h>
 
 class PropertyRowField : public PropertyRow
 {
 public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-	int widgetSizeMin(const PropertyTree* tree) const override{ 
-		if (userWidgetSize() >= 0)
-			return userWidgetSize();
-		else
-			return 40;
-	}
+	int widgetSizeMin(const PropertyTree* tree) const override;
 
 	virtual int buttonCount() const{ return 0; }
-	virtual yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const{ return yasli::IconXPM(); }
+	virtual property_tree::Icon buttonIcon(const PropertyTree* tree, int index) const;
 	virtual bool usePathEllipsis() const { return false; }
+	virtual bool onActivateButton(int buttonIndex, const PropertyActivationEvent& e) { return false; }
+	int hitButton(const PropertyTree* tree, const Point& p) const;
 
 	void redraw(IDrawContext& context) override;
+	bool onActivate(const PropertyActivationEvent& e) override;
+protected:
+	Rect fieldRect(const PropertyTree* tree) const;
+	void drawButtons(int* offset);
+
+	mutable RowWidthCache widthCache_;
 };
 

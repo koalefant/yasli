@@ -9,6 +9,7 @@
 
 #include "StdAfx.h"
 #include "yasli/Assert.h"
+#include "yasli/Config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -44,10 +45,12 @@ void MemoryWriter::alloc(size_t initialSize)
     position_ = memory_;
 }
 
-void MemoryWriter::realloc(size_t newSize)
+void MemoryWriter::reallocate(size_t newSize)
 {
     YASLI_ASSERT(newSize > size_);
     size_t pos = position();
+    // Supressing the warning as we generally don't handle malloc errors.
+    // cppcheck-suppress memleakOnRealloc
     memory_ = (char*)::realloc(memory_, newSize + 1);
     YASLI_ASSERT(memory_ != 0);
     position_ = memory_ + pos;
@@ -111,7 +114,7 @@ MemoryWriter& MemoryWriter::operator<<(i8 value)
     return operator<<((const char*)buffer);
 }
 
-inline void cutRightZeros(const char* str)
+inline void cutTrailingZeros(const char* str)
 {
 	for(char* p = (char*)str + strlen(str) - 1; p >= str; --p)
 		if(*p == '0')
@@ -128,12 +131,11 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 
 void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 {
-#ifdef ANDROID_NDK
+#if YASLI_NO_FCVT
 	char buf[64] = { 0 };
 	sprintf(buf, "%f", value);
 	operator<<(buf);
 #else
-	// YASLI_ASSERT(!isnan(value)); disabled, because physics data is not always initialized
 
 	int point = 0;
 	int sign = 0;
@@ -148,7 +150,7 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
     if(sign != 0)
         write("-");
     if(point <= 0){
-		cutRightZeros(buf);
+		cutTrailingZeros(buf);
 		if (strlen(buf)){
 			write("0.");
 			while (point < 0){
@@ -165,9 +167,9 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
         write(buf, point);
         write(".");
 		if (allowTrailingPoint)
-			cutRightZeros(buf + point);
+			cutTrailingZeros(buf + point);
 		else if (buf[point] != '\0')
-			cutRightZeros(buf + point + 1);
+			cutTrailingZeros(buf + point + 1);
 		operator<<(buf + point);
     }
 #endif
@@ -217,7 +219,7 @@ bool MemoryWriter::write(const void* data, size_t size)
         if(!reallocate_)
             return false;
 
-        realloc(size_ * 2);
+        reallocate(size_ * 2);
         write(data, size);
     }
     YASLI_ASSERT(position() < this->size());
@@ -232,7 +234,7 @@ void MemoryWriter::write(char c)
     }
     else{
 		YASLI_ESCAPE(reallocate_, return);
-        realloc(size_ * 2);
+        reallocate(size_ * 2);
         write(c);
     }
     YASLI_ASSERT(position() < this->size());

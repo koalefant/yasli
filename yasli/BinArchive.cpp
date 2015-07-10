@@ -62,7 +62,7 @@ bool BinOArchive::save(const char* filename)
 inline void BinOArchive::openNode(const char* name, bool size8)
 {
 #ifdef YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
-	YASLI_ASSERT(blockTypes_.back() == UNDEFINED || blockTypes_.back() == (!strlen(name) ? POD : NON_POD), "Mixing empty and non-empty names is dangerous for BinArchives");
+	YASLI_ASSERT_STR(blockTypes_.back() == UNDEFINED || blockTypes_.back() == (!strlen(name) ? POD : NON_POD), "Mixing empty and non-empty names is dangerous for BinArchives");
 	blockTypes_.back() = (!strlen(name) ? POD : NON_POD);
 	blockTypes_.push_back(UNDEFINED);
 #endif
@@ -287,17 +287,14 @@ bool BinOArchive::operator()(PointerInterface& ptr, const char* name, const char
 {
 	openNode(name, false);
 
-
-	TypeID derived = ptr.type();
-	const TypeDescription* desc = 0;
-	const char* typeName = "";
-	if (derived) {
-		desc = ptr.factory()->descriptionByType(derived);
-		typeName = desc->name();
-		YASLI_ASSERT(desc != 0 && "Writing unregistered class. Use YASLI_CLASS macro for registration.");
+	const char* typeName = ptr.registeredTypeName();
+	if (!typeName)
+		typeName = "";
+	if (typeName[0] == '\0' && ptr.get()) {
+		YASLI_ASSERT(0 && "Writing unregistered class. Use YASLI_CLASS_NAME macro for registration.");
 	}
 
-    TypeID baseType = ptr.baseType();
+	TypeID baseType = ptr.baseType();
 
 	if(ptr.get()){
 		stream_ << typeName;
@@ -307,8 +304,8 @@ bool BinOArchive::operator()(PointerInterface& ptr, const char* name, const char
 	else
 		stream_.write(char(0));
 
-    closeNode(name, false);
-    return true;
+	closeNode(name, false);
+	return true;
 }
 
 
@@ -351,10 +348,10 @@ bool BinIArchive::load(const char* filename)
 
 bool BinIArchive::open(const char* buffer, size_t size)
 {
-    if(!buffer)
-        return false;
-    if(size < sizeof(unsigned int))
-        return false;
+	if(!buffer)
+		return false;
+	if(size < sizeof(unsigned int))
+		return false;
 	if(*(unsigned*)(buffer) != BIN_MAGIC)
 		return false;
 	buffer += sizeof(unsigned int);
@@ -663,17 +660,13 @@ bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char
 	if(strlen(name) && !openNode(name))
 		return false;
 
-	string& typeName = stringBuffer_;
-	typeName.clear();
+	string typeName;
 	read(typeName);
-	TypeID type;
-	if(!typeName.empty())
-		type = ptr.factory()->findTypeByName(typeName.c_str());
-	if(ptr.type() && (!type || (type != ptr.type())))
-		ptr.create(TypeID()); // 0
+	if(ptr.get() && (typeName.empty() || strcmp(typeName.c_str(), ptr.registeredTypeName()) != 0))
+		ptr.create(""); // 0
 
-	if(type && !ptr.get())
-		ptr.create(type);
+	if(!typeName.empty() && !ptr.get())
+		ptr.create(typeName.c_str());
 
 	if(Serializer ser = ptr.serializer())
 		ser(*this);

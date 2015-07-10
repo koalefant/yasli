@@ -21,6 +21,9 @@ set(SOURCES
 	../PropertyTree/ConstStringList.cpp
 	../PropertyTree/ConstStringList.h
 	../PropertyTree/Factory.h
+	../PropertyTree/IDrawContext.h
+	../PropertyTree/IMenu.h
+	../PropertyTree/IUIFacade.h
 	../PropertyTree/MathUtils.h
 	../PropertyTree/PropertyIArchive.cpp
 	../PropertyTree/PropertyIArchive.h
@@ -72,6 +75,7 @@ set(SOURCES
 	PropertyRowFileSave.cpp
 	QDrawContext.cpp
 	QDrawContext.h
+	QPropertyTree.qrc
 	QPropertyTree.cpp
 	QPropertyTree.h
 	QUIFacade.cpp

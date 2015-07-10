@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "yasli/STL.h"
+#include "ValidatorBlock.h"
 #include "PropertyOArchive.h"
 #include "PropertyTreeModel.h"
 #include "PropertyTree.h"
@@ -27,17 +28,20 @@
 #include "yasli/BitVector.h"
 #include "yasli/ClassFactory.h"
 #include "yasli/StringList.h"
+#include "yasli/Callback.h"
 using yasli::TypeID;
 
 
-PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
-: Archive(OUTPUT | EDIT)
+PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root, ValidatorBlock* validator)
+: Archive(OUTPUT | EDIT | VALIDATION | DOCUMENTATION)
 , model_(model)
 , currentNode_(root)
 , lastNode_(0)
 , updateMode_(false)
 , defaultValueCreationMode_(false)
 , rootNode_(root)
+, outlineMode_(false)
+, validator_(validator)
 {
 	stack_.push_back(Level());
 	YASLI_ASSERT(model != 0);
@@ -50,13 +54,15 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root)
 
 
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType)
-: Archive(OUTPUT | EDIT)
+: Archive(OUTPUT | EDIT | VALIDATION | DOCUMENTATION)
 , model_(model)
 , currentNode_(0)
 , lastNode_(0)
 , updateMode_(false)
 , defaultValueCreationMode_(forDefaultType)
 , rootNode_(0)
+, outlineMode_(false)
+, validator_(0)
 {
 	rootNode_ = new PropertyRow();
 	rootNode_->setName("root");
@@ -153,22 +159,21 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		const char* oldLabel = 0;
 		if(oldRow){
 			oldRow->setMultiValue(false);
-			oldLabel = oldRow->label();
 			newRow = static_cast<RowType*>(oldRow);
 			level.oldRows[rowIndex] = 0;
 			level.rowIndex = rowIndex + 1;
+			oldLabel = oldRow->label();
+			newRow->setNames(name, label, typeName);
 		}
 		else{
-			//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
 			PropertyRowFactory& factory = PropertyRowFactory::the();
 			newRow = static_cast<RowType*>(factory.create(typeName));
 			if(!newRow)
 				newRow.reset(new RowType());
-
+			newRow->setNames(name, label, typeName);
 			if(model_->expandLevels() != 0 && (model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level()))
 				newRow->_setExpanded(true);
 		}
-		newRow->setNames(name, label, typeName);
 		currentNode_->add(newRow);
 		if (!oldRow || oldLabel != label) {
 			// for new rows we should mark all parents with labelChanged_
@@ -181,7 +186,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 }
 
 template<class RowType, class ValueType>
-PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value)
+PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value, const void* handle, const yasli::TypeID& typeId)
 {
 	SharedPtr<RowType> newRow;
 
@@ -231,7 +236,7 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 		// for new rows we should mark all parents with labelChanged_
 		newRow->setLabelChanged();
 
-	newRow->setValue(value);
+	newRow->setValue(value, handle, typeId);
 	return newRow;
 }
 
@@ -241,7 +246,10 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
     size_t size = ser.size();
 
 	lastNode_ = currentNode_;
+	bool hideChildren = outlineMode_ && currentNode_ && currentNode_->isContainer();
 	PropertyRow* row = updateRow<PropertyRow>(name, label, typeName, ser);
+	row->setHideChildren(hideChildren);
+
 	PropertyRow* nonLeaf = 0;
 	if(!row->isLeaf() || currentNode_ == 0){
 		enterNode(row);
@@ -260,33 +268,33 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 		ser(*this);
 
 	if (nonLeaf)
-		nonLeaf->closeNonLeaf(ser);
+		nonLeaf->closeNonLeaf(ser, *this);
 
-    closeStruct(name);
+	closeStruct(name);
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::StringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get());
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get(), value.handle(), value.type());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::WStringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get());
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get(), value.handle(), value.type());
 	return true;
 }
 
 bool PropertyOArchive::operator()(bool& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowBool>(name, label, "bool", value);
+	lastNode_ = updateRowPrimitive<PropertyRowBool>(name, label, "bool", value, &value, yasli::TypeID::get<bool>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(char& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<char> >(name, label, "char", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<char> >(name, label, "char", value, &value, yasli::TypeID::get<char>());
 	return true;
 }
 
@@ -294,25 +302,25 @@ bool PropertyOArchive::operator()(char& value, const char* name, const char* lab
 
 bool PropertyOArchive::operator()(yasli::i8& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i8> >(name, label, "int8", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i8> >(name, label, "int8", value, &value, yasli::TypeID::get<yasli::i8>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::i16& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i16> >(name, label, "int16", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i16> >(name, label, "int16", value, &value, yasli::TypeID::get<yasli::i16>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::i32& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i32> >(name, label, "int32", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i32> >(name, label, "int32", value, &value, yasli::TypeID::get<yasli::i32>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::i64& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i64> >(name, label, "int64", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::i64> >(name, label, "int64", value, &value, yasli::TypeID::get<yasli::i64>());
 	return true;
 }
 
@@ -320,25 +328,25 @@ bool PropertyOArchive::operator()(yasli::i64& value, const char* name, const cha
 
 bool PropertyOArchive::operator()(yasli::u8& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u8> >(name, label, "uint8", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u8> >(name, label, "uint8", value, &value, yasli::TypeID::get<yasli::u8>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::u16& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u16> >(name, label, "uint16", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u16> >(name, label, "uint16", value, &value, yasli::TypeID::get<yasli::u16>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::u32& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u32> >(name, label, "uint32", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u32> >(name, label, "uint32", value, &value, yasli::TypeID::get<yasli::u32>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(yasli::u64& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u64> >(name, label, "uint64", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<yasli::u64> >(name, label, "uint64", value, &value, yasli::TypeID::get<yasli::u64>());
 	return true;
 }
 
@@ -346,13 +354,13 @@ bool PropertyOArchive::operator()(yasli::u64& value, const char* name, const cha
 
 bool PropertyOArchive::operator()(float& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<float> >(name, label, "float", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<float> >(name, label, "float", value, &value, yasli::TypeID::get<float>());
 	return true;
 }
 
 bool PropertyOArchive::operator()(double& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowNumber<double> >(name, label, "double", value);
+	lastNode_ = updateRowPrimitive<PropertyRowNumber<double> >(name, label, "double", value, &value, yasli::TypeID::get<float>());
 	return true;
 }
 
@@ -366,6 +374,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 
 	if (!model_->defaultTypeRegistered(elementTypeName)) {
 		PropertyOArchive ar(model_, true);
+		ar.setOutlineMode(outlineMode_);
 		ar.setFilter(getFilter());
 		ar.setLastContext(lastContext());
 		model_->addDefaultType(0, elementTypeName); // add empty default to prevent recursion
@@ -387,7 +396,10 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name, const char *label)
 {
 	lastNode_ = currentNode_;
+
+	bool hideChildren = outlineMode_ && currentNode_ && currentNode_->isContainer();
 	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
+	row->setHideChildren(hideChildren);
 	enterNode(row);
 	{
 		TypeID baseType = ptr.baseType();
@@ -397,8 +409,7 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 		const char* nullLabel = factory->nullLabel();
 		if (!(nullLabel && nullLabel[0] == '\0'))
 		{
-			PropertyDefaultTypeValue nullValue;
-			nullValue.type = TypeID();
+			PropertyDefaultDerivedTypeValue nullValue;
 			nullValue.factory = factory;
 			nullValue.factoryIndex = -1;
 			nullValue.label = nullLabel ? nullLabel : "[ null ]";
@@ -407,13 +418,14 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 
 		for(size_t i = 0; i < count; ++i) {
 			const yasli::TypeDescription *desc = factory->descriptionByIndex((int)i);
-			if (!model_->defaultTypeRegistered(baseType, desc->typeID())){
+			if (!model_->defaultTypeRegistered(baseType, desc->name())){
 				PropertyOArchive ar(model_, true);
+				ar.setOutlineMode(outlineMode_);
 				ar.setLastContext(lastContext());
 				ar.setFilter(getFilter());
 
-				PropertyDefaultTypeValue defaultValue;
-				defaultValue.type = desc->typeID();
+				PropertyDefaultDerivedTypeValue defaultValue;
+				defaultValue.registeredName = desc->name();
 				defaultValue.factory = factory;
 				defaultValue.factoryIndex = int(i);
 				defaultValue.label = desc->label();
@@ -432,6 +444,15 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 	if(Serializer ser = ptr.serializer())
 		ser(*this);
 	closeStruct(name);
+	return true;
+}
+
+bool PropertyOArchive::operator()(yasli::CallbackInterface& callback, const char* name, const char* label)
+{
+	if (!callback.serializeValue(*this, name, label))
+		return false;
+
+	lastNode_->setCallback(callback.clone());
 	return true;
 }
 
@@ -456,9 +477,33 @@ bool PropertyOArchive::openBlock(const char* name, const char* label)
 	return true;
 }
 
+void PropertyOArchive::validatorMessage(bool error, const void* handle, const yasli::TypeID& type, const char* message)
+{
+	if (validator_) {
+		ValidatorEntry entry(error ? VALIDATOR_ENTRY_ERROR : VALIDATOR_ENTRY_WARNING,
+							 handle,
+							 type,
+							 message);
+		validator_->addEntry(entry);
+	}
+}
+
+void PropertyOArchive::documentLastField(const char* message)
+{
+	if (lastNode_ && (!currentNode_ || lastNode_->parent() == currentNode_))
+		lastNode_->setTooltip(message ? message : "");
+	else if (currentNode_)
+		currentNode_->setTooltip(message ? message : "");
+}
+
 void PropertyOArchive::closeBlock()
 {
 	closeStruct("block");
+}
+
+void PropertyOArchive::setOutlineMode(bool outlineMode)
+{
+	outlineMode_ = outlineMode;
 }
 
 // vim:ts=4 sw=4:

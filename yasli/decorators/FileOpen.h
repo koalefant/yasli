@@ -54,3 +54,7 @@ struct FileOpen
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileOpen& value, const char* name, const char* label);
 
 }
+
+#if YASLI_INLINE_IMPLEMENTATION
+#include "yasli/decorators/FileOpen.cpp"
+#endif

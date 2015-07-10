@@ -50,6 +50,7 @@ enum Key
 	KEY_LEFT,
 	KEY_MENU,
 	KEY_RETURN,
+	KEY_ENTER,
 	KEY_RIGHT,
 	KEY_SPACE,
 	KEY_UP,
@@ -80,9 +81,11 @@ struct KeyEvent
 
 enum Cursor
 {
+	CURSOR_BLANK,
+	CURSOR_ARROW,
+	CURSOR_HAND,
 	CURSOR_SLIDE
 };
-
 
 struct IUIFacade
 {
@@ -97,6 +100,8 @@ struct IUIFacade
 	virtual void unsetCursor() = 0;
 	virtual Point cursorPosition() = 0;
 	virtual int textWidth(const char* text, Font font) = 0;
+	virtual int textHeight(int width, const char* text, Font font) = 0;
+
 	virtual Point screenSize() = 0;
 
 	virtual InplaceWidget* createComboBox(ComboBoxClientRow* client) = 0;

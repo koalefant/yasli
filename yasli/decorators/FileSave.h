@@ -49,3 +49,7 @@ bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileSave& value, const char* name, co
 
 }
 
+#if YASLI_INLINE_IMPLEMENTATION
+#include "yasli/decorators/FileSave.cpp"
+#endif
+

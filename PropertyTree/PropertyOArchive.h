@@ -15,13 +15,16 @@
 
 class PropertyRow;
 class PropertyTreeModel;
+class ValidatorBlock;
 using yasli::SharedPtr;
 
 class PropertyOArchive : public yasli::Archive{
 public:
-	PropertyOArchive(PropertyTreeModel* model, PropertyRow* rootNode = 0);
+	PropertyOArchive(PropertyTreeModel* model, PropertyRow* rootNode, ValidatorBlock* validator);
 	~PropertyOArchive();
 
+	void setOutlineMode(bool outlineMode);
+protected:
 	bool operator()(yasli::StringInterface& value, const char* name, const char* label) override;
 	bool operator()(yasli::WStringInterface& value, const char* name, const char* label) override;
 	bool operator()(bool& value, const char* name, const char* label) override;
@@ -43,10 +46,14 @@ public:
 	bool operator()(const yasli::Serializer& ser, const char* name, const char* label) override;
 	bool operator()(yasli::PointerInterface& ptr, const char *name, const char *label) override;
 	bool operator()(yasli::ContainerInterface& ser, const char *name, const char *label) override;
+	bool operator()(yasli::CallbackInterface& callback, const char* name, const char* label) override;
 	bool operator()(yasli::Object& obj, const char *name, const char *label) override;
+	using yasli::Archive::operator();
 
 	bool openBlock(const char* name, const char* label) override;
 	void closeBlock() override;
+	void validatorMessage(bool error, const void* handle, const yasli::TypeID& type, const char* message) override;
+	void documentLastField(const char* docString) override;
 
 protected:
 	PropertyOArchive(PropertyTreeModel* model, bool forDefaultType);
@@ -60,7 +67,7 @@ private:
 	std::vector<Level> stack_;
 
 	template<class RowType, class ValueType>
-	PropertyRow* updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value);
+	PropertyRow* updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value, const void* handle, const yasli::TypeID& typeId);
 
 	template<class RowType, class ValueType>
 	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value);
@@ -72,6 +79,7 @@ private:
 	bool updateMode_;
 	bool defaultValueCreationMode_;
 	PropertyTreeModel* model_;
+	ValidatorBlock* validator_;
 	SharedPtr<PropertyRow> currentNode_;
 	SharedPtr<PropertyRow> lastNode_;
 
@@ -80,6 +88,7 @@ private:
 	yasli::string typeName_;
 	const char* derivedTypeName_;
 	yasli::string derivedTypeNameAlt_;
+	bool outlineMode_;
 };
 
 // vim:ts=4 sw=4:

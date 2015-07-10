@@ -30,10 +30,7 @@ public:
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return false; }
 
-	bool onActivate(PropertyTree* tree, bool force) override
-	{
-		return false;
-	}
+	bool onActivate(const PropertyActivationEvent& e) override { return false; }
 	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(IconXPM), return);
 		icon_ = *(IconXPM*)(ser.pointer());
@@ -72,11 +69,13 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return true; }
-	bool onActivate(PropertyTree* tree, bool force) override
+	bool onActivate(const PropertyActivationEvent& ev) override
 	{
-		tree->model()->rowAboutToBeChanged(this);
-		value_ = !value_;
-		tree->model()->rowChanged(this);
+		if (ev.reason != ev.REASON_RELEASE) {
+			ev.tree->model()->rowAboutToBeChanged(this);
+			value_ = !value_;
+			ev.tree->model()->rowChanged(this);
+		}
 		return true;
 	}
 	DragCheckBegin onMouseDragCheckBegin() override

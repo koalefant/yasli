@@ -139,9 +139,10 @@ public:
 		hardMax_ = limit_max((Type)0);
 	}
 
-	void setValue(Type value)
-	{
+	void setValue(Type value, const void* handle, const yasli::TypeID& type) {
 		value_ = value;
+		serializer_.setPointer((void*)handle);
+		serializer_.setType(type);
 	}
 	bool setValueFromString(const char* str) override{
         Type value = value_;
@@ -157,8 +158,10 @@ public:
 		return true;
 	}
 
-    void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
+		serializer_.setPointer((void*)range->value);
+		serializer_.setType(yasli::TypeID::get<Type>());
 		value_ = *range->value;
 		softMin_ = range->softMin;
 		softMax_ = range->softMax;
@@ -166,10 +169,16 @@ public:
 		hardMax_ = range->hardMax;
 	}
 
-    bool assignTo(const yasli::Serializer& ser) const override {
-		yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
-		*range->value = value_;
-        return true;
+  bool assignTo(const yasli::Serializer& ser) const override 
+	{
+		if (ser.type() == yasli::TypeID::get<yasli::RangeDecorator<Type>>()) {
+			yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
+			*range->value = value_;
+		}
+		else if (ser.type() == yasli::TypeID::get<Type>()) {
+			*(Type*)ser.pointer() = value_;
+		}			
+    return true;
 	}
 
 	void serializeValue(yasli::Archive& ar) override{
@@ -190,26 +199,26 @@ public:
 		if (value_ != incrementStartValue_) {
 			Type value = value_;
 			value_ = incrementStartValue_;
-			tree->model()->rowAboutToBeChanged(this);
 			value_ = value;
-			tree->model()->rowChanged(this, false);
+			tree->model()->rowChanged(this, true);
 		}
 	}
 
-	void incrementLog(float screenFraction) override
+	void incrementLog(float screenFraction, float valueFieldFraction) override
 	{
 		bool bothSoftLimitsSet = (limit_min((Type)0) == 0 || softMin_ != limit_min((Type)0)) && softMax_ != limit_max((Type)0);
 
 		if (bothSoftLimitsSet)
 		{
 			Type softRange = softMax_ - softMin_;
-			double newValue = incrementStartValue_ + softRange * screenFraction * 3.0f;
+			double newValue = incrementStartValue_ + softRange * valueFieldFraction;
 			value_ = clamp(newValue, hardMin_, hardMax_);
 		}
 		else
 		{
 			double screenFractionMultiplier = 1000.0;
-			if (yasli::TypeID::get<Type>() == yasli::TypeID::get<float>() || yasli::TypeID::get<Type>() == yasli::TypeID::get<double>()) 
+			if (yasli::TypeID::get<Type>() == yasli::TypeID::get<float>() ||
+			 	  yasli::TypeID::get<Type>() == yasli::TypeID::get<double>()) 
 				screenFractionMultiplier = 10.0;
 
 			double startPower = log10(fabs(double(incrementStartValue_)) + 1.0) - 3.0;
@@ -232,6 +241,13 @@ public:
 			}
 			value_ = clamp(newValue, hardMin_, hardMax_);
 		}
+	}
+
+	double sliderPosition() const override
+	{
+		if ((softMin_ == std::numeric_limits<Type>::lowest() && softMax_ == std::numeric_limits<Type>::max() && softMax_ != Type(255)) || (softMin_ >= softMax_))
+			return 0.0;
+		return clamp(double(value_ - softMin_) / (softMax_ - softMin_), 0.0, 1.0);
 	}
 protected:
 	Type incrementStartValue_; 

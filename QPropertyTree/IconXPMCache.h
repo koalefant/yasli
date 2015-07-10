@@ -35,7 +35,7 @@ struct IconXPMCache
 
 	~IconXPMCache();
 
-	QImage* getImageForIcon(const yasli::IconXPM& icon);
+	QImage* getImageForIcon(const Icon& icon);
 private:
 	struct BitmapCache {
 		std::vector<Color> pixels;
@@ -43,8 +43,10 @@ private:
 	};
 
 	static bool parseXPM(RGBAImage* out, const yasli::IconXPM& xpm);
-	typedef std::map<const char* const*, BitmapCache> IconToBitmap;
-	IconToBitmap iconToImageMap_;
+	typedef std::map<const char* const*, BitmapCache> XPMToBitmap;
+	XPMToBitmap xpmToImageMap_;
+	typedef std::map<yasli::string, BitmapCache> FilenameToBitmap;
+	FilenameToBitmap filenameToImageMap_;
 };
 
 }

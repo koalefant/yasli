@@ -21,3 +21,4 @@ example-*
 .garbage/*
 .tmp/*
 .garbage*
+tags

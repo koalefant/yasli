@@ -7,20 +7,20 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
+#include "yasli/Config.h"
+
+#if !YASLI_YASLI_INLINE_IMPLEMENTATION
 #include "StdAfx.h"
+#endif
 
 #include "yasli/STL.h"
-#include "Enum.h"
+#include "yasli/Enum.h"
 #include "yasli/Archive.h"
-#include "StringList.h"
-#include "yasli/STLImpl.h"
-#include "yasli/BitVectorImpl.h"
+#include "yasli/StringList.h"
 
 namespace yasli{
 
-const EnumDescription* BitVectorWrapper::currentDescription;
-
-void EnumDescription::add(int value, const char* name, const char *label)
+YASLI_INLINE void EnumDescription::add(int value, const char* name, const char *label)
 {
     YASLI_ESCAPE( name, return );
 	nameToValue_[name] = value;
@@ -36,31 +36,45 @@ void EnumDescription::add(int value, const char* name, const char *label)
 	values_.push_back(value);
 }
 
-bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
+YASLI_INLINE bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
 {
-	int index = 0;
-	if(ar.isOutput())
-		index = indexByValue(value);
-
-	StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
-	ar(stringListValue, name, label);
-	if(ar.isInput())
-		value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
-	return true;
+	if (!ar.isInPlace()) {
+		if(count() == 0){
+			YASLI_ASSERT_STR(0 && "Attempt to serialize enum type that is not registered with YASLI_ENUM macro", type().name());
+			return false;
+		}
+		int index = -1;
+		if(ar.isOutput())
+			index = indexByValue(value);
+		StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index, &value, type());
+		if (!ar(stringListValue, name, label))
+			return false;
+		if(ar.isInput()){
+			if(stringListValue.index() == -1)
+				return false;
+			value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
+		}
+		else if(index == -1)
+			ar.error(&value, type(), "Unregistered or uninitialized enumeration value.");
+		return true;
+	}
+	else {
+		return ar(value, name, label);
+	}
 }
 
-bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const
+YASLI_INLINE bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const
 {
     if(ar.isOutput())
     {
         StringListStatic names = nameCombination(value);
-		std::string str;
+		string str;
         joinStringList(&str, names, '|');
         return ar(str, name, label);
     }
     else
     {
-		std::string str;
+		string str;
         if(!ar(str, name, label))
             return false;
         StringList values;
@@ -75,20 +89,20 @@ bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* na
 }
 
 
-const char* EnumDescription::name(int value) const
+YASLI_INLINE const char* EnumDescription::name(int value) const
 {
     ValueToName::const_iterator it = valueToName_.find(value);
     YASLI_ESCAPE(it != valueToName_.end(), return "");
     return it->second;
 }
-const char* EnumDescription::label(int value) const
+YASLI_INLINE const char* EnumDescription::label(int value) const
 {
     ValueToLabel::const_iterator it = valueToLabel_.find(value);
     YASLI_ESCAPE(it != valueToLabel_.end(), return "");
     return it->second;
 }
 
-StringListStatic EnumDescription::nameCombination(int bitVector) const 
+YASLI_INLINE StringListStatic EnumDescription::nameCombination(int bitVector) const 
 {
     StringListStatic strings;
     for(ValueToName::const_iterator i = valueToName_.begin(); i != valueToName_.end(); ++i)
@@ -100,7 +114,7 @@ StringListStatic EnumDescription::nameCombination(int bitVector) const
     return strings;
 }
 
-StringListStatic EnumDescription::labelCombination(int bitVector) const 
+YASLI_INLINE StringListStatic EnumDescription::labelCombination(int bitVector) const 
 {
     StringListStatic strings;
     for(ValueToLabel::const_iterator i = valueToLabel_.begin(); i != valueToLabel_.end(); ++i)
@@ -113,17 +127,18 @@ StringListStatic EnumDescription::labelCombination(int bitVector) const
 }
 
 
-int EnumDescription::indexByValue(int value) const
+YASLI_INLINE int EnumDescription::indexByValue(int value) const
 {
 	if(!YASLI_CHECK(!valueToIndex_.empty()))
-		return 0;
+		return -1;
     ValueToIndex::const_iterator it = valueToIndex_.find(value);
-	if(!YASLI_CHECK(it != valueToIndex_.end()))
-		it = valueToIndex_.begin();
-	return it->second;
+	if(YASLI_CHECK(it != valueToIndex_.end()))
+		return it->second;
+	else
+		return -1;
 }
 
-int EnumDescription::valueByIndex(int index) const
+YASLI_INLINE int EnumDescription::valueByIndex(int index) const
 {
 	if(!YASLI_CHECK(!values_.empty()))
 		return 0;
@@ -132,25 +147,27 @@ int EnumDescription::valueByIndex(int index) const
 	return values_[0];
 }
 
-const char* EnumDescription::nameByIndex(int index) const
+YASLI_INLINE const char* EnumDescription::nameByIndex(int index) const
 {
 	if(!YASLI_CHECK(!names_.empty()))
 		return "";
 	if(YASLI_CHECK(size_t(index) < names_.size()))
 		return names_[index];
-	return names_[0];
+	else
+		return "";
 }
 
-const char* EnumDescription::labelByIndex(int index) const
+YASLI_INLINE const char* EnumDescription::labelByIndex(int index) const
 {
 	if(!YASLI_CHECK(!labels_.empty()))
 		return "";
 	if(YASLI_CHECK(size_t(index) < labels_.size()))
 		return labels_[index];
-	return labels_[0];
+	else
+		return "";
 }
 
-int EnumDescription::value(const char* name) const
+YASLI_INLINE int EnumDescription::value(const char* name) const
 {
 	if(!YASLI_CHECK(!nameToValue_.empty()))
 		return 0;
@@ -159,7 +176,8 @@ int EnumDescription::value(const char* name) const
 		it = nameToValue_.begin();
 	return it->second;
 }
-int EnumDescription::valueByLabel(const char* label) const
+
+YASLI_INLINE int EnumDescription::valueByLabel(const char* label) const
 {
 	if(!YASLI_CHECK(!labelToValue_.empty()))
 		return 0;

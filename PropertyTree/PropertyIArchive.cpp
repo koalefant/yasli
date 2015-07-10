@@ -9,6 +9,7 @@
 
 #include "Serialization.h"
 #include "yasli/Enum.h"
+#include "yasli/Callback.h"
 #include "PropertyTreeModel.h"
 #include "PropertyIArchive.h"
 #include "PropertyRowBool.h"
@@ -198,9 +199,9 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 {
 	const char* typeName = ser.containerType().name();
 	if(!openRow(name, label, typeName))
-        return false;
+		return false;
 
-    size_t size = 0;
+	size_t size = 0;
 	if(currentNode_->multiValue())
 		size = ser.size();
 	else{
@@ -211,45 +212,45 @@ bool PropertyIArchive::operator()(yasli::ContainerInterface& ser, const char* na
 	stack_.push_back(Level());
 
 	size_t index = 0;
-    if(ser.size() > 0)
-        while(index < size)
-        {
-            ser(*this, "", "xxx");
-            ser.next();
+	if(ser.size() > 0)
+		while(index < size)
+		{
+			ser(*this, "", "xxx");
+			ser.next();
 			++index;
-        }
+		}
 
 	stack_.pop_back();
 
-    closeRow(name);
+	closeRow(name);
 	return true;
 }
 
 bool PropertyIArchive::operator()(const yasli::Serializer& ser, const char* name, const char* label)
 {
-	PropertyRow* nonLeaf = 0;
+	PropertyRow* nonLeafNode = 0;
 	if(openRow(name, label, ser.type().name())){
-		if(currentNode_->isLeaf()) {
+		if (currentNode_->isLeaf()) {
 			if(!currentNode_->isRoot()){
 				currentNode_->assignTo(ser);
 				closeRow(name);
 				return true;
 			}
 		}
-		else
-			nonLeaf = currentNode_;
-    }
+		else 
+			nonLeafNode = currentNode_;
+	}
 	else
 		return false;
 
 	stack_.push_back(Level());
 
-    ser(*this);
+	ser(*this);
 
 	stack_.pop_back();
 
-	if (nonLeaf)
-		nonLeaf->closeNonLeaf(ser);
+	if (nonLeafNode)
+		nonLeafNode->closeNonLeaf(ser, *this);
 	closeRow(name);
 	return true;
 }
@@ -285,6 +286,11 @@ bool PropertyIArchive::operator()(yasli::PointerInterface& ser, const char* name
 
 	closeRow(name);
 	return true;
+}
+
+bool PropertyIArchive::operator()(yasli::CallbackInterface& callback, const char* name, const char* label)
+{
+	return callback.serializeValue(*this, name, label);
 }
 
 bool PropertyIArchive::operator()(yasli::Object& obj, const char* name, const char* label)

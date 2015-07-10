@@ -10,6 +10,8 @@
 #pragma once
 #pragma warning (disable : 4100) 
 
+#include <stdarg.h>
+
 #include "yasli/Config.h"
 #include "yasli/Helpers.h"
 #include "yasli/Serializer.h"
@@ -19,6 +21,7 @@
 namespace yasli{
 
 class Archive;
+struct CallbackInterface;
 
 template<class T>
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T& object, const char* name, const char* label);
@@ -54,7 +57,7 @@ struct Context {
 	Context* previousContext;
 	Archive* archive;
 
-	Context() : object(0), previousContext(0) {}
+	Context() : archive(0), object(0), previousContext(0) {}
 	template<class T>
 	void set(T* object);
 	template<class T>
@@ -64,6 +67,7 @@ struct Context {
 	~Context();
 };
 
+struct BlackBox;
 class Archive{
 public:
 	enum ArchiveCaps{
@@ -72,9 +76,13 @@ public:
 		TEXT = 1 << 2,
 		BINARY = 1 << 3,
 		EDIT = 1 << 4,
-		CUSTOM1 = 1 << 5,
-		CUSTOM2 = 1 << 6,
-		CUSTOM3 = 1 << 7
+		INPLACE = 1 << 5,
+		NO_EMPTY_NAMES = 1 << 6,
+		VALIDATION = 1 << 7,
+		DOCUMENTATION = 1 << 8,
+		CUSTOM1 = 1 << 9,
+		CUSTOM2 = 1 << 10,
+		CUSTOM3 = 1 << 11
 	};
 
 	Archive(int caps)
@@ -87,7 +95,14 @@ public:
 
 	bool isInput() const{ return caps_ & INPUT ? true : false; }
 	bool isOutput() const{ return caps_ & OUTPUT ? true : false; }
-	bool isEdit() const{ return caps_ & EDIT ? true : false; }
+	bool isEdit() const{
+#if YASLI_NO_EDITING
+		return false;
+#else
+		return (caps_ & EDIT)  != 0;
+#endif
+	}
+	bool isInPlace() const { return (caps_ & INPLACE) != 0; }
 	bool caps(int caps) const { return (caps_ & caps) == caps; }
 
 	void setFilter(int filter){
@@ -100,7 +115,6 @@ public:
 		return (filter_ & flags) != 0;
 	}
 
-	virtual void warning(const char* message) {}
 	virtual bool operator()(bool& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(u8& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
@@ -117,30 +131,46 @@ public:
 	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
 	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
 	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) { return operator()(Serializer(keyValue), name, label); }
+	virtual bool operator()(CallbackInterface& callback, const char* name = "", const char* label = 0) { return false; }
 
 	// No point in supporting long double since it is represented as double on MSVC
 	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+
+	template<class T>
+	bool operator()(const T& value, const char* name = "", const char* label = 0);
+
+	// Error and Warning calls are used for diagnostics and validation of the
+	// values. Output depends on the specific implementation of Archive,
+	// for example PropertyTree uses it to show bubbles with errors in UI
+	// next to the mentioned property.
+	template<class T> void error(T& value, const char* format, ...);
+	template<class T> void warning(T& value, const char* format, ...);
+
+	void error(const void* value, const yasli::TypeID& type, const char* format, ...);
+	// Used to add tooltips in PropertyTree
+	void doc(const char* docString);
 
 	// block call are osbolete, please do not use
 	virtual bool openBlock(const char* name, const char* label) { return true; }
 	virtual void closeBlock() {}
 
-	// templated switch
-	template<class T>
-	bool operator()(const T& value, const char* name = "", const char* label = 0);
-
 	template<class T>
 	T* context() const {
-		TypeID type = TypeID::get<T>();
+		return (T*)contextByType(TypeID::get<T>());
+	}
+
+	void* contextByType(const TypeID& type) const {
 		for (Context* current = lastContext_; current != 0; current = current->previousContext)
 			if (current->type == type)
-				return (T*)current->object;
+				return current->object;
 		return 0;
 	}
+
 	Context* setLastContext(Context* context) {
 		Context* previousContext = lastContext_;
 		lastContext_ = context;
@@ -148,13 +178,15 @@ public:
 	}
 	Context* lastContext() const{ return lastContext_; }
 protected:
-	Context* lastContext_;
-	int caps_;
+	virtual void validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) {}
+	virtual void documentLastField(const char* text) {}
 
-private:
 	void notImplemented() { YASLI_ASSERT(0 && "Not implemented!"); }
 
+	int caps_;
 	int filter_;
+
+	Context* lastContext_;
 };
 
 namespace Helpers{
@@ -215,6 +247,58 @@ void Context::set(T* object) {
 inline Context::~Context() {
 	if (archive)
 		archive->setLastContext(previousContext);
+}
+
+inline void Archive::doc(const char* docString)
+{
+#if !YASLI_NO_EDITING
+	if (caps_ & DOCUMENTATION)
+		documentLastField(docString); 
+#endif
+}
+
+template<class T>
+void Archive::error(T& value, const char* format, ...)
+{
+#if !YASLI_NO_EDITING
+	if ((caps_ & VALIDATION) == 0)
+		return;
+	va_list args;
+	va_start(args, format);
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+	validatorMessage(true, &value, TypeID::get<T>(), buf);
+#endif
+}
+
+inline void Archive::error(const void* handle, const yasli::TypeID& type, const char* format, ...)
+{
+#if !YASLI_NO_EDITING
+	if ((caps_ & VALIDATION) == 0)
+		return;
+	va_list args;
+	va_start(args, format);
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+	validatorMessage(true, handle, type, buf);
+#endif
+}
+
+template<class T>
+void Archive::warning(T& value, const char* format, ...)
+{
+#if !YASLI_NO_EDITING
+	if ((caps_ & VALIDATION) == 0)
+		return;
+	va_list args;
+	va_start(args, format);
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+	validatorMessage(false, &value, TypeID::get<T>(), buf);
+#endif
 }
 
 template<class T>

@@ -1,9 +1,11 @@
 #pragma once
 #include <QObject>
 #include <QLineEdit>
+#include "QPropertyTree/QPropertyTree.h"
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/PropertyRowNumberField.h"
+#include "PropertyTree/MathUtils.h"
 
 class InplaceWidgetNumber : public QObject, public property_tree::InplaceWidget
 
@@ -37,6 +39,12 @@ InplaceWidgetNumber::InplaceWidgetNumber(PropertyRowNumberField* row, QPropertyT
 {
 	entry_->setText(row_->valueAsString().c_str());
 	connect(entry_, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));
+	connect(entry_, &QLineEdit::textChanged, this, [this,tree]{
+		QFontMetrics fm(entry_->font());
+		int contentWidth = min((int)fm.width(entry_->text()) + 8, tree->width() - entry_->x());
+		if (contentWidth > entry_->width())
+			entry_->resize(contentWidth, entry_->height());
+	});
 
 	entry_->selectAll();
 }

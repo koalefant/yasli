@@ -93,6 +93,8 @@ static void unescapeString(string& buf, const char* begin, const char* end)
 	buf.resize(ptr - &buf[0]);
 }
 
+double parseFloat(const char* str);
+
 // ---------------------------------------------------------------------------
 
 class Tokenizer{
@@ -990,31 +992,6 @@ bool TextIArchive::operator()(u64& value, const char* name, const char* label)
         return true;
     }
     return false;
-}
-
-inline bool isDigit(int ch) 
-{
-	return unsigned(ch - '0') <= 9;
-}
-
-double parseFloat(const char* s)
-{
-	double res = 0, f = 1, sign = 1;
-	while(*s && (*s == ' ' || *s == '\t')) 
-		s++;
-
-	if(*s == '-') 
-		sign=-1, s++; 
-	else if (*s == '+') 
-		s++;
-
-	for(; isDigit(*s); s++)
-		res = res * 10 + (*s - '0');
-
-	if(*s == '.')
-		for (s++; isDigit(*s); s++)
-			res += (f *= 0.1)*(*s - '0');
-	return res*sign;
 }
 
 bool TextIArchive::operator()(float& value, const char* name, const char* label)

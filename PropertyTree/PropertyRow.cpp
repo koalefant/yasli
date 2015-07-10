@@ -9,9 +9,12 @@
 
 #include "PropertyTree.h"
 #include "PropertyTreeModel.h"
+#include "PropertyTreeStyle.h"
 #include "PropertyRowContainer.h"
+#include "ValidatorBlock.h"
 #include "IDrawContext.h"
 #include "yasli/ClassFactory.h"
+#include "yasli/Callback.h"
 #include "Unicode.h"
 #include "Serialization.h"
 #include "IUIFacade.h"
@@ -21,6 +24,10 @@
 #include "IMenu.h"
 #include "MathUtils.h"
 
+#ifndef _MSC_VER
+#include <limits.h>
+#endif
+
 #if 0
 # define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 # define DEBUG_TRACE_ROW(fmt, ...) for(PropertyRow* zzzz = this; zzzz; zzzz = zzzz->parent()) printf(" "); printf(fmt "\n", __VA_ARGS__)
@@ -29,6 +36,7 @@
 # define DEBUG_TRACE_ROW(...)
 #endif
 	
+enum { TEXT_VALUE_SPACING = 3 };
 
 inline unsigned calcHash(const char* str, unsigned hash = 5381)
 {
@@ -36,6 +44,7 @@ inline unsigned calcHash(const char* str, unsigned hash = 5381)
 		hash = hash*33 + (unsigned char)*str++;
 	return hash;
 }
+
 
 template<class T>
 inline unsigned calcHash(const T& t, unsigned hash = 5381)
@@ -52,14 +61,15 @@ ConstStringList* PropertyRow::constStrings_ = 0;
 PropertyRow::PropertyRow()
 {
 	parent_ = 0;
+	callback_ = 0;
 
 	expanded_ = false;
 	selected_ = false;
 	visible_ = true;
 	labelUndecorated_ = 0;
-    belongsToFilteredRow_ = false;
-    matchFilter_ = true;
-	
+	belongsToFilteredRow_ = false;
+	matchFilter_ = true;
+
 	pos_ =  Point(0, 0);
 	size_ = Point(-1, -1);
 	plusSize_ = 0;
@@ -68,24 +78,33 @@ PropertyRow::PropertyRow()
 	textHash_ = 0;
 	textSize_ = 0;
 	widgetPos_ = 0;
-    widgetSize_ = 0;
+	widgetSize_ = 0;
 	userWidgetSize_ = -1;
-	
+	heightIncludingChildren_ = 0;
+
 	name_ = "";
 	typeName_ = "";
-	
+
 	pulledUp_ = false;
 	pulledBefore_ = false;
+	packedAfterPreviousRow_ = false;
 	hasPulled_ = false;
 	userReadOnly_ = false;
 	userReadOnlyRecurse_ = false;
 	userFullRow_ = false;
+	userPackCheckboxes_ = false;
+	userWidgetToContent_ = false;
 	multiValue_ = false;
 	userHideChildren_ = false;
-	
+
 	label_ = "";
 	labelChanged_ = true;
 	layoutChanged_ = true;
+	hideChildren_ = false;
+	validatorHasErrors_ = false;
+	validatorHasWarnings_ = false;
+
+	tooltip_ = "";
 }
 
 PropertyRow::~PropertyRow()
@@ -94,6 +113,9 @@ PropertyRow::~PropertyRow()
 	for (size_t i = 0; i < count; ++i)
 		if (children_[i]->parent() == this)
 			children_[i]->setParent(0);
+	if (callback_)
+		callback_->release();
+	callback_ = 0;
 }
 
 void PropertyRow::setNames(const char* name, const char* label, const char* typeName)
@@ -157,10 +179,10 @@ void PropertyRow::setExpandedRecursive(PropertyTree* tree, bool expanded)
 	scanChildren(op, tree);
 }
 
-int PropertyRow::childIndex(PropertyRow* row)
+int PropertyRow::childIndex(const PropertyRow* row) const
 {
 	YASLI_ASSERT(row);
-	Rows::iterator it = std::find(children_.begin(), children_.end(), row);
+	Rows::const_iterator it = std::find(children_.begin(), children_.end(), row);
 	YASLI_ESCAPE(it != children_.end(), return -1);
 	return (int)std::distance(children_.begin(), it);
 }
@@ -233,20 +255,23 @@ void PropertyRow::assignRowProperties(PropertyRow* row)
 	widgetPos_ = row->widgetPos_;
 	widgetSize_ = row->widgetSize_;
 	userWidgetSize_ = row->userWidgetSize_;
+	userWidgetToContent_ = row->userWidgetToContent_;
+	callback_ = row->callback_;
+	row->callback_ = 0;
 
     assignRowState(*row, false);
 }
 
-void PropertyRow::replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, bool preserveChildren)
+void PropertyRow::replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model)
 {
 	Rows::iterator it = std::find(children_.begin(), children_.end(), oldRow);
 	YASLI_ASSERT(it != children_.end());
 	if(it != children_.end()){
 		newRow->assignRowProperties(*it);
 		newRow->labelChanged_ = true;
-		if(preserveChildren)
-			(*it)->swapChildren(newRow);
 		*it = newRow;
+		if (model)
+			model->callRowCallback(newRow);
 	}
 }
 
@@ -259,7 +284,7 @@ void PropertyRow::erase(PropertyRow* row)
 		children_.erase(it);
 }
 
-void PropertyRow::swapChildren(PropertyRow* row)
+void PropertyRow::swapChildren(PropertyRow* row, PropertyTreeModel* model)
 {
 	children_.swap(row->children_);
 	iterator it;
@@ -267,12 +292,22 @@ void PropertyRow::swapChildren(PropertyRow* row)
 		(**it).setParent(this);
 	for( it = row->children_.begin(); it != row->children_.end(); ++it)
 		(**it).setParent(row);
+	if (model){
+		for(it = children_.begin(); it != children_.end(); ++it){
+			PropertyRow* child = *it;
+			if (PropertyRow* srcChild = row->find(child->name(), child->label(), child->typeName())) {
+				child->setCallback(srcChild->callback_);
+				srcChild->setCallback(0);
+				model->callRowCallback(child);
+			}
+		}
+	}
 }
 
 void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 {
 	if(before == 0)
-		children_.push_back(row);
+		children_.insert(children_.begin(), row);
 	else{
 		iterator it = std::find(children_.begin(), children_.end(), before);
 		if(it != children_.end())
@@ -305,6 +340,8 @@ SharedPtr<PropertyRow> PropertyRow::clone(ConstStringList* constStrings) const
 	SharedPtr<PropertyRow> clonedRow;
 	ia(clonedRow, "row", "Row");
 	PropertyRow::setConstStrings(0);
+	if (clonedRow)
+		clonedRow->setHideChildren(hideChildren_);
 	return clonedRow;
 }
 
@@ -334,9 +371,12 @@ void PropertyRow::YASLI_SERIALIZE_METHOD(Archive& ar)
 	}
 }
 
-bool PropertyRow::onActivate(PropertyTree* tree, bool force)
+bool PropertyRow::onActivate(const PropertyActivationEvent& e)
 {
-    return tree->spawnWidget(this, force);
+	if (e.reason != e.REASON_RELEASE)
+	    return e.tree->spawnWidget(this, e.force);
+	else
+		return false;
 }
 
 void PropertyRow::setLabelChanged() 
@@ -378,7 +418,55 @@ void PropertyRow::setLabel(const char* label)
 	}
 }
 
-void PropertyRow::updateLabel(const PropertyTree* tree, int index)
+void PropertyRow::propagateFlagsTopToBottom()
+{
+	// these flags are reset in parseControlCodes
+	if (!userReadOnly_ && !userWidgetToContent_)
+		return;
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* r = children_[i];
+		if (userReadOnly_)
+			r->userReadOnly_ = true;
+		if (userWidgetToContent_) {
+			r->userWidgetToContent_ = true;
+			r->userFixedWidget_ = true;
+		}
+		r->propagateFlagsTopToBottom();
+	}
+}
+
+void PropertyRow::setTooltip(const char* tooltip)
+{
+	tooltip_ = tooltip;
+}
+
+bool PropertyRow::setValidatorEntry(int index, int count)
+{
+	if (index != validatorIndex_ || count != validatorCount_) {
+		validatorIndex_ = min(index, 0xffff);
+		validatorCount_ = min(count, 0xff);
+		validatorsHeight_ = 0;
+		return true;
+	}
+	return false;
+}
+
+void PropertyRow::resetValidatorIcons()
+{
+	validatorHasWarnings_ = false;
+	validatorHasErrors_ = false;
+}
+
+void PropertyRow::addValidatorIcons(bool hasWarnings, bool hasErrors)
+{
+	if (hasWarnings )
+		validatorHasWarnings_ = true;
+	if (hasErrors)
+		validatorHasErrors_ = true;
+}
+
+void PropertyRow::updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren)
 {
 	if (!labelChanged_) {
 		if (pulledUp_)
@@ -391,19 +479,14 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index)
 	int numChildren = (int)children_.size();
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
-		row->updateLabel(tree, i);
+		row->updateLabel(tree, i, hideChildren_);
 	}
 
-	parseControlCodes(label_, true);
-	visible_ = *labelUndecorated_ != '\0' || userFullRow_ || pulledUp_ || isRoot();
-	if (userHideChildren_) {
-		for (int i = 0; i < numChildren; ++i) {
-			PropertyRow* row = children_[i];
-			if (row->pulledUp())
-				continue;
-			row->visible_ = false;
-		}
-	}
+	parseControlCodes(tree, label_, true);
+	bool hiddenByParentFlag = parentHidesNonInlineChildren && !pulledUp_;
+	visible_ = (*labelUndecorated_ != '\0' || userFullRow_ || pulledUp_ || isRoot()) && !hiddenByParentFlag;
+
+	propagateFlagsTopToBottom();
 
 	if(pulledContainer())
 		pulledContainer()->_setExpanded(expanded());
@@ -420,7 +503,7 @@ struct ResetSerializerOp{
     }
 };
 
-void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
+void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, bool changeLabel)
 {
 	if (changeLabel) {
 		userFullRow_ = false;
@@ -429,8 +512,10 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 		userReadOnly_ = false;
 		userReadOnlyRecurse_ = false;
 		userFixedWidget_ = false;
+		userPackCheckboxes_ = false;
 		userWidgetSize_ = -1;
 		userHideChildren_ = false;
+		userWidgetToContent_ = false;
 	}
 
 	while(true){
@@ -445,8 +530,14 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 					parent()->setPulledContainer(this);
 			}
 		}
-		else if(*ptr == '+')
-			_setExpanded(true);
+		else if(*ptr == '='){
+			userWidgetToContent_ = true;
+		}
+		else if(*ptr == '+'){
+			bool isFirstUpdate = labelUndecorated_ == 0;
+			if (isFirstUpdate)
+				_setExpanded(true);
+		}
 		else if(*ptr == '<')
 			userFullRow_ = true;
 		else if(*ptr == '>'){
@@ -471,11 +562,14 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 				userReadOnlyRecurse_ = true;
 			userReadOnly_ = true;
 		}
+		else if(*ptr == '|'){
+			userPackCheckboxes_ = true;
+		}
 		else if(*ptr == '['){
 			++ptr;
 			PropertyRow::iterator it;
 			for(it = children_.begin(); it != children_.end(); ++it)
-				(*it)->parseControlCodes(ptr, false);
+				(*it)->parseControlCodes(tree, ptr, false);
 
 			int counter = 1;
 			while(*ptr){
@@ -491,6 +585,24 @@ void PropertyRow::parseControlCodes(const char* ptr, bool changeLabel)
 		++ptr;
 	}
 
+	if (isContainer()) {
+		// automatically inline children for short arrays
+		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(this);
+		int numChildren = (int)container->count();
+		if (container->isFixedSize() && numChildren > 0 && numChildren <= 4) {
+			if (container->childByIndex(0)->inlineInShortArrays()) {
+				for(int i = 0; i < numChildren; ++i) {
+					PropertyRow* child = container->childByIndex(i);
+					child->pulledUp_ = true;
+					if (child->label_)
+						child->labelUndecorated_ = child->label_ + strlen(child->label_);
+				}
+				hasPulled_ = true;
+				container->setInlined(true);
+			}
+		}
+	}
+
 	if (changeLabel)
 		labelUndecorated_ = ptr;
 
@@ -502,25 +614,26 @@ const char* PropertyRow::typeNameForFilter(PropertyTree* tree) const
 	return typeName();
 }
 
-void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
+void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index, bool fontChanged)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
-	if(text[0] == '\0') {
+	if(text[0] == '\0' || widgetPlacement() == WIDGET_INSTEAD_OF_TEXT) {
 		textSizeInitial_ = 0;
 		textHash_ = 0;
 	}
 	else{
 		unsigned hash = calcHash(text);
-		hash = calcHash(FONT_NORMAL, hash);
-		if(hash != textHash_){
-			textSizeInitial_ = tree->ui()->textWidth(text, FONT_NORMAL) + 3;
+		property_tree::Font font = rowFont(tree);
+		hash = calcHash(font, hash);
+		if(hash != textHash_ || fontChanged){
+			textSizeInitial_ = tree->ui()->textWidth(text, font) + 3;
 			textHash_ = hash;
 		}
 	}
 }
 
-void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index)
+void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, int availableWidth, bool force, int* _extraSizeRemainder, int* _extraSize, int index)
 {
 	PropertyRow* nonPulled = nonPulledParent();
 	if (!layoutChanged_ && !force && !nonPulled->layoutChanged_) {
@@ -532,10 +645,10 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	if(isRoot())
 		expanded_ = true;
 	else{
-		if(nonPulled->isRoot() || (tree->compact() && nonPulled->parent()->isRoot()))
+		if(nonPulled->isRoot() || (tree->treeStyle().compact && nonPulled->parent()->isRoot()))
 			_setExpanded(true);
 		else if(!pulledUp())
-			plusSize_ = tree->tabSize();
+			plusSize_ = int(tree->treeStyle().firstLevelIndent * tree->_defaultRowHeight());
 
 		if(parent()->pulledUp())
 			pulledBefore_ = false;
@@ -548,25 +661,38 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		}
 	}
 
-	widgetSize_ = widgetSizeMin(tree);
+	int minWidgetSize = widgetSizeMin(tree);
+	widgetSize_ = minWidgetSize;
+	if (_extraSizeRemainder && *_extraSizeRemainder) {
+		widgetSize_ += *_extraSizeRemainder;
+		*_extraSizeRemainder = 0;
+	}
 
-	updateTextSizeInitial(tree, index);
+	updateTextSizeInitial(tree, index, force);
 
-	size_ = Point(textSizeInitial_ + widgetSizeMin(tree), isRoot() ? 0 : tree->_defaultRowHeight() + floorHeight());
+	int height = isRoot() ? 0 : tree->_defaultRowHeight() + floorHeight();
+	size_.setY(height);
 
 	pos_.setX(posX);
 	posX += plusSize_;
 
-	int freePulledChildren = 0;
 	int extraSizeStorage = 0;
 	int& extraSize = !pulledUp() || !_extraSize ? extraSizeStorage : *_extraSize;
+
+	int validatorIconsWidth = 0;
+	if (validatorHasErrors_)
+		validatorIconsWidth += tree->_defaultRowHeight();
+	if (validatorHasWarnings_)
+		validatorIconsWidth += tree->_defaultRowHeight();
+
+	int freePulledChildren = 0;
 	if(!pulledUp()){
 		int minTextSize = 0;
-		int minimalWidth = 0;
-		calcPulledRows(&minTextSize, &freePulledChildren, &minimalWidth, tree, index);
-		DEBUG_TRACE_ROW("%s minTextSize: %i, minimalWidth: %i", label(), minTextSize, minimalWidth);
-		size_.setX(minimalWidth);
-		extraSize = (tree->rightBorder() - tree->leftBorder()) - minimalWidth - posX;
+		int totalMinimalWidth = 0;
+		calcPulledRows(&minTextSize, &freePulledChildren, &totalMinimalWidth, tree, index);
+		DEBUG_TRACE_ROW("%s minTextSize: %i, totalMinimalWidth: %i", label(), minTextSize, totalMinimalWidth);
+		size_.setX(totalMinimalWidth);
+		extraSize = (tree->rightBorder() - tree->leftBorder()) - totalMinimalWidth - posX - validatorIconsWidth;
 		DEBUG_TRACE_ROW("%s extraSize 0: %i", label(), extraSize);
 
 		float textScale = 1.0f;
@@ -595,22 +721,33 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	if(widgetPlace == WIDGET_AFTER_NAME && !tree->fullRowContainers())
 		widgetPlace = WIDGET_VALUE;
 
+	int numChildren = (int)children_.size();
+
 	if(widgetPlace == WIDGET_ICON){
-		widgetPos_ = widgetSize_ ? posX : -1000;
+		if (tree->treeStyle().alignLabelsToRight && !pulledUp_ && !pulledBefore_ && !hasPulled_ && numChildren == 0)
+			widgetPos_ = widgetSize_ ? tree->leftBorder() + xround((tree->rightBorder() - tree->leftBorder())* (1.f - tree->treeStyle().valueColumnWidth)) : -1000;
+		else
+			widgetPos_ = widgetSize_ ? posX : -1000;
 		posX += widgetSize_;
-		textPos_ = posX;
+		if (tree->treeStyle().alignLabelsToRight)
+			textPos_ = widgetPos_ + widgetSize_ + TEXT_VALUE_SPACING;
+		else
+			textPos_ = posX;
 		posX += textSize_;
 	}
 
-	int numChildren = (int)children_.size();
+	bool hasPulledBefore = false;
 	if (hasPulled_) {
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = children_[i];
 			if(row->visible(tree) && row->pulledBefore()){
-				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				row->calculateMinimalSize(tree, posX, availableWidth, force, 0, &extraSize, i);
 				posX += row->size_.x();
+				hasPulledBefore = true;
 			}
 		}
+		if (hasPulledBefore)
+			posX += TEXT_VALUE_SPACING;
 	}
 
 	if(widgetPlace != WIDGET_ICON){
@@ -619,44 +756,81 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	}
 
 	if(widgetPlace == WIDGET_AFTER_NAME){
+		if (textSize_)
+			posX += TEXT_VALUE_SPACING;
 		widgetPos_ = posX;
 		posX += widgetSize_;
 	}
 
-	if(!pulledUp() && extraSize > 0){ // align widget value to value column
-		if(!isFullRow(tree)){
-			int oldX = posX;
-			int newX = max(int(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth()))), posX);
-			int xDelta = newX - oldX;
-			if (xDelta <= extraSize){
-				extraSize -= xDelta;
-				posX = newX;
-			}
-			else{
-				posX += extraSize;
-				extraSize = 0;
+	if (widgetPlace == WIDGET_INSTEAD_OF_TEXT)
+		widgetPos_ = posX;
+
+	if(widgetPlace == WIDGET_VALUE || widgetPlace == WIDGET_AFTER_PULLED || (freePulledChildren > 0)){
+		if (textSize_)
+			posX += TEXT_VALUE_SPACING;
+
+		if(!pulledUp() && extraSize > 0){
+			// align widget value to value column
+			if(!isFullRow(tree))
+			{
+				int oldX = posX;
+
+				bool rightAlignment = tree->treeStyle().alignLabelsToRight && !hasPulledBefore;
+				int maxX = rightAlignment ? textSize_ + TEXT_VALUE_SPACING: posX;
+				int newX = max(tree->leftBorder() + xround((tree->rightBorder() - tree->leftBorder())* (1.f - tree->treeStyle().valueColumnWidth)), maxX);
+
+				if (rightAlignment) {
+					textPos_ = newX - textSize_ - TEXT_VALUE_SPACING;
+					widgetPos_ = textPos_ - widgetSize_ - TEXT_VALUE_SPACING;
+				}
+
+				int xDelta = newX - oldX;
+				if (xDelta <= extraSize)
+				{
+					extraSize -= xDelta;
+					posX = newX;
+				}
+				else
+				{
+					posX += extraSize;
+					extraSize = 0;
+				}
 			}
 		}
 	}
-	if (freePulledChildren > 0)
-		extraSize = extraSize / freePulledChildren;
 
-	if (widgetPlace == WIDGET_VALUE) {
-		if(widgetSize_ && !isWidgetFixed() && extraSize > 0) {
-			DEBUG_TRACE_ROW("%s widget extraSize: %i", label(), extraSize);
-			widgetSize_ += extraSize;
+	int extraSizeRemainder = 0;
+	if (freePulledChildren > 0) {
+			extraSizeRemainder = extraSize % freePulledChildren;
+			extraSize = extraSize / freePulledChildren;
+	}
+
+	if (widgetPlace == WIDGET_VALUE || widgetPlace == WIDGET_INSTEAD_OF_TEXT) {
+		if(minWidgetSize && !isWidgetFixed() && extraSize > 0) {
+			DEBUG_TRACE_ROW("%s widget extraSize: %i+%d", label(), extraSize, extraSizeRemainder);
+			widgetSize_ += extraSize + extraSizeRemainder;
+			extraSizeRemainder = 0;
 		}
 
+		if (widgetPlace != WIDGET_INSTEAD_OF_TEXT)
 		widgetPos_ = posX;
 		DEBUG_TRACE_ROW("textSize: %i widgetPos: %i", int(textSize_), int(widgetPos_));
 		posX += widgetSize_;
-		int delta = tree->rightBorder() - posX;
-		if(delta > 0 && delta < 4)
-			widgetSize_ += delta;
 	}
 
-	size_.setX(textSize_ + widgetSize_);
+	size_.setX(textSize_ + (textSize_ ? TEXT_VALUE_SPACING : 0) + widgetSize_ + validatorIconsWidth);
+	
+	int childrenLeft = nonPulled->pos_.x();
+	if (parent() != 0){
+		if (parent()->parent() == 0) {
+			if (!tree->treeStyle().doNotIndentSecondLevel)
+				childrenLeft += int(tree->treeStyle().firstLevelIndent * tree->_defaultRowHeight());
+		}
+		else
+			childrenLeft += int(tree->treeStyle().levelIndent * tree->_defaultRowHeight());
+	}
 
+	int checkBoxChildren = 0;
 	for (int i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
 		if(!row->visible(tree)) {
@@ -665,39 +839,135 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		}
 		if(row->pulledUp()){
 			if(!row->pulledBefore()){
-				if(!widgetPos_)
-					widgetPos_ = posX;
-				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				row->calculateMinimalSize(tree, posX, availableWidth, force, &extraSizeRemainder, &extraSize, i);
 				posX += row->size_.x();
+				posX += TEXT_VALUE_SPACING;
 			}
-			size_.setX(size_.x() + row->size_.x());
+			size_.setX(size_.x() + TEXT_VALUE_SPACING + row->size_.x());
 			size_.setY(max(size_.y(), row->size_.y()));
 		}
-		else if(expanded())
-			row->calculateMinimalSize(tree, nonPulled->plusRect(tree).right(), force, &extraSize, i);
+		else if(expanded()){
+			row->calculateMinimalSize(tree, childrenLeft, availableWidth, force, 0, &extraSize, i);
+			if (row->widgetPlacement() == WIDGET_ICON && row->count() == 0)
+				++checkBoxChildren;
+		}
+	}
+
+	// align checkboxes into two columns
+	if (tree->packCheckboxes() || userPackCheckboxes_) {
+		if (expanded() && checkBoxChildren > 0 && hasVisibleChildren(tree)) {
+			int widthTotal = tree->rightBorder() - 16 - childrenLeft - plusSize_;
+			int widthNextToLastCheckbox = 0;
+			int left = childrenLeft + plusSize_;
+			PropertyRow* previousCheckbox = nullptr;
+
+			std::vector<PropertyRow*> checkboxesToRealign;
+			bool hasChanges = false;
+
+			for (int i = 0; i < numChildren; ++i) {
+				PropertyRow* row = children_[i];
+				if(!row->visible(tree))
+					continue;
+				if(row->widgetPlacement() != WIDGET_ICON || row->count() > 0) {
+					previousCheckbox = 0;
+					continue;
+				}
+				if(!row->pulledUp()){
+					int checkboxWidth = row->textSize_ + tree->_defaultRowHeight()/* + TEXT_VALUE_SPACING*/;
+
+					if (previousCheckbox && widthNextToLastCheckbox >= widthTotal / 2 && checkboxWidth < widthTotal / 2) {
+						row->packedAfterPreviousRow_ = true;
+						widthNextToLastCheckbox = 0;
+
+						row->pos_.setX(left + widthTotal / 2);
+						row->widgetPos_ = row->pos_.x();
+						row->textPos_ = row->pos_.x() + row->widgetSize_;
+						row->size_.setX(widthTotal / 2);
+
+						previousCheckbox->size_.setX(widthTotal / 2);
+						previousCheckbox->pos_.setX(left);
+						previousCheckbox->widgetPos_ = left;
+						previousCheckbox->textPos_ = left + previousCheckbox->widgetSize_;
+						row->size_.setX(widthTotal / 2);
+						previousCheckbox = 0;
+						hasChanges = true;
+					}
+					else {
+						row->packedAfterPreviousRow_ = false;
+						widthNextToLastCheckbox = widthTotal - checkboxWidth;
+						previousCheckbox = row;
+					}
+
+					if (previousCheckbox && tree->treeStyle().alignLabelsToRight)
+						checkboxesToRealign.push_back(previousCheckbox);
+				}
+			}
+
+			if (hasChanges) {
+				for (int i = 0; i < checkboxesToRealign.size(); ++i) {
+					PropertyRow* row = checkboxesToRealign[i];
+					row->size_.setX(widthTotal / 2);
+					row->pos_.setX(left);
+					row->widgetPos_ = left;
+					row->textPos_ = left + row->widgetSize_;
+				}
+			}
+		}
 	}
 
 	if (widgetPlace == WIDGET_AFTER_PULLED)
+	{
+		posX += TEXT_VALUE_SPACING;
 		widgetPos_ = posX;
+	}
 
 	if(!pulledUp())
 		size_.setX(tree->rightBorder() - pos_.x());
 	DEBUG_TRACE_ROW("calculateMinimalSize: '%s' %i %i (%s)", label(), size_.x(), size_.y(), isRoot() ? "root" : "non-root");
 	layoutChanged_ = false;
+
+	validatorsHeight_ = 0;
+	if (!pulledUp() && !pulledBefore() && (validatorCount_ != 0 || hasPulled_)) {
+		int padding = int(0.1f * tree->_defaultRowHeight());
+		auto calculateValidatorHeight = [&](PropertyRow* row) {
+			const ValidatorEntry* entries = tree->_validatorBlock()->getEntry(row->validatorIndex_, row->validatorCount_);
+			if (entries) {
+				for (int i = 0; i < row->validatorCount_; ++i) {
+					int startPos = pos_.x() + plusSize_;
+					int height = tree->ui()->textHeight(availableWidth - startPos - tree->_defaultRowHeight() - padding * 2, entries[i].message.c_str(), property_tree::FONT_NORMAL);
+					validatorsHeight_ += max(tree->_defaultRowHeight(), height+ padding * 2) + padding * 3;
+				}
+			}
+		};
+		calculateValidatorHeight(this);
+		visitPulledRows(this, calculateValidatorHeight);
+	}
+
+	size_.setY(size_.y() + validatorsHeight_);
 }
 
 void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHeight)
 {
+	int defaultRowHeight = tree->_defaultRowHeight();
 	pos_.setY(totalHeight);
-	if(!pulledUp())
-		totalHeight += size_.y();
+	int rowHeight = size_.y() + int(defaultRowHeight * (tree->treeStyle().rowSpacing - 1.0f) + 0.5f);
+
+	if (packedAfterPreviousRow_)
+		pos_.setY(totalHeight - rowHeight);
+	else
+		pos_.setY(totalHeight);
+
+	if(!pulledUp()) {
+		if (!packedAfterPreviousRow_)
+			totalHeight += rowHeight;
+	}
 	else{
 		pos_.setY(parent()->pos_.y());
 		expanded_ = parent()->expanded();
 	}
 	PropertyRow* nonPulled = nonPulledParent();
 
-	DEBUG_TRACE_ROW("adjustRect: %s %i %i %i %i, totalHeight: %i %s", label(), pos_.x(), pos_.y(), size_.x(), size_.y(), totalHeight, pulledUp() ? "pulled" : "");
+	DEBUG_TRACE_ROW("adjustRect: %s %i %i %i %i %s", label(), pos_.x(), pos_.y(), size_.x(), size_.y(), pulledUp() ? "pulled" : "");
 
 	if (expanded_ || hasPulled_) {
 		for(PropertyRows::iterator it = children_.begin(); it != children_.end(); ++it){
@@ -706,13 +976,17 @@ void PropertyRow::adjustVerticalPosition(const PropertyTree* tree, int& totalHei
 				row->adjustVerticalPosition(tree, totalHeight);
 		}
 	}
+	int delta = totalHeight - pos_.y();
+	if (delta > USHRT_MAX)
+		delta = USHRT_MAX;
+	heightIncludingChildren_ = delta;
 }
 
 void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 {
-	updateTextSizeInitial(tree, index);
+	updateTextSizeInitial(tree, index, false);
 
-	textSize_ = xround(textSizeInitial_ * mult);
+	textSize_ = int(textSizeInitial_ * mult);
 
 	size_t numChildren = children_.size();
 	for (size_t i = 0; i < numChildren; ++i) {
@@ -724,19 +998,33 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 
 void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
 {
-	updateTextSizeInitial(tree, index);
+	updateTextSizeInitial(tree, index, false);
 
 	*minTextSize += textSizeInitial_;
-	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
+	WidgetPlacement widgetPlace = widgetPlacement();
+	if((widgetPlace == WIDGET_VALUE || widgetPlace == WIDGET_INSTEAD_OF_TEXT || widgetPlace == WIDGET_AFTER_PULLED) && !isWidgetFixed())
 		*freePulledChildren += 1;
-	*minimalWidth += textSizeInitial_ + widgetSizeMin(tree);
+	*minimalWidth += textSizeInitial_ + widgetSizeMin(tree); // spacing
+	bool hasWidget = widgetPlace == WIDGET_VALUE || 
+									 widgetPlace == WIDGET_INSTEAD_OF_TEXT ||
+									 widgetPlace == WIDGET_AFTER_PULLED;
+	if (textSizeInitial_ && (hasWidget || hasPulled_))
+			*minimalWidth += TEXT_VALUE_SPACING;
+	if (hasWidget && hasPulled_)
+		*minimalWidth += TEXT_VALUE_SPACING;
 
 	size_t numChildren = children_.size();
+	int pulledCount = 0;
 	for (size_t i = 0; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
 		if(row->pulledUp())
+		{
+			++pulledCount;
 			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
 	}
+	}
+	if (hasPulled_)
+		*minimalWidth += (pulledCount - 1) * TEXT_VALUE_SPACING;
 }
 
 PropertyRow* PropertyRow::findSelected()
@@ -768,6 +1056,7 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
 {
 	int numChildren = (int)children_.size();
+	startIndex = min(startIndex, numChildren);
 
 	for (int i = startIndex; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
@@ -901,22 +1190,45 @@ bool PropertyRow::pulledSelected() const
 
 Font PropertyRow::rowFont(const PropertyTree* tree) const
 {
-	return hasVisibleChildren(tree) || isContainer() ? FONT_BOLD : FONT_NORMAL;
+	return (hasVisibleChildren(tree) || (isContainer() && !static_cast<const PropertyRowContainer*>(this)->isInlined())) ? property_tree::FONT_BOLD : property_tree::FONT_NORMAL;
+}
+
+Rect PropertyRow::rectIncludingChildren(const PropertyTree* tree) const
+{
+	Rect r = rect();
+	if (expanded())
+		for (size_t i = 0; i < children_.size(); ++i)
+			if (children_[i]->visible(tree))
+				r = r.united(children_[i]->rectIncludingChildren(tree));
+	return r;
 }
 
 void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int index, bool selectionPass)
 {
 	Rect rowRect = rect();
 	Rect selectionRect;
-	if(!pulledUp())
-		selectionRect = rowRect.adjusted(plusSize_ - (tree->compact() ? 1 : 2), -2, 1, 1);
-	else
-		selectionRect = rowRect.adjusted(-1, 0, 1, -1);
+
+	bool showSelection = true;
+	if (tree->treeStyle().selectionRectangle) {
+		if(!pulledUp())
+			selectionRect = rowRect.adjusted(plusSize_ - (tree->compact() ? 1 : 2), -2, 1, 1);
+		else {
+			selectionRect = rowRect.adjusted(-1, 0, 1, -1);
+		}
+	}
+	else {
+		selectionRect = widgetRect(tree).adjusted(-1, -1, 1, 1);
+		if (widgetPlacement() == WIDGET_ICON)
+			showSelection = labelUndecorated()[0] == '\0';
+		else
+			showSelection = widgetPlacement() != WIDGET_NONE;
+	}
 
 	if (selectionPass) {
 		if (selected()) {
 			// drawing a selection rectangle
-			context.drawSelection(selectionRect, false);
+			if (showSelection)
+				context.drawSelection(selectionRect, false);
 		}
 		else{
 			bool pulledChildrenSelected = false;
@@ -930,7 +1242,8 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 			}
 
 			if (pulledChildrenSelected) {
-				context.drawSelection(selectionRect, true);
+				if (tree->treeStyle().selectionRectangle)
+					context.drawSelection(selectionRect, true);
 				// draw rectangle around parent of selected pulled row
 			}
 		}
@@ -942,14 +1255,14 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 		context.pressed = tree->_pressedRow() == this;
 
 
+		// drawing a horizontal line
+		int lineSize = widgetPos_ - textPos_ - 2;
+		if(lineSize > textSize_){
+			Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
 
-	// drawing a horizontal line
-	int lineSize = widgetPos_ - textPos_ - 2;
-	if(lineSize > textSize_){
-		Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
-
-		context.drawRowLine(rect);
-	}
+			if (tree->treeStyle().horizontalLines)
+				context.drawRowLine(rect);
+		}
 
 
 		if(!tree->compact() || !parent()->isRoot()){
@@ -965,7 +1278,21 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 		if(textSize_ > 0){
 			char containerLabel[16] = "";
 			yasli::string text = rowText(containerLabel, tree, index);
-			context.drawLabel(text.c_str(), FONT_NORMAL, textRect(tree), pulledSelected());
+			context.drawLabel(text.c_str(), rowFont(tree), textRect(tree), pulledSelected());
+		}
+
+		if (validatorHasWarnings_) {
+			context.drawValidatorWarningIcon(validatorWarningIconRect(tree));
+		}
+		if (validatorHasErrors_) {
+			context.drawValidatorErrorIcon(validatorWarningIconRect(tree));
+		}
+
+		if (!selectionPass && validatorsHeight_ > 0)
+		{
+			Rect totalRect = validatorRect(tree);
+
+			context.drawValidators(this, totalRect);
 		}
 	}
 }
@@ -974,14 +1301,14 @@ bool PropertyRow::visible(const PropertyTree* tree) const
 {
 	if (tree->_isDragged(this))
 		return false;
-	return ((visible_ || !tree->hideUntranslated()) && (matchFilter_ || belongsToFilteredRow_));
+	return (visible_ && (matchFilter_ || belongsToFilteredRow_));
 }
 
 bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 {
 	if(!visible(tree))
 		return false;
-	if((tree->compact() && (parent() && parent()->isRoot())) || (isContainer() && pulledUp()) || !hasVisibleChildren(tree))
+	if((tree->treeStyle().compact && (parent() && parent()->isRoot())) || (isContainer() && pulledUp()) || !hasVisibleChildren(tree))
 		return false;
 	return !empty();
 }
@@ -1081,7 +1408,7 @@ void PropertyRow::intersect(const PropertyRow* row)
 
 const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int index) const
 {
-	if(parent() && parent()->isContainer()){
+	if(parent() && parent()->isContainer() && !pulledUp()){
 		if (tree->showContainerIndices()) {
             sprintf(containerLabelBuffer, " %i.", index);
 			return containerLabelBuffer;
@@ -1138,7 +1465,7 @@ PropertyRow* PropertyRow::hit(const PropertyTree* tree, Point point)
 
 PropertyRow* PropertyRow::findByAddress(const void* addr)
 {
-    if(serializer_.pointer() == addr)
+    if(searchHandle() == addr)
         return this;
     else{
         Rows::iterator it;
@@ -1151,6 +1478,12 @@ PropertyRow* PropertyRow::findByAddress(const void* addr)
     return 0;
 }
 
+const void* PropertyRow::searchHandle() const
+{
+	return serializer_.pointer();
+}
+
+
 struct GetVerticalIndexOp{
     int index_;
     const PropertyRow* row_;
@@ -1161,7 +1494,7 @@ struct GetVerticalIndexOp{
     {
         if(row == row_)
             return SCAN_FINISHED;
-        if(row->visible(tree) && row->isSelectable() && !row->pulledUp())
+				if(row->visible(tree) && row->isSelectable() && !row->pulledUp() && !row->packedAfterPreviousRow())
             ++index_;
         return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
     }
@@ -1182,14 +1515,14 @@ struct RowByVerticalIndexOp{
     RowByVerticalIndexOp(int index) : row_(0), index_(index) {}
 
     ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
-    {
-        if(row->visible(tree) && !row->pulledUp() && row->isSelectable()){
-            row_ = row;
-            if(index_-- <= 0)
-                return SCAN_FINISHED;
-        }
-        return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
-    }
+		{
+			if(row->visible(tree) && !row->pulledUp() && row->isSelectable() && !row->packedAfterPreviousRow()){
+				row_ = row;
+				if(index_-- <= 0)
+					return SCAN_FINISHED;
+			}
+			return row->expanded() ? SCAN_CHILDREN_SIBLINGS : SCAN_SIBLINGS;
+		}
 };
 
 PropertyRow* PropertyRow::rowByVerticalIndex(PropertyTree* tree, int index)
@@ -1287,6 +1620,27 @@ Rect PropertyRow::widgetRect(const PropertyTree* tree) const
 	return Rect(widgetPos_, pos_.y(), widgetSize_, tree->_defaultRowHeight());
 }
 
+Rect PropertyRow::validatorRect(const PropertyTree* tree) const
+{
+	return Rect(pos_.x() + plusSize_, pos_.y() + size_.y() - validatorsHeight_, size_.x() - plusSize_, validatorsHeight_);
+}
+
+Rect PropertyRow::validatorErrorIconRect(const PropertyTree* tree) const
+{
+	int rowHeight = tree->_defaultRowHeight();
+	int width = validatorHasErrors_ && !expanded_ ? rowHeight : 0;
+	int normalX = pos_.x() + size_.x() - width;
+	int minimalX = max(widgetPos_ + widgetSize_, textPos_ + textSize_);
+	return Rect(max(minimalX, normalX), pos_.y(), width, rowHeight);
+}
+
+Rect PropertyRow::validatorWarningIconRect(const PropertyTree* tree) const
+{
+	Rect r = validatorErrorIconRect(tree);	
+	int width = validatorHasWarnings_ && !expanded_ ? r.height() : 0;
+	return Rect(r.left() - width, pos_.y(), width, r.height());
+}
+
 Rect PropertyRow::plusRect(const PropertyTree* tree) const
 {
 	return Rect(pos_.x(), pos_.y(), plusSize_, tree->_defaultRowHeight());
@@ -1297,10 +1651,40 @@ Rect PropertyRow::floorRect(const PropertyTree* tree) const
 	return Rect(textPos_, pos_.y() + tree->_defaultRowHeight(), size_.x() - (textPos_ - pos_.x()) , size_.y() - tree->_defaultRowHeight());
 }
 
-YASLI_CLASS(PropertyRow, PropertyRow, "Structure");
+void PropertyRow::setCallback(yasli::CallbackInterface* callback)
+{
+	callback_ = callback;
+}
+
+YASLI_CLASS_NAME(PropertyRow, PropertyRow, "PropertyRow", "Structure");
+
+YASLI_API PropertyRowFactory& globalPropertyRowFactory()
+{
+	return PropertyRowFactory::the();
+}
+
+YASLI_API yasli::ClassFactory<PropertyRow>& globalPropertyRowClassFactory()
+{
+	return yasli::ClassFactory<PropertyRow>::the();
+}
 
 // ---------------------------------------------------------------------------
 
+int RowWidthCache::getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace)
+{
+	yasli::string value = rowForValue->valueAsString();
+	const Font font = rowForValue->rowFont(tree);
+	unsigned int newHash = calculateHash(value.c_str());
+	newHash = calculateHash(font, newHash);
+	if (newHash != valueHash)
+	{
+		width = tree->ui()->textWidth(value.c_str(), font) + 6 + extraSpace;
+		if (width < 24)
+			width = 24;
+		valueHash = newHash;
+	}
+	return width;
+}
 
 FORCE_SEGMENT(PropertyRowNumber)
 FORCE_SEGMENT(PropertyRowStringList)

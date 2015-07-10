@@ -1,9 +1,9 @@
 #include "UnitTest++.h"
 #include "ComplexClass.h"
 
-YASLI_CLASS(PolyBase, PolyBase, "Base")
-YASLI_CLASS(PolyBase, PolyDerivedA, "Derived A")
-YASLI_CLASS(PolyBase, PolyDerivedB, "Derived B")
+YASLI_CLASS_NAME(PolyBase, PolyBase, "base", "Base")
+YASLI_CLASS_NAME(PolyBase, PolyDerivedA, "derivedA", "Derived A")
+YASLI_CLASS_NAME(PolyBase, PolyDerivedB, "derivedB", "Derived B")
 
 
 int main(int argc, char* argv[])

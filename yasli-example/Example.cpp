@@ -160,8 +160,8 @@ struct MyDataContainer
 	std::vector<MyDataClass> objects;
 };
 
-YASLI_CLASS(PolyBase, PolyBase, "Base")
-YASLI_CLASS(PolyBase, PolyDerivedA, "Derived A")
+YASLI_CLASS_NAME(PolyBase, PolyBase, "PolyBase", "Base")
+YASLI_CLASS_NAME(PolyBase, PolyDerivedA, "PolyDerivedA", "Derived A")
 
 struct AutoTimer
 {

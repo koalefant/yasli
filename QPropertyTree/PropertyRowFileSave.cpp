@@ -29,9 +29,9 @@ public:
 
 	bool isLeaf() const override{ return true; }
 
-	bool onActivate(PropertyTree* tree, bool force) override
+	bool onActivate(const PropertyActivationEvent& e) override
 	{
-		QFileDialog dialog(tree->ui()->qwidget());
+		QFileDialog dialog(e.tree->ui()->qwidget());
 		dialog.setAcceptMode(QFileDialog::AcceptSave);
 		dialog.setFileMode(QFileDialog::AnyFile);
 		dialog.setDefaultSuffix(extractExtensionFromFilter(value().filter.c_str()).c_str());
@@ -51,20 +51,20 @@ public:
 			dialog.selectFile(QString(value().path.c_str()));
 
 		if (dialog.exec() && !dialog.selectedFiles().isEmpty()) {
-			tree->model()->rowAboutToBeChanged(this);
+			e.tree->model()->rowAboutToBeChanged(this);
 			QString filename = dialog.selectedFiles()[0];
 			QString relativeFilename = directory.relativeFilePath(filename);
 			value().path = relativeFilename.toLocal8Bit().data();
-			tree->model()->rowChanged(this);
+			e.tree->model()->rowChanged(this);
 		}
 		return true;
 	}
 
 
 	int buttonCount() const override{ return 1; }
-	yasli::IconXPM buttonIcon(const PropertyTree* tree, int index) const override{ 
+	property_tree::Icon buttonIcon(const PropertyTree* tree, int index) const override{ 
 		#include "PropertyTree/file_save.xpm"
-		return yasli::IconXPM(file_save_xpm);
+		return property_tree::Icon(yasli::IconXPM(file_save_xpm));
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 

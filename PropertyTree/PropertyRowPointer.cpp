@@ -58,39 +58,28 @@ IMenu* ClassMenuItemAdder::addMenu(IMenu& menu, const char* text)
 
 // ---------------------------------------------------------------------------
 
-YASLI_CLASS(PropertyRow, PropertyRowPointer, "SharedPtr");
+YASLI_CLASS_NAME(PropertyRow, PropertyRowPointer, "PropertyRowPointer", "SharedPtr");
 
 PropertyRowPointer::PropertyRowPointer()
 : factory_(0)
+, searchHandle_(0)
+, colorOverride_(0,0,0,0)
 {
 }
 
-void PropertyRowPointer::setDerivedType(const TypeID& typeID, yasli::ClassFactoryBase* factory)
+void PropertyRowPointer::setDerivedType(const char* typeName, yasli::ClassFactoryBase* factory)
 {
 	if (!factory) {
 		derivedTypeName_.clear();
 		return;
 	}
-	const yasli::TypeDescription* desc = factory->descriptionByType(typeID);
-	if (!desc) {
-		derivedTypeName_.clear();
-		return;
-	}
-	derivedTypeName_ = desc->name();
-}
-
-TypeID PropertyRowPointer::getDerivedType(yasli::ClassFactoryBase* factory) const
-{
-	if (!factory)
-		return TypeID();
-	return factory->findTypeByName(derivedTypeName_.c_str());
+	derivedTypeName_ = typeName;
 }
 
 bool PropertyRowPointer::assignTo(yasli::PointerInterface &ptr)
 {
-	TypeID derivedType = getDerivedType(ptr.factory());
-	if ( ptr.type() != derivedType ) {
-		ptr.create(derivedType);
+	if (derivedTypeName_ != ptr.registeredTypeName()) {
+		ptr.create(derivedTypeName_.c_str());
 	}
 
 	return true;
@@ -101,25 +90,25 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 {
 	tree->model()->rowAboutToBeChanged(row);
 	if(index < 0){ // NULL value
-		row->setDerivedType(TypeID(), 0);
+		row->setDerivedType("", 0);
 		row->clear();
 	}
 	else{
-		const PropertyDefaultTypeValue* defaultValue = tree->model()->defaultType(row->baseType(), index);
+		const PropertyDefaultDerivedTypeValue* defaultValue = tree->model()->defaultType(row->baseType(), index);
 		SharedPtr<PropertyRow> clonedDefault = defaultValue->root->clone(tree->model()->constStrings());
 		if (defaultValue && defaultValue->root) {
 			YASLI_ASSERT(defaultValue->root->refCount() == 1);
 			if(useDefaultValue){
 				row->clear();
-				row->swapChildren(clonedDefault);
+				row->swapChildren(clonedDefault, 0);
 			}
-			row->setDerivedType(defaultValue->type, row->factory());
+			row->setDerivedType(defaultValue->registeredName.c_str(), row->factory());
 			row->setLabelChanged();
 			row->setLabelChangedToChildren();
 			tree->expandRow(row);
 		}
 		else{
-			row->setDerivedType(TypeID(), 0);
+			row->setDerivedType("", 0);
 			row->clear();
 		}
 	}
@@ -132,7 +121,7 @@ yasli::string PropertyRowPointer::valueAsString() const
 	yasli::string result;
 	const yasli::TypeDescription* desc = 0;
 	if (factory_)
-		desc = factory_->descriptionByType(getDerivedType(factory_));
+		desc = factory_->descriptionByRegisteredName(derivedTypeName_.c_str());
 	if (desc)
 		result = desc->label();
 	else
@@ -150,7 +139,8 @@ yasli::string PropertyRowPointer::generateLabel() const
 	if(!derivedTypeName_.empty()){
 		const char* textStart = derivedTypeName_.c_str();
 		if (factory_) {
-			const yasli::TypeDescription* desc = factory_->descriptionByType(getDerivedType(factory_));
+			const yasli::TypeDescription* desc = factory_->descriptionByRegisteredName(derivedTypeName_.c_str());
+
 			if (desc)
 				textStart = desc->label();
 		}
@@ -187,7 +177,7 @@ void PropertyRowPointer::redraw(IDrawContext& context)
 	property_tree::Font font = derivedTypeName_.empty() ? FONT_NORMAL : FONT_BOLD;
 	context.drawControlButton(rt, str.c_str(),
 		(context.pressed ? BUTTON_PRESSED : 0) | (userReadOnly() ? BUTTON_DISABLED : 0) | BUTTON_DROP_DOWN,
-		font);
+		font, colorOverride_.a != 0 ? &colorOverride_ : 0);
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
@@ -199,7 +189,7 @@ struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
 		handler->row = row_;
 		handler->tree = tree_;
 		handler->index = index;
-		handler->useDefaultValue = !tree_->immediateUpdate();
+		handler->useDefaultValue = !tree_->config().immediateUpdate;
 
 		menu.addAction(text, 0, handler, &CreatePointerMenuHandler::onMenuCreateByIndex);
 	}
@@ -209,25 +199,28 @@ protected:
 };
 
 
-bool PropertyRowPointer::onActivate( PropertyTree* tree, bool force)
+bool PropertyRowPointer::onActivate(const PropertyActivationEvent& ev)
 {
 	if(userReadOnly())
 			return false;
-	std::auto_ptr<property_tree::IMenu> menu(tree->ui()->createMenu());
-	ClassMenuItemAdderRowPointer(this, tree).generateMenu(*menu, tree->model()->typeStringList(baseType()));
-	tree->_setPressedRow(this);
-	menu->exec(Point(widgetPos_, pos_.y() + tree->_defaultRowHeight()));
-	tree->_setPressedRow(0);
+	std::auto_ptr<property_tree::IMenu> menu(ev.tree->ui()->createMenu());
+	ClassMenuItemAdderRowPointer(this, ev.tree).generateMenu(*menu, ev.tree->model()->typeStringList(baseType()));
+	ev.tree->_setPressedRow(this);
+	menu->exec(Point(widgetPos_, pos_.y() + ev.tree->_defaultRowHeight()));
+	ev.tree->_setPressedRow(0);
 	return true;
 }
 
 bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Point point, bool& changed) 
 {
-		if(widgetRect(tree).contains(point)){
-				if(onActivate(tree, false))
-						changed = true;
-		}
-		return false; 
+	if(widgetRect(tree).contains(point)){
+		PropertyActivationEvent ev;
+		ev.tree = tree;
+		ev.clickPoint = point;
+		if(onActivate(ev))
+			changed = true;
+	}
+	return false; 
 }
 
 bool PropertyRowPointer::onContextMenu(IMenu &menu, PropertyTree* tree)
@@ -253,12 +246,30 @@ int PropertyRowPointer::widgetSizeMin(const PropertyTree* tree) const
 	return tree->ui()->textWidth(text.c_str(), font) + 18;
 }
 
+static Color parseColorString(const char* str)
+{
+	unsigned int color = 0;
+	if (sscanf(str, "%x", &color) != 1)
+		return Color(0,0,0,0);
+	Color result((color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff, 255);
+	return result;
+}
+
 void PropertyRowPointer::setValueAndContext(const yasli::PointerInterface& ptr, yasli::Archive& ar)
 {
 	baseType_ = ptr.baseType();
 	factory_ = ptr.factory();
 	serializer_ = ptr.serializer();
-	const yasli::TypeDescription* desc = factory_->descriptionByType(ptr.type());
+	pointerType_ = ptr.pointerType();
+	searchHandle_ = ptr.handle();
+
+	const char* colorString = factory_->findAnnotation(ptr.registeredTypeName(), "color");
+	if (colorString[0] != '\0')
+		colorOverride_ = parseColorString(colorString);
+	else
+		colorOverride_ = Color(0,0,0,0);
+
+	const yasli::TypeDescription* desc = factory_->descriptionByRegisteredName(ptr.registeredTypeName());
 	if (desc)
 		derivedTypeName_ = desc->name();
 	else

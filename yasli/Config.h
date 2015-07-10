@@ -11,11 +11,28 @@
 #pragma once
 
 // Use ConfigLocal.h to redefine any of the options below.
-#include "ConfigLocal.h"
+#include <yasli/ConfigLocal.h>
+
+#ifndef YASLI_API
+#define YASLI_API
+#endif
+
+#ifndef PROPERTY_TREE_API
+#define PROPERTY_TREE_API
+#endif
+
+#ifndef YASLI_INLINE_IMPLEMENTATION
+#define YASLI_INLINE_IMPLEMENTATION 0
+#define YASLI_INLINE
+#endif
 
 // Disable C++ RTTI use (e.g. typeid())
 #ifndef YASLI_NO_RTTI
 #define YASLI_NO_RTTI 1
+#endif
+
+#ifndef YASLI_NO_FCVT
+#define YASLI_NO_FCVT 0
 #endif
 
 // Disable extra struct-level for polymorphic pointer serialization
@@ -28,14 +45,15 @@
 #define YASLI_DEFAULT_FILTER 0
 #endif
 
-// Toggles between russian and english serialization labels 
-#ifndef XMATH_IN_ENGLISH
-#define XMATH_IN_ENGLISH 0
-#endif
-
 // Serialize std::pair: 1 - ("first", "second") or 0 - ("key", "value")
 #ifndef YASLI_STD_PAIR_FIRST_SECOND
 #define YASLI_STD_PAIR_FIRST_SECOND 0
+#endif
+
+// Useful to compile out editing functionality like Archive::isEdit() check
+// warning/error messages.
+#ifndef YASLI_NO_EDITING
+#define YASLI_NO_EDITING 0
 #endif
 
 #ifdef _DEBUG
@@ -94,6 +112,13 @@ namespace yasli {
 	using std::string;
 	using std::wstring;
 }
+#endif
+
+#ifndef YASLI_STRING_NAMESPACE_BEGIN
+#define YASLI_STRING_NAMESPACE_BEGIN namespace std {
+#endif
+#ifndef YASLI_STRING_NAMESPACE_END
+#define YASLI_STRING_NAMESPACE_END }
 #endif
 
 #ifndef YASLI_STRING_LIST_BASE_DEFINED

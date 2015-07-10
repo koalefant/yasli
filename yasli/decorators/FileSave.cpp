@@ -5,14 +5,14 @@
 
 namespace yasli {
 
-void FileSave::YASLI_SERIALIZE_METHOD(Archive& ar)
+YASLI_INLINE void FileSave::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
 	ar(path, "path");
 	ar(filter, "filter");
 	ar(relativeToFolder, "folder");
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileSave& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileSave& value, const char* name, const char* label)
 {
 	if (ar.isEdit())
 		return ar(Serializer(value), name, label);

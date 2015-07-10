@@ -12,6 +12,7 @@
 #if !defined(__clang__) && defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
 // GCC got support for override keyword in 4.8
 # define override
+# define final
 #endif
 
 #include <typeinfo>
@@ -23,8 +24,13 @@
 #include "Factory.h"
 #include "ConstStringList.h"
 #include "IDrawContext.h"
+#include "IUIFacade.h"
 #include "Rect.h"
 #include "sigslot.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4264) // no override available for virtual member function from base 'PropertyRow'; function is hidden
+#endif
 
 class QPainter;
 namespace property_tree { 
@@ -48,10 +54,33 @@ enum ScanResult {
 
 struct PropertyRowMenuHandler : sigslot::has_slots
 {
-public:
-
 	virtual ~PropertyRowMenuHandler() {}
+};
 
+struct PropertyActivationEvent
+{
+	enum Reason
+	{
+		REASON_PRESS,
+		REASON_RELEASE,
+		REASON_DOUBLECLICK,
+		REASON_KEYBOARD,
+		REASON_NEW_ELEMENT,
+		REASON_CONTEXT_MENU
+	};
+
+	PropertyTree* tree;
+	Reason reason;
+	bool force;
+	Point clickPoint;
+
+	PropertyActivationEvent()
+	: force(false)
+	, clickPoint(0, 0)
+	, tree(0)
+	, reason(REASON_PRESS)
+	{
+	}
 };
 
 struct PropertyDragEvent
@@ -60,6 +89,18 @@ struct PropertyDragEvent
 	Point pos;
 	Point start;
 	Point lastDelta;
+	Point totalDelta;
+};
+
+struct PropertyHoverInfo
+{
+	property_tree::Cursor cursor;
+	yasli::string toolTip;
+
+	PropertyHoverInfo()
+	: cursor(CURSOR_ARROW)
+	{
+	}
 };
 
 enum DragCheckBegin {
@@ -70,7 +111,7 @@ enum DragCheckBegin {
 
 class PropertyTreeTransaction;
 
-class PropertyRow : public yasli::RefCounter
+class PROPERTY_TREE_API PropertyRow : public yasli::RefCounter
 {
 public:
 	enum WidgetPlacement {
@@ -78,7 +119,8 @@ public:
 		WIDGET_ICON,
 		WIDGET_AFTER_NAME,
 		WIDGET_VALUE,
-		WIDGET_AFTER_PULLED
+		WIDGET_AFTER_PULLED,
+		WIDGET_INSTEAD_OF_TEXT
 	};
 
 	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
@@ -124,13 +166,14 @@ public:
 
 	PropertyRow* childByIndex(int index);
 	const PropertyRow* childByIndex(int index) const;
-	int childIndex(PropertyRow* row);
+	int childIndex(const PropertyRow* row) const;
 	bool isChildOf(const PropertyRow* row) const;
 
 	bool empty() const{ return children_.empty(); }
 	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
 	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
-	PropertyRow* findByAddress(const void* addr);
+	PropertyRow* findByAddress(const void* handle);
+	virtual const void* searchHandle() const;
 	iterator begin() { return children_.begin(); }
 	iterator end() { return children_.end(); }
 	const_iterator begin() const{ return children_.begin(); }
@@ -139,11 +182,11 @@ public:
 	iterator erase(iterator it){ return children_.erase(it); }
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
-	void swapChildren(PropertyRow* row);
+	void swapChildren(PropertyRow* row, PropertyTreeModel* model);
 
 	void assignRowState(const PropertyRow& row, bool recurse);
 	void assignRowProperties(PropertyRow* row);
-	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, bool preserveChildren = true);
+	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model);
 
 	const char* name() const{ return name_; }
 	void setName(const char* name) { name_ = name; }
@@ -151,13 +194,22 @@ public:
 	const char* labelUndecorated() const { return labelUndecorated_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
+	void setTooltip(const char* tooltip);
+	bool setValidatorEntry(int index, int count);
+	int validatorCount() const{ return validatorCount_; }
+	int validatorIndex() const{ return validatorIndex_; }
+	void resetValidatorIcons();
+	void addValidatorIcons(bool hasWarnings, bool hasErrors);
+	const char* tooltip() const { return tooltip_; }
 	void setLayoutChanged();
 	void setLabelChangedToChildren();
 	void setLayoutChangedToChildren();
-	void updateLabel(const PropertyTree* tree, int index);
-	void updateTextSizeInitial(const PropertyTree* tree, int index);
+	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
+	bool hideChildren() const { return hideChildren_; }
+	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
+	void updateTextSizeInitial(const PropertyTree* tree, int index, bool force);
 	virtual void labelChanged() {}
-	void parseControlCodes(const char* label, bool changeLabel);
+	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
 	virtual const char* typeNameForFilter(PropertyTree* tree) const;
 	void setTypeName(const char* typeName) { YASLI_ASSERT(strlen(typeName)); typeName_ = typeName; }
@@ -175,7 +227,9 @@ public:
 
 	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
 	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
+	virtual bool assignToByPointer(void* instance, const yasli::TypeID& type) const{ return assignTo(yasli::Serializer(type, instance, type.sizeOf(), 0)); }
 	virtual void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) { serializer_ = ser; }
+	virtual void handleChildrenChange() {}
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
 
@@ -185,22 +239,27 @@ public:
 	virtual int floorHeight() const{ return 0; }
 
 	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree* tree, int index);
-	void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index);
+	void calculateMinimalSize(const PropertyTree* tree, int posX, int availableWidth, bool force, int* extraSizeRemainder, int* _extraSize, int index);
 	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 	void calculateTotalSizes(int* minTextSize);
 	void adjustVerticalPosition(const PropertyTree* tree, int& totalHeight);
 
-	virtual bool isWidgetFixed() const{ return userFixedWidget_ || widgetPlacement() != WIDGET_VALUE; }
+	virtual bool isWidgetFixed() const{ return userFixedWidget_ || (widgetPlacement() != WIDGET_VALUE && widgetPlacement() != WIDGET_INSTEAD_OF_TEXT); }
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	Rect rect() const{ return Rect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
+	Rect rectIncludingChildren(const PropertyTree* tree) const;
 	Rect textRect(const PropertyTree* tree) const;
 	Rect widgetRect(const PropertyTree* tree) const;
 	Rect plusRect(const PropertyTree* tree) const;
 	Rect floorRect(const PropertyTree* tree) const;
+	Rect validatorRect(const PropertyTree* tree) const;
+	Rect validatorWarningIconRect(const PropertyTree* tree) const;
+	Rect validatorErrorIconRect(const PropertyTree* tree) const;
 	void adjustHoveredRect(Rect& hoveredRect);
-	Font rowFont(const PropertyTree* tree) const;
+	int heightIncludingChildren() const{ return heightIncludingChildren_; }
+	property_tree::Font rowFont(const PropertyTree* tree) const;
 
 	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
 
@@ -212,21 +271,25 @@ public:
 	virtual bool isObject() const{ return false; }
 
 	virtual bool isLeaf() const{ return false; }
-	virtual void closeNonLeaf(const yasli::Serializer& ser) {}
+	virtual void closeNonLeaf(const yasli::Serializer& ser, yasli::Archive& ar) {}
 	virtual bool isStatic() const{ return pulledContainer_ == 0; }
 	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!pulledUp() && !pulledBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
+	virtual bool inlineInShortArrays() const{ return false; }
 
 	bool canBeToggled(const PropertyTree* tree) const;
 	bool canBeDragged() const;
 	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const;
 	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
+	virtual bool getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTree* tree) const { 
+		hit->toolTip = tooltip_;
+		return true; 
+	}
 
-	virtual bool onActivate(PropertyTree* tree, bool force);
-	virtual bool onActivateRelease(PropertyTree* tree) { return false; }
+	virtual bool onActivate(const PropertyActivationEvent& e);
 	virtual bool onKeyDown(PropertyTree* tree, const KeyEvent* ev);
 	virtual bool onMouseDown(PropertyTree* tree, Point point, bool& changed) { return false; }
-    virtual void onMouseDrag(const PropertyDragEvent& e) {}
+	virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseStill(const PropertyDragEvent& e) {}
 	virtual void onMouseUp(PropertyTree* tree, Point point) {}
 	// "drag check" allows you to "paint" with the mouse through checkboxes to set all values at once
@@ -234,7 +297,7 @@ public:
 	virtual bool onMouseDragCheck(PropertyTree* tree, bool value) { return false; }
 	virtual bool onContextMenu(IMenu &menu, PropertyTree* tree);
 
-	bool isFullRow(const PropertyTree* tree) const;
+	virtual bool isFullRow(const PropertyTree* tree) const;
 
 	// User states.
 	// Assigned using control codes (characters in the beginning of label)
@@ -242,7 +305,9 @@ public:
 	bool userFixedWidget() const{ return userFixedWidget_; }
 	bool userFullRow() const { return userFullRow_; }
 	bool userReadOnly() const { return userReadOnly_; }
+	void propagateFlagsTopToBottom();
 	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
+	bool userWidgetToContent() const { return userWidgetToContent_; }
 	int userWidgetSize() const{ return userWidgetSize_; }
 
 	// multiValue is used to edit properties of multiple objects simulateneously
@@ -254,6 +319,7 @@ public:
 	bool pulledUp() const { return pulledUp_; }
 	bool pulledBefore() const { return pulledBefore_; }
 	bool hasPulled() const { return hasPulled_; }
+	bool packedAfterPreviousRow() const { return packedAfterPreviousRow_; }
 	bool pulledSelected() const;
 	PropertyRow* nonPulledParent();
 	void setPulledContainer(PropertyRow* container){ pulledContainer_ = container; }
@@ -263,9 +329,13 @@ public:
 	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
 
 	yasli::Serializer serializer() const{ return serializer_; }
-    void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
+	virtual yasli::TypeID typeId() const{ return serializer_.type(); }
+	void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
 	virtual void serializeValue(yasli::Archive& ar) {}
 	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
+
+	void setCallback(yasli::CallbackInterface* callback);
+	yasli::CallbackInterface* callback() { return callback_; }
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
 
@@ -278,6 +348,8 @@ protected:
 	const char* typeName_;
 	yasli::Serializer serializer_;
 	PropertyRow* parent_;
+	yasli::CallbackInterface* callback_;
+	const char* tooltip_;
 	Rows children_;
 
 	unsigned int textHash_;
@@ -291,6 +363,10 @@ protected:
 	short int widgetPos_; // widget == icon!
 	short int widgetSize_;
 	short int userWidgetSize_;
+	unsigned short heightIncludingChildren_;
+	unsigned short validatorIndex_;	
+	unsigned short validatorsHeight_;
+	unsigned char validatorCount_;
 	unsigned char plusSize_;
 	bool visible_ : 1;
 	bool matchFilter_ : 1;
@@ -304,15 +380,45 @@ protected:
 	bool userFixedWidget_ : 1;
 	bool userFullRow_ : 1;
 	bool userHideChildren_ : 1;
+	bool userPackCheckboxes_ : 1;
+	bool userWidgetToContent_ : 1;
 	bool pulledUp_ : 1;
 	bool pulledBefore_ : 1;
+	bool packedAfterPreviousRow_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
+	bool hideChildren_ : 1;
+	bool validatorHasErrors_ : 1;
+	bool validatorHasWarnings_ : 1;
 
 	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	static ConstStringList* constStrings_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;
+};
+
+inline unsigned int calculateHash(const char* str, unsigned hash = 5381)
+{
+	while(*str)
+		hash = hash * 33 + (unsigned char)*str++;
+	return hash;
+}
+
+template<class T>
+inline unsigned int calculateHash(const T& t, unsigned hash = 5381)
+{
+	for (int i = 0; i < sizeof(T); i++)
+		hash = hash * 33 + ((unsigned char*)&t)[i];
+	return hash;
+}
+
+struct RowWidthCache
+{
+	unsigned int valueHash;
+	int width;
+
+	RowWidthCache() : valueHash(0), width(-1) {}
+	int getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace);
 };
 
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
@@ -404,9 +510,36 @@ bool PropertyRow::scanChildrenBottomUp(Op& op, PropertyTree* tree)
 	return true;
 }
 
+template<class T>
+inline void visitPulledRows(PropertyRow* row, T& drawFunc) 
+{
+	int count = (int)row->count();
+	for (int i = 0; i < count; ++i) {
+		PropertyRow* child = row->childByIndex(i);
+		if (child->pulledUp() || child->pulledBefore()) {
+			drawFunc(child);
+			visitPulledRows(child, drawFunc);
+		}
+	}
+};
+
+YASLI_API PropertyRowFactory& globalPropertyRowFactory();
+YASLI_API yasli::ClassFactory<PropertyRow>& globalPropertyRowClassFactory();
+
+struct PropertyRowPtrSerializer : yasli::SharedPtrSerializer<PropertyRow>
+{
+	PropertyRowPtrSerializer(yasli::SharedPtr<PropertyRow>& ptr) : SharedPtrSerializer(ptr) {}
+	yasli::ClassFactory<PropertyRow>* factory() const override { return &globalPropertyRowClassFactory(); }
+};
+
+inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::SharedPtr<PropertyRow>& ptr, const char* name, const char* label)
+{
+	PropertyRowPtrSerializer serializer(ptr);
+	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
+}
 
 #define REGISTER_PROPERTY_ROW(DataType, RowType) \
 	REGISTER_IN_FACTORY(PropertyRowFactory, yasli::TypeID::get<DataType>().name(), RowType); \
-	YASLI_CLASS(PropertyRow, RowType, #DataType);
+	YASLI_CLASS_NAME(PropertyRow, RowType, #RowType, #DataType);
 
 

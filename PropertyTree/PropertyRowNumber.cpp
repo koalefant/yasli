@@ -16,7 +16,7 @@
 	typedef PropertyRowNumber<TypeName> PropertyRow##postfix; \
 	typedef yasli::RangeDecorator<TypeName> RangeDecorator##postfix; \
 	REGISTER_IN_FACTORY(PropertyRowFactory, yasli::TypeID::get<RangeDecorator##postfix>().name(), PropertyRow##postfix); \
-	YASLI_CLASS(PropertyRow, PropertyRow##postfix, #TypeName);
+	YASLI_CLASS_NAME(PropertyRow, PropertyRow##postfix, #TypeName, #TypeName);
 
 using yasli::string;
 using yasli::i8;
@@ -39,6 +39,8 @@ REGISTER_NUMBER_ROW(u8, U8)
 REGISTER_NUMBER_ROW(u16, U16)
 REGISTER_NUMBER_ROW(u32, U32)
 REGISTER_NUMBER_ROW(u64, U64)
+
+#undef REGISTER_NUMBER_ROW
 
 DECLARE_SEGMENT(PropertyRowNumber)
 

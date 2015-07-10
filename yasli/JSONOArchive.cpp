@@ -674,20 +674,19 @@ bool JSONOArchive::operator()(PointerInterface& ser, const char* name, const cha
 	placeIndent();
 	placeName(name);
 	openBracket();
-	TypeID derived = ser.type();
-	if (derived)
+	const char* registeredTypeName = ser.registeredTypeName();
+	if (registeredTypeName && registeredTypeName[0] != '\0')
 	{
-		if (const TypeDescription* description = ser.factory()->descriptionByType(derived)) {
-			*buffer_ << " ";
-			placeName(description->name());
-			stack_.back().isKeyValue = true;
-			operator()(ser.serializer(), "");
-			stack_.back().isKeyValue = false;
-			*buffer_ << " ";
-		}
+		*buffer_ << " ";
+		placeName(registeredTypeName);
+		stack_.back().isKeyValue = true;
+		operator()(ser.serializer(), "");
+		stack_.back().isKeyValue = false;
+		*buffer_ << " ";
 	}
 	closeBracket();
 	return true;
+
 }
 
 bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const char* label)

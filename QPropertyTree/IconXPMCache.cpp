@@ -33,10 +33,13 @@ IconXPMCache::~IconXPMCache()
 
 void IconXPMCache::flush()
 {
-	IconToBitmap::iterator it;
-	for (it = iconToImageMap_.begin(); it != iconToImageMap_.end(); ++it)
+	for (XPMToBitmap::iterator it = xpmToImageMap_.begin(); it != xpmToImageMap_.end(); ++it)
 		delete it->second.bitmap;
-	iconToImageMap_.clear();
+	xpmToImageMap_.clear();
+
+	for (FilenameToBitmap::iterator it = filenameToImageMap_.begin(); it != filenameToImageMap_.end(); ++it)
+		delete it->second.bitmap;
+	filenameToImageMap_.clear();
 }
 
 struct RGBAImage
@@ -160,20 +163,36 @@ bool IconXPMCache::parseXPM(RGBAImage* out, const yasli::IconXPM& icon)
 }
 
 
-QImage* IconXPMCache::getImageForIcon(const yasli::IconXPM& icon)
+QImage* IconXPMCache::getImageForIcon(const Icon& icon)
 {
-	IconToBitmap::iterator it = iconToImageMap_.find(icon.source);
-	if (it != iconToImageMap_.end())
-		return it->second.bitmap;
+	if (icon.type == icon.TYPE_XPM)
+	{
+		XPMToBitmap::iterator it = xpmToImageMap_.find(icon.xpm.source);
+		if (it != xpmToImageMap_.end())
+			return it->second.bitmap;
+		RGBAImage image;
+		if (!parseXPM(&image, icon.xpm))
+			return 0;
 
-	RGBAImage image;
-	if (!parseXPM(&image, icon))
-		return 0;
+		BitmapCache& cache = xpmToImageMap_[icon.xpm.source];
+		cache.pixels.swap(image.pixels_);
+		cache.bitmap = new QImage((unsigned char*)&cache.pixels[0], image.width_, image.height_, QImage::Format_ARGB32);
+		return cache.bitmap;
+	}
+	else if (icon.type == icon.TYPE_FILE)
+	{
+		FilenameToBitmap::iterator it = filenameToImageMap_.find(icon.filename);
+		if (it != filenameToImageMap_.end())
+			return it->second.bitmap;
+		;
 
-	BitmapCache& cache = iconToImageMap_[icon.source];
-	cache.pixels.swap(image.pixels_);
-	cache.bitmap = new QImage((unsigned char*)&cache.pixels[0], image.width_, image.height_, QImage::Format_ARGB32);
-	return cache.bitmap;
+		BitmapCache& cache = filenameToImageMap_[icon.filename];
+		cache.bitmap = new QImage(QIcon(QString::fromUtf8(icon.filename.c_str())).pixmap(16, 16).toImage());
+		return cache.bitmap;
+	}
+
+	static QImage emptyImage;
+	return &emptyImage;
 }
 
 // ---------------------------------------------------------------------------

@@ -39,13 +39,13 @@ public:
 
 	void resizeHelper(size_t _size, ...) const
 	{
-		while(container_->size() > _size)
+		while(size_t(container_->size()) > _size)
 		{
 			typename Container::iterator it = container_->end();
 			--it;
 			container_->erase(it);
 		}
-		while(container_->size() < _size)
+		while(size_t(container_->size()) < _size)
 			container_->insert(container_->end(), Element());
 	}
 
@@ -74,6 +74,7 @@ public:
 	}
 
 	void* elementPointer() const{ return &*it_; }
+  size_t elementSize() const { return sizeof(typename Container::value_type); }
 
 	bool operator()(Archive& ar, const char* name, const char* label){
 		YASLI_ESCAPE(container_, return false);
@@ -131,25 +132,27 @@ namespace yasli {
 class StringSTL : public StringInterface
 {
 public:
-	StringSTL(std::string& str) : str_(str) { }
+	StringSTL(yasli::string& str) : str_(str) { }
 
 	void set(const char* value) { str_ = value; }
 	const char* get() const { return str_.c_str(); }
+	const void* handle() const { return &str_; }
+	TypeID type() const { return TypeID::get<string>(); }
 private:
-	std::string& str_;
+	yasli::string& str_;
 };
 
 }
 
-namespace std {
+YASLI_STRING_NAMESPACE_BEGIN
 
-inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::string& value, const char* name, const char* label)
+inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::string& value, const char* name, const char* label)
 {
 	yasli::StringSTL str(value);
 	return ar(static_cast<yasli::StringInterface&>(str), name, label);
 }
 
-}
+YASLI_STRING_NAMESPACE_END
 
 // ---------------------------------------------------------------------------
 namespace std {
@@ -174,25 +177,27 @@ namespace yasli {
 class WStringSTL : public WStringInterface
 {
 public:
-	WStringSTL(std::wstring& str) : str_(str) { }
+	WStringSTL(yasli::wstring& str) : str_(str) { }
 
 	void set(const wchar_t* value) { str_ = value; }
 	const wchar_t* get() const { return str_.c_str(); }
+	const void* handle() const { return &str_; }
+	TypeID type() const { return TypeID::get<wstring>(); }
 private:
-	std::wstring& str_;
+	yasli::wstring& str_;
 };
 
 }
 
-namespace std {
+YASLI_STRING_NAMESPACE_BEGIN
 
-inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::wstring& value, const char* name, const char* label)
+inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::wstring& value, const char* name, const char* label)
 {
 	yasli::WStringSTL str(value);
 	return ar(static_cast<yasli::WStringInterface&>(str), name, label);
 }
 
-}
+YASLI_STRING_NAMESPACE_END
 
 // ---------------------------------------------------------------------------
 
@@ -203,18 +208,20 @@ struct StdStringPair : yasli::KeyValueInterface
 {
 	const char* get() const { return pair_.first.c_str(); }
 	void set(const char* key) { pair_.first.assign(key); }
+	const void* handle() const { return &pair_; }
+	yasli::TypeID type() const { return yasli::TypeID::get<string>(); }
 	bool serializeValue(yasli::Archive& ar, const char* name, const char* label) 
 	{
 		return ar(pair_.second, name, label);
 	}
 
-	StdStringPair(std::pair<std::string, V>& pair)
+	StdStringPair(std::pair<yasli::string, V>& pair)
 	: pair_(pair)
 	{
 	}
 
 
-	std::pair<std::string, V>& pair_;
+	std::pair<yasli::string, V>& pair_;
 };
 
 template<class K, class V>
@@ -236,12 +243,14 @@ struct StdPair : std::pair<K, V>
 
 namespace std{
 
+#if !YASLI_NO_MAP_AS_DICTIONARY
 template<class V>
-bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<std::string, V>& pair, const char* name, const char* label)
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<yasli::string, V>& pair, const char* name, const char* label)
 {
 	yasli::StdStringPair<V> keyValue(pair);
 	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
 }
+#endif
 
 template<class K, class V>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label)

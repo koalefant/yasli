@@ -7,7 +7,10 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
+#include "yasli/Config.h"
+#if !YASLI_YASLI_INLINE_IMPLEMENTATION
 #include "StdAfx.h"
+#endif
 #include "StringList.h"
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
@@ -15,11 +18,8 @@
 
 namespace yasli{
 
-StringList StringList::EMPTY;
-StringListStatic StringListStatic::EMPTY;
-
 // ---------------------------------------------------------------------------
-void splitStringList(StringList* result, const char *str, char delimeter)
+YASLI_INLINE void splitStringList(StringList* result, const char *str, char delimeter)
 {
     result->clear();
 
@@ -27,14 +27,14 @@ void splitStringList(StringList* result, const char *str, char delimeter)
     for(; *ptr; ++ptr)
 	{
         if(*ptr == delimeter){
-			result->push_back(std::string(str, ptr));
+			result->push_back(string(str, ptr));
             str = ptr + 1;
         }
 	}
-	result->push_back(std::string(str, ptr));
+	result->push_back(string(str, ptr));
 }
 
-void joinStringList(std::string* result, const StringList& stringList, char sep)
+YASLI_INLINE void joinStringList(string* result, const StringList& stringList, char sep)
 {
     YASLI_ESCAPE(result != 0, return);
     result->clear();
@@ -46,7 +46,7 @@ void joinStringList(std::string* result, const StringList& stringList, char sep)
     }
 }
 
-void joinStringList(std::string* result, const StringListStatic& stringList, char sep)
+YASLI_INLINE void joinStringList(string* result, const StringListStatic& stringList, char sep)
 {
     YASLI_ESCAPE(result != 0, return);
     result->clear();
@@ -59,43 +59,59 @@ void joinStringList(std::string* result, const StringListStatic& stringList, cha
     }
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const char* name, const char* label)
 {
-	return ar(static_cast<std::vector<std::string>&>(value), name, label);
+	return ar(static_cast<std::vector<string>&>(value), name, label);
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label)
 {
     if(ar.isEdit()){
-		Serializer ser(value);
-        return ar(ser, name, label);
+			Serializer ser = Serializer::forEdit(value);
+			return ar(ser, name, label);
     }
-    else{
-        std::string str;
-        if(ar.isOutput())
-            str = value.c_str();
-        if(ar(str, name, label) && ar.isInput()){
-            value = str.c_str();
-            return true;
-        }
-        return false;
-    }
+		else{
+			string str;
+			if(ar.isOutput())
+				str = value.c_str();
+			if(!ar(str, name, label))
+				return false;
+			if(ar.isInput()){
+				int index = value.stringList().find(str.c_str());
+				if(index >= 0){
+					value = index;
+					return true;
+				}
+				else
+					return false;
+			}
+			return true;
+		}
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
 {
-    if(ar.isEdit())
-        return ar(Serializer(value), name, label);
-    else{
-        std::string str;
-        if(ar.isOutput())
-            str = value.c_str();
-        if(ar(str, name, label) && ar.isInput()){
-            value = str.c_str();
-            return true;
-        }
-        return true;
-    }
+    if(ar.isEdit()) {
+			Serializer ser = Serializer::forEdit(value);
+			return ar(ser, name, label);
+		}
+		else{
+			string str;
+			if(ar.isOutput())
+				str = value.c_str();
+			if(!ar(str, name, label))
+				return false;
+			if(ar.isInput()){
+				int index = value.stringList().find(str.c_str());
+				if(index >= 0){
+					value = index;
+					return true;
+				}
+				else
+					return false;
+			}
+			return true;
+		}
 }
 
 }

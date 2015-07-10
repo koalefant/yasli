@@ -19,10 +19,11 @@ class PropertyRowString : public PropertyRowField
 public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	bool assignTo(yasli::string& str);
-	bool assignTo(yasli::wstring& str);
-	void setValue(const char* str);
-	void setValue(const wchar_t* str);
+	bool assignTo(yasli::string& str) const;
+	bool assignTo(yasli::wstring& str) const;
+	bool assignToByPointer(void* instance, const yasli::TypeID& type) const override;
+	void setValue(const char* str, const void* handle, const yasli::TypeID& typeId);
+	void setValue(const wchar_t* str, const void* handle, const yasli::TypeID& typeId);
 	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 	yasli::string valueAsString() const override;
 	yasli::wstring valueAsWString() const override { return value_; }

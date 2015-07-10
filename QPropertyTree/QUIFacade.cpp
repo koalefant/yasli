@@ -11,8 +11,9 @@
 #include "InplaceWidgetNumber.h"
 #include "InplaceWidgetString.h"
 
-namespace property_tree {
+QCursor translateCursor(property_tree::Cursor cursor);
 
+namespace property_tree {
 
 // ---------------------------------------------------------------------------
 
@@ -24,6 +25,13 @@ int QUIFacade::textWidth(const char* text, Font font)
 	return fm.width(text);
 }
 
+int QUIFacade::textHeight(int width, const char* text, Font font)
+{
+	const QFont* qfont = font == FONT_BOLD ? &tree_->boldFont() : &tree_->font();
+	QFontMetrics fm(*qfont);
+	return fm.boundingRect(0, 0, width, 0, Qt::TextWordWrap|Qt::AlignTop, QString::fromUtf8(text)).height();
+}
+
 Point QUIFacade::screenSize()
 {
 	QSize s = QApplication::desktop()->screenGeometry(tree_).size();
@@ -32,19 +40,13 @@ Point QUIFacade::screenSize()
 
 IMenu* QUIFacade::createMenu()
 {
-	return new QtMenu(new QMenu(), tree_);
+	return new QtMenu(new QMenu(), tree_, "");
 }
 
 void QUIFacade::setCursor(Cursor cursor)
 {
-	switch (cursor)
-	{
-	case CURSOR_SLIDE:
-	tree_->setCursor(QCursor(Qt::SizeHorCursor));
-	return;
-	}
 
-	tree_->setCursor(QCursor());
+	tree_->setCursor(translateCursor(cursor));
 }
 
 void QUIFacade::unsetCursor()

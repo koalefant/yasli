@@ -32,6 +32,7 @@ private:
 };
 YASLI_CLASS(ConditionBase, ConditionBase, "Always True")
 YASLI_CLASS_NULL(ConditionBase, 0) // remove NULL value from the list of available types
+YASLI_CLASS_ANNOTATION(ConditionBase, ConditionBase, "color", "ffffff")
 
 class ConditionSwitch : public ConditionBase
 {
@@ -85,6 +86,7 @@ private:
 	bool isReadOnly_;
 };
 YASLI_CLASS(ConditionBase, ConditionCheckFileAttributes, "Check File Attributes")
+YASLI_CLASS_ANNOTATION(ConditionBase, ConditionCheckFileAttributes, "color", "ffff00")
 
 // ---------------------------------------------------------------------------
 
@@ -141,6 +143,7 @@ private:
 	std::string message_;
 };
 YASLI_CLASS(ActionBase, ActionMessageBox, "Show Message")
+YASLI_CLASS_ANNOTATION(ActionBase, ActionMessageBox, "color", "ff0000")
 
 YASLI_ENUM_BEGIN_NESTED(ActionMessageBox, Icon, "Icon")
 YASLI_ENUM_VALUE_NESTED(ActionMessageBox, NO_ICON, "No Icon")
@@ -167,6 +170,7 @@ public:
 	std::vector<SharedPtr<ActionBase> > actions_;
 };
 YASLI_CLASS(ActionBase, ActionSequence, "Sequence");
+YASLI_CLASS_ANNOTATION(ActionBase, ActionSequence, "color", "00ff00")
 
 class ActionPaintSky : public ActionBase
 {
@@ -198,6 +202,7 @@ private:
 	bool showSun_;
 };
 YASLI_CLASS(ActionBase, ActionPaintSky, "Paint Sky");
+YASLI_CLASS_ANNOTATION(ActionBase, ActionPaintSky, "color", "0000ff")
 
 
 class ActionSmile : public ActionBase
@@ -223,6 +228,7 @@ private:
 	bool withTeeth_;
 };
 YASLI_CLASS(ActionBase, ActionSmile, "Smile");
+YASLI_CLASS_ANNOTATION(ActionBase, ActionSmile, "color", "ffff00")
 
 struct PolymorphicTreeData
 {

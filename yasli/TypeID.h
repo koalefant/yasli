@@ -9,18 +9,21 @@
 
 #pragma once
 
+#if !YALSI_NO_RTTI
 #include <typeinfo>
+#endif
 #include "yasli/Config.h"
 #include "yasli/Assert.h"
 #include <string.h>
+
+
+namespace yasli{
 
 #if !YASLI_NO_RTTI
 #ifndef _MSC_VER
 using std::type_info;
 #endif
 #endif
-
-namespace yasli{
 
 class Archive;
 struct TypeInfo;
@@ -29,21 +32,16 @@ class TypeID{
 	friend class TypesFactory;
 public:
 	TypeID()
-	: 
-#if YASLI_NO_RTTI
-	runtimeID_(0),
-#endif
-    typeInfo_(0)
+	: module_(0)
+	, typeInfo_(0)
 	{}
 
 	TypeID(const TypeID& original)
-	: 
+	: typeInfo_(original.typeInfo_)
+	, module_(original.module_)
 #if !YASLI_NO_RTTI
-	name_(original.name_),
-#else
-	runtimeID_(original.runtimeID_),
+	, name_(original.name_)
 #endif
-    typeInfo_(original.typeInfo_)
 	{
 	}
 
@@ -62,55 +60,25 @@ public:
 	static TypeID get();
 	std::size_t sizeOf() const;
 	const char* name() const;
-	bool registered() const;
 
-	bool operator==(const TypeID& rhs) const{
-		if(typeInfo_ && rhs.typeInfo_)
-			return typeInfo_ == rhs.typeInfo_;
-		else
-		{
-			const char* name1 = name();
-			const char* name2 = rhs.name();
-			return strcmp(name1, name2) == 0;
-		}
-	}
-	bool operator!=(const TypeID& rhs) const{
-#if YASLI_NO_RTTI
-		return runtimeID_ != rhs.runtimeID_;
-#else
-		return typeInfo_ != rhs.typeInfo_;
-#endif
-	}
-	bool operator<(const TypeID& rhs) const{
-#if YASLI_NO_RTTI
-		return runtimeID_ < rhs.runtimeID_;
-#else
-		if(typeInfo_ && rhs.typeInfo_)
-			return typeInfo_->before(*rhs.typeInfo_) > 0;
-		else if(!typeInfo_)
-			return rhs.typeInfo_!= 0;
-		else if(!rhs.typeInfo_)
-			return false;
-		return false;
-#endif
-	}
+	bool operator==(const TypeID& rhs) const;
+	bool operator!=(const TypeID& rhs) const;
+	bool operator<(const TypeID& rhs) const;
 
-#if YASLI_NO_RTTI
+#if !YASLI_NO_RTTI
+	typedef const type_info TypeInfo;
+#endif
 	const TypeInfo* typeInfo() const{ return typeInfo_; }
-#else
-	const type_info* typeInfo() const{ return typeInfo_; }
-#endif
 private:
-#if YASLI_NO_RTTI 
-	unsigned int runtimeID_;
 	TypeInfo* typeInfo_;
-    friend class bTypeInfo;
+#if YASLI_NO_RTTI 
+	friend class bTypeInfo;
 #else
-	const type_info* typeInfo_;
 	string name_;
 #endif
+	void* module_;
 	friend class TypeDescription;
-    friend struct TypeInfo;
+	friend struct TypeInfo;
 };
 
 #if YASLI_NO_RTTI
@@ -227,28 +195,28 @@ struct TypeInfo
 		YASLI_ASSERT(s == send && "Type name does not fit into the buffer");
 	}
 
-	static unsigned int generateTypeID()
-	{
-		// on gcc 4.6.3: if we start this counter from the zero
-		// then the first two calls of this function returns same value
-		static unsigned int counter = 1;
-		return counter++;
-	}
-
 	TypeInfo(size_t size, const char* templatedFunctionName)
 	: size(size)
 	{
-		id.runtimeID_ = generateTypeID();
 		extractTypeName(name, templatedFunctionName);
 		id.typeInfo_ = this;
+		static int moduleSpecificSymbol;
+		id.module_ = &moduleSpecificSymbol;
+	}
+
+	bool operator==(const TypeInfo& rhs) const{
+		return size == rhs.size && strcmp(name, rhs.name) == 0;
+	}
+
+	bool operator<(const TypeInfo& rhs) const{
+		if (size == rhs.size)
+			return strcmp(name, rhs.name) < 0;
+		else
+			return size < rhs.size;
 	}
 };
 #endif
 
-#ifdef __APPLE__
-template<class T> const char* funcNameHelper(T* ref) { return __PRETTY_FUNCTION__; }
-#endif
-    
 template<class T>
 TypeID TypeID::get()
 {
@@ -256,16 +224,57 @@ TypeID TypeID::get()
 # ifdef _MSC_VER
 	static TypeInfo typeInfo(sizeof(T), __FUNCSIG__);
 # else
-#if defined(__APPLE__)
-    static TypeInfo typeInfo(sizeof(T), funcNameHelper((T*)0));
-#else
 	static TypeInfo typeInfo(sizeof(T), __PRETTY_FUNCTION__);
-#endif
 # endif
 	return typeInfo.id;
 #else
 	static TypeID result(typeid(T));
 	return result;
+#endif
+}
+
+inline bool TypeID::operator==(const TypeID& rhs) const{
+#if YASLI_NO_RTTI
+	if (typeInfo_ == rhs.typeInfo_)
+		return true;
+	else if (!typeInfo_ || !rhs.typeInfo_)
+		return false;
+	else if (module_ == rhs.module_)
+		return false;
+	else
+		return *typeInfo_ == *rhs.typeInfo_;
+#else
+	if(typeInfo_ && rhs.typeInfo_)
+		return typeInfo_ == rhs.typeInfo_;
+	else
+	{
+		const char* name1 = name();
+		const char* name2 = rhs.name();
+		return strcmp(name1, name2) == 0;
+	}
+#endif
+}
+
+inline bool TypeID::operator!=(const TypeID& rhs) const{
+	return !operator==(rhs);
+}
+
+inline bool TypeID::operator<(const TypeID& rhs) const{
+#if YASLI_NO_RTTI
+	if (!typeInfo_)
+		return rhs.typeInfo_ != 0;
+	else if (!rhs.typeInfo_)
+		return false;
+	else
+		return *typeInfo_ < *rhs.typeInfo_;
+#else
+	if(typeInfo_ && rhs.typeInfo_)
+		return typeInfo_->before(*rhs.typeInfo_) > 0;
+	else if(!typeInfo_)
+		return rhs.typeInfo_!= 0;
+	else if(!rhs.typeInfo_)
+		return false;
+	return false;
 #endif
 }
 

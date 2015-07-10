@@ -5,7 +5,7 @@
 
 namespace yasli {
 
-void FileOpen::YASLI_SERIALIZE_METHOD(Archive& ar)
+YASLI_INLINE void FileOpen::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
 	ar(path, "path");
 	ar(filter, "filter");
@@ -13,7 +13,7 @@ void FileOpen::YASLI_SERIALIZE_METHOD(Archive& ar)
 	ar(flags, "flags");
 }
 
-bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileOpen& value, const char* name, const char* label)
+YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileOpen& value, const char* name, const char* label)
 {
 	if (ar.isEdit())
 		return ar(Serializer(value), name, label);

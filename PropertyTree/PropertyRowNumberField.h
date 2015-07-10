@@ -17,28 +17,30 @@ class PropertyRowNumberField;
 class PropertyRowNumberField : public PropertyRow
 {
 public:
+	PropertyRowNumberField();
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
-	int widgetSizeMin(const PropertyTree* tree) const override{ 
-		if (userWidgetSize() >= 0)
-			return userWidgetSize();
-		else
-			return 40;
-	}
+	int widgetSizeMin(const PropertyTree* tree) const override;
 
 	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
+	bool inlineInShortArrays() const override{ return true; }
 	void redraw(IDrawContext& context) override;
-	bool onActivate(PropertyTree* tree, bool force) override;
-	bool onActivateRelease(PropertyTree* tree) override;
+	bool onActivate(const PropertyActivationEvent& e) override;
 	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
 	void onMouseUp(PropertyTree* tree, Point point) override;
 	void onMouseDrag(const PropertyDragEvent& e) override;
 	void onMouseStill(const PropertyDragEvent& e) override;
+	bool getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTree* tree) const override;
 
 	virtual void startIncrement() = 0;
 	virtual void endIncrement(PropertyTree* tree) = 0;
-	virtual void incrementLog(float screenFraction) = 0;
+	virtual void incrementLog(float screenFraction, float valueFieldFraction) = 0;
 	virtual bool setValueFromString(const char* str) = 0;
+	virtual double sliderPosition() const = 0;
+
+	mutable RowWidthCache widthCache_;
+	bool pressed_ : 1;
+	bool dragStarted_ : 1;
 };
 

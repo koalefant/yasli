@@ -31,9 +31,25 @@ struct TreeSelection : vector<TreePath>
 	}
 };
 
+struct PropertyDefaultDerivedTypeValue
+{
+	yasli::string registeredName;
+	yasli::SharedPtr<PropertyRow> root;
+	yasli::ClassFactoryBase* factory;
+	int factoryIndex;
+	std::string label;
+
+	PropertyDefaultDerivedTypeValue()
+	: factoryIndex(-1)
+	, factory(0)
+	{
+	}
+};
+
 struct PropertyDefaultTypeValue
 {
 	yasli::TypeID type;
+	yasli::string registedName;
 	yasli::SharedPtr<PropertyRow> root;
 	yasli::ClassFactoryBase* factory;
 	int factoryIndex;
@@ -89,6 +105,7 @@ public:
 	void clear();
 	bool canUndo() const{ return !undoOperators_.empty(); }
 	void undo();
+	void clearUndo();
 
 	TreePath pathFromRow(PropertyRow* node);
 	PropertyRow* rowFromPath(const TreePath& path);
@@ -112,6 +129,7 @@ public:
 	void deselectAll();
 
 	void rowAboutToBeChanged(PropertyRow* row);
+	void callRowCallback(PropertyRow* row);
 	void rowChanged(PropertyRow* row, bool apply = true); // be careful: it can destroy 'row'
 
 	void setUndoEnabled(bool enabled) { undoEnabled_ = enabled; }
@@ -130,9 +148,9 @@ public:
 	void addDefaultType(PropertyRow* propertyRow, const char* typeName);
 	PropertyRow* defaultType(const char* typeName) const;
 
-	bool defaultTypeRegistered(const yasli::TypeID& baseType, const yasli::TypeID& derivedType) const;
-	void addDefaultType(const yasli::TypeID& baseType, const PropertyDefaultTypeValue& value);
-	const PropertyDefaultTypeValue* defaultType(const yasli::TypeID& baseType, int index) const;
+	bool defaultTypeRegistered(const yasli::TypeID& baseType, const char* derivedRegisteredName) const;
+	void addDefaultType(const yasli::TypeID& baseType, const PropertyDefaultDerivedTypeValue& value);
+	const PropertyDefaultDerivedTypeValue* defaultType(const yasli::TypeID& baseType, int index) const;
 	ConstStringList* constStrings() { return &constStrings_; }
 
 private:
@@ -152,7 +170,7 @@ private:
 	DefaultTypes defaultTypes_;
 
 
-	typedef vector<PropertyDefaultTypeValue> DerivedTypes;
+	typedef vector<PropertyDefaultDerivedTypeValue> DerivedTypes;
 	struct BaseClass{
 		yasli::TypeID type;
 		yasli::string name;

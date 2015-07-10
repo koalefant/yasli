@@ -45,11 +45,11 @@ SUITE(General)
 	TEST(RegistrationInMultipleFactories)
 	{
 		yasli::ClassFactory<TestBaseA>& aFactory = yasli::ClassFactory<TestBaseA>::the(); 
-		TestBaseA* a = aFactory.create(aFactory.findTypeByName("a-class"));
+		TestBaseA* a = aFactory.create("a-class");
 		CHECK(a != 0);
 
 		yasli::ClassFactory<TestBaseB>& bFactory = yasli::ClassFactory<TestBaseB>::the(); 
-		TestBaseB* b = bFactory.create(bFactory.findTypeByName("b-class"));
+		TestBaseB* b = bFactory.create("b-class");
 		CHECK(b != 0);
 	}
 
