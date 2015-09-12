@@ -46,6 +46,16 @@ int wwUIFacade::textWidth(const char* text, Font _font)
 	return bound.Width;
 }
 
+int wwUIFacade::textHeight(int width, const char* text, Font _font)
+{
+	Gdiplus::Font* font = _font == FONT_NORMAL ? propertyTreeDefaultFont() : propertyTreeDefaultBoldFont();
+	std::wstring wstr(ww::toWideChar(text));
+	Gdiplus::StringFormat format;
+	Gdiplus::RectF bound;
+	tree_->_graphics()->MeasureString(wstr.c_str(), (int)wstr.size(), font, Gdiplus::RectF(0.0f, width, 0.0f, 0.0f), &format, &bound, 0);
+	return bound.Height;
+}
+
 Point wwUIFacade::screenSize()
 {
 	return Point(1920, 1080);

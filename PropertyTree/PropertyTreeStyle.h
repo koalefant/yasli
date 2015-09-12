@@ -24,7 +24,7 @@ struct PropertyTreeStyle
 
 	PropertyTreeStyle()
 	: compact(false)
-	, packCheckboxes(true)
+	, packCheckboxes(false)
 	, fullRowMode(false)
 	, valueColumnWidth(.59f)
 	, rowSpacing(1.1f)

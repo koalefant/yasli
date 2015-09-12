@@ -28,23 +28,23 @@ namespace ww{
 
 class PropertyRowHotkey : public PropertyRowImpl<KeyPress>{
 public:
-	bool onActivate(::PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent & e) override;
 	bool onContextMenu(property_tree::IMenu& root, ::PropertyTree* tree) override;
 	void onMenuClear(PropertyTreeModel* model);
 	std::string valueAsString() const override{ return value().toString(false); }
 protected:
 };
 
-bool PropertyRowHotkey::onActivate(::PropertyTree* tree, bool force)
+bool PropertyRowHotkey::onActivate(const PropertyActivationEvent& e)
 {
 	KeyPress& key = value();
 
-	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(tree);
+	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(e.tree);
 	ww::HotkeyDialog hotkeyDialog(wwTree, key);
 	if(hotkeyDialog.showModal() == RESPONSE_OK){
-        tree->model()->rowAboutToBeChanged(this);
+        e.tree->model()->rowAboutToBeChanged(this);
 		key = hotkeyDialog.get();
-		tree->model()->rowChanged(this);
+		e.tree->model()->rowChanged(this);
 		return true;
 	}
 	else
@@ -68,7 +68,7 @@ bool PropertyRowHotkey::onContextMenu(property_tree::IMenu& root, ::PropertyTree
 	if(!root.isEmpty())
 		root.addSeparator();
 	HotkeyMenuHandler* handler = new HotkeyMenuHandler(this, tree);
-	root.addAction(TRANSLATE("Clear"))->signalTriggered.connect(handler, &HotkeyMenuHandler::onMenuClear);
+	root.addAction(TRANSLATE("Clear"), 0, handler, &HotkeyMenuHandler::onMenuClear);
 	return __super::onContextMenu(root, tree);
 }
 

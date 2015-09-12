@@ -353,7 +353,7 @@ struct TestData
 		if(button)
 		{
 			ww::PropertyTree* tree = ar.context<ww::PropertyTree>();
-			ww::edit(Serializer(*this), "testStateNested", ww::IMMEDIATE_UPDATE | ww::ONLY_TRANSLATED, tree);
+			ww::edit(Serializer(*this), "testStateNested", 0, tree);
 		}
 
 		ar(hotkey, "hotkey", "Hotkey");

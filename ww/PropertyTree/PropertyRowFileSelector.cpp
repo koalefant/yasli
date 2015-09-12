@@ -32,7 +32,7 @@ class PropertyRowFileSelector : public PropertyRowImpl<FileSelector>, public has
 public:
 	PropertyRowFileSelector() : locked_(false) {}
 	bool activateOnAdd() const{ return true; }
-	bool onActivate(::PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent& e) override;
 	bool onContextMenu(property_tree::IMenu& root, PropertyTree* tree);
 	void onMenuClear(PropertyTreeModel* model);
 
@@ -57,7 +57,7 @@ public:
 	}
 };
 
-bool PropertyRowFileSelector::onActivate(::PropertyTree* tree, bool force)
+bool PropertyRowFileSelector::onActivate(const PropertyActivationEvent & e)
 {
 	if(locked_)
 		return false;
@@ -78,10 +78,10 @@ bool PropertyRowFileSelector::onActivate(::PropertyTree* tree, bool force)
 		    fileName = root[root.size() - 1] == '\\' ? root + fileName : root + '\\' + fileName;
     }
 
-	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(tree);
+	ww::PropertyTree* wwTree = safe_cast<ww::PropertyTree*>(e.tree);
 	ww::FileDialog fileDialog(wwTree, options->save, masks, root.c_str(), fileName.c_str());
 	if(fileDialog.showModal()){
-        tree->model()->rowAboutToBeChanged(this);
+		e.tree->model()->rowAboutToBeChanged(this);
 		if(!root.empty()){
 			string relativePath = Files::relativePath(fileDialog.fileName(), root.c_str());;
 			if(!relativePath.empty())
@@ -91,7 +91,7 @@ bool PropertyRowFileSelector::onActivate(::PropertyTree* tree, bool force)
 		}
 		else
 			selector = fileDialog.fileName();
-		tree->model()->rowChanged(this);
+		e.tree->model()->rowChanged(this);
 		locked_ = false;
 		return true;
 	}
@@ -120,7 +120,7 @@ bool PropertyRowFileSelector::onContextMenu(property_tree::IMenu& root, Property
 		root.addSeparator();
 
 	FileSelectorMenuHandler* handler = new FileSelectorMenuHandler(this, tree->model());
-	root.addAction(TRANSLATE("Clear"))->signalTriggered.connect(handler, &FileSelectorMenuHandler::onMenuClear);
+	root.addAction(TRANSLATE("Clear"), 0, handler, &FileSelectorMenuHandler::onMenuClear);
 	tree->addMenuHandler(handler);
 	return __super::onContextMenu(root, tree);
 }

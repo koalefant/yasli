@@ -46,7 +46,7 @@ public:
 	void redraw(IDrawContext& context) override;
 
 	bool activateOnAdd() const override{ return true; }
-	bool onActivate(PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent& e) override;
 	string valueAsString() const { 
 		char buf[64];
 		formatColor(buf, value_);
@@ -58,13 +58,13 @@ public:
 };
 
 template<class ColorType>
-bool PropertyRowColor<ColorType>::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowColor<ColorType>::onActivate(const PropertyActivationEvent& e) 
 {
-	ColorChooserDialog dialog(tree->ui()->hwnd(), Color(toARGB(value())));
+	ColorChooserDialog dialog(e.tree->ui()->hwnd(), Color(toARGB(value())));
     if(dialog.showModal() == ww::RESPONSE_OK){
-        tree->model()->rowAboutToBeChanged(this);
+        e.tree->model()->rowAboutToBeChanged(this);
 		fromColor(&value(), dialog.get());
-		tree->model()->rowChanged(this);
+		e.tree->model()->rowChanged(this);
 		return true;
 	}
 	return false;

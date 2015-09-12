@@ -403,7 +403,7 @@ void wwDrawContext::drawCheck(const Rect& rect, bool disabled, CheckState checke
 	}
 }
 
-void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font fontName)
+void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font fontName, const property_tree::Color* colorOverride)
 {
 	graphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
@@ -428,13 +428,14 @@ void wwDrawContext::drawControlButton(const Rect& rect, const char* text, int bu
 
 	ww::Color textColor;
 	textColor.setGDI(!enabled ? GetSysColor(COLOR_3DSHADOW) : GetSysColor(COLOR_WINDOWTEXT));
+	ww::Color textColorBlended = colorOverride ? textColor.interpolate(ww::Color(colorOverride->r, colorOverride->g, colorOverride->b, colorOverride->a), 0.11f) : textColor;
 	ww::Rect textRect = toWWRect(rect);
 	if (!center)
 		textRect.setLeft(textRect.left() + 4);
-	tree_->_drawRowValue(graphics, text, font, textRect, textColor, false, center);
+	tree_->_drawRowValue(graphics, text, font, textRect, textColorBlended, false, center);
 }
 
-void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font)
+void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font, const Color* colorOverride)
 {
 	bool pressed = (buttonFlags & BUTTON_PRESSED) != 0;
 	bool focused = (buttonFlags & BUTTON_FOCUSED) != 0;
@@ -474,6 +475,8 @@ void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFla
 	format.SetTrimming(StringTrimmingEllipsisCharacter);
 	Color textColor;
 	textColor.SetFromCOLORREF(GetSysColor(COLOR_WINDOWTEXT));
+	property_tree::Color windowTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	Color textColorBlended = colorOverride ? windowTextColor.interpolate(*colorOverride, 0.11f).rgb() : textColor;
 	SolidBrush textBrush(textColor);
 
 	Rect textRect = gdiplusRect(rect);
@@ -488,6 +491,11 @@ void wwDrawContext::drawButton(const Rect& rect, const char* text, int buttonFla
 	std::wstring wstr = ww::toWideChar(text);
 	graphics->DrawString( wstr.c_str(), (int)wstr.size(), propertyTreeDefaultFont(), RectF(Gdiplus::REAL(textRect.X), Gdiplus::REAL(textRect.Y), Gdiplus::REAL(textRect.Width), Gdiplus::REAL(textRect.Height)), &format, &textBrush );
 }
+
+void wwDrawContext::drawButtonWithIcon(const Icon&, const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) {
+	// TODO
+}
+
 
 
 void wwDrawContext::drawValueText(bool highlighted, const char* text)
@@ -573,10 +581,10 @@ void wwDrawContext::drawRowLine(const Rect& _rect)
 	graphics->FillRectangle(&gradientBrush, rect);
 }
 
-void wwDrawContext::drawIcon(const Rect& rect, const yasli::IconXPM& icon)
+void wwDrawContext::drawIcon(const Rect& rect, const Icon& icon, IconEffect iconEffect)
 {
 	ww::Icon wwIcon;
-	wwIcon.set(icon.source, icon.lineCount);
+	wwIcon.set(icon.xpm.source, icon.xpm.lineCount);
 	Gdiplus::Bitmap* bitmap = DrawingCache::get()->getBitmapForIcon(wwIcon);
 	YASLI_ESCAPE(bitmap != 0, return);
 	int x = rect.left() + (rect.width() - wwIcon.width()) / 2;
@@ -597,8 +605,9 @@ void wwDrawContext::drawLabel(const char* text, Font _font, const Rect& rect, bo
 	tree_->_drawRowLabel(graphics, text, font, toWWRect(rect), textColor);
 }
 
-void wwDrawContext::drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed)
+void wwDrawContext::drawNumberEntry(const char* text, const Rect& rect, int fieldFlags, double sliderPos)
 {
+	bool grayed = (fieldFlags & property_tree::FIELD_DISABLED) != 0;
 	drawEntry(rect, text, false, grayed, 0);
 }
 

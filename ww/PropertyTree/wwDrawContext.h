@@ -76,17 +76,18 @@ public:
 		this->tree = tree;
 	}
 
-	virtual void drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) override;
-	virtual void drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font) override;
+	virtual void drawControlButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font, const property_tree::Color* colorOverride);
+	virtual void drawButton(const Rect& rect, const char* text, int buttonFlags, property_tree::Font font, const property_tree::Color* colorOverride) override;
+	virtual void drawButtonWithIcon(const Icon&, const Rect& rect, const char* text, int buttonFlags, property_tree::Font font);
 	virtual void drawCheck(const Rect& rect, bool disabled, CheckState checked) override;
 	virtual void drawColor(const Rect& rect, const Color& color) override;
 	virtual void drawComboBox(const Rect& rect, const char* text) override;
 	virtual void drawEntry(const Rect& rect, const char* text, bool pathEllipsis, bool grayBackground, int trailingOffset) override;
 	virtual void drawRowLine(const Rect& rect) override;
 	virtual void drawHorizontalLine(const Rect& rect) override;
-	virtual void drawIcon(const Rect& rect, const yasli::IconXPM& icon) override;
+	virtual void drawIcon(const Rect& rect, const Icon& icon, IconEffect iconEffect) override;
 	virtual void drawLabel(const char* text, Font font, const Rect& rect, bool selected) override;
-	virtual void drawNumberEntry(const char* text, const Rect& rect, bool selected, bool grayed) override;
+	virtual void drawNumberEntry(const char* text, const Rect& rect, int fieldFlags, double sliderPos) override;
 	virtual void drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed) override;
 	virtual void drawSelection(const Rect& rect, bool inlinedRow) override;
 	virtual void drawValueText(bool highlighted, const char* text) override;

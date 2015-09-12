@@ -19,14 +19,11 @@ struct BitVectorWrapper
 	int* valuePointer;
 	int value;
 	const EnumDescription* description;
-    static const EnumDescription* currentDescription;
 
 	explicit BitVectorWrapper(int* _value = 0, const EnumDescription* _description = 0)
     : valuePointer(_value)
     , description(_description)
     {
-		if(description)
-			currentDescription = description;
 		if(valuePointer)
 			value = *valuePointer;
     }
@@ -39,8 +36,6 @@ struct BitVectorWrapper
 
 	~BitVectorWrapper()
 	{
-		if(description)
-			currentDescription = 0;
 		if(valuePointer)
 			*valuePointer = value;
 	}

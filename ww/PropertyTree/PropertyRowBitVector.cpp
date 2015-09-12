@@ -42,7 +42,7 @@ public:
 		comboBox_->signalEdited().connect(this, &InplaceWidgetBitVector::onChange);
 	}
 	~InplaceWidgetBitVector() {}
-
+	
 	void onChange(){
         tree()->model()->rowAboutToBeChanged(row_);
 		row_->setValueAlt(comboBox_->value());
@@ -59,8 +59,7 @@ protected:
 //YASLI_CLASS(PropertyRow, PropertyRowBitVector, "BitVector");
 
 PropertyRowBitVector::PropertyRowBitVector()
-: description_(BitVectorWrapper::currentDescription)
-, flags_(0)
+: flags_(0)
 {
 	//YASLI_ASSERT(description_)
 }
@@ -69,8 +68,7 @@ void PropertyRowBitVector::setValueAndContext(const yasli::Serializer& ser, yasl
 {
 	BitVectorWrapper* wrapper = ser.cast<BitVectorWrapper>();
 	flags_ = wrapper->value;
-	if(!description_)
-		description_ = wrapper->description;
+	description_ = wrapper->description;
 
 	if(description_){
 		StringListStatic values = description_->nameCombination(flags_);

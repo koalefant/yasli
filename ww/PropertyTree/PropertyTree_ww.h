@@ -41,6 +41,7 @@ namespace ww {
 using std::vector;
 struct Color;
 class DragController;
+class DragWindow;
 class TreeImpl;
 class PopupMenuItem;
 typedef std::vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
@@ -74,6 +75,8 @@ public:
 	signal0& signalChanged(){ return signalChanged_; }
 	typedef signal1<const yasli::Object&> SignalObjectChanged;
 	SignalObjectChanged& signalObjectChanged(){ return signalObjectChanged_; }
+	typedef signal1<yasli::Archive&> SignalSerialized;
+	SignalSerialized& signalSerialized(){ return signalSerialized_; }
 	signal0& signalSelected(){ return signalSelected_; }
 	signal0& signalReverted(){ return signalReverted_; }
 	signal0& signalPushUndo(){ return signalPushUndo_; }
@@ -82,6 +85,7 @@ protected:
 	void onChanged() override { signalChanged_.emit(); }
 	void onContinuousChange() override { signalContinuousChange_.emit(); }
 	void onAboutToSerialize(yasli::Archive& ar) { signalAboutToSerialize_.emit(ar); }
+	void onSerialized(yasli::Archive& ar) { signalSerialized_.emit(ar); }
 	void onSelected() override { signalSelected_.emit(); }
 	void onReverted() override { signalReverted_.emit(); }
 	void onPushUndo() override { signalPushUndo_.emit(); }
@@ -97,7 +101,7 @@ protected:
 	void onScroll(int y);
 
 	void repaint() override { update(); }
-	void updateHeights() override;
+	void updateHeights(bool recalcTextSize) override;
 	bool updateScrollBar();
 	void defocusInplaceEditor() override;
 
@@ -116,6 +120,7 @@ protected:
 	void _arrangeChildren() override;
 	void visitChildren(WidgetVisitor& visitor) const;
 	void resetFilter() override;
+	int tabSize() const;
 
 	void drawFilteredString(Gdiplus::Graphics* gr, const char* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 	void interruptDrag();
@@ -126,7 +131,8 @@ protected:
 	signal0 signalReverted_;
 	signal0 signalSelected_;
     signal0 signalPushUndo_;
-    signal1<yasli::Archive&> signalAboutToSerialize_;
+	signal1<yasli::Archive&> signalAboutToSerialize_;
+	SignalSerialized signalSerialized_;
 
 	Vect2 pressPoint_;
 
@@ -137,6 +143,7 @@ protected:
 
 	friend class TreeImpl;
 	friend class DragController;
+	friend class DragWindow;
 	friend class FilterEntry;
 	friend struct FilterVisitor;
 };

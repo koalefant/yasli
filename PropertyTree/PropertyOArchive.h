@@ -24,7 +24,7 @@ public:
 	~PropertyOArchive();
 
 	void setOutlineMode(bool outlineMode);
-protected:
+
 	bool operator()(yasli::StringInterface& value, const char* name, const char* label) override;
 	bool operator()(yasli::WStringInterface& value, const char* name, const char* label) override;
 	bool operator()(bool& value, const char* name, const char* label) override;

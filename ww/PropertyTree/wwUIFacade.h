@@ -57,7 +57,7 @@ public:
 		return result;
 	}
 	void addSeparator() { menuItem_->addSeparator(); }
-	IMenuAction* addAction(const char* text, int flags = 0) {
+	IMenuAction* addAction(const Icon& icon, const char* text, int flags = 0) {
 		ww::PopupMenuItem0& item = menuItem_->add(text);
 		if (flags & MENU_DISABLED)
 			item.enable(false);
@@ -69,9 +69,10 @@ public:
 	}
 	void exec(const Point& point) {
 		if (menu_.get()) {
+			property_tree::Point widgetPoint = ((ww::PropertyTree*)tree_)->_toWidget(point);
 			::RECT rt;
 			GetWindowRect(tree_->_window()->handle(), &rt);
-			menu_->spawn(ww::Vect2(point.x() + rt.left, point.y() + rt.top), tree_);
+			menu_->spawn(ww::Vect2(widgetPoint.x() + rt.left, widgetPoint.y() + rt.top), tree_);
 		}
 	}
 
@@ -95,6 +96,7 @@ public:
 	void unsetCursor() override;
 	Point cursorPosition() override;
 	int textWidth(const char* text, Font font) override;
+	int textHeight(int width, const char* text, Font font) override;
 	Point screenSize() override;
 
 	InplaceWidget* createComboBox(ComboBoxClientRow* client) override;

@@ -476,7 +476,7 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 {
 	if(!creating()){
-        tree()->updateHeights();
+        tree()->updateHeights(false);
 	}
 	return TRUE;
 }
@@ -569,7 +569,7 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
 
 int TreeImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
-	if (tree_->filterWhenType_) {
+	if (tree_->config().filterWhenType) {
 		if (code >= 0x20 && code != VK_ESCAPE) {
 			if (!(code == VK_BACK && !tree_->filterMode_))
 				tree_->setFilterMode(true);

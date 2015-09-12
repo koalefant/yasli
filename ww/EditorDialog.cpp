@@ -59,9 +59,7 @@ void EditorDialog::init(const Serializer& serializer, const char* title, const c
 	
 	setResizeable(true);
 
-	tree_ = new ww::PropertyTree;
-	tree_->setImmediateUpdate((flags & ww::IMMEDIATE_UPDATE) != 0);
-	tree_->setHideUntranslated((flags & ww::ONLY_TRANSLATED) != 0);
+	tree_ = new ww::PropertyTree();
 	tree_->setCompact((flags & ww::COMPACT) != 0);
 	tree_->attach(serializer);
 	if(flags & ww::EXPAND_ALL)
@@ -74,15 +72,10 @@ void EditorDialog::init(const Serializer& serializer, const char* title, const c
 		ia(*this, "window", 0);
 	}
 
-	if((flags & ww::IMMEDIATE_UPDATE) == 0)
-		addButton("Refresh", ww::RESPONSE_RETRY, false);
-	else
-	{
-		tree_->signalChanged().connect(this, &EditorDialog::onTreeChanged);
-		originalData_.reset(new BinOArchive());
-		if (serializer)
-			serializer(*originalData_);
-	}
+	tree_->signalChanged().connect(this, &EditorDialog::onTreeChanged);
+	originalData_.reset(new BinOArchive());
+	if (serializer)
+		serializer(*originalData_);
 
 	addButton("OK", ww::RESPONSE_OK);
 	addButton("Cancel", ww::RESPONSE_CANCEL);
@@ -101,10 +94,6 @@ void EditorDialog::onResponse(int response)
 		tree_->apply();
 		tree_->revert();
 		return;
-	}
-
-	if(response == ww::RESPONSE_OK && !tree_->immediateUpdate()){
-		tree_->apply();
 	}
 
 	if(response == ww::RESPONSE_CANCEL && originalData_.get() != 0)

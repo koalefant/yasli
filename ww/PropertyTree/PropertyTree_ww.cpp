@@ -15,6 +15,7 @@
 #include "ww/PropertyTree/TreeImpl.h"
 #include "PropertyTree/Serialization.h"
 #include "PropertyTree/PropertyTreeModel.h"
+#include "PropertyTree/PropertyTreeStyle.h"
 #include "PropertyTree/PropertyRowContainer.h"
 #include "PropertyTree/PropertyRowPointer.h"
 #include "PropertyTree/Unicode.h"
@@ -112,7 +113,7 @@ PropertyTree::PropertyTree(int border)
 
 	DrawingCache::get()->initialize();
 
-	(TreeConfig&)*this = defaultConfig;
+	config_ = TreeConfig::defaultConfig;
 
 	HDC dc = GetDC(impl()->handle());
 	graphics_ = new Gdiplus::Graphics(dc);
@@ -188,7 +189,7 @@ void PropertyTree::interruptDrag()
 	dragController_->interrupt();
 }
 
-void PropertyTree::updateHeights()
+void PropertyTree::updateHeights(bool fontChanged)
 {
 	bool force = false;
 	{
@@ -207,13 +208,13 @@ void PropertyTree::updateHeights()
 
 		updateScrollBar();
 
-		model()->root()->updateLabel(this, 0);
-		int lb = compact_ ? 0 : 4;
+		model()->root()->updateLabel(this, 0, false);
+		int lb = compact() ? 0 : 4;
 		int rb = area_.w - lb*2;
-		force = force || lb != leftBorder_ || rb != rightBorder_;
+		force = fontChanged || force || lb != leftBorder_ || rb != rightBorder_;
 		leftBorder_ = lb;
 		rightBorder_ = rb;
-		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
+		model()->root()->calculateMinimalSize(this, leftBorder_, rb-lb, force, 0, 0, 0);
 
 		size_.y_ = area_.top();
 		model()->root()->adjustVerticalPosition(this, size_.y_);
@@ -293,7 +294,7 @@ void PropertyTree::setFilterMode(bool inFilterMode)
     if (changed)
     {
         onFilterChanged();
-		updateHeights();
+		updateHeights(false);
     }
 }
 
@@ -460,7 +461,7 @@ void PropertyTree::onFilterChanged()
 	rowFilter_.parse(filterStr);
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
-	updateHeights();
+	updateHeights(false);
 }
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const char* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
@@ -631,7 +632,9 @@ void PropertyTree::onLButtonDown(int button, int x, int y)
 	if(row && !row->isSelectable())
 		row = row->parent();
 	if (row){
-		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), (GetKeyState(VK_CONTROL) >> 15) != 0)) {
+		bool controlPressed = (GetKeyState(VK_CONTROL) >> 15) != 0;
+		bool shiftPressed = (GetKeyState(VK_SHIFT) >> 15) != 0;
+		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), controlPressed, shiftPressed)) {
 			SetCapture(impl()->handle());
 			capturedRow_ = row;
 		}
@@ -765,14 +768,18 @@ void PropertyTree::onLButtonDoubleClick(int x, int y)
 	PropertyRow* row = rowByPoint(point);
 	if(row){
 		YASLI_ASSERT(row->refCount() > 0);
+		PropertyActivationEvent e;
+		e.force = true;
+		e.tree = this;
+		e.clickPoint = point;
+		e.reason = e.REASON_DOUBLECLICK;
+
 		if(row->widgetRect(this).contains(pointToRootSpace(point))){
-			if(!row->onActivate(this, true) &&
-				!row->onActivateRelease(this))
+			if(!row->onActivate(e))
 				toggleRow(row);	
 		}
 		else if(!toggleRow(row)) {
-			row->onActivate(this, false);
-			row->onActivateRelease(this);
+			row->onActivate(e);
 		}
 	}
 }
@@ -827,6 +834,13 @@ void PropertyTree::serialize(Archive& ar)
 {
 	::PropertyTree::serialize(ar);
 }
+
+int PropertyTree::tabSize() const 
+{
+	return int(treeStyle().firstLevelIndent * _defaultRowHeight());
+}
+
+
 
 FORCE_SEGMENT(PropertyRowBitVector)
 FORCE_SEGMENT(PropertyRowDecorators)

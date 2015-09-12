@@ -84,7 +84,7 @@ bool Clipboard::copy(yasli::Serializer& se)
 {
 	PropertyRow::setConstStrings(constStrings_);
 	PropertyTreeModel model(0);
-	PropertyOArchive oa(model_ ? model_ : &model);
+	PropertyOArchive oa(model_ ? model_ : &model, 0, 0);
     oa.setFilter(filter_);
 	oa(se, "row", "Row");
 	bool result = copy(model.root());
@@ -97,13 +97,13 @@ bool Clipboard::paste(yasli::Serializer& se)
 	ConstStringList constStrings;
 	PropertyRow::setConstStrings(constStrings_ ? constStrings_ : &constStrings);
 	PropertyTreeModel model(0);
-	PropertyOArchive oa(model_ ? model_ : &model);
+	PropertyOArchive oa(model_ ? model_ : &model, 0, 0);
     oa.setFilter(filter_);
 	se(oa);
 	bool result = false;
 	PropertyRow* dest = model.root();
 	if(paste(dest)){
-		PropertyIArchive ia(&model);
+		PropertyIArchive ia(&model, 0);
         ia.setFilter(filter_);
 		se(ia);
 		result = true;
@@ -160,8 +160,6 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 	
 	bool result = false;
 	if(strcmp(dest->typeName(), source->typeName()) == 0 && 
-		// FIXME: немножко хак, т.к. vector<vector<> > уже может работать 
-		// неправильно, нужно сделать нормальные имена типов для контейнеров
 		source->isContainer() == dest->isContainer()){
 		result = true;
 		if(!onlyCheck){
@@ -171,7 +169,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 				const char* derivedName = d->typeName();
 				const char* derivedNameAlt = d->typeName();
 				SharedPtr<PropertyRow> newSourceRoot = d->clone(constStrings_);
-				source->swapChildren(newSourceRoot);
+				source->swapChildren(newSourceRoot, model_);
 				source = newSourceRoot;
 			}
 			const char* name = dest->name();
@@ -182,7 +180,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 				dest->parent()->replaceAndPreserveState(dest, source, false);
 			else{
 				dest->clear();
-				dest->swapChildren(source);
+				dest->swapChildren(source, model_);
 			}
 		}
 	}
@@ -201,7 +199,7 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 						const char* derivedName = d->typeName();
 						const char* derivedNameAlt = d->typeName();
 						SharedPtr<PropertyRow> newSourceRoot = d->clone(constStrings_);
-						source->swapChildren(newSourceRoot);
+						source->swapChildren(newSourceRoot, model_);
 						source = newSourceRoot;
 					}
 

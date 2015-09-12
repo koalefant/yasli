@@ -17,14 +17,12 @@ namespace ww{
 class Widget;
 
 enum EditFlags{
-	ONLY_TRANSLATED   = 1 << 0,
-	IMMEDIATE_UPDATE  = 1 << 1,
-	COMPACT		      = 1 << 2,
-	EXPAND_ALL		  = 1 << 3
+	COMPACT		      = 1 << 0,
+	EXPAND_ALL		  = 1 << 1
 };
 
 bool edit(const Serializer& ser, const char* stateFileName,
-		  int flags = IMMEDIATE_UPDATE | ONLY_TRANSLATED,
+		  int flags = 0,
 		  Widget* parent = 0, const char* title = 0);
 bool edit(const Serializer& ser, const char* stateFileName,
 		  int flags, HWND parent, const char* title = 0);

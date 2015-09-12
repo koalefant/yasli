@@ -40,18 +40,18 @@ using ww::NotDecorator;
 
 class PropertyRowNot : public PropertyRowImpl<NotDecorator>{
 public:
-	bool onActivate(PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent& e) override;
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	yasli::string valueAsString() const override{ return value_ ? label() : ""; }
 	int widgetSizeMin(const PropertyTree* tree) const override{ return 16; }
 };
 
-bool PropertyRowNot::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowNot::onActivate(const PropertyActivationEvent& e)
 {
-    tree->model()->rowAboutToBeChanged(this);
+    e.tree->model()->rowAboutToBeChanged(this);
 	value() = !value();
-	tree->model()->rowChanged(this);
+	e.tree->model()->rowChanged(this);
 	return true;
 }
 
@@ -69,18 +69,18 @@ using ww::RadioDecorator;
 
 class PropertyRowRadio : public PropertyRowImpl<RadioDecorator>{
 public:
-	bool onActivate(PropertyTree* tree, bool force) override;
+	bool onActivate(const PropertyActivationEvent & e) override;
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	yasli::string valueAsString() const override{ return value() ? label() : ""; }
 	int widgetSizeMin(const PropertyTree*) const override{ return 16; }
 };
 
-bool PropertyRowRadio::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowRadio::onActivate(const PropertyActivationEvent & e)
 {
-    tree->model()->rowAboutToBeChanged(this);
+    e.tree->model()->rowAboutToBeChanged(this);
 	value() = !value();
-	tree->model()->rowChanged(this);
+	e.tree->model()->rowChanged(this);
 	return true;
 }
 

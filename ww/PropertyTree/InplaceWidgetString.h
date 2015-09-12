@@ -32,7 +32,7 @@ public:
 	void onChange(){
 		if(initialValue_ != entry_->textW() || row_->multiValue()){
 			tree_->model()->rowAboutToBeChanged(row_);
-			row_->setValue(entry_->textW());
+			row_->setValue(entry_->textW(), row_->searchHandle(), row_->typeId());
 			tree_->model()->rowChanged(row_);
 		}
 		else

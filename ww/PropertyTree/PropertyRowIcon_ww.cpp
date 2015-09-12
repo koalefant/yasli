@@ -42,8 +42,7 @@ public:
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return false; }
 
-	bool onActivate(::PropertyTree* tree, bool force) override
-	{
+	bool onActivate(const PropertyActivationEvent& e) override {
 		return false;
 	}
 	void setValueAndContext(const Serializer& ser, yasli::Archive& ar) override {
@@ -72,11 +71,11 @@ public:
 	bool isLeaf() const{ return true; }
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return true; }
-	bool onActivate(::PropertyTree* tree, bool force)
+	bool onActivate(const PropertyActivationEvent & e) override
 	{
-		tree->model()->rowAboutToBeChanged(this);
+		e.tree->model()->rowAboutToBeChanged(this);
 		value().value_ = !value().value_;
-		tree->model()->rowChanged(this);
+		e.tree->model()->rowChanged(this);
 		return true;
 	}
 	yasli::string valueAsString() const override{ return value().value_ ? "true" : "false"; }
