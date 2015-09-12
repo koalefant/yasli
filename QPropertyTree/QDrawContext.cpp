@@ -484,8 +484,8 @@ void QDrawContext::drawValidators(PropertyRow* row, const Rect& totalRect)
 				static QIcon warningIcon(":/QPropertyTree/validator_warning.png");
 				static QIcon errorIcon(":/QPropertyTree/validator_error.png");
 				const QIcon& icon = isError ? errorIcon : warningIcon;
-				QColor brushColor = isError ? QColor(255, 64, 64, 192) : QPalette().color(QPalette::ToolTipBase);
-				QColor penColor = isError ? QColor(64, 0, 0, 255) : QPalette().color(QPalette::ToolTipText);
+				QColor brushColor = isError ? QColor(255, 64, 64, 192) : QColor(255, 255, 220, 255);
+				QColor penColor = isError ? QColor(64, 0, 0, 255) : QColor(40, 20, 0, 255);
 
 				QRect rect(totalRect.left(), totalRect.top() + offset,
 						  totalRect.width(), totalRect.height() - offset);
