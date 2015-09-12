@@ -929,7 +929,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, int a
 	validatorsHeight_ = 0;
 	if (!pulledUp() && !pulledBefore() && (validatorCount_ != 0 || hasPulled_)) {
 		int padding = int(0.1f * tree->_defaultRowHeight());
-		auto calculateValidatorHeight = [&](PropertyRow* row) {
+		auto calculateValidatorHeight = [this,tree,padding,availableWidth](PropertyRow* row) {
 			const ValidatorEntry* entries = tree->_validatorBlock()->getEntry(row->validatorIndex_, row->validatorCount_);
 			if (entries) {
 				for (int i = 0; i < row->validatorCount_; ++i) {
@@ -1248,37 +1248,39 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 			}
 		}
 	}
-	else{
-		context.widgetRect = widgetRect(tree);
-		context.lineRect = floorRect(tree);
-		context.captured = tree->_isCapturedRow(this);
-		context.pressed = tree->_pressedRow() == this;
+	else {
+		if (!isRoot()) {
+			context.widgetRect = widgetRect(tree);
+			context.lineRect = floorRect(tree);
+			context.captured = tree->_isCapturedRow(this);
+			context.pressed = tree->_pressedRow() == this;
 
 
-		// drawing a horizontal line
-		int lineSize = widgetPos_ - textPos_ - 2;
-		if(lineSize > textSize_){
-			Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
+			// drawing a horizontal line
+			int lineSize = widgetPos_ - textPos_ - 2;
+			if(lineSize > textSize_){
+				Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
 
-			if (tree->treeStyle().horizontalLines)
-				context.drawRowLine(rect);
-		}
-
-
-		if(!tree->compact() || !parent()->isRoot()){
-			if(hasVisibleChildren(tree)){
-				context.drawPlus(plusRect(tree), expanded(), selected(), expanded());
+				if (tree->treeStyle().horizontalLines)
+					context.drawRowLine(rect);
 			}
-		}
 
-		// custom drawing
-		if(!isStatic() && context.widgetRect.isValid())
-			redraw(context);
 
-		if(textSize_ > 0){
-			char containerLabel[16] = "";
-			yasli::string text = rowText(containerLabel, tree, index);
-			context.drawLabel(text.c_str(), rowFont(tree), textRect(tree), pulledSelected());
+			if(!tree->compact() || !parent()->isRoot()){
+				if(hasVisibleChildren(tree)){
+					context.drawPlus(plusRect(tree), expanded(), selected(), expanded());
+				}
+			}
+
+			// custom drawing
+			if(!isStatic() && context.widgetRect.isValid())
+				redraw(context);
+
+			if(textSize_ > 0){
+				char containerLabel[16] = "";
+				yasli::string text = rowText(containerLabel, tree, index);
+				context.drawLabel(text.c_str(), rowFont(tree), textRect(tree), pulledSelected());
+			}
 		}
 
 		if (validatorHasWarnings_) {
@@ -1288,8 +1290,7 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 			context.drawValidatorErrorIcon(validatorWarningIconRect(tree));
 		}
 
-		if (!selectionPass && validatorsHeight_ > 0)
-		{
+		if (!selectionPass && validatorsHeight_ > 0) {
 			Rect totalRect = validatorRect(tree);
 
 			context.drawValidators(this, totalRect);

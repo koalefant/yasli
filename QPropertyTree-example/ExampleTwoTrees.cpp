@@ -156,3 +156,4 @@ QWidget* createExampleTwoTrees()
 {
 	return new TwoTreesWidget();
 }
+

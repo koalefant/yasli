@@ -59,20 +59,41 @@ struct CustomRows
 
 	void serialize(Archive& ar)
 	{
+		ar.warning(*this,
+			"Below are different examples of Decorators, annotations "
+			"that are used to add meta-data to values and change way "
+			"they are edited.");
+
 		#include "Icons/favourites.xpm"
 		ar(yasli::IconXPM(favourites_xpm), "icon", "yasli::IconXPM");
 
 		// new way to serialize bit flags, less intrusive
 		ar(yasli::BitFlags<Flags>(bitFlags), "bitFlags", "yasli::BitFlags");
+		ar.doc("BitFlags allows to edit individual flags of integer as "
+			   "separate checkboxes and serialize as string containing "
+			   "containing values combined with | operator.");
 			
 		ar(propertyTreeColor, "propertyTreeColor", "property_tree::Color");
+		ar.doc("propertyTree::Color is a type that can be used to expose "
+			   "color value with color selector. ");
 
 		ar(yasli::Range(rangeF, 0.0f, 1.0f), "rangeF", "yasli::Range (float)");
 		ar(yasli::Range(rangeI, 0, 100), "rangeI", "yasli::Range (int)");
+		ar.doc("Range allows to edit individual flags of integer as "
+			   "separate checkboxes and serialize as string containing "
+			   "containing values combined with | operator.");
+
 		ar(yasli::FileOpen(fileOpen, "Text Files (*.txt);;All Files (*.*)", "."), "fileOpen", "yasli::File Open");
+		ar.doc("FileOpen provides a quick way to add file selection dialog.");
+
 		ar(yasli::FileSave(fileSave, "Text Files (*.txt);;All Files (*.*)", "."), "fileSave", "yasli::File Save");
+		ar.doc("FileSave allows to specify output filename.");
+
 		ar(yasli::HorizontalLine(), "yasliHline", "<yasli::HorizontalLine");
+		ar.doc("HorizontalLine used as a simple separator for UI.");
+
 		ar(yasli::Button("yasli::Button"), "yasliButton", "<");
+		ar.doc("Button exposes boolean value as a button that can be pressed.");
 	}
 
 } customRows;

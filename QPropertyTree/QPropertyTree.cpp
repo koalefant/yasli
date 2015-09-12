@@ -345,9 +345,9 @@ protected:
 	bool selectionPass_;
 };
 
-struct DrawRowVisitor
+struct DrawDragRowVisitor
 {
-	DrawRowVisitor(QPainter& painter) : painter_(painter) {}
+	DrawDragRowVisitor(QPainter& painter) : painter_(painter) {}
 
 	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
 	{
@@ -383,7 +383,7 @@ void DragWindow::drawRow(QPainter& p)
 	QDrawContext context(tree_, &p);
 	row_->drawRow(context, tree_, 0, true);
 	row_->drawRow(context, tree_, 0, false);
-	DrawRowVisitor visitor(p);
+	DrawDragRowVisitor visitor(p);
 	row_->scanChildren(visitor, tree_);
 	p.translate(-offsetX, -offsetY);
 }
@@ -1069,8 +1069,18 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 	 	dragController_->drawUnder(painter);
 
     if (model()->root()) {
+		// first we draw selection underneath, so big
+		// selection rectangles don't occlue previous drawn items
+		//
+		// root is drawn only for validators
+		QDrawContext context(this, &painter);
+		model()->root()->drawRow(context, this, 0, true);
+
         DrawVisitor selectionOp(painter, toQRect(area_), offset_.y(), true);
         model()->root()->scanChildren(selectionOp, this);
+
+		// and then we draw everything on top of selection again
+		model()->root()->drawRow(context, this, 0, false);
 
         DrawVisitor op(painter, toQRect(area_), offset_.y(), false);
         model()->root()->scanChildren(op, this);
