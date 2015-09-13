@@ -1,6 +1,7 @@
 # makefile
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_AUTOMOC true)
+set(CMAKE_AUTORCC true)
 
 project("QPropertyTreeTest")
 
@@ -15,7 +16,6 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif (UNIX)
 
-#file(GLOB SOURCES *.h *.cpp)
 set(SOURCES 
 	main.cpp
 	ExampleControlCharacters.cpp
@@ -25,6 +25,7 @@ set(SOURCES
 	ExampleTwoTrees.h
 	ExampleTwoTrees.cpp
 	MainWindow.cpp MainWindow.h
+	../QPropertyTree/QPropertyTree.qrc
   )
 source_group("" FILES ${SOURCES})
 

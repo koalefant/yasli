@@ -75,7 +75,6 @@ set(SOURCES
 	PropertyRowFileSave.cpp
 	QDrawContext.cpp
 	QDrawContext.h
-	QPropertyTree.qrc
 	QPropertyTree.cpp
 	QPropertyTree.h
 	QUIFacade.cpp
