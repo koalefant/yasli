@@ -40,6 +40,9 @@ public:
 		for (size_t i = 0; i < ownedMenus_.size(); ++i)
 			delete ownedMenus_[i];
 		ownedMenus_.clear();
+		for (size_t i = 0; i < ownedActions_.size(); ++i)
+			delete ownedActions_[i];
+		ownedActions_.clear();
 	}
 
 	bool isEmpty() override { return menuItem_->empty(); }
