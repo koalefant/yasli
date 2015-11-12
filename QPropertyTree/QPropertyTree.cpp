@@ -581,6 +581,8 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 , sizeHint_(180, 180)
 , dragController_(new DragController(this))
 , sizeToContent_(false)
+, aggregateMouseEvents_(0)
+, aggregatedMouseEventCount_(0)
 
 , updateHeightsTime_(0)
 , paintTime_(0)
