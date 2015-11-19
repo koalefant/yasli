@@ -626,7 +626,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	if(!pulledUp() && extraSize > 0){ // align widget value to value column
 		if(!isFullRow(tree)){
 			int oldX = posX;
-			int newX = max(int(tree->leftBorder() + round((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth()))), posX);
+			int newX = max(int(tree->leftBorder() + xround((tree->rightBorder() - tree->leftBorder())* (1.f - tree->valueColumnWidth()))), posX);
 			int xDelta = newX - oldX;
 			if (xDelta <= extraSize){
 				extraSize -= xDelta;
