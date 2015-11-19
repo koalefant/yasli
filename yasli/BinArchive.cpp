@@ -624,6 +624,8 @@ bool BinIArchive::operator()(ContainerInterface& ser, const char* name, const ch
 		if(!openNode(name))
 			return false;
 
+		currentBlock().setDisableCheck();
+
 		size_t size = currentBlock().readPackedSize();
 		ser.resize(size);
 
@@ -700,10 +702,12 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 	unsigned short hashName = calcHash(name);
 
 #ifdef YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION
-	HashMap::iterator i = hashMap_.find(hashName);
-	if(i != hashMap_.end() && i->second != name)
-		YASLI_ASSERT(0, "BinArchive hash colliding: %s - %s", i->second.c_str(), name);
-	hashMap_[hashName] = name;
+	if(!disableCheck_){
+		HashMap::iterator i = hashMap_.find(hashName);
+		if(i != hashMap_.end() && i->second != name)
+			YASLI_ASSERT(0, "BinArchive hash colliding: %s - %s", i->second.c_str(), name);
+		hashMap_[hashName] = name;
+	}
 #endif
 
 	const char* currInitial = curr_;
