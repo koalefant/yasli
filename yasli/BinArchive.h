@@ -120,7 +120,7 @@ private:
 	{
 	public:
 		Block(const char* data, int size) : 
-		  begin_(data), curr_(data), end_(data + size), complex_(false) {}
+		  begin_(data), curr_(data), end_(data + size), complex_(false), disableCheck_(false) {}
 
 		  bool get(const char* name, Block& block);
 
@@ -174,12 +174,14 @@ private:
 		  unsigned int readPackedSize();
 
 		  bool validToClose() const { return complex_ || curr_ == end_; } // ѕростые блоки должны быть вычитаны точно
+		  void setDisableCheck() { disableCheck_ = true; }
 	
 	private:
 		const char* begin_;
 		const char* end_;
 		const char* curr_;
 		bool complex_;
+		bool disableCheck_;
 
 #ifdef YASLI_BIN_ARCHIVE_CHECK_HASH_COLLISION
 		typedef std::map<unsigned short, string> HashMap;
