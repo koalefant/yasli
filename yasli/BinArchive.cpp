@@ -665,6 +665,7 @@ bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char
 	if(strlen(name) && !openNode(name))
 		return false;
 
+	currentBlock().setIsPointer();
 	string& typeName = stringBuffer_;
 	typeName.clear();
 	read(typeName);
@@ -720,7 +721,7 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 	const char* currInitial = curr_;
 	bool restarted = false;
 	if(curr_ >= end_){
-		curr_ = begin_;
+		rewind();
 		restarted = true;
 	}
 	for(;;){
@@ -732,7 +733,7 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 		if((curr_ += size) >= end_){
 			if(restarted)
 				return false;
-			curr_ = begin_;
+			rewind();
 			restarted = true;
 		}
 
@@ -745,5 +746,16 @@ bool BinIArchive::Block::get(const char* name, Block& block)
 			return false;
 	}
 }
+
+void BinIArchive::Block::rewind()
+{
+	curr_ = begin_;
+	if(isPointer_){
+		string typeName;
+		read(typeName);
+	}
+}
+
+
 
 }
