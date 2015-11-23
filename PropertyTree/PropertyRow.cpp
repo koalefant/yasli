@@ -941,17 +941,6 @@ void PropertyRow::drawRow(IDrawContext& context, const PropertyTree* tree, int i
 		context.captured = tree->_isCapturedRow(this);
 		context.pressed = tree->_pressedRow() == this;
 
-
-
-	// drawing a horizontal line
-	int lineSize = widgetPos_ - textPos_ - 2;
-	if(lineSize > textSize_){
-		Rect rect(textPos_, rowRect.bottom() - 3, lineSize, 1);
-
-		context.drawRowLine(rect);
-	}
-
-
 		if(!tree->compact() || !parent()->isRoot()){
 			if(hasVisibleChildren(tree)){
 				context.drawPlus(plusRect(tree), expanded(), selected(), expanded());
