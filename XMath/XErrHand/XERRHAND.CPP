@@ -17,10 +17,12 @@ public:
 char exceptMSG[512] = "";
 char miniDampName[512] = "";
 void (*userHandler)();
+bool interactiveExceptionHandler = true;
 
 void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, 511); }
 void setMiniDampName(const char* name){ strncpy(miniDampName, name, 511); }
 void setExceptionHandler(void (*pf)()){ userHandler = pf; }
+void setInteractiveExceptionHandler(bool interactiveEH) { interactiveExceptionHandler = interactiveEH; }
 
 #pragma warning (disable : 4073)
 #pragma init_seg(lib)
@@ -203,7 +205,8 @@ XErrorHandler::XErrorHandler()
 
 void XErrorHandler::Abort(const char* msg)
 {
-	MessageBox(NULL, msg, "EXCEPTION OCCURED", MB_TOPMOST | MB_SYSTEMMODAL);
+	if(interactiveExceptionHandler)
+		MessageBox(NULL, msg, "EXCEPTION OCCURED", MB_TOPMOST | MB_SYSTEMMODAL);
 	exit(0);
 }
 
