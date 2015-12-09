@@ -61,7 +61,6 @@ SUITE(General)
 		CHECK_EQUAL("Container<pair<int,float>>", string(TypeID::get<Namespace::Container<std::pair<int, float> > >().name()));
 		CHECK_EQUAL("Prefix", string(TypeID::get<Namespace::CPrefix>().name()));
 		CHECK_EQUAL("GlobalPrefix", string(TypeID::get<SGlobalPrefix>().name()));
-		CHECK_EQUAL("basic_string<char>", string(TypeID::get<string>().name()));
 	}
 #endif
 }
