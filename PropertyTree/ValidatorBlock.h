@@ -95,7 +95,7 @@ public:
 	{
 		if (start < 0)
 			return;
-		if (start + count > entries_.size())
+		if (start + count > (int)entries_.size())
 			return;
 		for(int i = start; i < start + count; ++i) {
 			used_[i] = true;

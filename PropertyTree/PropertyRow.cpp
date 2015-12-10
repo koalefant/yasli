@@ -904,7 +904,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, int a
 			}
 
 			if (hasChanges) {
-				for (int i = 0; i < checkboxesToRealign.size(); ++i) {
+				for (size_t i = 0; i < checkboxesToRealign.size(); ++i) {
 					PropertyRow* row = checkboxesToRealign[i];
 					row->size_.setX(widthTotal / 2);
 					row->pos_.setX(left);
