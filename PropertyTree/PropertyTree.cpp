@@ -47,6 +47,8 @@ TreeConfig::TreeConfig()
 , filterWhenType_(true)
 , sliderUpdateDelay_(25)
 , undoEnabled_(true)
+, fullUndo_(false)
+, expandLevels_(1)
 {
 	//QFont font;
 	//QFontMetrics fm(font);
@@ -111,7 +113,11 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , capturedRow_(0)
 , dragCheckMode_(false)
 , dragCheckValue_(false)
-, archiveContext_()
+, archiveContext_(0)
+, widgetRow_(0)
+, size_(0, 0)
+, offset_(0, 0)
+, area_(0, 0, 0, 0)
 {
 	model_.reset(new PropertyTreeModel(this));
 	model_->setExpandLevels(expandLevels_);
