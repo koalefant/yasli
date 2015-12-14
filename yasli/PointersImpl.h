@@ -52,7 +52,7 @@ public:
 		return &ptr_;
 	}
 	TypeID pointerType() const{
-		return TypeID::get<SharedPtr<T>>();
+		return TypeID::get<SharedPtr<T> >();
 	}
 	virtual ClassFactory<T>* factory() const{ return &ClassFactory<T>::the(); }
 protected:

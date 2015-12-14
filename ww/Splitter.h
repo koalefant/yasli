@@ -76,7 +76,8 @@ protected:
 
 	struct Element{
 		Element()
-		: position(0.0f)
+		: splitterRect(0, 0, 0, 0)
+		, position(0.0f)
 		, snappedPosition(0.0f)
 		, fold(false)
 		{

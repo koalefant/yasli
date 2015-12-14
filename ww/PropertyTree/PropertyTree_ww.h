@@ -148,9 +148,6 @@ protected:
 	friend struct FilterVisitor;
 };
 
-
-wstring generateDigest(Serializer& ser);
-
 }
 
 // vim:ts=4
