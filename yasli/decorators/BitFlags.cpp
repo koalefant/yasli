@@ -1,5 +1,6 @@
 #include "yasli/decorators/BitFlags.h"
 #include "yasli/Archive.h"
+#include "yasli/STL.h"
 
 namespace yasli {
 
@@ -15,8 +16,7 @@ void BitFlagsWrapper::YASLI_SERIALIZE_METHOD(yasli::Archive& ar)
 			bool flag = (previousValue & flagValue) == flagValue;
 			bool previousFlag = flag;
 			ar(flag, desc.nameByIndex(i), desc.labelByIndex(i));
-			if (flag != previousFlag)
-			{
+			if (flag != previousFlag) {
 				if (flag)
 					*variable |= flagValue;
 				else
@@ -25,6 +25,11 @@ void BitFlagsWrapper::YASLI_SERIALIZE_METHOD(yasli::Archive& ar)
 		}
 	}
 	else {
+		if (ar.isEdit()) {
+			string digest = desc.labelCombinationString(*variable);
+			ar(digest, "digest", "^!");
+		}
+
 		for (size_t i = 0; i < (size_t)count; ++i) {
 			int flagValue = desc.valueByIndex(i);
 			bool flag = (*variable & flagValue) == flagValue;

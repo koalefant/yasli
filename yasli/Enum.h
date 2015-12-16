@@ -47,6 +47,7 @@ public:
 	const StringListStatic& labels() const{ return labels_; }
 	StringListStatic nameCombination(int bitVector) const;
 	StringListStatic labelCombination(int bitVector) const;
+	string labelCombinationString(int bitVector) const;
 	bool registered() const { return !names_.empty(); }
 	TypeID type() const{ return type_; }
 private:

@@ -126,6 +126,21 @@ YASLI_INLINE StringListStatic EnumDescription::labelCombination(int bitVector) c
 	return strings;
 }
 
+YASLI_INLINE string EnumDescription::labelCombinationString(int bitVector) const 
+{
+	string result;
+    for(ValueToLabel::const_reverse_iterator i = valueToLabel_.rbegin(); i != valueToLabel_.rend(); ++i)
+        if(i->second && (bitVector & i->first) == i->first){
+            bitVector &= ~i->first;
+			if (!result.empty()) {
+				result += "|";
+			}
+            result += i->second;
+        }
+	YASLI_ASSERT(!bitVector && "Unregistered enum value");
+	return result;
+}
+
 
 YASLI_INLINE int EnumDescription::indexByValue(int value) const
 {
