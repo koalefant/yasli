@@ -310,13 +310,13 @@ yasli::string PropertyRowContainer::valueAsString() const
 	return yasli::string(buf);
 }
 
-const char* PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const 
+yasli::string PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const
 {
 	const PropertyRow* defaultType = defaultRow(tree->model());
 	if (defaultType)
 		return defaultType->typeNameForFilter(tree);
 	else
-		return elementTypeName_;
+        return yasli::makePrettyTypeName(elementTypeName_);
 }
 
 bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)

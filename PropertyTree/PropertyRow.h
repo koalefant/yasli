@@ -211,7 +211,7 @@ public:
 	virtual void labelChanged() {}
 	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
-	virtual const char* typeNameForFilter(PropertyTree* tree) const;
+	virtual yasli::string typeNameForFilter(PropertyTree* tree) const;
 	void setTypeName(const char* typeName) { YASLI_ASSERT(strlen(typeName)); typeName_ = typeName; }
 	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
 

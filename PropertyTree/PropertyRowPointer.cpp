@@ -115,6 +115,10 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 	tree->model()->rowChanged(row);
 }
 
+yasli::string PropertyRowPointer::typeNameForFilter(PropertyTree* tree) const
+{
+    return yasli::makePrettyTypeName(baseType_.name());
+}
 
 yasli::string PropertyRowPointer::valueAsString() const
 {

@@ -90,61 +90,45 @@ struct TypeInfo
 	size_t size;
 	char name[128];
 
-	// We are trying to minimize type names here. Stripping namespaces,
-	// whitespaces and S/C/E/I prefixes. Why namespaces? Type names are usually
-	// used in two contexts: for unique name within factory context, where
-	// collision is unlikely, or for filtering in PropertyTree where concise
-	// name is much more useful.
-	static void cleanTypeName(char*& d, const char* dend, const char*& s, const char* send)
-	{
-		if(strncmp(s, "class ", 6) == 0)
-			s += 6;
-		else if(strncmp(s, "struct ", 7) == 0)
-			s += 7;
+    // Remove class/struct prefixes and whitespaces
+    static void cleanTypeName(char*& d, const char* dend, const char*& s, const char* send)
+    {
+        if(strncmp(s, "class ", 6) == 0)
+            s += 6;
+        else if(strncmp(s, "struct ", 7) == 0)
+            s += 7;
 
-		while(*s == ' ' && s != send)
-			++s;
+        while(*s == ' ' && s != send)
+            ++s;
 
-		// strip C/S/I/E prefixes
-		if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
-			++s;
+        if (s >= send)
+            return;
 
-		if (s >= send)
-			return;
+        char* startd = d;
+        while (d != dend && s != send) {
+            while(*s == ' ' && s != send)
+                ++s;
+            if (s == send)
+                break;
+            if (s >= send)
+                break;
+            if (*s == '<') {
+                *d = '<';
+                ++d;
+                ++s;
+                cleanTypeName(d, dend, s, send);
+            }
+            else if (*s == '>') {
+                *d = '\0';
+                return;
+            }
+            *d = *s;
+            ++s;
+            ++d;
+        }
+    }
 
-		char* startd = d;
-		while (d != dend && s != send) {
-			while(*s == ' ' && s != send)
-				++s;
-			if (s == send)
-				break;
-			if (*s == ':' && s[1] == ':') {
-				// strip namespaces
-				s += 2;
-				d = startd;
-
-				if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
-					++s;
-			}
-			if (s >= send)
-				break;
-			if (*s == '<') {
-				*d = '<';
-				++d;
-				++s;
-				cleanTypeName(d, dend, s, send);
-			}
-			else if (*s == '>') {
-				*d = '\0';
-				return;
-			}
-			*d = *s;
-			++s;
-			++d;
-		}
-	}
-
-	template<size_t nameLen>
+    template<size_t nameLen>
 	static void extractTypeName(char (&name)[nameLen], const char* funcName)
 	{
 #ifdef __clang__
@@ -282,6 +266,68 @@ inline bool TypeID::operator<(const TypeID& rhs) const{
 
 template<class T>
 T* createDerivedClass(TypeID typeID);
+
+// We are trying to minimize type names here not to scare user of UI. Stripping
+// namespaces, whitespaces and S/C/E/I prefixes.
+inline void makePrettyTypeName(char*& d, const char* dend, const char*& s, const char* send)
+{
+    if(strncmp(s, "class ", 6) == 0)
+        s += 6;
+    else if(strncmp(s, "struct ", 7) == 0)
+        s += 7;
+
+    while(*s == ' ' && s != send)
+        ++s;
+
+    // strip C/S/I/E prefixes
+    if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
+        ++s;
+
+    if (s >= send)
+		return;
+
+    char* startd = d;
+    while (d != dend && s != send) {
+        while(*s == ' ' && s != send)
+            ++s;
+        if (s == send)
+            break;
+        if (*s == ':' && s[1] == ':') {
+            // strip namespaces
+            s += 2;
+            d = startd;
+
+            if ((*s == 'C' || *s == 'S' || *s == 'I' || *s == 'E') && s[1] >= 'A' && s[1] <= 'Z')
+                ++s;
+        }
+        if (s >= send)
+            break;
+        if (*s == '<') {
+            *d = '<';
+            ++d;
+            ++s;
+            makePrettyTypeName(d, dend, s, send);
+        }
+        else if (*s == '>') {
+            *d = '\0';
+			return;
+        }
+        *d = *s;
+        ++s;
+        ++d;
+    }
+}
+
+inline yasli::string makePrettyTypeName(const char* typeName) {
+    char result[256] = "";
+    char* d = result;
+    const char* dend = d+sizeof(result)-1;
+    const char* s = typeName;
+    const char* send = typeName+strlen(typeName);
+	makePrettyTypeName(d, dend, s, send);
+	*d = '\0';
+	return result;
+}
 
 }
 

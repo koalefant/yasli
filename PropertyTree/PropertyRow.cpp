@@ -609,9 +609,9 @@ void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, b
 	labelChanged();
 }
 
-const char* PropertyRow::typeNameForFilter(PropertyTree* tree) const
+yasli::string PropertyRow::typeNameForFilter(PropertyTree* tree) const
 {
-	return typeName();
+	return yasli::makePrettyTypeName(typeName());
 }
 
 void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index, bool fontChanged)

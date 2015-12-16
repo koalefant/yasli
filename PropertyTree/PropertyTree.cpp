@@ -991,7 +991,7 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 		filter->addAction((yasli::string("Value:\t") + valueFilter).c_str(), 0, handler, &PropertyTreeMenuHandler::onMenuFilterByValue);
 
 		yasli::string typeFilter = ":";
-		typeFilter += quoteIfNeeded(row->typeNameForFilter(this));
+        typeFilter += quoteIfNeeded(row->typeNameForFilter(this).c_str());
 		handler->filterType = typeFilter;
 		filter->addAction((yasli::string("Type:\t") + typeFilter).c_str(), 0, handler, &PropertyTreeMenuHandler::onMenuFilterByType);
 	}

@@ -60,7 +60,7 @@ public:
 		serializer_.setPointer(value.pointer());
 		serializer_.setType(value.containerType());
 	}
-	const char* typeNameForFilter(PropertyTree* tree) const override;
+	yasli::string typeNameForFilter(PropertyTree* tree) const override;
 	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }

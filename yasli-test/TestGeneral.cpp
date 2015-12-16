@@ -56,11 +56,24 @@ SUITE(General)
 #if YASLI_NO_RTTI
 	TEST(TypeIDNameParsing)
 	{
-		CHECK_EQUAL("int", string(TypeID::get<int>().name()));
-		CHECK_EQUAL("float", string(TypeID::get<float>().name()));
-		CHECK_EQUAL("Container<pair<int,float>>", string(TypeID::get<Namespace::Container<std::pair<int, float> > >().name()));
-		CHECK_EQUAL("Prefix", string(TypeID::get<Namespace::CPrefix>().name()));
-		CHECK_EQUAL("GlobalPrefix", string(TypeID::get<SGlobalPrefix>().name()));
+		CHECK_EQUAL("int",
+					string(TypeID::get<int>().name()));
+		CHECK_EQUAL("float",
+					string(TypeID::get<float>().name()));
+
+		CHECK_EQUAL("Container<pair<int,float>>", 
+					yasli::makePrettyTypeName(TypeID::get<Namespace::Container<std::pair<int, float> > >().name()));
+		CHECK_EQUAL("Prefix", 
+					yasli::makePrettyTypeName(TypeID::get<Namespace::CPrefix>().name()));
+		CHECK_EQUAL("GlobalPrefix", 
+					yasli::makePrettyTypeName(TypeID::get<SGlobalPrefix>().name()));
+
+        CHECK_EQUAL("SuiteGeneral::Namespace::Container<std::pair<int,float>>",
+					string(TypeID::get<Namespace::Container<std::pair<int, float> > >().name()));
+        CHECK_EQUAL("SuiteGeneral::Namespace::CPrefix",
+					string(TypeID::get<Namespace::CPrefix>().name()));
+        CHECK_EQUAL("SGlobalPrefix",
+					string(TypeID::get<SGlobalPrefix>().name()));
 	}
 #endif
 }

@@ -412,7 +412,7 @@ struct FilterVisitor
 		if (matchFilter && filter_.typeRelevant(filter_.VALUE))
 			matchFilter = filter_.match(value.c_str(), filter_.VALUE, 0, 0);
 		if (matchFilter && filter_.typeRelevant(filter_.TYPE))
-			matchFilter = filter_.match(row->typeNameForFilter(tree), filter_.TYPE, 0, 0);						   
+			matchFilter = filter_.match(row->typeNameForFilter(tree).c_str(), filter_.TYPE, 0, 0);						   
 		
 		int numChildren = int(row->count());
 		if (matchFilter) {
