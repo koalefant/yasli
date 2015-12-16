@@ -44,7 +44,9 @@ public:
 
 	~QtMenu()
 	{
-		// actions are freed with the QMenu
+		for (size_t i = 0; i < actions_.size(); ++i)
+			delete actions_[i];
+
 		for (size_t i = 0; i < menus_.size(); ++i)
 			delete menus_[i];
 	}

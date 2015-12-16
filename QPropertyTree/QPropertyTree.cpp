@@ -609,6 +609,7 @@ QPropertyTree::QPropertyTree(QWidget* parent)
 QPropertyTree::~QPropertyTree()
 {
 	clearMenuHandlers();
+	delete dragController_;
 }
 
 void QPropertyTree::interruptDrag()
