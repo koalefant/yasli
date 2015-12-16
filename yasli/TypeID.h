@@ -78,7 +78,9 @@ private:
 #endif
 	void* module_;
 	friend class TypeDescription;
+#if YASLI_NO_RTTI
 	friend struct TypeInfo;
+#endif
 };
 
 #if YASLI_NO_RTTI

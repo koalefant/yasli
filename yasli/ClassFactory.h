@@ -155,6 +155,7 @@ public:
 
 	virtual const char* getRegisteredTypeName(BaseType* ptr) const
 	{
+#if YASLI_NO_RTTI
 		if (ptr == 0)
 			return "";
 		void* vptr = extractVPtr(ptr);
@@ -162,6 +163,14 @@ public:
 		if (it == vptrToCreatorMap_.end())
 			return "";
 		return it->second->description().name();
+#else
+		if (ptr == 0)
+			return "";
+		typename TypeIDToCreatorMap::const_iterator it = typeIdToCreatorMap_.find(TypeID(typeid(*ptr)));
+		if (it == typeIdToCreatorMap_.end()) 
+			return "";
+		return it->second->description().name();
+#endif
 	}
 
 	BaseType* createByIndex(int index) const
@@ -221,6 +230,8 @@ public:
 			typeToCreatorMap_.erase(current->description().typeID());
 #if YASLI_NO_RTTI
 			vptrToCreatorMap_.erase(current->vptr());
+#else
+			typeIdToCreatorMap_.erase(current->typeID());
 #endif
 			for (size_t i = 0; i < creators_.size(); ++i) {
 				if (creators_[i] == current) {
@@ -251,7 +262,11 @@ protected:
 		}
 		creators_.push_back(creator);
 		registeredNameToTypeID_[creator->description().name()] = creator->typeID();
+#if !YASLI_NO_RTTI
+		typeIdToCreatorMap_[creator->typeID()] = creator;
+#else
 		vptrToCreatorMap_[creator->vptr()] =  creator;
+#endif
 	}
 
 	template<class T>
@@ -262,6 +277,11 @@ protected:
 	virtual void addAnnotation(const yasli::TypeID& id, const char* name, const char* value) {
 		annotations_[id].push_back(std::make_pair(name, value));
 	}
+
+#if !YASLI_NO_RTTI
+	typedef std::map<TypeID, CreatorBase*> TypeIDToCreatorMap;
+	TypeIDToCreatorMap typeIdToCreatorMap_;
+#endif
 
 	TypeToCreatorMap typeToCreatorMap_;
 	std::vector<CreatorBase*> creators_;
