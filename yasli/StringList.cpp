@@ -94,7 +94,7 @@ bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const c
             value = str.c_str();
             return true;
         }
-        return true;
+        return false;
     }
 }
 
