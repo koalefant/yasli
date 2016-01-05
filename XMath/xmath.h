@@ -304,6 +304,7 @@ public:
 
 	void transpose(){ float t = xy; xy = yx; yx = t; }
 	void invert();
+	float det() const { return xx*yy - xy*yx; }
 
 	Mat2f& operator*=(const Mat2f& m) { return (*this) = Mat2f(xx*m.xx+xy*m.yx, xx*m.xy+xy*m.yy, yx*m.xx+yy*m.yx, yx*m.xy+yy*m.yy); }
 	Mat2f operator*(const Mat2f& m) const { return Mat2f(*this) *= m; }
