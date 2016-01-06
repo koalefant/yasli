@@ -70,8 +70,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 #endif
 	va_end(args);
 
-	text << " ( " << buffer << " )";
-	text << "\n";
+	text << "\n\n" << buffer << "\n";
 
 	if(logHandler)
 		logHandler(text.c_str());
