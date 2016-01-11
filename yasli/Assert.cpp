@@ -59,7 +59,7 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 			break;
 #endif
 
-	char buffer[4000];
+	char buffer[4000] = "";
 	va_list args;
 	va_start(args, str);
 #ifdef _MSC_VER
