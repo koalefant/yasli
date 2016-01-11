@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <float.h>
 #include <stdio.h>
+#include <time.h>
 #include "BugslayerUtil.h"
 
 typedef BOOL (WINAPI * MINIDUMPWRITEDUMP)(HANDLE, DWORD, HANDLE, MINIDUMP_TYPE, PMINIDUMP_EXCEPTION_INFORMATION, PMINIDUMP_USER_STREAM_INFORMATION, PMINIDUMP_CALLBACK_INFORMATION);
@@ -11,16 +12,17 @@ public:
 	 XErrorHandler();
 
 	void	 Abort(const char* subj = NULL);
-	void	 WriteLog(const char* msg);
 };
 
-char exceptMSG[512] = "";
-char miniDampName[512] = "";
+const int BUFFER_SIZE = 512;
+char exceptMSG[BUFFER_SIZE] = "";
+char miniDampName[BUFFER_SIZE] = "";
+char fileName[BUFFER_SIZE] = "Error.log";
 void (*userHandler)();
 bool interactiveExceptionHandler = true;
 
-void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, 511); }
-void setMiniDampName(const char* name){ strncpy(miniDampName, name, 511); }
+void setExceptionMessage(const char* msg){ strncpy(exceptMSG, msg, BUFFER_SIZE - 1); }
+void setMiniDampName(const char* name){ strncpy(miniDampName, name, BUFFER_SIZE - 1); }
 void setExceptionHandler(void (*pf)()){ userHandler = pf; }
 void setInteractiveExceptionHandler(bool interactiveEH) { interactiveExceptionHandler = interactiveEH; }
 
@@ -55,8 +57,16 @@ char* uctoa(unsigned char a)
 	return _ConvertBuffer;
 }
 
+void addTimeStamp(char* buffer, int len)
+{
+	time_t time;
+	_time64(&time);
+	strftime(buffer, len, "%Y_%m_%d_%H_%M_%S_", localtime(&time));
+}
+
 LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 {
+	ASSERT(0);
 	static bool handled = false;
 	if(handled)
 		return EXCEPTION_CONTINUE_EXECUTION;
@@ -65,17 +75,22 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 	_clearfp();
 	SetUnhandledExceptionFilter(NULL);
 
-	if(strlen(miniDampName))
+	if(strlen(miniDampName)){
+		addTimeStamp(fileName, BUFFER_SIZE - 1);
+		strcat(fileName, miniDampName);
+		strcat(fileName, ".dmp");
 		if(HMODULE hDll = LoadLibraryA("DBGHELP.DLL"))
 			if(MINIDUMPWRITEDUMP pfnDump = (MINIDUMPWRITEDUMP)GetProcAddress(hDll, "MiniDumpWriteDump")){
 				MINIDUMP_EXCEPTION_INFORMATION exInfo = { 0 };
 				exInfo.ThreadId = GetCurrentThreadId();
 				exInfo.ExceptionPointers = except_info;
 				exInfo.ClientPointers = 0;
-				HANDLE hFile = CreateFileA(miniDampName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+				HANDLE hFile = CreateFileA(fileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 				pfnDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &exInfo, NULL, NULL);
 				CloseHandle(hFile);
 			}
+		strcpy(strstr(fileName, ".dmp"), ".log");
+	}
 
 	static char msg[100000];
 
@@ -189,8 +204,11 @@ LONG APIENTRY exHandler(EXCEPTION_POINTERS *except_info)
 			}
 		}
 
+	if(FILE* f = fopen(fileName, "wb")){
+		fwrite(msg, 1, strlen(msg), f);
+		fclose(f);
+	}
 
-	ErrH.WriteLog(msg);
 	if(userHandler)
 		userHandler();
 	ErrH.Abort(msg);
@@ -210,13 +228,4 @@ void XErrorHandler::Abort(const char* msg)
 	exit(0);
 }
 
-void XErrorHandler::WriteLog(const char* msg)
-{
-    FILE* f = fopen("Error.log", "wb");
-    if(!f)
-        return;
-
-    fwrite(msg, 1, strlen(msg), f);
-    fclose(f);
-}
 
