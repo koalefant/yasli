@@ -94,29 +94,29 @@ struct NotDecorator{
 };
 
 
-template<class T, class PointerType = SharedPtr<T> >
-struct OptionalPtr : PointerType{
-	void serialize(yasli::Archive& ar){
-		xassert(ar.isEdit());
-		bool optionallyEnabled = false;
-		if(ar.isInput()){
-			ar(optionallyEnabled, "optionallyEnabled", "^");
-			if(optionallyEnabled){
-				if(!get())
-					set(new T());
-				get()->serialize(ar);
-			}
-			else
-				set(0);
-		}
-		else{
-			optionallyEnabled = get() != 0;
-			ar(optionallyEnabled, "optionallyEnabled", "^");
-			if(optionallyEnabled)
-				get()->serialize(ar);
-		}
-	}
-};
+// template<class T, class PointerType = SharedPtr<T> >
+// struct OptionalPtr : PointerType{
+// 	void serialize(yasli::Archive& ar){
+// 		YASLI_ASSERT(ar.isEdit());
+// 		bool optionallyEnabled = false;
+// 		if(ar.isInput()){
+// 			ar(optionallyEnabled, "optionallyEnabled", "^");
+// 			if(optionallyEnabled){
+// 				if(!get())
+// 					set(new T());
+// 				get()->serialize(ar);
+// 			}
+// 			else
+// 				set(0);
+// 		}
+// 		else{
+// 			optionallyEnabled = get() != 0;
+// 			ar(optionallyEnabled, "optionallyEnabled", "^");
+// 			if(optionallyEnabled)
+// 				get()->serialize(ar);
+// 		}
+// 	}
+// };
 
 inline bool serialize(yasli::Archive& ar, ww::RadioDecorator& value, const char* name, const char* label){		
     if(ar.isEdit())
