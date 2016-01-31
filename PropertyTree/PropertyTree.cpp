@@ -385,27 +385,25 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	bool addToSelection = false;
 	int previousFocusedElement = focusedLayoutElement_;
 	Point focusCursor;
-	switch(ev->key()){
-	case KEY_UP:
-	{
+
+	int key = ev->key();
+	int modifiers = ev->modifiers();
+
+	if ( key == KEY_UP ) {
 		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
 			focusCursor_ = focusCursor;
 		}
-		break;
 	}
-	case KEY_DOWN:
-	{
+	if ( key == KEY_DOWN ) {
 		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,1), false);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
 			focusCursor_ = focusCursor;
 		}
-		break;
 	}
-	case KEY_LEFT:
-	{
+	if ( key == KEY_LEFT ) {
 		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(-1,0), true);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
@@ -424,10 +422,8 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 					expandRow(nonInlinedParent, false);
 			}
 		}
-		break;
 	}
-	case KEY_RIGHT:
-	{
+	if ( key == KEY_RIGHT ) {
 		int element = findNextChildLayoutElement(*layout_, focusedLayoutElement_);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
@@ -448,75 +444,61 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 					expandRow(nonInlinedParent, true);
 			}
 		}
-		break;
 	}
-	case KEY_HOME:
-		if (!parentRow)
-			break;
-		if (ev->modifiers() == MODIFIER_CONTROL) {
-			// navigate to the beginning of the row
-			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(-1,0), true);
-			if (element > 0) {
-				focusedLayoutElement_ = element;
-				focusCursor_ = focusCursor;
-			}
+	if ( key == KEY_HOME && modifiers == 0) {
+		// navigate to the top
+		int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
+		if (element > 0) {
+			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
 		}
-		else {
-			// navigate to the top
-			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
-			if (element > 0) {
-				focusedLayoutElement_ = element;
-				focusCursor_ = focusCursor;
-			}
+	}
+	if ( ( key == KEY_HOME && modifiers == MODIFIER_CONTROL ) ||
+		 ( key == KEY_LEFT && modifiers == (MODIFIER_CONTROL|MODIFIER_ALT) ) ) {
+		// navigate to the beginning of the row
+		int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(-1,0), true);
+		if (element > 0) {
+			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
 		}
-		break;
-	case KEY_END:
-		if (!parentRow)
-			break;
-		if (ev->modifiers() == MODIFIER_CONTROL) {
-			// navigate to the end of the row
-			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(1,0), true);
-			if (element > 0) {
-				focusedLayoutElement_ = element;
-				focusCursor_ = focusCursor;
-			}
+	}
+	if ( ( key == KEY_END && modifiers == MODIFIER_CONTROL ) ||
+		 ( key == KEY_RIGHT && modifiers == (MODIFIER_CONTROL|MODIFIER_ALT) ) ) {
+		// navigate to the end of the row
+		int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(1,0), true);
+		if (element > 0) {
+			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
 		}
-		else {
-			// navigate to the bottom
-			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0, 1), false);
-			if (element > 0) {
-				focusedLayoutElement_ = element;
-				focusCursor_ = focusCursor;
-			}
+	}
+	if ( key == KEY_END && modifiers == 0 ) {
+		// navigate to the bottom
+		int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0, 1), false);
+		if (element > 0) {
+			focusedLayoutElement_ = element;
+			focusCursor_ = focusCursor;
 		}
-		break;
-	case KEY_SPACE:
-		if (ev->modifiers() == MODIFIER_CONTROL) {
-			if (size_t(focusedLayoutElement_) <  layout_->rows.size()) {
-				selectedRow = layout_->rows[focusedLayoutElement_];
-				addToSelection = true;
-			}
-			break;
+	}
+	if ( key == KEY_SPACE && modifiers == MODIFIER_CONTROL ) {
+		if (size_t(focusedLayoutElement_) <  layout_->rows.size()) {
+			selectedRow = layout_->rows[focusedLayoutElement_];
+			addToSelection = true;
 		}
-		else {
-			if (filterWhenType_)
-				break;
-			// fall through
-		}
-	case KEY_RETURN:
+	}
+	if ( ( key == KEY_SPACE && modifiers == 0 && !filterWhenType_ ) || 
+		 key == KEY_RETURN ) {
 		if(focusedRow->canBeToggled(this))
 			expandRow(focusedRow, !focusedRow->expanded());
 		else {
 			focusedRow->onActivate(this, false);
 			focusedRow->onActivateRelease(this);
 		}
-		break;
 	}
-	if ((ev->modifiers() != MODIFIER_CONTROL && ev->key() != KEY_SPACE) &&
+	if (modifiers != MODIFIER_CONTROL && ev->key() != KEY_SPACE &&
 		focusedLayoutElement_ != previousFocusedElement && focusedLayoutElement_ > 0) {
 		selectedRow = layout_->rows[focusedLayoutElement_];
 	}
-	if(selectedRow){
+	if (selectedRow){
 		onRowSelected(selectedRow, addToSelection, false);	
 		return true;
 	}
