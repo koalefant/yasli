@@ -126,12 +126,26 @@ static bool overlapsOnAxis(const Rect& a, const Rect& b, Point axis)
 	return !(maxB <= minA || maxA <= minB);
 }
 
-static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layout, int element, Point cursorPos, Point direction, bool onlyOverlapping)
+// Looks for next adjacent rectangle in the layout.
+//
+// 'cursorPos' is used to keep column when focus goes through narrow->wide->narrow fields:
+//
+//  |-------------------------|
+//  |        |       |        |
+//  |-------------------------|  |
+//	|                      +  |  |
+//  |-------------------------|  V
+//  |        |       |        |
+//  |-------------------------|
+//
+static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layout, int element,
+											Point cursorPos, Point direction, bool onlyOverlapping)
 {
 	const vector<Rect>& rectangles = layout.rectangles;
 	const Rect& ref = rectangles[element];
 	Point cursor = ref.clamp(cursorPos);
 
+	// select first available element in case we had no selection previously
 	if (element == -1) {
 		for (size_t i = 0; i < layout.elements.size(); ++i) {
 			if (!layout.elements[i].focusable)
@@ -140,6 +154,7 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 		}
 	}
 
+	// iterate over all rectangles and choose closest one in 'direction'
 	long long minDistance = LLONG_MAX;
 
 	int bestElement = -1;
@@ -155,15 +170,20 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 		Point distance = distanceInDirection(ref, cursor, r, direction);
 		if (distance.x() <= 0)
 			continue;
+		// rectangles are compared by distance along direction (distance.x) and then by distance
+		// perpendicular to direction (distance.y)
 		long long distanceValue = abs(distance.x()) * 0xffffffffull + abs(distance.y());
 		if (distanceValue < minDistance) {
 			bestElement = i;
 			minDistance = distanceValue;
 		}
 	}
+
+	// 'newCursor' position is always clipped to a focused rectangle
 	if (bestElement > 0) {
 		*newCursor = rectangles[bestElement].clamp(cursor);
 	}
+
 	return bestElement;
 }
 
@@ -352,6 +372,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			if (element > 0)
 				focusedLayoutElement_ = element;
 			else {
+				// can't move further to the left, collapse row
 				PropertyRow* nonInlinedParent = 0;
 				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
 					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
@@ -375,6 +396,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 				focusCursor_ = focusCursor;
 			}
 			else {
+				// can't move further, expand row
 				PropertyRow* nonInlinedParent = 0;
 				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
 					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
@@ -722,7 +744,6 @@ void PropertyTree::serialize(Archive& ar)
 
 static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
 {
-
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
 	int labelMin = row->textSizeInitial();
