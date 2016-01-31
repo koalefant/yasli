@@ -10,11 +10,12 @@ namespace property_tree
 {
 using std::vector;
 
-enum
-{
-	MAX_PRIORITY = 4
-};
+// Number of collapse-prioritiies. 
+// Used to hide individual cells in a row depending on their priority when
+// there is not enough space to display all of them.
+enum { MAX_PRIORITY = 4 };
 
+// layout behavior of individual layout element
 enum ElementType
 {
 	FIXED_SIZE,
@@ -24,6 +25,7 @@ enum ElementType
 	VERTICAL,
 };
 
+// Role fulfilled by individual layout element
 enum RowPart
 {
 	PART_INVALID,
@@ -38,6 +40,7 @@ enum RowPart
 	PART_PLUS
 };
 
+// Describes one element in the layout
 struct LayoutElement
 {
 	int childrenList;
@@ -70,19 +73,30 @@ struct ChildrenList
 
 struct Layout
 {
+	// defines position where magnet elements get aligned to, used for name/value columns
 	int magnetPoint;
+
+	// Structure of Arrays below:
+	// defines behavior of separate layout elements
 	vector<LayoutElement> elements;
+	// pointer to a row corresponding to an element
 	vector<PropertyRow*> rows;
-	vector<ChildrenList> childrenLists;
+	// actual rectangle, result of the layout
 	vector<Rect> rectangles;
+	// minimal sizes considering children in the layout structure
 	vector<int> minimalWidths;
 	vector<int> minimalHeights;
+	// ^^^ end of SoA
+
+	// lists of children elements, referenced by individual LayoutElement
+	vector<ChildrenList> childrenLists;
 	int nextChildrenList;
 
 	Layout()
 	: nextChildrenList(0)
 	, magnetPoint(0) {}
 
+	// adds element to the layout
 	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, bool focusable)
 	{
 		LayoutElement e;
@@ -131,6 +145,7 @@ struct Layout
 	}
 };
 
+// result of a hit test through the layout
 struct HitResult
 {
 	Point point;
