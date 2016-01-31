@@ -187,6 +187,50 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 	return bestElement;
 }
 
+// Looks for furthest element in layout in 'direction'. Tries to maintain closest position on
+// perpendicular axis.
+static int findLastLayoutElementInDirection(Point* newCursor, const Layout& layout, int element, Point cursorPos, Point direction, bool onlyOverlapping) {
+	const vector<Rect>& rectangles = layout.rectangles;
+	const Rect& ref = rectangles[element];
+	Point cursor = ref.clamp(cursorPos);
+
+	// iterate over all rectangles and choose closest one in 'direction'
+	int minDistance = INT_MIN;
+	int minCrossDistance = INT_MAX;
+
+	int bestElement = -1;
+	for (size_t i = 0; i < rectangles.size(); ++i) {
+		if (i == element)
+			continue;
+		if (!layout.elements[i].focusable)
+			continue;
+		const Rect& r = rectangles[i];
+		if (onlyOverlapping && !overlapsOnAxis(ref, r, Point(-direction.y(), direction.x())))
+			continue;
+		Point distance = distanceInDirection(ref, cursor, r, direction);
+		if (distance.x() <= 0)
+			continue;
+		int distanceValue = abs(distance.x());
+		if (distanceValue > minDistance) {
+			bestElement = i;
+			minDistance = distanceValue;
+		} else if ( distanceValue == minDistance ) {
+			int crossDistance = abs(distance.y());
+			if ( crossDistance < minCrossDistance ) {
+				minCrossDistance = crossDistance;
+				bestElement = i;
+			}
+		}
+	}
+
+	// 'newCursor' position is always clipped to a focused rectangle
+	if (bestElement > 0) {
+		*newCursor = rectangles[bestElement].clamp(cursor);
+	}
+
+	return bestElement;
+}
+
 // ---------------------------------------------------------------------------
 
 TreeConfig::TreeConfig()
@@ -410,24 +454,40 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 		if (!parentRow)
 			break;
 		if (ev->modifiers() == MODIFIER_CONTROL) {
-			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MIN);
+			// navigate to the beginning of the row
+			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(-1,0), true);
+			if (element > 0) {
+				focusedLayoutElement_ = element;
+				focusCursor_ = focusCursor;
+			}
 		}
 		else {
-			selectedRow = model()->root()->rowByVerticalIndex(this, 0);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+			// navigate to the top
+			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
+			if (element > 0) {
+				focusedLayoutElement_ = element;
+				focusCursor_ = focusCursor;
+			}
 		}
 		break;
 	case KEY_END:
 		if (!parentRow)
 			break;
 		if (ev->modifiers() == MODIFIER_CONTROL) {
-			selectedRow = parentRow->rowByHorizontalIndex(this, cursorX_ = INT_MAX);
+			// navigate to the end of the row
+			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(1,0), true);
+			if (element > 0) {
+				focusedLayoutElement_ = element;
+				focusCursor_ = focusCursor;
+			}
 		}
 		else {
-			selectedRow = model()->root()->rowByVerticalIndex(this, INT_MAX);
-			if (selectedRow)
-				selectedRow = selectedRow->rowByHorizontalIndex(this, cursorX_);
+			// navigate to the bottom
+			int element = findLastLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0, 1), false);
+			if (element > 0) {
+				focusedLayoutElement_ = element;
+				focusCursor_ = focusCursor;
+			}
 		}
 		break;
 	case KEY_SPACE:
