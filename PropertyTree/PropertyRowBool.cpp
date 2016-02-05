@@ -35,7 +35,7 @@ bool PropertyRowBool::assignToByPointer(void* instance, const yasli::TypeID& typ
 
 void PropertyRowBool::redraw(IDrawContext& context)
 {
-	context.drawCheck(widgetRect(context.tree), userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
+	context.drawCheck(context.widgetRect, userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
 bool PropertyRowBool::onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev)

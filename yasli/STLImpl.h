@@ -20,7 +20,7 @@
 namespace yasli {
 
 template<class Container, class Element>
-class ContainerSTL : public ContainerInterface/*{{{*/
+class ContainerSTL final : public ContainerInterface/*{{{*/
 {
 public:
 	explicit ContainerSTL(Container* container = 0)
@@ -129,7 +129,7 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::list<T, Alloc>& container
 // ---------------------------------------------------------------------------
 namespace yasli {
 
-class StringSTL : public StringInterface
+class StringSTL final : public StringInterface
 {
 public:
 	StringSTL(yasli::string& str) : str_(str) { }
@@ -174,7 +174,7 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::map<K, V, C, Alloc>& cont
 
 namespace yasli {
 
-class WStringSTL : public WStringInterface
+class WStringSTL final : public WStringInterface
 {
 public:
 	WStringSTL(yasli::wstring& str) : str_(str) { }
@@ -204,7 +204,7 @@ YASLI_STRING_NAMESPACE_END
 namespace yasli {
 
 template<class V>
-struct StdStringPair : yasli::KeyValueInterface
+struct StdStringPair final : yasli::KeyValueInterface
 {
 	const char* get() const { return pair_.first.c_str(); }
 	void set(const char* key) { pair_.first.assign(key); }
@@ -225,7 +225,7 @@ struct StdStringPair : yasli::KeyValueInterface
 };
 
 template<class K, class V>
-struct StdPair : std::pair<K, V>
+struct StdPair final : std::pair<K, V>
 {
 	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar) 
 	{

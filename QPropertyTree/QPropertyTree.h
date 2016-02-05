@@ -77,6 +77,9 @@ public:
 
 	void attachPropertyTree(PropertyTree* propertyTree) override;
 
+	void apply(bool continuous) override;
+	void revert() override;
+
 public slots:
 	void onAttachedTreeChanged();
 public:
@@ -86,7 +89,6 @@ public:
 	int _updateHeightsTime() const{ return updateHeightsTime_; }
 	int _paintTime() const{ return paintTime_; }
 	bool hasFocusOrInplaceHasFocus() const override;
-	bool _isDragged(const PropertyRow* row) const override;
 	void _cancelWidget() override;
 
 signals:
@@ -155,6 +157,7 @@ protected:
 
 	void setFilterMode(bool inFilterMode);
 	void startFilter(const char* filter) override;
+	int filterAreaHeight() const override;
 
 	using PropertyTree::pointToRootSpace;
 	using PropertyTree::pointFromRootSpace;
@@ -178,6 +181,7 @@ protected:
 	QScopedPointer<QMouseEvent> lastMouseMoveEvent_;
 
 	int updateHeightsTime_;
+	int updateLayoutTime_;
 	int paintTime_;
 	bool sizeToContent_;
 	QSize contentSize_;

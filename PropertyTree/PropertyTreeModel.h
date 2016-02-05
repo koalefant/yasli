@@ -109,15 +109,13 @@ public:
 
 	TreePath pathFromRow(PropertyRow* node);
 	PropertyRow* rowFromPath(const TreePath& path);
-	void setFocusedRow(PropertyRow* row) { focusedRow_ = pathFromRow(row); }
-	PropertyRow* focusedRow() { return rowFromPath(focusedRow_); }
 
 	const Selection& selection() const{ return selection_; }
 	void setSelection(const Selection& selection);
 
-	void setRoot(PropertyRow* root) { root_ = root; }
-	PropertyRow* root() { return root_; }
-	const PropertyRow* root() const { return root_; }
+	void setRoot(PropertyRowStruct* root) { root_ = root; }
+	PropertyRowStruct* root() { return root_; }
+	const PropertyRowStruct* root() const { return root_; }
 
 	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar, PropertyTree* tree);
 
@@ -160,10 +158,9 @@ private:
 	void pushUndo(const PropertyTreeOperator& op);
 	void clearObjectReferences();
 
-	TreePath focusedRow_;
 	Selection selection_;
 
-	yasli::SharedPtr<PropertyRow> root_;
+	yasli::SharedPtr<PropertyRowStruct> root_;
 	UpdateLock updateLock_;
 
 	typedef std::map<yasli::string, yasli::SharedPtr<PropertyRow> > DefaultTypes;

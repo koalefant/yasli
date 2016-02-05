@@ -32,7 +32,7 @@
 using yasli::TypeID;
 
 
-PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRow* root, ValidatorBlock* validator)
+PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* root, ValidatorBlock* validator)
 : Archive(OUTPUT | EDIT | VALIDATION | DOCUMENTATION)
 , model_(model)
 , currentNode_(root)
@@ -64,7 +64,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 , outlineMode_(false)
 , validator_(0)
 {
-	rootNode_ = new PropertyRow();
+	rootNode_ = new PropertyRowStruct();
 	rootNode_->setName("root");
 	currentNode_ = rootNode_.get();
 	stack_.push_back(Level());
@@ -81,8 +81,12 @@ PropertyRow* PropertyOArchive::defaultValueRootNode()
 	return rootNode_->childByIndex(0);
 }
 
-void PropertyOArchive::enterNode(PropertyRow* row)
+void PropertyOArchive::enterNode(PropertyRowStruct* row)
 {
+	if (!row->isStruct()) {
+		YASLI_ASSERT(0);
+		return;
+	}
 	currentNode_ = row;
 
 	stack_.push_back(Level());
@@ -104,6 +108,7 @@ void PropertyOArchive::closeStruct(const char* name)
 static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, const char* typeName, int startIndex)
 {
 	int count = int(rows.size());
+	int iterations = 1;
 	for(int i = startIndex; i < count; ++i){
 		PropertyRow* row = rows[i];
 		if (!row)
@@ -111,8 +116,11 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
 			*index = (int)i;
+			if (iterations > 1)
+				printf("Searching %d times for \"%s\"\n", iterations, name);
 			return row;
 		}
+		++iterations;
 	}
 	for(int i = 0; i < startIndex; ++i){
 		PropertyRow* row = rows[i];
@@ -121,8 +129,11 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
 		   (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0)) {
 			*index = (int)i;
+			if (iterations > 1)
+				printf("Searching %d times for \"%s\"\n", iterations, name);
 			return row;
 		}
+		++iterations;
 	}
 	return 0;
 }
@@ -138,7 +149,11 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
 		if(updateMode_){
-			model_->setRoot(newRow);
+			if (!newRow->isStruct() ) {
+				// fail
+				return NULL;
+			}
+			model_->setRoot(newRow->asStruct());
 			return newRow;
 		}
 		else{
@@ -191,20 +206,25 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 	SharedPtr<RowType> newRow;
 
 	if(currentNode_ == 0){
-		if (rootNode_)
-			newRow = static_cast<RowType*>(rootNode_.get());
-		else		
+		if (rootNode_) {
+			printf("Catch me\n");
+			newRow = static_cast<RowType*>(static_cast<PropertyRow*>(rootNode_.get()));
+		} else		
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
 		if(updateMode_){
-			model_->setRoot(newRow);
+			model_->setRoot(newRow->asStruct());
 			return newRow;
 		}
 		else{
-			if(defaultValueCreationMode_)
-				rootNode_ = newRow;
+			if(defaultValueCreationMode_) {
+				if (!newRow->isStruct()) {
+					return NULL;
+				}
+				rootNode_ = newRow->asStruct();
+			}
 			else
-				model_->setRoot(newRow);
+				model_->setRoot(newRow->asStruct());
 			return newRow;
 		}
 	}
@@ -247,7 +267,7 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 
 	lastNode_ = currentNode_;
 	bool hideChildren = outlineMode_ && currentNode_ && currentNode_->isContainer();
-	PropertyRow* row = updateRow<PropertyRow>(name, label, typeName, ser);
+	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, typeName, ser);
 	row->setHideChildren(hideChildren);
 
 	PropertyRow* nonLeaf = 0;
@@ -398,7 +418,7 @@ bool PropertyOArchive::operator()(yasli::PointerInterface& ptr, const char *name
 	lastNode_ = currentNode_;
 
 	bool hideChildren = outlineMode_ && currentNode_ && currentNode_->isContainer();
-	PropertyRow* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
+	PropertyRowPointer* row = updateRow<PropertyRowPointer>(name, label, ptr.baseType().name(), ptr);
 	row->setHideChildren(hideChildren);
 	enterNode(row);
 	{
@@ -471,7 +491,7 @@ bool PropertyOArchive::operator()(yasli::Object& obj, const char *name, const ch
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
-	PropertyRow* row = updateRow<PropertyRow>(name, label, "block", Serializer());
+	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, "block", Serializer());
 	lastNode_ = currentNode_;
 	enterNode(row);
 	return true;

@@ -26,6 +26,7 @@
 #include "IDrawContext.h"
 #include "IUIFacade.h"
 #include "Rect.h"
+#include "Layout.h"
 #include "sigslot.h"
 
 #ifdef _MSC_VER
@@ -110,6 +111,7 @@ enum DragCheckBegin {
 };
 
 class PropertyTreeTransaction;
+class PropertyRowStruct;
 
 class PROPERTY_TREE_API PropertyRow : public yasli::RefCounter
 {
@@ -119,22 +121,19 @@ public:
 		WIDGET_ICON,
 		WIDGET_AFTER_NAME,
 		WIDGET_VALUE,
-		WIDGET_AFTER_PULLED,
+		WIDGET_AFTER_INLINED,
 		WIDGET_INSTEAD_OF_TEXT
 	};
 
-	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
-	typedef Rows::iterator iterator;
-	typedef Rows::const_iterator const_iterator;
 
-	PropertyRow();
+	PropertyRow(bool isStruct = false, bool isContainer = false);
 	virtual ~PropertyRow();
 
 	void setNames(const char* name, const char* label, const char* typeName);
 
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
-	bool expanded() const{ return expanded_; }
+	bool expanded() const{ return expanded_ || inlined_ || inlinedBefore_; }
 	void _setExpanded(bool expanded); // use PropertyTree::expandRow
 	void setExpandedRecursive(PropertyTree* tree, bool expanded);
 
@@ -147,51 +146,32 @@ public:
 	bool visible(const PropertyTree* tree) const;
 	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
-	const PropertyRow* hit(const PropertyTree* tree, Point point) const;
-	PropertyRow* hit(const PropertyTree* tree, Point point);
-	PropertyRow* parent() { return parent_; }
-	const PropertyRow* parent() const{ return parent_; }
-	void setParent(PropertyRow* row) { parent_ = row; }
+	PropertyRowStruct* parent() { return parent_; }
+	const PropertyRowStruct* parent() const{ return parent_; }
+	void setParent(PropertyRowStruct* row) { parent_ = row; }
 	bool isRoot() const { return !parent_; }
 	int level() const;
-
-	void add(PropertyRow* row);
-	void addAfter(PropertyRow* row, PropertyRow* after);
-	void addBefore(PropertyRow* row, PropertyRow* before);
-
-	template<class Op> bool scanChildren(Op& op);
-	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
-	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
-	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTree* tree);
 
 	PropertyRow* childByIndex(int index);
 	const PropertyRow* childByIndex(int index) const;
 	int childIndex(const PropertyRow* row) const;
 	bool isChildOf(const PropertyRow* row) const;
 
-	bool empty() const{ return children_.empty(); }
-	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
+	bool empty() const;
+	//iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
 	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
 	PropertyRow* findByAddress(const void* handle);
 	virtual const void* searchHandle() const;
-	iterator begin() { return children_.begin(); }
-	iterator end() { return children_.end(); }
-	const_iterator begin() const{ return children_.begin(); }
-	const_iterator end() const{ return children_.end(); }
-	std::size_t count() const{ return children_.size(); }
-	iterator erase(iterator it){ return children_.erase(it); }
-	void clear(){ children_.clear(); }
-	void erase(PropertyRow* row);
-	void swapChildren(PropertyRow* row, PropertyTreeModel* model);
+	size_t count() const;
+	virtual void swapChildren(PropertyRow* row, PropertyTreeModel* model) {}
 
 	void assignRowState(const PropertyRow& row, bool recurse);
 	void assignRowProperties(PropertyRow* row);
-	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model);
 
 	const char* name() const{ return name_; }
 	void setName(const char* name) { name_ = name; }
 	const char* label() const { return label_; }
-	const char* labelUndecorated() const { return labelUndecorated_; }
+	const char* labelUndecorated() const { return label_ + controlCharacterCount_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
 	void setTooltip(const char* tooltip);
@@ -207,7 +187,7 @@ public:
 	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
 	bool hideChildren() const { return hideChildren_; }
 	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
-	void updateTextSizeInitial(const PropertyTree* tree, int index, bool force);
+	void updateTextSizeInitial(const PropertyTree* tree, int index, bool fontChanged);
 	virtual void labelChanged() {}
 	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
@@ -233,13 +213,11 @@ public:
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
 
-	int height() const{ return size_.y(); }
-
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree* tree, int index);
-	void calculateMinimalSize(const PropertyTree* tree, int posX, int availableWidth, bool force, int* extraSizeRemainder, int* _extraSize, int index);
+	void calcInlinedRows(int* minTextSize, int* freeInlinedChildren, int* minimalWidth, const PropertyTree* tree, int index);
+	void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index);
 	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 	void calculateTotalSizes(int* minTextSize);
 	void adjustVerticalPosition(const PropertyTree* tree, int& totalHeight);
@@ -248,8 +226,9 @@ public:
 
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
-	Rect rect() const{ return Rect(pos_.x(), pos_.y(), size_.x(), size_.y()); }
+	Rect rect(const PropertyTree* tree) const;
 	Rect rectIncludingChildren(const PropertyTree* tree) const;
+	Rect childrenRect(const PropertyTree* tree) const;
 	Rect textRect(const PropertyTree* tree) const;
 	Rect widgetRect(const PropertyTree* tree) const;
 	Rect plusRect(const PropertyTree* tree) const;
@@ -261,26 +240,26 @@ public:
 	int heightIncludingChildren() const{ return heightIncludingChildren_; }
 	property_tree::Font rowFont(const PropertyTree* tree) const;
 
-	void drawRow(IDrawContext& x, const PropertyTree* tree, int rowIndex, bool selectionPass);
+	void drawElement(IDrawContext& x, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex);
 
 	virtual void redraw(IDrawContext& context);
 	virtual property_tree::InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
 
-	virtual bool isContainer() const{ return false; }
+	bool isContainer() const{ return isContainer_; }
 	virtual bool isPointer() const{ return false; }
 	virtual bool isObject() const{ return false; }
 
 	virtual bool isLeaf() const{ return false; }
 	virtual void closeNonLeaf(const yasli::Serializer& ser, yasli::Archive& ar) {}
-	virtual bool isStatic() const{ return pulledContainer_ == 0; }
-	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!pulledUp() && !pulledBefore()); }
+	virtual bool isStatic() const{ return inlinedContainer() == 0; }
+	virtual bool isSelectable() const{ return (!userReadOnly() && !userReadOnlyRecurse()) || (!inlined() && !inlinedBefore()); }
 	virtual bool activateOnAdd() const{ return false; }
 	virtual bool inlineInShortArrays() const{ return false; }
 
 	bool canBeToggled(const PropertyTree* tree) const;
 	bool canBeDragged() const;
 	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const;
-	void dropInto(PropertyRow* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
+	void dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
 	virtual bool getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTree* tree) const { 
 		hit->toolTip = tooltip_;
 		return true; 
@@ -308,6 +287,7 @@ public:
 	void propagateFlagsTopToBottom();
 	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
 	bool userWidgetToContent() const { return userWidgetToContent_; }
+	bool userRenamable() const { return userRenamable_; }
 	int userWidgetSize() const{ return userWidgetSize_; }
 
 	// multiValue is used to edit properties of multiple objects simulateneously
@@ -316,21 +296,25 @@ public:
 
 	// pulledRow - is the one that is pulled up to the parents row
 	// (created with ^ in the beginning of label)
-	bool pulledUp() const { return pulledUp_; }
-	bool pulledBefore() const { return pulledBefore_; }
-	bool hasPulled() const { return hasPulled_; }
+	bool inlined() const { return inlined_; }
+	bool inlinedBefore() const { return inlinedBefore_; }
+	bool hasInlinedChildren() const { return hasInlinedChildren_; }
 	bool packedAfterPreviousRow() const { return packedAfterPreviousRow_; }
 	bool pulledSelected() const;
-	PropertyRow* nonPulledParent();
-	void setPulledContainer(PropertyRow* container){ pulledContainer_ = container; }
-	PropertyRow* pulledContainer() { return pulledContainer_; }
-	const PropertyRow* pulledContainer() const{ return pulledContainer_; }
+	PropertyRow* findNonInlinedParent();
+	PropertyRow* inlinedContainer();
+	const PropertyRow* inlinedContainer() const;
+	int textSizeInitial() const { return textSizeInitial_; }
 
 	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
 
-	yasli::Serializer serializer() const{ return serializer_; }
-	virtual yasli::TypeID typeId() const{ return serializer_.type(); }
-	void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
+	bool isStruct() const { return isStruct_; }
+	PropertyRowStruct* asStruct();
+	const PropertyRowStruct* asStruct() const;
+	yasli::Serializer serializer() const;
+	virtual yasli::TypeID typeId() const{ return serializer().type(); }
+	void setSerializer(const yasli::Serializer& ser);
+
 	virtual void serializeValue(yasli::Archive& ar) {}
 	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 
@@ -338,61 +322,106 @@ public:
 	yasli::CallbackInterface* callback() { return callback_; }
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
+	void setLayoutElement(int layoutElement) { layoutElement_ = layoutElement; }
+	int layoutElement() const { return layoutElement_; }
 
 protected:
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;
+	const char* typeName_;
 	const char* label_;
 	const char* labelUndecorated_;
-	const char* typeName_;
 	yasli::Serializer serializer_;
-	PropertyRow* parent_;
+	PropertyRowStruct* parent_;
 	yasli::CallbackInterface* callback_;
 	const char* tooltip_;
-	Rows children_;
 
+	int layoutElement_;
 	unsigned int textHash_;
 
 	// do we really need Point here? 
-	Point pos_;
-	Point size_;
-	short int textPos_;
 	short int textSizeInitial_;
-	short int textSize_;
-	short int widgetPos_; // widget == icon!
-	short int widgetSize_;
 	short int userWidgetSize_;
 	unsigned short heightIncludingChildren_;
 	unsigned short validatorIndex_;	
 	unsigned short validatorsHeight_;
 	unsigned char validatorCount_;
 	unsigned char plusSize_;
+	unsigned char controlCharacterCount_;
+	bool isStruct_ : 1;
+	bool isContainer_ : 1;
 	bool visible_ : 1;
 	bool matchFilter_ : 1;
 	bool belongsToFilteredRow_ : 1;
 	bool expanded_ : 1;
 	bool selected_ : 1;
 	bool labelChanged_ : 1;
-	bool layoutChanged_ : 1;
 	bool userReadOnly_ : 1;
 	bool userReadOnlyRecurse_ : 1;
+	bool userRenamable_ : 1;
 	bool userFixedWidget_ : 1;
 	bool userFullRow_ : 1;
 	bool userHideChildren_ : 1;
 	bool userPackCheckboxes_ : 1;
 	bool userWidgetToContent_ : 1;
-	bool pulledUp_ : 1;
-	bool pulledBefore_ : 1;
 	bool packedAfterPreviousRow_ : 1;
-	bool hasPulled_ : 1;
+	bool inlined_ : 1;
+	bool inlinedBefore_ : 1;
+	bool hasInlinedChildren_ : 1;
 	bool multiValue_ : 1;
 	bool hideChildren_ : 1;
 	bool validatorHasErrors_ : 1;
 	bool validatorHasWarnings_ : 1;
 
-	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	static ConstStringList* constStrings_;
+	friend class PropertyOArchive;
+	friend class PropertyIArchive;
+	friend class PropertyRowStruct;
+};
+
+class PropertyRowStruct : public PropertyRow
+{
+public:
+	typedef std::vector< yasli::SharedPtr<PropertyRow> > Rows;
+
+	PropertyRowStruct(bool isContainer = false) : PropertyRow(true, isContainer) { children_.reserve(8); }
+	~PropertyRowStruct();
+
+	yasli::Serializer serializer() const{ return serializer_; }
+    void setSerializer(const yasli::Serializer& ser) { serializer_ = ser; }
+
+	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override { serializer_ = ser; }
+	size_t count() const{ return children_.size(); }
+	PropertyRow* childByIndex(int index);
+	const PropertyRow* childByIndex(int index) const;
+	int childIndex(const PropertyRow* row) const;
+
+	bool isStatic() const override { return inlinedContainer_ == 0; }
+	void add(PropertyRow* row);
+	void addAfter(PropertyRow* row, PropertyRow* after);
+	void addBefore(PropertyRow* row, PropertyRow* before);
+	bool empty() const;
+	void clear(){ children_.clear(); }
+	void erase(PropertyRow* row);
+	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model, bool preserveChildren);
+
+	const PropertyRowStruct* inlinedContainer() const{ return inlinedContainer_; }
+	void setInlinedContainer(PropertyRowStruct* container){ inlinedContainer_ = container; }
+	PropertyRowStruct* inlinedContainer() { return inlinedContainer_; }
+
+	void swapChildren(PropertyRow* row, PropertyTreeModel* model) override;
+
+	template<class Op> bool scanChildren(Op& op);
+	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTree* tree);
+
+	void serialize(yasli::Archive& ar);
+protected:
+	Rows children_;
+	yasli::Serializer serializer_;
+	yasli::SharedPtr<PropertyRowStruct> inlinedContainer_;
 	friend class PropertyOArchive;
 	friend class PropertyIArchive;
 };
@@ -438,7 +467,7 @@ struct LessStrCmpPR
 typedef Factory<const char*, PropertyRow, Constructor0<PropertyRow>, LessStrCmpPR> PropertyRowFactory;
 
 template<class Op>
-bool PropertyRow::scanChildren(Op& op)
+bool PropertyRowStruct::scanChildren(Op& op)
 {
 	Rows::iterator it;
 
@@ -447,17 +476,20 @@ bool PropertyRow::scanChildren(Op& op)
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
-			if(!(*it)->scanChildren(op))
-				return false;
-			if(result == SCAN_CHILDREN)
-				return false;
+			if((*it)->isStruct()) {
+				PropertyRowStruct* schild = static_cast<PropertyRowStruct*>(it->get());
+				if(!schild->scanChildren(op))
+					return false;
+				if(result == SCAN_CHILDREN)
+					return false;
+			}
 		}
 	}
 	return true;
 }
 
 template<class Op>
-bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildren(Op& op, PropertyTree* tree)
 {
 	int numChildren = (int)children_.size();
 	for(int index = 0; index < numChildren; ++index){
@@ -466,17 +498,20 @@ bool PropertyRow::scanChildren(Op& op, PropertyTree* tree)
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
-			if(!child->scanChildren(op, tree))
-				return false;
-			if(result == SCAN_CHILDREN)
-				return false;
+			if (child->isStruct()) {
+				PropertyRowStruct* schild = static_cast<PropertyRowStruct*>(child);
+				if(!schild->scanChildren(op, tree))
+					return false;
+				if(result == SCAN_CHILDREN)
+					return false;
+			}
 		}
 	}
 	return true;
 }
 
 template<class Op>
-bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildrenReverse(Op& op, PropertyTree* tree)
 {
 	int numChildren = (int)children_.size();
 	for(int index = numChildren - 1; index >= 0; --index){
@@ -485,24 +520,28 @@ bool PropertyRow::scanChildrenReverse(Op& op, PropertyTree* tree)
 		if(result == SCAN_FINISHED)
 			return false;
 		if(result == SCAN_CHILDREN || result == SCAN_CHILDREN_SIBLINGS){
-			if(!child->scanChildrenReverse(op, tree))
-				return false;
-			if(result == SCAN_CHILDREN)
-				return false;
+			if (child->isStruct()) {
+				PropertyRowStruct* schild = static_cast<PropertyRowStruct*>(child);
+				if(!schild->scanChildrenReverse(op, tree))
+					return false;
+				if(result == SCAN_CHILDREN)
+					return false;
+			}
 		}
 	}
 	return true;
 }
 
 template<class Op>
-bool PropertyRow::scanChildrenBottomUp(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildrenBottomUp(Op& op, PropertyTree* tree)
 {
 	size_t numChildren = children_.size();
 	for(size_t i = 0; i < numChildren; ++i)
 	{
 		PropertyRow* child = children_[i];
-		if(!child->scanChildrenBottomUp(op, tree))
-			return false;
+		if (child->isStruct())
+			if(!static_cast<PropertyRowStruct*>(child)->scanChildrenBottomUp(op, tree))
+				return false;
 		ScanResult result = op(child, tree);
 		if(result == SCAN_FINISHED)
 			return false;
@@ -516,7 +555,7 @@ inline void visitPulledRows(PropertyRow* row, T& drawFunc)
 	int count = (int)row->count();
 	for (int i = 0; i < count; ++i) {
 		PropertyRow* child = row->childByIndex(i);
-		if (child->pulledUp() || child->pulledBefore()) {
+		if (child->inlined() || child->inlinedBefore()) {
 			drawFunc(child);
 			visitPulledRows(child, drawFunc);
 		}

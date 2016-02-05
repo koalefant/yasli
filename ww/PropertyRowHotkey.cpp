@@ -34,7 +34,7 @@ public:
 protected:
 };
 
-bool PropertyRowHotkey::onActivate(PropertyTree* tree, bool force)
+bool PropertyRowHotkey::onActivate(PropertyTree* tree, bool rename)
 {
 	KeyPress& key = value();
 

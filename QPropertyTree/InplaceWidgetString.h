@@ -16,11 +16,7 @@ public:
 	, tree_(tree)
 	, row_(row)
 	{
-#ifdef _MSC_VER
-		initialValue_ = QString::fromUtf16((const ushort*)row->value().c_str());
-#else
-		initialValue_ = QString::fromWCharArray(row->value().c_str());
-#endif
+		initialValue_ = row->value().c_str();
 		entry_->setText(initialValue_);
 		entry_->selectAll();
 		QObject::connect(entry_.data(), SIGNAL(editingFinished()), this, SLOT(onEditingFinished()));

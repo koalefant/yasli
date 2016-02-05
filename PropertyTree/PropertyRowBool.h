@@ -29,7 +29,6 @@ public:
 	bool onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev) override;
 	DragCheckBegin onMouseDragCheckBegin() override;
 	bool onMouseDragCheck(PropertyTree* tree, bool value) override;
-	yasli::wstring valueAsWString() const override{ return value_ ? L"true" : L"false"; }
 	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(yasli::Archive& ar) override;

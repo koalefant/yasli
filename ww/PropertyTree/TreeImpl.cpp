@@ -118,7 +118,7 @@ struct DrawRowVisitor
 	ScanResult operator()(PropertyRow* row, ::PropertyTree* tree, int index)
 	{
 		wwDrawContext context((PropertyTree*)tree, graphics);
-		if (row->pulledUp() || (row->parent() && row->parent()->pulledUp())) {
+		if (row->inlined() || (row->parent() && row->parent()->inlined())) {
 			row->drawRow(context, tree, index, true);
 			row->drawRow(context, tree, index, false);
 		}

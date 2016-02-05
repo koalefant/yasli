@@ -43,7 +43,7 @@ public:
 	bool isStatic() const{ return false; }
 	bool isSelectable() const{ return false; }
 
-	bool onActivate(PropertyTree* tree, bool force)
+	bool onActivate(PropertyTree* tree, bool rename)
 	{
 
 		return false;
@@ -52,7 +52,7 @@ public:
 		YASLI_ESCAPE(ser.size() == sizeof(Icon), return);
 		icon_ = *(Icon*)(ser.pointer());
 	}
-	wstring valueAsWString() const{ return L""; }
+	string valueAsString() const{ return ""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	PropertyRow* clone() const{
 		PropertyRowIcon* result = new PropertyRowIcon();
@@ -84,10 +84,10 @@ public:
 	{
 		tree->model()->rowAboutToBeChanged(this);
 		value().value_ = !value().value_;
-		tree->model()->rowChanged(this);
+		tree->model()-rowChanged(this);
 		return true;
 	}
-	wstring valueAsWString() const{ return value().value_ ? L"true" : L"false"; }
+	string valueAsString() const{ return value().value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 
 	int widgetSizeMin() const{ return value().iconFalse_.width() + 1; }

@@ -81,7 +81,6 @@ struct IDrawContext
 {
 	const PropertyTree* tree;
 	Rect widgetRect;
-	Rect lineRect;
 	bool captured;
 	bool pressed;
 

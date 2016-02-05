@@ -40,7 +40,7 @@ bool PropertyIArchive::operator()(yasli::StringInterface& value, const char* nam
 {
 	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
- 			value.set(fromWideChar(row->value().c_str()).c_str());
+ 			value.set(row->value().c_str());
 		closeRow(name);
 		return true;
 	}
@@ -52,7 +52,7 @@ bool PropertyIArchive::operator()(yasli::WStringInterface& value, const char* na
 {
 	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_)) {
-			value.set(row->value().c_str());
+			value.set(toWideChar(row->value().c_str()).c_str());
 		}
 		closeRow(name);
 		return true;
@@ -344,8 +344,8 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	PropertyRow* node = 0;
 	if(currentNode_->isContainer()){
-		if (level.rowIndex < int(currentNode_->children_.size()))
-			node = currentNode_->children_[level.rowIndex];
+		if (level.rowIndex < int(currentNode_->count()))
+			node = currentNode_->childByIndex(level.rowIndex);
 		++level.rowIndex;
 	}
 	else {

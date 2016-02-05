@@ -22,3 +22,4 @@ example-*
 .tmp/*
 .garbage*
 tags
+*.orig

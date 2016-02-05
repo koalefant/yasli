@@ -53,8 +53,8 @@ void PropertyRowField::redraw(IDrawContext& context)
 
 	int iconSpace = offset ? offset + 2 : 0;
     if(multiValue())
-		context.drawEntry(context.widgetRect, " ... ", false, userReadOnly(), iconSpace);
-    else if(userReadOnly())
+		context.drawEntry(context.widgetRect, " ... ", false, userReadOnly() || userRenamable(), iconSpace);
+    else if(userReadOnly() || userRenamable())
 		context.drawValueText(pulledSelected(), valueAsString().c_str());
     else
         context.drawEntry(context.widgetRect, valueAsString().c_str(), usePathEllipsis(), false, iconSpace);

@@ -63,7 +63,6 @@ public:
 		else
 			return 80;
 	}
-
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	const void* searchHandle() const override { return handle_; }
 	yasli::TypeID typeId() const override{ return type_; }

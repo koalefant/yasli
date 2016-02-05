@@ -26,19 +26,19 @@ YASLI_CLASS_NAME(PropertyRow, PropertyRowString, "PropertyRowString", "string");
 
 bool PropertyRowString::assignTo(yasli::string& str) const
 {
-    str = fromWideChar(value_.c_str());
+    str = value_.c_str();
     return true;
 }
 
 bool PropertyRowString::assignTo(yasli::wstring& str) const
 {
-    str = value_;
+    str = toWideChar(value_.c_str());
     return true;
 }
 
 property_tree::InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
 {
-		return tree->ui()->createStringWidget(this);
+	return tree->ui()->createStringWidget(this);
 }
 
 bool PropertyRowString::assignToByPointer(void* instance, const yasli::TypeID& type) const
@@ -57,19 +57,20 @@ bool PropertyRowString::assignToByPointer(void* instance, const yasli::TypeID& t
 
 yasli::string PropertyRowString::valueAsString() const
 {
-	return fromWideChar(value_.c_str());
+	return value_.c_str();
 }
 
 void PropertyRowString::setValue(const wchar_t* str, const void* handle, const yasli::TypeID& type)
 {
-	value_ = str;
+	value_ = fromWideChar(str);
 	serializer_.setPointer((void*)handle);
 	serializer_.setType(type);
+	value_ = fromWideChar(str);
 }
 
 void PropertyRowString::setValue(const char* str, const void* handle, const yasli::TypeID& type)
 {
-	value_ = toWideChar(str);
+	value_ = str;
 	serializer_.setPointer((void*)handle);
 	serializer_.setType(type);
 }

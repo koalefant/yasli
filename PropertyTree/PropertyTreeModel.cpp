@@ -53,7 +53,6 @@ void PropertyTreeModel::selectRow(PropertyRow* row, bool select, bool exclusive)
 	if(select){
 		if(it == selection_.end())
 			selection_.push_back(pathFromRow(row));
-		setFocusedRow(row);
 	}
 	else if(it != selection_.end()){
 		PropertyRow* it_row = rowFromPath(*it);
@@ -110,7 +109,7 @@ void PropertyTreeModel::clear()
 	if(root_)
 		root_->clear();
 	root_ = 0;
-	setRoot(new PropertyRow());
+	setRoot(new PropertyRowStruct());
 	root_->setNames("", "root", "rootType");
 	selection_.clear();
 }
@@ -129,10 +128,10 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
         return;
     YASLI_ESCAPE(op->row_, return);
     if(dest->parent())
-        dest->parent()->replaceAndPreserveState(dest, op->row_, this);
+        dest->parent()->replaceAndPreserveState(dest, op->row_, this, false);
     else{
         op->row_->assignRowProperties(root_);
-        root_ = op->row_;
+        root_ = static_cast<PropertyRowStruct*>(op->row_.get());
     }
     PropertyRow* newRow = op->row_;
     op->row_ = 0;
@@ -213,7 +212,6 @@ protected:
 
 void PropertyTreeModel::YASLI_SERIALIZE_METHOD(Archive& ar, PropertyTree* tree)
 {
-	ar(focusedRow_, "focusedRow", 0);		
 	ar(selection_, "selection", 0);
 
 	if (root()) {
@@ -228,8 +226,6 @@ void PropertyTreeModel::YASLI_SERIALIZE_METHOD(Archive& ar, PropertyTree* tree)
 			setSelection(sel);
 			RowExpander op(expanded);
 			root()->scanChildren(op, tree);
-			root()->setLayoutChanged();
-			root()->setLayoutChangedToChildren();
 		}
 	}
 }
@@ -294,7 +290,6 @@ void PropertyTreeModel::rowChanged(PropertyRow* row, bool apply)
 
 	YASLI_ESCAPE(row, return);
 	row->setLabelChanged();
-	row->setLayoutChanged();
 
 	PropertyRow* parentObj = row;
 	while (parentObj->parent() && !parentObj->isObject())

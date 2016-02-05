@@ -34,6 +34,8 @@ add_executable(qpropertytree-example ${SOURCES})
 target_link_libraries(qpropertytree-example yasli qpropertytree)
 set_target_properties(qpropertytree-example PROPERTIES DEBUG_POSTFIX "-debug")
 set_target_properties(qpropertytree-example PROPERTIES RELWITHDEBINFO_POSTFIX "-relwithdebinfo")
+set_target_properties(qpropertytree-example PROPERTIES RELEASE_POSTFIX "-release")
+set_target_properties(qpropertytree-example PROPERTIES MINSIZEREL_POSTFIX "-minsizerel")
 
 if (MSVC_IDE)
     set_target_properties(qpropertytree-example PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR})

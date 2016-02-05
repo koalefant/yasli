@@ -31,11 +31,10 @@ public:
 	void onMenuChildRemove();
 };
 
-class PropertyRowContainer : public PropertyRow
+class PropertyRowContainer : public PropertyRowStruct
 {
 public:
 	PropertyRowContainer();
-	bool isContainer() const override{ return true; }
 	bool onActivate(const PropertyActivationEvent& e) override;
 	bool onContextMenu(IMenu& item, PropertyTree* tree) override;
 	void redraw(IDrawContext& context) override;

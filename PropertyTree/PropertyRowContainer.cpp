@@ -35,7 +35,8 @@ ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContai
 YASLI_CLASS_NAME(PropertyRow, PropertyRowContainer, "PropertyRowContainer", "Container");
 
 PropertyRowContainer::PropertyRowContainer()
-: fixedSize_(false)
+: PropertyRowStruct(/*isContainer=*/true)
+, fixedSize_(false)
 , elementTypeName_("")
 , inlined_(false)
 {
@@ -90,7 +91,8 @@ bool PropertyRowContainer::onActivate(const PropertyActivationEvent& e)
 	std::auto_ptr<property_tree::IMenu> menu(e.tree->ui()->createMenu());
 	generateMenu(*menu, e.tree, true);
 	e.tree->_setPressedRow(this);
-	menu->exec(Point(widgetPos_, pos_.y() + e.tree->_defaultRowHeight()));
+	Rect widgetRect = this->widgetRect(e.tree);
+	menu->exec(Point(widgetRect.left(), widgetRect.bottom()));
 	e.tree->_setPressedRow(0);
 	return true;
 }
@@ -121,16 +123,17 @@ void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree
 			}
 			else {
 
-				menu.addAction("Insert", "Insert", 0, handler, &ContainerMenuHandler::onMenuInsertElement);
-				menu.addAction("Add", "", 0, handler, &ContainerMenuHandler::onMenuAppendElement);
+				menu.addAction("Insert", "", 0, handler, &ContainerMenuHandler::onMenuInsertElement);
+				menu.addAction("Add", "Insert", 0, handler, &ContainerMenuHandler::onMenuAppendElement);
 			}
 		}
 
 		if (!menu.isEmpty())
 			menu.addSeparator();
 
-		menu.addAction(pulledUp() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
+		menu.addAction(inlined() ? "Remove Children" : "Remove All", "Shift+Delete", userReadOnly() ? MENU_DISABLED : 0,
 			handler, &ContainerMenuHandler::onMenuRemoveAll);
+
 	}
 }
 
@@ -141,7 +144,7 @@ bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTree* tree)
 
 	generateMenu(menu, tree, true);
 
-	if(pulledUp())
+	if(inlined())
 		return !menu.isEmpty();
 
 	return PropertyRow::onContextMenu(menu, tree);

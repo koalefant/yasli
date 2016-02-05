@@ -11,8 +11,15 @@ struct Point
 	Point operator-(const Point& p) const { return Point(x_ - p.x_, y_ - p.y_); }
 	Point& operator+=(const Point& p) { *this = *this + p; return *this; }
 	bool operator!=(const Point& rhs) const { return x_ != rhs.x_ || y_ != rhs.y_; }
+	bool operator<(const Point& rhs) const { 
+		if (x_ == rhs.x_)
+			return y_ < rhs.y_;
+		else
+			return x_ < rhs.x_;
+	}
 
 	int manhattanLength() const { return abs(x_) + abs(y_); }
+	int dot(const Point& rhs) const { return x_ * rhs.x_ + y_ * rhs.y_; }
 
 	int x_;
 	int y_;
@@ -26,9 +33,9 @@ struct Point
 
 struct Rect
 {
-	int x;
+	short x;
+	short w;
 	int y;
-	int w;
 	int h;
 
 	int left() const { return x; }
@@ -55,6 +62,17 @@ struct Rect
 		if (p.y() < y || p.y() >= y + h)
 			return false;
 		return true;
+	}
+
+	template<class TPoint>
+	TPoint clamp(const TPoint& point) const
+	{
+		TPoint r = point;
+		if (r.x() < x) r.setX(x);
+		if (r.x() >= x + w) r.setX(x + w -1);
+		if (r.y() < y) r.setY(y);
+		if (r.y() >= y + h) r.setY(y + h -1);
+		return r;
 	}
 
 	Point center() const { return Point(x + w / 2, y + h / 2); }

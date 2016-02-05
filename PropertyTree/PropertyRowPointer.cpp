@@ -209,8 +209,8 @@ bool PropertyRowPointer::onActivate(const PropertyActivationEvent& ev)
 			return false;
 	std::auto_ptr<property_tree::IMenu> menu(ev.tree->ui()->createMenu());
 	ClassMenuItemAdderRowPointer(this, ev.tree).generateMenu(*menu, ev.tree->model()->typeStringList(baseType()));
-	ev.tree->_setPressedRow(this);
-	menu->exec(Point(widgetPos_, pos_.y() + ev.tree->_defaultRowHeight()));
+	Rect widgetRect = this->widgetRect(ev.tree);
+	menu->exec(Point(widgetRect.left(), widgetRect.bottom()));
 	ev.tree->_setPressedRow(0);
 	return true;
 }

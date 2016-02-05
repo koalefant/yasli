@@ -22,12 +22,16 @@ namespace yasli { class Object; struct Context; }
 
 namespace property_tree{ 
 class InplaceWidget;
+struct IDrawContext;
 struct Color;
 class QDrawContext;
+struct Layout;
+struct HitResult;
 
 class IMenu;
 struct IUIFacade; 
 struct KeyEvent;
+struct PersistentLayoutElement;
 }
 using property_tree::IUIFacade;
 using property_tree::KeyEvent;
@@ -81,12 +85,12 @@ public:
 
 	// Forces serialization of attached object to update properties.  Can be used to update
 	// property tree when attached object was changed for some reason.
-	void revert();
+	virtual void revert();
 	// Same as revert(), except that it will but interrupt editing or mouse action in
 	// progress.
 	void revertNoninterrupting();
 	// Forces deserialization of attached objects from property items. 
-	void apply(bool continuousUpdate = false);
+	virtual void apply(bool continuousUpdate = false);
 	// Useful to apply edit boxes that are being edited at the moment.
 	// May be needed when click on toolbar button doesn't steal the focus, leaving input
 	// data effectively not saved.
@@ -140,6 +144,7 @@ public:
 	void setMultiSelection(bool multiSelection) { config_.multiSelection = multiSelection; }
 	bool multiSelection() const{ return config_.multiSelection; }
 
+	bool spawnWidget(PropertyRow* row, bool rename);
 	// Sets head of the context-list. Can be used to pass additional data to nested decorators.
 	void setArchiveContext(yasli::Context* lastContext);
 	// Sets archive filter. Filter is a bit mask stored within archive that can be used to
@@ -151,6 +156,7 @@ public:
 	bool selectByAddress(const void*, bool keepSelectionIfChildSelected = false);
 	bool selectByAddresses(const void* const* addresses, size_t addressCount, bool keepSelectionIfChildSelected);
 	bool selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected);
+	void ensureVisible(PropertyRow* row, bool considerChildren);
 	// Can be used to query information about selection in the tree.
 	bool setSelectedRow(PropertyRow* row);
 	PropertyRow* selectedRow();
@@ -186,7 +192,6 @@ public:
 	int leftBorder() const { return leftBorder_; }
 	int rightBorder() const { return rightBorder_; }
 
-	bool spawnWidget(PropertyRow* row, bool ignoreReadOnly);
 	void expandParents(PropertyRow* row);
 	void expandChildren(PropertyRow*);
 	void collapseChildren(PropertyRow*);
@@ -205,7 +210,6 @@ public:
 	const ValidatorBlock* _validatorBlock() const { return validatorBlock_.get(); }
 	IUIFacade* ui() const { return ui_; }
 	virtual void _cancelWidget();
-	virtual bool _isDragged(const PropertyRow* row) const = 0;
 	bool _isCapturedRow(const PropertyRow* row) const;
 
 
@@ -217,6 +221,12 @@ public:
 	void addMenuHandler(PropertyRowMenuHandler* handler);
 	void clearMenuHandlers();
 	Point _toWidget(Point point) const;
+	void updateLayout();
+	Rect findRowRect(const PropertyRow* row, int part, int subindex) const;
+	void drawLayout(property_tree::IDrawContext& context, int height);
+	void drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row);
+	int layoutElementByFocusIndex(int x, int y);
+
 	virtual void repaint() = 0;
 	virtual void updateHeights(bool recalculateTextSize = false) = 0;
 	virtual void defocusInplaceEditor() = 0;
@@ -260,15 +270,19 @@ protected:
 	virtual void pasteRow(PropertyRow* row) = 0;
 	virtual bool canBePasted(PropertyRow* destination) = 0;
 	virtual bool canBePasted(const char* destinationType) = 0;
-	PropertyRow* rowByPoint(const Point& point);
+	PropertyRow* rowByPoint(const Point& rootSpacePoint);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
+	PropertyRow* focusedRow() const;
+
+	void hitTest(property_tree::HitResult* result, const Point& point);
 
 	Point pointToRootSpace(const Point& pointInWindowSpace) const;
 	Point pointFromRootSpace(const Point& point) const;
 	virtual bool updateScrollBar() = 0;
 	virtual void interruptDrag() = 0;
 	virtual void _arrangeChildren() = 0;
+	virtual int filterAreaHeight() const { return 0; }
 	virtual void startFilter(const char* text) = 0;
 	virtual void resetFilter() = 0;
 
@@ -280,10 +294,10 @@ protected:
 
 	bool onRowKeyDown(PropertyRow* row, const KeyEvent* ev);
 	// points here are specified in root-row space
-	bool onRowLMBDown(PropertyRow* row, const Rect& rowRect, Point point, bool controlPressed, bool shiftPressed);
-	void onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point);
-	void onRowRMBDown(PropertyRow* row, const Rect& rowRect, Point point);
-	void onRowMouseMove(PropertyRow* row, const Rect& rowRect, Point point);
+	void onRowLMBUp(const property_tree::HitResult& hit);
+	bool onRowLMBDown(const property_tree::HitResult& hit, bool controlPressed, bool shiftPressed);
+	void onRowRMBDown(const property_tree::HitResult& hit);
+	void onRowMouseMove(PropertyRow* row, Point point);
 	void onMouseStill();
 
 	void setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow);
@@ -297,6 +311,10 @@ private:
 	PropertyTree(const PropertyTree&);
 	PropertyTree& operator=(const PropertyTree&);
 protected:
+	void setDraggedRow(PropertyRow* row);
+	void storePersistentFocusElement();
+	void restorePersistentFocusElement();
+
 	std::auto_ptr<PropertyTreeModel> model_;
 	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
 	PropertyRow* widgetRow_;
@@ -308,6 +326,8 @@ protected:
 	PropertyTree* attachedPropertyTree_;
 	RowFilter rowFilter_;
 	yasli::Context* archiveContext_;
+	std::vector<int> hiddenLayoutElements_;
+	property_tree::Layout* layout_;
 
 	int defaultRowHeight_;
 	int leftBorder_;
@@ -317,6 +337,10 @@ protected:
 	Rect area_;
 
 	int cursorX_;
+	int focusedLayoutElement_;
+	std::auto_ptr<property_tree::PersistentLayoutElement> persistentFocusedLayoutElement_;
+	Point focusCursor_;
+
 	bool filterMode_;
 	yasli::SharedPtr<PropertyRow> lastSelectedRow_;
 	Point pressPoint_;
