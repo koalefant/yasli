@@ -39,6 +39,9 @@ bool PropertyRowNumberField::onMouseDown(PropertyTree* tree, Point point, bool& 
 
 void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 {
+	if(abs(e.pos.x() - e.start.x()) < 3)
+		return;
+
 	e.tree->ui()->setCursor(CURSOR_SLIDE);
 
 	Point screenSize = e.tree->ui()->screenSize();
