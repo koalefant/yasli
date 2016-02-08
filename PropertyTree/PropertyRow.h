@@ -331,7 +331,6 @@ protected:
 	const char* name_;
 	const char* typeName_;
 	const char* label_;
-	const char* labelUndecorated_;
 	yasli::Serializer serializer_;
 	PropertyRowStruct* parent_;
 	yasli::CallbackInterface* callback_;

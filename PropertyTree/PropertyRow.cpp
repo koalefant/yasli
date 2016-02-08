@@ -80,7 +80,6 @@ PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 , multiValue_(false)
 , userHideChildren_(false)
 , label_("")
-, labelUndecorated_("")
 , labelChanged_(false)
 , layoutElement_(0xffffffff)
 , controlCharacterCount_(0)
@@ -477,7 +476,7 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index, bool parentHi
 
 	parseControlCodes(tree, label_, true);
 	bool hiddenByParentFlag = parentHidesNonInlineChildren && !inlined_;
-    visible_ = ((labelUndecorated_ && *labelUndecorated_ != '\0') || userFullRow_ || inlined_ || isRoot()) && !hiddenByParentFlag;
+    visible_ = ((labelUndecorated()[0] != '\0') || userFullRow_ || inlined_ || isRoot()) && !hiddenByParentFlag;
 
 	if (userHideChildren_) {
 		for (int i = 0; i < numChildren; ++i) {
@@ -535,7 +534,7 @@ void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, b
 			userWidgetToContent_ = true;
 		}
 		else if(*ptr == '+'){
-			bool isFirstUpdate = labelUndecorated_ == 0;
+			bool isFirstUpdate = layoutElement_ == 0xffffffff;
 			if (isFirstUpdate)
 				_setExpanded(true);
 		}
@@ -600,8 +599,9 @@ void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, b
 				for(int i = 0; i < numChildren; ++i) {
 					PropertyRow* child = container->childByIndex(i);
 					child->inlined_ = true;
-					if (child->label_)
-						child->labelUndecorated_ = child->label_ + strlen(child->label_);
+					if (child->label_) {
+						child->controlCharacterCount_ = strlen(child->label_);
+					}
 				}
 				inlined_ = true;
 				container->setInlined(true);
