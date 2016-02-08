@@ -613,7 +613,7 @@ void PropertyTree::revert()
 	if (filterMode_) {
 		if (model_->root())
 			model_->root()->updateLabel(this, 0);
-		resetFilter();
+		//resetFilter();
 	}
 	else {
 		updateHeights();
