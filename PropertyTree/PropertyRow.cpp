@@ -82,6 +82,7 @@ PropertyRow::PropertyRow()
 	userFullRow_ = false;
 	multiValue_ = false;
 	userHideChildren_ = false;
+	updated_ = true;
 	
 	label_ = "";
 	labelChanged_ = true;
@@ -267,6 +268,18 @@ void PropertyRow::swapChildren(PropertyRow* row)
 		(**it).setParent(this);
 	for( it = row->children_.begin(); it != row->children_.end(); ++it)
 		(**it).setParent(row);
+}
+
+void PropertyRow::eraseOldRecursive()
+{
+	updated_ = false;
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else{
+			(*i)->eraseOldRecursive();
+			++i;
+		}
 }
 
 void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
@@ -752,27 +765,25 @@ PropertyRow* PropertyRow::findSelected()
     return 0;
 }
 
-PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName)
+PropertyRow* PropertyRow::find(const char* name, const char* typeName)
 {
 	iterator it;
 	for(it = children_.begin(); it != children_.end(); ++it){
 		PropertyRow* row = *it;
-		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
-		   ((nameAlt == 0) || (row->label() != 0 && strcmp(row->label(), nameAlt) == 0)) &&
-		   ((typeName == 0) || (row->typeName() != 0 && strcmp(row->typeName(), typeName) == 0)))
+		if((row->name() == name || strcmp(row->name(), name) == 0) &&
+		   (typeName == 0 || (row->typeName() != 0 && strcmp(row->typeName(), typeName) == 0)))
 			return row;
 	}
 	return 0;
 }
 
-PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
+PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated) const
 {
 	int numChildren = (int)children_.size();
 
 	for (int i = startIndex; i < numChildren; ++i) {
 		PropertyRow* row = children_[i];
-		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
-			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+		if((row->name() == name || strcmp(row->name(), name) == 0) && (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0) && (!checkUpdated || !row->updated_)){
 			*outIndex = i;
 			return row;
 		}
@@ -780,8 +791,7 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 
 	for (int i = 0; i < startIndex; ++i) {
 		PropertyRow* row = children_[i];
-		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
-			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+		if((row->name() == name || strcmp(row->name(), name) == 0) && (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0) && (!checkUpdated || !row->updated_)){
 			*outIndex = i;
 			return row;
 		}
@@ -790,12 +800,6 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 	*outIndex = -1;
 	return 0;
 }
-
-const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName) const
-{
-	return const_cast<PropertyRow* const>(this)->find(name, nameAlt, typeName);
-}
-
 
 bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {

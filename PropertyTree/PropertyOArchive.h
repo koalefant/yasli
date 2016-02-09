@@ -21,6 +21,8 @@ class PropertyOArchive : public yasli::Archive{
 public:
 	PropertyOArchive(PropertyTreeModel* model, PropertyRow* rootNode = 0);
 	~PropertyOArchive();
+	
+	void finalize();
 
 	bool operator()(yasli::StringInterface& value, const char* name, const char* label) override;
 	bool operator()(yasli::WStringInterface& value, const char* name, const char* label) override;
@@ -53,7 +55,6 @@ protected:
 
 private:
 	struct Level {
-		std::vector<SharedPtr<PropertyRow> > oldRows;
 		int rowIndex;
 		Level() : rowIndex(0) {}
 	};
@@ -63,7 +64,7 @@ private:
 	PropertyRow* updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value);
 
 	template<class RowType, class ValueType>
-	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value);
+	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value, bool isBlock = false);
 
 	void enterNode(PropertyRow* row); // sets currentNode
 	void closeStruct(const char* name);

@@ -594,6 +594,7 @@ void PropertyTree::revert()
 		Objects::iterator it = attached_.begin();
 		onAboutToSerialize(oa);
 		(*it)(oa);
+		oa.finalize();
 		
 		PropertyTreeModel model2(this);
 		while(++it != attached_.end()){
@@ -603,6 +604,7 @@ void PropertyTree::revert()
 			oa2.setFilter(filter_);
 			onAboutToSerialize(oa2);
 			(*it)(oa2);
+			oa2.finalize();
 			model_->root()->intersect(model2.root());
 		}
 		//revertTime_ = int(timer.elapsed());

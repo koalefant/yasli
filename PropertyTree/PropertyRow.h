@@ -129,7 +129,7 @@ public:
 
 	bool empty() const{ return children_.empty(); }
 	iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
-	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
+	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated = false) const;
 	PropertyRow* findByAddress(const void* addr);
 	iterator begin() { return children_.begin(); }
 	iterator end() { return children_.end(); }
@@ -140,6 +140,7 @@ public:
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
 	void swapChildren(PropertyRow* row);
+	void eraseOldRecursive();
 
 	void assignRowState(const PropertyRow& row, bool recurse);
 	void assignRowProperties(PropertyRow* row);
@@ -164,8 +165,7 @@ public:
 	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
 
 	PropertyRow* findSelected();
-	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
-	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName) const;
+	PropertyRow* find(const char* name, const char* typeName);
 	void intersect(const PropertyRow* row);
 
 	int verticalIndex(PropertyTree* tree, PropertyRow* row);
@@ -308,6 +308,7 @@ protected:
 	bool pulledBefore_ : 1;
 	bool hasPulled_ : 1;
 	bool multiValue_ : 1;
+	bool updated_ : 1;
 
 	yasli::SharedPtr<PropertyRow> pulledContainer_;
 	static ConstStringList* constStrings_;
