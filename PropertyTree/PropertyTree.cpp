@@ -745,7 +745,7 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 				PropertyActivationEvent ev;
 				ev.tree = this;
 				ev.reason = ev.REASON_PRESS;
-				ev.force = true;
+                ev.force = false;
 				row->onActivate(ev);
 				return false;
 			}
@@ -889,7 +889,6 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 	restorePersistentFocusElement();
 }
 
-
 void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
 {
 	bool hasChanges = false;
@@ -959,11 +958,9 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	if (label[0])
 		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	break;
-	case PropertyRow::WIDGET_VALUE:
-	{
+	case PropertyRow::WIDGET_VALUE: {
 		if (!labelBeforeInlined && label[0])
 			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
-
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
 		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
@@ -978,11 +975,11 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		labelElement = l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	break;
-	case PropertyRow::WIDGET_AFTER_INLINED:
-	{
+	case PropertyRow::WIDGET_AFTER_INLINED: {
 		if (label[0])
 			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 		// add value later
+		break;
 	}
 	case PropertyRow::WIDGET_INSTEAD_OF_TEXT: {
 		
