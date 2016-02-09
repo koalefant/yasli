@@ -370,7 +370,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			PropertyActivationEvent ev;
 			ev.tree = this;
 			ev.reason = ev.REASON_KEYBOARD;
-			ev.force = true;
+			ev.rename = true;
 			selectedRow()->onActivate(ev);
 		}
 	}
@@ -506,7 +506,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			PropertyActivationEvent e;
 			e.tree = this;
 			e.reason = e.REASON_KEYBOARD;
-			e.force = false;
+			e.rename = false;
 			focusedRow->onActivate(e);
 		}
 	}
@@ -745,7 +745,7 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 				PropertyActivationEvent ev;
 				ev.tree = this;
 				ev.reason = ev.REASON_PRESS;
-                ev.force = false;
+                ev.rename = false;
 				row->onActivate(ev);
 				return false;
 			}
@@ -779,7 +779,7 @@ void PropertyTree::onRowLMBUp(const HitResult& hit)
 		PropertyActivationEvent ev;
 		ev.tree = this;
 		ev.reason = ev.REASON_RELEASE;
-		ev.force = false;
+		ev.rename = false;
 		hit.row->onActivate(ev);
 	}
 }

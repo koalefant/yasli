@@ -398,7 +398,7 @@ void PropertyRowStruct::serialize(Archive& ar)
 bool PropertyRow::onActivate(const PropertyActivationEvent& e)
 {
 	if (e.reason != e.REASON_RELEASE)
-	    return e.tree->spawnWidget(this, e.force);
+	    return e.tree->spawnWidget(this, e.rename);
 	else
 		return false;
 }

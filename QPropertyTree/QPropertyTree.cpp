@@ -1284,7 +1284,7 @@ void QPropertyTree::mouseDoubleClickEvent(QMouseEvent* ev)
 	if(row){
 		PropertyActivationEvent e;
 		e.tree = this;
-		e.force = true;
+		e.rename = true;
 		e.reason = e.REASON_DOUBLECLICK;
 		PropertyRow* nonPulledParent = row;
 		while (nonPulledParent && nonPulledParent->inlined())

@@ -72,11 +72,11 @@ struct PropertyActivationEvent
 
 	PropertyTree* tree;
 	Reason reason;
-	bool force;
+	bool rename;
 	Point clickPoint;
 
 	PropertyActivationEvent()
-	: force(false)
+	: rename(false)
 	, clickPoint(0, 0)
 	, tree(0)
 	, reason(REASON_PRESS)
