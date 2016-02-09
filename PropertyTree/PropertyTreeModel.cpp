@@ -61,14 +61,23 @@ void PropertyTreeModel::selectRow(PropertyRow* row, bool select, bool exclusive)
 	}
 }
 
+struct DeselectOp {
+	ScanResult operator()(PropertyRow* row)
+	{
+		row->setSelected(false);
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+};
+
 void PropertyTreeModel::deselectAll()
 {
-	Selection::iterator it;
-	for(it = selection_.begin(); it != selection_.end(); ++it){
-		PropertyRow* row = rowFromPath(*it);
-		row->setSelected(false);
-	}
+// 	Selection::iterator it;
+// 	for(it = selection_.begin(); it != selection_.end(); ++it){
+// 		PropertyRow* row = rowFromPath(*it);
+// 		row->setSelected(false);
+// 	}
 	selection_.clear();
+	root()->scanChildren(DeselectOp());
 }
 
 PropertyRow* PropertyTreeModel::rowFromPath(const TreePath& path)
