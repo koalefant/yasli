@@ -1138,7 +1138,7 @@ PropertyRow* PropertyRow::findByAddress(const void* addr)
 
 const void* PropertyRow::searchHandle() const
 {
-	return serializer_.pointer();
+	return serializer().pointer();
 }
 
 void PropertyRow::redraw(IDrawContext& context)

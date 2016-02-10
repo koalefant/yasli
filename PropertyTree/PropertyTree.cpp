@@ -1031,6 +1031,15 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 		bool hasNonPulledChildren = false;
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
 
+		if (child->validatorCount()) {
+			if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(child->validatorIndex(), child->validatorCount())) {
+				for (int i = 0; i < child->validatorCount(); ++i) {
+					const ValidatorEntry* validatorEntry = validatorEntries + i;
+					l->addElement(parentElement, FIXED_SIZE, child, PART_VALIDATOR, 40, 40, 0, false);
+				}
+			}
+		}
+
 		if (child->expanded()) {
 			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
 			if (showPlus)
@@ -1425,14 +1434,12 @@ struct ValidatorVisitor
 		const void* rowHandle = row->searchHandle();
 		int index = 0;
 		int count = 0;
-		if (validator_->findHandleEntries(&index, &count, rowHandle, row->typeId()))
-		{
+		if (validator_->findHandleEntries(&index, &count, rowHandle, row->searchType())) {
 			validator_->markAsUsed(index, count);
 			if (row->setValidatorEntry(index, count))
 				row->setLabelChanged();
 		}
-		else
-		{
+		else {
 			if (row->setValidatorEntry(0, 0))
 				row->setLabelChanged();
 		}

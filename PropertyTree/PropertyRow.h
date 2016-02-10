@@ -162,6 +162,7 @@ public:
 	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
 	PropertyRow* findByAddress(const void* handle);
 	virtual const void* searchHandle() const;
+	virtual yasli::TypeID searchType() const { return serializer().type(); }
 	size_t count() const;
 	virtual void swapChildren(PropertyRow* row, PropertyTreeModel* model) {}
 
@@ -208,7 +209,7 @@ public:
 	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
 	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
 	virtual bool assignToByPointer(void* instance, const yasli::TypeID& type) const{ return assignTo(yasli::Serializer(type, instance, type.sizeOf(), 0)); }
-	virtual void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) { serializer_ = ser; }
+	virtual void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) {}
 	virtual void handleChildrenChange() {}
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
@@ -331,7 +332,6 @@ protected:
 	const char* name_;
 	const char* typeName_;
 	const char* label_;
-	yasli::Serializer serializer_;
 	PropertyRowStruct* parent_;
 	yasli::CallbackInterface* callback_;
 	const char* tooltip_;

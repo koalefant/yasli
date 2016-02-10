@@ -19,7 +19,7 @@ public:
 	PropertyRowBool();
 	bool assignToPrimitive(void* val, size_t size) const override;
 	bool assignToByPointer(void* instance, const yasli::TypeID& type) const override;
-	void setValue(bool value, const void* handle, const yasli::TypeID& typeId) { value_ = value; serializer_.setPointer((void*)handle); serializer_.setType(yasli::TypeID::get<bool>()); }
+	void setValue(bool value, const void* handle, const yasli::TypeID& typeId) { value_ = value; searchHandle_ = handle; }
 
 	void redraw(IDrawContext& context) override;
 	bool isLeaf() const override{ return true; }
@@ -33,7 +33,10 @@ public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(yasli::Archive& ar) override;
 	int widgetSizeMin(const PropertyTree* tree) const override;
+	const void * searchHandle() const override { return searchHandle_; }
+	yasli::TypeID searchType() const override { return yasli::TypeID::get<bool>(); }
 protected:
 	bool value_;
+	const void* searchHandle_;
 };
 

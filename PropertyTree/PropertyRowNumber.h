@@ -132,6 +132,7 @@ template<class Type>
 class PropertyRowNumber : public PropertyRowNumberField{
 public:
 	PropertyRowNumber()
+	: searchHandle_()
 	{
 		softMin_ = limit_min((Type)0);
 		softMax_ = limit_max((Type)0);
@@ -141,8 +142,8 @@ public:
 
 	void setValue(Type value, const void* handle, const yasli::TypeID& type) {
 		value_ = value;
-		serializer_.setPointer((void*)handle);
-		serializer_.setType(type);
+		searchHandle_ = handle;
+		searchType_ = type;
 	}
 	bool setValueFromString(const char* str) override{
         Type value = value_;
@@ -160,8 +161,8 @@ public:
 
 	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		yasli::RangeDecorator<Type>* range = (yasli::RangeDecorator<Type>*)ser.pointer();
-		serializer_.setPointer((void*)range->value);
-		serializer_.setType(yasli::TypeID::get<Type>());
+		searchHandle_ = (void*)range->value;
+		searchType_ = yasli::TypeID::get<Type>();
 		value_ = *range->value;
 		softMin_ = range->softMin;
 		softMax_ = range->softMax;
@@ -249,6 +250,10 @@ public:
 			return 0.0;
 		return clamp(double(value_ - softMin_) / (softMax_ - softMin_), 0.0, 1.0);
 	}
+
+	const void * searchHandle() const override { return searchHandle_; }
+	yasli::TypeID searchType() const override { return searchType_; }
+
 protected:
 	Type incrementStartValue_; 
 	Type value_; 
@@ -256,4 +261,6 @@ protected:
 	Type softMax_;
 	Type hardMin_;
 	Type hardMax_;
+	const void* searchHandle_;
+	yasli::TypeID searchType_;
 };

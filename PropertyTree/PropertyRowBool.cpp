@@ -18,6 +18,7 @@ YASLI_CLASS_NAME(PropertyRow, PropertyRowBool, "PropertyRowBool", "bool");
 
 PropertyRowBool::PropertyRowBool()
 : value_(false)
+, searchHandle_( NULL )
 {
 }
 

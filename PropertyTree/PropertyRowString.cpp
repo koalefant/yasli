@@ -63,16 +63,16 @@ yasli::string PropertyRowString::valueAsString() const
 void PropertyRowString::setValue(const wchar_t* str, const void* handle, const yasli::TypeID& type)
 {
 	value_ = fromWideChar(str);
-	serializer_.setPointer((void*)handle);
-	serializer_.setType(type);
+	searchHandle_ = (void*)handle;
+	searchType_ = type;
 	value_ = fromWideChar(str);
 }
 
 void PropertyRowString::setValue(const char* str, const void* handle, const yasli::TypeID& type)
 {
 	value_ = str;
-	serializer_.setPointer((void*)handle);
-	serializer_.setType(type);
+	searchHandle_ = (void*)handle;
+	searchType_ = type;
 }
 
 void PropertyRowString::serializeValue(yasli::Archive& ar)

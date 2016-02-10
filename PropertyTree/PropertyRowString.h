@@ -17,6 +17,7 @@
 class PropertyRowString : public PropertyRowField
 {
 public:
+	PropertyRowString() : searchHandle_() {}
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	bool assignTo(yasli::string& str) const;
@@ -29,7 +30,11 @@ public:
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;
 	const yasli::string& value() const{ return value_; }
+	const void* searchHandle() const override { return searchHandle_; }
+	yasli::TypeID searchType() const override { return searchType_; }
 private:
 	yasli::string value_;
+	yasli::TypeID searchType_;
+	const void * searchHandle_;
 };
 
