@@ -137,13 +137,14 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 				newRow->_setExpanded(true);
 		
 			newRow->setNames(name, label, typeName);
-			currentNode_->add(newRow);
+			currentNode_->insertAfterUpdated(newRow, level.realIndex);
 
 			// for new rows we should mark all parents with labelChanged_
 			newRow->setLabelChanged();
 			newRow->setLabelChangedToChildren();
 		}
 		newRow->setValueAndContext(value, *this);
+		++level.realIndex;
 		newRow->updated_ = true;
 		return newRow;
 	}
@@ -190,13 +191,14 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
 				newRow->_setExpanded(true);
 		}
-		currentNode_->add(newRow);
+		currentNode_->insertAfterUpdated(newRow, level.realIndex);
 		// for new rows we should mark all parents with labelChanged_
 		newRow->setLabelChanged();
 	}
 
 	newRow->setValue(value);
 	newRow->updated_ = true;
+	++level.realIndex;
 	return newRow;
 }
 

@@ -183,6 +183,22 @@ void PropertyRow::add(PropertyRow* row)
 	row->setParent(this);
 }
 
+void PropertyRow::insertAfterUpdated(PropertyRow* row, int index)
+{
+	row->setParent(this);
+	if(!index){
+		children_.insert(children_.begin(), row);
+		return;
+	}
+	for(Rows::iterator i = children_.begin(); i != children_.end(); ++i)
+		if((*i)->updated_)
+			if(!--index){
+				children_.insert(i + 1, row);
+				return;
+			}
+	children_.push_back(row);
+}
+
 void PropertyRow::addAfter(PropertyRow* row, PropertyRow* after)
 {
 	iterator it = std::find(children_.begin(), children_.end(), after);

@@ -114,6 +114,7 @@ public:
 	int level() const;
 
 	void add(PropertyRow* row);
+	void insertAfterUpdated(PropertyRow* row, int index);
 	void addAfter(PropertyRow* row, PropertyRow* after);
 	void addBefore(PropertyRow* row, PropertyRow* before);
 

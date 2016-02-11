@@ -56,7 +56,8 @@ protected:
 private:
 	struct Level {
 		int rowIndex;
-		Level() : rowIndex(0) {}
+		int realIndex;
+		Level() : rowIndex(0), realIndex(0) {}
 	};
 	std::vector<Level> stack_;
 
