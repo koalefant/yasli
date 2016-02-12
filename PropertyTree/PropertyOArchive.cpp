@@ -77,18 +77,18 @@ PropertyRow* PropertyOArchive::defaultValueRootNode()
 	return rootNode_->childByIndex(0);
 }
 
-void PropertyOArchive::enterNode(PropertyRow* row)
+void PropertyOArchive::enterNode(PropertyRow* row, bool isBlock)
 {
 	currentNode_ = row;
-	stack_.push_back(Level());
+	stack_.push_back(Level(isBlock && currentNode_ ? currentNode_->countUpdated() : 0));
 }
 
-void PropertyOArchive::closeStruct(const char* name, bool eraseOld)
+void PropertyOArchive::closeStruct(const char* name, bool isBlock)
 {
 	stack_.pop_back();
 
 	if(currentNode_){
-		if(eraseOld)
+		if(!isBlock)
 			currentNode_->eraseOld();
 		lastNode_ = currentNode_;
 		currentNode_ = currentNode_->parent();
@@ -422,13 +422,13 @@ bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
 	PropertyRow* row = updateRow<PropertyRow>(name, label, "block", Serializer(), true);
 	lastNode_ = currentNode_;
-	enterNode(row);
+	enterNode(row, true);
 	return true;
 }
 
 void PropertyOArchive::closeBlock()
 {
-	closeStruct("block", false);
+	closeStruct("block", true);
 }
 
 // vim:ts=4 sw=4:

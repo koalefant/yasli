@@ -307,6 +307,16 @@ void PropertyRow::eraseOldRecursive()
 		}
 }
 
+
+std::size_t PropertyRow::countUpdated() const
+{
+	int counter = 0;
+	for(Rows::const_iterator i = begin(); i != end(); ++i)
+		if((*i)->updated_)
+			++counter;
+	return counter;
+}
+
 void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 {
 	if(before == 0)

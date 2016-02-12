@@ -57,7 +57,7 @@ private:
 	struct Level {
 		int rowIndex;
 		int realIndex;
-		Level() : rowIndex(0), realIndex(0) {}
+		Level(int realIndex = 0) : rowIndex(0), realIndex(realIndex) {}
 	};
 	std::vector<Level> stack_;
 
@@ -67,8 +67,8 @@ private:
 	template<class RowType, class ValueType>
 	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value, bool isBlock = false);
 
-	void enterNode(PropertyRow* row); // sets currentNode
-	void closeStruct(const char* name, bool eraseOld = true);
+	void enterNode(PropertyRow* row, bool isBlock = false); // sets currentNode
+	void closeStruct(const char* name, bool isBlock = false);
 	PropertyRow* defaultValueRootNode();
 
 	bool updateMode_;

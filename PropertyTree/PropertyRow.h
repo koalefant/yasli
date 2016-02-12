@@ -143,6 +143,7 @@ public:
 	void swapChildren(PropertyRow* row);
 	void eraseOld();
 	void eraseOldRecursive();
+	std::size_t countUpdated() const;
 
 	void assignRowState(const PropertyRow& row, bool recurse);
 	void assignRowProperties(PropertyRow* row);
