@@ -108,3 +108,4 @@ QWidget* createExampleCustomRows()
 
 	return propertyTree;
 }
+

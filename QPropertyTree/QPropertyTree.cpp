@@ -1068,7 +1068,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 		drawLayout(context, h);
 
 		int num = layout_->rectangles.size();
-#if 0
+#if 1
 		for (int i = 0; i < num; ++i) {
 			QRect r = toQRect(layout_->rectangles[i]);
 			switch (layout_->elements[i].rowPart) {

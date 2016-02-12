@@ -20,6 +20,7 @@ enum ElementType
 {
 	FIXED_SIZE,
 	EXPANDING,
+	HEIGHT_BY_WIDTH,
 	EXPANDING_MAGNET,
 	HORIZONTAL,
 	VERTICAL,
@@ -90,6 +91,11 @@ struct Layout
 	vector<int> minimalWidths;
 	vector<int> minimalHeights;
 	// ^^^ end of SoA
+	
+	// a cal back to calculate height of flowing elements (i.e. validator boxes)
+	void * heightByWidthArgument;
+	typedef int(*HeightByWidthFunction)(void *, int element, int width);
+	HeightByWidthFunction heightByWidth;
 
 	// lists of children elements, referenced by individual LayoutElement
 	vector<ChildrenList> childrenLists;
