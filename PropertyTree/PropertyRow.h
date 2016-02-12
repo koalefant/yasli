@@ -141,6 +141,7 @@ public:
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
 	void swapChildren(PropertyRow* row);
+	void eraseOld();
 	void eraseOldRecursive();
 
 	void assignRowState(const PropertyRow& row, bool recurse);

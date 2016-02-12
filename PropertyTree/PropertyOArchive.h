@@ -68,7 +68,7 @@ private:
 	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value, bool isBlock = false);
 
 	void enterNode(PropertyRow* row); // sets currentNode
-	void closeStruct(const char* name);
+	void closeStruct(const char* name, bool eraseOld = true);
 	PropertyRow* defaultValueRootNode();
 
 	bool updateMode_;

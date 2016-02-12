@@ -286,6 +286,15 @@ void PropertyRow::swapChildren(PropertyRow* row)
 		(**it).setParent(row);
 }
 
+void PropertyRow::eraseOld()
+{
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else
+			++i;
+}
+
 void PropertyRow::eraseOldRecursive()
 {
 	updated_ = false;

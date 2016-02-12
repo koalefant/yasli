@@ -83,11 +83,13 @@ void PropertyOArchive::enterNode(PropertyRow* row)
 	stack_.push_back(Level());
 }
 
-void PropertyOArchive::closeStruct(const char* name)
+void PropertyOArchive::closeStruct(const char* name, bool eraseOld)
 {
 	stack_.pop_back();
 
 	if(currentNode_){
+		if(eraseOld)
+			currentNode_->eraseOld();
 		lastNode_ = currentNode_;
 		currentNode_ = currentNode_->parent();
 	}
@@ -346,6 +348,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 			if ( !ser.next() )
 				break;
 		}
+	currentNode_->eraseOld();
 	currentNode_->labelChanged();
 	closeStruct(name);
 	return true;
@@ -425,7 +428,7 @@ bool PropertyOArchive::openBlock(const char* name, const char* label)
 
 void PropertyOArchive::closeBlock()
 {
-	closeStruct("block");
+	closeStruct("block", false);
 }
 
 // vim:ts=4 sw=4:
