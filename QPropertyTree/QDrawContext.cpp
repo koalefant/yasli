@@ -467,58 +467,46 @@ void QDrawContext::drawEntry(const Rect& rect, const char* text, bool pathEllips
 	tree_->_drawRowValue(*painter_, text, &tree_->font(),  textRect,  tree_->palette().color(QPalette::WindowText), pathEllipsis, false);
 }
 
-void QDrawContext::drawValidators(PropertyRow* row, const Rect& totalRect)
+void QDrawContext::drawValidator(PropertyRow* row, int index, const Rect& rect)
 {
 	using namespace property_tree;
 	QPropertyTree* tree = tree_;
 	const int padding = tree->_defaultRowHeight() * 0.1f;
 	int offset = padding;
-	auto drawFunc = [&](PropertyRow* row) {
-		QFontMetrics fm(tree->font());
-		if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
-			for (int i = 0; i < row->validatorCount(); ++i) {
-				const ValidatorEntry* validatorEntry = validatorEntries + i;
-				bool isError = validatorEntry->type == VALIDATOR_ENTRY_ERROR;
+	QFontMetrics fm(tree->font());
+	const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount());
+	if (validatorEntries) {
+		const ValidatorEntry* validatorEntry = validatorEntries + index;
+		bool isError = validatorEntry->type == VALIDATOR_ENTRY_ERROR;
 
-				const char* text = validatorEntry->message.c_str();
-				static QIcon warningIcon(":/QPropertyTree/validator_warning.png");
-				static QIcon errorIcon(":/QPropertyTree/validator_error.png");
-				const QIcon& icon = isError ? errorIcon : warningIcon;
-				QColor brushColor = isError ? QColor(255, 64, 64, 192) : QColor(255, 255, 220, 255);
-				QColor penColor = isError ? QColor(64, 0, 0, 255) : QColor(40, 20, 0, 255);
+		const char* text = validatorEntry->message.c_str();
+		static QIcon warningIcon(":/QPropertyTree/validator_warning.png");
+		static QIcon errorIcon(":/QPropertyTree/validator_error.png");
+		const QIcon& icon = isError ? errorIcon : warningIcon;
+		QColor brushColor = isError ? QColor(255, 64, 64, 192) : QColor(255, 255, 220, 255);
+		QColor penColor = isError ? QColor(64, 0, 0, 255) : QColor(40, 20, 0, 255);
 
-				QRect rect(totalRect.left(), totalRect.top() + offset,
-						  totalRect.width(), totalRect.height() - offset);
+		QRect textRect = toQRect(rect.adjusted(tree->_defaultRowHeight() + padding, padding * 2, -padding*2, -padding *2));
+		QRect r = toQRect(rect.adjusted(1, padding, 0, -padding));
 
-				QRect textRect = rect.adjusted(tree->_defaultRowHeight() + padding, padding, -padding, -padding);
-				int textHeight = max(tree->_defaultRowHeight(),
-					fm.boundingRect(textRect, Qt::TextWordWrap, QString::fromUtf8(text), 0, 0).height() + padding * 2);
-				rect.setHeight(textHeight + padding * 2);
-				textRect.setHeight(textHeight);
-
-				QPen pen(penColor);
-				pen.setWidth(1);
-				painter_->setPen(QPen(penColor));
-				painter_->setRenderHint(QPainter::Antialiasing);
-				painter_->setBrush(brushColor);
-				painter_->translate(-0.5f, -0.5f);
-				painter_->drawRoundedRect(rect, 5, 5, Qt::AbsoluteSize);
-				painter_->translate(0.5f, 0.5f);
-				painter_->setPen(penColor);
-				painter_->setBrush(QBrush());
-				QTextOption opt;
-				opt.setWrapMode(QTextOption::WordWrap);
-				opt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-				painter_->drawText(textRect, text, opt);
-				textRect.setHeight(0xffff);
-				QRect iconRect(rect.left(), rect.top(), tree->_defaultRowHeight(), rect.height());
-				icon.paint(&*painter_, iconRect, Qt::AlignCenter);
-				offset += rect.height() + padding;
-			}
-		}
-	};
-	drawFunc(row);
-	visitPulledRows(row, drawFunc);
+		QPen pen(penColor);
+		pen.setWidth(1);
+		painter_->setPen(QPen(penColor));
+		painter_->setRenderHint(QPainter::Antialiasing);
+		painter_->setBrush(brushColor);
+		painter_->translate(-0.5f, -0.5f);
+		painter_->drawRoundedRect(r, 5, 5, Qt::AbsoluteSize);
+		painter_->translate(0.5f, 0.5f);
+		painter_->setPen(penColor);
+		painter_->setBrush(QBrush());
+		QTextOption opt;
+		opt.setWrapMode(QTextOption::WordWrap);
+		opt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		painter_->drawText(textRect, text, opt);
+		textRect.setHeight(0xffff);
+		QRect iconRect(r.left(), r.top(), tree->_defaultRowHeight(), r.height());
+		icon.paint(&*painter_, iconRect, Qt::AlignCenter);
+	}
 }
 
 }

@@ -60,6 +60,7 @@ static int translateKey(int qtKey)
 	case Qt::Key_Down: return KEY_DOWN;
 	case Qt::Key_End: return KEY_END;
 	case Qt::Key_Escape: return KEY_ESCAPE;
+	case Qt::Key_F1: return KEY_F1;
 	case Qt::Key_F2: return KEY_F2;
 	case Qt::Key_Home: return KEY_HOME;
 	case Qt::Key_Insert: return KEY_INSERT;
@@ -1068,25 +1069,25 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 		drawLayout(context, h);
 
 		int num = layout_->rectangles.size();
-#if 1
-		for (int i = 0; i < num; ++i) {
-			QRect r = toQRect(layout_->rectangles[i]);
-			switch (layout_->elements[i].rowPart) {
-			case property_tree::PART_WIDGET:
-			painter.setPen(QColor(0,0,0));
-			painter.setBrush(QColor(0,255,0,64));
-			break;
-			case property_tree::PART_LABEL:
-			painter.setPen(Qt::NoPen);
-			painter.setBrush(QColor(255,255,0,64));
-			break;
-			default:
-			painter.setPen(QColor(0,0,0, focusedLayoutElement_ ? 255 : 16));
-			painter.setBrush(Qt::NoBrush);
+		if (config_.debugDrawLayout) {
+			for (int i = 0; i < num; ++i) {
+				QRect r = toQRect(layout_->rectangles[i]);
+				switch (layout_->elements[i].rowPart) {
+				case property_tree::PART_WIDGET:
+					painter.setPen(QColor(0,0,0));
+					painter.setBrush(QColor(0,255,0,64));
+					break;
+				case property_tree::PART_LABEL:
+					painter.setPen(Qt::NoPen);
+					painter.setBrush(QColor(255,255,0,64));
+					break;
+				default:
+					painter.setPen(QColor(0,0,0, focusedLayoutElement_ ? 255 : 16));
+					painter.setBrush(Qt::NoBrush);
+				}
+				painter.drawRect(r);
 			}
-			painter.drawRect(r);
 		}
-#endif
 
 		if (size_t(focusedLayoutElement_) < layout_->rectangles.size()) {
 			QRect r = toQRect(layout_->rectangles[focusedLayoutElement_]);

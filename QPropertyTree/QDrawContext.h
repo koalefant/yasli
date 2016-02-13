@@ -35,7 +35,7 @@ public:
 	void drawPlus(const Rect& rect, bool expanded, bool selected, bool grayed) override;
 	void drawSelection(const Rect& rect, bool inlinedRow) override;
 	void drawValueText(bool highlighted, const char* text) override;
-	void drawValidators(PropertyRow* row, const Rect& totalRect) override;
+	void drawValidator(PropertyRow* row, int validatorIndex, const Rect& rect) override;
 
 	QPropertyTree* tree_;
 	QPainter* painter_;

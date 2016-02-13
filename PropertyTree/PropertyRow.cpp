@@ -958,6 +958,10 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 			redraw(context);
 		}
 		break;
+	case PART_VALIDATOR: {
+		context.drawValidator(this, partSubindex, rect);
+		break;
+	}
 	default:
 		break;
 	}

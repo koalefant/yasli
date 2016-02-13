@@ -233,9 +233,29 @@ static int findLastLayoutElementInDirection(Point* newCursor, const Layout& layo
 	return bestElement;
 }
 
-static int layoutHeightByWidth(void * argument, int element, int width) {
+static int heightByWidth(void * argument, int element, int subindex, int width) {
 	property_tree::Layout * l = (property_tree::Layout*)argument;
-	return width / 2;
+	if ( element < 0 || element >= l->rows.size() ) {
+		return 0;
+	}
+	PropertyTree* tree = l->tree;
+	const int padding = tree->_defaultRowHeight() * 0.1f;
+
+	PropertyRow * row = l->rows[ element ];
+	int validatorIndex = row->validatorIndex();
+	const ValidatorEntry* entries = tree->_validatorBlock()->getEntry(validatorIndex, row->validatorCount());
+	if (subindex >= row->validatorCount()) {
+		return 40;
+	}
+	if (entries) {
+		const ValidatorEntry & entry = entries[subindex];
+		int height = max(tree->_defaultRowHeight(),
+						 tree->ui()->textHeight(width - tree->_defaultRowHeight() - padding * 3,
+												entry.message.c_str(), property_tree::FONT_NORMAL));
+		return height + padding * 6;
+	} else {
+		return 40;
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -251,6 +271,7 @@ TreeConfig::TreeConfig()
 , sliderUpdateDelay(25)
 , undoEnabled(true)
 , multiSelection(false)
+, debugDrawLayout(false)
 {
 	defaultRowHeight = 22;
 	tabSize = defaultRowHeight;
@@ -328,8 +349,9 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , layout_(new property_tree::Layout())
 , persistentFocusedLayoutElement_(new PersistentLayoutElement())
 {
+	layout_->tree = this;
 	layout_->heightByWidthArgument = (void*)layout_;
-	layout_->heightByWidth = &layoutHeightByWidth;
+	layout_->heightByWidth = &heightByWidth;
 	model_.reset(new PropertyTreeModel(this));
 	model_->setExpandLevels(config_.expandLevels);
 	model_->setUndoEnabled(config_.undoEnabled);
@@ -371,6 +393,11 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			return true;
 		}
 	break;
+	case KEY_F1: {
+		config_.debugDrawLayout = !config_.debugDrawLayout;
+		repaint();
+		break;
+	}
 	case KEY_F2:
 	if (ev->modifiers() == 0) {
 		if(selectedRow()) {
@@ -1042,7 +1069,7 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 			if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(child->validatorIndex(), child->validatorCount())) {
 				for (int i = 0; i < child->validatorCount(); ++i) {
 					const ValidatorEntry* validatorEntry = validatorEntries + i;
-					l->addElement(parentElement, HEIGHT_BY_WIDTH, child, PART_VALIDATOR, 40, 40, 0, false);
+					l->addElement(parentElement, HEIGHT_BY_WIDTH, child, PART_VALIDATOR, 40, 40, 0, false, i);
 				}
 			}
 		}
@@ -1066,7 +1093,7 @@ void calculateMinimalSizes(int* minSize, ElementType orientation, Layout* l, int
 			*minSize = e.minWidth;
 		} else {
 			if (e.type == HEIGHT_BY_WIDTH) {
-				*minSize = l->heightByWidth(l->heightByWidthArgument, element, l->rectangles[element].w);
+				*minSize = l->heightByWidth(l->heightByWidthArgument, element, e.rowPartSubindex, l->rectangles[element].w);
 			} else {
 				*minSize = e.minHeight;
 			}

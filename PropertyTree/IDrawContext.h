@@ -108,7 +108,7 @@ struct IDrawContext
 	virtual void drawValueText(bool highlighted, const char* text) = 0;
 	virtual void drawValidatorWarningIcon(const Rect& rect) {}
 	virtual void drawValidatorErrorIcon(const Rect& rect) {}
-	virtual void drawValidators(PropertyRow* row, const Rect& rect) {}
+	virtual void drawValidator(PropertyRow* row, int validatorIndex, const Rect& rect) {}
 };
 
 }

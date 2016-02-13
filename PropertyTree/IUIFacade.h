@@ -44,6 +44,7 @@ enum Key
 	KEY_DOWN,
 	KEY_END,
 	KEY_ESCAPE,
+	KEY_F1,
 	KEY_F2,
 	KEY_HOME,
 	KEY_INSERT,

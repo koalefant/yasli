@@ -21,4 +21,7 @@ struct TreeConfig
 	bool undoEnabled;
 	bool fullUndo;
 	bool multiSelection;
+
+	// debug tools
+	bool debugDrawLayout;
 };

@@ -77,6 +77,7 @@ struct ChildrenList
 
 struct Layout
 {
+	PropertyTree* tree;
 	// defines position where magnet elements get aligned to, used for name/value columns
 	int magnetPoint;
 
@@ -94,7 +95,7 @@ struct Layout
 	
 	// a cal back to calculate height of flowing elements (i.e. validator boxes)
 	void * heightByWidthArgument;
-	typedef int(*HeightByWidthFunction)(void *, int element, int width);
+	typedef int(*HeightByWidthFunction)(void *, int element, int subElement, int width);
 	HeightByWidthFunction heightByWidth;
 
 	// lists of children elements, referenced by individual LayoutElement
@@ -102,15 +103,17 @@ struct Layout
 	int nextChildrenList;
 
 	Layout()
-	: nextChildrenList(0)
+	: tree()
+    , nextChildrenList(0)
 	, magnetPoint(0) {}
 
 	// adds element to the layout
-	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, bool focusable)
+	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, bool focusable, int partSubindex = 0)
 	{
 		LayoutElement e;
 		e.type = type;
 		e.rowPart = part;
+		e.rowPartSubindex = partSubindex;
 		e.minWidth = minWidth;
 		e.minHeight = minHeight;
 		e.priority = priority;
