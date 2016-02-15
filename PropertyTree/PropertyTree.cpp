@@ -716,23 +716,26 @@ void PropertyTree::hitTest(property_tree::HitResult* r, const Point& point)
 
 bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool shiftPressed)
 {
-	PropertyRow* row = hit.row;
 	Point point = hit.point;
 	pressPoint_ = point;
 	pointerMovedSincePress_ = false;
-	// row = model()->root()->hit(this, point);
-	// if(row){
-	// 	if (!row->isRoot()) {
-	// 		if(row->plusRect(this).contains(point) && toggleRow(row))
-	// 			return true;
-	// 		if (row->validatorWarningIconRect(this).contains(point)) {
-	// 			jumpToNextHiddenValidatorIssue(false, row);
-	// 			return true;
-	// 		}
-	// 		if (row->validatorErrorIconRect(this).contains(point)) {
-	// 			jumpToNextHiddenValidatorIssue(true, row);
-	// 			return true;
-	// 		}
+	PropertyRow* row = hit.row;
+	if (!row) {
+		return false;
+	}
+	if (!row->isRoot()) {
+		if(row->plusRect(this).contains(point) && toggleRow(row))
+			return true;
+// 		if (row->validatorWarningIconRect(this).contains(point)) {
+// 			jumpToNextHiddenValidatorIssue(false, row);
+// 			return true;
+// 		}
+// 		if (row->validatorErrorIconRect(this).contains(point)) {
+// 			jumpToNextHiddenValidatorIssue(true, row);
+// 			return true;
+// 		}
+	}
+
 
 	bool changed = false;
 
@@ -766,7 +769,7 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 	while (rowToSelect && !rowToSelect->isSelectable())
 		rowToSelect = rowToSelect->parent();
 	if (rowToSelect)
-		onRowSelected(vector<PropertyRow*>(1, rowToSelect), multiSelectable() && controlPressed, true);	
+		onRowSelected(vector<PropertyRow*>(1, rowToSelect), multiSelectable() && controlPressed, true);
 
 	if (!dragCheckMode_) {
 		bool capture = row->onMouseDown(this, point, changed);
@@ -779,7 +782,7 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 				PropertyActivationEvent ev;
 				ev.tree = this;
 				ev.reason = ev.REASON_PRESS;
-                ev.rename = false;
+				ev.rename = false;
 				row->onActivate(ev);
 				return false;
 			}
@@ -823,7 +826,7 @@ void PropertyTree::onRowRMBDown(const HitResult& hit)
 	SharedPtr<PropertyRow> handle = hit.row;
 	PropertyRow* menuRow = 0;
 	PropertyRow* row = hit.row;
-	
+
 	focusedLayoutElement_ = hit.focusableElementIndex;
 
 	PropertyRow* rowToSelect = row;
@@ -996,7 +999,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		if (!labelBeforeInlined && label[0])
 			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
-										row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
+		row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
 		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
 	break;
@@ -1016,7 +1019,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		break;
 	}
 	case PropertyRow::WIDGET_INSTEAD_OF_TEXT: {
-		
+
 		break;
 	}
 	}
@@ -1229,6 +1232,9 @@ static void calculateRectangles(Layout* l, ElementType pass, int element, int le
 						--expandingLeft;
 					calculateRectangles(l, pass, children[i], childLength, offset+position);
 					position += childLength;
+				}
+				if ( pass == VERTICAL ) {
+					out.h = position;
 				}
 			} else {
 				// leave this level for other pass
