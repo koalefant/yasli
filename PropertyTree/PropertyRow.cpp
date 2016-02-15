@@ -664,12 +664,6 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 	int extraSizeStorage = 0;
 	int& extraSize = !inlined() || !_extraSize ? extraSizeStorage : *_extraSize;
 
-	int validatorIconsWidth = 0;
-	if (validatorHasErrors_)
-		validatorIconsWidth += tree->_defaultRowHeight();
-	if (validatorHasWarnings_)
-		validatorIconsWidth += tree->_defaultRowHeight();
-
 	if(!inlined()){
 		int minTextSize = 0;
 		int minimalWidth = 0;
@@ -960,6 +954,14 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 		break;
 	case PART_VALIDATOR: {
 		context.drawValidator(this, partSubindex, rect);
+		break;
+	}
+	case PART_VALIDATOR_WARNING_ICON: {
+		context.drawValidatorWarningIcon( rect );
+		break;
+	}
+	case PART_VALIDATOR_ERROR_ICON: {
+		context.drawValidatorErrorIcon( rect );
 		break;
 	}
 	default:

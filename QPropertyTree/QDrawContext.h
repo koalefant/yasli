@@ -36,6 +36,8 @@ public:
 	void drawSelection(const Rect& rect, bool inlinedRow) override;
 	void drawValueText(bool highlighted, const char* text) override;
 	void drawValidator(PropertyRow* row, int validatorIndex, const Rect& rect) override;
+	void drawValidatorErrorIcon(const property_tree::Rect & rect) override;
+	void drawValidatorWarningIcon(const property_tree::Rect & rect) override;
 
 	QPropertyTree* tree_;
 	QPainter* painter_;

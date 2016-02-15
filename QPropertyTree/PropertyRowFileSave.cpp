@@ -86,6 +86,7 @@ public:
 
 	yasli::string valueAsString() const override{ return value_.path; }
 	const void* searchHandle() const override { return searchHandle_; }
+	yasli::TypeID searchType() const override { return yasli::TypeID::get<yasli::string>(); }
 	yasli::TypeID typeId() const override { return yasli::TypeID::get<yasli::string>(); }
 private:
 	FileSave value_;

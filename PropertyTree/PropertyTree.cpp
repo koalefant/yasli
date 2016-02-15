@@ -933,9 +933,9 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights
 
 	if (hasChanges && updateHeights) {
 		storePersistentFocusElement();
+		updateValidatorIcons();
 		this->updateHeights();
 		restorePersistentFocusElement();
-		updateValidatorIcons();
 	}
 }
 
@@ -1035,9 +1035,17 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
 		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
 	}
-		row->setLayoutElement(rowArea);
-	if (labelElement > 0 && (*hasNonPulledChildren || (row->parent() && row->parent()->isContainer())))
+	row->setLayoutElement(rowArea);
+	if (labelElement > 0 && (*hasNonPulledChildren || (row->parent() && row->parent()->isContainer()))) {
 		l->elements[labelElement].focusable = true;
+	}
+
+	if ( row->validatorHasWarnings() ) {
+		l->addElement( rowArea, FIXED_SIZE, row, PART_VALIDATOR_WARNING_ICON, tree->_defaultRowHeight(), 0, 0, true );
+	}
+	if ( row->validatorHasErrors() ) {
+		l->addElement( rowArea, FIXED_SIZE, row, PART_VALIDATOR_ERROR_ICON, tree->_defaultRowHeight(), 0, 0, true );
+	}
 }
 
 

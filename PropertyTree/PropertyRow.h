@@ -179,6 +179,8 @@ public:
 	bool setValidatorEntry(int index, int count);
 	int validatorCount() const{ return validatorCount_; }
 	int validatorIndex() const{ return validatorIndex_; }
+	bool validatorHasWarnings() const{ return validatorHasWarnings_; }
+	bool validatorHasErrors() const{ return validatorHasErrors_; }
 	void resetValidatorIcons();
 	void addValidatorIcons(bool hasWarnings, bool hasErrors);
 	const char* tooltip() const { return tooltip_; }
