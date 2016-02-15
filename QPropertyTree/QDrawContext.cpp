@@ -511,12 +511,12 @@ void QDrawContext::drawValidator(PropertyRow* row, int index, const Rect& rect)
 
 void QDrawContext::drawValidatorErrorIcon(const property_tree::Rect & rect) {
 	static QIcon icon(":/QPropertyTree/validator_error.png");
-	icon.paint(&*painter_, toQRect(r), Qt::AlignCenter);
+	icon.paint(&*painter_, toQRect(rect), Qt::AlignCenter);
 }
 
 void QDrawContext::drawValidatorWarningIcon(const property_tree::Rect & rect) {
 	static QIcon icon(":/QPropertyTree/validator_warning.png");
-	icon.paint(&*painter_, toQRect(r), Qt::AlignCenter);
+	icon.paint(&*painter_, toQRect(rect), Qt::AlignCenter);
 }
 
 }
