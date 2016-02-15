@@ -616,7 +616,7 @@ void QPropertyTree::updateHeights(bool recalculateTextSize)
 		bool force = lb != leftBorder_ || rb != rightBorder_ || recalculateTextSize;
 		leftBorder_ = lb;
 		rightBorder_ = rb;
-		model()->root()->calculateMinimalSize(this, leftBorder_, force, 0, 0);
+		model()->root()->updateTextSize_r(this, force, 0);
 
 		updateHeightsTime_ = timer.elapsed();
 

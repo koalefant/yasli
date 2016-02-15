@@ -639,7 +639,7 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index, boo
 	}
 }
 
-void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index)
+void PropertyRow::updateTextSize_r(const PropertyTree* tree, bool force, int index)
 {
 	PropertyRow* nonInlined = findNonInlinedParent();
 
@@ -660,14 +660,8 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 
 	updateTextSizeInitial(tree, index, force);
 
-	int freeInlinedChildren = 0;
-	int extraSizeStorage = 0;
-	int& extraSize = !inlined() || !_extraSize ? extraSizeStorage : *_extraSize;
-
 	if(!inlined()){
-		int minTextSize = 0;
-		int minimalWidth = 0;
-		calcInlinedRows(&minTextSize, &freeInlinedChildren, &minimalWidth, tree, index);
+		updateInlineTextSize_r(tree, index);
 	}
 
 	int numChildren = count();
@@ -675,7 +669,7 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = childByIndex(i);
 			if(row->visible(tree) && row->inlinedBefore()){
-				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				row->updateTextSize_r(tree, force, i);
 			}
 		}
 	}
@@ -688,11 +682,11 @@ void PropertyRow::calculateMinimalSize(const PropertyTree* tree, int posX, bool 
 		}
 		if(row->inlined() || row->inlinedBefore()){
 			if(!row->inlinedBefore()){
-				row->calculateMinimalSize(tree, posX, force, &extraSize, i);
+				row->updateTextSize_r(tree, force, i);
 			}
 		}
 		else if(expanded())
-			row->calculateMinimalSize(tree, nonInlined->plusRect(tree).right(), force, &extraSize, i);
+			row->updateTextSize_r(tree, force, i);
 	}
 }
 
@@ -709,15 +703,16 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 	}
 }
 
-void PropertyRow::calcInlinedRows(int* minTextSize, int* freeInlinedChildren, int* minimalWidth, const PropertyTree *tree, int index) 
+void PropertyRow::updateInlineTextSize_r(const PropertyTree *tree, int index) 
 {
 	updateTextSizeInitial(tree, index, false);
 
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
 		PropertyRow* row = childByIndex(i);
-		if(row->inlined())
-			row->calcInlinedRows(minTextSize, freeInlinedChildren, minimalWidth, tree, index);
+		if(row->inlined()) {
+			row->updateInlineTextSize_r(tree, index);
+		}
 	}
 }
 

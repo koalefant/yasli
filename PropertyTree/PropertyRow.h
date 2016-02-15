@@ -219,11 +219,8 @@ public:
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void calcInlinedRows(int* minTextSize, int* freeInlinedChildren, int* minimalWidth, const PropertyTree* tree, int index);
-	void calculateMinimalSize(const PropertyTree* tree, int posX, bool force, int* _extraSize, int index);
+	void updateTextSize_r(const PropertyTree* tree, bool force, int index);
 	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
-	void calculateTotalSizes(int* minTextSize);
-	void adjustVerticalPosition(const PropertyTree* tree, int& totalHeight);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || (widgetPlacement() != WIDGET_VALUE && widgetPlacement() != WIDGET_INSTEAD_OF_TEXT); }
 
@@ -329,6 +326,7 @@ public:
 	int layoutElement() const { return layoutElement_; }
 
 protected:
+	void updateInlineTextSize_r(const PropertyTree* tree, int index);
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;
