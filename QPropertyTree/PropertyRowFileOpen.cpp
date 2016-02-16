@@ -62,10 +62,25 @@ yasli::string extractExtensionFromFilter(const char* mask)
 
 using yasli::FileOpen;
 
-class PropertyRowFileOpen : public PropertyRowImpl<FileOpen>{
+class PropertyRowFileOpen : public PropertyRowField{
 public:
 
+	PropertyRowFileOpen() : flags_() {}
+
 	bool isLeaf() const override{ return true; }
+
+	bool assignTo(const Serializer& ser) const override{
+		*ser.cast<FileOpen>()->pathPointer = value_;
+		return true;
+	}
+
+	void setValueAndContext(const Serializer& ser, Archive& ar) override {
+		FileOpen* value = ser.cast<FileOpen>();
+		filter_ = value->filter;
+		relativeToFolder_ = value->relativeToFolder;
+		flags_ = value->flags;
+		searchHandle_ = value->pathPointer;
+	}
 
 	bool onActivate(const PropertyActivationEvent& e) override
 	{
@@ -75,21 +90,21 @@ public:
 		if (labelUndecorated())
 			dialog.setWindowTitle(QString("Choose file for '") + labelUndecorated() + "'");		
 		
-		QDir directory(value().relativeToFolder.c_str());
-		dialog.setNameFilter(value().filter.c_str());
+		QDir directory(relativeToFolder_.c_str());
+		dialog.setNameFilter(filter_.c_str());
 		
-		QString existingFile = value().path.c_str();
+		QString existingFile = value_.c_str();
         if (!QDir::isAbsolutePath(existingFile)) {
             existingFile = directory.currentPath();
-            if (!value().relativeToFolder.empty()) {
+            if (!relativeToFolder_.empty()) {
                 existingFile += QDir::separator();
-                existingFile += value().relativeToFolder.c_str();
+                existingFile += relativeToFolder_.c_str();
             }
             existingFile += QDir::separator();
-            existingFile += value().path.c_str();
+            existingFile += value_.c_str();
         }
-        if (value().flags & FileOpen::STRIP_EXTENSION)
-            existingFile += QString(extractExtensionFromFilter(value().filter.c_str()).c_str());
+        if (flags_ & FileOpen::STRIP_EXTENSION)
+            existingFile += QString(extractExtensionFromFilter(filter_.c_str()).c_str());
 
 		if (!QFile::exists(existingFile))
 			dialog.setDirectory(directory);
@@ -100,9 +115,9 @@ public:
 			e.tree->model()->rowAboutToBeChanged(this);
 			QString filename = dialog.selectedFiles()[0];
 			QString relativeFilename = directory.relativeFilePath(filename);
-			value().path = relativeFilename.toLocal8Bit().data();
-			if (value().flags & FileOpen::STRIP_EXTENSION)
-				value().path = removeExtension(value().path.c_str());
+			value_ = relativeFilename.toLocal8Bit().data();
+			if (flags_ & FileOpen::STRIP_EXTENSION)
+				value_ = removeExtension(value_.c_str());
 			e.tree->model()->rowChanged(this);
 		}
 		return true;
@@ -111,7 +126,7 @@ public:
 	void clear(PropertyTree* tree)
 	{
 		tree->model()->rowAboutToBeChanged(this);
-		value().path.clear();
+		value_.clear();
 		tree->model()->rowChanged(this);
 	}
 
@@ -133,7 +148,15 @@ public:
 	}
 	virtual bool usePathEllipsis() const override{ return true; }
 
-	yasli::string valueAsString() const override{ return value().path; }
+	yasli::string valueAsString() const override{ return value_; }
+	const void* searchHandle() const override{ return searchHandle_; }
+	yasli::TypeID searchType() const override{ return yasli::TypeID::get<yasli::string>(); }
+private:
+	yasli::string filter_;
+	yasli::string relativeToFolder_;
+	yasli::string value_;
+	int flags_;
+	const void* searchHandle_;
 };
 
 REGISTER_PROPERTY_ROW(FileOpen, PropertyRowFileOpen); 
