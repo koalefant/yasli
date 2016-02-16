@@ -235,9 +235,23 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 	return true;
 }
 
+std::string escape(const char* str)
+{
+	std::string val;
+	val.reserve(strlen(str));
+	for(const char* p = str; *p; ++p)
+		if(*p == '\n'){
+			val.push_back('\\');
+			val.push_back('n');
+		}		
+		else
+			val.push_back(*p);
+	return val;
+}
+
 bool PropertyOArchive::operator()(yasli::StringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get());
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", escape(value.get()).c_str());
 	return true;
 }
 
