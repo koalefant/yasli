@@ -82,7 +82,7 @@ PropertyRow::PropertyRow()
 	userFullRow_ = false;
 	multiValue_ = false;
 	userHideChildren_ = false;
-	updated_ = true;
+	updated_ = false;
 	
 	label_ = "";
 	labelChanged_ = true;
