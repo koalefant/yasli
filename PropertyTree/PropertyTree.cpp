@@ -1043,14 +1043,36 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		l->elements[labelElement].focusable = true;
 	}
 
-	if ( row->validatorHasWarnings() ) {
-		l->addElement( rowArea, FIXED_SIZE, row, PART_VALIDATOR_WARNING_ICON, tree->_defaultRowHeight(), 0, 0, true );
-	}
-	if ( row->validatorHasErrors() ) {
-		l->addElement( rowArea, FIXED_SIZE, row, PART_VALIDATOR_ERROR_ICON, tree->_defaultRowHeight(), 0, 0, true );
-	}
+	// add icons that can be used to jump to the nested warning/error
+	if ( row->validatorHasWarnings() )
+		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_WARNING_ICON, tree->_defaultRowHeight(), 0, 0, true);
+	if ( row->validatorHasErrors() )
+		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_ERROR_ICON, tree->_defaultRowHeight(), 0, 0, true);
 }
 
+
+static void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, PropertyRow* row)
+{
+	if (row->validatorCount()) {
+		if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
+			for (int i = 0; i < row->validatorCount(); ++i) {
+				const ValidatorEntry* validatorEntry = validatorEntries + i;
+				l->addElement(parentElement, HEIGHT_BY_WIDTH, row, PART_VALIDATOR, 40, 40, 0, false, i);
+			}
+		}
+	}
+
+	// put bubbles of inlined properties below the property itself
+	int numChildren = row->count();
+	for (int i = 0; i < numChildren; ++i) {
+		PropertyRow* child = row->childByIndex(i);
+		if (!child)
+			continue;
+		if (child->inlined() || child->inlinedBefore()) {
+			addValidatorsToLayout_r(tree, l, parentElement, child);
+		}
+	}
+}
 
 static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
 {
@@ -1076,14 +1098,8 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 		bool hasNonPulledChildren = false;
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
 
-		if (child->validatorCount()) {
-			if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(child->validatorIndex(), child->validatorCount())) {
-				for (int i = 0; i < child->validatorCount(); ++i) {
-					const ValidatorEntry* validatorEntry = validatorEntries + i;
-					l->addElement(parentElement, HEIGHT_BY_WIDTH, child, PART_VALIDATOR, 40, 40, 0, false, i);
-				}
-			}
-		}
+		// add validator bubbles from the row itself and its inlined chlildren
+		addValidatorsToLayout_r(tree, l, parentElement, child);
 
 		if (child->expanded()) {
 			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
