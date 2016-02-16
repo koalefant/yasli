@@ -607,7 +607,7 @@ void PropertyTree::jumpToNextHiddenValidatorIssue(bool isError, PropertyRow* sta
 		row = parents[i];
 	}
 	if (row)
-		setSelectedRow(row);
+		setFocusedRow(row);
 
 	updateValidatorIcons();
 	updateHeights();
@@ -726,14 +726,14 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 	if (!row->isRoot()) {
 		if(row->plusRect(this).contains(point) && toggleRow(row))
 			return true;
-// 		if (row->validatorWarningIconRect(this).contains(point)) {
-// 			jumpToNextHiddenValidatorIssue(false, row);
-// 			return true;
-// 		}
-// 		if (row->validatorErrorIconRect(this).contains(point)) {
-// 			jumpToNextHiddenValidatorIssue(true, row);
-// 			return true;
-// 		}
+ 		if (row->validatorWarningIconRect(this).contains(point)) {
+ 			jumpToNextHiddenValidatorIssue(false, row);
+ 			return true;
+ 		}
+ 		if (row->validatorErrorIconRect(this).contains(point)) {
+ 			jumpToNextHiddenValidatorIssue(true, row);
+ 			return true;
+ 		}
 	}
 
 
@@ -1801,6 +1801,28 @@ bool PropertyTree::getSelectedObject(yasli::Object* object)
 		}
 	}
 	return false;
+}
+
+static int findFirstFocusableElement(const property_tree::Layout& layout, int startingWithElement) {
+	int numLayoutElements = (int)layout.elements.size();
+	for ( int index = startingWithElement; index < numLayoutElements; ++index) {
+		const property_tree::LayoutElement& element = layout.elements[index];
+		if ( element.focusable ) {
+			return index;
+		}
+	}
+	return 0;
+}
+
+void PropertyTree::setFocusedRow(PropertyRow* row) {
+	// make sure that the row is actually in layout now
+	ensureVisible(row);
+
+	int layoutElement = findFirstFocusableElement( *layout_, row->layoutElement() );
+	if ( layoutElement > 0 ) {
+		focusedLayoutElement_ = layoutElement;
+		setSelectedRow(row);
+	}
 }
 
 bool PropertyTree::setSelectedRow(PropertyRow* row)

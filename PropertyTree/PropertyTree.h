@@ -157,7 +157,10 @@ public:
 	bool selectByAddresses(const void* const* addresses, size_t addressCount, bool keepSelectionIfChildSelected);
 	bool selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected);
 	void ensureVisible(PropertyRow* row, bool considerChildren);
-	// Can be used to query information about selection in the tree.
+	// Used to set focus rectangle on the row (automatically changes focus).
+	void setFocusedRow(PropertyRow* row);
+	PropertyRow* focusedRow() const;
+	// Can be used to set or query information about selection.
 	bool setSelectedRow(PropertyRow* row);
 	PropertyRow* selectedRow();
 	int selectedRowCount() const;
@@ -273,7 +276,6 @@ protected:
 	PropertyRow* rowByPoint(const Point& rootSpacePoint);
 	void onRowMenuDecompose(PropertyRow* row);
 	bool toggleRow(PropertyRow* row);
-	PropertyRow* focusedRow() const;
 
 	void hitTest(property_tree::HitResult* result, const Point& point);
 
