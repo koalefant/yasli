@@ -272,6 +272,7 @@ TreeConfig::TreeConfig()
 , undoEnabled(true)
 , multiSelection(false)
 , debugDrawLayout(false)
+, expandLevels(1)
 {
 	defaultRowHeight = 22;
 	tabSize = defaultRowHeight;
@@ -329,6 +330,9 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 , focusedLayoutElement_(-1)
 , filterMode_(false)
 
+, offset_(0, 0)
+, size_(0, 0)
+, area_(0, 0, 1, 1)
 , applyTime_(0)
 , revertTime_(0)
 , pressPoint_(-1, -1)
