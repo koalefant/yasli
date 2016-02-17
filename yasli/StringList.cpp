@@ -66,52 +66,52 @@ YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringList& value, const
 
 YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListValue& value, const char* name, const char* label)
 {
-    if(ar.isEdit()){
-			Serializer ser = Serializer::forEdit(value);
-			return ar(ser, name, label);
-    }
-		else{
-			string str;
-			if(ar.isOutput())
-				str = value.c_str();
-			if(!ar(str, name, label))
-				return false;
-			if(ar.isInput()){
-				int index = value.stringList().find(str.c_str());
-				if(index >= 0){
-					value = index;
-					return true;
-				}
-				else
-					return false;
+	if(ar.isEdit()){
+		Serializer ser = Serializer::forEdit(value);
+		return ar(ser, name, label);
+	}
+	else{
+		string str;
+		if(ar.isOutput())
+			str = value.c_str();
+		if(!ar(str, name, label))
+			return false;
+		if(ar.isInput()){
+			int index = value.stringList().find(str.c_str());
+			if(index >= 0){
+				value = index;
+				return true;
 			}
-			return true;
+			else
+				return false;
 		}
+		return true;
+	}
 }
 
 YASLI_INLINE bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, StringListStaticValue& value, const char* name, const char* label)
 {
-    if(ar.isEdit()) {
-			Serializer ser = Serializer::forEdit(value);
-			return ar(ser, name, label);
-		}
-		else{
-			string str;
-			if(ar.isOutput())
-				str = value.c_str();
-			if(!ar(str, name, label))
-				return false;
-			if(ar.isInput()){
-				int index = value.stringList().find(str.c_str());
-				if(index >= 0){
-					value = index;
-					return true;
-				}
-				else
-					return false;
+	if(ar.isEdit()) {
+		Serializer ser = Serializer::forEdit(value);
+		return ar(ser, name, label);
+	}
+	else{
+		string str;
+		if(ar.isOutput())
+			str = value.c_str();
+		if(!ar(str, name, label))
+			return false;
+		if(ar.isInput()){
+			int index = value.stringList().find(str.c_str());
+			if(index >= 0){
+				value = index;
+				return true;
 			}
-			return true;
+			else
+				return false;
 		}
+		return true;
+	}
 }
 
 }

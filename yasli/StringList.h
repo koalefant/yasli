@@ -48,11 +48,14 @@ public:
 	StringListStaticValue(const StringListStaticValue& original)
 	: stringList_(original.stringList_)
 	, index_(original.index_)
+	, type_(original.type_)
+	, handle_(original.handle_)
 	{
 	}
     StringListStaticValue(const StringListStatic& stringList, int value)
     : stringList_(&stringList)
     , index_(value)
+	, type_(TypeID::get<StringListStaticValue>())
     {
         handle_ = this;
     }
@@ -160,6 +163,7 @@ public:
 	StringListValue(const StringList& stringList, int value)
 	: stringList_(stringList)
 	, index_(value)
+	, type_(TypeID::get<StringListValue>())
 	{
 		handle_ = this;
 	}
@@ -173,6 +177,7 @@ public:
 	StringListValue(const StringList& stringList, const char* value)
 	: stringList_(stringList)
 	, index_(stringList.find(value))
+	, type_(TypeID::get<StringListValue>())
 	{
 		handle_ = this;
 		YASLI_ASSERT(index_ != StringList::npos);

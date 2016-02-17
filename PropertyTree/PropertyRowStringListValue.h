@@ -42,12 +42,12 @@ public:
 
 	yasli::string valueAsString() const override { return value_.c_str(); }
 	bool assignTo(const Serializer& ser) const override {
-		*((StringListValue*)ser.pointer()) = value_.c_str();
+		*ser.cast<StringListValue>() = value_.c_str();
 		return true;
 	}
 	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
 		YASLI_ESCAPE(ser.size() == sizeof(StringListValue), return);
-		const StringListValue& stringListValue = *((StringListValue*)(ser.pointer()));
+		const StringListValue& stringListValue = *ser.cast<StringListValue>();
 		stringList_ = stringListValue.stringList();
 		value_ = stringListValue.c_str();
 		handle_ = stringListValue.handle();
@@ -65,6 +65,7 @@ public:
 	}
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	const void* searchHandle() const override { return handle_; }
+	yasli::TypeID searchType() const override { return type_; }
 	yasli::TypeID typeId() const override{ return type_; }
 
 	void redraw(IDrawContext& context) override
@@ -114,12 +115,11 @@ public:
 	}
 	yasli::string valueAsString() const override { return value_.c_str(); }
 	bool assignTo(const Serializer& ser) const override {
-		*((StringListStaticValue*)ser.pointer()) = value_.c_str();
+		*ser.cast<StringListStaticValue>() = value_.c_str();
 		return true;
 	}
 	void setValueAndContext(const Serializer& ser, yasli::Archive& ar) override {
-		YASLI_ESCAPE(ser.size() == sizeof(StringListStaticValue), return);
-		const StringListStaticValue& stringListValue = *((StringListStaticValue*)(ser.pointer()));
+		const StringListStaticValue& stringListValue = *ser.cast<StringListStaticValue>();
 		stringList_.resize(stringListValue.stringList().size());
 		for (size_t i = 0; i < stringList_.size(); ++i)
 			stringList_[i] = stringListValue.stringList()[i];
@@ -139,6 +139,7 @@ public:
 	}
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	const void* searchHandle() const override { return handle_; }
+	yasli::TypeID searchType() const override { return type_; }
 	yasli::TypeID typeId() const override{ return type_; }
 	void redraw(IDrawContext& context) override
 	{
