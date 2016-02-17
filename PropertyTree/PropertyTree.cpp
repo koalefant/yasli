@@ -1311,8 +1311,7 @@ void PropertyTree::updateLayout()
 	l.clear();
 
 	// Width of our name/value column
-	int width = area_.width();
-	l.magnetPoint = int(width * (1.0f - valueColumnWidth()));
+	l.magnetPoint = int(area_.width() * (1.0f - valueColumnWidth()));
 
 	// Allocate root layout element
 	l.elements.push_back(LayoutElement());
@@ -1334,7 +1333,7 @@ void PropertyTree::updateLayout()
 	calculateMinimalSizes(0, HORIZONTAL, &l, lroot);
 	// 2. Compute horizontal offsets and sizes top-down
 	l.rectangles.resize(l.elements.size());
-	calculateRectangles(&l, HORIZONTAL, lroot, width, filterAreaHeight());
+	calculateRectangles(&l, HORIZONTAL, lroot, area_.width(), 0);
 	// 3. Propagate vertical minimal sizes of individual elements bottom up
 	calculateMinimalSizes(0, VERTICAL, &l, lroot);
 	// 4. Compute vertical offsets and sizes top-down
