@@ -1115,18 +1115,19 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 	}
 }
 
-void calculateMinimalSizes(int* minSize, ElementType orientation, Layout* l, int element )
+void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, int element )
 {
+	int minSize = 0;
 	// Width and height are required to define minimal size of HEIGHT_BY_WIDTH elements.
 	LayoutElement& e = l->elements[element];
 	if (e.type == FIXED_SIZE || e.type == EXPANDING || e.type == EXPANDING_MAGNET || e.type == HEIGHT_BY_WIDTH) {
 		if ( orientation == HORIZONTAL ) {
-			*minSize = e.minWidth;
+			minSize = e.minWidth;
 		} else {
 			if (e.type == HEIGHT_BY_WIDTH) {
-				*minSize = l->heightByWidth(l->heightByWidthArgument, element, e.rowPartSubindex, l->rectangles[element].w);
+				minSize = l->heightByWidth(l->heightByWidthArgument, element, e.rowPartSubindex, l->rectangles[element].w);
 			} else {
-				*minSize = e.minHeight;
+				minSize = e.minHeight;
 			}
 		}
 	}
@@ -1161,16 +1162,19 @@ void calculateMinimalSizes(int* minSize, ElementType orientation, Layout* l, int
 				}
 			}
 		}
-		if ( orientation == HORIZONTAL ) {
-			*minSize = max(s, e.minWidth);
+		if (orientation == HORIZONTAL) {
+			minSize = max(s, e.minWidth);
 		} else {
-			*minSize = max(s, e.minHeight);
+			minSize = max(s, e.minHeight);
 		}
 	}
 	if ( orientation == HORIZONTAL ) {
-		l->minimalWidths[element] = *minSize;
+		l->minimalWidths[element] = minSize;
 	} else {
-		l->minimalHeights[element] = *minSize;
+		l->minimalHeights[element] = minSize;
+	}
+	if (outMinSize) {
+		*outMinSize = minSize;
 	}
 }
 
@@ -1306,29 +1310,41 @@ void PropertyTree::updateLayout()
 	Layout& l = *layout_;
 	l.clear();
 
+	// Width of our name/value column
 	int width = area_.width();
 	l.magnetPoint = int(width * (1.0f - valueColumnWidth()));
 
+	// Allocate root layout element
 	l.elements.push_back(LayoutElement());
 	PropertyRow* root = model_->root();
 	l.rows.push_back(root);
-
 	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA, 0, 0, 0, false);
 	root->setLayoutElement(lroot);
+	// Root level and orphaned validators
+	addValidatorsToLayout_r(this, &l, lroot, root);
+	// Most of the layout is generated here
 	populateChildrenArea(&l, lroot, root, this);
 
 	l.minimalWidths.resize(l.elements.size());
 	l.minimalHeights.resize(l.elements.size());
 
-	int minWidth = 0;
-	calculateMinimalSizes(&minWidth, HORIZONTAL, &l, lroot);
+	// Individual rectangles of the layout are computed in following steps:
+	//
+	// 1. Propagate horizontal minimal sizes of individual elements bottom up
+	calculateMinimalSizes(0, HORIZONTAL, &l, lroot);
+	// 2. Compute horizontal offsets and sizes top-down
 	l.rectangles.resize(l.elements.size());
 	calculateRectangles(&l, HORIZONTAL, lroot, width, filterAreaHeight());
-
-	int minHeight = 0;
-	calculateMinimalSizes(&minHeight, VERTICAL, &l, lroot);
+	// 3. Propagate vertical minimal sizes of individual elements bottom up
+	calculateMinimalSizes(0, VERTICAL, &l, lroot);
+	// 4. Compute vertical offsets and sizes top-down
 	calculateRectangles(&l, VERTICAL, lroot, 0, filterAreaHeight());
-	printf("Minimal size: %d %d\n", minWidth, minHeight);
+	//
+	// Separating minimal size computation step allows to perform layout in O(n) instead
+	// of O(n^2).
+	//
+	// Horizontal and vertical size computation is separated as some of the elements
+	// height depends on their width.
 }
 
 void PropertyTree::ensureVisible(PropertyRow* row, bool update, bool considerChildren)
