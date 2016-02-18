@@ -131,6 +131,7 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 #ifdef ANDROID_NDK
 	char buf[64] = { 0 };
 	sprintf(buf, "%f", value);
+	cutRightZeros(buf);
 	operator<<(buf);
 #else
 	// YASLI_ASSERT(!isnan(value)); disabled, because physics data is not always initialized
@@ -184,6 +185,7 @@ MemoryWriter& MemoryWriter::operator<<(const char* value)
 MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
 {
 #if defined(ANDROID_NDK) || defined(NACL)
+	YASLI_ASSERT(0, "Not implemented");
 	return *this;
 #else
     write((void*)value, wcslen(value) * sizeof(wchar_t));
