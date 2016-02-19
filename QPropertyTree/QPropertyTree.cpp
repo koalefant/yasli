@@ -52,6 +52,22 @@
 using property_tree::toQRect;
 using property_tree::toQPoint;
 
+struct DebugTimer
+{
+	const char* label;
+	QElapsedTimer timer;
+	int threshold = 0;
+	DebugTimer(const char* label, int threshold) : label(label), threshold(threshold) {
+		timer.start();
+	}
+	~DebugTimer() {
+		int elapsed = (int)timer.elapsed();
+		if ( elapsed > threshold) { 
+			printf("timer '%s': %d ms\n", label, elapsed);
+		}
+	}
+};
+
 static int translateKey(int qtKey)
 {
 	switch (qtKey) {
@@ -1394,13 +1410,16 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 				}
 			}
 			
-			if (hoverRow->validatorWarningIconRect(this).contains(pointToRootSpace(point))) {
-				newCursor = QCursor(Qt::PointingHandCursor);
-				newToolTip = "Jump to next warning";
-			}
-			if (hoverRow->validatorErrorIconRect(this).contains(pointToRootSpace(point))) {
-				newCursor = QCursor(Qt::PointingHandCursor);
-				newToolTip = "Jump to next error";
+			if (hit.elementIndex >= 0 && hit.elementIndex < layout_->elements.size()) {
+				const LayoutElement & e = layout_->elements[hit.elementIndex];
+				if (e.rowPart == PART_VALIDATOR_WARNING_ICON) {
+					newCursor = QCursor(Qt::PointingHandCursor);
+					newToolTip = "Jump to next warning";
+				}
+				if (e.rowPart == PART_VALIDATOR_ERROR_ICON) {
+					newCursor = QCursor(Qt::PointingHandCursor);
+					newToolTip = "Jump to next error";
+				}
 			}
 		}
 	}
