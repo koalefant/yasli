@@ -593,9 +593,9 @@ void QPropertyTree::interruptDrag()
 	dragController_->interrupt();
 }
 
-void QPropertyTree::updateHeights(bool recalculateTextSize)
+void QPropertyTree::updateHeights()
 {
-	DebugTimer t("QPropertyTree::updateHeights", 10);
+	DebugTimer t(__FUNCTION__, 10);
 	{
 		QFontMetrics fm(font());
 		defaultRowHeight_ = max(16, int(fm.lineSpacing() * 1.666f)); // to fit at least 16x16 icons
@@ -615,10 +615,9 @@ void QPropertyTree::updateHeights(bool recalculateTextSize)
 		model()->root()->updateLabel(this, 0, false);
 		int lb = style_->compact ? 0 : 4;
 		int rb = widgetRect.right() - lb - scrollBarW - 2;
-		bool force = lb != leftBorder_ || rb != rightBorder_ || recalculateTextSize;
 		leftBorder_ = lb;
 		rightBorder_ = rb;
-		model()->root()->updateTextSize_r(this, force, 0);
+		model()->root()->updateTextSize_r(this, 0);
 
 		updateHeightsTime_ = timer.elapsed();
 
@@ -634,13 +633,8 @@ void QPropertyTree::updateHeights(bool recalculateTextSize)
 
 		updateLayout();
 		size_.setY(model()->root()->childrenRect(this).height());
-		printf("totalHeight: %d\n", size_.y());
-		printf("rect size: %d\n", (int)sizeof(Rect));
-
 		updateLayoutTime_ = timer.elapsed();
 	}
-
-	printf("updateLayout/Heights: %d %d\n", updateLayoutTime_, updateHeightsTime_);
 
 	_arrangeChildren();
 
@@ -932,7 +926,7 @@ void QPropertyTree::onFilterChanged(const QString& text)
 	rowFilter_.parse(filterStr);
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
-	updateHeights(false);
+	updateHeights();
 }
 
 void QPropertyTree::drawFilteredString(QPainter& p, const char* text, RowFilter::Type type, const QFont* font, const QRect& rect, const QColor& textColor, bool pathEllipsis, bool center) const
@@ -1440,7 +1434,7 @@ void QPropertyTree::wheelEvent(QWheelEvent* ev)
 		font.setBold(true);
 		boldFont_ = font;
 
-		updateHeights(true);
+		updateHeights();
 	}
 	else {
 		if (scrollBar_->isVisible() && scrollBar_->isEnabled())

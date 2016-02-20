@@ -241,7 +241,7 @@ public:
 	int layoutElementByFocusIndex(int x, int y);
 
 	virtual void repaint() = 0;
-	virtual void updateHeights(bool recalculateTextSize = false) = 0;
+	virtual void updateHeights() = 0;
 	virtual void defocusInplaceEditor() = 0;
 
 	struct RowFilter {
@@ -326,6 +326,7 @@ protected:
 	void setDraggedRow(PropertyRow* row);
 	void storePersistentFocusElement();
 	void restorePersistentFocusElement();
+	int zoomLevel() const{ return zoomLevel_; }
 
 	std::auto_ptr<PropertyTreeModel> model_;
 	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
@@ -383,4 +384,5 @@ protected:
 	friend struct PropertyTreeMenuHandler;
 	friend struct ContainerMenuHandler;
 	friend class PropertyTreeModel;
+	friend class PropertyRow;
 };

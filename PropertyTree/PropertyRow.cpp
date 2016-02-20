@@ -623,7 +623,7 @@ yasli::string PropertyRow::typeNameForFilter(PropertyTree* tree) const
 	return yasli::makePrettyTypeName(typeName());
 }
 
-void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index, bool fontChanged)
+void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
@@ -632,17 +632,19 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index, boo
 		textHash_ = 0;
 	}
 	else{
-		unsigned hash = calcHash(text);
 		property_tree::Font font = rowFont(tree);
+		unsigned int hash = calcHash(font);
+		hash = calcHash(tree->_defaultRowHeight(), hash);
+		hash = calcHash(tree->zoomLevel(), hash);
 		hash = calcHash(font, hash);
-		if(hash != textHash_ || fontChanged){
+		if(hash != textHash_){
 			textSizeInitial_ = tree->ui()->textWidth(text, font) + 3;
 			textHash_ = hash;
 		}
 	}
 }
 
-void PropertyRow::updateTextSize_r(const PropertyTree* tree, bool force, int index)
+void PropertyRow::updateTextSize_r(const PropertyTree* tree, int index)
 {
 	PropertyRow* nonInlined = findNonInlinedParent();
 
@@ -661,7 +663,7 @@ void PropertyRow::updateTextSize_r(const PropertyTree* tree, bool force, int ind
 		}
 	}
 
-	updateTextSizeInitial(tree, index, force);
+	updateTextSizeInitial(tree, index);
 
 	if(!inlined()){
 		updateInlineTextSize_r(tree, index);
@@ -672,7 +674,7 @@ void PropertyRow::updateTextSize_r(const PropertyTree* tree, bool force, int ind
 		for (int i = 0; i < numChildren; ++i) {
 			PropertyRow* row = childByIndex(i);
 			if(row->visible(tree) && row->inlinedBefore()){
-				row->updateTextSize_r(tree, force, i);
+				row->updateTextSize_r(tree, i);
 			}
 		}
 	}
@@ -685,17 +687,17 @@ void PropertyRow::updateTextSize_r(const PropertyTree* tree, bool force, int ind
 		}
 		if(row->inlined() || row->inlinedBefore()){
 			if(!row->inlinedBefore()){
-				row->updateTextSize_r(tree, force, i);
+				row->updateTextSize_r(tree, i);
 			}
 		}
 		else if(expanded())
-			row->updateTextSize_r(tree, force, i);
+			row->updateTextSize_r(tree, i);
 	}
 }
 
 void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 {
-	updateTextSizeInitial(tree, index, false);
+	updateTextSizeInitial(tree, index);
 
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
@@ -708,7 +710,7 @@ void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
 
 void PropertyRow::updateInlineTextSize_r(const PropertyTree *tree, int index) 
 {
-	updateTextSizeInitial(tree, index, false);
+	updateTextSizeInitial(tree, index);
 
 	size_t numChildren = count();
 	for (size_t i = 0; i < numChildren; ++i) {
@@ -1247,8 +1249,7 @@ int RowWidthCache::getOrUpdate(const PropertyTree* tree, const PropertyRow* rowF
 	const Font font = rowForValue->rowFont(tree);
 	unsigned int newHash = calculateHash(value.c_str());
 	newHash = calculateHash(font, newHash);
-	if (newHash != valueHash)
-	{
+	if (newHash != valueHash) {
 		width = tree->ui()->textWidth(value.c_str(), font) + 6 + extraSpace;
 		if (width < 24)
 			width = 24;

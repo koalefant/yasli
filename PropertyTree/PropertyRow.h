@@ -190,7 +190,7 @@ public:
 	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
 	bool hideChildren() const { return hideChildren_; }
 	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
-	void updateTextSizeInitial(const PropertyTree* tree, int index, bool fontChanged);
+	void updateTextSizeInitial(const PropertyTree* tree, int index);
 	virtual void labelChanged() {}
 	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
@@ -219,7 +219,7 @@ public:
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 	virtual int floorHeight() const{ return 0; }
 
-	void updateTextSize_r(const PropertyTree* tree, bool force, int index);
+	void updateTextSize_r(const PropertyTree* tree, int index);
 	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || (widgetPlacement() != WIDGET_VALUE && widgetPlacement() != WIDGET_INSTEAD_OF_TEXT); }
@@ -339,7 +339,6 @@ protected:
 	int layoutElement_;
 	unsigned int textHash_;
 
-	// do we really need Point here? 
 	short int textSizeInitial_;
 	short int userWidgetSize_;
 	unsigned short heightIncludingChildren_;

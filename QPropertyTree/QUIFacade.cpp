@@ -38,6 +38,7 @@ int QUIFacade::textWidth(const char* text, Font font)
 
 	unsigned int hash = calcHash(text);
 	hash = calcHash(font, hash);
+	hash = calcHash(tree_->zoomLevel(), hash);
 
 	auto it = cache.find(hash);
 	if (it != cache.end())

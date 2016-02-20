@@ -1339,6 +1339,7 @@ Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) c
 
 void PropertyTree::updateLayout()
 {
+	DebugTimer t( __FUNCTION__, 0 );
 	Layout& l = *layout_;
 	l.clear();
 
@@ -2219,7 +2220,7 @@ void PropertyTree::setValueColumnWidth(float valueColumnWidth)
 	if (style_->valueColumnWidth != valueColumnWidth)
 	{
 		style_->valueColumnWidth = valueColumnWidth; 
-		updateHeights(false);
+		updateHeights();
 		repaint();
 	}
 }
@@ -2303,13 +2304,13 @@ void PropertyTree::setDefaultTreeStyle(const PropertyTreeStyle& treeStyle)
 void PropertyTree::setTreeStyle(const PropertyTreeStyle& style)
 {
 	*style_ = style;
-	updateHeights(true);
+	updateHeights();
 }
 
 void PropertyTree::setPackCheckboxes(bool pack)
 {
 	style_->packCheckboxes = pack;
-	updateHeights(true);
+	updateHeights();
 }
 
 bool PropertyTree::packCheckboxes() const

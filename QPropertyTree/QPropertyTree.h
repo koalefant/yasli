@@ -137,7 +137,7 @@ protected:
 	void defocusInplaceEditor() override;
 	class DragController;
 
-	void updateHeights(bool recalculateText = false) override;
+	void updateHeights() override;
 	void repaint() override { update(); }
 	void resetFilter() override { onFilterChanged(QString()); }
 
