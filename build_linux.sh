@@ -2,7 +2,10 @@
 
 BUILD_ROOT=$(dirname $(readlink -f $0))
 
-CONFIGURATION=Debug
+CONFIGURATION="$VIM_PROJECT_CONFIGURATION"
+if [ CONFIGURATION = "" ]; then
+	CONFIGURATION=Debug
+fi
 TEMP_DIR=${BUILD_ROOT}/.tmp/linux-${CONFIGURATION}
 
 mkdir -p ${TEMP_DIR} 

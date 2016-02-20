@@ -610,6 +610,7 @@ void QPropertyTree::interruptDrag()
 
 void QPropertyTree::updateHeights(bool recalculateTextSize)
 {
+	DebugTimer t("QPropertyTree::updateHeights", 10);
 	{
 		QFontMetrics fm(font());
 		defaultRowHeight_ = max(16, int(fm.lineSpacing() * 1.666f)); // to fit at least 16x16 icons
@@ -1167,6 +1168,7 @@ void QPropertyTree::resizeEvent(QResizeEvent* ev)
 
 void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 {
+	DebugTimer t("mousePressEvent", 3);
 	setFocus(Qt::MouseFocusReason);
 
 	HitResult hit;
@@ -1203,6 +1205,7 @@ void QPropertyTree::mousePressEvent(QMouseEvent* ev)
 
 void QPropertyTree::mouseReleaseEvent(QMouseEvent* ev)
 {
+	DebugTimer t("QPropertyTree::mouseReleaseEvent", 3);
 	QWidget::mouseReleaseEvent(ev);
 
 	if (ev->button() == Qt::LeftButton)
@@ -1344,6 +1347,7 @@ void QPropertyTree::flushAggregatedMouseEvents()
 
 void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 {
+	DebugTimer t("QPropertyTree::mouseMoveEvent", 3);
 	if (ev->type() == QEvent::MouseMove && aggregateMouseEvents_) {
 		lastMouseMoveEvent_.reset(new QMouseEvent(QEvent::MouseMove, ev->localPos(), ev->windowPos(), ev->screenPos(), ev->button(), ev->buttons(), ev->modifiers()));
 		ev = lastMouseMoveEvent_.data();
