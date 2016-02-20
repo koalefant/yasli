@@ -338,6 +338,14 @@ bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 
 int PropertyRowContainer::widgetSizeMin(const PropertyTree* tree) const
 {
-	return inlined_ ? 0 : (userWidgetSize() >=0 ? userWidgetSize() : int(tree->_defaultRowHeight() * 1.7f));
+	if (inlined_)
+		return 0;
+	if (userWidgetSize() >= 0) {
+		return userWidgetSize();
+	}
+	int rowHeight = tree->_defaultRowHeight();
+	int textWidth = widthCache_.getOrUpdate(tree, this, rowHeight / 2, buttonLabel_);
+	int minWidth = int(rowHeight * 1.7f);
+	return textWidth > minWidth ? textWidth : minWidth;
 }
 

@@ -425,7 +425,7 @@ struct RowWidthCache
 	int width;
 
 	RowWidthCache() : valueHash(0), width(-1) {}
-	int getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace);
+	int getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace, const char* text = 0);
 };
 
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;

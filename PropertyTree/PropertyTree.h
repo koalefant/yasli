@@ -385,4 +385,5 @@ protected:
 	friend struct ContainerMenuHandler;
 	friend class PropertyTreeModel;
 	friend class PropertyRow;
+	friend class RowWidthCache;
 };

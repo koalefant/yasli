@@ -73,4 +73,5 @@ protected:
 	char buttonLabel_[8];
 	bool fixedSize_;
 	bool inlined_;
+	mutable RowWidthCache widthCache_;
 };

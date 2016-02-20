@@ -1016,6 +1016,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	int widgetElement = -1;
 
 	bool widgetFocusable = row->isSelectable();
+	// for container elements we put array index text before inlined widgets
 	bool labelBeforeInlined = false;
 	if (row->parent() && row->parent()->isContainer() && 
 		(placement == PropertyRow::WIDGET_VALUE || placement == PropertyRow::WIDGET_NONE)) {

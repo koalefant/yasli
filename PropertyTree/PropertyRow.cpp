@@ -1189,14 +1189,20 @@ YASLI_CLASS(PropertyRow, PropertyRowStruct, "Struct");
 
 // ---------------------------------------------------------------------------
 
-int RowWidthCache::getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace)
+int RowWidthCache::getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace, const char* text)
 {
-	yasli::string value = rowForValue->valueAsString();
+	yasli::string value;
+	const char* str = text;
+	if (!text) {
+		value = rowForValue->valueAsString();
+		str = value.c_str();
+	}
 	const Font font = rowForValue->rowFont(tree);
-	unsigned int newHash = calculateHash(value.c_str());
+	unsigned int newHash = calculateHash(str);
 	newHash = calculateHash(font, newHash);
+	newHash = calculateHash(tree->zoomLevel(), newHash);
 	if (newHash != valueHash) {
-		width = tree->ui()->textWidth(value.c_str(), font) + 6 + extraSpace;
+		width = tree->ui()->textWidth(str, font) + 6 + extraSpace;
 		if (width < 24)
 			width = 24;
 		valueHash = newHash;
