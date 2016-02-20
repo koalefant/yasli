@@ -7,6 +7,16 @@
 #include <yasli/Pointers.h>
 #include "Rect.h"
 #include "sigslot.h"
+
+struct DebugTimer
+{
+	const char* label;
+	uint64_t threshold = 0;
+	uint64_t startTime = 0;
+	DebugTimer(const char* label, int threshold);
+	~DebugTimer();
+};
+
 using std::vector;
 
 class PropertyTreeModel;

@@ -52,21 +52,6 @@
 using property_tree::toQRect;
 using property_tree::toQPoint;
 
-struct DebugTimer
-{
-	const char* label;
-	QElapsedTimer timer;
-	int threshold = 0;
-	DebugTimer(const char* label, int threshold) : label(label), threshold(threshold) {
-		timer.start();
-	}
-	~DebugTimer() {
-		int elapsed = (int)timer.elapsed();
-		if ( elapsed > threshold) { 
-			printf("timer '%s': %d ms\n", label, elapsed);
-		}
-	}
-};
 
 static int translateKey(int qtKey)
 {

@@ -33,6 +33,9 @@
 #include "MathUtils.h"
 
 #include "PropertyRowObject.h"
+#ifdef __linux__
+#include <time.h>
+#endif
 
 // #define PROFILE
 #ifdef PROFILE
@@ -41,6 +44,35 @@
 
 using yasli::Serializers;
 using namespace property_tree;
+
+static int timerLevel;
+DebugTimer::DebugTimer(const char* label, int threshold) : label(label), threshold(threshold) {
+#ifdef __linux__
+	timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	startTime = t.tv_sec * 1000 + t.tv_nsec / 1000000;
+	++timerLevel;
+#endif
+}
+
+DebugTimer::~DebugTimer() {
+#ifdef __linux__
+	--timerLevel;
+	timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	uint64_t endTime = t.tv_sec * 1000 + t.tv_nsec / 1000000;
+	int elapsed = (int)(endTime - startTime);
+	if ( elapsed > threshold) {
+		for (int i = 0; i < timerLevel; ++i) {
+			printf("  ");
+		}
+		printf("timer '%s': %d ms\n", label, elapsed);
+	}
+#endif
+}
+
+
+// ---------------------------------------------------------------------------
 
 template<class T>
 static bool findInSortedVector(const std::vector<T>& vec, const T& value)
@@ -1474,6 +1506,7 @@ bool PropertyTree::revertObject(void* objectAddress)
 
 void PropertyTree::revert()
 {
+	DebugTimer t("PropertyTree::revert", 10);
 	interruptDrag();
 	_cancelWidget();
 	capturedRow_ = 0;
@@ -1591,6 +1624,7 @@ void PropertyTree::revertNoninterrupting()
 
 void PropertyTree::apply(bool continuous)
 {
+	DebugTimer t("PropertyTree::apply", 10);
 #ifdef PROFILE
 	QElapsedTimer timer;
 	timer.start();
@@ -2332,6 +2366,8 @@ void PropertyTree::focusFirstError()
 
 void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
 {
+	DebugTimer t("PropertyTree::drawLayout", 0);
+	int lastElement = 0;
 	int numElements = layout_->rectangles.size();
 	for (size_t i = 0; i < numElements; ++i) {
 		if (findInSortedVector(hiddenLayoutElements_, (int)i))
