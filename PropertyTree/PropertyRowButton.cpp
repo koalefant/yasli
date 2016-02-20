@@ -25,7 +25,6 @@ public:
 	void onMouseDrag(const PropertyDragEvent& e) override;
 	void onMouseUp(PropertyTree* tree, Point point) override;
 	bool onActivate(const PropertyActivationEvent& e) override;
-	int floorHeight() const override{ return 3; }
 	yasli::string valueAsString() const override{ return value_ ? value_.text : ""; }
 	int widgetSizeMin(const PropertyTree* tree) const override{ 
 		if (userWidgetSize() >= 0)

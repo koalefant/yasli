@@ -337,7 +337,7 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 
 	YASLI_ESCAPE(currentNode_, return false);
 
-	if(currentNode_->empty())
+	if(currentNode_->count() == 0)
 		return false;
 
 	Level& level = stack_.back();

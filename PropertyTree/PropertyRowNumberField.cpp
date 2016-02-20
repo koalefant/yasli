@@ -31,7 +31,7 @@ void PropertyRowNumberField::redraw(IDrawContext& context)
 	if(multiValue())
 		context.drawEntry(context.widgetRect, " ... ", false, userReadOnly(), 0);
 	else if (userReadOnly())
-		context.drawValueText(pulledSelected(), valueAsString().c_str());
+		context.drawValueText(inlinedSelected(), valueAsString().c_str());
 	else 
 	{
 		double sliderPos = sliderPosition();

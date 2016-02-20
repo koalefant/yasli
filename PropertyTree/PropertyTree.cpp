@@ -994,6 +994,15 @@ void PropertyTree::YASLI_SERIALIZE_METHOD(Archive& ar)
 	}
 }
 
+static bool isFullRow(const PropertyRow* row, const PropertyTree* tree)
+{
+    if (tree->fullRowMode())
+		return true;
+	if (row->parent() && row->parent()->isContainer() && tree->fullRowContainers())
+		return true;
+	return row->userFullRow();
+}
+
 static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
 {
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
@@ -1001,7 +1010,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	int labelMin = row->textSizeInitial();
 	char labelBuffer[16] = ""; 
 	const char* label = row->rowText(labelBuffer, tree, indexForContainerElement);
-	ElementType labelElementType = (row->isFullRow(tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
+	ElementType labelElementType = (isFullRow(row, tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
 	int labelPriority = 1;
 	int labelElement = -1;
 	int widgetElement = -1;

@@ -45,7 +45,7 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* 
 {
 	stack_.push_back(Level());
 	YASLI_ASSERT(model != 0);
-	if(!rootNode_->empty()){
+	if(rootNode_->count() != 0){
 		updateMode_ = true;
 		stack_.back().oldRows.swap(rootNode_->children_);
 	}

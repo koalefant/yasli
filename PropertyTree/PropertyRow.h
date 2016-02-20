@@ -146,8 +146,7 @@ public:
 	bool visible(const PropertyTree* tree) const;
 	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
 
-	PropertyRowStruct* parent() { return parent_; }
-	const PropertyRowStruct* parent() const{ return parent_; }
+	PropertyRowStruct* parent() const { return parent_; }
 	void setParent(PropertyRowStruct* row) { parent_ = row; }
 	bool isRoot() const { return !parent_; }
 	int level() const;
@@ -157,8 +156,6 @@ public:
 	int childIndex(const PropertyRow* row) const;
 	bool isChildOf(const PropertyRow* row) const;
 
-	bool empty() const;
-	//iterator find(PropertyRow* row) { return std::find(children_.begin(), children_.end(), row); }
 	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
 	PropertyRow* findByAddress(const void* handle);
 	virtual const void* searchHandle() const;
@@ -175,7 +172,10 @@ public:
 	const char* labelUndecorated() const { return label_ + controlCharacterCount_; }
 	void setLabel(const char* label);
 	void setLabelChanged();
+
+	const char* tooltip() const { return tooltip_; }
 	void setTooltip(const char* tooltip);
+
 	bool setValidatorEntry(int index, int count);
 	int validatorCount() const{ return validatorCount_; }
 	int validatorIndex() const{ return validatorIndex_; }
@@ -183,14 +183,13 @@ public:
 	bool validatorHasErrors() const{ return validatorHasErrors_; }
 	void resetValidatorIcons();
 	void addValidatorIcons(bool hasWarnings, bool hasErrors);
-	const char* tooltip() const { return tooltip_; }
+
 	void setLayoutChanged();
 	void setLabelChangedToChildren();
 	void setLayoutChangedToChildren();
 	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
 	bool hideChildren() const { return hideChildren_; }
 	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
-	void updateTextSizeInitial(const PropertyTree* tree, int index);
 	virtual void labelChanged() {}
 	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
@@ -198,15 +197,9 @@ public:
 	void setTypeName(const char* typeName) { YASLI_ASSERT(strlen(typeName)); typeName_ = typeName; }
 	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
 
-	PropertyRow* findSelected();
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
 	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName) const;
 	void intersect(const PropertyRow* row);
-
-	int verticalIndex(PropertyTree* tree, PropertyRow* row);
-	PropertyRow* rowByVerticalIndex(PropertyTree* tree, int index);
-	int horizontalIndex(PropertyTree* tree, PropertyRow* row);
-	PropertyRow* rowByHorizontalIndex(PropertyTree* tree, int index);
 
 	virtual bool assignToPrimitive(void* object, size_t size) const{ return false; }
 	virtual bool assignTo(const yasli::Serializer& ser) const{ return false; }
@@ -217,27 +210,21 @@ public:
 	virtual yasli::wstring valueAsWString() const;
 
 	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
-	virtual int floorHeight() const{ return 0; }
 
+	int textSizeInitial() const { return textSizeInitial_; }
 	void updateTextSize_r(const PropertyTree* tree, int index);
-	void setTextSize(const PropertyTree* tree, int rowIndex, float multiplier);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || (widgetPlacement() != WIDGET_VALUE && widgetPlacement() != WIDGET_INSTEAD_OF_TEXT); }
-
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
 	Rect rect(const PropertyTree* tree) const;
-	Rect rectIncludingChildren(const PropertyTree* tree) const;
-	Rect childrenRect(const PropertyTree* tree) const;
 	Rect textRect(const PropertyTree* tree) const;
+	Rect childrenRect(const PropertyTree* tree) const;
 	Rect widgetRect(const PropertyTree* tree) const;
 	Rect plusRect(const PropertyTree* tree) const;
-	Rect floorRect(const PropertyTree* tree) const;
 	Rect validatorRect(const PropertyTree* tree) const;
 	Rect validatorWarningIconRect(const PropertyTree* tree) const;
 	Rect validatorErrorIconRect(const PropertyTree* tree) const;
-	void adjustHoveredRect(Rect& hoveredRect);
-	int heightIncludingChildren() const{ return heightIncludingChildren_; }
 	property_tree::Font rowFont(const PropertyTree* tree) const;
 
 	void drawElement(IDrawContext& x, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex);
@@ -276,15 +263,12 @@ public:
 	virtual bool onMouseDragCheck(PropertyTree* tree, bool value) { return false; }
 	virtual bool onContextMenu(IMenu &menu, PropertyTree* tree);
 
-	virtual bool isFullRow(const PropertyTree* tree) const;
-
 	// User states.
 	// Assigned using control codes (characters in the beginning of label)
 	// fixed widget doesn't expand automatically to occupy all available place
 	bool userFixedWidget() const{ return userFixedWidget_; }
 	bool userFullRow() const { return userFullRow_; }
 	bool userReadOnly() const { return userReadOnly_; }
-	void propagateFlagsTopToBottom();
 	bool userReadOnlyRecurse() const { return userReadOnlyRecurse_; }
 	bool userWidgetToContent() const { return userWidgetToContent_; }
 	bool userRenamable() const { return userRenamable_; }
@@ -299,12 +283,10 @@ public:
 	bool inlined() const { return inlined_; }
 	bool inlinedBefore() const { return inlinedBefore_; }
 	bool hasInlinedChildren() const { return hasInlinedChildren_; }
-	bool packedAfterPreviousRow() const { return packedAfterPreviousRow_; }
-	bool pulledSelected() const;
+	bool inlinedSelected() const;
 	PropertyRow* findNonInlinedParent();
 	PropertyRow* inlinedContainer();
 	const PropertyRow* inlinedContainer() const;
-	int textSizeInitial() const { return textSizeInitial_; }
 
 	yasli::SharedPtr<PropertyRow> clone(ConstStringList* constStrings) const;
 
@@ -322,11 +304,13 @@ public:
 	yasli::CallbackInterface* callback() { return callback_; }
 
 	static void setConstStrings(ConstStringList* constStrings){ constStrings_ = constStrings; }
-	void setLayoutElement(int layoutElement) { layoutElement_ = layoutElement; }
+
 	int layoutElement() const { return layoutElement_; }
+	void setLayoutElement(int layoutElement) { layoutElement_ = layoutElement; }
 
 protected:
 	void updateInlineTextSize_r(const PropertyTree* tree, int index);
+	void updateTextSizeInitial(const PropertyTree* tree, int index);
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;
@@ -341,11 +325,9 @@ protected:
 
 	short int textSizeInitial_;
 	short int userWidgetSize_;
-	unsigned short heightIncludingChildren_;
 	unsigned short validatorIndex_;	
 	unsigned short validatorsHeight_;
 	unsigned char validatorCount_;
-	unsigned char plusSize_;
 	unsigned char controlCharacterCount_;
 	bool isStruct_ : 1;
 	bool isContainer_ : 1;
@@ -363,7 +345,6 @@ protected:
 	bool userHideChildren_ : 1;
 	bool userPackCheckboxes_ : 1;
 	bool userWidgetToContent_ : 1;
-	bool packedAfterPreviousRow_ : 1;
 	bool inlined_ : 1;
 	bool inlinedBefore_ : 1;
 	bool hasInlinedChildren_ : 1;
@@ -399,7 +380,6 @@ public:
 	void add(PropertyRow* row);
 	void addAfter(PropertyRow* row, PropertyRow* after);
 	void addBefore(PropertyRow* row, PropertyRow* before);
-	bool empty() const;
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
 	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model, bool preserveChildren);

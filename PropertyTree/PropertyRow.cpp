@@ -84,8 +84,6 @@ PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 , labelChanged_(false)
 , layoutElement_(0xffffffff)
 , controlCharacterCount_(0)
-, heightIncludingChildren_(0)
-, packedAfterPreviousRow_(false)
 , callback_(0)
 , userPackCheckboxes_(false)
 , userWidgetToContent_(false)
@@ -489,7 +487,6 @@ void PropertyRow::updateLabel(const PropertyTree* tree, int index, bool parentHi
 			row->visible_ = false;
 		}
 	}
-	// propagateFlagsTopToBottom();
 
 	if(inlinedContainer())
 		inlinedContainer()->_setExpanded(expanded());
@@ -695,19 +692,6 @@ void PropertyRow::updateTextSize_r(const PropertyTree* tree, int index)
 	}
 }
 
-void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
-{
-	updateTextSizeInitial(tree, index);
-
-	size_t numChildren = count();
-	for (size_t i = 0; i < numChildren; ++i) {
-		PropertyRow* row = childByIndex(i);
-		if (row->inlined()) {
-			row->setTextSize(tree, 0, mult);
-		}
-	}
-}
-
 void PropertyRow::updateInlineTextSize_r(const PropertyTree *tree, int index) 
 {
 	updateTextSizeInitial(tree, index);
@@ -719,19 +703,6 @@ void PropertyRow::updateInlineTextSize_r(const PropertyTree *tree, int index)
 			row->updateInlineTextSize_r(tree, index);
 		}
 	}
-}
-
-PropertyRow* PropertyRow::findSelected()
-{
-    if(selected())
-        return this;
-	int num = count();
-    for(int i = 0; i < num; ++i){
-        PropertyRow* result = childByIndex(i)->findSelected();
-        if(result)
-            return result;
-    }
-    return 0;
 }
 
 PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName)
@@ -888,7 +859,7 @@ const PropertyRow* PropertyRow::inlinedContainer() const
 	return 0;
 }
 
-bool PropertyRow::pulledSelected() const
+bool PropertyRow::inlinedSelected() const
 {
 	if(selected())
 		return true;
@@ -933,7 +904,7 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 			char containerLabel[16] = "";
 			int index = parent() ? parent()->childIndex(this) : 0;
 			yasli::string text = rowText(containerLabel, context.tree, index);
-			context.drawLabel(text.c_str(), FONT_NORMAL, rect, pulledSelected());
+			context.drawLabel(text.c_str(), FONT_NORMAL, rect, inlinedSelected());
 		}
 		break;
 	case PART_PLUS:
@@ -980,7 +951,7 @@ bool PropertyRow::canBeToggled(const PropertyTree* tree) const
 		return false;
 	if((tree->treeStyle().compact && (parent() && parent()->isRoot())) || (isContainer() && inlined()) || !hasVisibleChildren(tree))
 		return false;
-	return !empty();
+	return count() != 0;
 }
 
 bool PropertyRow::canBeDragged() const
@@ -1092,7 +1063,7 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const Propert
 
 bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall) const
 {
-	if(empty() || (!internalCall && inlined()))
+	if(count() == 0 || (!internalCall && inlined()))
 		return false;
 
 	int num = count();
@@ -1114,16 +1085,6 @@ size_t PropertyRow::count() const
 	if (isStruct_)
 		return asStruct()->count();
 	return 0;
-}
-
-bool PropertyRow::empty() const{
-	if (isStruct_)
-		return asStruct()->empty();
-	return true;
-}
-
-bool PropertyRowStruct::empty() const{
-	return children_.empty();
 }
 
 PropertyRow* PropertyRow::findByAddress(const void* addr)
@@ -1151,16 +1112,6 @@ void PropertyRow::redraw(IDrawContext& context)
 {
 
 }
-
-bool PropertyRow::isFullRow(const PropertyTree* tree) const
-{
-    if (tree->fullRowMode())
-		return true;
-	if (parent() && parent()->isContainer() && tree->fullRowContainers())
-		return true;
-	return userFullRow();
-}
-
 
 Rect PropertyRow::rect(const PropertyTree* tree) const
 {
@@ -1205,11 +1156,6 @@ Rect PropertyRow::validatorWarningIconRect(const PropertyTree* tree) const
 Rect PropertyRow::plusRect(const PropertyTree* tree) const
 {
 	return tree->findRowRect(this, PART_PLUS, 0);
-}
-
-Rect PropertyRow::floorRect(const PropertyTree* tree) const
-{
-	return tree->findRowRect(this, PART_ROW_AREA, 0);
 }
 
 void PropertyRow::setCallback(yasli::CallbackInterface* callback) {
