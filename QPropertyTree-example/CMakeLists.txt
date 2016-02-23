@@ -21,6 +21,8 @@ set(SOURCES
 	ExampleControlCharacters.cpp
 	ExampleCustomRows.cpp
 	ExamplePolymorphicTree.cpp
+	ExampleStyle.h
+	ExampleStyle.cpp
 	ExampleTable.cpp
 	ExampleTwoTrees.h
 	ExampleTwoTrees.cpp

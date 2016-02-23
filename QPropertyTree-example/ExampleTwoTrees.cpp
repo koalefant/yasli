@@ -13,7 +13,6 @@ using std::vector;
 
 using yasli::Archive;
 using yasli::SharedPtr;
-using namespace ww;
 
 enum Filter
 {

@@ -12,6 +12,7 @@ using yasli::Archive;
 using yasli::Range;
 #include "yasli/STLImpl.h"
 
+QWidget* createExampleStyle();
 QWidget* createExampleCustomRows();
 QWidget* createExampleControlCharacters();
 QWidget* createExamplePolymorphicTree();
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
 
+	tabs->addTab(createExampleStyle(), "Style");
 	tabs->addTab(createExampleCustomRows(), "Decorators and Custom Rows");
 	tabs->addTab(createExamplePolymorphicTree(), "Polymorphic Tree");
 	tabs->addTab(createExampleControlCharacters(), "Control Characters");
