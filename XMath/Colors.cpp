@@ -11,7 +11,12 @@ using std::min;
 using std::max;
 #include "Colors.h"
 #include "yasli/Archive.h"
+#ifdef WIN32
+#define USE_WW_COLOR
+#endif
+#ifdef USE_WW_COLOR
 #include "ww/Color.h"	
+#endif
 using namespace yasli;
 
 
@@ -54,13 +59,14 @@ struct SerializeableColor4c : Color4c {
 };
 bool serialize(yasli::Archive& ar, Color4c& c, const char* name, const char* label) 
 {
+#ifdef USE_WW_COLOR
 	if(ar.isEdit()){
 		ww::Color wc(c.r, c.g, c.b, c.a);
 		bool result = ar(wc, name, label);
 		c.set(wc.r, wc.g, wc.b, wc.a);
 		return result;
 	}
-
+#endif
     return ar((SerializeableColor4c&)c, name, label);
 }
 
@@ -74,12 +80,14 @@ struct SerializeableColor4f : Color4f {
 };
 bool serialize(yasli::Archive& ar, Color4f& c, const char* name, const char* label)
 {
+#ifdef USE_WW_COLOR
 	if(ar.isEdit()){
 		ww::Color wc(c.GetR(), c.GetG(), c.GetB(), c.GetA());
 		bool result = ar(wc, name, label);
 		c = Color4f(Color4c(wc.r, wc.g, wc.b, wc.a));
 		return result;
 	}
+#endif
     return ar((SerializeableColor4f&)c, name, label);
 }
 
@@ -92,12 +100,14 @@ struct SerializeableColor3c : Color3c {
 };
 bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label)
 {
+#ifdef USE_WW_COLOR
 	if(ar.isEdit()){
 		ww::Color wc(c.r, c.g, c.b);
 		bool result = ar(wc, name, label);
 		c.set(wc.r, wc.g, wc.b);
 		return result;
 	}
+#endif
     return ar((SerializeableColor3c&)c, name, label);
 }
 
