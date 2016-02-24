@@ -108,3 +108,7 @@ namespace yasli {
 #ifndef YASLI_ASSERT_DEFINED
 #endif
 
+// To control dependency of ww
+#ifdef WIN32
+#define XMATH_USE_WW_COLOR
+#endif
