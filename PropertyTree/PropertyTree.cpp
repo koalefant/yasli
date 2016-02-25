@@ -1120,7 +1120,7 @@ static void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentEle
 	}
 }
 
-static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
+static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel)
 {
 	int rowHeight = int(tree->_defaultRowHeight() * max(0.1f, tree->treeStyle().rowSpacing) + 0.5f);
 	// assuming that parentRow is expanded
@@ -1132,12 +1132,12 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 
 		// children of inlined elements here
 		if (child->inlined() || child->inlinedBefore()) {
-			populateChildrenArea(l, parentElement, child, tree);
+			populateChildrenArea(l, parentElement, child, tree, indentationLevel);
 			continue;
 		}
 
 		int rowArea = l->addElement(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, false);
-		bool showPlus = !(tree->compact() && parentRow->isRoot());
+		bool showPlus = !(tree->treeStyle().compact && parentRow->isRoot());
 		if (showPlus)
 			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0, false);
 
@@ -1149,10 +1149,17 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 
 		if (child->expanded()) {
 			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
-			if (showPlus)
-				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, 20, 0, 0, false);
+			if (showPlus) {
+				int indentation;
+				if (indentationLevel == 0 || (tree->treeStyle().compact && indentationLevel == 1)) {
+					indentation = int(rowHeight * tree->treeStyle().firstLevelIndent + 0.5f);
+				} else {
+					indentation = int(rowHeight * tree->treeStyle().levelIndent + 0.5f);
+				}
+				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, indentation, 0, 0, false);
+			}
 			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
-			populateChildrenArea(l, contentArea, child, tree);
+			populateChildrenArea(l, contentArea, child, tree, indentationLevel + 1);
 		}
 	}
 }
@@ -1365,7 +1372,7 @@ void PropertyTree::updateLayout()
 	// Root level and orphaned validators
 	addValidatorsToLayout_r(this, &l, lroot, root);
 	// Most of the layout is generated here
-	populateChildrenArea(&l, lroot, root, this);
+	populateChildrenArea(&l, lroot, root, this, 0);
 
 	l.minimalWidths.resize(l.elements.size());
 	l.minimalHeights.resize(l.elements.size());
