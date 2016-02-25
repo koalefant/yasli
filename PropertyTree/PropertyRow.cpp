@@ -883,20 +883,22 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 	switch (part)
 	{
 	case PART_ROW_AREA:
-		if (selected())
-			context.drawSelection(rect, false);
-		else {
-			bool pulledChildrenSelected = false;
-			int num = count();
-			for (int i = 0; i < num; ++i) {
-				PropertyRow* child = childByIndex(i);
-				if (!child)
-					continue;
-				if ((child->inlinedBefore() || child->inlined()) && child->selected())
-					pulledChildrenSelected = true;
+		if (context.tree->treeStyle().selectionRectangle) {
+			if (selected()) {
+				context.drawSelection(rect, false);
+			} else {
+				bool pulledChildrenSelected = false;
+				int num = count();
+				for (int i = 0; i < num; ++i) {
+					PropertyRow* child = childByIndex(i);
+					if (!child)
+						continue;
+					if ((child->inlinedBefore() || child->inlined()) && child->selected())
+						pulledChildrenSelected = true;
+				}
+				if (pulledChildrenSelected)
+					context.drawSelection(rect, true);
 			}
-			if (pulledChildrenSelected)
-				context.drawSelection(rect, true);
 		}
 		break;
 	case PART_LABEL:
