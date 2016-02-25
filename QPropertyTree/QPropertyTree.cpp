@@ -598,7 +598,7 @@ void QPropertyTree::updateHeights()
 	DebugTimer t(__FUNCTION__, 10);
 	{
 		QFontMetrics fm(font());
-		defaultRowHeight_ = max(16, int(fm.lineSpacing() * 1.666f)); // to fit at least 16x16 icons
+		defaultRowHeight_ = max(16, int(fm.lineSpacing() * 1.5f)); // to fit at least 16x16 icons
 
 		QElapsedTimer timer;
 		timer.start();

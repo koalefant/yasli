@@ -1122,7 +1122,7 @@ static void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentEle
 
 static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree)
 {
-	int rowHeight = tree->_defaultRowHeight();
+	int rowHeight = int(tree->_defaultRowHeight() * max(0.1f, tree->treeStyle().rowSpacing) + 0.5f);
 	// assuming that parentRow is expanded
 	int count = (int)parentRow->count();
 	for (int i = 0 ; i < count; ++i) {

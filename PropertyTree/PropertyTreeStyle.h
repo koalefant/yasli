@@ -27,7 +27,7 @@ struct PropertyTreeStyle
 	, packCheckboxes(false)
 	, fullRowMode(false)
 	, valueColumnWidth(.59f)
-	, rowSpacing(1.1f)
+	, rowSpacing(1.0f)
 	, horizontalLines(true)
 	, firstLevelIndent(0.75f)
 	, levelIndent(0.75f)
@@ -48,7 +48,7 @@ struct PropertyTreeStyle
 		ar.doc("Here you can define appearance of QPropertyTree control.");
 
 		ar(valueColumnWidth, "valueColumnWidth", "Value Column Width");		ar.doc("Defines a ratio of the value / name columns. Normalized.");
-		ar(Range(rowSpacing, 0.5f, 3.0f), "rowSpacing", "Row Spacing"); ar.doc("Height of one row (line) in text-height units.");
+		ar(Range(rowSpacing, 0.5f, 2.0f), "rowSpacing", "Row Spacing"); ar.doc("Height of one row (line) proportional to text-height.");
 		ar(alignLabelsToRight, "alignLabelsToRight", "Right Alignment");
 		ar(Range(levelIndent, 0.0f, 3.0f), "levelIndent", "Level Indent"); ar.doc("Indentation of a every next level in text-height units.");
 
