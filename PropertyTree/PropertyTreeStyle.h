@@ -10,14 +10,12 @@ struct PropertyTreeStyle
 	bool fullRowMode;
 	bool horizontalLines;
 	bool doNotIndentSecondLevel;
-	bool groupRectangle;
 	bool alignLabelsToRight;
 	bool selectionRectangle;
 	float valueColumnWidth;
 	float rowSpacing;
 	float firstLevelIndent;
 	float levelIndent;
-	float groupShade;
 	float sliderSaturation;
 
 	PropertyTreeStyle()
@@ -31,8 +29,6 @@ struct PropertyTreeStyle
 	, firstLevelIndent(0.75f)
 	, doNotIndentSecondLevel(false)
 	, sliderSaturation(0.0f)
-	, groupShade(0.15f)
-	, groupRectangle(false)
 	, alignLabelsToRight(false)
 	, selectionRectangle(true)
 	{
@@ -58,9 +54,6 @@ struct PropertyTreeStyle
 		ar(horizontalLines, "horizontalLines", "Horizontal Lines"); ar.doc("Show thin line that connects row name with its value.");
 
 		ar(doNotIndentSecondLevel, "doNotIndentSecondLevel", "Do not indent second level");	
-		ar(groupRectangle, "groupRectangle", "Group Rectangle");	
-
-		ar(Range(groupShade, -1.0f, 1.0f), "groupShade", groupRectangle ? "Group Shade" : 0); ar.doc("Shade of the group.");
 	}
 };
 
