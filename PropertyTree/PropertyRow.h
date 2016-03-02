@@ -273,6 +273,7 @@ public:
 	bool userWidgetToContent() const { return userWidgetToContent_; }
 	bool userRenamable() const { return userRenamable_; }
 	int userWidgetSize() const{ return userWidgetSize_; }
+	bool userPackCheckboxes() const{ return userPackCheckboxes_; }
 
 	// multiValue is used to edit properties of multiple objects simulateneously
 	bool multiValue() const { return multiValue_; }

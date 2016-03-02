@@ -1158,10 +1158,79 @@ static void populateChildrenArea(Layout* l, int parentElement, PropertyRow* pare
 				}
 				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, indentation, 0, 0, false);
 			}
-			int contentArea = l->addElement(indentationAndContent, VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
+			int contentArea = l->addElement(indentationAndContent, child->userPackCheckboxes() ? MULTI_COLUMN : VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
 			populateChildrenArea(l, contentArea, child, tree, indentationLevel + 1);
 		}
 	}
+}
+
+static void restoreColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColumns, const Layout &l, int element) {
+	const LayoutElement& e = l.elements[element];
+	const vector<int>& children = l.childrenLists[e.childrenList].children;
+	int count = (int)children.size();
+	int currentColumn = 0;
+	for (int i = 0; i < count; ++i) {
+		const LayoutElement& child = l.elements[children[i]];
+		if (child.beginsColumn) {
+			(*columns)[currentColumn].end = i;
+			if (currentColumn + 1< MAX_COLUMNS) {
+				++currentColumn;
+				(*columns)[currentColumn].start = i;
+			}
+		}
+	}
+	(*columns)[currentColumn].end = count;
+	*numColumns = currentColumn+1;
+}
+
+static void calculateColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColumns, int* maxColumnLength,
+							 Layout * l, int element, int widthAvailable)
+{
+	const LayoutElement& e = l->elements[element];
+	const vector<int>& children = l->childrenLists[e.childrenList].children;
+	int count = (int)children.size();
+
+	// access width, in vertical pass
+	int minimalWidth = max(1, l->minimalWidths[element]);
+	*numColumns = clamp(widthAvailable / minimalWidth, 1, MAX_COLUMNS);
+	int columnWidth = widthAvailable / *numColumns;
+	int length = 0;
+	for (int i = 0; i < count; ++i) {
+		int childIndex = children[i];
+		const LayoutElement& child = l->elements[childIndex];
+		int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[childIndex] : l->minimalHeights[childIndex];
+		length += childFixedLength;
+	}
+	int lastColumn = 0;
+	for (int i = 0; i < *numColumns - 1; ++i) {
+		LayoutColumn& column = (*columns)[i];
+		column.left = lastColumn;
+		column.width = columnWidth;
+		lastColumn = lastColumn + columnWidth;
+	}
+	(*columns)[*numColumns-1].left = lastColumn;
+	(*columns)[*numColumns-1].width = widthAvailable - lastColumn;
+
+	int columnLength = 0;
+	int desiredLength = length / *numColumns;
+	int currentColumn = 0;
+	for (int i = 0; i < count; ++i) {
+		int childIndex = children[i];
+		LayoutElement& child = l->elements[childIndex];
+		int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[childIndex] : l->minimalHeights[childIndex];
+		if (columnLength + childFixedLength > desiredLength && currentColumn + 1 < *numColumns) {
+			child.beginsColumn = true;
+			(*columns)[currentColumn].end = i;
+			++currentColumn;
+			(*columns)[currentColumn].start = i;
+			*maxColumnLength = max(*maxColumnLength, columnLength);
+			columnLength = childFixedLength;
+		} else {
+			columnLength += childFixedLength;
+		}
+	}
+	(*columns)[currentColumn].end = count;
+	*maxColumnLength = max(*maxColumnLength, columnLength);
 }
 
 void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, int element )
@@ -1169,7 +1238,10 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 	int minSize = 0;
 	// Width and height are required to define minimal size of HEIGHT_BY_WIDTH elements.
 	LayoutElement& e = l->elements[element];
-	if (e.type == FIXED_SIZE || e.type == EXPANDING || e.type == EXPANDING_MAGNET || e.type == HEIGHT_BY_WIDTH) {
+	if (e.type == FIXED_SIZE ||
+		e.type == EXPANDING ||
+		e.type == EXPANDING_MAGNET ||
+		e.type == HEIGHT_BY_WIDTH) {
 		if ( orientation == HORIZONTAL ) {
 			minSize = e.minWidth;
 		} else {
@@ -1179,8 +1251,7 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 				minSize = e.minHeight;
 			}
 		}
-	}
-	else {
+	} else {
 		int s = 0;
 		if (e.childrenList != -1) {
 			const vector<int>& children = l->childrenLists[e.childrenList].children;
@@ -1191,31 +1262,49 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 				calculateMinimalSizes(&childrenSize, orientation, l, children[i]);
 				if (e.type == HORIZONTAL) {
 					if ( orientation == HORIZONTAL ) {
-						if (child.priority == 0)
-							s += childrenSize;
+						// FIXME: priorities
+						s += childrenSize;
 					} else {
 						s = max(s, childrenSize);
 					}
-				}
-				else if (e.type == VERTICAL) {
-					// Exception for vertical layouts, so only individual rows
-					// are getting outside of window, when it is too narrow.
-					//
-					// May cause problems with multiple columns.
-					//
-					// w = max(w, childrenWidth);
+				} else if (e.type == VERTICAL || e.type == MULTI_COLUMN) {
 					if ( orientation == VERTICAL ) {
 						if (child.priority == 0)
 							s += childrenSize;
+					} else {
+						// Exception for vertical layouts, so only individual rows
+						// are getting outside of window, when it is too narrow.
+						if (e.type != VERTICAL)  {
+							s = max(s, childrenSize);
+						}
 					}
 				}
 			}
+
+			if (e.type == MULTI_COLUMN && orientation == VERTICAL) {
+				LayoutColumn columns[MAX_COLUMNS] = {
+					{ 0, int(children.size()), 0, 0 }
+				};
+				int numColumns = 1;
+				int maxColumnLength = 0;
+				const Rect& rect = l->rectangles[element];
+				calculateColumns(&columns, &numColumns, &maxColumnLength, &*l, element, rect.w);
+				// repeat horizontal layout pass knowing that elements
+				// are split in the columns now
+				for (int i = 0; i < count; ++i) {
+					int childIndex = children[i];
+					int column = 0; 
+					for (int j = 0; j < numColumns; ++j) {
+						if (i >= columns[j].start) {
+							column = j;
+						}
+					}
+					calculateRectangles(&*l, HORIZONTAL, childIndex, columns[column].width, columns[column].left+l->rectangles[element].x);
+				}
+				s = maxColumnLength;
+			}
 		}
-		if (orientation == HORIZONTAL) {
-			minSize = max(s, e.minWidth);
-		} else {
-			minSize = max(s, e.minHeight);
-		}
+		minSize = max(s, orientation == HORIZONTAL ? e.minWidth : e.minHeight);
 	}
 	if ( orientation == HORIZONTAL ) {
 		l->minimalWidths[element] = minSize;
@@ -1227,7 +1316,20 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 	}
 }
 
-static void calculateRectangles(Layout* l, ElementType pass, int element, int length, int offset)
+static void adjustChildrenRectangles_r(Layout* l, int index, int deltaX) {
+	Rect & childRect = l->rectangles[index];
+	childRect.x = childRect.x + deltaX;
+	LayoutElement& e = l->elements[index];
+	if (e.childrenList == -1) {
+		return;
+	}
+	const vector<int>& children = l->childrenLists[e.childrenList].children;
+	for(int i = 0; i < children.size(); ++i) {
+		adjustChildrenRectangles_r(l, children[i], deltaX);
+	}
+}
+
+void property_tree::calculateRectangles(Layout* l, ElementType pass, int element, int length, int offset)
 {
 	LayoutElement& e = l->elements[element];
 	Rect & out = l->rectangles[element];
@@ -1239,84 +1341,108 @@ static void calculateRectangles(Layout* l, ElementType pass, int element, int le
 		out.h = length;
 	}
 
-	if (e.type == HORIZONTAL || e.type == VERTICAL) {
-		if (e.childrenList != -1) {
-			const vector<int>& children = l->childrenLists[e.childrenList].children;
-			int count = (int)children.size();
-			if ( e.type == pass ) {
-				int availableLength = length;
-				int expandingCount = 0;
-				int countByPriority[MAX_PRIORITY] = { 0 };
-				int lengthByPriority[MAX_PRIORITY+1] = { 0 };
-				int totalFixedLength = 0;;
-				for (int i = 0; i < count; ++i) {
-					LayoutElement& child = l->elements[children[i]];
-					if (child.type != FIXED_SIZE &&
-						child.type != HEIGHT_BY_WIDTH)
-						++expandingCount;
-					countByPriority[child.priority] += 1;
-					int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
-					lengthByPriority[child.priority] += childFixedLength;
-					totalFixedLength += childFixedLength;
-				}
+	if (e.type != HORIZONTAL &&
+		e.type != VERTICAL &&
+		e.type != MULTI_COLUMN) {
+		return;
+	}
+
+	if (e.childrenList == -1) {
+		return;
+	}
+
+	const vector<int>& children = l->childrenLists[e.childrenList].children;
+	int count = (int)children.size();
+	bool updateInPass = pass == HORIZONTAL ? e.type == HORIZONTAL : e.type == VERTICAL || e.type == MULTI_COLUMN;
+	if ( !updateInPass) {
+		// leave this level for other pass
+		for (int i = 0; i < count; ++i) {
+			LayoutElement& child = l->elements[children[i]];
+			calculateRectangles(l, pass, children[i], length, offset);
+		}
+		return;
+	}
+
+	LayoutColumn columns[MAX_COLUMNS] = {
+		{ 0, int(children.size()), 0, 0 }
+	};
+	int numColumns = 1;
+	if (e.type == MULTI_COLUMN) {
+		restoreColumns(&columns, &numColumns, *l, element);
+	}
+
+	int maxLength = 0;
+	for (int columnIndex = 0; columnIndex < numColumns; ++columnIndex) {
+		const LayoutColumn & column = columns[columnIndex];
+
+		int availableLength = length;
+		int expandingCount = 0;
+		int countByPriority[MAX_PRIORITY] = { 0 };
+		int lengthByPriority[MAX_PRIORITY+1] = { 0 };
+		int totalFixedLength = 0;;
+		for (int i = column.start; i < column.end; ++i) {
+			LayoutElement& child = l->elements[children[i]];
+			if (child.type != FIXED_SIZE &&
+				child.type != HEIGHT_BY_WIDTH)
+				++expandingCount;
+			countByPriority[child.priority] += 1;
+			int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
+			lengthByPriority[child.priority] += childFixedLength;
+			totalFixedLength += childFixedLength;
+		}
 
 
-				int discardedPriority = MAX_PRIORITY;
-				int itemsToDiscardPartially = 0;
-				int fixedLength = 0;;//e.type == HORIZONTAL ? l->minimalWidths[element] : l->minimalHeights[element];
-				for (int i = 0; i < MAX_PRIORITY; ++i) {
-					if (i && fixedLength + lengthByPriority[i] > availableLength) {
-						itemsToDiscardPartially = countByPriority[i];
-						discardedPriority = i;
-						break;
-					}
-					fixedLength += lengthByPriority[i];
-				}
-				int freeSpaceLeft = max(0, availableLength - fixedLength);
+		int discardedPriority = MAX_PRIORITY;
+		int itemsToDiscardPartially = 0;
+		int fixedLength = 0;;//e.type == HORIZONTAL ? l->minimalWidths[element] : l->minimalHeights[element];
+		for (int i = 0; i < MAX_PRIORITY; ++i) {
+			if (i && fixedLength + lengthByPriority[i] > availableLength) {
+				itemsToDiscardPartially = countByPriority[i];
+				discardedPriority = i;
+				break;
+			}
+			fixedLength += lengthByPriority[i];
+		}
+		int freeSpaceLeft = max(0, availableLength - fixedLength);
 
-				int expandingLeft = expandingCount;
-				int position = 0;
-				for (int i = 0; i < count; ++i) {
-					LayoutElement& child = l->elements[children[i]];
-					int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
-					int childLength = childFixedLength;
-					if (child.priority > discardedPriority) {
-						childLength = 0;
-					}
-					else if (child.priority == discardedPriority) {
-						childLength = min(childLength, freeSpaceLeft / itemsToDiscardPartially);
-						freeSpaceLeft -= childLength;
-						--itemsToDiscardPartially;
-					}
-					else if(discardedPriority == MAX_PRIORITY) { 
-						if (child.type == EXPANDING_MAGNET) {
-							int magnetLeft = max(0, l->magnetPoint - (offset + position + childLength));
-							int freeDelta = min(magnetLeft, freeSpaceLeft);
-							childLength += freeDelta;
-							freeSpaceLeft -= freeDelta;
-						}
-						else if (child.type != FIXED_SIZE && child.type != HEIGHT_BY_WIDTH) {
-							int freeDelta = expandingLeft ? freeSpaceLeft / expandingLeft : 0;
-							childLength += freeDelta;
-							freeSpaceLeft -= freeDelta;
-						}
-					}
-					if (child.type != FIXED_SIZE && child.type != HEIGHT_BY_WIDTH)
-						--expandingLeft;
-					calculateRectangles(l, pass, children[i], childLength, offset+position);
-					position += childLength;
+		int expandingLeft = expandingCount;
+		int position = 0;
+		for (int i = column.start; i < column.end; ++i) {
+			LayoutElement& child = l->elements[children[i]];
+			int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[children[i]] : l->minimalHeights[children[i]];
+			int childLength = childFixedLength;
+			if (child.priority > discardedPriority) {
+				childLength = 0;
+			}
+			else if (child.priority == discardedPriority) {
+				childLength = min(childLength, freeSpaceLeft / itemsToDiscardPartially);
+				freeSpaceLeft -= childLength;
+				--itemsToDiscardPartially;
+			}
+			else if(discardedPriority == MAX_PRIORITY) { 
+				if (child.type == EXPANDING_MAGNET) {
+					int magnetLeft = max(0, l->magnetPoint - (offset + position + childLength));
+					int freeDelta = min(magnetLeft, freeSpaceLeft);
+					childLength += freeDelta;
+					freeSpaceLeft -= freeDelta;
 				}
-				if ( pass == VERTICAL ) {
-					out.h = position;
-				}
-			} else {
-				// leave this level for other pass
-				for (int i = 0; i < count; ++i) {
-					LayoutElement& child = l->elements[children[i]];
-					calculateRectangles(l, pass, children[i], length, offset);
+				else if (pass == HORIZONTAL && child.type != FIXED_SIZE && child.type != HEIGHT_BY_WIDTH) {
+					int freeDelta = expandingLeft ? freeSpaceLeft / expandingLeft : 0;
+					childLength += freeDelta;
+					freeSpaceLeft -= freeDelta;
 				}
 			}
+			if (child.type != FIXED_SIZE && child.type != HEIGHT_BY_WIDTH) {
+				--expandingLeft;
+			}
+			calculateRectangles(l, pass, children[i], childLength, offset+position);
+			position += childLength;
 		}
+		maxLength = max(position, maxLength);
+	}
+
+	if ( pass == VERTICAL ) {
+		out.h = maxLength;
 	}
 }
 
@@ -2384,7 +2510,7 @@ void PropertyTree::focusFirstError()
 
 void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
 {
-	DebugTimer t("PropertyTree::drawLayout", 0);
+	DebugTimer t("PropertyTree::drawLayout", 20);
 	int lastElement = 0;
 	int numElements = layout_->rectangles.size();
 	for (size_t i = 0; i < numElements; ++i) {

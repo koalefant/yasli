@@ -15,15 +15,26 @@ using std::vector;
 // there is not enough space to display all of them.
 enum { MAX_PRIORITY = 4 };
 
+// Number of columns in MULTI_COLUMN layout element
+enum { MAX_COLUMNS = 3 };
+
 // layout behavior of individual layout element
 enum ElementType
 {
+	// never changes its size
 	FIXED_SIZE,
+	// Fixed size on one axis and will expand to cover as much as possible space on other axis.
 	EXPANDING,
+	// Determines height dynamically by width. E.g. wrapped text, or could have a proportional-size.
 	HEIGHT_BY_WIDTH,
+	// Aligned to virtual columns (name/value separation)
 	EXPANDING_MAGNET,
+	// Horizontal box
 	HORIZONTAL,
+	// Vertical box
 	VERTICAL,
+	// Vertical that automatically splits in multiple columns based on widths of the elements.
+	MULTI_COLUMN
 };
 
 // Role fulfilled by individual layout element
@@ -50,11 +61,12 @@ struct LayoutElement
 	int childrenList;
 	unsigned short minWidth;
 	unsigned short minHeight;
-	unsigned char type;
+	unsigned char type : 4;
 	unsigned char rowPart: 4;
 	unsigned char rowPartSubindex: 4;
 	unsigned char priority : 3;
 	bool focusable : 1;
+	bool beginsColumn : 1;
 
 	LayoutElement()
 	: type(FIXED_SIZE)
@@ -65,6 +77,7 @@ struct LayoutElement
 	, minWidth(0)
 	, minHeight(0)
 	, focusable(false)
+	, beginsColumn(false)
 	{
 	}
 };
@@ -157,6 +170,15 @@ struct Layout
 	}
 };
 
+struct LayoutColumn
+{
+	int start;
+	int end;
+
+	int left;
+	int width;
+};
+
 // result of a hit test through the layout
 struct HitResult
 {
@@ -181,5 +203,7 @@ struct PersistentLayoutElement
 	{
 	}
 };
+
+void calculateRectangles(Layout* l, ElementType pass, int element, int length, int offset);
 
 };
