@@ -24,6 +24,7 @@ set(SOURCES
 	../PropertyTree/IDrawContext.h
 	../PropertyTree/IMenu.h
 	../PropertyTree/IUIFacade.h
+	../PropertyTree/Layout.cpp
 	../PropertyTree/MathUtils.h
 	../PropertyTree/PropertyIArchive.cpp
 	../PropertyTree/PropertyIArchive.h
