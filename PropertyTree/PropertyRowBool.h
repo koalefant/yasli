@@ -24,6 +24,7 @@ public:
 	void redraw(IDrawContext& context) override;
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
+	bool canBePacked() const override{ return true; }
 
 	bool onActivate(const PropertyActivationEvent& ev) override;
 	bool onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev) override;

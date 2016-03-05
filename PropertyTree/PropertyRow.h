@@ -251,6 +251,7 @@ public:
 		hit->toolTip = tooltip_;
 		return true; 
 	}
+	virtual bool canBePacked() const { return !isStruct() && labelUndecorated()[0] == '\0'; }
 
 	virtual bool onActivate(const PropertyActivationEvent& e);
 	virtual bool onKeyDown(PropertyTree* tree, const KeyEvent* ev);

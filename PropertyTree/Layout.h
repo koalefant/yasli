@@ -204,9 +204,9 @@ struct PersistentLayoutElement
 	}
 };
 
-void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, int element);
-void calculateRectangles(Layout* l, ElementType pass, int element, int length, int offset);
+void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l, int element);
+void calculateRectangles_r(Layout* l, ElementType pass, int element, int length, int offset);
 void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, PropertyRow* row);
-void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel);
+void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel);
 
 };

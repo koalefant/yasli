@@ -1046,7 +1046,7 @@ void PropertyTree::updateLayout()
 	// Root level and orphaned validators
 	addValidatorsToLayout_r(this, &l, lroot, root);
 	// Most of the layout is generated here
-	populateChildrenArea(&l, lroot, root, this, 0);
+	populateChildrenArea_r(&l, lroot, root, this, 0);
 
 	l.minimalWidths.resize(l.elements.size());
 	l.minimalHeights.resize(l.elements.size());
@@ -1054,14 +1054,14 @@ void PropertyTree::updateLayout()
 	// Individual rectangles of the layout are computed in following steps:
 	//
 	// 1. Propagate horizontal minimal sizes of individual elements bottom up
-	calculateMinimalSizes(0, HORIZONTAL, &l, lroot);
+	calculateMinimalSizes_r(0, HORIZONTAL, &l, lroot);
 	// 2. Compute horizontal offsets and sizes top-down
 	l.rectangles.resize(l.elements.size());
-	calculateRectangles(&l, HORIZONTAL, lroot, area_.width(), 0);
+	calculateRectangles_r(&l, HORIZONTAL, lroot, area_.width(), 0);
 	// 3. Propagate vertical minimal sizes of individual elements bottom up
-	calculateMinimalSizes(0, VERTICAL, &l, lroot);
+	calculateMinimalSizes_r(0, VERTICAL, &l, lroot);
 	// 4. Compute vertical offsets and sizes top-down
-	calculateRectangles(&l, VERTICAL, lroot, 0, filterAreaHeight());
+	calculateRectangles_r(&l, VERTICAL, lroot, 0, filterAreaHeight());
 	//
 	// Separating minimal size computation step allows to perform layout in O(n) instead
 	// of O(n^2).

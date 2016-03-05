@@ -162,9 +162,30 @@ void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, P
 	}
 }
 
-void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel)
+static int rangeOfPackableRows(PropertyRow* parentRow, int index)
+{
+	int result = 0;
+	int count = parentRow->count();
+	for (int i = index; i < count; ++i) {
+		PropertyRow* child = parentRow->childByIndex(i);
+		if (!child->inlined() && !child->inlinedBefore() && child->canBePacked()) {
+			result += 1;
+		} else {
+			return result;
+		}
+	}
+	return result;
+}
+
+void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel)
 {
 	int rowHeight = int(tree->_defaultRowHeight() * max(0.1f, tree->treeStyle().rowSpacing) + 0.5f);
+
+	// can alternate with multi-column area for packed checkboxes
+	int currentChildrenArea = parentElement;
+	const bool packCheckboxesAtThisLevel = tree->treeStyle().packCheckboxes && !parentRow->userPackCheckboxes();
+	int packRowsEnd = -1;
+
 	// assuming that parentRow is expanded
 	int count = (int)parentRow->count();
 	for (int i = 0 ; i < count; ++i) {
@@ -174,11 +195,21 @@ void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, 
 
 		// children of inlined elements here
 		if (child->inlined() || child->inlinedBefore()) {
-			populateChildrenArea(l, parentElement, child, tree, indentationLevel);
+			populateChildrenArea_r(l, parentElement, child, tree, indentationLevel);
 			continue;
 		}
+		
+		// begin packing sequence of packable rows (usually checkboxes)
+		if (packCheckboxesAtThisLevel && i > packRowsEnd) {
+			int rangeLength = rangeOfPackableRows(parentRow, i);
+			const int minCheckboxesToPack = 6;
+			if (rangeLength >= minCheckboxesToPack) {
+				packRowsEnd = i + rangeLength - 1;
+				currentChildrenArea = l->addElement(parentElement, MULTI_COLUMN, parentRow, PART_CHILDREN_AREA, 0, 0, 0, false);
+			}
+		}
 
-		int rowArea = l->addElement(parentElement, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, false);
+		int rowArea = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, false);
 		bool showPlus = !(tree->treeStyle().compact && parentRow->isRoot());
 		if (showPlus)
 			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0, false);
@@ -187,10 +218,10 @@ void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, 
 		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
 
 		// add validator bubbles from the row itself and its inlined chlildren
-		addValidatorsToLayout_r(tree, l, parentElement, child);
+		addValidatorsToLayout_r(tree, l, currentChildrenArea, child);
 
 		if (child->expanded()) {
-			int indentationAndContent = l->addElement(parentElement, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
+			int indentationAndContent = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
 			if (showPlus) {
 				int indentation;
 				if (indentationLevel == 0 || (tree->treeStyle().compact && indentationLevel == 1)) {
@@ -201,7 +232,12 @@ void populateChildrenArea(Layout* l, int parentElement, PropertyRow* parentRow, 
 				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, indentation, 0, 0, false);
 			}
 			int contentArea = l->addElement(indentationAndContent, child->userPackCheckboxes() ? MULTI_COLUMN : VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
-			populateChildrenArea(l, contentArea, child, tree, indentationLevel + 1);
+			populateChildrenArea_r(l, contentArea, child, tree, indentationLevel + 1);
+		}
+
+		if (i == packRowsEnd) {
+			// end sequence of packed (multi-column) rows and return to normal layout
+			currentChildrenArea = parentElement;
 		}
 	}
 }
@@ -275,7 +311,7 @@ static void calculateColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColum
 	*maxColumnLength = max(*maxColumnLength, columnLength);
 }
 
-void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, int element )
+void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l, int element )
 {
 	int minSize = 0;
 	// Width and height are required to define minimal size of HEIGHT_BY_WIDTH elements.
@@ -301,7 +337,7 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 			for (int i = 0; i < count; ++i) {
 				int childrenSize = 0;;
 				LayoutElement& child = l->elements[children[i]];
-				calculateMinimalSizes(&childrenSize, orientation, l, children[i]);
+				calculateMinimalSizes_r(&childrenSize, orientation, l, children[i]);
 				if (e.type == HORIZONTAL) {
 					if ( orientation == HORIZONTAL ) {
 						// FIXME: priorities
@@ -341,7 +377,7 @@ void calculateMinimalSizes(int* outMinSize, ElementType orientation, Layout* l, 
 							column = j;
 						}
 					}
-					calculateRectangles(&*l, HORIZONTAL, childIndex, columns[column].width, columns[column].left+l->rectangles[element].x);
+					calculateRectangles_r(&*l, HORIZONTAL, childIndex, columns[column].width, columns[column].left+l->rectangles[element].x);
 				}
 				s = maxColumnLength;
 			}
@@ -371,7 +407,7 @@ static void adjustChildrenRectangles_r(Layout* l, int index, int deltaX) {
 	}
 }
 
-void calculateRectangles(Layout* l, ElementType pass, int element, int length, int offset)
+void calculateRectangles_r(Layout* l, ElementType pass, int element, int length, int offset)
 {
 	LayoutElement& e = l->elements[element];
 	Rect & out = l->rectangles[element];
@@ -400,7 +436,7 @@ void calculateRectangles(Layout* l, ElementType pass, int element, int length, i
 		// leave this level for other pass
 		for (int i = 0; i < count; ++i) {
 			LayoutElement& child = l->elements[children[i]];
-			calculateRectangles(l, pass, children[i], length, offset);
+			calculateRectangles_r(l, pass, children[i], length, offset);
 		}
 		return;
 	}
@@ -477,7 +513,7 @@ void calculateRectangles(Layout* l, ElementType pass, int element, int length, i
 			if (child.type != FIXED_SIZE && child.type != HEIGHT_BY_WIDTH) {
 				--expandingLeft;
 			}
-			calculateRectangles(l, pass, children[i], childLength, offset+position);
+			calculateRectangles_r(l, pass, children[i], childLength, offset+position);
 			position += childLength;
 		}
 		maxLength = max(position, maxLength);

@@ -29,6 +29,7 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return false; }
+	bool canBePacked() const override{ return true; }
 
 	bool onActivate(const PropertyActivationEvent& e) override { return false; }
 	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override {
@@ -69,6 +70,7 @@ public:
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return true; }
+	bool canBePacked() const override{ return true; }
 	bool onActivate(const PropertyActivationEvent& ev) override
 	{
 		if (ev.reason != ev.REASON_RELEASE) {
