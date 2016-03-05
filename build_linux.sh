@@ -3,7 +3,7 @@
 BUILD_ROOT=$(dirname $(readlink -f $0))
 
 CONFIGURATION="$VIM_PROJECT_CONFIGURATION"
-if [ CONFIGURATION = "" ]; then
+if [ "$CONFIGURATION" = "" ]; then
 	CONFIGURATION=Debug
 fi
 TEMP_DIR=${BUILD_ROOT}/.tmp/linux-${CONFIGURATION}

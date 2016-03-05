@@ -5,7 +5,7 @@ let &makeprg=s:path.'/build_linux.sh'
 function! RunProject()
 	let s:project_configuration=tolower($VIM_PROJECT_CONFIGURATION)
 	if s:project_configuration == ""
-		let project_configuration="debug"
+		let s:project_configuration="debug"
 	endif
 	let s:command="!x-terminal-emulator -e 'bash -c ".s:path."/".s:program_to_run_prefix.tolower(s:project_configuration)."\\|\\|read -s -n 1' &"
 	execute s:command
