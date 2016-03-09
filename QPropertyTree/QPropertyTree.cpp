@@ -1066,16 +1066,28 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 		int num = layout_->rectangles.size();
 		if (config_.debugDrawLayout) {
+			const int visibleParts[] = { property_tree::PART_WIDGET, property_tree::PART_LABEL };
 			for (int i = 0; i < num; ++i) {
+				const LayoutElement & element = layout_->elements[i];
 				QRect r = toQRect(layout_->rectangles[i]);
-				switch (layout_->elements[i].rowPart) {
-				case property_tree::PART_WIDGET:
+				bool visible = false;
+				for (int j = 0; j < sizeof(visibleParts)/sizeof(visibleParts[0]); ++j) {
+					if (element.rowPart == visibleParts[j]) {
+						visible = true;
+						break;
+					}
+				}
+				if (!visible)
+					continue;
+
+				switch (element.type) {
+				case property_tree::FIXED_SIZE:
 					painter.setPen(QColor(0,0,0));
-					painter.setBrush(QColor(0,255,0,64));
+					painter.setBrush(QColor(0,128 - 128 / MAX_PRIORITY * element.priority,255,64));
 					break;
-				case property_tree::PART_LABEL:
+				case property_tree::EXPANDING:
 					painter.setPen(Qt::NoPen);
-					painter.setBrush(QColor(255,255,0,64));
+					painter.setBrush(QColor(0,255,0,64));
 					break;
 				default:
 					painter.setPen(QColor(0,0,0, focusedLayoutElement_ ? 255 : 16));

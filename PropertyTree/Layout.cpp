@@ -63,6 +63,7 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 	if (row->parent() && row->parent()->isContainer() && 
 		(placement == PropertyRow::WIDGET_VALUE || placement == PropertyRow::WIDGET_NONE)) {
 		labelBeforeInlined = true;
+		labelPriority = 2;
 		if (label[0])
 			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
 	}
