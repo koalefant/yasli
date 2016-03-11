@@ -97,6 +97,7 @@ public:
 	float x,y;
 
 	Vect2f()								{ }
+	explicit Vect2f(float x_)					{ x = y = x_; }
 	Vect2f(float x_,float y_)					{ x = x_; y = y_; }
 	
 	typedef float float2[2];
@@ -168,6 +169,7 @@ public:
 	int x,y;
 
 	Vect2i()								{ }
+	explicit Vect2i(int x_)						{ x = y = x_; }
 	Vect2i(int x_, int y_)						{ x = x_; y = y_; }
 	Vect2i(float x_, float y_)					{ x = xround(x_); y = xround(y_); }
 	

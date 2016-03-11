@@ -41,8 +41,17 @@ public:
 		return Rectf( min_ + offset, max_ + offset );
 	}
 
+	Rectf& operator*=(const Vect2f& v){ 
+		min_ *= v; max_ *= v; return *this; 
+	}
+	Rectf operator*(const Vect2f& v) const { 
+		return Rectf(min_*v, max_*v); 
+	}
+
 	const Vect2f& leftTop() const { return min_; }
 	const Vect2f& rightBottom() const { return max_; }
+	Vect2f& leftTop() { return min_; }
+	Vect2f& rightBottom() { return max_; }
 	Vect2f center() const{ return (min_ + max_) / 2; }
 	Vect2f size() const{ return max_ - min_; }
 
