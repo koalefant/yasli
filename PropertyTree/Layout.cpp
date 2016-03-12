@@ -45,19 +45,18 @@ static bool isFullRow(const PropertyRow* row, const PropertyTree* tree)
 	return row->userFullRow();
 }
 
-static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
+static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
 {
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
 	int labelMin = row->textSizeInitial();
 	char labelBuffer[16] = ""; 
 	const char* label = row->rowText(labelBuffer, tree, indexForContainerElement);
-	ElementType labelElementType = (isFullRow(row, tree) || row->inlined()) ? FIXED_SIZE : EXPANDING_MAGNET;
+	ElementType labelElementType = (isFullRow(row, tree) || row->inlined()) ? FIXED_SIZE : EXPANDING;
 	int labelPriority = 1;
 	int labelElement = -1;
 	int widgetElement = -1;
 
-	bool widgetFocusable = row->isSelectable();
 	// for container elements we put array index text before inlined widgets
 	bool labelBeforeInlined = false;
 	if (row->parent() && row->parent()->isContainer() && 
@@ -65,45 +64,54 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		labelBeforeInlined = true;
 		labelPriority = 2;
 		if (label[0])
-			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
 	}
 
 	int count = (int)row->count();
+	bool hasInlinedChildren = false;
 	for (size_t j = 0; j < count; ++j) {
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
 		if (child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0, true);
+			populateRowArea(hasNonInlinedChildren, l, rowArea, child, tree, 0, true);
+			hasInlinedChildren = true;
+		}
+		if (child->inlined()) {
+			hasInlinedChildren = true;
 		}
 	}
+	if (labelElementType == EXPANDING && (hasInlinedChildren || placement == PropertyRow::WIDGET_VALUE)) {
+		labelElementType = EXPANDING_MAGNET;
+	}
 
+	const FocusFlags widgetFocusFlags = row->isSelectable() ? FOCUSABLE : NOT_FOCUSABLE;
 	switch (placement) {
 	case PropertyRow::WIDGET_ICON:
-	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusFlags);
 	if (label[0])
-		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority, false);
+		l->addElement(rowArea, isInlined ? FIXED_SIZE : EXPANDING, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
 	break;
 	case PropertyRow::WIDGET_VALUE: {
 		if (!labelBeforeInlined && label[0])
-			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
 		ElementType widgetElementType = row->userFullRow() ? EXPANDING :
 		row->userFixedWidget() ? FIXED_SIZE : EXPANDING;
-		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
+		widgetElement = l->addElement(rowArea, widgetElementType, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusFlags);
 	}
 	break;
 	case PropertyRow::WIDGET_NONE:
 	if (!labelBeforeInlined && label[0])
-		labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
+		labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
 	break;
 	case PropertyRow::WIDGET_AFTER_NAME:
 	if (label[0])
-		labelElement = l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority, false);
-	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
+		labelElement = l->addElement(rowArea, FIXED_SIZE, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
+	widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusFlags);
 	break;
 	case PropertyRow::WIDGET_AFTER_INLINED: {
 		if (label[0])
-			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, false);
+			labelElement = l->addElement(rowArea, labelElementType, row, PART_LABEL, labelMin, 0, labelPriority, NOT_FOCUSABLE);
 		// add value later
 		break;
 	}
@@ -118,25 +126,29 @@ static void populateRowArea(bool* hasNonPulledChildren, Layout* l, int rowArea, 
 		if (!child->visible(tree))
 			continue;
 		if (child->inlined() && !child->inlinedBefore()) {
-			populateRowArea(hasNonPulledChildren, l, rowArea, child, tree, 0, true);
+			populateRowArea(hasNonInlinedChildren, l, rowArea, child, tree, 0, true);
 		}
 		else if (!child->inlinedBefore())
-			*hasNonPulledChildren = true;
+			*hasNonInlinedChildren = true;
 	}
 
 	if (placement == PropertyRow::WIDGET_AFTER_INLINED) {
-		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusable);
+		widgetElement = l->addElement(rowArea, FIXED_SIZE, row, PART_WIDGET, widgetSizeMin, 0, 0, widgetFocusFlags);
 	}
 	row->setLayoutElement(rowArea);
-	if (labelElement > 0 && (*hasNonPulledChildren || (row->parent() && row->parent()->isContainer()))) {
-		l->elements[labelElement].focusable = true;
+	if (labelElement > 0) {
+		if (*hasNonInlinedChildren || (row->parent() && row->parent()->isContainer())) {
+			l->elements[labelElement].focusFlags = FOCUSABLE;
+		} else if( hasInlinedChildren ) {
+			l->elements[labelElement].focusFlags = FORWARDS_FOCUS;
+		}
 	}
 
 	// add icons that can be used to jump to the nested warning/error
 	if ( row->validatorHasWarnings() )
-		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_WARNING_ICON, tree->_defaultRowHeight(), 0, 0, true);
+		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_WARNING_ICON, tree->_defaultRowHeight(), 0, 0, FOCUSABLE);
 	if ( row->validatorHasErrors() )
-		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_ERROR_ICON, tree->_defaultRowHeight(), 0, 0, true);
+		l->addElement(rowArea, FIXED_SIZE, row, PART_VALIDATOR_ERROR_ICON, tree->_defaultRowHeight(), 0, 0, FOCUSABLE);
 }
 
 
@@ -146,7 +158,7 @@ void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, P
 		if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
 			for (int i = 0; i < row->validatorCount(); ++i) {
 				const ValidatorEntry* validatorEntry = validatorEntries + i;
-				l->addElement(parentElement, HEIGHT_BY_WIDTH, row, PART_VALIDATOR, 40, 40, 0, false, i);
+				l->addElement(parentElement, HEIGHT_BY_WIDTH, row, PART_VALIDATOR, 40, 40, 0, NOT_FOCUSABLE, i);
 			}
 		}
 	}
@@ -206,23 +218,23 @@ void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow
 			const int minCheckboxesToPack = 6;
 			if (rangeLength >= minCheckboxesToPack) {
 				packRowsEnd = i + rangeLength - 1;
-				currentChildrenArea = l->addElement(parentElement, MULTI_COLUMN, parentRow, PART_CHILDREN_AREA, 0, 0, 0, false);
+				currentChildrenArea = l->addElement(parentElement, MULTI_COLUMN, parentRow, PART_CHILDREN_AREA, 0, 0, 0, NOT_FOCUSABLE);
 			}
 		}
 
-		int rowArea = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, false);
+		int rowArea = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_ROW_AREA, 0, rowHeight, 0, NOT_FOCUSABLE);
 		bool showPlus = !(tree->treeStyle().compact && parentRow->isRoot());
 		if (showPlus)
-			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0, false);
+			l->addElement(rowArea, FIXED_SIZE, child, PART_PLUS, rowHeight, 0, 0, NOT_FOCUSABLE);
 
-		bool hasNonPulledChildren = false;
-		populateRowArea(&hasNonPulledChildren, l, rowArea, child, tree, i, false);
+		bool hasNonInlinedChildren = false;
+		populateRowArea(&hasNonInlinedChildren, l, rowArea, child, tree, i, false);
 
 		// add validator bubbles from the row itself and its inlined chlildren
 		addValidatorsToLayout_r(tree, l, currentChildrenArea, child);
 
 		if (child->expanded()) {
-			int indentationAndContent = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, false);
+			int indentationAndContent = l->addElement(currentChildrenArea, HORIZONTAL, child, PART_INDENTATION_AND_CONTENT_AREA, 0, 0, 0, NOT_FOCUSABLE);
 			if (showPlus) {
 				int indentation;
 				if (indentationLevel == 0 || (tree->treeStyle().compact && indentationLevel == 1)) {
@@ -230,9 +242,9 @@ void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow
 				} else {
 					indentation = int(rowHeight * tree->treeStyle().levelIndent + 0.5f);
 				}
-				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, indentation, 0, 0, false);
+				l->addElement(indentationAndContent, FIXED_SIZE, child, PART_INDENTATION, indentation, 0, 0, NOT_FOCUSABLE);
 			}
-			int contentArea = l->addElement(indentationAndContent, child->userPackCheckboxes() ? MULTI_COLUMN : VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, false);
+			int contentArea = l->addElement(indentationAndContent, child->userPackCheckboxes() ? MULTI_COLUMN : VERTICAL, child, PART_CHILDREN_AREA, 0, 0, 0, NOT_FOCUSABLE);
 			populateChildrenArea_r(l, contentArea, child, tree, indentationLevel + 1);
 		}
 

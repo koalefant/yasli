@@ -501,7 +501,7 @@ void QDrawContext::drawValidator(PropertyRow* row, int index, const Rect& rect)
 		painter_->setBrush(QBrush());
 		QTextOption opt;
 		opt.setWrapMode(QTextOption::WordWrap);
-		opt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		opt.setAlignment(Qt::Alignment(Qt::AlignLeft | Qt::AlignVCenter));
 		painter_->drawText(textRect, text, opt);
 		textRect.setHeight(0xffff);
 		QRect iconRect(r.left(), r.top(), tree->_defaultRowHeight(), r.height());

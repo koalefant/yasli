@@ -105,7 +105,7 @@ static int findParentLayoutElement(const Layout& layout, int startElement)
 				}
 			}
 		}
-	} while (element > 0 && !layout.elements[element].focusable);
+	} while (element > 0 && layout.elements[element].focusFlags == NOT_FOCUSABLE);
 	return element;
 }
 
@@ -134,7 +134,7 @@ static int findNextChildLayoutElement(const Layout& layout, int startElement)
 				}
 			}
 		}
-	} while (element > 0 && !layout.elements[element].focusable);
+	} while (element > 0 && layout.elements[element].focusFlags == NOT_FOCUSABLE);
 	return element;
 }
 
@@ -182,7 +182,7 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 	// select first available element in case we had no selection previously
 	if (element == -1) {
 		for (size_t i = 0; i < layout.elements.size(); ++i) {
-			if (!layout.elements[i].focusable)
+			if (layout.elements[i].focusFlags == NOT_FOCUSABLE)
 				continue;
 			return (int)i;
 		}
@@ -195,7 +195,7 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 	for (size_t i = 0; i < rectangles.size(); ++i) {
 		if (i == element)
 			continue;
-		if (!layout.elements[i].focusable)
+		if (layout.elements[i].focusFlags == NOT_FOCUSABLE)
 			continue;
 		const Rect& r = rectangles[i];
 
@@ -215,6 +215,14 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 
 	// 'newCursor' position is always clipped to a focused rectangle
 	if (bestElement > 0) {
+		if (layout.elements[bestElement].focusFlags == FORWARDS_FOCUS) { 
+			for (int i = bestElement; i < layout.elements.size(); ++i) {
+				if (layout.elements[i].focusFlags == FOCUSABLE) {
+					bestElement = i;
+					break;
+				}
+			}
+		}
 		*newCursor = rectangles[bestElement].clamp(cursor);
 	}
 
@@ -236,7 +244,7 @@ static int findLastLayoutElementInDirection(Point* newCursor, const Layout& layo
 	for (size_t i = 0; i < rectangles.size(); ++i) {
 		if (i == element)
 			continue;
-		if (!layout.elements[i].focusable)
+		if (layout.elements[i].focusFlags == NOT_FOCUSABLE)
 			continue;
 		const Rect& r = rectangles[i];
 		if (onlyOverlapping && !overlapsOnAxis(ref, r, Point(-direction.y(), direction.x())))
@@ -473,14 +481,14 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	int modifiers = ev->modifiers();
 
 	if ( key == KEY_UP ) {
-		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), false);
+		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,-1), true);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
 			focusCursor_ = focusCursor;
 		}
 	}
 	if ( key == KEY_DOWN ) {
-		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,1), false);
+		int element = findNextLayoutElementInDirection(&focusCursor, *layout_, focusedLayoutElement_, focusCursor_, Point(0,1), true);
 		if (element > 0) {
 			focusedLayoutElement_ = element;
 			focusCursor_ = focusCursor;
@@ -705,7 +713,7 @@ static LevelHit hitLayoutElementRecurse(const Layout& layout, int element, Point
 	const LayoutElement& e = layout.elements[element]; 
 	if (element == 0 || layout.rectangles[element].contains(point)) {
         r.hit = element;
-        if (e.focusable)
+        if (e.focusFlags == FOCUSABLE)
             r.focusable = element;
         if (e.childrenList >= 0) {
 			const ChildrenList& children = layout.childrenLists[e.childrenList];
@@ -724,7 +732,7 @@ static LevelHit hitLayoutElementRecurse(const Layout& layout, int element, Point
                     r.focusable = childHit.focusable;
                 if (childHit.focusableAlternative > 0)
                     r.focusableAlternative = childHit.focusableAlternative;
-                else if (ce.focusable)
+                else if (ce.focusFlags == FOCUSABLE)
                     r.focusableAlternative = childIndex;
 			}
             return r;
@@ -1014,7 +1022,7 @@ static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
 		return 0;
 	for (; index < l.elements.size(); ++index) {
 		const LayoutElement& element = l.elements[index];
-		if (l.rows[index] == row && element.focusable)
+		if (l.rows[index] == row && element.focusFlags == FOCUSABLE)
 			return index;
 	}
 	return 0;
@@ -1041,7 +1049,7 @@ void PropertyTree::updateLayout()
 	l.elements.push_back(LayoutElement());
 	PropertyRow* root = model_->root();
 	l.rows.push_back(root);
-	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA, 0, 0, 0, false);
+	int lroot = l.addElement(-1, VERTICAL, root, PART_CHILDREN_AREA, 0, 0, 0, NOT_FOCUSABLE);
 	root->setLayoutElement(lroot);
 	// Root level and orphaned validators
 	addValidatorsToLayout_r(this, &l, lroot, root);
@@ -1568,7 +1576,7 @@ static int findFirstFocusableElement(const property_tree::Layout& layout, int st
 	int numLayoutElements = (int)layout.elements.size();
 	for ( int index = startingWithElement; index < numLayoutElements; ++index) {
 		const property_tree::LayoutElement& element = layout.elements[index];
-		if ( element.focusable ) {
+		if ( element.focusFlags == FOCUSABLE ) {
 			return index;
 		}
 	}

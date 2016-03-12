@@ -55,6 +55,13 @@ enum RowPart
 	PART_VALIDATOR_WARNING_ICON
 };
 
+enum FocusFlags {
+	NOT_FOCUSABLE = 0,
+	FOCUSABLE = 1 << 0,
+	FORWARDS_FOCUS = 1 << 1,
+};
+inline FocusFlags operator|(FocusFlags a, FocusFlags b) { return FocusFlags(int(a)|int(b)); }
+
 // Describes one element in the layout
 struct LayoutElement
 {
@@ -65,7 +72,7 @@ struct LayoutElement
 	unsigned char rowPart: 4;
 	unsigned char rowPartSubindex: 4;
 	unsigned char priority : 3;
-	bool focusable : 1;
+	FocusFlags focusFlags : 2;
 	bool beginsColumn : 1;
 
 	LayoutElement()
@@ -76,11 +83,12 @@ struct LayoutElement
 	, childrenList(-1)
 	, minWidth(0)
 	, minHeight(0)
-	, focusable(false)
+	, focusFlags(NOT_FOCUSABLE)
 	, beginsColumn(false)
 	{
 	}
 };
+
 
 struct ChildrenList
 {
@@ -121,7 +129,7 @@ struct Layout
 	, magnetPoint(0) {}
 
 	// adds element to the layout
-	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, bool focusable, int partSubindex = 0)
+	int addElement(int parent, ElementType type, PropertyRow* row, RowPart part, int minWidth, int minHeight, int priority, FocusFlags focusFlags, int partSubindex = 0)
 	{
 		LayoutElement e;
 		e.type = type;
@@ -130,7 +138,7 @@ struct Layout
 		e.minWidth = minWidth;
 		e.minHeight = minHeight;
 		e.priority = priority;
-		e.focusable = focusable;
+		e.focusFlags = focusFlags;
 		int index = (int)elements.size();
 		elements.push_back(e);
 		rows.push_back(row);
