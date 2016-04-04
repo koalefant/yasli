@@ -19,6 +19,8 @@ using namespace ww;
 using namespace yasli;
 using namespace std;
 
+#if !defined(_FINAL_VERSION_) && !defined(_FINAL) && defined(WIN32)
+
 //#pragma warning (disable: 4073) // initializers put in library initialization area
 //#pragma init_seg(lib)
 
@@ -631,3 +633,4 @@ int totalMemoryUsed()
 }
 
 	
+#endif
