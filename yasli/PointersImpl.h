@@ -51,9 +51,7 @@ public:
 	const void* handle() const{
 		return &ptr_;
 	}
-	TypeID pointerType() const{
-		return TypeID::get<SharedPtr<T> >();
-	}
+	TypeID pointerType() const{ return TypeID::get<SharedPtr<T> >(); }
 	virtual ClassFactory<T>* factory() const{ return &ClassFactory<T>::the(); }
 protected:
 	SharedPtr<T>& ptr_;

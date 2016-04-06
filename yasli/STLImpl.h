@@ -13,6 +13,9 @@
 #include "yasli/Archive.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
+#if !YASLI_NO_CPP11
+#include "ClassFactory.h"
+#endif
 
 #pragma warning(push)
 #pragma warning(disable:4512)
@@ -259,5 +262,53 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const c
 }
 
 }
+
+#if !YASLI_NO_CPP11
+
+namespace yasli {
+
+template<class T>
+class StdUniquePtr : public PointerInterface
+{
+public:
+	StdUniquePtr(std::unique_ptr<T>& ptr)
+	: ptr_(ptr)
+	{}
+	const char* registeredTypeName() const override{
+		if(ptr_)
+			return ClassFactory<T>::the().getRegisteredTypeName(ptr_.get());
+		else
+			return "";
+	}
+	TypeID pointerType() const override{ return TypeID::get<std::unique_ptr<T> >(); }
+	void create(const char* typeName) const override{
+		if(typeName && typeName[0] != '\0')
+			ptr_.reset(factory()->create(typeName));
+		else
+			ptr_.reset((T*)0);
+	}
+	TypeID baseType() const override{ return TypeID::get<T>(); }
+	Serializer serializer() const override{ return Serializer(*ptr_); }
+	void* get() const override{ return reinterpret_cast<void*>(ptr_.get()); }
+	ClassFactory<T>* factory() const override{ return &ClassFactory<T>::the(); }
+	const void* handle() const override{ return &ptr_; }
+protected:
+	std::unique_ptr<T>& ptr_;
+};
+
+}
+
+namespace std {
+
+template<class T>
+bool serialize(yasli::Archive& ar, unique_ptr<T>& ptr, const char* name, const char* label)
+{
+  yasli::StdUniquePtr<T> serializer(ptr);
+  return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
+}
+
+}
+
+#endif
 
 #pragma warning(pop)

@@ -13,6 +13,9 @@
 #include <list>
 #include <map>
 #include <algorithm>
+#if !YASLI_NO_CPP11
+#include <memory>
+#endif
 
 #include "yasli/Config.h"
 #include "yasli/Serializer.h"
@@ -21,6 +24,11 @@
 namespace yasli{ class Archive; }
 
 namespace std{ // not nice, but needed for argument-dependent lookup to work
+
+#if !YASLI_NO_CPP11
+template<class T>
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::unique_ptr<T>& ptr, const char* name, const char* label);
+#endif
 
 template<class T, class Alloc>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label);
