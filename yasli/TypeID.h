@@ -88,7 +88,7 @@ struct TypeInfo
 {
 	TypeID id;
 	size_t size;
-	char name[128];
+	char name[256];
 
     // Remove class/struct prefixes and whitespaces
     static void cleanTypeName(char*& d, const char* dend, const char*& s, const char* send)
