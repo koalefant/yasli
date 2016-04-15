@@ -824,6 +824,7 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 		}
 	}
 
+	startIndex = min(startIndex, numChildren);
 	for (int i = 0; i < startIndex; ++i) {
 		PropertyRow* row = children_[i];
 		if((row->name() == name || strcmp(row->name(), name) == 0) && (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0) && (!checkUpdated || !row->updated_)){
