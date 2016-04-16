@@ -157,7 +157,6 @@ set(SOURCES
 	PopupMenu.h
 	ProgressBar.h
 	PropertyEditor.h
-	PropertyRowBitVector.h
 	PropertyTree.h
 	RadioButton.h
 	RadioButtonBox.h
