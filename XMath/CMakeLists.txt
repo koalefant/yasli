@@ -1,10 +1,20 @@
 project("xmath")
+cmake_minimum_required(VERSION 3.4)
 
-# file(GLOB SOURCES *.h *.cpp)
+
+if(WIN32)
+    set(ERRH_SOURCES XErrHand/BSUFunctions.cpp XErrHand/CrashHandler.cpp XErrHand/DiagAssert.cpp XErrHand/GetLoadedModules.cpp XErrHand/IsNT.cpp XErrHand/NT4ProcessInfo.cpp XErrHand/TLHELPProcessInfo.cpp
+	XErrHand/XERRHAND.CPP XErrHand/BugslayerUtil.h XErrHand/CrashHandler.h XErrHand/CriticalSection.h XErrHand/DiagAssert.h XErrHand/Internal.h XErrHand/MemDumperValidator.h XErrHand/MSJDBG.h XErrHand/PCH.h
+	XErrHand/PSAPI.H XErrHand/SymbolEngine.h XErrHand/WarningsOff.h XErrHand/WarningsOn.h)
+    source_group("Errh" FILES ${ERRH_SOURCES})
+else(WIN32)
+    set(ERRH_SOURCES)
+endif(WIN32)
+
 set(SOURCES xmath.h XMath.cpp Recti.cpp Rectf.cpp Range.cpp Colors.cpp ExceptionStub.cpp)
 source_group("" FILES ${SOURCES})
 
-include_directories(..)
+include_directories(. ..)
 if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(WIN32)
@@ -15,7 +25,7 @@ endif()
 if (EMSCRIPTEN)
 add_library("xmath" SHARED ${SOURCES})
 else (EMSCRIPTEN)
-add_library("xmath" ${SOURCES})
+add_library("xmath" ${SOURCES} ${ERRH_SOURCES})
 endif (EMSCRIPTEN)
 
 set_target_properties("xmath" PROPERTIES DEBUG_POSTFIX "-debug")
