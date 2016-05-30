@@ -223,7 +223,7 @@ public:
 #ifdef _MSC_VER
 			if (_isnan(newValue)) {
 #else
-			if (isnan(newValue)) {
+			if (std::isnan(newValue)) {
 #endif
 				if (screenFraction > 0.0f)
 					newValue = DBL_MAX;

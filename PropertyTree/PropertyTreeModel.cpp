@@ -77,7 +77,8 @@ void PropertyTreeModel::deselectAll()
 // 		row->setSelected(false);
 // 	}
 	selection_.clear();
-	root()->scanChildren(DeselectOp());
+	DeselectOp op;
+	root()->scanChildren(op);
 }
 
 PropertyRow* PropertyTreeModel::rowFromPath(const TreePath& path)
