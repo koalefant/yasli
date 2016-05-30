@@ -1106,7 +1106,7 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 			}
 		}
 
-		if (size_t(focusedLayoutElement_) < layout_->rectangles.size()) {
+		if (size_t(focusedLayoutElement_) < layout_->rectangles.size() && hasFocusOrInplaceHasFocus()) {
 			QRect r = toQRect(layout_->rectangles[focusedLayoutElement_]);
 			bool focusedSelected = layout_->rows[focusedLayoutElement_] ? layout_->rows[focusedLayoutElement_]->selected() : false;
 
