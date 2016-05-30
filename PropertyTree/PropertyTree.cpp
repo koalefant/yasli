@@ -1667,13 +1667,16 @@ bool PropertyTree::selectByAddresses(const void* const* addresses, size_t addres
 
 		if (!keepSelection) {
 			TreeSelection sel;
+			PropertyRow* lastRow = 0;
 			for (size_t j = 0; j < rows.size(); ++j) {
 				PropertyRow* row = rows[j];
 				if(row) {
 					sel.push_back(model()->pathFromRow(row));
 					ensureVisible(row, true, false);
+					lastRow = row;
 				}
 			}
+			setFocusedRow(lastRow);
 		}
 	}
 	return result;
