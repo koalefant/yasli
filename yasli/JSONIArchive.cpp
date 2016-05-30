@@ -1094,6 +1094,7 @@ bool JSONIArchive::operator()(float& value, const char* name, const char* label)
 			value = (float)NAN;
 		else
 			return false;
+		return true;
     }
     return false;
 }
@@ -1113,6 +1114,7 @@ bool JSONIArchive::operator()(double& value, const char* name, const char* label
 			value = NAN;
 		else
 			return false;
+		return true;
     }
     return false;
 }
