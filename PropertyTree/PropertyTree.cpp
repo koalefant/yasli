@@ -47,7 +47,7 @@ using namespace property_tree;
 
 static int timerLevel;
 DebugTimer::DebugTimer(const char* label, int threshold) : label(label), threshold(threshold) {
-#ifdef __linux__
+#if 0
 	timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 	startTime = t.tv_sec * 1000 + t.tv_nsec / 1000000;
@@ -56,7 +56,7 @@ DebugTimer::DebugTimer(const char* label, int threshold) : label(label), thresho
 }
 
 DebugTimer::~DebugTimer() {
-#ifdef __linux__
+#if 0
 	--timerLevel;
 	timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);

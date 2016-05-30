@@ -42,20 +42,24 @@ struct ExampleStyleContent
 		// ar(options, "options", "Options") call,
 		// we just need a bunch of individual flags here
 		// to test two-columns packing.
-		if (ar.openBlock("twoColumns", "|Two Columns")) {
+		if (ar.openBlock("twoColumns", "Two Columns")) {
 			ar(options[0], "option0", "First Option");
 			ar(options[1], "option1", "Second Option");
 			ar(options[2], "option2", "Third Option");
 			ar(options[3], "option3", "Fourth Option");
 			ar(options[4], "option4", "Fifth Option");
 			ar(options[5], "option5", "Option Six");
+			ar.warning(options[5], "Long bubble with descriptive text that spans accross multiple lines");
 			ar(options[6], "option6", "Seven");
 			ar(options[7], "option7", "Eight");
 			ar(options[8], "option8", "Nein");
 			ar(options[9], "option9", "Ten");
+			if (ar.openBlock("nested", "Nested")) {
 			ar(options[10], "option10", "Option Eleven");
 			ar(options[11], "option11", "Twelve");
 			ar(options[12], "option12", "Thirteen");
+			ar.closeBlock();
+			}
 			ar.closeBlock();
 		}
 

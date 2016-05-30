@@ -274,7 +274,7 @@ static void restoreColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColumns
 	*numColumns = currentColumn+1;
 }
 
-static void calculateColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColumns, int* maxColumnLength,
+static void calculateColumns(LayoutColumn (&columns)[MAX_COLUMNS], int* numColumns, int* maxColumnLength,
 							 Layout * l, int element, int widthAvailable)
 {
 	const LayoutElement& e = l->elements[element];
@@ -294,34 +294,115 @@ static void calculateColumns(LayoutColumn (*columns)[MAX_COLUMNS], int* numColum
 	}
 	int lastColumn = 0;
 	for (int i = 0; i < *numColumns - 1; ++i) {
-		LayoutColumn& column = (*columns)[i];
+		LayoutColumn& column = columns[i];
 		column.left = lastColumn;
 		column.width = columnWidth;
 		lastColumn = lastColumn + columnWidth;
 	}
-	(*columns)[*numColumns-1].left = lastColumn;
-	(*columns)[*numColumns-1].width = widthAvailable - lastColumn;
+	columns[*numColumns-1].left = lastColumn;
+	columns[*numColumns-1].width = widthAvailable - lastColumn;
 
+	int startColumns[MAX_COLUMNS] = { 0 };
 	int columnLength = 0;
+	int totalLength = 0;
 	int desiredLength = length / *numColumns;
 	int currentColumn = 0;
+	static vector<int> positions(count, 0); // FIXME: move to layout
 	for (int i = 0; i < count; ++i) {
 		int childIndex = children[i];
 		LayoutElement& child = l->elements[childIndex];
 		int childFixedLength = e.type == HORIZONTAL ? l->minimalWidths[childIndex] : l->minimalHeights[childIndex];
+		positions[i] = totalLength;
+		totalLength += childFixedLength;
 		if (columnLength + childFixedLength > desiredLength && currentColumn + 1 < *numColumns) {
-			child.beginsColumn = true;
-			(*columns)[currentColumn].end = i;
+			startColumns[currentColumn] = i;
 			++currentColumn;
-			(*columns)[currentColumn].start = i;
-			*maxColumnLength = max(*maxColumnLength, columnLength);
 			columnLength = childFixedLength;
 		} else {
 			columnLength += childFixedLength;
 		}
 	}
-	(*columns)[currentColumn].end = count;
-	*maxColumnLength = max(*maxColumnLength, columnLength);
+
+	// search for best column fit in small range
+	// is there a better analytical solution?
+	int offsets[] = { -1, 0, 1, -2, 2 };
+	const int numOffsets = sizeof(offsets) / sizeof(offsets[0]);
+	int bestColumnStarts[MAX_COLUMNS] = { 0 };
+	int bestColumnLengths[MAX_COLUMNS] = { 0 };
+	int leastDistanceSquareSum = INT_MAX;
+	int maxOffsets = 1;
+	int currentOffsetIndices[MAX_COLUMNS] = { 0 };
+	printf("Possible columns:\n");
+	if (*numColumns > 1) {
+		while (true) {
+			// increment current offset indices
+			int column = 0;
+			for (; column < *numColumns; ++column) {
+				currentOffsetIndices[column] += 1;
+				if (currentOffsetIndices[column] < numOffsets)
+					break;
+				currentOffsetIndices[column] = 0;
+			}
+			if (column == *numColumns) {
+				break;
+			}
+
+			int currentColumns[MAX_COLUMNS-1];
+			for (int j = 0; j < *numColumns - 1; ++j) {
+				currentColumns[j] = startColumns[j] + offsets[currentOffsetIndices[j]];
+			}
+			
+			// compute column lengths
+			int columnLengths[MAX_COLUMNS];
+			columnLengths[0] = positions[currentColumns[0]];
+			for (int j = 1; j < *numColumns - 1; ++j) {
+				columnLengths[j] = positions[currentColumns[j]] - positions[currentColumns[j-1]];
+			}
+			columnLengths[*numColumns - 1] = totalLength - positions[currentColumns[*numColumns - 2]];
+
+			int error = 0;
+			int idealColumn = totalLength / *numColumns;
+			for (int j = 0; j < *numColumns; ++j) {
+				int delta = columnLengths[j] - idealColumn;
+				error += delta * delta;
+			}
+
+			if (error < leastDistanceSquareSum) {
+				leastDistanceSquareSum = error;
+				int lastLength = totalLength;
+				for (int j = 0; j < *numColumns - 1; ++j) {
+					bestColumnStarts[j] = currentColumns[j];
+					lastLength -= columnLengths[j];
+					bestColumnLengths[j] = columnLengths[j];
+				}
+				bestColumnLengths[*numColumns - 1] = lastLength;
+			}
+		}
+
+		printf("best columns:\n");
+		for (int i = 0; i < *numColumns; ++i) {
+			printf("%d ", bestColumnLengths[i]);
+			columns[i].start = i == 0 ? 0 : bestColumnStarts[i - 1];
+			columns[i].end = i < *numColumns - 1 ? bestColumnStarts[i] : count;
+
+			*maxColumnLength = max(*maxColumnLength, bestColumnLengths[i]);
+
+			if (i > 0) {
+				int childIndex = children[columns[i].start];
+				LayoutElement& child = l->elements[childIndex];
+				child.beginsColumn = true;
+			}
+		}
+		printf("\n");
+
+		for (int i = 0; i < *numColumns; ++i) {
+			printf("column %d %d:%d w %d\n", i, columns[i].start, columns[i].end, columns[i].width);
+		}
+	} else {
+		columns[0].start = 0;
+		columns[0].end = count;
+		*maxColumnLength = totalLength;
+	}
 }
 
 void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l, int element )
@@ -379,7 +460,7 @@ void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l
 				int numColumns = 1;
 				int maxColumnLength = 0;
 				const Rect& rect = l->rectangles[element];
-				calculateColumns(&columns, &numColumns, &maxColumnLength, &*l, element, rect.w);
+				calculateColumns(*&columns, &numColumns, &maxColumnLength, &*l, element, rect.w);
 				// repeat horizontal layout pass knowing that elements
 				// are split in the columns now
 				for (int i = 0; i < count; ++i) {
