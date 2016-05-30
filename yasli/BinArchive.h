@@ -18,17 +18,12 @@
 
 namespace yasli{
 
-inline unsigned short calcHash(const char* str)
+inline unsigned calcHash(const char* str, unsigned hash = 5381)
 {
-	unsigned short hash = 0;
-	const unsigned short* p = (const unsigned short*)(str);
-	for(;;){
-		unsigned short w = *p++;
-		if(!(w & 0xff))
-			break;
-		hash ^= w;
-		if(!(w & 0xff00))
-			break;
+	int l = strlen(str);
+	while(*str != '\0') {
+		hash = hash*33 + (unsigned char)*str;
+		++str;
 	}
 	return hash;
 }

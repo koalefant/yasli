@@ -40,8 +40,11 @@ enum { TEXT_VALUE_SPACING = 3 };
 
 inline unsigned calcHash(const char* str, unsigned hash = 5381)
 {
-	while(*str)
-		hash = hash*33 + (unsigned char)*str++;
+	int l = strlen(str);
+	while(*str != '\0') {
+		hash = hash*33 + (unsigned char)*str;
+		++str;
+	}
 	return hash;
 }
 
