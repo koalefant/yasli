@@ -201,7 +201,7 @@ struct TypeInfo
             if (send > s && *(send-1) == ' ')
                 --send;
         }
-#elif __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+#elif (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)) // at least 4.4.0
 		// static yasli::TypeID yasli::TypeID::get() [with T = ActualTypeName]
 		const char* s = strstr(funcName, "[with T = ");
 		if (s)
