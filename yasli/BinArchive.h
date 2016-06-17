@@ -18,6 +18,35 @@
 
 namespace yasli{
 
+#ifdef EMSCRIPTEN
+
+template<class T>
+class Unaligned
+{
+	char t_[sizeof(T)];
+public:
+	Unaligned(const T& t) { *this = t; }
+	void operator=(const T& t) { memcpy(t_, &t, sizeof(T)); }
+	operator T() const { T t; memcpy(&t, t_, sizeof(T)); return t; }
+	void operator+=(const T& t) { *this = operator T() + t; }
+};
+
+#else
+
+template<class T>
+class Unaligned
+{
+	T t_;
+public:
+	Unaligned(const T& t) { *this = t; }
+	void operator=(const T& t) { t_ = t; }
+	operator T() const { return t_; }
+	void operator+=(const T& t) { t_ += t; }
+};
+
+#endif
+
+#if YASLI_BIN_ARCHIVE_LEGACY_HASH
 inline unsigned short calcHash(const char* str)
 {
 	unsigned short hash = 0;
@@ -32,6 +61,17 @@ inline unsigned short calcHash(const char* str)
 	}
 	return hash;
 }
+#else
+inline unsigned short calcHash(const char* str)
+{
+	unsigned int hash = 1315423911;
+
+	while(*str)
+		hash ^= (hash << 5) + *str++ + (hash >> 2);
+
+	return (unsigned short)hash;
+}
+#endif
 
 class BinOArchive : public Archive{
 public:

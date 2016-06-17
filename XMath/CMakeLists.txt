@@ -1,15 +1,14 @@
 project("xmath")
 cmake_minimum_required(VERSION 3.4)
 
-
-if(WIN32)
+if(WIN32 AND ${CMAKE_SIZEOF_VOID_P} EQUAL 4)
     set(ERRH_SOURCES XErrHand/BSUFunctions.cpp XErrHand/CrashHandler.cpp XErrHand/DiagAssert.cpp XErrHand/GetLoadedModules.cpp XErrHand/IsNT.cpp XErrHand/NT4ProcessInfo.cpp XErrHand/TLHELPProcessInfo.cpp
 	XErrHand/XERRHAND.CPP XErrHand/BugslayerUtil.h XErrHand/CrashHandler.h XErrHand/CriticalSection.h XErrHand/DiagAssert.h XErrHand/Internal.h XErrHand/MemDumperValidator.h XErrHand/MSJDBG.h XErrHand/PCH.h
-	XErrHand/PSAPI.H XErrHand/SymbolEngine.h XErrHand/WarningsOff.h XErrHand/WarningsOn.h)
+	XErrHand/PSAPI.H XErrHand/SymbolEngine.h XErrHand/WarningsOff.h XErrHand/WarningsOn.h Profiler.cpp Profiler.h XClock.cpp XClock.h)
     source_group("Errh" FILES ${ERRH_SOURCES})
-else(WIN32)
+else()
     set(ERRH_SOURCES)
-endif(WIN32)
+endif()
 
 set(SOURCES xmath.h XMath.cpp Recti.cpp Rectf.cpp Range.cpp Colors.cpp ExceptionStub.cpp)
 source_group("" FILES ${SOURCES})
@@ -23,7 +22,7 @@ if (CMAKE_CXX_COMPILER MATCHES "clang")
 endif()
 
 if (EMSCRIPTEN)
-add_library("xmath" SHARED ${SOURCES})
+add_library("xmath" ${SOURCES})
 else (EMSCRIPTEN)
 add_library("xmath" ${SOURCES} ${ERRH_SOURCES})
 endif (EMSCRIPTEN)
