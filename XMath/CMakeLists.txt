@@ -1,5 +1,5 @@
 project("xmath")
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 2.8)
 
 if(WIN32 AND ${CMAKE_SIZEOF_VOID_P} EQUAL 4)
     set(ERRH_SOURCES XErrHand/BSUFunctions.cpp XErrHand/CrashHandler.cpp XErrHand/DiagAssert.cpp XErrHand/GetLoadedModules.cpp XErrHand/IsNT.cpp XErrHand/NT4ProcessInfo.cpp XErrHand/TLHELPProcessInfo.cpp
