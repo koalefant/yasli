@@ -152,8 +152,10 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
 void PropertyTreeModel::undo()
 {
     YASLI_ESCAPE(!undoOperators_.empty(), return);
-    applyOperator(&undoOperators_.back(), true);
-    undoOperators_.pop_back();
+	PropertyTreeOperator op;
+	std::swap(op, undoOperators_.back());
+	undoOperators_.pop_back();
+	applyOperator(&op, true);
 }
 
 PropertyTreeModel::UpdateLock PropertyTreeModel::lockUpdate()
