@@ -962,6 +962,33 @@ void PropertyTree::updateAttachedPropertyTree(bool revert)
  	}
 }
 
+void toLowerUtf8(char* str)
+{
+#ifdef WW_DISABLE_UTF8
+	for(;*str; ++str)
+		*str = tolower(*str);
+#else
+	std::wstring ws = toWideChar(str);
+	_wcslwr_s((wchar_t*)ws.c_str(), ws.size() + 1);
+	std::string sl = fromWideChar(ws.c_str());
+	strcpy(str, sl.c_str());
+#endif
+}
+
+size_t countCharsUtf8(const char* str, const char* subStr)
+{
+	YASLI_ASSERT(str <= subStr);
+	size_t count = 0;
+#ifdef WW_DISABLE_UTF8
+	for(;str != subStr; ++str)
+		++count;
+#else
+	for(;str != subStr; ++str)
+		if((unsigned char)*str >> 7 == 0 || (unsigned char)*str >> 6 == 3)
+			++count;
+#endif
+	return count;
+}
 
 void PropertyTree::RowFilter::parse(const char* filter)
 {
@@ -974,9 +1001,7 @@ void PropertyTree::RowFilter::parse(const char* filter)
 	YASLI_ESCAPE(filter != 0, return);
 
 	vector<char> filterBuf(filter, filter + strlen(filter) + 1);
-	for (size_t i = 0; i < filterBuf.size(); ++i)
-		filterBuf[i] = tolower(filterBuf[i]);
-
+	toLowerUtf8(&filterBuf[0]);
 	const char* str = &filterBuf[0];
 
 	Type type = NAME_VALUE;
@@ -1043,8 +1068,7 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 		size_t textLen = strlen(textOriginal);
         text = (char*)alloca((textLen + 1));
 		memcpy(text, textOriginal, (textLen + 1));
-		for (char* p = text; *p; ++p)
-			*p = tolower(*p);
+		toLowerUtf8(text);
 	}
 	
 	const yasli::string &start = this->start[type];
@@ -1086,10 +1110,10 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 		}
 		startPos += substrings[i].size();
 		if (matchStart && i == 0 && start.empty()) {
-			*matchStart = substr - text;
+			*matchStart = countCharsUtf8(text, substr);
 		}
 		if (matchEnd)
-			*matchEnd = substr - text + substrings[i].size();
+			*matchEnd = countCharsUtf8(text, substr + substrings[i].size());
 	}
 	return true;
 }
