@@ -978,16 +978,15 @@ void toLowerUtf8(char* str)
 size_t countCharsUtf8(const char* str, const char* subStr)
 {
 	YASLI_ASSERT(str <= subStr);
-	size_t count = 0;
 #ifdef WW_DISABLE_UTF8
-	for(;str != subStr; ++str)
-		++count;
+	return subStr - str;
 #else
+	size_t count = 0;
 	for(;str != subStr; ++str)
 		if((unsigned char)*str >> 7 == 0 || (unsigned char)*str >> 6 == 3)
 			++count;
-#endif
 	return count;
+#endif
 }
 
 void PropertyTree::RowFilter::parse(const char* filter)
