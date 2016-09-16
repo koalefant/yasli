@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project("yasli")
 
+if(UNIX)
+# This is needed only for Vim to be able to figure out what path errors are erelative to
+message("make: Entering Directory '${CMAKE_CURRENT_SOURCE_DIR}'")
+endif()
+
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
@@ -40,3 +45,6 @@ add_subdirectory(QPropertyTree-example)
 #   add_subdirectory(ww-example)
 # endif (MSVC)
 
+if(UNIX)
+message("make: Entering Directory '${CMAKE_BINARY_DIR}'")
+endif()
