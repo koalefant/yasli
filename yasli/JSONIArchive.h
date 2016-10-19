@@ -25,6 +25,11 @@ public:
 
 	bool load(const char* filename);
 	bool open(const char* buffer, size_t length, bool free = false);
+	// filename that will be include with errors produced with error() calls
+	void setDebugFilename(const char* filename);
+	// enabled by default, can be disabled for performance reasons
+	void setWarnAboutUnusedFields(bool warn) { warnAboutUnusedFields_ = warn; }
+	int unusedFieldCount() const { return unusedFieldCount_; }
 
 	bool operator()(bool& value, const char* name = "", const char* label = 0) override;
 	bool operator()(char& value, const char* name = "", const char* label = 0) override;
@@ -47,9 +52,11 @@ public:
 	bool operator()(KeyValueInterface& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(PointerInterface& ser, const char* name = "", const char* label = 0) override;
 
+	void validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) override;
+
 	using Archive::operator();
 private:
-	bool findName(const char* name, Token* outName = 0);
+	bool findName(const char* name, Token* outName = 0, bool untilEndOfBlockOnly = false);
 	bool openBracket();
 	bool closeBracket();
 
@@ -57,10 +64,11 @@ private:
 	bool closeContainerBracket();
 
 	void checkValueToken();
+	void checkIntegerToken();
 	bool checkStringValueToken();
 	void readToken();
 	void putToken();
-	int line(const char* position) const; 
+	int line(int * column_no, const char* position) const; 
 	bool isName(Token token) const;
 
 	bool expect(char token);
@@ -71,7 +79,10 @@ private:
 		const char* firstToken;
 		bool isContainer;
 		bool isKeyValue;
-		Level() : isContainer(false), isKeyValue(false) {}
+		int fieldIndex;
+		bool parsedBlock;
+		std::vector<Token> names;
+		Level() : isContainer(false), isKeyValue(false), fieldIndex(0), parsedBlock(false) {}
 	};
 	typedef std::vector<Level> Stack;
 	Stack stack_;
@@ -80,6 +91,8 @@ private:
 	Token token_;
 	std::vector<char> unescapeBuffer_;
 	string filename_;
+	bool warnAboutUnusedFields_;
+	int unusedFieldCount_;
 	void* buffer_;
 };
 

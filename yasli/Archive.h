@@ -152,6 +152,7 @@ public:
 	template<class T> void warning(T& value, const char* format, ...);
 
 	void error(const void* value, const yasli::TypeID& type, const char* format, ...);
+	void warning(const void* value, const yasli::TypeID& type, const char* format, ...);
 	// Used to add tooltips in PropertyTree
 	void doc(const char* docString);
 
@@ -304,6 +305,20 @@ void Archive::warning(T& value, const char* format, ...)
 template<class T>
 bool Archive::operator()(const T& value, const char* name, const char* label){
     return YASLI_SERIALIZE_OVERRIDE(*this, const_cast<T&>(value), name, label);
+}
+
+inline void Archive::warning(const void* handle, const yasli::TypeID& type, const char* format, ...)
+{
+#if !YASLI_NO_EDITING
+	if ((caps_ & VALIDATION) == 0)
+		return;
+	va_list args;
+	va_start(args, format);
+	char buf[1024];
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+	validatorMessage(false, handle, type, buf);
+#endif
 }
 
 inline bool Archive::operator()(PointerInterface& ptr, const char* name, const char* label)

@@ -32,6 +32,9 @@ struct Token{
 			return false;
 		return memcmp(start, rhs.start, length()) == 0;
 	}
+	bool operator!=(const Token& rhs) const{
+		return !operator==(rhs);
+	}
 	bool operator==(const std::string& rhs) const{
 		if(length() != rhs.size())
 			return false;

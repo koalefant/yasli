@@ -19,7 +19,6 @@
 #include "yasli/Config.h"
 #include "JSONIArchive.h"
 #include "MemoryReader.h"
-#include "MemoryWriter.h"
 
 #ifdef _MSC_VER
 #ifndef NAN
@@ -29,8 +28,8 @@
 #endif
 
 #if 0
-# define DEBUG_TRACE(fmt, ...) printf(fmt "\n", __VA_ARGS__)
-# define DEBUG_TRACE_TOKENIZER(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+# define DEBUG_TRACE(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
+# define DEBUG_TRACE_TOKENIZER(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 #else
 # define DEBUG_TRACE(...)
 # define DEBUG_TRACE_TOKENIZER(...)
@@ -133,6 +132,48 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 		out.assign(&buf[0], &buf[0] + buf.size());
 	else
 		out.clear();
+}
+
+static Token get_line_content(const char* buffer, int line) {
+	const char* start = buffer;
+	for (int i = 0; i < line - 1; ++i) {
+		const char* p = start;
+		while (true) {
+			if (*p == '\0')
+				return Token();
+			if (*p == '\n') {
+				++p;
+				break;
+			}
+			++p;
+		}
+		start = p;
+	}
+	const char* p = start;
+	while (true) {
+		if (*p == '\0' || *p == '\n')
+			break;
+		++p;
+	}
+	return Token(start, p);
+}
+
+static void print_line_with_underlined_token(const char* buffer, int line_no, const Token& token) {
+	Token line_content = get_line_content(buffer, line_no);
+	printf("\t%s\n", line_content.str().c_str());
+	string line_underline;
+	line_underline.reserve(line_content.length());
+	for (const char* p = line_content.start; p != line_content.end; ++p) {
+		if (p == token.start)
+			line_underline.push_back('^');
+		else if (p > token.start && p < token.end)
+			line_underline.push_back('~');
+		else if (*p == '\t' || *p == '\n' || *p == '\r')
+			line_underline.push_back(*p);
+		else
+			line_underline.push_back(' ');
+	}
+	printf("\t%s\n", line_underline.c_str());
 }
 
 // ---------------------------------------------------------------------------
@@ -510,7 +551,7 @@ Token JSONTokenizer::operator()(const char* ptr) const
 			if(!*cur.end)
 				return cur;
 
-			DEBUG_TRACE_TOKENIZER("%c", *cur.end);
+			DEBUG_TRACE_TOKENIZER("%d", (int)*cur.end);
 			if(isWordPart(*cur.end))
 			{
 				do{
@@ -534,8 +575,10 @@ Token JSONTokenizer::operator()(const char* ptr) const
 // ---------------------------------------------------------------------------
 
 JSONIArchive::JSONIArchive()
-: Archive(INPUT | TEXT)
+: Archive(INPUT | TEXT | VALIDATION)
 , buffer_(0)
+, warnAboutUnusedFields_(true)
+, unusedFieldCount_(0)
 {
 }
 
@@ -565,6 +608,7 @@ bool JSONIArchive::open(const char* buffer, size_t length, bool free)
 	readToken();
 	putToken();
 	stack_.back().start = token_.end;
+	unusedFieldCount_ = 0;
 	return true;
 }
 
@@ -608,18 +652,27 @@ void JSONIArchive::readToken()
 {
 	JSONTokenizer tokenizer;
 	token_ = tokenizer(token_.end);
-	DEBUG_TRACE(" ~ read token '%s' at %i", token_.str().c_str(), int(token_.start - reader_->begin()));
 }
 
 void JSONIArchive::putToken()
 {
-	DEBUG_TRACE(" putToken: '%s'", token_.str().c_str());
     token_ = Token(token_.start, token_.start);
 }
 
-int JSONIArchive::line(const char* position) const
+int JSONIArchive::line(int* column_no, const char* position) const
 {
-	return int(std::count(reader_->begin(), position, '\n') + 1);
+	int line_no = 1;
+	const char* last_line = position;
+	for (const char* p = reader_->begin(); p != position; ++p) {
+		if (*p == '\n') {
+			++line_no;
+			last_line = p;
+		}
+	}
+	if (column_no) {
+		*column_no = position - last_line;
+	}
+	return line_no;
 }
 
 bool JSONIArchive::isName(Token token) const
@@ -639,11 +692,8 @@ bool JSONIArchive::expect(char token)
 		const char* lineEnd = token_.start;
 		while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
 			++lineEnd;
-
-		MemoryWriter msg;
-		msg << "Error parsing file, expected ':' at line " << line(token_.start) << ":\n"
-		<< string(token_.start, lineEnd).c_str();
-		YASLI_ASSERT_STR(0, msg.c_str());
+		error(0, TypeID(), "Error parsing file, expected ':' at line %d, got '%s'\n",
+			  line(nullptr, token_.start), string(token_.start, lineEnd).c_str());
 		return false;
 	}
 	return true;
@@ -660,9 +710,10 @@ void JSONIArchive::skipBlock()
 	if (token_ != ',')
 		putToken();
 	DEBUG_TRACE(" ...till %i", int(token_.end - reader_->begin()));
+	DEBUG_TRACE("Skipped");
 }
 
-bool JSONIArchive::findName(const char* name, Token* outName)
+bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlockOnly)
 {
 	DEBUG_TRACE(" * finding name '%s'", name);
 	DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
@@ -670,23 +721,21 @@ bool JSONIArchive::findName(const char* name, Token* outName)
 		// TODO: diagnose
 		return false;
 	}
-	if (stack_.back().isKeyValue)
+	Level& level = stack_.back();
+	if (level.isKeyValue)
 		return true;
-	const char* start = 0;
-	const char* blockBegin = stack_.back().start;
+	const char* blockBegin = level.start;
 	if(*blockBegin == '\0')
 		return false;
 
-	readToken();
-	if (token_ == ',')
-		readToken();
-	if(!token_){
-		start = blockBegin;
-		token_.set(blockBegin, blockBegin);
-		readToken();
-	}
 
-	if(stack_.size() == 1 || stack_.back().isContainer || outName != 0){
+	if(stack_.size() == 1 || level.isContainer || outName != 0){
+		// root or container or next value in a key-pair
+		readToken();
+		if (token_ == ',')
+			readToken();
+		// root level or inside of the container, or a structure that pretends to be an array by
+		// specifying empty names
 		if(token_ == ']' || token_ == '}'){
 			DEBUG_TRACE("Got close bracket...");
 			putToken();
@@ -698,59 +747,48 @@ bool JSONIArchive::findName(const char* name, Token* outName)
 			return true;
 		}
 	}
-	else{
-		if(isName(token_)){
-			DEBUG_TRACE("Seems to be a name '%s'", token_.str().c_str());
-			Token nameContent(token_.start+1, token_.end-1);
-			if(nameContent == name){
-				readToken();
-				expect(':');
-				DEBUG_TRACE("Got one");
-				return true;
-			}
-			else{
-				start = token_.start;
 
-				readToken();
-				expect(':');
-				skipBlock();
-			}
-		}
-		else{
-			start = token_.start;
-			if(token_ == ']' || token_ == '}')
-				token_ = Token(blockBegin, blockBegin);
-			else{
-				putToken();
-				skipBlock();
-			}
-		}
-	}
-
+	Token start;
 	while(true){
 		readToken();
+		if (token_ == ',')
+			readToken();
 		if(!token_){
-			token_.set(blockBegin, blockBegin);
-			continue;
+			// end of file
+			error(0, TypeID(), "Unexpected end of file");
+			return false;
 		}
-		//return false; // Reached end of file while searching for name
-		DEBUG_TRACE("'%s'", token_.str().c_str());
-		DEBUG_TRACE("Checking for loop: %i and %i", token_.start - reader_->begin(), start - reader_->begin());
-		YASLI_ASSERT(start != 0);
-		if(token_.start == start){
+		DEBUG_TRACE("token '%s'", token_.str().c_str());
+		DEBUG_TRACE("Checking for loop: %d and %d, start %s", int(token_.start - reader_->begin()), int(start.start - reader_->begin()), start.str().c_str());
+
+		if(token_ == start){
+			// we have seen this token before, it is a full circle and we haven't found the name we
+			// were looking for
 			putToken();
 			DEBUG_TRACE("unable to find...");
-			return false; // Reached a full circle: unable to find name
+			return false;
+		} else {
+			// initialize start
+			if (start == Token()) {
+				DEBUG_TRACE("initialized start to '%s'", token_.str().c_str());
+				start = token_;
+			}
 		}
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
-			DEBUG_TRACE("Going to begin of block, from %i", token_.start - reader_->begin());
+			DEBUG_TRACE("Going to begin of block, from %d", int(token_.start - reader_->begin()));
+			YASLI_ASSERT(start != Token());
 			token_ = Token(blockBegin, blockBegin);
-			DEBUG_TRACE(" to %i", token_.start - reader_->begin());
+			level.fieldIndex = 0;
+			level.parsedBlock = true;
+			DEBUG_TRACE(" to %i", int(token_.start - reader_->begin()));
+			if (untilEndOfBlockOnly) {
+				return false;
+			}
 			continue; // Reached '}' or ']' while searching for name, continue from begin of block
 		}
 
-		if(name[0] == '\0'){
+		if(name[0] == '\0' && !untilEndOfBlockOnly){
 			if(isName(token_)){
 				readToken();
 				if(!token_)
@@ -759,19 +797,43 @@ bool JSONIArchive::findName(const char* name, Token* outName)
 				skipBlock();
 			}
 			else{
-				putToken(); // Not a name - put it back
+				putToken(); // Not a name - that is what we are looking for
 				return true;
 			}
 		}
 		else{
 			if(isName(token_)){
+				Token nameToken = token_;
 				Token nameContent(token_.start+1, token_.end-1);
 				readToken();
 				expect(':');
-				if(nameContent == name)
+				if(nameContent == name) {
+					if (outName)
+						*outName = nameContent;
+					if (warnAboutUnusedFields_) {
+						// mark name as used
+						if (level.fieldIndex < level.names.size()) {
+							level.names[level.fieldIndex] = Token();
+						} else {
+							YASLI_ASSERT(level.names.size() == level.fieldIndex);
+							level.names.push_back(Token());
+						}
+						++level.fieldIndex;
+					}
 					return true;
-				else
+				}
+				else {
 					skipBlock();
+					if (warnAboutUnusedFields_) {
+						// mark name as unused
+						if (level.fieldIndex >= level.names.size()) {
+							YASLI_ASSERT(level.names.size() == level.fieldIndex);
+							level.names.push_back(nameToken);
+						}
+						++level.fieldIndex;
+					}
+				}
+
 			}
 			else{
 				putToken();
@@ -801,12 +863,10 @@ bool JSONIArchive::closeBracket()
 		if (token_ == ',')
 			readToken();
         if(!token_){
-            MemoryWriter msg;
             YASLI_ASSERT(!stack_.empty());
             const char* start = stack_.back().start;
-            msg << filename_.c_str() << ": " << line(start) << " line";
-            msg << ": End of file while no matching bracket found";
-			YASLI_ASSERT_STR(0, msg.c_str());
+			int column = 0;
+			error(nullptr, TypeID(), "No closing bracket found for line %d\n", line(nullptr, start));
 			return false;
         }
 		else if(token_ == '}' || token_ == ']'){ // CONVERSION
@@ -862,10 +922,32 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 
         if (ser)
             ser(*this);
+
+		if (warnAboutUnusedFields_) {
+			Level& level = stack_.back();
+
+			// read remaining names
+			if (!level.parsedBlock) {
+				findName("", nullptr, true);
+			}
+
+			int numFields = level.names.size();
+			for (int i = 0; i < numFields; ++i) {
+				Token token = level.names[i];
+				if (token != Token()) {
+					int column_no = 0;
+					int line_no = line(&column_no, token.start);
+					fprintf(stderr, "%s:%d:%d: error: unused field %s while deserializing type %s\n",
+							filename_.c_str(), line_no, column_no, token.str().c_str(), ser.type().name());
+					print_line_with_underlined_token(reader_->buffer(), line_no, token);
+					++unusedFieldCount_;
+				}
+			}
+		}
+
         YASLI_ASSERT(!stack_.empty());
         stack_.pop_back();
-        bool closed = closeBracket();
-        YASLI_ASSERT(closed);
+        closeBracket();
         return true;
     }
     return false;
@@ -982,6 +1064,8 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 		if (!containerBracket)
 			dictionaryBracket = openBracket();
 		if(containerBracket || dictionaryBracket){
+			if (dictionaryBracket)
+				warning(nullptr, TypeID(), "Container opens with a figure bracket instead of expected square bracket");
 			stack_.push_back(Level());
 			stack_.back().isContainer = true;
 			stack_.back().start = token_.end;
@@ -999,7 +1083,7 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 					break;
 				else if(!token_)
 				{
-					YASLI_ASSERT(0 && "Reached end of file while reading container!");
+					error(nullptr, TypeID(), "Reached end of file while reading container");
 					return false;
 				}
 				putToken();
@@ -1026,6 +1110,8 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 			YASLI_ASSERT(!stack_.empty());
 			stack_.pop_back();
 			return true;
+		} else {
+			warning(nullptr, TypeID(), "Non-container value where container is expected");
 		}
     }
     return false;
@@ -1035,32 +1121,34 @@ void JSONIArchive::checkValueToken()
 {
     if(!token_){
         YASLI_ASSERT(!stack_.empty());
-        MemoryWriter msg;
-        const char* start = stack_.back().start;
-        msg << filename_.c_str() << ": " << line(start) << " line";
-        msg << ": End of file while reading element's value";
-        YASLI_ASSERT_STR(0, msg.c_str());
+		error(nullptr, TypeID(), "End of while while expecting value token");
     }
+}
+
+void JSONIArchive::checkIntegerToken()
+{
+    if(!token_){
+        YASLI_ASSERT(!stack_.empty());
+		error(nullptr, TypeID(), "Reached end of file while expecting a value token");
+    } else {
+		const char* p = token_.start;
+		for (const char* p = token_.start; p != token_.end; ++p) {
+			if (*p != '-' && *p != '+' && !(*p >= '0' && *p <= '9')) {
+				error(nullptr, TypeID(), "Expecting an integer instead of %s", string(token_.start, token_.end).c_str());
+				return;
+			}
+		}
+	}
 }
 
 bool JSONIArchive::checkStringValueToken()
 {
     if(!token_){
-        return false;
-        MemoryWriter msg;
-        const char* start = stack_.back().start;
-        msg << filename_.c_str() << ": " << line(start) << " line";
-        msg << ": End of file while reading element's value";
-        YASLI_ASSERT_STR(0, msg.c_str());
+		error(nullptr, TypeID(), "End of file while expecting string");
 		return false;
     }
     if(token_.start[0] != '"' || token_.end[-1] != '"'){
-        return false;
-        MemoryWriter msg;
-        const char* start = stack_.back().start;
-        msg << filename_.c_str() << ": " << line(start) << " line";
-        msg << ": Expected string";
-        YASLI_ASSERT_STR(0, msg.c_str());
+		error(nullptr, TypeID(), "Expecting string instead of %s", token_.str().c_str());
 		return false;
     }
     return true;
@@ -1070,7 +1158,7 @@ bool JSONIArchive::operator()(i32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = strtol(token_.start, 0, 10);
         return true;
     }
@@ -1081,7 +1169,7 @@ bool JSONIArchive::operator()(u32& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = strtoul(token_.start, 0, 10);
         return true;
     }
@@ -1093,7 +1181,7 @@ bool JSONIArchive::operator()(i16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = (short)strtol(token_.start, 0, 10);
         return true;
     }
@@ -1104,7 +1192,7 @@ bool JSONIArchive::operator()(u16& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = (unsigned short)strtoul(token_.start, 0, 10);
         return true;
     }
@@ -1115,7 +1203,7 @@ bool JSONIArchive::operator()(i64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
 #ifdef _MSC_VER
 		value = _strtoi64(token_.start, 0, 10);
 #else
@@ -1130,7 +1218,7 @@ bool JSONIArchive::operator()(u64& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
 #ifdef _MSC_VER
 		value = _strtoui64(token_.start, 0, 10);
 #else
@@ -1319,8 +1407,9 @@ bool JSONIArchive::operator()(bool& value, const char* name, const char* label)
             value = true;
         else if(token_ == "false")
             value = false;
-		else 
-			YASLI_ASSERT(0 && "Invalid boolean value");
+		else {
+			error(nullptr, TypeID(), "Expecting true or false");
+		}
         return true;
     }
     return false;
@@ -1330,7 +1419,7 @@ bool JSONIArchive::operator()(i8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = (i8)strtol(token_.start, 0, 10);
         return true;
     }
@@ -1341,7 +1430,7 @@ bool JSONIArchive::operator()(u8& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = (u8)strtol(token_.start, 0, 10);
         return true;
     }
@@ -1352,11 +1441,26 @@ bool JSONIArchive::operator()(char& value, const char* name, const char* label)
 {
     if(findName(name)){
         readToken();
-        checkValueToken();
+        checkIntegerToken();
         value = (char)strtol(token_.start, 0, 10);
         return true;
     }
     return false;
+}
+
+void JSONIArchive::setDebugFilename(const char* filename) {
+	filename_ = filename;
+}
+
+void JSONIArchive::validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) {
+	if (token_.start) {
+		int column_no = 0;
+		int line_no = line(&column_no, token_.start);
+		fprintf(stderr, "%s:%d:%d: %s: %s\n", filename_.c_str(), line_no, column_no, error?"error":"warning", message);
+		print_line_with_underlined_token(reader_->buffer(), line_no, token_);
+	} else {
+		fprintf(stderr, "%s: %s: %s\n", filename_.c_str(), error?"error":"warning", message);
+	}
 }
 
 }
