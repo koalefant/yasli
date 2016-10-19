@@ -488,19 +488,6 @@ void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l
 	}
 }
 
-static void adjustChildrenRectangles_r(Layout* l, int index, int deltaX) {
-	Rect & childRect = l->rectangles[index];
-	childRect.x = childRect.x + deltaX;
-	LayoutElement& e = l->elements[index];
-	if (e.childrenList == -1) {
-		return;
-	}
-	const vector<int>& children = l->childrenLists[e.childrenList].children;
-	for(int i = 0; i < children.size(); ++i) {
-		adjustChildrenRectangles_r(l, children[i], deltaX);
-	}
-}
-
 void calculateRectangles_r(Layout* l, ElementType pass, int element, int length, int offset)
 {
 	LayoutElement& e = l->elements[element];
