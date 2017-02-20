@@ -188,7 +188,7 @@ BOOL Viewport2DImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 
 Viewport2D::Viewport2D(int border, int fontHeight)
 : _WidgetWithWindow(new Viewport2DImpl(this), border)
-, viewOffset_(Vect2f::ZERO)
+, viewOffset_(0)
 , viewSize_(Vect2::ZERO)
 , zoomIndex_(4)
 , scrolling_(false)
@@ -199,7 +199,7 @@ Viewport2D::Viewport2D(int border, int fontHeight)
 , enableBasicNavigation_(true)
 , viewCenter_(0.5f, 0.5f)
 {
-	viewScale_ = Vect2f::ID*ZoomTable[zoomIndex_];
+	viewScale_ = Vect2f(1)*ZoomTable[zoomIndex_];
 	createFont();
 }
 
@@ -240,7 +240,7 @@ void Viewport2D::setVisibleArea(const Rectf& rect, bool preserveAspect)
 {
 	viewOffset_ = -rect.leftTop() - rect.size() * 0.5f;
 	if(preserveAspect)
-		viewScale_ = Vect2f::ID*min(viewSize_.x/rect.size().x, viewSize_.y/rect.size().y);
+		viewScale_ = Vect2f(1)*min(viewSize_.x/rect.size().x, viewSize_.y/rect.size().y);
 	else
 		viewScale_.set(viewSize_.x/rect.size().x, viewSize_.y/rect.size().y);
 }
@@ -283,7 +283,7 @@ void Viewport2D::onMouseButtonDown(MouseButton button)
 	if(button == ww::MOUSE_BUTTON_WHEEL_DOWN){
         if(enableBasicNavigation_){
             zoomIndex_ = std::max(0, zoomIndex_ - 1);
-            viewScale_ = Vect2f::ID*ZoomTable[zoomIndex_];
+            viewScale_ = Vect2f(1)*ZoomTable[zoomIndex_];
             createFont();
             redraw();
         }
@@ -291,7 +291,7 @@ void Viewport2D::onMouseButtonDown(MouseButton button)
 	else if(button == ww::MOUSE_BUTTON_WHEEL_UP){
         if(enableBasicNavigation_){
             zoomIndex_ = min(MaxZoom - 1, zoomIndex_ + 1);
-            viewScale_ = Vect2f::ID*ZoomTable[zoomIndex_];
+            viewScale_ = Vect2f(1)*ZoomTable[zoomIndex_];
             createFont();
             redraw();
         }
@@ -440,7 +440,7 @@ void Viewport2D::drawText(HDC dc, const Vect2f& pos, const char* _text, const Co
 		sign.y = -0.5f;
 
 	if(backColor.a){
-		drawRectangle(dc, Rectf(pos - Vect2f::ID*pixelWidth(), (size + Vect2f::ID*2)/viewScale()), Color4c::BLACK);
+		drawRectangle(dc, Rectf(pos - Vect2f(1)*pixelWidth(), (size + Vect2f(1)*2)/viewScale()), Color4c::BLACK);
 		fillRectangle(dc, Rectf(pos, size/viewScale()), backColor);
 	}
 
