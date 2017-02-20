@@ -544,7 +544,7 @@ bool JSONIArchive::load(const char* filename)
 
 		void* buffer = 0;
 		if(fileSize > 0){
-			buffer = malloc(fileSize + 1);
+			buffer = new char[fileSize + 1];
 			YASLI_ASSERT(buffer != 0);
 			memset(buffer, 0, fileSize + 1);
 			size_t elementsRead = fread(buffer, fileSize, 1, file);
