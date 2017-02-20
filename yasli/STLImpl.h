@@ -14,9 +14,6 @@
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
 
-#pragma warning(push)
-#pragma warning(disable:4512)
-
 namespace yasli {
 
 template<class Container, class Element>
@@ -250,5 +247,3 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const c
 }
 
 }
-
-#pragma warning(pop)

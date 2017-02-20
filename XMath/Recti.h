@@ -37,6 +37,10 @@ public:
 		return Recti( min_ + offset, max_ + offset );
 	}
 
+	bool operator==(const Recti& rect) const {
+		return min_ == rect.min_ && max_ == rect.max_;
+	}
+
     void setLeft( int _left ){ min_.x = _left; }
     void setTop( int _top ){ min_.y = _top; }
     void setRight( int _right ){ max_.x = _right; }

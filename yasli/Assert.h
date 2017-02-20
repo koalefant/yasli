@@ -39,7 +39,9 @@ inline bool assertionDialog(const char* function, const char* fileName, int line
 # define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, __VA_ARGS__) ? YASLI_DEBUG_BREAK, false : false))
 #else
 // gcc doesn't remove trailing comma when __VA_ARGS__ is empty, but one can workaround this with ## prefix
+#ifdef __clang__
 # pragma clang system_header // to disable -Wunused-value
+#endif
 # define YASLI_ASSERT(expr, ...) ((expr) || (yasli::assertionDialog(__FUNCTION__, __FILE__, __LINE__, #expr, ##__VA_ARGS__) ? YASLI_DEBUG_BREAK, false : false))
 #endif
 #define YASLI_CHECK YASLI_ASSERT
@@ -51,5 +53,8 @@ inline bool assertionDialog(const char* function, const char* fileName, int line
 // use YASLI_CHECK instead
 #define YASLI_ESCAPE(x, action) if(!(x)) { YASLI_ASSERT(0 && #x); action; } 
 
+#ifdef _MSC_VER
 #pragma warning(disable:4127)
+#endif
+
 #endif

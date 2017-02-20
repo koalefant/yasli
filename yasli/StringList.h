@@ -81,8 +81,7 @@ protected:
 class StringList: public StringListBase{
 public:
     StringList() {}
-    StringList(const StringList& rhs){
-        *this  = rhs;
+    StringList(const StringList& rhs) : StringListBase(rhs){
     }
     StringList(const StringListStatic& rhs){
         const int size = int(rhs.size());

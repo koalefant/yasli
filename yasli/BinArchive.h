@@ -160,7 +160,7 @@ private:
 	{
 	public:
 		Block(const char* data, int size) : 
-		  begin_(data), curr_(data), end_(data + size), complex_(false), disableCheck_(false), isPointer_(false) {}
+		  begin_(data), end_(data + size), curr_(data), complex_(false), disableCheck_(false), isPointer_(false) {}
 
 		  bool get(const char* name, Block& block);
 

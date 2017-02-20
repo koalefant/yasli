@@ -4,8 +4,9 @@
 
 namespace yasli{
 
-#pragma warning (push)
+#ifdef _MSC_VER
 #pragma warning (disable:4127)
+#endif
 
 template<class _Dest, class _Source>
 _Dest safe_cast(_Source* source){
@@ -26,8 +27,5 @@ _Dest safe_cast(_Source& source){
 	return static_cast<_Dest>(source);
 #endif
 }
-
-#pragma warning (pop)
-
 
 }

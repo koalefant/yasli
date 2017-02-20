@@ -3,9 +3,11 @@
 #include "fastMath.h"
 #include "round.h"
 
+#ifdef _MSC_VER
 #pragma warning (disable : 4244)
 #pragma warning (disable : 4201)
 #pragma warning (disable : 4239)
+#endif
 
 namespace yasli { class Archive; }
 
@@ -3760,7 +3762,7 @@ QuatF operator* (float w,const QuatF& q)
 inline void QuatF::slerp(const QuatF& a,const QuatF& b,float t)
 { 
 	// Slerp(q1,q2,t) = (sin((1-t)*A)/sin(A))*q1+(sin(t*A)/sin(A))*q2 
-	// Но делаем линейную интерполяцию и нормализуем
+	// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     float cosom = a.dot(b);
     if(cosom < 0.0){ 

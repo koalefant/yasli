@@ -99,6 +99,7 @@ typedef std::vector<Serializer> Serializers;
 
 class ContainerInterface{
 public:
+	virtual ~ContainerInterface(){}
 	virtual size_t size() const = 0;
 	virtual size_t resize(size_t size) = 0;
 	virtual bool isFixedSize() const{ return false; }
@@ -162,6 +163,7 @@ class ClassFactoryBase;
 class PointerInterface
 {
 public:
+	virtual ~PointerInterface(){}
 	virtual TypeID type() const = 0;
 	virtual void create(TypeID type) const = 0;
 	virtual TypeID baseType() const = 0;
@@ -175,12 +177,14 @@ public:
 class StringInterface
 {
 public:
+	virtual ~StringInterface(){}
 	virtual void set(const char* value) = 0;
 	virtual const char* get() const = 0;
 };
 class WStringInterface
 {
 public:
+	virtual ~WStringInterface(){}
 	virtual void set(const wchar_t* value) = 0;
 	virtual const wchar_t* get() const = 0;
 };

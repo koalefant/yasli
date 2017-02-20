@@ -31,9 +31,10 @@ struct BitVectorWrapper
 			value = *valuePointer;
     }
     BitVectorWrapper(const BitVectorWrapper& _rhs)
-    : value(_rhs.value)
+    : valuePointer(0)
+	, value(_rhs.value)
     , description(0)
-	, valuePointer(0)
+
     {
     }
 

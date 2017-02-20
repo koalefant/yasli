@@ -37,13 +37,13 @@ public:
 	{}
 
 	TypeID(const TypeID& original)
-	: 
+	:
+	typeInfo_(original.typeInfo_),
 #if !YASLI_NO_RTTI
-	name_(original.name_),
+	name_(original.name_)
 #else
-	runtimeID_(original.runtimeID_),
+	runtimeID_(original.runtimeID_)
 #endif
-    typeInfo_(original.typeInfo_)
 	{
 	}
 

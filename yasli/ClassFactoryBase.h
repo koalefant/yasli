@@ -26,7 +26,7 @@ public:
 	, nullLabel_(0)
 	{
 	}
-
+	virtual ~ClassFactoryBase(){}
 	virtual size_t size() const = 0;
 	virtual const TypeDescription* descriptionByIndex(int index) const = 0;	
 	virtual const TypeDescription* descriptionByType(TypeID type) const = 0;

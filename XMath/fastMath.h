@@ -43,7 +43,7 @@ cycle_fast_fmod:
 }
 #else
 #include <math.h>
-inline const float sqrtFast(const float x)
+inline float sqrtFast(const float x)
 {
   return sqrtf(x);
 }
