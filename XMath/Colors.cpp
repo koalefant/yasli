@@ -37,7 +37,7 @@ const Color4c Color4c::MAGENTA(255, 0, 255);
 const Color4c Color4c::CYAN(0, 255, 255);
 const Color4c Color4c::ZERO(0, 0, 0, 0);
 
-Color4c& Color4c::setGDI(unsigned long color)
+Color4c& Color4c::setGDI(unsigned int color)
 {
 	r = color & 0xff;
 	g = (color >> 8) & 0xff;

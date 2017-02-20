@@ -31,9 +31,9 @@ struct Color4f
 	int GetG() const 						{ return xround(255*g); }
 	int GetB() const 						{ return xround(255*b); }
 	int GetA() const 						{ return xround(255*a); }
-	unsigned long RGBA() const 						{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b) | (xround(255*a) << 24); }
-	unsigned long GetRGB() const 					{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b); }
-	unsigned long RGBGDI() const 					{ return xround(255*r) | (xround(255*g) << 8) | (xround(255*b) << 16); }
+	unsigned int RGBA() const 						{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b) | (xround(255*a) << 24); }
+	unsigned int GetRGB() const 					{ return (xround(255*r) << 16) | (xround(255*g) << 8) | xround(255*b); }
+	unsigned int RGBGDI() const 					{ return xround(255*r) | (xround(255*g) << 8) | (xround(255*b) << 16); }
 	void interpolate(const Color4f &u,const Color4f &v,float f) { r=u.r+(v.r-u.r)*f; g=u.g+(v.g-u.g)*f; b=u.b+(v.b-u.b)*f; a=u.a+(v.a-u.a)*f; }
 	void interpolate3(const Color4f &u,const Color4f &v,float f) { r=u.r+(v.r-u.r)*f; g=u.g+(v.g-u.g)*f; b=u.b+(v.b-u.b)*f; }
 	bool operator == (const Color4f &color) const { return fabs(r - color.r) < FLT_EPS && fabs(g - color.g) < FLT_EPS && fabs(b - color.b) < FLT_EPS && fabs(a - color.a) < FLT_EPS; }
@@ -62,14 +62,14 @@ struct Color4c
 	Color4c(const Color4f& color)					{ set(color.GetR(),color.GetG(),color.GetB(),color.GetA()); }
 	Color4c(const Color3c& color);
 	Color4c(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a=255) { r=_r; g=_g; b=_b; a=_a; }
-	explicit Color4c(unsigned long _argb) { argb() = _argb; }
+	explicit Color4c(unsigned int _argb) { argb() = _argb; }
 	void set(int rc,int gc,int bc,int ac=255)	{ r=rc; g=gc; b=bc; a=ac; }
 	void set(const Color4f& color)			{ set(color.GetR(),color.GetG(),color.GetB(),color.GetA()); }
 	
 	Color4c& setSafe(const Color4f& color)		{ set(clamp(color.GetR(),0,255), clamp(color.GetG(),0,255), clamp(color.GetB(),0,255), clamp(color.GetA(),0,255)); return *this; }
 	Color4c& setSafe1(const Color4f& color)		{ set(clamp(color.GetR(),0,255), clamp(color.GetG(),0,255), clamp(color.GetB(),0,255), clamp(color.GetA(),0,255)); return *this; }
 
-	Color4c& setGDI(unsigned long color);
+	Color4c& setGDI(unsigned int color);
 	void setHSV(float h,float s,float v, unsigned char alpha = 255);
 
 	Color4c& operator *= (float f)			{ r=xround(r*f); g=xround(g*f); b=xround(b*f); a=xround(a*f); return *this; }
@@ -84,10 +84,10 @@ struct Color4c
 	bool operator==(const Color4c& rhs) const{ return argb() == rhs.argb(); }
 	bool operator!=(const Color4c& rhs) const{ return argb() != rhs.argb(); }
 	
-	unsigned long argb() const 						{ return *reinterpret_cast<const unsigned long*>(this); }
-	unsigned long& argb()							{ return *reinterpret_cast<unsigned long*>(this); }
-	unsigned long rgb() const 					{ return r | g << 8 | b << 16; }
-	unsigned long rgba() const 					{ return r | g << 8 | b << 16 | a << 24; }
+	unsigned int argb() const 						{ return *reinterpret_cast<const unsigned int*>(this); }
+	unsigned int& argb()							{ return *reinterpret_cast<unsigned int*>(this); }
+	unsigned int rgb() const 					{ return r | g << 8 | b << 16; }
+	unsigned int rgba() const 					{ return r | g << 8 | b << 16 | a << 24; }
 	void hsv(float& h,float& s,float& v);
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
 	void interpolate(const Color4c &u,const Color4c &v,float f) { r=xround(u.r+int(v.r-u.r)*f); g=xround(u.g+int(v.g-u.g)*f); b=xround(u.b+int(v.b-u.b)*f); a=xround(u.a+(v.a-u.a)*f); }
@@ -126,7 +126,7 @@ struct Color3c
 	Color3c operator / (int f) const 		{ if(f!=0) f=(1<<16)/f; else f=1<<16; return Color3c((r*f)>>16,(g*f)>>16,(b*f)>>16); }
 	unsigned char& operator[](int i)				{ return ((unsigned char*)this)[i];}
 	void interpolate(const Color3c &u,const Color3c &v,float f) { r=xround(u.r+int(v.r-u.r)*f); g=xround(u.g+int(v.g-u.g)*f); b=xround(u.b+int(v.b-u.b)*f); }
-	unsigned long argb() const 						{ return (0xff000000 | (r << 16) | g << 8 | b); }
+	unsigned int argb() const 						{ return (0xff000000 | (r << 16) | g << 8 | b); }
 };
 
 bool serialize(yasli::Archive& ar, Color3c& c, const char* name, const char* label);
