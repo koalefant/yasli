@@ -32,12 +32,6 @@ char exceptMSG[512] 	= "EXCEPTION OCCURED";
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-const Vect2f Vect2f::ZERO(0, 0);
-const Vect2f Vect2f::ID(1, 1);
-
-const Vect2i Vect2i::ZERO(0, 0);
-const Vect2i Vect2i::ID(1, 1);
-
 const Vect3d Vect3d::ZERO(0, 0, 0);
 const Vect3d Vect3d::I   (1, 0, 0);
 const Vect3d Vect3d::J   (0, 1, 0);
@@ -73,7 +67,7 @@ const Se3d  Se3d::ID    (QuatD::ID, Vect3d::ZERO);
 const Se3f  Se3f::ID    (QuatF::ID, Vect3f::ZERO);
 
 const Mat2f Mat2f::ID   (1, 0, 0, 1);
-const MatX2f MatX2f::ID   (Mat2f::ID, Vect2f::ZERO);
+const MatX2f MatX2f::ID   (Mat2f::ID, Vect2f(0));
 
 const Vect4f Vect4f::ZERO(0, 0, 0, 0);
 const Vect4f Vect4f::ID(1, 1, 1, 1);
@@ -1263,8 +1257,8 @@ void Se3f::serialize(yasli::Archive& ar)
 	ar(rot(), "rotation", "Orientation");
 	ar(trans(), "position", "Position");
 #else
-	ar(rot(), "rotation", "Ориентация");
-	ar(trans(), "position", "Позиция");
+	ar(rot(), "rotation", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+	ar(trans(), "position", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 #endif
 }
 
@@ -1274,8 +1268,8 @@ void Se3d::serialize(yasli::Archive& ar)
 	ar(rot(), "rotation", "Orientation");
 	ar(trans(), "position", "Position");
 #else
-	ar(rot(), "rotation", "Ориентация");
-	ar(trans(), "position", "Позиция");
+	ar(rot(), "rotation", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+	ar(trans(), "position", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 #endif
 }
 

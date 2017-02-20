@@ -152,10 +152,7 @@ public:
 
 	void swap(Vect2f &v)					{ Vect2f tmp = v; v = *this; *this = tmp; }
 
-    void serialize(yasli::Archive& ar);
-
-	static const Vect2f ZERO;
-	static const Vect2f ID;
+  void serialize(yasli::Archive& ar);
 };
 
 
@@ -225,10 +222,7 @@ public:
 
 	void swap(Vect2i &v)					{ Vect2i tmp = v; v = *this; *this = tmp; }
 
-    void serialize(yasli::Archive& ar);
-
-	static const Vect2i ZERO;
-	static const Vect2i ID;
+  void serialize(yasli::Archive& ar);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +312,7 @@ public:
 	// backward transform
 	Vect2f invXform(const Vect2f& v) const { return Vect2f(v.x*xx + v.y*yx, v.x*xy + v.y*yy); }
 
-    void serialize(yasli::Archive& ar);
+  void serialize(yasli::Archive& ar);
 	static const Mat2f ID;
 };
 // forward transform
