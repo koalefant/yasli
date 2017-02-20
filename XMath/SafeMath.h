@@ -4,12 +4,12 @@
 
 inline float cycle(float f, float size) 
 { 
-	return fmodFast(fmodFast(f, size) + size, size); 
+	return f - size*floorf(f/size);
 }
 
 inline float getDist(float v0, float v1, float size) 
 {
-	float d = fmodFast(v0 - v1, size);
+	float d = cycle(v0 - v1, size);
 	float ad = (float)fabs(d);
 	float dd = size - ad;
 	if(ad <= dd) return d;
