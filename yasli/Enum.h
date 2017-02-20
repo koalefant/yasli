@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 
+#include "yasli/Archive.h"
 #include "yasli/StringList.h"
 #include "yasli/TypeID.h"
 
@@ -38,7 +39,22 @@ public:
 	const char* indexByName(const char* name) const;
 	int indexByValue(int value) const;
 
-	bool serialize(Archive& ar, int& value, const char* name, const char* label) const;
+	template<class Enum>
+	bool serialize(Archive& ar, Enum& value, const char* name, const char* label) const
+	{
+		int index = 0;
+		if(ar.isOutput())
+			index = indexByValue(value);
+
+		StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index);
+		if(ar(stringListValue, name, label)){
+			if(ar.isInput())
+				value = Enum(ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str()));
+			return true;
+		}
+		return false;
+	}
+
 	bool serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const;
 
 	void add(int value, const char* name, const char* label = ""); // TODO
@@ -80,7 +96,8 @@ EnumDescription& getEnumDescription(){
 	return EnumDescriptionImpl<Enum>::the();
 }
 
-inline bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label){
+template<class Enum>
+bool serializeEnum(const EnumDescription& desc, Archive& ar, Enum& value, const char* name, const char* label){
 	return desc.serialize(ar, value, name, label);
 }
 
