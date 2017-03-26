@@ -160,7 +160,7 @@ static Token get_line_content(const char* buffer, int line) {
 
 static void print_line_with_underlined_token(const char* buffer, int line_no, const Token& token) {
 	Token line_content = get_line_content(buffer, line_no);
-	printf("\t%s\n", line_content.str().c_str());
+	fprintf(stderr, "\t%s\n", line_content.str().c_str());
 	string line_underline;
 	line_underline.reserve(line_content.length());
 	for (const char* p = line_content.start; p != line_content.end; ++p) {
@@ -173,7 +173,7 @@ static void print_line_with_underlined_token(const char* buffer, int line_no, co
 		else
 			line_underline.push_back(' ');
 	}
-	printf("\t%s\n", line_underline.c_str());
+	fprintf(stderr, "\t%s\n", line_underline.c_str());
 }
 
 // ---------------------------------------------------------------------------
