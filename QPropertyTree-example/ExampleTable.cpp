@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <math.h>
 using std::vector;
 
 #include "QPropertyTree/QPropertyTree.h"
