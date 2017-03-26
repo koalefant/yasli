@@ -51,6 +51,8 @@ SUITE(General)
 		yasli::ClassFactory<TestBaseB>& bFactory = yasli::ClassFactory<TestBaseB>::the(); 
 		TestBaseB* b = bFactory.create("b-class");
 		CHECK(b != 0);
+		delete a;
+		delete b;
 	}
 
 #if YASLI_NO_RTTI
