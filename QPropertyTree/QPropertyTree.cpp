@@ -260,7 +260,7 @@ protected:
             tree_->keyPressEvent(ev);
         }
 
-        if (ev->key() == Qt::Key_Backspace && text()[0] == '\0')
+        if (ev->key() == Qt::Key_Backspace && text().isEmpty())
         {
             tree_->setFilterMode(false);
         }
