@@ -16,4 +16,3 @@ CC=clang CXX=clang++ cmake \
 	-DCMAKE_BUILD_TYPE=${CONFIGURATION} \
 	-G "Ninja" ${BUILD_ROOT} &&
 ASAN_OPTIONS="detect_leaks=0" ninja
->>>>>>> source
