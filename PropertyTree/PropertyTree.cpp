@@ -456,7 +456,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 	case KEY_MENU:
 	{
 		if (ev->modifiers() == 0) {
-			std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
+			std::unique_ptr<property_tree::IMenu> menu(ui()->createMenu());
 
 			if(onContextMenu(row, *menu)){
 				Rect rect(row->widgetRect(this));
@@ -889,7 +889,7 @@ void PropertyTree::onRowRMBDown(const HitResult& hit)
 
 	if (menuRow) {
 		onRowSelected(std::vector<PropertyRow*>(1, menuRow), false, true);	
-		std::auto_ptr<property_tree::IMenu> menu(ui()->createMenu());
+		std::unique_ptr<property_tree::IMenu> menu(ui()->createMenu());
 		clearMenuHandlers();
 		if(onContextMenu(menuRow, *menu))
 			menu->exec(_toWidget(hit.point));
@@ -1179,7 +1179,7 @@ void PropertyTree::_cancelWidget()
 {
 	// make sure that widget_ is null the moment widget is destroyed, so we
 	// don't get focus callbacks to act on destroyed widget.
-	std::auto_ptr<property_tree::InplaceWidget> widget(widget_.release());
+	std::unique_ptr<property_tree::InplaceWidget> widget(widget_.release());
 }
 
 int PropertyTree::revertObjects(vector<void*> objectAddresses)

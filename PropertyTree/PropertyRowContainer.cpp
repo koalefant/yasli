@@ -88,7 +88,7 @@ bool PropertyRowContainer::onActivate(const PropertyActivationEvent& e)
 		return false;
 	if (inlined_)
 		return false;
-	std::auto_ptr<property_tree::IMenu> menu(e.tree->ui()->createMenu());
+	std::unique_ptr<property_tree::IMenu> menu(e.tree->ui()->createMenu());
 	generateMenu(*menu, e.tree, true);
 	e.tree->_setPressedRow(this);
 	Rect widgetRect = this->widgetRect(e.tree);

@@ -13,9 +13,7 @@
 #include "yasli/Archive.h"
 #include "yasli/Serializer.h"
 #include "yasli/KeyValue.h"
-#if !YASLI_NO_CPP11
 #include "ClassFactory.h"
-#endif
 
 #pragma warning(push)
 #pragma warning(disable:4512)
@@ -263,8 +261,6 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const c
 
 }
 
-#if !YASLI_NO_CPP11
-
 namespace yasli {
 
 template<class T>
@@ -308,7 +304,5 @@ bool serialize(yasli::Archive& ar, unique_ptr<T>& ptr, const char* name, const c
 }
 
 }
-
-#endif
 
 #pragma warning(pop)

@@ -84,7 +84,7 @@ private:
 	ww::PopupMenuItem* menuItem_;
 	std::vector<wwMenu*> ownedMenus_;
 	std::vector<wwMenuAction*> ownedActions_;
-	std::auto_ptr<ww::PopupMenu> menu_;
+	std::unique_ptr<ww::PopupMenu> menu_;
 };
 
 class wwUIFacade : public IUIFacade

@@ -138,8 +138,8 @@ enum{
 	OBM_CHECK = 32760
 };
 static HBITMAP checkBitmap = ::LoadBitmap(0, (LPCTSTR)OBM_CHECK);
-static std::auto_ptr<Gdiplus::Font> defaultFont;
-static std::auto_ptr<Gdiplus::Font> defaultBoldFont;
+static std::unique_ptr<Gdiplus::Font> defaultFont;
+static std::unique_ptr<Gdiplus::Font> defaultBoldFont;
 
 namespace property_tree{
 

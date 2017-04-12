@@ -26,11 +26,6 @@
 #define YASLI_INLINE
 #endif
 
-// Disable C++11
-#ifndef YASLI_NO_CPP11
-#define YASLI_NO_CPP11 0
-#endif
-
 // Disable C++ RTTI use (e.g. typeid())
 #ifndef YASLI_NO_RTTI
 #define YASLI_NO_RTTI 1

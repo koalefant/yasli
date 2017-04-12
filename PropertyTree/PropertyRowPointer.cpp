@@ -207,7 +207,7 @@ bool PropertyRowPointer::onActivate(const PropertyActivationEvent& ev)
 {
 	if(userReadOnly())
 			return false;
-	std::auto_ptr<property_tree::IMenu> menu(ev.tree->ui()->createMenu());
+	std::unique_ptr<property_tree::IMenu> menu(ev.tree->ui()->createMenu());
 	ClassMenuItemAdderRowPointer(this, ev.tree).generateMenu(*menu, ev.tree->model()->typeStringList(baseType()));
 	Rect widgetRect = this->widgetRect(ev.tree);
 	menu->exec(Point(widgetRect.left(), widgetRect.bottom()));

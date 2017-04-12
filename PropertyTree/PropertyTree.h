@@ -328,8 +328,8 @@ protected:
 	void restorePersistentFocusElement();
 	int zoomLevel() const{ return zoomLevel_; }
 
-	std::auto_ptr<PropertyTreeModel> model_;
-	std::auto_ptr<property_tree::InplaceWidget> widget_; // in-place widget
+	std::unique_ptr<PropertyTreeModel> model_;
+	std::unique_ptr<property_tree::InplaceWidget> widget_; // in-place widget
 	PropertyRow* widgetRow_;
 	vector<PropertyRowMenuHandler*> menuHandlers_;
 	IUIFacade* ui_;
@@ -351,7 +351,7 @@ protected:
 
 	int cursorX_;
 	int focusedLayoutElement_;
-	std::auto_ptr<property_tree::PersistentLayoutElement> persistentFocusedLayoutElement_;
+	std::unique_ptr<property_tree::PersistentLayoutElement> persistentFocusedLayoutElement_;
 	Point focusCursor_;
 
 	bool filterMode_;
@@ -364,8 +364,8 @@ protected:
 	PropertyRow* pressedRow_;
 	TreeConfig config_;
 	static PropertyTreeStyle defaultTreeStyle_;
-	std::auto_ptr<PropertyTreeStyle> style_;
-	std::auto_ptr<ValidatorBlock> validatorBlock_;
+	std::unique_ptr<PropertyTreeStyle> style_;
+	std::unique_ptr<ValidatorBlock> validatorBlock_;
 
 	bool autoRevert_;
 	int applyTime_;

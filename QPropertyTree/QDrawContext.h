@@ -41,7 +41,7 @@ public:
 
 	QPropertyTree* tree_;
 	QPainter* painter_;
-	std::auto_ptr<IconXPMCache> iconCache_;
+	std::unique_ptr<IconXPMCache> iconCache_;
 };
 
 void fillRoundRectangle(QPainter& p, const QBrush& brush, const QRect& r, const QColor& borderColor, int radius);

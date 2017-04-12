@@ -84,7 +84,7 @@ public:
 private:
 	std::vector<QtAction*> actions_;
 	std::vector<QtMenu*> menus_;
-	std::auto_ptr<QMenu> menu_;
+	std::unique_ptr<QMenu> menu_;
 	string text_;
 	QPropertyTree* tree_;
 };

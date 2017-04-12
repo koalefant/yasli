@@ -36,7 +36,7 @@ protected:
 	void onTreeChanged();
 
 	Serializer serializer_;
-	std::auto_ptr<BinOArchive> originalData_;
+	std::unique_ptr<BinOArchive> originalData_;
 	yasli::SharedPtr<PropertyTree> tree_;
 	std::string stateFileName_;
 };
