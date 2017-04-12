@@ -22,13 +22,13 @@ namespace yasli{
 
 YASLI_INLINE void EnumDescription::add(int value, const char* name, const char *label)
 {
-    YASLI_ESCAPE( name, return );
+	YASLI_ESCAPE( name, return );
 	nameToValue_[name] = value;
-    if (label)
-        labelToValue_[label] = value;
+	if (label)
+		labelToValue_[label] = value;
 	valueToName_[value] = name;
-    if (label)
-        valueToLabel_[value] = label;
+	if (label)
+		valueToLabel_[value] = label;
 	valueToIndex_[value] = int(names_.size());
 	names_.push_back(name);
 	if (label)
@@ -65,63 +65,63 @@ YASLI_INLINE bool EnumDescription::serialize(Archive& ar, int& value, const char
 
 YASLI_INLINE bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const
 {
-    if(ar.isOutput())
-    {
-        StringListStatic names = nameCombination(value);
+	if(ar.isOutput())
+	{
+		StringListStatic names = nameCombination(value);
 		string str;
-        joinStringList(&str, names, '|');
-        return ar(str, name, label);
-    }
-    else
-    {
+		joinStringList(&str, names, '|');
+		return ar(str, name, label);
+	}
+	else
+	{
 		string str;
-        if(!ar(str, name, label))
-            return false;
-        StringList values;
-        splitStringList(&values, str.c_str(), '|');
-        StringList::iterator it;
-        value = 0;
-        for(it = values.begin(); it != values.end(); ++it)
+		if(!ar(str, name, label))
+			return false;
+		StringList values;
+		splitStringList(&values, str.c_str(), '|');
+		StringList::iterator it;
+		value = 0;
+		for(it = values.begin(); it != values.end(); ++it)
 			if(!it->empty())
 				value |= this->value(it->c_str());
 		return true;
-    }
+	}
 }
 
 
 YASLI_INLINE const char* EnumDescription::name(int value) const
 {
-    ValueToName::const_iterator it = valueToName_.find(value);
-    YASLI_ESCAPE(it != valueToName_.end(), return "");
-    return it->second;
+	ValueToName::const_iterator it = valueToName_.find(value);
+	YASLI_ESCAPE(it != valueToName_.end(), return "");
+	return it->second;
 }
 YASLI_INLINE const char* EnumDescription::label(int value) const
 {
-    ValueToLabel::const_iterator it = valueToLabel_.find(value);
-    YASLI_ESCAPE(it != valueToLabel_.end(), return "");
-    return it->second;
+	ValueToLabel::const_iterator it = valueToLabel_.find(value);
+	YASLI_ESCAPE(it != valueToLabel_.end(), return "");
+	return it->second;
 }
 
 YASLI_INLINE StringListStatic EnumDescription::nameCombination(int bitVector) const 
 {
-    StringListStatic strings;
-    for(ValueToName::const_iterator i = valueToName_.begin(); i != valueToName_.end(); ++i)
-        if((bitVector & i->first) == i->first){
-            bitVector &= ~i->first;
-            strings.push_back(i->second);
-        }
+	StringListStatic strings;
+	for(ValueToName::const_iterator i = valueToName_.begin(); i != valueToName_.end(); ++i)
+		if((bitVector & i->first) == i->first){
+			bitVector &= ~i->first;
+			strings.push_back(i->second);
+		}
 	YASLI_ASSERT(!bitVector && "Unregistered enum value");
-    return strings;
+	return strings;
 }
 
 YASLI_INLINE StringListStatic EnumDescription::labelCombination(int bitVector) const 
 {
-    StringListStatic strings;
-    for(ValueToLabel::const_iterator i = valueToLabel_.begin(); i != valueToLabel_.end(); ++i)
-        if(i->second && (bitVector & i->first) == i->first){
-            bitVector &= ~i->first;
-            strings.push_back(i->second);
-        }
+	StringListStatic strings;
+	for(ValueToLabel::const_iterator i = valueToLabel_.begin(); i != valueToLabel_.end(); ++i)
+		if(i->second && (bitVector & i->first) == i->first){
+			bitVector &= ~i->first;
+			strings.push_back(i->second);
+		}
 	YASLI_ASSERT(!bitVector && "Unregistered enum value");
 	return strings;
 }
@@ -129,14 +129,14 @@ YASLI_INLINE StringListStatic EnumDescription::labelCombination(int bitVector) c
 YASLI_INLINE string EnumDescription::labelCombinationString(int bitVector) const 
 {
 	string result;
-    for(ValueToLabel::const_reverse_iterator i = valueToLabel_.rbegin(); i != valueToLabel_.rend(); ++i)
-        if(i->second && (bitVector & i->first) == i->first){
-            bitVector &= ~i->first;
+	for(ValueToLabel::const_reverse_iterator i = valueToLabel_.rbegin(); i != valueToLabel_.rend(); ++i)
+		if(i->second && (bitVector & i->first) == i->first){
+			bitVector &= ~i->first;
 			if (!result.empty()) {
 				result += "|";
 			}
-            result += i->second;
-        }
+			result += i->second;
+		}
 	YASLI_ASSERT(!bitVector && "Unregistered enum value");
 	return result;
 }
@@ -146,7 +146,7 @@ YASLI_INLINE int EnumDescription::indexByValue(int value) const
 {
 	if(!YASLI_CHECK(!valueToIndex_.empty()))
 		return -1;
-    ValueToIndex::const_iterator it = valueToIndex_.find(value);
+	ValueToIndex::const_iterator it = valueToIndex_.find(value);
 	if(YASLI_CHECK(it != valueToIndex_.end()))
 		return it->second;
 	else
