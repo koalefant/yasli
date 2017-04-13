@@ -8,9 +8,10 @@
  */
 
 #pragma once
-#pragma warning (disable : 4100 4996) 
-
 #include <stdarg.h>
+#ifdef _MSC_VER
+#pragma warning (disable : 4100 4996) 
+#endif
 
 #include "yasli/Config.h"
 #include "yasli/Helpers.h"
@@ -31,7 +32,8 @@ class KeyValueInterface;
 class EnumDescription;
 template <class Enum>
 EnumDescription& getEnumDescription();
-bool serializeEnum(const EnumDescription& desc, Archive& ar, int& value, const char* name, const char* label);
+template <class Enum>
+bool serializeEnum(const EnumDescription& desc, Archive& ar, Enum& value, const char* name, const char* label);
 
 // Context is used to pass arguments to nested serialization functions.
 // Example of usage:
@@ -204,7 +206,7 @@ template<class Enum>
 struct SerializeEnum{
 	static bool invoke(Archive& ar, Enum& value, const char* name, const char* label){
 		const EnumDescription& enumDescription = getEnumDescription<Enum>();
-		return serializeEnum(enumDescription, ar, reinterpret_cast<int&>(value), name, label);
+		return serializeEnum(enumDescription, ar, value, name, label);
 	};
 };
 

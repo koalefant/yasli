@@ -18,15 +18,60 @@
 
 namespace yasli{
 
-inline unsigned calcHash(const char* str, unsigned hash = 5381)
+#ifdef EMSCRIPTEN
+
+template<class T>
+class Unaligned
 {
-	int l = strlen(str);
-	while(*str != '\0') {
-		hash = hash*33 + (unsigned char)*str;
-		++str;
+	char t_[sizeof(T)];
+public:
+	Unaligned(const T& t) { *this = t; }
+	void operator=(const T& t) { memcpy(t_, &t, sizeof(T)); }
+	operator T() const { T t; memcpy(&t, t_, sizeof(T)); return t; }
+	void operator+=(const T& t) { *this = operator T() + t; }
+};
+
+#else
+
+template<class T>
+class Unaligned
+{
+	T t_;
+public:
+	Unaligned(const T& t) { *this = t; }
+	void operator=(const T& t) { t_ = t; }
+	operator T() const { return t_; }
+	void operator+=(const T& t) { t_ += t; }
+};
+
+#endif
+
+#if YASLI_BIN_ARCHIVE_LEGACY_HASH
+inline unsigned short calcHash(const char* str)
+{
+	unsigned short hash = 0;
+	const unsigned short* p = (const unsigned short*)(str);
+	for(;;){
+		unsigned short w = *p++;
+		if(!(w & 0xff))
+			break;
+		hash ^= w;
+		if(!(w & 0xff00))
+			break;
 	}
 	return hash;
 }
+#else
+inline unsigned short calcHash(const char* str)
+{
+	unsigned int hash = 1315423911;
+
+	while(*str)
+		hash ^= (hash << 5) + *str++ + (hash >> 2);
+
+	return (unsigned short)hash;
+}
+#endif
 
 class BinOArchive : public Archive{
 public:
@@ -115,7 +160,7 @@ private:
 	{
 	public:
 		Block(const char* data, int size) : 
-		  begin_(data), curr_(data), end_(data + size), complex_(false), disableCheck_(false), isPointer_(false) {}
+		  begin_(data), end_(data + size), curr_(data), complex_(false), disableCheck_(false), isPointer_(false) {}
 
 		  bool get(const char* name, Block& block);
 

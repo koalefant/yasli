@@ -63,13 +63,13 @@ private:
 
 	struct Level{
 		Level(bool _isContainer, std::size_t position, int column)
-		: isContainer(_isContainer)
-		, isKeyValue(false)
+		: isKeyValue(false)
+		, isContainer(_isContainer)
 		, isDictionary(false)
 		, startPosition(position)
-		, indentCount(-column)
-		, elementIndex(0)
 		, nameIndex(0)
+		, elementIndex(0)
+		, indentCount(-column)
 		{}
 		bool isKeyValue;
 		bool isContainer;

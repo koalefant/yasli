@@ -61,14 +61,24 @@ void PropertyTreeModel::selectRow(PropertyRow* row, bool select, bool exclusive)
 	}
 }
 
+struct DeselectOp {
+	ScanResult operator()(PropertyRow* row)
+	{
+		row->setSelected(false);
+		return SCAN_CHILDREN_SIBLINGS;
+	}
+};
+
 void PropertyTreeModel::deselectAll()
 {
-	Selection::iterator it;
-	for(it = selection_.begin(); it != selection_.end(); ++it){
-		PropertyRow* row = rowFromPath(*it);
-		row->setSelected(false);
-	}
+// 	Selection::iterator it;
+// 	for(it = selection_.begin(); it != selection_.end(); ++it){
+// 		PropertyRow* row = rowFromPath(*it);
+// 		row->setSelected(false);
+// 	}
 	selection_.clear();
+	DeselectOp op;
+	root()->scanChildren(op);
 }
 
 PropertyRow* PropertyTreeModel::rowFromPath(const TreePath& path)
@@ -142,8 +152,10 @@ void PropertyTreeModel::applyOperator(PropertyTreeOperator* op, bool createRedo)
 void PropertyTreeModel::undo()
 {
     YASLI_ESCAPE(!undoOperators_.empty(), return);
-    applyOperator(&undoOperators_.back(), true);
-    undoOperators_.pop_back();
+	PropertyTreeOperator op;
+	std::swap(op, undoOperators_.back());
+	undoOperators_.pop_back();
+	applyOperator(&op, true);
 }
 
 void PropertyTreeModel::clearUndo()

@@ -169,7 +169,7 @@ int EntryImpl::onMessageGetDlgCode(int keyCode, MSG* msg)
 
 int EntryImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 {
-	if(code == VK_RETURN || code == VK_ESCAPE || code == VK_TAB){
+	if(owner()->hasFocus() && (code == VK_RETURN || code == VK_ESCAPE || code == VK_TAB)){
 		if(code == VK_ESCAPE){
 			wstring text = text_;
 			setText(text.c_str());

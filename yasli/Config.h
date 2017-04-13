@@ -64,6 +64,8 @@
 #define YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
 #endif
 
+#define YASLI_BIN_ARCHIVE_LEGACY_HASH 1
+
 // This allows to change the name of global serialization function and
 // serialization method to match the coding conventions of the codebase.
 #ifndef YASLI_SERIALIZE_OVERRIDE
@@ -133,3 +135,7 @@ namespace yasli {
 #ifndef YASLI_ASSERT_DEFINED
 #endif
 
+// To control dependency of ww
+#ifdef WIN32
+#define XMATH_USE_WW_COLOR
+#endif

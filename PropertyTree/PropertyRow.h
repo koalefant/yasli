@@ -354,6 +354,7 @@ protected:
 	bool hideChildren_ : 1;
 	bool validatorHasErrors_ : 1;
 	bool validatorHasWarnings_ : 1;
+	bool updated_ : 1;
 
 	static ConstStringList* constStrings_;
 	friend class PropertyOArchive;

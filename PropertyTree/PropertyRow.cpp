@@ -96,6 +96,7 @@ PropertyRow::PropertyRow(bool isStruct, bool isContainer)
 , validatorIndex_(-1)
 , validatorCount_(0)
 , tooltip_("")
+, updated_(false)
 {
 }
 
@@ -217,6 +218,22 @@ void PropertyRowStruct::add(PropertyRow* row)
 	row->setParent(this);
 }
 
+void PropertyRow::insertAfterUpdated(PropertyRow* row, int index)
+{
+	row->setParent(this);
+	if(!index){
+		children_.insert(children_.begin(), row);
+		return;
+	}
+	for(Rows::iterator i = children_.begin(); i != children_.end(); ++i)
+		if((*i)->updated_)
+			if(!--index){
+				children_.insert(i + 1, row);
+				return;
+			}
+	children_.push_back(row);
+}
+
 void PropertyRowStruct::addAfter(PropertyRow* row, PropertyRow* after)
 {
 	Rows::iterator it = std::find(children_.begin(), children_.end(), after);
@@ -316,6 +333,46 @@ void PropertyRowStruct::swapChildren(PropertyRow* _row, PropertyTreeModel* model
 }
 
 void PropertyRowStruct::addBefore(PropertyRow* row, PropertyRow* before)
+{
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else
+			++i;
+}
+
+void PropertyRow::eraseOld()
+{
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else
+			++i;
+}
+
+void PropertyRow::eraseOldRecursive()
+{
+	updated_ = false;
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else{
+			(*i)->eraseOldRecursive();
+			++i;
+		}
+}
+
+
+std::size_t PropertyRow::countUpdated() const
+{
+	int counter = 0;
+	for(Rows::const_iterator i = begin(); i != end(); ++i)
+		if((*i)->updated_)
+			++counter;
+	return counter;
+}
+
+void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 {
 	if(before == 0)
 		children_.insert(children_.begin(), row);
@@ -721,15 +778,58 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 	return 0;
 }
 
-PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const
+void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
+{
+	updateTextSizeInitial(tree, index);
+
+	textSize_ = xround(textSizeInitial_ * mult);
+
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->setTextSize(tree, 0, mult);
+	}
+}
+
+void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
+{
+	updateTextSizeInitial(tree, index);
+
+	*minTextSize += textSizeInitial_;
+	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
+		*freePulledChildren += 1;
+	*minimalWidth += textSizeInitial_ + widgetSizeMin(tree);
+
+	size_t numChildren = children_.size();
+	for (size_t i = 0; i < numChildren; ++i) {
+		PropertyRow* row = children_[i];
+		if(row->pulledUp())
+			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
+	}
+}
+
+PropertyRow* PropertyRow::findSelected()
+{
+    if(selected())
+        return this;
+    iterator it;
+    for(it = children_.begin(); it != children_.end(); ++it){
+        PropertyRow* result = (*it)->findSelected();
+        if(result)
+            return result;
+    }
+    return 0;
+}
+
+PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated) const
 {
 	int numChildren = count();
 	int iterations = 1;
 
 	for (int i = startIndex; i < numChildren; ++i) {
-		PropertyRow* row = (PropertyRow*)childByIndex(i);
-		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
-			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+		PropertyRow* row = children_[i];
+		if((row->name() == name || strcmp(row->name(), name) == 0) && (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0) && (!checkUpdated || !row->updated_)){
 			*outIndex = i;
 			if (iterations > 1) 
 				printf("searching for \"%s\" with %d iterations!\n", name, iterations);
@@ -738,13 +838,11 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 		++iterations;
 	}
 
+	startIndex = min(startIndex, numChildren);
 	for (int i = 0; i < startIndex; ++i) {
-		PropertyRow* row = (PropertyRow*)childByIndex(i);
-		if(((row->name() == name) || strcmp(row->name(), name) == 0) &&
-			((row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0))) {
+		PropertyRow* row = children_[i];
+		if((row->name() == name || strcmp(row->name(), name) == 0) && (row->typeName() == typeName || strcmp(row->typeName(), typeName) == 0) && (!checkUpdated || !row->updated_)){
 			*outIndex = i;
-			if (iterations > 1) 
-				printf("searching for \"%s\" with %d iterations!\n", name, iterations);
 			return row;
 		}
 		++iterations;
@@ -753,12 +851,6 @@ PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const c
 	*outIndex = -1;
 	return 0;
 }
-
-const PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char* typeName) const
-{
-	return const_cast<PropertyRow* const>(this)->find(name, nameAlt, typeName);
-}
-
 
 bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 {

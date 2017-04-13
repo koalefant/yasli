@@ -105,14 +105,14 @@ inline void BinOArchive::closeNode(const char* name, bool size8)
 		YASLI_ASSERT(!size8);
 		if(size < 0x10000){
 			*sizePtr = SIZE16;
-			*((unsigned short*)(sizePtr + 1)) = size;
+			*((Unaligned<unsigned short>*)(sizePtr + 1)) = size;
 		}
 		else{
 			unsigned char* buffer = sizePtr + 3;
 			stream_.write((unsigned short)0);
 			*sizePtr = SIZE32;
 			memmove(buffer + 2, buffer, size);
-			*((unsigned int*)(sizePtr + 1)) = size;
+			*((Unaligned<unsigned int>*)(sizePtr + 1)) = size;
 		}
 	}
 }
@@ -352,7 +352,7 @@ bool BinIArchive::open(const char* buffer, size_t size)
 		return false;
 	if(size < sizeof(unsigned int))
 		return false;
-	if(*(unsigned*)(buffer) != BIN_MAGIC)
+	if(memcmp(buffer, &BIN_MAGIC, sizeof(unsigned int)))
 		return false;
 	buffer += sizeof(unsigned int);
 	size -= sizeof(unsigned int);
@@ -663,7 +663,8 @@ bool BinIArchive::operator()(PointerInterface& ptr, const char* name, const char
 		return false;
 
 	currentBlock().setIsPointer();
-	string typeName;
+	string& typeName = stringBuffer_;
+	typeName.clear();
 	read(typeName);
 	if(ptr.get() && (typeName.empty() || strcmp(typeName.c_str(), ptr.registeredTypeName()) != 0))
 		ptr.create(""); // 0

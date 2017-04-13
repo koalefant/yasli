@@ -4,7 +4,9 @@
 # include <emmintrin.h>
 #endif
 
+#ifdef _MSC_VER
 #pragma warning (disable : 4244)
+#endif
 
 template<class T, class T1, class T2> 
 inline T clamp(const T& x, const T1& xmin, const T2& xmax)

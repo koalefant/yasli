@@ -36,11 +36,25 @@ PropertyIArchive::PropertyIArchive(PropertyTreeModel* model, PropertyRow* root)
 		currentNode_ = root;
 }
 
+std::string unEscape(const char* str)
+{
+	std::string val;
+	val.reserve(strlen(str));
+	for(const char* p = str; *p; ++p)
+		if(*p == '\\' && p[1] == 'n'){
+			val.push_back('\n');
+			++p;
+		}		
+		else
+			val.push_back(*p);
+	return val;
+}
+
 bool PropertyIArchive::operator()(yasli::StringInterface& value, const char* name, const char* label)
 {
 	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
- 			value.set(row->value().c_str());
+ 			value.set(unEscape(fromWideChar(row->value().c_str()).c_str()).c_str());
 		closeRow(name);
 		return true;
 	}

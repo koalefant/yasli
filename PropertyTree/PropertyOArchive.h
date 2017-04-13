@@ -23,6 +23,8 @@ class PropertyOArchive final : public yasli::Archive{
 public:
 	PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* rootNode, ValidatorBlock* validator);
 	~PropertyOArchive();
+	
+	void finalize();
 
 	void setOutlineMode(bool outlineMode);
 
@@ -61,9 +63,9 @@ protected:
 
 private:
 	struct Level {
-		std::vector<SharedPtr<PropertyRow> > oldRows;
 		int rowIndex;
-		Level() : rowIndex(0) {}
+		int realIndex;
+		Level(int realIndex = 0) : rowIndex(0), realIndex(realIndex) {}
 	};
 	std::vector<Level> stack_;
 
@@ -71,10 +73,10 @@ private:
 	PropertyRow* updateRowPrimitive(const char* name, const char* label, const char* typeName, const ValueType& value, const void* handle, const yasli::TypeID& typeId);
 
 	template<class RowType, class ValueType>
-	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value);
+	RowType* updateRow(const char* name, const char* label, const char* typeName, const ValueType& value, bool isBlock = false);
 
-	void enterNode(PropertyRowStruct* row); // sets currentNode
-	void closeStruct(const char* name);
+	void enterNode(PropertyRowStruct* row, bool isBlock = false); // sets currentNode
+	void closeStruct(const char* name, bool isBlock = false);
 	PropertyRow* defaultValueRootNode();
 
 	bool updateMode_;

@@ -111,8 +111,7 @@ protected:
 class StringList: public StringListBase{
 public:
     StringList() {}
-    StringList(const StringList& rhs){
-        *this  = rhs;
+    StringList(const StringList& rhs) : StringListBase(rhs){
     }
 	StringList& operator=(const StringList& rhs)
 	{

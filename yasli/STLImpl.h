@@ -15,9 +15,10 @@
 #include "yasli/KeyValue.h"
 #include "ClassFactory.h"
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable:4512)
-
+#endif
 namespace yasli {
 
 template<class Container, class Element>
@@ -260,7 +261,6 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const c
 }
 
 }
-
 namespace yasli {
 
 template<class T>
@@ -305,4 +305,6 @@ bool serialize(yasli::Archive& ar, unique_ptr<T>& ptr, const char* name, const c
 
 }
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif

@@ -31,7 +31,6 @@
 #include "yasli/Callback.h"
 using yasli::TypeID;
 
-
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* root, ValidatorBlock* validator)
 : Archive(OUTPUT | EDIT | VALIDATION | DOCUMENTATION)
 , model_(model)
@@ -47,11 +46,8 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, PropertyRowStruct* 
 	YASLI_ASSERT(model != 0);
 	if(rootNode_->count() != 0){
 		updateMode_ = true;
-		stack_.back().oldRows.swap(rootNode_->children_);
 	}
 }
-
-
 
 PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType)
 : Archive(OUTPUT | EDIT | VALIDATION | DOCUMENTATION)
@@ -72,6 +68,13 @@ PropertyOArchive::PropertyOArchive(PropertyTreeModel* model, bool forDefaultType
 
 PropertyOArchive::~PropertyOArchive()
 {
+	YASLI_ASSERT(!updateMode_, "Call finalize() for update mode");
+}
+
+void PropertyOArchive::finalize()
+{
+	rootNode_->eraseOldRecursive();
+	updateMode_ = false;
 }
 
 PropertyRow* PropertyOArchive::defaultValueRootNode()
@@ -81,25 +84,23 @@ PropertyRow* PropertyOArchive::defaultValueRootNode()
 	return rootNode_->childByIndex(0);
 }
 
-void PropertyOArchive::enterNode(PropertyRowStruct* row)
+void PropertyOArchive::enterNode(PropertyRowStruct* row, bool isBlock)
 {
 	if (!row->isStruct()) {
 		YASLI_ASSERT(0);
 		return;
 	}
 	currentNode_ = row;
-
-	stack_.push_back(Level());
-	Level& level = stack_.back();
-	level.oldRows.swap(row->children_);
-	row->children_.reserve(level.oldRows.size());	
+	stack_.push_back(Level(isBlock && currentNode_ ? currentNode_->countUpdated() : 0));
 }
 
-void PropertyOArchive::closeStruct(const char* name)
+void PropertyOArchive::closeStruct(const char* name, bool isBlock)
 {
 	stack_.pop_back();
 
 	if(currentNode_){
+		if(!isBlock)
+			currentNode_->eraseOld();
 		lastNode_ = currentNode_;
 		currentNode_ = currentNode_->parent();
 	}
@@ -139,7 +140,7 @@ static PropertyRow* findRow(int* index, PropertyRows& rows, const char* name, co
 }
 
 template<class RowType, class ValueType>
-RowType* PropertyOArchive::updateRow(const char* name, const char* label, const char* typeName, const ValueType& value)
+RowType* PropertyOArchive::updateRow(const char* name, const char* label, const char* typeName, const ValueType& value, bool isBlock)
 {
 	SharedPtr<RowType> newRow;
 	if(currentNode_ == 0){
@@ -148,6 +149,7 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		else		
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
+		newRow->updated_ = true;
 		if(updateMode_){
 			if (!newRow->isStruct() ) {
 				// fail
@@ -166,16 +168,12 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 		}
 	}
 	else{
-
 		Level& level = stack_.back();
 		int rowIndex;
-		PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
-
-		const char* oldLabel = 0;
+		PropertyRow* oldRow = currentNode_->findFromIndex(&rowIndex, name, typeName, level.rowIndex, !isBlock);
 		if(oldRow){
 			oldRow->setMultiValue(false);
 			newRow = static_cast<RowType*>(oldRow);
-			level.oldRows[rowIndex] = 0;
 			level.rowIndex = rowIndex + 1;
 			oldLabel = oldRow->label();
 			newRow->setNames(name, label, typeName);
@@ -188,14 +186,17 @@ RowType* PropertyOArchive::updateRow(const char* name, const char* label, const 
 			newRow->setNames(name, label, typeName);
 			if(model_->expandLevels() != 0 && (model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level()))
 				newRow->_setExpanded(true);
-		}
-		currentNode_->add(newRow);
-		if (!oldRow || oldLabel != label) {
+
+			newRow->setNames(name, label, typeName);
+			currentNode_->insertAfterUpdated(newRow, level.realIndex);
+
 			// for new rows we should mark all parents with labelChanged_
 			newRow->setLabelChanged();
 			newRow->setLabelChangedToChildren();
 		}
 		newRow->setValueAndContext(value, *this);
+		++level.realIndex;
+		newRow->updated_ = true;
 		return newRow;
 	}
 }
@@ -207,11 +208,11 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 
 	if(currentNode_ == 0){
 		if (rootNode_) {
-			printf("Catch me\n");
 			newRow = static_cast<RowType*>(static_cast<PropertyRow*>(rootNode_.get()));
 		} else		
 			newRow.reset(new RowType());
 		newRow->setNames(name, label, typeName);
+		newRow->updated_ = true;
 		if(updateMode_){
 			model_->setRoot(newRow->asStruct());
 			return newRow;
@@ -231,16 +232,11 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 
 	int rowIndex;
 	Level& level = stack_.back();
-	PropertyRow* oldRow = findRow(&rowIndex, level.oldRows, name, typeName, level.rowIndex);
-
-	const char* oldLabel = 0;
+	PropertyRow* oldRow = currentNode_->findFromIndex(&rowIndex, name, typeName, level.rowIndex, true);
 	if(oldRow){
 		oldRow->setMultiValue(false);
 		newRow.reset(static_cast<RowType*>(oldRow));
-		level.oldRows[rowIndex] = 0;
 		level.rowIndex = rowIndex + 1;
-		oldLabel = oldRow->label();
-		oldRow->setNames(name, label, typeName);
 	}
 	else{
 		//printf("creating new row '%s' '%s' '%s'\n", name, label, typeName);
@@ -250,13 +246,14 @@ PropertyRow* PropertyOArchive::updateRowPrimitive(const char* name, const char* 
 			if(model_->expandLevels() == -1 || model_->expandLevels() >= currentNode_->level())
 				newRow->_setExpanded(true);
 		}
-	}
-	currentNode_->add(newRow);
-	if (!oldRow || oldLabel != label)
+		currentNode_->insertAfterUpdated(newRow, level.realIndex);
 		// for new rows we should mark all parents with labelChanged_
 		newRow->setLabelChanged();
+	}
 
 	newRow->setValue(value, handle, typeId);
+	newRow->updated_ = true;
+	++level.realIndex;
 	return newRow;
 }
 
@@ -294,9 +291,23 @@ bool PropertyOArchive::operator()(const yasli::Serializer& ser, const char* name
 	return true;
 }
 
+std::string escape(const char* str)
+{
+	std::string val;
+	val.reserve(strlen(str));
+	for(const char* p = str; *p; ++p)
+		if(*p == '\n'){
+			val.push_back('\\');
+			val.push_back('n');
+		}		
+		else
+			val.push_back(*p);
+	return val;
+}
+
 bool PropertyOArchive::operator()(yasli::StringInterface& value, const char* name, const char* label)
 {
-	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", value.get(), value.handle(), value.type());
+	lastNode_ = updateRowPrimitive<PropertyRowString>(name, label, "string", escape(value.get()), value.handle(), value.type());
 	return true;
 }
 
@@ -408,6 +419,7 @@ bool PropertyOArchive::operator()(yasli::ContainerInterface& ser, const char *na
 			if ( !ser.next() )
 				break;
 		}
+	currentNode_->eraseOld();
 	currentNode_->labelChanged();
 	closeStruct(name);
 	return true;
@@ -491,9 +503,9 @@ bool PropertyOArchive::operator()(yasli::Object& obj, const char *name, const ch
 
 bool PropertyOArchive::openBlock(const char* name, const char* label)
 {
-	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, "block", Serializer());
+	PropertyRowStruct* row = updateRow<PropertyRowStruct>(name, label, "block", Serializer(), true);
 	lastNode_ = currentNode_;
-	enterNode(row);
+	enterNode(row, true);
 	return true;
 }
 
@@ -518,7 +530,7 @@ void PropertyOArchive::documentLastField(const char* message)
 
 void PropertyOArchive::closeBlock()
 {
-	closeStruct("block");
+	closeStruct("block", true);
 }
 
 void PropertyOArchive::setOutlineMode(bool outlineMode)

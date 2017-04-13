@@ -134,6 +134,7 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 #if YASLI_NO_FCVT
 	char buf[64] = { 0 };
 	sprintf(buf, "%f", value);
+	cutRightZeros(buf);
 	operator<<(buf);
 #else
 
@@ -186,6 +187,7 @@ MemoryWriter& MemoryWriter::operator<<(const char* value)
 MemoryWriter& MemoryWriter::operator<<(const wchar_t* value)
 {
 #if defined(ANDROID_NDK) || defined(NACL)
+	YASLI_ASSERT(0, "Not implemented");
 	return *this;
 #else
     write((void*)value, wcslen(value) * sizeof(wchar_t));

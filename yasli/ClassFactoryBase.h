@@ -24,11 +24,9 @@ public:
 	, typeID_(typeID)
 	{
 #if YASLI_NO_RTTI
-#if 0
 		const size_t bufLen = sizeof(typeID.typeInfo_->name);
 		strncpy(typeID.typeInfo_->name, name, bufLen - 1);
 		typeID.typeInfo_->name[bufLen - 1] = '\0';
-#endif
 #endif
 	}
 	const char* name() const{ return name_; }
@@ -48,7 +46,6 @@ public:
 	, nullLabel_(0)
 	{
 	}
-
 	virtual ~ClassFactoryBase() {}
 
 	virtual size_t size() const = 0;

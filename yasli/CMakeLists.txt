@@ -57,11 +57,7 @@ if(MSVC)
 endif(MSVC)
 
 include_directories(..)
-if (EMSCRIPTEN)
-    add_library("yasli" SHARED ${SOURCES} ${DECORATORS})
-else (EMSCRIPTEN)
-    add_library("yasli" ${SOURCES} ${DECORATORS})
-endif (EMSCRIPTEN)
+add_library("yasli" ${SOURCES} ${DECORATORS})
 
 set_target_properties("yasli" PROPERTIES DEBUG_POSTFIX "-debug")
 

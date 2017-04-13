@@ -15,8 +15,10 @@
 #include "ClassFactory.h"
 #include "Object.h"
 
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4512)
+#endif
 
 namespace yasli{
 
@@ -141,6 +143,8 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::AsObjectWrapper<yasli::
 
 }
 
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 // vim:sw=4 ts=4:

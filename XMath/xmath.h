@@ -3,9 +3,11 @@
 #include "fastMath.h"
 #include "round.h"
 
+#ifdef _MSC_VER
 #pragma warning (disable : 4244)
 #pragma warning (disable : 4201)
 #pragma warning (disable : 4239)
+#endif
 
 namespace yasli { class Archive; }
 
@@ -97,6 +99,7 @@ public:
 	float x,y;
 
 	Vect2f()								{ }
+	explicit Vect2f(float x_)					{ x = y = x_; }
 	Vect2f(float x_,float y_)					{ x = x_; y = y_; }
 	
 	typedef float float2[2];
@@ -168,6 +171,7 @@ public:
 	int x,y;
 
 	Vect2i()								{ }
+	explicit Vect2i(int x_)						{ x = y = x_; }
 	Vect2i(int x_, int y_)						{ x = x_; y = y_; }
 	Vect2i(float x_, float y_)					{ x = xround(x_); y = xround(y_); }
 	
@@ -304,6 +308,7 @@ public:
 
 	void transpose(){ float t = xy; xy = yx; yx = t; }
 	void invert();
+	float det() const { return xx*yy - xy*yx; }
 
 	Mat2f& operator*=(const Mat2f& m) { return (*this) = Mat2f(xx*m.xx+xy*m.yx, xx*m.xy+xy*m.yy, yx*m.xx+yy*m.yx, yx*m.xy+yy*m.yy); }
 	Mat2f operator*(const Mat2f& m) const { return Mat2f(*this) *= m; }
@@ -3757,7 +3762,7 @@ QuatF operator* (float w,const QuatF& q)
 inline void QuatF::slerp(const QuatF& a,const QuatF& b,float t)
 { 
 	// Slerp(q1,q2,t) = (sin((1-t)*A)/sin(A))*q1+(sin(t*A)/sin(A))*q2 
-	// Но делаем линейную интерполяцию и нормализуем
+	// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     float cosom = a.dot(b);
     if(cosom < 0.0){ 

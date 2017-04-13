@@ -36,33 +36,6 @@ YASLI_INLINE void EnumDescription::add(int value, const char* name, const char *
 	values_.push_back(value);
 }
 
-YASLI_INLINE bool EnumDescription::serialize(Archive& ar, int& value, const char* name, const char* label) const
-{
-	if (!ar.isInPlace()) {
-		if(count() == 0){
-			YASLI_ASSERT_STR(0 && "Attempt to serialize enum type that is not registered with YASLI_ENUM macro", type().name());
-			return false;
-		}
-		int index = -1;
-		if(ar.isOutput())
-			index = indexByValue(value);
-		StringListStaticValue stringListValue(ar.isEdit() ? labels() : names(), index, &value, type());
-		if (!ar(stringListValue, name, label))
-			return false;
-		if(ar.isInput()){
-			if(stringListValue.index() == -1)
-				return false;
-			value = ar.isEdit() ? valueByLabel(stringListValue.c_str()) : this->value(stringListValue.c_str());
-		}
-		else if(index == -1)
-			ar.error(&value, type(), "Unregistered or uninitialized enumeration value.");
-		return true;
-	}
-	else {
-		return ar(value, name, label);
-	}
-}
-
 YASLI_INLINE bool EnumDescription::serializeBitVector(Archive& ar, int& value, const char* name, const char* label) const
 {
 	if(ar.isOutput())

@@ -41,6 +41,8 @@ public:
 	, module_(original.module_)
 #if !YASLI_NO_RTTI
 	, name_(original.name_)
+#else
+	, runtimeID_(original.runtimeID_)
 #endif
 	{
 	}

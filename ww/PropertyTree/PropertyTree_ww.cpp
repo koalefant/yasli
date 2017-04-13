@@ -200,11 +200,9 @@ void PropertyTree::updateHeights(bool fontChanged)
 
 		area_ = property_tree::Rect(clientRect.left + 1, clientRect.top + 1, clientRect.width() - 2, clientRect.height() - 2);
 
+		int filterAreaHeight = 0;
 		if (filterMode_)
-		{
-			int filterAreaHeight = filterEntry_ ? filterEntry_->_minimalSize().y : 0;
-			area_.setTop(area_.top() + filterAreaHeight + 2 + 2);
-		}
+			filterAreaHeight = filterEntry_->_minimalSize().y + 4;
 
 		updateScrollBar();
 
@@ -216,7 +214,7 @@ void PropertyTree::updateHeights(bool fontChanged)
 		rightBorder_ = rb;
 		model()->root()->calculateMinimalSize(this, leftBorder_, rb-lb, force, 0, 0, 0);
 
-		size_.y_ = area_.top();
+		size_.y_ = area_.top() + filterAreaHeight;
 		model()->root()->adjustVerticalPosition(this, size_.y_);
 	}
 	updateScrollBar();
