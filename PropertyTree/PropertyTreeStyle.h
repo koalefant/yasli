@@ -9,8 +9,6 @@ struct PropertyTreeStyle
 	bool packCheckboxes;
 	bool fullRowMode;
 	bool horizontalLines;
-	bool doNotIndentSecondLevel;
-	bool alignLabelsToRight;
 	bool selectionRectangle;
 	float valueColumnWidth;
 	float rowSpacing;
@@ -27,9 +25,7 @@ struct PropertyTreeStyle
 	, horizontalLines(true)
 	, levelIndent(0.75f)
 	, firstLevelIndent(0.75f)
-	, doNotIndentSecondLevel(false)
 	, sliderSaturation(0.0f)
-	, alignLabelsToRight(false)
 	, selectionRectangle(true)
 	{
 	}
@@ -41,7 +37,6 @@ struct PropertyTreeStyle
 
 		ar(valueColumnWidth, "valueColumnWidth", "Value Column Width");		ar.doc("Defines a ratio of the value / name columns. Normalized.");
 		ar(Range(rowSpacing, 0.5f, 2.0f), "rowSpacing", "Row Spacing"); ar.doc("Height of one row (line) proportional to text-height.");
-		ar(alignLabelsToRight, "alignLabelsToRight", "Right Alignment");
 		ar(Range(firstLevelIndent, 0.0f, 3.0f), "firstLevelIndent", "First Level Indent"); ar.doc("Indentation of a very first level in text-height units.");
 		ar(Range(levelIndent, 0.0f, 3.0f), "levelIndent", "Level Indent"); ar.doc("Indentation of a every next level in text-height units.");
 
@@ -52,8 +47,6 @@ struct PropertyTreeStyle
 		ar(packCheckboxes, "packCheckboxes", "Pack Checkboxes"); ar.doc("Arranges checkboxes in two columns, when possible.");
 
 		ar(horizontalLines, "horizontalLines", "Horizontal Lines"); ar.doc("Show thin line that connects row name with its value.");
-
-		ar(doNotIndentSecondLevel, "doNotIndentSecondLevel", "Do not indent second level");	
 	}
 };
 
