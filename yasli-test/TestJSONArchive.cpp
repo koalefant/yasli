@@ -44,6 +44,7 @@ SUITE(JSONArchive)
 			ComplexClass obj;
 
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(bufChanged.c_str(), bufChanged.size()));
 			CHECK(ia(obj, "obj"));
 
@@ -86,6 +87,7 @@ SUITE(JSONArchive)
 		"]";
 
 		JSONIArchive ia;
+		ia.setDebugFilename(m_details.testName);
 		ia.open(content, strlen(content));
 
 		Root obj;
@@ -113,6 +115,7 @@ SUITE(JSONArchive)
 		StringToElement elements;
 		{
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(json, strlen(json)));
 			ia(elements);
 		}
@@ -129,6 +132,7 @@ SUITE(JSONArchive)
 		elements.clear();
 		{
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(oa.c_str(), oa.length()));
 			ia(elements);
 		}
@@ -149,6 +153,7 @@ SUITE(JSONArchive)
 		StringToElement elements;
 		{
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(json, strlen(json)));
 			ia(elements);
 		}
@@ -166,6 +171,7 @@ SUITE(JSONArchive)
 
 		{
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			ia.open(oa.c_str(), oa.length());
 			ia(elements);
 		}
@@ -203,6 +209,7 @@ SUITE(JSONArchive)
 		const char* json = "{ \"value\": \"\\\"\\\"\" }\n";
 
 		JSONIArchive ia;
+		ia.setDebugFilename(m_details.testName);
 		CHECK(ia.open(json, strlen(json)));
 		DoubleQuotes instance;
 		CHECK(ia(instance));
@@ -342,6 +349,7 @@ SUITE(JSONArchive)
 			JSONOArchive oa;
 			CHECK(oa(floatTestRef, ""));
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(oa.c_str(), oa.length()));
 			ia(floatTest, "");
 			CHECK(floatTest == floatTestRef);
@@ -353,6 +361,7 @@ SUITE(JSONArchive)
 			JSONOArchive oa;
 			CHECK(oa(doubleTestRef, ""));
 			JSONIArchive ia;
+			ia.setDebugFilename(m_details.testName);
 			CHECK(ia.open(oa.c_str(), oa.length()));
 			ia(doubleTest, "");
 			CHECK(doubleTest == doubleTestRef);
