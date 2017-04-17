@@ -36,12 +36,14 @@ include_directories(UnitTest++/src)
 include_directories(.)
 add_subdirectory(yasli)
 add_subdirectory(yasli-example)
-#add_subdirectory(yasli-test)
+add_subdirectory(yasli-test)
 
 add_subdirectory(XMath)
 
-add_subdirectory(QPropertyTree)
-add_subdirectory(QPropertyTree-example)
+if(NOT YASLI_NO_QT)
+	add_subdirectory(QPropertyTree)
+	add_subdirectory(QPropertyTree-example)
+endif()
 
 if (MSVC)
    add_subdirectory(ww)
