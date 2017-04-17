@@ -13,7 +13,7 @@
 #include "PropertyRowStringListValue.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "ConstStringList.h"
 
 #include "yasli/Archive.h"
@@ -26,7 +26,7 @@ using yasli::StringListValue;
 REGISTER_PROPERTY_ROW(StringListValue, PropertyRowStringListValue)
 
 
-property_tree::InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowStringListValue::createWidget(PropertyTreeBase* tree)
 {
 	return tree->ui()->createComboBox(this);
 }
@@ -34,7 +34,7 @@ property_tree::InplaceWidget* PropertyRowStringListValue::createWidget(PropertyT
 // ---------------------------------------------------------------------------
 REGISTER_PROPERTY_ROW(StringListStaticValue, PropertyRowStringListStaticValue)
 
-property_tree::InplaceWidget* PropertyRowStringListStaticValue::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowStringListStaticValue::createWidget(PropertyTreeBase* tree)
 {
 	return tree->ui()->createComboBox(this);
 }

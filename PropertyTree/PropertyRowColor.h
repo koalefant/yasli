@@ -16,7 +16,7 @@ class PropertyRowColor : public PropertyRowStruct
 public:
 	PropertyRowColor();
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_AFTER_INLINED; }
-	int widgetSizeMin(const PropertyTree* tree) const override;
+	int widgetSizeMin(const PropertyTreeBase* tree) const override;
 	void redraw(IDrawContext& context) override;
 	void closeNonLeaf(const yasli::Serializer& ser, yasli::Archive& ar) override;
 

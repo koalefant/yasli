@@ -13,7 +13,7 @@
 
 enum { BUTTON_SIZE = 16 };
 
-Rect PropertyRowField::fieldRect(const PropertyTree* tree) const
+Rect PropertyRowField::fieldRect(const PropertyTreeBase* tree) const
 {
 		Rect fieldRect = widgetRect(tree);
 		fieldRect.w -= buttonCount() * BUTTON_SIZE;
@@ -61,12 +61,12 @@ void PropertyRowField::redraw(IDrawContext& context)
 
 }
 
-Icon PropertyRowField::buttonIcon(const PropertyTree* tree, int index) const
+Icon PropertyRowField::buttonIcon(const PropertyTreeBase* tree, int index) const
 {
 	return Icon();
 }
 
-int PropertyRowField::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowField::widgetSizeMin(const PropertyTreeBase* tree) const
 { 
 	if (userWidgetSize() >= 0)
 		return userWidgetSize();
@@ -77,7 +77,7 @@ int PropertyRowField::widgetSizeMin(const PropertyTree* tree) const
 		return 40;
 }
 
-int PropertyRowField::hitButton(const PropertyTree* tree, const Point& point) const
+int PropertyRowField::hitButton(const PropertyTreeBase* tree, const Point& point) const
 {
 	int buttonCount = this->buttonCount();
 	Rect buttonsRect = widgetRect(tree);

@@ -12,7 +12,7 @@
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/PropertyRowImpl.h"
 
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/IDrawContext.h"
 #include "PropertyTree/PropertyRow.h"
 #include "PropertyTree/Serialization.h"
@@ -52,7 +52,7 @@ public:
 		formatColor(buf, value_);
 		return string(buf);
 	}
-	virtual int widgetSizeMin(const PropertyTree* tree) const override{ 
+	virtual int widgetSizeMin(const PropertyTreeBase* tree) const override{ 
 		return userWidgetSize() >= 0 ? userWidgetSize() : tree->_defaultRowHeight(); 
 	}
 };

@@ -11,7 +11,7 @@
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "yasli/decorators/Button.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "IDrawContext.h"
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
@@ -21,12 +21,12 @@ class PropertyRowButton : public PropertyRowImpl<Button>{
 public:
 	PropertyRowButton();
 	void redraw(IDrawContext& context) override;
-	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
+	bool onMouseDown(PropertyTreeBase* tree, Point point, bool& changed) override;
 	void onMouseDrag(const PropertyDragEvent& e) override;
-	void onMouseUp(PropertyTree* tree, Point point) override;
+	void onMouseUp(PropertyTreeBase* tree, Point point) override;
 	bool onActivate(const PropertyActivationEvent& e) override;
 	yasli::string valueAsString() const override{ return value_ ? value_.text : ""; }
-	int widgetSizeMin(const PropertyTree* tree) const override{ 
+	int widgetSizeMin(const PropertyTreeBase* tree) const override{ 
 		if (userWidgetSize() >= 0)
 			return userWidgetSize();
 		else
@@ -55,7 +55,7 @@ void PropertyRowButton::redraw(IDrawContext& context)
 	context.drawButton(buttonRect, text.c_str(), buttonFlags, rowFont(context.tree));
 }
 
-bool PropertyRowButton::onMouseDown(PropertyTree* tree, Point point, bool& changed)
+bool PropertyRowButton::onMouseDown(PropertyTreeBase* tree, Point point, bool& changed)
 {
 	if(widgetRect(tree).contains(point)){
 		value().pressed = !value().pressed;
@@ -75,7 +75,7 @@ void PropertyRowButton::onMouseDrag(const PropertyDragEvent& e)
 	}
 }
 
-void PropertyRowButton::onMouseUp(PropertyTree* tree, Point point)
+void PropertyRowButton::onMouseUp(PropertyTreeBase* tree, Point point)
 {
 	PropertyActivationEvent ev;
 	ev.clickPoint = point;

@@ -16,7 +16,7 @@ struct PropertyTreeMenuHandler : PropertyRowMenuHandler
 {
 public:
 	PropertyRow* row;
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 
 	yasli::string filterName;
 	yasli::string filterValue;

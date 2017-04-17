@@ -3,14 +3,14 @@
 #include "PropertyTree/PropertyRow.h"
 
 class PropertyRowFileOpen;
-class PropertyTree;
+class PropertyTreeBase;
 
 struct FileOpenMenuHandler : PropertyRowMenuHandler
 {
 	PropertyRowFileOpen* self;
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 
-	FileOpenMenuHandler(PropertyRowFileOpen* self, PropertyTree* tree)
+	FileOpenMenuHandler(PropertyRowFileOpen* self, PropertyTreeBase* tree)
 	: self(self)
 	, tree(tree)
 	{

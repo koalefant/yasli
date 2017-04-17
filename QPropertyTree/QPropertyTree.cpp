@@ -553,7 +553,7 @@ protected:
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 QPropertyTree::QPropertyTree(QWidget* parent)
 : QWidget(parent)
-, PropertyTree(new QUIFacade(this))
+, PropertyTreeBase(new QUIFacade(this))
 , sizeHint_(180, 180)
 , dragController_(new DragController(this))
 , sizeToContent_(false)
@@ -818,11 +818,11 @@ QPoint QPropertyTree::_toScreen(Point point) const
 	return mapToGlobal(pt);
 }
 
-void QPropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
+void QPropertyTree::attachPropertyTree(PropertyTreeBase* propertyTree) 
 { 
 	if(attachedPropertyTree_)
 		disconnect((QPropertyTree*)attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	PropertyTree::attachPropertyTree(propertyTree);
+	PropertyTreeBase::attachPropertyTree(propertyTree);
 	connect((QPropertyTree*)attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
 }
 
@@ -863,7 +863,7 @@ struct FilterVisitor
 		return false;
 	}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* _tree)
+	ScanResult operator()(PropertyRow* row, PropertyTreeBase* _tree)
 	{
 		QPropertyTree* tree = (QPropertyTree*)_tree;
 		const char* label = row->labelUndecorated();
@@ -1144,12 +1144,12 @@ void QPropertyTree::paintEvent(QPaintEvent* ev)
 
 QPoint QPropertyTree::pointToRootSpace(const QPoint& point) const
 {
-	return toQPoint(PropertyTree::pointToRootSpace(fromQPoint(point)));
+	return toQPoint(PropertyTreeBase::pointToRootSpace(fromQPoint(point)));
 }
 
 QPoint QPropertyTree::pointFromRootSpace(const QPoint& point) const
 {
-	return toQPoint(PropertyTree::pointFromRootSpace(fromQPoint(point)));
+	return toQPoint(PropertyTreeBase::pointFromRootSpace(fromQPoint(point)));
 }
 
 void QPropertyTree::moveEvent(QMoveEvent* ev)
@@ -1384,7 +1384,7 @@ void QPropertyTree::mouseMoveEvent(QMouseEvent* ev)
 			{
 				pressDelta_ += pointToRootSpace(fromQPoint(ev->pos())) - pressPoint_;
 				pointerMovedSincePress_ = true;
-				QCursor::setPos(mapToGlobal(toQPoint(PropertyTree::pointFromRootSpace(pressPoint_))));
+				QCursor::setPos(mapToGlobal(toQPoint(PropertyTreeBase::pointFromRootSpace(pressPoint_))));
 			}
 			else
 			*/
@@ -1468,12 +1468,12 @@ void QPropertyTree::onAttachedTreeChanged()
 
 void QPropertyTree::apply(bool continuous)
 {
-	PropertyTree::apply(continuous);
+	PropertyTreeBase::apply(continuous);
 }
 
 void QPropertyTree::revert()
 {
-	PropertyTree::revert();
+	PropertyTreeBase::revert();
 }
 
 void QPropertyTree::_cancelWidget()
@@ -1494,7 +1494,7 @@ void QPropertyTree::_cancelWidget()
 	if (inplaceWidgetHasFocus)
 		setFocus();
 
-	PropertyTree::_cancelWidget();
+	PropertyTreeBase::_cancelWidget();
 }
 
 FORCE_SEGMENT(PropertyRowColor)

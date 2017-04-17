@@ -14,7 +14,7 @@
 #include "PropertyTree/IDrawContext.h"
 #include <map>
 
-class PropertyTree;
+class PropertyTreeBase;
 
 namespace Gdiplus{
 	class Color;

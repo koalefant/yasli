@@ -8,7 +8,7 @@
  */
 
 #include "PropertyRowBool.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
 #include "yasli/ClassFactory.h"
@@ -39,7 +39,7 @@ void PropertyRowBool::redraw(IDrawContext& context)
 	context.drawCheck(context.widgetRect, userReadOnly(), multiValue() ? CHECK_IN_BETWEEN : (value_ ? CHECK_SET : CHECK_NOT_SET));
 }
 
-bool PropertyRowBool::onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev)
+bool PropertyRowBool::onKeyDown(PropertyTreeBase* tree, const property_tree::KeyEvent* ev)
 {
 	if (ev->key() == property_tree::KEY_SPACE)
 	{
@@ -74,7 +74,7 @@ DragCheckBegin PropertyRowBool::onMouseDragCheckBegin()
 	return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
 }
 
-bool PropertyRowBool::onMouseDragCheck(PropertyTree* tree, bool value)
+bool PropertyRowBool::onMouseDragCheck(PropertyTreeBase* tree, bool value)
 {
 	if (value_ != value) {
 		tree->model()->rowAboutToBeChanged(this);
@@ -90,7 +90,7 @@ void PropertyRowBool::serializeValue(yasli::Archive& ar)
     ar(value_, "value", "Value");
 }
 
-int PropertyRowBool::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowBool::widgetSizeMin(const PropertyTreeBase* tree) const
 {
 	return int(tree->_defaultRowHeight() * 0.9f);
 }

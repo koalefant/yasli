@@ -11,7 +11,7 @@
 #include "yasli/Archive.h"
 #include "yasli/BinArchive.h"
 #include "yasli/Pointers.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
@@ -279,7 +279,7 @@ static int heightByWidth(void * argument, int element, int subindex, int width) 
 	if ( element < 0 || element >= int(l->rows.size()) ) {
 		return 0;
 	}
-	PropertyTree* tree = l->tree;
+	PropertyTreeBase* tree = l->tree;
 	const int padding = int(tree->_defaultRowHeight() * 0.1f);
 
 	PropertyRow * row = l->rows[ element ];
@@ -360,9 +360,9 @@ void PropertyTreeMenuHandler::onMenuPaste()
 }
 // ---------------------------------------------------------------------------
 
-PropertyTreeStyle PropertyTree::defaultTreeStyle_;
+PropertyTreeStyle PropertyTreeBase::defaultTreeStyle_;
 
-PropertyTree::PropertyTree(IUIFacade* uiFacade)
+PropertyTreeBase::PropertyTreeBase(IUIFacade* uiFacade)
 : attachedPropertyTree_(0)
 , ui_(uiFacade)
 , autoRevert_(true)
@@ -404,7 +404,7 @@ PropertyTree::PropertyTree(IUIFacade* uiFacade)
 	model_->setFullUndo(config_.fullUndo);
 }
 
-PropertyTree::~PropertyTree()
+PropertyTreeBase::~PropertyTreeBase()
 {
 	delete layout_;
 	layout_ = 0;
@@ -412,7 +412,7 @@ PropertyTree::~PropertyTree()
 	delete ui_;
 }
 
-bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
+bool PropertyTreeBase::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 {
 	using namespace property_tree;
 	PropertyTreeMenuHandler handler;
@@ -614,7 +614,7 @@ struct FirstIssueVisitor
 	{
 	}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	ScanResult operator()(PropertyRow* row, PropertyTreeBase* tree, int)
 	{
 		if ((row->inlined() || row->inlinedBefore()) && row->findNonInlinedParent() == startRow_)
 			return SCAN_SIBLINGS;
@@ -633,7 +633,7 @@ struct FirstIssueVisitor
 	}
 };
 
-void PropertyTree::jumpToNextHiddenValidatorIssue(bool isError, PropertyRow* start)
+void PropertyTreeBase::jumpToNextHiddenValidatorIssue(bool isError, PropertyRow* start)
 {
 	FirstIssueVisitor op(isError ? VALIDATOR_ENTRY_ERROR : VALIDATOR_ENTRY_WARNING, start);
 	if (start->isStruct()) {
@@ -744,7 +744,7 @@ static LevelHit hitLayoutElementRecurse(const Layout& layout, int element, Point
     return r;
 }
 
-void PropertyTree::hitTest(property_tree::HitResult* r, const Point& point)
+void PropertyTreeBase::hitTest(property_tree::HitResult* r, const Point& point)
 {
 	r->point = point;
     r->focusableElementIndex = 0;
@@ -760,7 +760,7 @@ void PropertyTree::hitTest(property_tree::HitResult* r, const Point& point)
 	r->partIndex = element.rowPartSubindex;
 }
 
-bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool shiftPressed)
+bool PropertyTreeBase::onRowLMBDown(const HitResult& hit, bool controlPressed, bool shiftPressed)
 {
 	Point point = hit.point;
 	pressPoint_ = point;
@@ -837,7 +837,7 @@ bool PropertyTree::onRowLMBDown(const HitResult& hit, bool controlPressed, bool 
 	return false;
 }
 
-void PropertyTree::onMouseStill()
+void PropertyTreeBase::onMouseStill()
 {
 	if (capturedRow_) {
 		PropertyDragEvent e;
@@ -850,7 +850,7 @@ void PropertyTree::onMouseStill()
 	}
 }
 
-void PropertyTree::onRowLMBUp(const HitResult& hit)
+void PropertyTreeBase::onRowLMBUp(const HitResult& hit)
 {
 	onMouseStill();
 	if (capturedRow_)
@@ -867,7 +867,7 @@ void PropertyTree::onRowLMBUp(const HitResult& hit)
 	}
 }
 
-void PropertyTree::onRowRMBDown(const HitResult& hit)
+void PropertyTreeBase::onRowRMBDown(const HitResult& hit)
 {
 	SharedPtr<PropertyRow> handle = hit.row;
 	PropertyRow* menuRow = 0;
@@ -898,7 +898,7 @@ void PropertyTree::onRowRMBDown(const HitResult& hit)
 	}
 }
 
-void PropertyTree::expandParents(PropertyRow* row)
+void PropertyTreeBase::expandParents(PropertyRow* row)
 {
 	storePersistentFocusElement();
 	bool hasChanges = false;
@@ -924,13 +924,13 @@ void PropertyTree::expandParents(PropertyRow* row)
 	}
 }
 
-void PropertyTree::expandAll()
+void PropertyTreeBase::expandAll()
 {
 	expandChildren(0);
 }
 
 
-void PropertyTree::expandChildren(PropertyRow* root)
+void PropertyTreeBase::expandChildren(PropertyRow* root)
 {
 	if(!root){
 		root = model()->root();
@@ -948,12 +948,12 @@ void PropertyTree::expandChildren(PropertyRow* root)
 	restorePersistentFocusElement();
 }
 
-void PropertyTree::collapseAll()
+void PropertyTreeBase::collapseAll()
 {
 	collapseChildren(0);
 }
 
-void PropertyTree::collapseChildren(PropertyRow* root)
+void PropertyTreeBase::collapseChildren(PropertyRow* root)
 {
 	if(!root){
 		root = model()->root();
@@ -972,7 +972,7 @@ void PropertyTree::collapseChildren(PropertyRow* root)
 	restorePersistentFocusElement();
 }
 
-void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
+void PropertyTreeBase::expandRow(PropertyRow* row, bool expanded, bool updateHeights)
 {
 	bool hasChanges = false;
 	if (row->expanded() != expanded) {
@@ -988,17 +988,17 @@ void PropertyTree::expandRow(PropertyRow* row, bool expanded, bool updateHeights
 	}
 }
 
-Point PropertyTree::treeSize() const
+Point PropertyTreeBase::treeSize() const
 {
 	return size_ + (compact() ? Point(0,0) : Point(8, 8));
 }
 
-void PropertyTree::YASLI_SERIALIZE_METHOD(Archive& ar)
+void PropertyTreeBase::YASLI_SERIALIZE_METHOD(Archive& ar)
 {
 	model()->YASLI_SERIALIZE_METHOD(ar, this);
 
 	if(ar.isInput()){
-		updateAttachedPropertyTree(false);
+		updateAttachedPropertyTreeBase(false);
 		updateHeights();
 		onSelected();
 	}
@@ -1030,7 +1030,7 @@ static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
 	return 0;
 }
 
-Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) const
+Rect PropertyTreeBase::findRowRect(const PropertyRow* row, int part, int subindex) const
 {
 	int element = findRowElement(*layout_, row, part, subindex);
 	if (element > 0)
@@ -1038,7 +1038,7 @@ Rect PropertyTree::findRowRect(const PropertyRow* row, int part, int subindex) c
 	return Rect();
 }
 
-void PropertyTree::updateLayout()
+void PropertyTreeBase::updateLayout()
 {
 	DebugTimer t( __FUNCTION__, 0 );
 	Layout& l = *layout_;
@@ -1080,7 +1080,7 @@ void PropertyTree::updateLayout()
 	// height depends on their width.
 }
 
-void PropertyTree::ensureVisible(PropertyRow* row, bool update, bool considerChildren)
+void PropertyTreeBase::ensureVisible(PropertyRow* row, bool update, bool considerChildren)
 {
 	if(row == 0)
 		return;
@@ -1106,7 +1106,7 @@ void PropertyTree::ensureVisible(PropertyRow* row, bool update, bool considerChi
 	repaint();
 }
 
-void PropertyTree::onRowSelected(const std::vector<PropertyRow*>& rows, bool addSelection, bool adjustCursorPos)
+void PropertyTreeBase::onRowSelected(const std::vector<PropertyRow*>& rows, bool addSelection, bool adjustCursorPos)
 {
 	for (size_t i = 0; i < rows.size(); ++i) {
 		PropertyRow* row = rows[i];
@@ -1119,11 +1119,11 @@ void PropertyTree::onRowSelected(const std::vector<PropertyRow*>& rows, bool add
 	if (!rows.empty()) {
 		ensureVisible(rows.back(), true, false);
 	}
-	updateAttachedPropertyTree(false);
+	updateAttachedPropertyTreeBase(false);
 	onSelected();
 }
 
-bool PropertyTree::attach(const yasli::Serializers& serializers)
+bool PropertyTreeBase::attach(const yasli::Serializers& serializers)
 {
 	bool changed = false;
 	if (attached_.size() != serializers.size())
@@ -1151,7 +1151,7 @@ bool PropertyTree::attach(const yasli::Serializers& serializers)
 	return changed;
 }
 
-void PropertyTree::attach(const yasli::Serializer& serializer)
+void PropertyTreeBase::attach(const yasli::Serializer& serializer)
 {
 	if (attached_.size() != 1 || attached_[0].serializer() != serializer) {
 		attached_.clear();
@@ -1161,7 +1161,7 @@ void PropertyTree::attach(const yasli::Serializer& serializer)
 	revert();
 }
 
-void PropertyTree::attach(const yasli::Object& object)
+void PropertyTreeBase::attach(const yasli::Object& object)
 {
 	attached_.clear();
 	attached_.push_back(object);
@@ -1169,7 +1169,7 @@ void PropertyTree::attach(const yasli::Object& object)
 	revert();
 }
 
-void PropertyTree::detach()
+void PropertyTreeBase::detach()
 {
 	_cancelWidget();
 	attached_.clear();
@@ -1177,14 +1177,14 @@ void PropertyTree::detach()
 	repaint();
 }
 
-void PropertyTree::_cancelWidget()
+void PropertyTreeBase::_cancelWidget()
 {
 	// make sure that widget_ is null the moment widget is destroyed, so we
 	// don't get focus callbacks to act on destroyed widget.
 	std::unique_ptr<property_tree::InplaceWidget> widget(widget_.release());
 }
 
-int PropertyTree::revertObjects(vector<void*> objectAddresses)
+int PropertyTreeBase::revertObjects(vector<void*> objectAddresses)
 {
 	int result = 0;
 	for (size_t i = 0; i < objectAddresses.size(); ++i) {
@@ -1194,7 +1194,7 @@ int PropertyTree::revertObjects(vector<void*> objectAddresses)
 	return result;
 }
 
-bool PropertyTree::revertObject(void* objectAddress)
+bool PropertyTreeBase::revertObject(void* objectAddress)
 {
 	PropertyRow* row = model()->root()->findByAddress(objectAddress);
 	if (row && row->isObject()) {
@@ -1206,9 +1206,9 @@ bool PropertyTree::revertObject(void* objectAddress)
 }
 
 
-void PropertyTree::revert()
+void PropertyTreeBase::revert()
 {
-	DebugTimer t("PropertyTree::revert", 10);
+	DebugTimer t("PropertyTreeBase::revert", 10);
 	interruptDrag();
 	_cancelWidget();
 	capturedRow_ = 0;
@@ -1270,7 +1270,7 @@ void PropertyTree::revert()
 
 	restorePersistentFocusElement();
 	repaint();
-	updateAttachedPropertyTree(true);
+	updateAttachedPropertyTreeBase(true);
 
 	onReverted();
 }
@@ -1282,7 +1282,7 @@ struct ValidatorVisitor
 	{
 	}
 
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	ScanResult operator()(PropertyRow* row, PropertyTreeBase* tree, int)
 	{
 		const void* rowHandle = row->searchHandle();
 		int index = 0;
@@ -1304,7 +1304,7 @@ protected:
 	ValidatorBlock* validator_;
 };
 
-void PropertyTree::applyValidation()
+void PropertyTreeBase::applyValidation()
 {
 	if (!validatorBlock_->isEnabled())
 		return;
@@ -1320,15 +1320,15 @@ void PropertyTree::applyValidation()
 	model()->root()->setLabelChanged();
 }
 
-void PropertyTree::revertNoninterrupting()
+void PropertyTreeBase::revertNoninterrupting()
 {
 	if (!capturedRow_)
 		revert();
 }
 
-void PropertyTree::apply(bool continuous)
+void PropertyTreeBase::apply(bool continuous)
 {
-	DebugTimer t("PropertyTree::apply", 10);
+	DebugTimer t("PropertyTreeBase::apply", 10);
 #ifdef PROFILE
 	QElapsedTimer timer;
 	timer.start();
@@ -1356,13 +1356,13 @@ void PropertyTree::apply(bool continuous)
 		onChanged();
 }
 
-void PropertyTree::applyInplaceEditor()
+void PropertyTreeBase::applyInplaceEditor()
 {
 	if (widget_.get())
 		widget_->commit();
 }
 
-bool PropertyTree::spawnWidget(PropertyRow* row, bool rename)
+bool PropertyTreeBase::spawnWidget(PropertyRow* row, bool rename)
 {
 	if(!widget_.get() || widgetRow_ != row){
 		interruptDrag();
@@ -1378,12 +1378,12 @@ bool PropertyTree::spawnWidget(PropertyRow* row, bool rename)
 	return false;
 }
 
-void PropertyTree::addMenuHandler(PropertyRowMenuHandler* handler)
+void PropertyTreeBase::addMenuHandler(PropertyRowMenuHandler* handler)
 {
 	menuHandlers_.push_back(handler);
 }
 
-void PropertyTree::clearMenuHandlers()
+void PropertyTreeBase::clearMenuHandlers()
 {
 	for (size_t i = 0; i < menuHandlers_.size(); ++i)
 	{
@@ -1409,7 +1409,7 @@ static yasli::string quoteIfNeeded(const char* str)
 	}
 }
 
-bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
+bool PropertyTreeBase::onContextMenu(PropertyRow* r, IMenu& menu)
 {
 	SharedPtr<PropertyRow> row(r);
 	PropertyTreeMenuHandler* handler = new PropertyTreeMenuHandler();
@@ -1469,11 +1469,11 @@ bool PropertyTree::onContextMenu(PropertyRow* r, IMenu& menu)
 	}
 
 	// menu.addSeparator();
-	// menu.addAction(TRANSLATE("Decompose"), row).connect(this, &PropertyTree::onRowMenuDecompose);
+	// menu.addAction(TRANSLATE("Decompose"), row).connect(this, &PropertyTreeBase::onRowMenuDecompose);
 	return true;
 }
 
-void PropertyTree::onRowMouseMove(PropertyRow* row, Point point)
+void PropertyTreeBase::onRowMouseMove(PropertyRow* row, Point point)
 {
 	PropertyDragEvent e;
 	e.tree = this;
@@ -1496,14 +1496,14 @@ struct DecomposeProxy
 	SharedPtr<PropertyRow>& row;
 };
 
-void PropertyTree::onRowMenuDecompose(PropertyRow* row)
+void PropertyTreeBase::onRowMenuDecompose(PropertyRow* row)
 {
   // SharedPtr<PropertyRow> clonedRow = row->clone();
   // DecomposeProxy proxy(clonedRow);
   // edit(Serializer(proxy), 0, IMMEDIATE_UPDATE, this);
 }
 
-void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
+void PropertyTreeBase::onModelUpdated(const PropertyRows& rows, bool needApply)
 {
 	_cancelWidget();
 
@@ -1515,7 +1515,7 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 			revert();
 		else {
 			updateHeights();
-			updateAttachedPropertyTree(true);
+			updateAttachedPropertyTreeBase(true);
 		}
 	}
 	else {
@@ -1523,12 +1523,12 @@ void PropertyTree::onModelUpdated(const PropertyRows& rows, bool needApply)
 	}
 }
 
-void PropertyTree::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
+void PropertyTreeBase::onModelPushUndo(PropertyTreeOperator* op, bool* handled)
 {
 	onPushUndo();
 }
 
-void PropertyTree::setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow)
+void PropertyTreeBase::setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow)
 {
 	_cancelWidget();
 	widget_.reset(widget);
@@ -1542,13 +1542,13 @@ void PropertyTree::setWidget(property_tree::InplaceWidget* widget, PropertyRow* 
 	}
 }
 
-void PropertyTree::setExpandLevels(int levels)
+void PropertyTreeBase::setExpandLevels(int levels)
 {
 	config_.expandLevels = levels;
     model()->setExpandLevels(levels);
 }
 
-PropertyRow* PropertyTree::selectedRow()
+PropertyRow* PropertyTreeBase::selectedRow()
 {
     const PropertyTreeModel::Selection &sel = model()->selection();
     if(sel.empty())
@@ -1556,7 +1556,7 @@ PropertyRow* PropertyTree::selectedRow()
     return model()->rowFromPath(sel.front());
 }
 
-bool PropertyTree::getSelectedObject(yasli::Object* object)
+bool PropertyTreeBase::getSelectedObject(yasli::Object* object)
 {
 	const PropertyTreeModel::Selection &sel = model()->selection();
 	if(sel.empty())
@@ -1587,7 +1587,7 @@ static int findFirstFocusableElement(const property_tree::Layout& layout, int st
 	return 0;
 }
 
-void PropertyTree::setFocusedRow(PropertyRow* row) {
+void PropertyTreeBase::setFocusedRow(PropertyRow* row) {
 	// make sure that the row is actually in layout now
 	ensureVisible(row);
 
@@ -1598,7 +1598,7 @@ void PropertyTree::setFocusedRow(PropertyRow* row) {
 	}
 }
 
-bool PropertyTree::setSelectedRow(PropertyRow* row)
+bool PropertyTreeBase::setSelectedRow(PropertyRow* row)
 {
 	TreeSelection sel;
 	if(row)
@@ -1607,19 +1607,19 @@ bool PropertyTree::setSelectedRow(PropertyRow* row)
 		model()->setSelection(sel);
 		if (row)
 			ensureVisible(row);
-		updateAttachedPropertyTree(false);
+		updateAttachedPropertyTreeBase(false);
 		repaint();
 		return true;
 	}
 	return false;
 }
 
-int PropertyTree::selectedRowCount() const
+int PropertyTreeBase::selectedRowCount() const
 {
 	return (int)model()->selection().size();
 }
 
-PropertyRow* PropertyTree::selectedRowByIndex(int index)
+PropertyRow* PropertyTreeBase::selectedRowByIndex(int index)
 {
 	const PropertyTreeModel::Selection &sel = model()->selection();
 	if (size_t(index) >= sel.size())
@@ -1629,19 +1629,19 @@ PropertyRow* PropertyTree::selectedRowByIndex(int index)
 }
 
 
-bool PropertyTree::selectByAddress(const void* addr, bool keepSelectionIfChildSelected)
+bool PropertyTreeBase::selectByAddress(const void* addr, bool keepSelectionIfChildSelected)
 {
 	return selectByAddresses(vector<const void*>(1, addr), keepSelectionIfChildSelected);
 }
 
-bool PropertyTree::selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected)
+bool PropertyTreeBase::selectByAddresses(const vector<const void*>& addresses, bool keepSelectionIfChildSelected)
 {
 	return selectByAddresses(&addresses.front(), addresses.size(), keepSelectionIfChildSelected);
 }
 
 
 
-bool PropertyTree::selectByAddresses(const void* const* addresses, size_t addressCount, bool keepSelectionIfChildSelected)
+bool PropertyTreeBase::selectByAddresses(const void* const* addresses, size_t addressCount, bool keepSelectionIfChildSelected)
 {
 	bool result = false;
 	if (model()->root()) {
@@ -1686,7 +1686,7 @@ bool PropertyTree::selectByAddresses(const void* const* addresses, size_t addres
 	return result;
 }
 
-void PropertyTree::setUndoEnabled(bool enabled, bool full)
+void PropertyTreeBase::setUndoEnabled(bool enabled, bool full)
 {
 	config_.undoEnabled = enabled;
 	config_.fullUndo = full;
@@ -1694,7 +1694,7 @@ void PropertyTree::setUndoEnabled(bool enabled, bool full)
     model()->setFullUndo(full);
 }
 
-void PropertyTree::attachPropertyTree(PropertyTree* propertyTree) 
+void PropertyTreeBase::attachPropertyTree(PropertyTreeBase* propertyTree) 
 { 
 	// TODO:
 	// if(attachedPropertyTree_)
@@ -1702,20 +1702,20 @@ void PropertyTree::attachPropertyTree(PropertyTree* propertyTree)
 	attachedPropertyTree_ = propertyTree; 
 	//if (attachedPropertyTree_)
 	//	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	updateAttachedPropertyTree(true); 
+	updateAttachedPropertyTreeBase(true); 
 }
 
-void PropertyTree::detachPropertyTree()
+void PropertyTreeBase::detachPropertyTree()
 {
 	attachPropertyTree(0);
 }
 
-void PropertyTree::setAutoHideAttachedPropertyTree(bool autoHide)
+void PropertyTreeBase::setAutoHideAttachedPropertyTree(bool autoHide)
 {
 	autoHideAttachedPropertyTree_ = autoHide;
 }
 
-void PropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
+void PropertyTreeBase::getSelectionSerializers(yasli::Serializers* serializers)
 {
 	TreeSelection::const_iterator i;
 	for(i = model()->selection().begin(); i != model()->selection().end(); ++i){
@@ -1745,7 +1745,7 @@ void PropertyTree::getSelectionSerializers(yasli::Serializers* serializers)
 	}
 }
 
-void PropertyTree::updateAttachedPropertyTree(bool revert)
+void PropertyTreeBase::updateAttachedPropertyTreeBase(bool revert)
 {
 	if(attachedPropertyTree_) {
  		Serializers serializers;
@@ -1788,7 +1788,7 @@ size_t countCharsUtf8(const char* str, const char* subStr)
 #endif
 }
 
-void PropertyTree::RowFilter::parse(const char* filter)
+void PropertyTreeBase::RowFilter::parse(const char* filter)
 {
 	for (int i = 0; i < NUM_TYPES; ++i) {
 		start[i].clear();
@@ -1857,7 +1857,7 @@ void PropertyTree::RowFilter::parse(const char* filter)
 	}
 }
 
-bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t* matchStart, size_t* matchEnd) const
+bool PropertyTreeBase::RowFilter::match(const char* textOriginal, Type type, size_t* matchStart, size_t* matchEnd) const
 {
 	YASLI_ESCAPE(textOriginal, return false);
 
@@ -1916,7 +1916,7 @@ bool PropertyTree::RowFilter::match(const char* textOriginal, Type type, size_t*
 	return true;
 }
 
-PropertyRow* PropertyTree::rowByPoint(const Point& pointInWidgetSpace)
+PropertyRow* PropertyTreeBase::rowByPoint(const Point& pointInWidgetSpace)
 {
 	Point pt = pointToRootSpace(pointInWidgetSpace);
 	const Layout& l = *layout_;
@@ -1927,17 +1927,17 @@ PropertyRow* PropertyTree::rowByPoint(const Point& pointInWidgetSpace)
 	return model()->root();
 }
 
-Point PropertyTree::pointToRootSpace(const Point& point) const
+Point PropertyTreeBase::pointToRootSpace(const Point& point) const
 {
 	return Point(point.x() + offset_.x(), point.y() + offset_.y());
 }
 
-Point PropertyTree::pointFromRootSpace(const Point& point) const
+Point PropertyTreeBase::pointFromRootSpace(const Point& point) const
 {
 	return Point(point.x() - offset_.x() + area_.left(), point.y() - offset_.y() + area_.top());
 }
 
-bool PropertyTree::toggleRow(PropertyRow* row)
+bool PropertyTreeBase::toggleRow(PropertyRow* row)
 {
 	if(!row->canBeToggled(this))
 		return false;
@@ -1945,12 +1945,12 @@ bool PropertyTree::toggleRow(PropertyRow* row)
 	return true;
 }
 
-bool PropertyTree::_isCapturedRow(const PropertyRow* row) const
+bool PropertyTreeBase::_isCapturedRow(const PropertyRow* row) const
 {
 	return capturedRow_ == row;
 }
 
-void PropertyTree::setValueColumnWidth(float valueColumnWidth) 
+void PropertyTreeBase::setValueColumnWidth(float valueColumnWidth) 
 {
 	if (style_->valueColumnWidth != valueColumnWidth)
 	{
@@ -1960,34 +1960,34 @@ void PropertyTree::setValueColumnWidth(float valueColumnWidth)
 	}
 }
 
-void PropertyTree::setArchiveContext(yasli::Context* lastContext)
+void PropertyTreeBase::setArchiveContext(yasli::Context* lastContext)
 {
 	archiveContext_ = lastContext;
 }
 
-PropertyTree::PropertyTree(const PropertyTree&)
+PropertyTreeBase::PropertyTreeBase(const PropertyTreeBase&)
 {
 }
 
 
-PropertyTree& PropertyTree::operator=(const PropertyTree&)
+PropertyTreeBase& PropertyTreeBase::operator=(const PropertyTreeBase&)
 {
 	return *this;
 }
 
-void PropertyTree::onAttachedTreeChanged()
+void PropertyTreeBase::onAttachedTreeChanged()
 {
 	revert();
 }
 
-Point PropertyTree::_toWidget(Point point) const
+Point PropertyTreeBase::_toWidget(Point point) const
 {
 	return Point(point.x() - offset_.x(), point.y() - offset_.y());
 }
 
 struct ValidatorIconVisitor
 {
-	ScanResult operator()(PropertyRow* row, PropertyTree* tree, int)
+	ScanResult operator()(PropertyRow* row, PropertyTreeBase* tree, int)
 	{
 		row->resetValidatorIcons();
 		if (row->validatorCount()) {
@@ -2022,7 +2022,7 @@ struct ValidatorIconVisitor
 	}
 };
 
-void PropertyTree::updateValidatorIcons()
+void PropertyTreeBase::updateValidatorIcons()
 {
 	if (!validatorBlock_->isEnabled())
 		return;
@@ -2031,78 +2031,78 @@ void PropertyTree::updateValidatorIcons()
 	model()->root()->setLabelChangedToChildren();
 }
 
-void PropertyTree::setDefaultTreeStyle(const PropertyTreeStyle& treeStyle)
+void PropertyTreeBase::setDefaultTreeStyle(const PropertyTreeStyle& treeStyle)
 {
 	defaultTreeStyle_ = treeStyle;
 }
 
-void PropertyTree::setTreeStyle(const PropertyTreeStyle& style)
+void PropertyTreeBase::setTreeStyle(const PropertyTreeStyle& style)
 {
 	*style_ = style;
 	updateHeights();
 }
 
-void PropertyTree::setPackCheckboxes(bool pack)
+void PropertyTreeBase::setPackCheckboxes(bool pack)
 {
 	style_->packCheckboxes = pack;
 	updateHeights();
 }
 
-bool PropertyTree::packCheckboxes() const
+bool PropertyTreeBase::packCheckboxes() const
 {
 	return style_->packCheckboxes;
 }
 
-void PropertyTree::setCompact(bool compact)
+void PropertyTreeBase::setCompact(bool compact)
 {
 	style_->compact = compact;
 	repaint();
 }
 
-bool PropertyTree::compact() const
+bool PropertyTreeBase::compact() const
 {
 	return style_->compact;
 }
 
-void PropertyTree::setRowSpacing(float rowSpacing)
+void PropertyTreeBase::setRowSpacing(float rowSpacing)
 {
 	style_->rowSpacing = rowSpacing;
 }
 
-float PropertyTree::rowSpacing() const
+float PropertyTreeBase::rowSpacing() const
 {
 	return style_->rowSpacing;
 }
 
-float PropertyTree::valueColumnWidth() const
+float PropertyTreeBase::valueColumnWidth() const
 {
 	return style_->valueColumnWidth;
 }
 
-void PropertyTree::setFullRowMode(bool fullRowMode)
+void PropertyTreeBase::setFullRowMode(bool fullRowMode)
 {
 	style_->fullRowMode = fullRowMode;
 	repaint();
 }
 
-bool PropertyTree::fullRowMode() const
+bool PropertyTreeBase::fullRowMode() const
 {
 	return style_->fullRowMode;
 }
 
-bool PropertyTree::containsErrors() const
+bool PropertyTreeBase::containsErrors() const
 {
 	return validatorBlock_->containsErrors();
 }
 
-void PropertyTree::focusFirstError()
+void PropertyTreeBase::focusFirstError()
 {
 	jumpToNextHiddenValidatorIssue(true, model()->root());
 }
 
-void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
+void PropertyTreeBase::drawLayout(property_tree::IDrawContext& context, int h)
 {
-	DebugTimer t("PropertyTree::drawLayout", 20);
+	DebugTimer t("PropertyTreeBase::drawLayout", 20);
 	int lastElement = 0;
 	int numElements = layout_->rectangles.size();
 	for (int i = 0; i < numElements; ++i) {
@@ -2166,7 +2166,7 @@ static int findLayoutElementByFocusIndex(Layout& layout,
 	return -1;
 }
 
-int PropertyTree::layoutElementByFocusIndex(int x, int y)
+int PropertyTreeBase::layoutElementByFocusIndex(int x, int y)
 {
 	int currentX = 0;
 	int currentY = 0;
@@ -2186,7 +2186,7 @@ static void findLayoutChildren(vector<int>* elements, const property_tree::Layou
 	}
 }
 
-void PropertyTree::drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row)
+void PropertyTreeBase::drawRowLayout(property_tree::IDrawContext& context, PropertyRow* row)
 {
 	int elementIndex = row->layoutElement();
 
@@ -2218,7 +2218,7 @@ void PropertyTree::drawRowLayout(property_tree::IDrawContext& context, PropertyR
 	}
 }
 
-void PropertyTree::setDraggedRow(PropertyRow* row)
+void PropertyTreeBase::setDraggedRow(PropertyRow* row)
 {
 	hiddenLayoutElements_.clear();
 	if (row && row->layoutElement() >= 0) {
@@ -2227,7 +2227,7 @@ void PropertyTree::setDraggedRow(PropertyRow* row)
 	}
 }
 
-void PropertyTree::storePersistentFocusElement()
+void PropertyTreeBase::storePersistentFocusElement()
 {
 	LayoutElement* element = 0;
 	if (size_t(focusedLayoutElement_) < layout_->elements.size()) {
@@ -2243,7 +2243,7 @@ void PropertyTree::storePersistentFocusElement()
 
 }
 
-void PropertyTree::restorePersistentFocusElement()
+void PropertyTreeBase::restorePersistentFocusElement()
 {
 	const PersistentLayoutElement& pe = *persistentFocusedLayoutElement_;
 	PropertyRow* row = model()->rowFromPath(pe.row);
@@ -2260,7 +2260,7 @@ void PropertyTree::restorePersistentFocusElement()
 		model()->selectRow(row, true);
 }
 
-PropertyRow* PropertyTree::focusedRow() const
+PropertyRow* PropertyTreeBase::focusedRow() const
 {
 	if (focusedLayoutElement_ == 0)
 		return 0;

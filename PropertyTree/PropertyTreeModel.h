@@ -64,7 +64,7 @@ struct PropertyDefaultTypeValue
 
 // ---------------------------------------------------------------------------
 
-class PropertyTree;
+class PropertyTreeBase;
 
 class PropertyTreeModel
 {
@@ -99,7 +99,7 @@ public:
 
 	typedef TreeSelection Selection;
 
-	PropertyTreeModel(PropertyTree* tree);
+	PropertyTreeModel(PropertyTreeBase* tree);
 	~PropertyTreeModel();
 
 	void clear();
@@ -117,7 +117,7 @@ public:
 	PropertyRowStruct* root() { return root_; }
 	const PropertyRowStruct* root() const { return root_; }
 
-	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar, PropertyTree* tree);
+	void YASLI_SERIALIZE_METHOD(yasli::Archive& ar, PropertyTreeBase* tree);
 
 	UpdateLock lockUpdate();
 	void requestUpdate(const PropertyRows& rows, bool needApply);
@@ -185,7 +185,7 @@ private:
 	std::vector<PropertyTreeOperator> redoOperators_;
 
 	ConstStringList constStrings_;
-	PropertyTree* tree_;
+	PropertyTreeBase* tree_;
 
 	friend class TreeImpl;
 };

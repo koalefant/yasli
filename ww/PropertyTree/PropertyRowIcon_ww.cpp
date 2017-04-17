@@ -12,7 +12,7 @@
 
 #include "PropertyTree/IDrawContext.h"
 #include "PropertyTree/PropertyRowImpl.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/Serialization.h"
 
@@ -53,7 +53,7 @@ public:
 	yasli::string valueAsString() const override{ return ""; }
 	WidgetPlacement widgetPlacement() const{ return WIDGET_ICON; }
 	void serializeValue(Archive& ar) override{}
-	int widgetSizeMin(const ::PropertyTree* tree) const override{ return 16 + 2; }
+	int widgetSizeMin(const PropertyTreeBase* tree) const override{ return 16 + 2; }
 	int height() const{ return 16; }
 protected:
 	yasli::IconXPM icon_;
@@ -81,7 +81,7 @@ public:
 	yasli::string valueAsString() const override{ return value().value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 
-	int widgetSizeMin(const ::PropertyTree* tree) const override{ return value().iconFalse_.width() + 1; }
+	int widgetSizeMin(const PropertyTreeBase* tree) const override{ return value().iconFalse_.width() + 1; }
 	int height() const{ return value().iconFalse_.height(); }
 };
 

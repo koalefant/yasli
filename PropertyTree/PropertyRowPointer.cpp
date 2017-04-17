@@ -8,7 +8,7 @@
  */
 
 #include "PropertyRowPointer.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
 #include "Serialization.h"
@@ -115,7 +115,7 @@ void CreatePointerMenuHandler::onMenuCreateByIndex()
 	tree->model()->rowChanged(row);
 }
 
-yasli::string PropertyRowPointer::typeNameForFilter(PropertyTree* tree) const
+yasli::string PropertyRowPointer::typeNameForFilter(PropertyTreeBase* tree) const
 {
     return yasli::makePrettyTypeName(baseType_.name());
 }
@@ -185,7 +185,7 @@ void PropertyRowPointer::redraw(IDrawContext& context)
 }
 
 struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
-	ClassMenuItemAdderRowPointer(PropertyRowPointer* row, PropertyTree* tree) : row_(row), tree_(tree) {}    
+	ClassMenuItemAdderRowPointer(PropertyRowPointer* row, PropertyTreeBase* tree) : row_(row), tree_(tree) {}    
 	void addAction(property_tree::IMenu& menu, const char* text, int index)
 	{
 		CreatePointerMenuHandler* handler = new CreatePointerMenuHandler;
@@ -199,7 +199,7 @@ struct ClassMenuItemAdderRowPointer : ClassMenuItemAdder{
 	}
 protected:
 	PropertyRowPointer* row_;
-	PropertyTree* tree_;
+	PropertyTreeBase* tree_;
 };
 
 
@@ -215,7 +215,7 @@ bool PropertyRowPointer::onActivate(const PropertyActivationEvent& ev)
 	return true;
 }
 
-bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Point point, bool& changed) 
+bool PropertyRowPointer::onMouseDown(PropertyTreeBase* tree, Point point, bool& changed) 
 {
 	if(widgetRect(tree).contains(point)){
 		PropertyActivationEvent ev;
@@ -227,7 +227,7 @@ bool PropertyRowPointer::onMouseDown(PropertyTree* tree, Point point, bool& chan
 	return false; 
 }
 
-bool PropertyRowPointer::onContextMenu(IMenu &menu, PropertyTree* tree)
+bool PropertyRowPointer::onContextMenu(IMenu &menu, PropertyTreeBase* tree)
 {
 	if(!menu.isEmpty())
 		menu.addSeparator();
@@ -243,7 +243,7 @@ void PropertyRowPointer::serializeValue(yasli::Archive& ar)
 	ar(derivedTypeName_, "derivedTypeName", "Derived Type Name");
 }
 
-int PropertyRowPointer::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowPointer::widgetSizeMin(const PropertyTreeBase* tree) const
 {
 	property_tree::Font font = derivedTypeName_.empty() ? property_tree::FONT_NORMAL : property_tree::FONT_BOLD;
 	std::string text = generateLabel();

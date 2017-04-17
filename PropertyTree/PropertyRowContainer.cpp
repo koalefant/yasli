@@ -9,7 +9,7 @@
 
 #include "PropertyRowContainer.h"
 #include "PropertyRowPointer.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
 #include "Serialization.h"
@@ -21,7 +21,7 @@
 
 // ---------------------------------------------------------------------------
 
-ContainerMenuHandler::ContainerMenuHandler(PropertyTree* tree, PropertyRowContainer* container)
+ContainerMenuHandler::ContainerMenuHandler(PropertyTreeBase* tree, PropertyRowContainer* container)
 : element()
 , container(container)
 , tree(tree)
@@ -46,7 +46,7 @@ PropertyRowContainer::PropertyRowContainer()
 
 struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder
 {
-	ClassMenuItemAdderRowContainer(PropertyRowContainer* row, PropertyTree* tree, bool insert = false) 
+	ClassMenuItemAdderRowContainer(PropertyRowContainer* row, PropertyTreeBase* tree, bool insert = false) 
 	: row_(row)
 	, tree_(tree)
 	, insert_(insert) {}    
@@ -61,7 +61,7 @@ struct ClassMenuItemAdderRowContainer : ClassMenuItemAdder
 	}
 protected:
 	PropertyRowContainer* row_;
-	PropertyTree* tree_;
+	PropertyTreeBase* tree_;
 	bool insert_;
 };
 
@@ -98,7 +98,7 @@ bool PropertyRowContainer::onActivate(const PropertyActivationEvent& e)
 }
 
 
-void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree* tree, bool addActions)
+void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTreeBase* tree, bool addActions)
 {
 	ContainerMenuHandler* handler = new ContainerMenuHandler(tree, this);
 	tree->addMenuHandler(handler);
@@ -137,7 +137,7 @@ void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree
 	}
 }
 
-bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTree* tree)
+bool PropertyRowContainer::onContextMenu(IMenu& menu, PropertyTreeBase* tree)
 {
 	if(!menu.isEmpty())
 		menu.addSeparator();
@@ -182,7 +182,7 @@ void ContainerMenuHandler::onMenuAppendElement()
 	container->addElement(tree, true);
 }
 
-PropertyRow* PropertyRowContainer::addElement(PropertyTree* tree, bool append)
+PropertyRow* PropertyRowContainer::addElement(PropertyTreeBase* tree, bool append)
 {
 	tree->model()->rowAboutToBeChanged(this);
 	PropertyRow* defaultType = defaultRow(tree->model());
@@ -284,13 +284,13 @@ void ContainerMenuHandler::onMenuChildRemove()
 	container->erase(element);
 	container->setMultiValue(false);
 	tree->model()->deselectAll();
-	tree->updateAttachedPropertyTree(false);
+	tree->updateAttachedPropertyTreeBase(false);
 	tree->model()->rowChanged(container);
 	PropertyRow* newSelectedRow = container->childByIndex(index);
 	if (newSelectedRow == 0)
 		newSelectedRow = container;
 	tree->model()->selectRow(newSelectedRow, true, true);
-	tree->updateAttachedPropertyTree(false);
+	tree->updateAttachedPropertyTreeBase(false);
 }
 
 
@@ -313,7 +313,7 @@ yasli::string PropertyRowContainer::valueAsString() const
 	return yasli::string(buf);
 }
 
-yasli::string PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const
+yasli::string PropertyRowContainer::typeNameForFilter(PropertyTreeBase* tree) const
 {
 	const PropertyRow* defaultType = defaultRow(tree->model());
 	if (defaultType)
@@ -322,7 +322,7 @@ yasli::string PropertyRowContainer::typeNameForFilter(PropertyTree* tree) const
         return yasli::makePrettyTypeName(elementTypeName_);
 }
 
-bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
+bool PropertyRowContainer::onKeyDown(PropertyTreeBase* tree, const KeyEvent* ev)
 {
 	ContainerMenuHandler handler(tree, this);
 	if(ev->key() == KEY_DELETE && ev->modifiers() == MODIFIER_SHIFT){
@@ -336,7 +336,7 @@ bool PropertyRowContainer::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
     return PropertyRow::onKeyDown(tree, ev);
 }
 
-int PropertyRowContainer::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowContainer::widgetSizeMin(const PropertyTreeBase* tree) const
 {
 	if (inlined_)
 		return 0;

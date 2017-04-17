@@ -20,7 +20,6 @@ struct DebugTimer
 using std::vector;
 
 class PropertyTreeModel;
-class PropertyTreeModel;
 class PropertyRow;
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
 class PropertyTreeOperator;
@@ -47,10 +46,10 @@ using property_tree::IUIFacade;
 using property_tree::KeyEvent;
 class ValidatorBlock;
 struct PropertyTreeStyle;
-class PROPERTY_TREE_API PropertyTree
+class PROPERTY_TREE_API PropertyTreeBase
 {
 public:
-	// Used to attach an object to a PropertyTree widget. Attached object should implement
+	// Used to attach an object to a PropertyTreeBase widget. Attached object should implement
 	// Serialize method. Example of usage:
 	//
 	//   struct MyType
@@ -81,14 +80,14 @@ public:
 	// Temporary structures (e.g. created on the stack) should not be used in this mode
 	// (except for decorators), as this may cause access to deallocated object when
 	// selecting it in the tree.
-	virtual void attachPropertyTree(PropertyTree* propertyTree);
+	virtual void attachPropertyTree(PropertyTreeBase* propertyTree);
 	void detachPropertyTree();
 	void setAutoHideAttachedPropertyTree(bool autoHide);
 	// Effectively clears the tree.
 	void detach();
 	bool attached() const { return !attached_.empty(); }
 	// This methods returns array of Serializers for all selected properties.
-	// This is useful for manual implementation of attachPropertyTree behavior
+	// This is useful for manual implementation of attachPropertyTreeBase behavior
 	// with type filtering or special logic.
 	void getSelectionSerializers(yasli::Serializers* serializers);
 	bool getSelectedObject(yasli::Object* object);
@@ -144,7 +143,7 @@ public:
 	
 	// Outline mode hides content of the elements of the container (excepted for
 	// inlined/pulled-up properties). Can be used together with second property
-	// tree through attachPropertyTree.
+	// tree through attachPropertyTreeBase.
 	void setOutlineMode(bool outlineMode) { outlineMode_ = outlineMode; }
 	bool outlineMode() const{ return outlineMode_; }
 	// Hide selection when widget is out of focus. Disables selection for parent of inline items.
@@ -197,8 +196,8 @@ public:
 	virtual void YASLI_SERIALIZE_METHOD(yasli::Archive& ar);
 
 protected:
-	PropertyTree(IUIFacade* ui);
-	~PropertyTree();
+	PropertyTreeBase(IUIFacade* ui);
+	~PropertyTreeBase();
 
 public:
 	// internal use
@@ -314,14 +313,14 @@ protected:
 
 	void setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow);
 
-	void updateAttachedPropertyTree(bool revert);
+	void updateAttachedPropertyTreeBase(bool revert);
 
 	void onModelUpdated(const PropertyRows& rows, bool needApply);
 	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);
 
 private:
-	PropertyTree(const PropertyTree&);
-	PropertyTree& operator=(const PropertyTree&);
+	PropertyTreeBase(const PropertyTreeBase&);
+	PropertyTreeBase& operator=(const PropertyTreeBase&);
 protected:
 	void setDraggedRow(PropertyRow* row);
 	void storePersistentFocusElement();
@@ -336,7 +335,7 @@ protected:
 
 	typedef vector<yasli::Object> Objects;
 	Objects attached_;
-	PropertyTree* attachedPropertyTree_;
+	PropertyTreeBase* attachedPropertyTree_;
 	RowFilter rowFilter_;
 	yasli::Context* archiveContext_;
 	std::vector<int> hiddenLayoutElements_;

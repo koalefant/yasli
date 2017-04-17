@@ -14,7 +14,7 @@
 #include "ValidatorBlock.h"
 #include "PropertyOArchive.h"
 #include "PropertyTreeModel.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 
 #include "PropertyRowContainer.h"
 #include "PropertyRowBool.h"

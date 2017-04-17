@@ -14,12 +14,12 @@ using yasli::StringList;
 
 #include "PropertyRow.h"
 
-class PropertyTree;
+class PropertyTreeBase;
 class PropertyRowPointer;
 struct CreatePointerMenuHandler : PropertyRowMenuHandler
 {
 public:
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 	PropertyRowPointer* row;
 	int index;
 	bool useDefaultValue;
@@ -51,14 +51,14 @@ public:
 	void setFactory(yasli::ClassFactoryBase* factory) { factory_ = factory; }
 	yasli::ClassFactoryBase* factory() const{ return factory_; }
 	bool onActivate(const PropertyActivationEvent& ev) override;
-	bool onMouseDown(PropertyTree* tree, Point point, bool& changed) override;
-	bool onContextMenu(IMenu &root, PropertyTree* tree) override;
+	bool onMouseDown(PropertyTreeBase* tree, Point point, bool& changed) override;
+	bool onContextMenu(IMenu &root, PropertyTreeBase* tree) override;
 	bool isStatic() const override{ return false; }
 	bool isPointer() const override{ return true; }
-	int widgetSizeMin(const PropertyTree*) const override;
+	int widgetSizeMin(const PropertyTreeBase*) const override;
 	yasli::string generateLabel() const;
 	yasli::string valueAsString() const override;
-	yasli::string typeNameForFilter(PropertyTree* tree) const override;
+	yasli::string typeNameForFilter(PropertyTreeBase* tree) const override;
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;

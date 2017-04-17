@@ -14,7 +14,7 @@
 #include "yasli/Serializer.h"
 #include "yasli/Object.h"
 #include "yasli/Pointers.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/PropertyRow.h"
 #include <QWidget>
 #include <QPainter>
@@ -53,7 +53,7 @@ protected:
 	QPoint offset_;
 };
 
-class PROPERTY_TREE_API QPropertyTree : public QWidget, public PropertyTree
+class PROPERTY_TREE_API QPropertyTree : public QWidget, public PropertyTreeBase
 {
 	Q_OBJECT
 public:
@@ -75,7 +75,7 @@ public:
 	// Retrieves size of the content, doesn't require sizeToContent to be set.
 	QSize contentSize() const{ return contentSize_; }
 
-	void attachPropertyTree(PropertyTree* propertyTree) override;
+	void attachPropertyTree(PropertyTreeBase* propertyTree) override;
 
 	void apply(bool continuous) override;
 	void revert() override;
@@ -159,8 +159,8 @@ protected:
 	void startFilter(const char* filter) override;
 	int filterAreaHeight() const override;
 
-	using PropertyTree::pointToRootSpace;
-	using PropertyTree::pointFromRootSpace;
+	using PropertyTreeBase::pointToRootSpace;
+	using PropertyTreeBase::pointFromRootSpace;
 	QPoint pointToRootSpace(const QPoint& pointInWindowSpace) const;
 	QPoint pointFromRootSpace(const QPoint& point) const;
 

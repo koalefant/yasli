@@ -83,7 +83,7 @@ private:
 #pragma warning(push)
 #pragma warning(disable: 4355) //  'this' : used in base member initializer list
 PropertyTree::PropertyTree(int border)
-: ::PropertyTree(new property_tree::wwUIFacade(this))
+: PropertyTreeBase(new property_tree::wwUIFacade(this))
 , _ContainerWithWindow(new TreeImpl(this), border)
 {
 	dragController_.reset(new DragController(impl()));
@@ -305,7 +305,7 @@ Vect2 PropertyTree::_toScreen(Vect2 point) const
     return Vect2(pt.x, pt.y);
 }
 
-void PropertyTree::attachPropertyTree(::PropertyTree* propertyTree) 
+void PropertyTree::attachPropertyTree(PropertyTreeBase* propertyTree) 
 { 
 	if(attachedPropertyTree_)
 		((PropertyTree*)attachedPropertyTree_)->signalChanged().disconnect((ww::Widget*)this);
@@ -350,7 +350,7 @@ struct FilterVisitor
 		return false;
 	}
 
-	ScanResult operator()(PropertyRow* row, ::PropertyTree* _tree)
+	ScanResult operator()(PropertyRow* row, PropertyTreeBase* _tree)
 	{
 		PropertyTree* tree = (PropertyTree*)_tree;
 		string label = row->labelUndecorated();
@@ -759,7 +759,7 @@ void PropertyTree::onAttachedTreeChanged()
 
 void PropertyTree::serialize(Archive& ar)
 {
-	::PropertyTree::serialize(ar);
+	PropertyTreeBase::serialize(ar);
 }
 
 int PropertyTree::tabSize() const 

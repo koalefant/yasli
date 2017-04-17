@@ -29,7 +29,7 @@ namespace ww{
 class PropertyRowHotkey : public PropertyRowImpl<KeyPress>{
 public:
 	bool onActivate(const PropertyActivationEvent & e) override;
-	bool onContextMenu(property_tree::IMenu& root, ::PropertyTree* tree) override;
+	bool onContextMenu(property_tree::IMenu& root, ::PropertyTreeBase* tree) override;
 	void onMenuClear(PropertyTreeModel* model);
 	std::string valueAsString() const override{ return value().toString(false); }
 protected:
@@ -54,8 +54,8 @@ bool PropertyRowHotkey::onActivate(const PropertyActivationEvent& e)
 struct HotkeyMenuHandler : PropertyRowMenuHandler
 {
 	PropertyRowHotkey* row;
-	::PropertyTree* tree;
-	HotkeyMenuHandler(PropertyRowHotkey* row, ::PropertyTree* tree) : tree(tree), row(row) {}
+	PropertyTreeBase* tree;
+	HotkeyMenuHandler(PropertyRowHotkey* row, PropertyTreeBase* tree) : tree(tree), row(row) {}
 
 	void onMenuClear()
 	{
@@ -63,7 +63,7 @@ struct HotkeyMenuHandler : PropertyRowMenuHandler
 	}
 };
 
-bool PropertyRowHotkey::onContextMenu(property_tree::IMenu& root, ::PropertyTree* tree)
+bool PropertyRowHotkey::onContextMenu(property_tree::IMenu& root, PropertyTreeBase* tree)
 {
 	if(!root.isEmpty())
 		root.addSeparator();

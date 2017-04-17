@@ -7,7 +7,7 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "Serialization.h"
 #include "PropertyRowNumber.h"

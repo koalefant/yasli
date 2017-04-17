@@ -12,7 +12,7 @@
 #include "PropertyRowImpl.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "IUIFacade.h"
 #include "Rect.h"
 #include <vector>
@@ -21,15 +21,15 @@
 using yasli::StringListValue;
 class PropertyRowStringListValue : public PropertyRow, public ComboBoxClientRow {
 public:
-	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
+	property_tree::InplaceWidget* createWidget(PropertyTreeBase* tree) override;
 
-	void populateComboBox(std::vector<std::string>* values, int* selectedIndex, PropertyTree* tree) override
+	void populateComboBox(std::vector<std::string>* values, int* selectedIndex, PropertyTreeBase* tree) override
 	{
 		values->assign(stringList_.begin(), stringList_.end());
 		*selectedIndex = stringList_.find(value_.c_str());
 	}
 
-	bool onComboBoxSelected(const char* newValue, PropertyTree* tree) override
+	bool onComboBoxSelected(const char* newValue, PropertyTreeBase* tree) override
 	{
 		if (value_ != newValue) {
 			tree->model()->rowAboutToBeChanged(this);
@@ -56,7 +56,7 @@ public:
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin(const PropertyTree* tree) const override
+	int widgetSizeMin(const PropertyTreeBase* tree) const override
 	{
 		if (userWidgetToContent())
 			return widthCache_.getOrUpdate(tree, this, tree->_defaultRowHeight());
@@ -95,15 +95,15 @@ private:
 using yasli::StringListStaticValue;
 class PropertyRowStringListStaticValue : public PropertyRowImpl<StringListStaticValue>, public ComboBoxClientRow {
 public:
-	InplaceWidget* createWidget(PropertyTree* tree) override;
+	InplaceWidget* createWidget(PropertyTreeBase* tree) override;
 
-	void populateComboBox(std::vector<std::string>* values, int* selectedIndex, PropertyTree* tree) override
+	void populateComboBox(std::vector<std::string>* values, int* selectedIndex, PropertyTreeBase* tree) override
 	{
 		values->assign(stringList_.begin(), stringList_.end());
 		*selectedIndex = stringList_.find(value_.c_str());
 	}
 
-	bool onComboBoxSelected(const char* newValue, PropertyTree* tree) override
+	bool onComboBoxSelected(const char* newValue, PropertyTreeBase* tree) override
 	{
 		if (value_ != newValue) {
 			tree->model()->rowAboutToBeChanged(this);
@@ -130,7 +130,7 @@ public:
 
 	bool isLeaf() const override{ return true; }
 	bool isStatic() const override{ return false; }
-	int widgetSizeMin(const PropertyTree* tree) const override
+	int widgetSizeMin(const PropertyTreeBase* tree) const override
 	{
 		if (userWidgetToContent())
 			return widthCache_.getOrUpdate(tree, this, tree->_defaultRowHeight());

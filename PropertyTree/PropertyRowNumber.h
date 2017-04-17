@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "yasli/MemoryWriter.h"
 #include "yasli/decorators/Range.h"
 #include "PropertyRowNumberField.h"
@@ -195,7 +195,7 @@ public:
 		incrementStartValue_ = value_;
 	}
 
-	void endIncrement(PropertyTree* tree) override
+	void endIncrement(PropertyTreeBase* tree) override
 	{
 		if (value_ != incrementStartValue_) {
 			Type value = value_;

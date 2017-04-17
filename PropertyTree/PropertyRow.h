@@ -42,7 +42,7 @@ class InplaceWidget;
 using property_tree::KeyEvent;
 
 using std::vector;
-class PropertyTree;
+class PropertyTreeBase;
 class PropertyRow;
 class PropertyTreeModel;
 
@@ -70,7 +70,7 @@ struct PropertyActivationEvent
 		REASON_CONTEXT_MENU
 	};
 
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 	Reason reason;
 	bool rename;
 	Point clickPoint;
@@ -86,7 +86,7 @@ struct PropertyActivationEvent
 
 struct PropertyDragEvent
 {
-	::PropertyTree* tree;
+	PropertyTreeBase* tree;
 	Point pos;
 	Point start;
 	Point lastDelta;
@@ -134,8 +134,8 @@ public:
 	bool selected() const{ return selected_; }
 	void setSelected(bool selected) { selected_ = selected; }
 	bool expanded() const{ return expanded_ || inlined_ || inlinedBefore_; }
-	void _setExpanded(bool expanded); // use PropertyTree::expandRow
-	void setExpandedRecursive(PropertyTree* tree, bool expanded);
+	void _setExpanded(bool expanded); // use PropertyTreeBase::expandRow
+	void setExpandedRecursive(PropertyTreeBase* tree, bool expanded);
 
 	void setMatchFilter(bool matchFilter) { matchFilter_ = matchFilter; }
 	bool matchFilter() const { return matchFilter_; }
@@ -143,8 +143,8 @@ public:
 	void setBelongsToFilteredRow(bool belongs) { belongsToFilteredRow_ = belongs; }
 	bool belongsToFilteredRow() const { return belongsToFilteredRow_; }
 
-	bool visible(const PropertyTree* tree) const;
-	bool hasVisibleChildren(const PropertyTree* tree, bool internalCall = false) const;
+	bool visible(const PropertyTreeBase* tree) const;
+	bool hasVisibleChildren(const PropertyTreeBase* tree, bool internalCall = false) const;
 
 	PropertyRowStruct* parent() const { return parent_; }
 	void setParent(PropertyRowStruct* row) { parent_ = row; }
@@ -186,13 +186,13 @@ public:
 	void setLabelChangedToChildren();
 	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
 	bool hideChildren() const { return hideChildren_; }
-	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
+	void updateLabel(const PropertyTreeBase* tree, int index, bool parentHidesNonInlineChildren);
 	virtual void labelChanged() {}
-	void parseControlCodes(const PropertyTree* tree, const char* label, bool changeLabel);
+	void parseControlCodes(const PropertyTreeBase* tree, const char* label, bool changeLabel);
 	const char* typeName() const{ return typeName_; }
-	virtual yasli::string typeNameForFilter(PropertyTree* tree) const;
+	virtual yasli::string typeNameForFilter(PropertyTreeBase* tree) const;
 	void setTypeName(const char* typeName) { YASLI_ASSERT(strlen(typeName)); typeName_ = typeName; }
-	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int rowIndex) const;
+	const char* rowText(char (&containerLabelBuffer)[16], const PropertyTreeBase* tree, int rowIndex) const;
 
 	PropertyRow* find(const char* name, const char* nameAlt, const char* typeName);
 	const PropertyRow* find(const char* name, const char* nameAlt, const char* typeName) const;
@@ -206,28 +206,28 @@ public:
 	virtual yasli::string valueAsString() const;
 	virtual yasli::wstring valueAsWString() const;
 
-	virtual int widgetSizeMin(const PropertyTree*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
+	virtual int widgetSizeMin(const PropertyTreeBase*) const { return userWidgetSize() >= 0 ? userWidgetSize() : 0; } 
 
 	int textSizeInitial() const { return textSizeInitial_; }
-	void updateTextSize_r(const PropertyTree* tree, int index);
+	void updateTextSize_r(const PropertyTreeBase* tree, int index);
 
 	virtual bool isWidgetFixed() const{ return userFixedWidget_ || (widgetPlacement() != WIDGET_VALUE && widgetPlacement() != WIDGET_INSTEAD_OF_TEXT); }
 	virtual WidgetPlacement widgetPlacement() const{ return WIDGET_NONE; }
 
-	Rect rect(const PropertyTree* tree) const;
-	Rect textRect(const PropertyTree* tree) const;
-	Rect childrenRect(const PropertyTree* tree) const;
-	Rect widgetRect(const PropertyTree* tree) const;
-	Rect plusRect(const PropertyTree* tree) const;
-	Rect validatorRect(const PropertyTree* tree) const;
-	Rect validatorWarningIconRect(const PropertyTree* tree) const;
-	Rect validatorErrorIconRect(const PropertyTree* tree) const;
-	property_tree::Font rowFont(const PropertyTree* tree) const;
+	Rect rect(const PropertyTreeBase* tree) const;
+	Rect textRect(const PropertyTreeBase* tree) const;
+	Rect childrenRect(const PropertyTreeBase* tree) const;
+	Rect widgetRect(const PropertyTreeBase* tree) const;
+	Rect plusRect(const PropertyTreeBase* tree) const;
+	Rect validatorRect(const PropertyTreeBase* tree) const;
+	Rect validatorWarningIconRect(const PropertyTreeBase* tree) const;
+	Rect validatorErrorIconRect(const PropertyTreeBase* tree) const;
+	property_tree::Font rowFont(const PropertyTreeBase* tree) const;
 
 	void drawElement(IDrawContext& x, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex);
 
 	virtual void redraw(IDrawContext& context);
-	virtual property_tree::InplaceWidget* createWidget(PropertyTree* tree) { return 0; }
+	virtual property_tree::InplaceWidget* createWidget(PropertyTreeBase* tree) { return 0; }
 
 	bool isContainer() const{ return isContainer_; }
 	virtual bool isPointer() const{ return false; }
@@ -240,26 +240,26 @@ public:
 	virtual bool activateOnAdd() const{ return false; }
 	virtual bool inlineInShortArrays() const{ return false; }
 
-	bool canBeToggled(const PropertyTree* tree) const;
+	bool canBeToggled(const PropertyTreeBase* tree) const;
 	bool canBeDragged() const;
-	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const;
-	void dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before);
-	virtual bool getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTree* tree) const { 
+	bool canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTreeBase* tree) const;
+	void dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow, PropertyTreeBase* tree, bool before);
+	virtual bool getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTreeBase* tree) const { 
 		hit->toolTip = tooltip_;
 		return true; 
 	}
 	virtual bool canBePacked() const { return !isStruct() && labelUndecorated()[0] == '\0'; }
 
 	virtual bool onActivate(const PropertyActivationEvent& e);
-	virtual bool onKeyDown(PropertyTree* tree, const KeyEvent* ev);
-	virtual bool onMouseDown(PropertyTree* tree, Point point, bool& changed) { return false; }
+	virtual bool onKeyDown(PropertyTreeBase* tree, const KeyEvent* ev);
+	virtual bool onMouseDown(PropertyTreeBase* tree, Point point, bool& changed) { return false; }
 	virtual void onMouseDrag(const PropertyDragEvent& e) {}
 	virtual void onMouseStill(const PropertyDragEvent& e) {}
-	virtual void onMouseUp(PropertyTree* tree, Point point) {}
+	virtual void onMouseUp(PropertyTreeBase* tree, Point point) {}
 	// "drag check" allows you to "paint" with the mouse through checkboxes to set all values at once
 	virtual DragCheckBegin onMouseDragCheckBegin() { return DRAG_CHECK_IGNORE; }
-	virtual bool onMouseDragCheck(PropertyTree* tree, bool value) { return false; }
-	virtual bool onContextMenu(IMenu &menu, PropertyTree* tree);
+	virtual bool onMouseDragCheck(PropertyTreeBase* tree, bool value) { return false; }
+	virtual bool onContextMenu(IMenu &menu, PropertyTreeBase* tree);
 
 	// User states.
 	// Assigned using control codes (characters in the beginning of label)
@@ -308,8 +308,8 @@ public:
 	void setLayoutElement(int layoutElement) { layoutElement_ = layoutElement; }
 
 protected:
-	void updateInlineTextSize_r(const PropertyTree* tree, int index);
-	void updateTextSizeInitial(const PropertyTree* tree, int index);
+	void updateInlineTextSize_r(const PropertyTreeBase* tree, int index);
+	void updateTextSizeInitial(const PropertyTreeBase* tree, int index);
 	void init(const char* name, const char* nameAlt, const char* typeName);
 
 	const char* name_;
@@ -396,9 +396,9 @@ public:
 	void eraseOldRecursive();
 
 	template<class Op> bool scanChildren(Op& op);
-	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);
-	template<class Op> bool scanChildrenReverse(Op& op, PropertyTree* tree);
-	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTree* tree);
+	template<class Op> bool scanChildren(Op& op, PropertyTreeBase* tree);
+	template<class Op> bool scanChildrenReverse(Op& op, PropertyTreeBase* tree);
+	template<class Op> bool scanChildrenBottomUp(Op& op, PropertyTreeBase* tree);
 
 	void serialize(yasli::Archive& ar);
 protected:
@@ -430,7 +430,7 @@ struct RowWidthCache
 	int width;
 
 	RowWidthCache() : valueHash(0), width(-1) {}
-	int getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace, const char* text = 0);
+	int getOrUpdate(const PropertyTreeBase* tree, const PropertyRow* rowForValue, int extraSpace, const char* text = 0);
 };
 
 typedef vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
@@ -472,7 +472,7 @@ bool PropertyRowStruct::scanChildren(Op& op)
 }
 
 template<class Op>
-bool PropertyRowStruct::scanChildren(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildren(Op& op, PropertyTreeBase* tree)
 {
 	int numChildren = (int)children_.size();
 	for(int index = 0; index < numChildren; ++index){
@@ -494,7 +494,7 @@ bool PropertyRowStruct::scanChildren(Op& op, PropertyTree* tree)
 }
 
 template<class Op>
-bool PropertyRowStruct::scanChildrenReverse(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildrenReverse(Op& op, PropertyTreeBase* tree)
 {
 	int numChildren = (int)children_.size();
 	for(int index = numChildren - 1; index >= 0; --index){
@@ -516,7 +516,7 @@ bool PropertyRowStruct::scanChildrenReverse(Op& op, PropertyTree* tree)
 }
 
 template<class Op>
-bool PropertyRowStruct::scanChildrenBottomUp(Op& op, PropertyTree* tree)
+bool PropertyRowStruct::scanChildrenBottomUp(Op& op, PropertyTreeBase* tree)
 {
 	size_t numChildren = children_.size();
 	for(size_t i = 0; i < numChildren; ++i)

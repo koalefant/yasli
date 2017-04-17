@@ -1,5 +1,5 @@
 #include "PropertyTree/PropertyRowColor.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "Rect.h"
@@ -11,7 +11,7 @@ PropertyRowColor::PropertyRowColor()
 {
 }
 
-int PropertyRowColor::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowColor::widgetSizeMin(const PropertyTreeBase* tree) const
 {
 	return tree->_defaultRowHeight();
 }

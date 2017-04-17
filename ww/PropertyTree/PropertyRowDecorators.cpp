@@ -12,7 +12,7 @@
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 #include "ww/Decorators.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/IDrawContext.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "ww/Win32/Window32.h"
@@ -44,7 +44,7 @@ public:
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	yasli::string valueAsString() const override{ return value_ ? label() : ""; }
-	int widgetSizeMin(const PropertyTree* tree) const override{ return 16; }
+	int widgetSizeMin(const PropertyTreeBase* tree) const override{ return 16; }
 };
 
 bool PropertyRowNot::onActivate(const PropertyActivationEvent& e)
@@ -73,7 +73,7 @@ public:
 	void redraw(IDrawContext& context) override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	yasli::string valueAsString() const override{ return value() ? label() : ""; }
-	int widgetSizeMin(const PropertyTree*) const override{ return 16; }
+	int widgetSizeMin(const PropertyTreeBase*) const override{ return 16; }
 };
 
 bool PropertyRowRadio::onActivate(const PropertyActivationEvent & e)

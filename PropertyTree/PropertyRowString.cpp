@@ -12,7 +12,7 @@
 #include "PropertyRowString.h"
 #include "PropertyTreeModel.h"
 #include "IDrawContext.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 
 #include "yasli/STL.h"
 #include "yasli/Archive.h"
@@ -36,7 +36,7 @@ bool PropertyRowString::assignTo(yasli::wstring& str) const
     return true;
 }
 
-property_tree::InplaceWidget* PropertyRowString::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowString::createWidget(PropertyTreeBase* tree)
 {
 	return tree->ui()->createStringWidget(this);
 }

@@ -56,8 +56,8 @@ set(SOURCES
 	../PropertyTree/PropertyRowString.h
 	../PropertyTree/PropertyRowStringListValue.cpp
 	../PropertyTree/PropertyRowStringListValue.h
-	../PropertyTree/PropertyTree.cpp
-	../PropertyTree/PropertyTree.h
+	../PropertyTree/PropertyTreeBase.cpp
+	../PropertyTree/PropertyTreeBase.h
 	../PropertyTree/PropertyTreeMenuHandler.h
 	../PropertyTree/PropertyTreeModel.cpp
 	../PropertyTree/PropertyTreeModel.h

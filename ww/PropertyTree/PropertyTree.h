@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/ConstStringList.h"
 #include "ww/_WidgetWithWindow.h"
 #include "yasli/Serializer.h"
@@ -47,13 +47,13 @@ class PopupMenuItem;
 typedef std::vector<yasli::SharedPtr<PropertyRow> > PropertyRows;
 class Entry;
 
-class PropertyTree : public _ContainerWithWindow, public ::PropertyTree
+class PropertyTree : public _ContainerWithWindow, public PropertyTreeBase
 {
 public:
 	PropertyTree(int border = 0);
 	~PropertyTree();
 
-	void attachPropertyTree(::PropertyTree* propertyTree) override;
+	void attachPropertyTree(PropertyTreeBase* propertyTree) override;
 
 	void serialize(Archive& ar);
 

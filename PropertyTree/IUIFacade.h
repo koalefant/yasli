@@ -9,7 +9,7 @@ typedef HWND__* HWND;
 
 class QWidget;
 
-class PropertyTree;
+class PropertyTreeBase;
 class PropertyRow;
 class PropertyTreeModel;
 class PropertyRowNumberField;
@@ -21,19 +21,19 @@ class IMenu;
 class InplaceWidget
 {
 public:
-	InplaceWidget(PropertyTree* tree) : tree_(tree) {}
+	InplaceWidget(PropertyTreeBase* tree) : tree_(tree) {}
 	virtual ~InplaceWidget() {}
 	virtual void* actualWidget() { return 0; }
 	virtual void showPopup() {}
 	virtual void commit() = 0;
-	PropertyTree* tree() { return tree_; }
+	PropertyTreeBase* tree() { return tree_; }
 protected:
-	PropertyTree* tree_;
+	PropertyTreeBase* tree_;
 };
 
 struct ComboBoxClientRow {
-	virtual void populateComboBox(std::vector<std::string>* strings, int* selectedIndex, PropertyTree* tree) = 0;
-	virtual bool onComboBoxSelected(const char* text, PropertyTree* tree) = 0;
+	virtual void populateComboBox(std::vector<std::string>* strings, int* selectedIndex, PropertyTreeBase* tree) = 0;
+	virtual bool onComboBoxSelected(const char* text, PropertyTreeBase* tree) = 0;
 };
 
 enum Key

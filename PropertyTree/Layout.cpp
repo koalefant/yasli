@@ -11,7 +11,7 @@
 #include "yasli/Archive.h"
 #include "yasli/BinArchive.h"
 #include "yasli/Pointers.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "IDrawContext.h"
 #include "Serialization.h"
 #include "PropertyTreeModel.h"
@@ -36,7 +36,7 @@
 
 namespace property_tree {
 
-static bool isFullRow(const PropertyRow* row, const PropertyTree* tree)
+static bool isFullRow(const PropertyRow* row, const PropertyTreeBase* tree)
 {
     if (tree->fullRowMode())
 		return true;
@@ -45,7 +45,7 @@ static bool isFullRow(const PropertyRow* row, const PropertyTree* tree)
 	return row->userFullRow();
 }
 
-static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTree* tree, int indexForContainerElement, bool isInlined)
+static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea, PropertyRow* row, PropertyTreeBase* tree, int indexForContainerElement, bool isInlined)
 {
 	PropertyRow::WidgetPlacement placement = row->widgetPlacement();
 	int widgetSizeMin = row->widgetSizeMin(tree);
@@ -152,7 +152,7 @@ static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea,
 }
 
 
-void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, PropertyRow* row)
+void addValidatorsToLayout_r(PropertyTreeBase* tree, Layout* l, int parentElement, PropertyRow* row)
 {
 	if (row->validatorCount()) {
 		if (const ValidatorEntry* validatorEntries = tree->_validatorBlock()->getEntry(row->validatorIndex(), row->validatorCount())) {
@@ -190,7 +190,7 @@ static int rangeOfPackableRows(PropertyRow* parentRow, int index)
 	return result;
 }
 
-void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel)
+void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTreeBase* tree, int indentationLevel)
 {
 	int rowHeight = int(tree->_defaultRowHeight() * max(0.1f, tree->treeStyle().rowSpacing) + 0.5f);
 

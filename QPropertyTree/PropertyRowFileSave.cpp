@@ -11,7 +11,7 @@
 
 #include "PropertyTree/IDrawContext.h"
 #include "PropertyTree/PropertyRowImpl.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/Serialization.h"
@@ -78,7 +78,7 @@ public:
 
 
 	int buttonCount() const override{ return 1; }
-	property_tree::Icon buttonIcon(const PropertyTree* tree, int index) const override{ 
+	property_tree::Icon buttonIcon(const PropertyTreeBase* tree, int index) const override{ 
 		#include "PropertyTree/file_save.xpm"
 		return property_tree::Icon(yasli::IconXPM(file_save_xpm));
 	}

@@ -7,11 +7,11 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "PropertyRowNumberField.h"
 #include "IDrawContext.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "IUIFacade.h"
 #include <float.h>
 
@@ -21,7 +21,7 @@ PropertyRowNumberField::PropertyRowNumberField()
 {
 }
 
-property_tree::InplaceWidget* PropertyRowNumberField::createWidget(PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowNumberField::createWidget(PropertyTreeBase* tree)
 {
 	return tree->ui()->createNumberWidget(this);
 }
@@ -65,7 +65,7 @@ void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 	setMultiValue(false);
 }
 
-bool PropertyRowNumberField::getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTree* tree) const
+bool PropertyRowNumberField::getHoverInfo(PropertyHoverInfo* hit, const Point& cursorPos, const PropertyTreeBase* tree) const
 {
 	if (pressed_ && !userReadOnly())
 		hit->cursor = property_tree::CURSOR_BLANK;
@@ -81,7 +81,7 @@ void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
 	e.tree->apply(true);
 }
 
-bool PropertyRowNumberField::onMouseDown(PropertyTree* tree, Point point, bool& changed)
+bool PropertyRowNumberField::onMouseDown(PropertyTreeBase* tree, Point point, bool& changed)
 {
 	changed = false;
 	if (widgetRect(tree).contains(point) && !userReadOnly()) {
@@ -93,7 +93,7 @@ bool PropertyRowNumberField::onMouseDown(PropertyTree* tree, Point point, bool& 
 }
 
 
-void PropertyRowNumberField::onMouseUp(PropertyTree* tree, Point point) 
+void PropertyRowNumberField::onMouseUp(PropertyTreeBase* tree, Point point) 
 {
 	tree->ui()->unsetCursor();
 	pressed_ = false;
@@ -111,7 +111,7 @@ bool PropertyRowNumberField::onActivate(const PropertyActivationEvent& e)
 	return false;
 }
 
-int PropertyRowNumberField::widgetSizeMin(const PropertyTree* tree) const
+int PropertyRowNumberField::widgetSizeMin(const PropertyTreeBase* tree) const
 { 
 	if (userWidgetSize() >= 0)
 		return userWidgetSize();

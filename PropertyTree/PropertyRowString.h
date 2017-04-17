@@ -10,7 +10,7 @@
 #pragma once
 
 #include "PropertyRowField.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "Unicode.h"
 
@@ -25,7 +25,7 @@ public:
 	bool assignToByPointer(void* instance, const yasli::TypeID& type) const override;
 	void setValue(const char* str, const void* handle, const yasli::TypeID& typeId);
 	void setValue(const wchar_t* str, const void* handle, const yasli::TypeID& typeId);
-	property_tree::InplaceWidget* createWidget(PropertyTree* tree) override;
+	property_tree::InplaceWidget* createWidget(PropertyTreeBase* tree) override;
 	yasli::string valueAsString() const override;
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_VALUE; }
 	void serializeValue(yasli::Archive& ar) override;

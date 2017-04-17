@@ -49,8 +49,8 @@ set(SOURCES
 	../PropertyTree/PropertyRowString.h
 	../PropertyTree/PropertyRowStringListValue.cpp
 	../PropertyTree/PropertyRowStringListValue.h
-	../PropertyTree/PropertyTree.cpp
-	../PropertyTree/PropertyTree.h
+	../PropertyTree/PropertyTreeBase.cpp
+	../PropertyTree/PropertyTreeBase.h
 	../PropertyTree/PropertyTreeMenuHandler.h
 	../PropertyTree/PropertyTreeModel.cpp
 	../PropertyTree/PropertyTreeModel.h
@@ -206,7 +206,7 @@ set(SOURCES
 	PropertyTree/PropertyRowFileSelector.cpp
 	PropertyTree/PropertyRowHotkey.cpp
 	PropertyTree/PropertyRowIcon_ww.cpp
-	PropertyTree/PropertyTree_ww.cpp
+	PropertyTree/PropertyTree.cpp
 	PropertyTree/TreeImpl.cpp
 	PropertyTree/wwDrawContext.cpp
 	PropertyTree/wwUIFacade.cpp
@@ -214,7 +214,7 @@ set(SOURCES
 	PropertyTree/InplaceWidgetNumber.h
 	PropertyTree/InplaceWidgetString.h
 	PropertyTree/PropertyRowBitVector.h
-	PropertyTree/PropertyTree_ww.h
+	PropertyTree/PropertyTree.h
 	PropertyTree/TreeImpl.h
 	PropertyTree/wwDrawContext.h
 	PropertyTree/wwUIFacade.h

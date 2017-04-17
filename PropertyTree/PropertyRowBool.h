@@ -27,13 +27,13 @@ public:
 	bool canBePacked() const override{ return true; }
 
 	bool onActivate(const PropertyActivationEvent& ev) override;
-	bool onKeyDown(PropertyTree* tree, const property_tree::KeyEvent* ev) override;
+	bool onKeyDown(PropertyTreeBase* tree, const property_tree::KeyEvent* ev) override;
 	DragCheckBegin onMouseDragCheckBegin() override;
-	bool onMouseDragCheck(PropertyTree* tree, bool value) override;
+	bool onMouseDragCheck(PropertyTreeBase* tree, bool value) override;
 	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(yasli::Archive& ar) override;
-	int widgetSizeMin(const PropertyTree* tree) const override;
+	int widgetSizeMin(const PropertyTreeBase* tree) const override;
 	const void * searchHandle() const override { return searchHandle_; }
 	yasli::TypeID searchType() const override { return yasli::TypeID::get<bool>(); }
 protected:

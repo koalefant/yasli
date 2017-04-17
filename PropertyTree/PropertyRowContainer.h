@@ -15,12 +15,12 @@ struct ContainerMenuHandler : PropertyRowMenuHandler
 {
 public:
 
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 	PropertyRowContainer* container;
 	PropertyRow* element;
 	int pointerIndex;
 
-	ContainerMenuHandler(PropertyTree* tree, PropertyRowContainer* container);
+	ContainerMenuHandler(PropertyTreeBase* tree, PropertyRowContainer* container);
 
 public:
 	void onMenuInsertElement();
@@ -36,15 +36,15 @@ class PropertyRowContainer : public PropertyRowStruct
 public:
 	PropertyRowContainer();
 	bool onActivate(const PropertyActivationEvent& e) override;
-	bool onContextMenu(IMenu& item, PropertyTree* tree) override;
+	bool onContextMenu(IMenu& item, PropertyTreeBase* tree) override;
 	void redraw(IDrawContext& context) override;
-	bool onKeyDownContainer(PropertyTree* tree, const KeyEvent* key);
-	bool onKeyDown(PropertyTree* tree, const KeyEvent* key) override;
+	bool onKeyDownContainer(PropertyTreeBase* tree, const KeyEvent* key);
+	bool onKeyDown(PropertyTreeBase* tree, const KeyEvent* key) override;
 
 	void labelChanged() override;
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return userWidgetSize() == 0 ? false : true; }
-	PropertyRow* addElement(PropertyTree* tree, bool append);
+	PropertyRow* addElement(PropertyTreeBase* tree, bool append);
 	void setInlined(bool inlined) { inlined_ = inlined; }
 	bool isInlined() const{ return inlined_; }
 
@@ -59,15 +59,15 @@ public:
 		serializer_.setPointer(value.pointer());
 		serializer_.setType(value.containerType());
 	}
-	yasli::string typeNameForFilter(PropertyTree* tree) const override;
+	yasli::string typeNameForFilter(PropertyTreeBase* tree) const override;
 	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
 	WidgetPlacement widgetPlacement() const override{ return inlined_ ? WIDGET_NONE : WIDGET_AFTER_NAME; }
-	int widgetSizeMin(const PropertyTree*) const override;
+	int widgetSizeMin(const PropertyTreeBase*) const override;
 
 protected:
-	virtual void generateMenu(property_tree::IMenu& menu, PropertyTree* tree, bool addActions);
+	virtual void generateMenu(property_tree::IMenu& menu, PropertyTreeBase* tree, bool addActions);
 
 	const char* elementTypeName_;
 	char buttonLabel_[8];

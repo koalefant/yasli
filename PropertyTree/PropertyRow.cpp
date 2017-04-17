@@ -7,7 +7,7 @@
  *                          http://www.opensource.org/licenses/MIT
  */
 
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "PropertyTreeModel.h"
 #include "PropertyTreeStyle.h"
 #include "PropertyRowContainer.h"
@@ -167,7 +167,7 @@ void PropertyRow::_setExpanded(bool expanded)
 struct SetExpandedOp {
     bool expanded_;
     SetExpandedOp(bool expanded) : expanded_(expanded) {}
-    ScanResult operator()(PropertyRow* row, PropertyTree* tree, int index)
+    ScanResult operator()(PropertyRow* row, PropertyTreeBase* tree, int index)
     {
         if(row->canBeToggled(tree))
             row->_setExpanded(expanded_);
@@ -175,7 +175,7 @@ struct SetExpandedOp {
     }
 };
 
-void PropertyRow::setExpandedRecursive(PropertyTree* tree, bool expanded)
+void PropertyRow::setExpandedRecursive(PropertyTreeBase* tree, bool expanded)
 {
 	if(canBeToggled(tree))
 		_setExpanded(expanded);
@@ -517,7 +517,7 @@ void PropertyRow::addValidatorIcons(bool hasWarnings, bool hasErrors)
 		validatorHasErrors_ = true;
 }
 
-void PropertyRow::updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren)
+void PropertyRow::updateLabel(const PropertyTreeBase* tree, int index, bool parentHidesNonInlineChildren)
 {
 	if (!labelChanged_) {
 		if (inlined_)
@@ -560,7 +560,7 @@ struct ResetSerializerOp{
     }
 };
 
-void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, bool changeLabel)
+void PropertyRow::parseControlCodes(const PropertyTreeBase* tree, const char* ptr, bool changeLabel)
 {
 	const char* startPtr = ptr;
 	if (changeLabel) {
@@ -673,12 +673,12 @@ void PropertyRow::parseControlCodes(const PropertyTree* tree, const char* ptr, b
 	labelChanged();
 }
 
-yasli::string PropertyRow::typeNameForFilter(PropertyTree* tree) const
+yasli::string PropertyRow::typeNameForFilter(PropertyTreeBase* tree) const
 {
 	return yasli::makePrettyTypeName(typeName());
 }
 
-void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
+void PropertyRow::updateTextSizeInitial(const PropertyTreeBase* tree, int index)
 {
 	char containerLabel[16] = "";
 	const char* text = rowText(containerLabel, tree, index);
@@ -699,7 +699,7 @@ void PropertyRow::updateTextSizeInitial(const PropertyTree* tree, int index)
 	}
 }
 
-void PropertyRow::updateTextSize_r(const PropertyTree* tree, int index)
+void PropertyRow::updateTextSize_r(const PropertyTreeBase* tree, int index)
 {
 	PropertyRow* nonInlined = findNonInlinedParent();
 
@@ -750,7 +750,7 @@ void PropertyRow::updateTextSize_r(const PropertyTree* tree, int index)
 	}
 }
 
-void PropertyRow::updateInlineTextSize_r(const PropertyTree *tree, int index) 
+void PropertyRow::updateInlineTextSize_r(const PropertyTreeBase *tree, int index) 
 {
 	updateTextSizeInitial(tree, index);
 
@@ -806,7 +806,7 @@ PropertyRow* PropertyRowStruct::findFromIndex(int* outIndex, const char* name, c
 	return 0;
 }
 
-bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
+bool PropertyRow::onKeyDown(PropertyTreeBase* tree, const KeyEvent* ev)
 {
 	using namespace property_tree;
 	if(parent() && parent()->isContainer()){
@@ -827,8 +827,8 @@ bool PropertyRow::onKeyDown(PropertyTree* tree, const KeyEvent* ev)
 
 struct ExpansionMenuHandler : PropertyRowMenuHandler
 {
-	PropertyTree* tree;
-	ExpansionMenuHandler(PropertyTree* tree)
+	PropertyTreeBase* tree;
+	ExpansionMenuHandler(PropertyTreeBase* tree)
 	: tree(tree)
 	{
 	}
@@ -843,7 +843,7 @@ struct ExpansionMenuHandler : PropertyRowMenuHandler
 	}
 };
 
-bool PropertyRow::onContextMenu(property_tree::IMenu &menu, PropertyTree* tree)
+bool PropertyRow::onContextMenu(property_tree::IMenu &menu, PropertyTreeBase* tree)
 {
 	if(parent() && parent()->isContainer()){
 		PropertyRowContainer* container = static_cast<PropertyRowContainer*>(parent());
@@ -922,7 +922,7 @@ bool PropertyRow::inlinedSelected() const
 }
 
 
-Font PropertyRow::rowFont(const PropertyTree* tree) const
+Font PropertyRow::rowFont(const PropertyTreeBase* tree) const
 {
 	return (hasVisibleChildren(tree) || (isContainer() && !static_cast<const PropertyRowContainer*>(this)->isInlined())) ? property_tree::FONT_BOLD : property_tree::FONT_NORMAL;
 }
@@ -991,12 +991,12 @@ void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part
 	}
 }
 
-bool PropertyRow::visible(const PropertyTree* tree) const
+bool PropertyRow::visible(const PropertyTreeBase* tree) const
 {
 	return (visible_ && (matchFilter_ || belongsToFilteredRow_));
 }
 
-bool PropertyRow::canBeToggled(const PropertyTree* tree) const
+bool PropertyRow::canBeToggled(const PropertyTreeBase* tree) const
 {
 	if(!visible(tree))
 		return false;
@@ -1014,7 +1014,7 @@ bool PropertyRow::canBeDragged() const
 	return false;
 }
 
-bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTree* tree) const
+bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow* beforeChild, const PropertyTreeBase* tree) const
 {
 	YASLI_ASSERT(parentRow);
 
@@ -1037,7 +1037,7 @@ bool PropertyRow::canBeDroppedOn(const PropertyRow* parentRow, const PropertyRow
 	return false;	
 }
 
-void PropertyRow::dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow, PropertyTree* tree, bool before)
+void PropertyRow::dropInto(PropertyRowStruct* parentRow, PropertyRow* cursorRow, PropertyTreeBase* tree, bool before)
 {
 	SharedPtr<PropertyRow> ref(this);
 
@@ -1098,7 +1098,7 @@ void PropertyRow::intersect(const PropertyRow* row)
 	}
 }
 
-const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const PropertyTree* tree, int index) const
+const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const PropertyTreeBase* tree, int index) const
 {
 	if(parent() && parent()->isContainer() && !inlined()){
 		if (tree->showContainerIndices()) {
@@ -1112,7 +1112,7 @@ const char* PropertyRow::rowText(char (&containerLabelBuffer)[16], const Propert
 		return labelUndecorated() ? labelUndecorated() : "";
 }
 
-bool PropertyRow::hasVisibleChildren(const PropertyTree* tree, bool internalCall) const
+bool PropertyRow::hasVisibleChildren(const PropertyTreeBase* tree, bool internalCall) const
 {
 	if(count() == 0 || (!internalCall && inlined()))
 		return false;
@@ -1164,12 +1164,12 @@ void PropertyRow::redraw(IDrawContext& context)
 
 }
 
-Rect PropertyRow::rect(const PropertyTree* tree) const
+Rect PropertyRow::rect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_ROW_AREA, 0);
 }
 
-Rect PropertyRow::childrenRect(const PropertyTree* tree) const
+Rect PropertyRow::childrenRect(const PropertyTreeBase* tree) const
 {
 	Rect r = tree->findRowRect(this, PART_CHILDREN_AREA, 0);
 	if (r.height() == 0) {
@@ -1179,32 +1179,32 @@ Rect PropertyRow::childrenRect(const PropertyTree* tree) const
 	return r;
 }
 
-Rect PropertyRow::textRect(const PropertyTree* tree) const
+Rect PropertyRow::textRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_LABEL, 0);
 }
 
-Rect PropertyRow::widgetRect(const PropertyTree* tree) const
+Rect PropertyRow::widgetRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_WIDGET, 0);
 }
 
-Rect PropertyRow::validatorRect(const PropertyTree* tree) const
+Rect PropertyRow::validatorRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_VALIDATOR, 0);
 }
 
-Rect PropertyRow::validatorErrorIconRect(const PropertyTree* tree) const
+Rect PropertyRow::validatorErrorIconRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_VALIDATOR_ERROR_ICON, 0);
 }
 
-Rect PropertyRow::validatorWarningIconRect(const PropertyTree* tree) const
+Rect PropertyRow::validatorWarningIconRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_VALIDATOR_WARNING_ICON, 0);
 }
 
-Rect PropertyRow::plusRect(const PropertyTree* tree) const
+Rect PropertyRow::plusRect(const PropertyTreeBase* tree) const
 {
 	return tree->findRowRect(this, PART_PLUS, 0);
 }
@@ -1238,7 +1238,7 @@ YASLI_CLASS(PropertyRow, PropertyRowStruct, "Struct");
 
 // ---------------------------------------------------------------------------
 
-int RowWidthCache::getOrUpdate(const PropertyTree* tree, const PropertyRow* rowForValue, int extraSpace, const char* text)
+int RowWidthCache::getOrUpdate(const PropertyTreeBase* tree, const PropertyRow* rowForValue, int extraSpace, const char* text)
 {
 	yasli::string value;
 	const char* str = text;

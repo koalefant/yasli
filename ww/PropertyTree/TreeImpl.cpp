@@ -29,7 +29,7 @@
 #include "gdiplusUtils.h"
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyRow.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "wwDrawContext.h"
 #include "ww/PropertyTree.h"

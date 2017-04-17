@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "PropertyRowBitVector.h"
 #include "PropertyTree/PropertyRow.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/IUIFacade.h"
 #include "ww/CheckComboBox.h"
@@ -31,7 +31,7 @@ public:
 
 class InplaceWidgetBitVector : public property_tree::InplaceWidget, public has_slots{
 public:
-	InplaceWidgetBitVector(PropertyRowBitVector* row, ::PropertyTree* tree)
+	InplaceWidgetBitVector(PropertyRowBitVector* row, PropertyTreeBase* tree)
 	: InplaceWidget(tree)
 	, comboBox_(new AutoDropCheckComboBox())
 	, row_(row)
@@ -109,7 +109,7 @@ void PropertyRowBitVector::setValueAlt(const char* value)
 }
 
 
-property_tree::InplaceWidget* PropertyRowBitVector::createWidget(::PropertyTree* tree)
+property_tree::InplaceWidget* PropertyRowBitVector::createWidget(PropertyTreeBase* tree)
 {
 	return new InplaceWidgetBitVector(this, tree);
 }

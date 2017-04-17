@@ -102,7 +102,7 @@ struct ChildrenList
 
 struct Layout
 {
-	PropertyTree* tree;
+	PropertyTreeBase* tree;
 	// defines position where magnet elements get aligned to, used for name/value columns
 	int magnetPoint;
 
@@ -218,7 +218,7 @@ struct PersistentLayoutElement
 
 void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l, int element);
 void calculateRectangles_r(Layout* l, ElementType pass, int element, int length, int offset);
-void addValidatorsToLayout_r(PropertyTree* tree, Layout* l, int parentElement, PropertyRow* row);
-void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTree* tree, int indentationLevel);
+void addValidatorsToLayout_r(PropertyTreeBase* tree, Layout* l, int parentElement, PropertyRow* row);
+void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTreeBase* tree, int indentationLevel);
 
 };

@@ -12,7 +12,7 @@
 #include "IDrawContext.h"
 #include "PropertyRowImpl.h"
 #include "PropertyTreeModel.h"
-#include "PropertyTree.h"
+#include "PropertyTreeBase.h"
 #include "Serialization.h"
 #include "Color.h"	
 #include "yasli/decorators/IconXPM.h"
@@ -39,7 +39,7 @@ public:
 	yasli::string valueAsString() const override{ return ""; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 	void serializeValue(Archive& ar) override{}
-	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
+	int widgetSizeMin(const PropertyTreeBase*) const override{ return 18; }
 protected:
 	IconXPM icon_;
 };
@@ -86,7 +86,7 @@ public:
 			return DRAG_CHECK_IGNORE;
 		return value_ ? DRAG_CHECK_UNSET : DRAG_CHECK_SET;
 	}
-	bool onMouseDragCheck(PropertyTree* tree, bool value) override
+	bool onMouseDragCheck(PropertyTreeBase* tree, bool value) override
 	{
 		if (value_ != value) {
 			tree->model()->rowAboutToBeChanged(this);
@@ -99,7 +99,7 @@ public:
 	yasli::string valueAsString() const override{ return value_ ? "true" : "false"; }
 	WidgetPlacement widgetPlacement() const override{ return WIDGET_ICON; }
 
-	int widgetSizeMin(const PropertyTree*) const override{ return 18; }
+	int widgetSizeMin(const PropertyTreeBase*) const override{ return 18; }
 
 	IconXPM iconTrue_;
 	IconXPM iconFalse_;

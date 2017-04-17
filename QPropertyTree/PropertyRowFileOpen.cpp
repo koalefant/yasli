@@ -14,7 +14,7 @@
 #include "PropertyTree/PropertyRowImpl.h"
 #include "PropertyTree/PropertyTreeModel.h"
 #include "PropertyTree/Serialization.h"
-#include "PropertyTree/PropertyTree.h"
+#include "PropertyTree/PropertyTreeBase.h"
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/IMenu.h"
 #include "yasli/decorators/FileOpen.h"
@@ -123,14 +123,14 @@ public:
 		return true;
 	}
 
-	void clear(PropertyTree* tree)
+	void clear(PropertyTreeBase* tree)
 	{
 		tree->model()->rowAboutToBeChanged(this);
 		value_.clear();
 		tree->model()->rowChanged(this);
 	}
 
-	bool onContextMenu(IMenu &menu, PropertyTree* tree) override
+	bool onContextMenu(IMenu &menu, PropertyTreeBase* tree) override
 	{
 		FileOpenMenuHandler* handler = new FileOpenMenuHandler(this, tree);
 		tree->addMenuHandler(handler);
@@ -142,7 +142,7 @@ public:
 	}
 
 	int buttonCount() const override{ return 1; }
-	virtual property_tree::Icon buttonIcon(const PropertyTree* tree, int index) const override{ 
+	virtual property_tree::Icon buttonIcon(const PropertyTreeBase* tree, int index) const override{ 
 		#include "PropertyTree/file_open.xpm"
 		return property_tree::Icon(yasli::IconXPM(file_open_xpm));
 	}

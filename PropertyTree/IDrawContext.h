@@ -4,7 +4,7 @@
 #include "Rect.h"
 #include <yasli/decorators/IconXPM.h>
 
-class PropertyTree;
+class PropertyTreeBase;
 class PropertyRow;
 
 namespace property_tree {
@@ -79,7 +79,7 @@ enum {
 
 struct IDrawContext
 {
-	const PropertyTree* tree;
+	const PropertyTreeBase* tree;
 	Rect widgetRect;
 	bool captured;
 	bool pressed;
