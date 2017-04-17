@@ -56,6 +56,8 @@ set(SOURCES
 	../PropertyTree/PropertyTreeModel.h
 	../PropertyTree/PropertyTreeOperator.cpp
 	../PropertyTree/PropertyTreeOperator.h
+	../PropertyTree/Layout.cpp
+	../PropertyTree/Layout.h
 	../PropertyTree/Serialization.h
 	../PropertyTree/Unicode.cpp
 	../PropertyTree/Unicode.h

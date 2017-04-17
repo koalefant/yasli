@@ -156,7 +156,6 @@ public:
 	int childIndex(const PropertyRow* row) const;
 	bool isChildOf(const PropertyRow* row) const;
 
-	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex) const;
 	PropertyRow* findByAddress(const void* handle);
 	virtual const void* searchHandle() const;
 	virtual yasli::TypeID searchType() const { return serializer().type(); }
@@ -184,9 +183,7 @@ public:
 	void resetValidatorIcons();
 	void addValidatorIcons(bool hasWarnings, bool hasErrors);
 
-	void setLayoutChanged();
 	void setLabelChangedToChildren();
-	void setLayoutChangedToChildren();
 	void setHideChildren(bool hideChildren) { hideChildren_ = hideChildren; }
 	bool hideChildren() const { return hideChildren_; }
 	void updateLabel(const PropertyTree* tree, int index, bool parentHidesNonInlineChildren);
@@ -375,14 +372,17 @@ public:
 
 	void setValueAndContext(const yasli::Serializer& ser, yasli::Archive& ar) override { serializer_ = ser; }
 	size_t count() const{ return children_.size(); }
+	size_t countUpdated() const;
 	PropertyRow* childByIndex(int index);
 	const PropertyRow* childByIndex(int index) const;
 	int childIndex(const PropertyRow* row) const;
 
 	bool isStatic() const override { return inlinedContainer_ == 0; }
+	PropertyRow* findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated) const;
 	void add(PropertyRow* row);
 	void addAfter(PropertyRow* row, PropertyRow* after);
 	void addBefore(PropertyRow* row, PropertyRow* before);
+	void insertAfterUpdated(PropertyRow* row, int index);
 	void clear(){ children_.clear(); }
 	void erase(PropertyRow* row);
 	void replaceAndPreserveState(PropertyRow* oldRow, PropertyRow* newRow, PropertyTreeModel* model, bool preserveChildren);
@@ -392,6 +392,8 @@ public:
 	PropertyRowStruct* inlinedContainer() { return inlinedContainer_; }
 
 	void swapChildren(PropertyRow* row, PropertyTreeModel* model) override;
+	void eraseOld();
+	void eraseOldRecursive();
 
 	template<class Op> bool scanChildren(Op& op);
 	template<class Op> bool scanChildren(Op& op, PropertyTree* tree);

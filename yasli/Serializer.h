@@ -222,7 +222,6 @@ class WStringInterface
 {
 public:
 	virtual ~WStringInterface() {}
-	virtual ~WStringInterface(){}
 
 	virtual void set(const wchar_t* value) = 0;
 	virtual const wchar_t* get() const = 0;

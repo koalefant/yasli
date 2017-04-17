@@ -54,7 +54,7 @@ bool PropertyIArchive::operator()(yasli::StringInterface& value, const char* nam
 {
 	if(openRow(name, label, "string")){
 		if(PropertyRowString* row = static_cast<PropertyRowString*>(currentNode_))
- 			value.set(unEscape(fromWideChar(row->value().c_str()).c_str()).c_str());
+ 			value.set(unEscape(row->value().c_str()).c_str());
 		closeRow(name);
 		return true;
 	}
@@ -363,8 +363,10 @@ bool PropertyIArchive::openRow(const char* name, const char* label, const char* 
 		++level.rowIndex;
 	}
 	else {
-		node = currentNode_->findFromIndex(&level.rowIndex, name, typeName, level.rowIndex);
-		++level.rowIndex;
+		if (PropertyRowStruct* currentNodeStruct = currentNode_->asStruct()) {
+			node = currentNodeStruct->findFromIndex(&level.rowIndex, name, typeName, level.rowIndex, false);
+			++level.rowIndex;
+		}
 	}
 
 	if(node){

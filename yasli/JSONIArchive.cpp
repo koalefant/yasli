@@ -812,7 +812,7 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 						*outName = nameContent;
 					if (warnAboutUnusedFields_) {
 						// mark name as used
-						if (level.fieldIndex < level.names.size()) {
+						if (level.fieldIndex < int(level.names.size())) {
 							level.names[level.fieldIndex] = Token();
 						} else {
 							YASLI_ASSERT(level.names.size() == level.fieldIndex);
@@ -826,7 +826,7 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 					skipBlock();
 					if (warnAboutUnusedFields_) {
 						// mark name as unused
-						if (level.fieldIndex >= level.names.size()) {
+						if (level.fieldIndex >= int(level.names.size())) {
 							YASLI_ASSERT(level.names.size() == level.fieldIndex);
 							level.names.push_back(nameToken);
 						}

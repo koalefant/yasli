@@ -1,5 +1,5 @@
 #include "UnitTest++.h"
-#include "../yasli/ComplexClass.h"
+#include "../yasli-test/ComplexClass.h"
 
 // TODO: move into ComplexClass.cpp
 YASLI_CLASS(PolyBase, PolyBase, "Base")

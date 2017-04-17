@@ -70,9 +70,8 @@ public:
 		ownedActions_.push_back(result);
 		return result;
 	}
-	void exec(const Point& point) {
+	void exec(const Point& widgetPoint) {
 		if (menu_.get()) {
-			property_tree::Point widgetPoint = ((ww::PropertyTree*)tree_)->_toWidget(point);
 			::RECT rt;
 			GetWindowRect(tree_->_window()->handle(), &rt);
 			menu_->spawn(ww::Vect2(widgetPoint.x() + rt.left, widgetPoint.y() + rt.top), tree_);

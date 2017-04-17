@@ -177,10 +177,12 @@ bool Clipboard::paste(PropertyRow* dest, bool onlyCheck)
 			source->setName(name);
 			source->setLabel(nameAlt);
 			if(dest->parent())
-				dest->parent()->replaceAndPreserveState(dest, source, false);
+				dest->parent()->replaceAndPreserveState(dest, source, model_, false);
 			else{
-				dest->clear();
-				dest->swapChildren(source, model_);
+				if (PropertyRowStruct* destStruct = dest->asStruct()) {
+					destStruct->clear();
+					destStruct->swapChildren(source, model_);
+				}
 			}
 		}
 	}

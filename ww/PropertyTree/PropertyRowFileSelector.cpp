@@ -41,7 +41,7 @@ public:
 		if(multiValue())
 			context.drawEntry(context.widgetRect, " ... ", false, true, 0);
 		else if(userReadOnly())
-			context.drawValueText(pulledSelected(), valueAsString().c_str());
+			context.drawValueText(inlinedSelected(), valueAsString().c_str());
 		else
 			context.drawEntry(context.widgetRect, valueAsString().c_str(), true, false, 0);
 	}

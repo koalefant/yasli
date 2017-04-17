@@ -1,29 +1,20 @@
 @echo off
 setlocal
 
-set DEVENV2005="c:\Program Files (x86)\Microsoft Visual Studio 8\Common7\IDE\devenv.com"
-for %%C in ( ^
-Release^|Win32 ^
-Release^|x64 ^
-ReleaseStatic^|Win32 ^
-ReleaseStatic^|x64 ^
-Debug^|Win32 ^
-Debug^|x64 ^
-DebugStatic^|Win32 ^
-DebugStatic^|x64 ^
- ) do ( %DEVENV2005% %~d0%~p0\yasli.sln /Rebuild %%C || ( exit /b -1 ) )
+cd /d %~d0%~p0
 
-:vs2013
+mkdir .tmp-vc2013
+cd .tmp-vc2013
+
+set CMAKE="c:\Program Files\CMake\bin\cmake.exe"
+
+%CMAKE% .. ^
+	-DYASLI_NO_QT=1 ^
+	-G"Visual Studio 12 2013" ^
+	|| ( exit /b -1 )
+
 set DEVENV2013="c:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.com"
-for %%C in ( ^
-Release^|Win32 ^
-Release^|x64 ^
-ReleaseStatic^|Win32 ^
-ReleaseStatic^|x64 ^
-Debug^|Win32 ^
-Debug^|x64 ^
-DebugStatic^|Win32 ^
-DebugStatic^|x64 ^
- ) do ( %DEVENV2013% %~d0%~p0\yasli2013.sln /Rebuild %%C || ( exit /b -1 ) )
+%DEVENV2013% yasli.sln /Build Debug   2>&1 || ( exit /b -1 )
+:: %DEVENV2013% yasli.sln /Build Release 2>&1 || ( exit /b -1 )
 
 endlocal

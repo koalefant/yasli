@@ -45,29 +45,6 @@
 
 namespace ww{
 
-struct DebugTimer
-{
-	const char* name;
-	unsigned int startTime;
-	DebugTimer(const char* name)
-	: name(name)
-	{
-		startTime = timeGetTime();
-	}
-
-	~DebugTimer()
-	{
-		unsigned int endTime = timeGetTime();
-		char buf[128] = "";
-		sprintf_s(buf, "timer %s: %i\n", name, endTime-startTime);
-		// OutputDebugStringA(buf);
-	}
-};
-
-
-
-
-
 class FilterEntry : public Entry
 {
 public:
@@ -127,43 +104,6 @@ PropertyTree::PropertyTree(int border)
 }
 #pragma warning(pop)
 
-struct DrawVisitor
-{
-	DrawVisitor(Gdiplus::Graphics* graphics, const property_tree::Rect& area, int scrollOffset, bool selectionPass)
-		: area_(area)
-		, graphics_(graphics)
-		, scrollOffset_(scrollOffset)
-		, lastParent_(0)
-		, selectionPass_(selectionPass)
-	{}
-
-	ScanResult operator()(PropertyRow* row, ::PropertyTree* _tree, int index)
-	{
-		if(row->visible(_tree) && (row->parent()->expanded() && !lastParent_ || row->inlined())){
-			if(row->rect().top() > scrollOffset_ + area_.height())
-				lastParent_ = row->parent();
-
-			if(row->rect().bottom() > scrollOffset_)
-			{
-				wwDrawContext context((ww::PropertyTree*)_tree, graphics_);
-				row->drawRow(context, _tree, index, selectionPass_);
-			}
-
-			return SCAN_CHILDREN_SIBLINGS;
-		}
-		else
-			return SCAN_SIBLINGS;
-	}
-
-protected:
-	Gdiplus::Graphics* graphics_;
-	property_tree::Rect area_;
-	int scrollOffset_;
-	PropertyRow* lastParent_;
-	bool selectionPass_;
-};
-
-
 PropertyTree::~PropertyTree()
 {
 	ReleaseDC(impl()->handle(), graphics_->GetHDC());
@@ -189,35 +129,46 @@ void PropertyTree::interruptDrag()
 	dragController_->interrupt();
 }
 
-void PropertyTree::updateHeights(bool fontChanged)
+int PropertyTree::filterAreaHeight() const
 {
+	if (!filterMode_)
+		return 0;
+	return filterEntry_->_minimalSize().y + 4;
+}
+
+void PropertyTree::updateHeights()
+{
+	DebugTimer t(__FUNCTION__, 10);
 	bool force = false;
 	{
-		DebugTimer("updateHeights");
-
 		Win32::Rect clientRect;
 		::GetClientRect(impl()->handle(), &clientRect);
 
-		area_ = property_tree::Rect(clientRect.left + 1, clientRect.top + 1, clientRect.width() - 2, clientRect.height() - 2);
-
-		int filterAreaHeight = 0;
-		if (filterMode_)
-			filterAreaHeight = filterEntry_->_minimalSize().y + 4;
+		int scrollBarW = GetSystemMetrics(SM_CXVSCROLL);
+		area_ = property_tree::Rect(clientRect.left, clientRect.top, clientRect.right - 2, clientRect.bottom);
 
 		updateScrollBar();
 
 		model()->root()->updateLabel(this, 0, false);
-		int lb = compact() ? 0 : 4;
+		int lb = style_->compact ? 0 : 4;
 		int rb = area_.w - lb*2;
+		bool fontChanged = false;
 		force = fontChanged || force || lb != leftBorder_ || rb != rightBorder_;
 		leftBorder_ = lb;
 		rightBorder_ = rb;
-		model()->root()->calculateMinimalSize(this, leftBorder_, rb-lb, force, 0, 0, 0);
+		model()->root()->updateTextSize_r(this, 0);
 
-		size_.y_ = area_.top() + filterAreaHeight;
-		model()->root()->adjustVerticalPosition(this, size_.y_);
+		size_.setX(area_.width());
+		size_.setY(0);
 	}
-	updateScrollBar();
+
+	{
+		updateLayout();
+		size_.setY(model()->root()->childrenRect(this).height());
+		updateScrollBar();
+	}
+
+	_arrangeChildren();
 	update();
 }
 
@@ -292,7 +243,7 @@ void PropertyTree::setFilterMode(bool inFilterMode)
     if (changed)
     {
         onFilterChanged();
-		updateHeights(false);
+		updateHeights();
     }
 }
 
@@ -424,7 +375,6 @@ struct FilterVisitor
 			else {
 				markChildrenAsBelonging(row, true);
 				row->setBelongsToFilteredRow(false);
-				row->setLayoutChanged();
 				row->setLabelChanged();
 			}
 		}
@@ -441,7 +391,6 @@ struct FilterVisitor
 			}
 			else {
 				row->_setExpanded(false);
-				row->setLayoutChanged();
 			}
 		}
 
@@ -459,7 +408,7 @@ void PropertyTree::onFilterChanged()
 	rowFilter_.parse(filterStr);
 	FilterVisitor visitor(rowFilter_);
 	model()->root()->scanChildrenBottomUp(visitor, this);
-	updateHeights(false);
+	updateHeights();
 }
 
 void PropertyTree::drawFilteredString(Gdiplus::Graphics* gr, const char* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& textColor, bool pathEllipsis, bool center) const
@@ -537,15 +486,15 @@ void PropertyTree::_drawRowValue(Gdiplus::Graphics* gr, const char* text, Gdiplu
 void PropertyTree::onPaint(HDC dc)
 {
 	using namespace Gdiplus;
-	DebugTimer timer("redraw");
+	DebugTimer timer("redraw", 10);
 
 	RECT clientRect = { area_.left(), area_.top(), area_.right(), area_.bottom() };
 	::GetClientRect(impl()->handle(), &clientRect);
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 
-	Graphics gr(dc);
 	{
+		Graphics gr(dc);
 		gr.FillRectangle(&SolidBrush(gdiplusSysColor(COLOR_BTNFACE)), clientRect.left,
 			clientRect.top, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
 	}
@@ -563,17 +512,15 @@ void PropertyTree::onPaint(HDC dc)
 
 	::IntersectClipRect(dc, area_.left(), area_.top(), area_.right(), area_.bottom());
 
-	//OffsetViewportOrgEx(dc, -offset_.x(), -offset_.y(), 0);
 	if (dragController_->captured())
 		dragController_->drawUnder(dc);
-	//OffsetViewportOrgEx(dc, offset_.x(), offset_.y(), 0);
-
 
 	OffsetViewportOrgEx(dc, -offset_.x(), -offset_.y(), 0);
-	if (model()->root()) {
-		Gdiplus::Graphics gr(dc);
-		model()->root()->scanChildren(DrawVisitor(&gr, area_, offset_.y(), true), this);
-		model()->root()->scanChildren(DrawVisitor(&gr, area_, offset_.y(), false), this);
+	if (layout_) {
+		Graphics gr(dc);
+		wwDrawContext context(this, &gr);
+		int h = clientHeight;
+		drawLayout(context, h);
 	}
 	OffsetViewportOrgEx(dc, offset_.x(), offset_.y(), 0);
 
@@ -609,16 +556,15 @@ void PropertyTree::onPaint(HDC dc)
 	}
 
 	if(dragController_->captured()){
-		//OffsetViewportOrgEx(dc, -offset_.x, -offset_.y, 0);
 		dragController_->drawOver(dc);
-		//OffsetViewportOrgEx(dc, offset_.x, offset_.y, 0);
 	}
 	else{
-		if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && hasFocus()){
-			clientRect.left += 2; clientRect.top += 2;
-			clientRect.right -= 2; clientRect.bottom -= 2;
-			DrawFocusRect(dc, &clientRect);
-		}
+		// FIXME
+		// if(model()->focusedRow() != 0 && model()->focusedRow()->isRoot() && hasFocus()){
+		// 	clientRect.left += 2; clientRect.top += 2;
+		// 	clientRect.right -= 2; clientRect.bottom -= 2;
+		// 	DrawFocusRect(dc, &clientRect);
+		// }
 	}
 }
 
@@ -626,13 +572,15 @@ void PropertyTree::onPaint(HDC dc)
 void PropertyTree::onLButtonDown(int button, int x, int y)
 {
 	::SetFocus(impl()->handle());
-	PropertyRow* row = rowByPoint(property_tree::Point(x, y));
+	HitResult hit;
+	hitTest(&hit, pointToRootSpace(Point(x, y)));
+	PropertyRow* row = hit.row;
 	if(row && !row->isSelectable())
 		row = row->parent();
 	if (row){
 		bool controlPressed = (GetKeyState(VK_CONTROL) >> 15) != 0;
 		bool shiftPressed = (GetKeyState(VK_SHIFT) >> 15) != 0;
-		if (onRowLMBDown(row, row->rect(), pointToRootSpace(property_tree::Point(x, y)), controlPressed, shiftPressed)) {
+		if (onRowLMBDown(hit, controlPressed, shiftPressed)) {
 			SetCapture(impl()->handle());
 			capturedRow_ = row;
 		}
@@ -657,6 +605,10 @@ void PropertyTree::onLButtonDown(int button, int x, int y)
 
 void PropertyTree::onLButtonUp(int button, int x, int y)
 {
+	HitResult hit;
+	hitTest(&hit, pointToRootSpace(Point(x, y)));
+	PropertyRow* row = hit.row;
+
 	HWND focusedWindow = GetFocus();
 	if(focusedWindow){
 		YASLI_ASSERT(::IsWindow(focusedWindow));
@@ -680,10 +632,8 @@ void PropertyTree::onLButtonUp(int button, int x, int y)
 	}
 	else {
 		Vect2 point(x, y);
-		PropertyRow* row = rowByPoint(property_tree::Point(point.x, point.y));
 		if(capturedRow_){
-
-			onRowLMBUp(capturedRow_, capturedRow_->rect(), pointToRootSpace(Point(x, y)));
+			onRowLMBUp(hit);
 			capturedRow_ = 0;
 			repaint();
 		}
@@ -694,20 +644,9 @@ void PropertyTree::onRButtonDown(int button, int x, int y)
 {
 	::SetFocus(impl()->handle());
 
-	property_tree::Point point(x, y);
-	PropertyRow* row = rowByPoint(point);
-	if(row){
-		model()->setFocusedRow(row);
-		RedrawWindow(impl()->handle(), 0, 0, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		onRowRMBDown(row, row->rect(), pointToRootSpace(point));
-	}
-	else{
-		Win32::Rect rect;
-		GetClientRect(impl()->handle(), &rect);
-		if (model()->root())
-			onRowRMBDown(model()->root(), property_tree::Rect(rect.left, rect.top, rect.width(), rect.height()), pointToRootSpace(point));
-	}
+	HitResult hit;
+	hitTest(&hit, pointToRootSpace(Point(x, y)));
+	onRowRMBDown(hit);
 }
 
 bool PropertyTree::updateScrollBar()
@@ -767,7 +706,6 @@ void PropertyTree::onLButtonDoubleClick(int x, int y)
 	if(row){
 		YASLI_ASSERT(row->refCount() > 0);
 		PropertyActivationEvent e;
-		e.force = true;
 		e.tree = this;
 		e.clickPoint = point;
 		e.reason = e.REASON_DOUBLECLICK;
@@ -801,7 +739,7 @@ void PropertyTree::onMouseMove(int button, int x, int y)
 			row->onMouseDragCheck(this, dragCheckValue_);
 		}
 		else if(capturedRow_){
-			onRowMouseMove(capturedRow_, property_tree::Rect(), point);
+			onRowMouseMove(capturedRow_, point);
 		}
 	}
 }

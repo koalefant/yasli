@@ -69,7 +69,7 @@ static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea,
 
 	int count = (int)row->count();
 	bool hasInlinedChildren = false;
-	for (size_t j = 0; j < count; ++j) {
+	for (int j = 0; j < count; ++j) {
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
@@ -121,7 +121,7 @@ static void populateRowArea(bool* hasNonInlinedChildren, Layout* l, int rowArea,
 	}
 	}
 
-	for (size_t j = 0; j < count; ++j) {
+	for (int j = 0; j < count; ++j) {
 		PropertyRow* child = row->childByIndex(j);
 		if (!child->visible(tree))
 			continue;
@@ -610,7 +610,7 @@ static int findRowElement(const Layout& l, const PropertyRow* row, int part, int
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
 		return 0;
-	for (; index < l.elements.size(); ++index) {
+	for (; index < int(l.elements.size()); ++index) {
 		const LayoutElement& element = l.elements[index];
 		if (element.rowPart == part && element.rowPartSubindex == subindex && l.rows[index] == row)
 			return index;
@@ -623,7 +623,7 @@ static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
 		return 0;
-	for (; index < l.elements.size(); ++index) {
+	for (; index < int(l.elements.size()); ++index) {
 		const LayoutElement& element = l.elements[index];
 		if (l.rows[index] == row && element.focusFlags != NOT_FOCUSABLE)
 			return index;

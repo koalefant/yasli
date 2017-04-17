@@ -49,6 +49,8 @@ void PropertyRowNumberField::redraw(IDrawContext& context)
 
 void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
 {
+	if(abs(e.pos.x() - e.start.x()) < 3)
+		return;
 	if (!dragStarted_) {
 		e.tree->model()->rowAboutToBeChanged(this);
 		dragStarted_ = true;
@@ -90,23 +92,6 @@ bool PropertyRowNumberField::onMouseDown(PropertyTree* tree, Point point, bool& 
 	return false;
 }
 
-void PropertyRowNumberField::onMouseDrag(const PropertyDragEvent& e)
-{
-	if(abs(e.pos.x() - e.start.x()) < 3)
-		return;
-
-	e.tree->ui()->setCursor(CURSOR_SLIDE);
-
-	Point screenSize = e.tree->ui()->screenSize();
-	float relativeDelta = float((e.pos - e.start).x()) / screenSize.x();
-	incrementLog(relativeDelta);
-	setMultiValue(false);
-}
-
-void PropertyRowNumberField::onMouseStill(const PropertyDragEvent& e)
-{
-	e.tree->apply(true);
-}
 
 void PropertyRowNumberField::onMouseUp(PropertyTree* tree, Point point) 
 {

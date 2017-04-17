@@ -218,7 +218,7 @@ void PropertyRowStruct::add(PropertyRow* row)
 	row->setParent(this);
 }
 
-void PropertyRow::insertAfterUpdated(PropertyRow* row, int index)
+void PropertyRowStruct::insertAfterUpdated(PropertyRow* row, int index)
 {
 	row->setParent(this);
 	if(!index){
@@ -258,7 +258,7 @@ void PropertyRow::assignRowState(const PropertyRow& row, bool recurse)
             PropertyRow* child = childByIndex(i);
             YASLI_ESCAPE(child, continue);
 			int unusedIndex;
-            const PropertyRow* rhsChild = row.findFromIndex(&unusedIndex, child->name(), child->typeName(), i);
+            const PropertyRow* rhsChild = row.asStruct() ? row.asStruct()->findFromIndex(&unusedIndex, child->name(), child->typeName(), i, false) : 0;
             if(rhsChild)
                 child->assignRowState(*rhsChild, true);
         }
@@ -334,48 +334,8 @@ void PropertyRowStruct::swapChildren(PropertyRow* _row, PropertyTreeModel* model
 
 void PropertyRowStruct::addBefore(PropertyRow* row, PropertyRow* before)
 {
-	for(Rows::iterator i = children_.begin(); i != children_.end();)
-		if(!(*i)->updated_)
-			i = children_.erase(i);
-		else
-			++i;
-}
-
-void PropertyRow::eraseOld()
-{
-	for(Rows::iterator i = children_.begin(); i != children_.end();)
-		if(!(*i)->updated_)
-			i = children_.erase(i);
-		else
-			++i;
-}
-
-void PropertyRow::eraseOldRecursive()
-{
-	updated_ = false;
-	for(Rows::iterator i = children_.begin(); i != children_.end();)
-		if(!(*i)->updated_)
-			i = children_.erase(i);
-		else{
-			(*i)->eraseOldRecursive();
-			++i;
-		}
-}
-
-
-std::size_t PropertyRow::countUpdated() const
-{
-	int counter = 0;
-	for(Rows::const_iterator i = begin(); i != end(); ++i)
-		if((*i)->updated_)
-			++counter;
-	return counter;
-}
-
-void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
-{
 	if(before == 0)
-		children_.insert(children_.begin(), row);
+		children_.push_back(row);
 	else{
 		Rows::iterator it = std::find(children_.begin(), children_.end(), before);
 		if(it != children_.end())
@@ -384,6 +344,44 @@ void PropertyRow::addBefore(PropertyRow* row, PropertyRow* before)
 			children_.push_back(row);
 	}
 	row->setParent(this);
+}
+
+
+void PropertyRowStruct::eraseOld()
+{
+	for(Rows::iterator i = children_.begin(); i != children_.end();)
+		if(!(*i)->updated_)
+			i = children_.erase(i);
+		else
+			++i;
+}
+
+void PropertyRowStruct::eraseOldRecursive()
+{
+	updated_ = false;
+	for(Rows::iterator i = children_.begin(); i != children_.end();) {
+		PropertyRow* row = i->get();
+		if(!row->updated_)
+			i = children_.erase(i);
+		else{
+			if (PropertyRowStruct* rowStruct = row->asStruct())
+				rowStruct->eraseOldRecursive();
+			else
+				row->updated_ = false;
+			++i;
+		}
+	}
+}
+
+
+std::size_t PropertyRowStruct::countUpdated() const
+{
+	int counter = 0;
+	int numChildren = children_.size();
+	for(int i = 0; i < numChildren; ++i)
+		if(children_[i] && children_[i]->updated_)
+			++counter;
+	return counter;
 }
 
 yasli::wstring PropertyRow::valueAsWString() const
@@ -778,51 +776,7 @@ PropertyRow* PropertyRow::find(const char* name, const char* nameAlt, const char
 	return 0;
 }
 
-void PropertyRow::setTextSize(const PropertyTree* tree, int index, float mult)
-{
-	updateTextSizeInitial(tree, index);
-
-	textSize_ = xround(textSizeInitial_ * mult);
-
-	size_t numChildren = children_.size();
-	for (size_t i = 0; i < numChildren; ++i) {
-		PropertyRow* row = children_[i];
-		if(row->pulledUp())
-			row->setTextSize(tree, 0, mult);
-	}
-}
-
-void PropertyRow::calcPulledRows(int* minTextSize, int* freePulledChildren, int* minimalWidth, const PropertyTree *tree, int index) 
-{
-	updateTextSizeInitial(tree, index);
-
-	*minTextSize += textSizeInitial_;
-	if(widgetPlacement() == WIDGET_VALUE && !isWidgetFixed())
-		*freePulledChildren += 1;
-	*minimalWidth += textSizeInitial_ + widgetSizeMin(tree);
-
-	size_t numChildren = children_.size();
-	for (size_t i = 0; i < numChildren; ++i) {
-		PropertyRow* row = children_[i];
-		if(row->pulledUp())
-			row->calcPulledRows(minTextSize, freePulledChildren, minimalWidth, tree, index);
-	}
-}
-
-PropertyRow* PropertyRow::findSelected()
-{
-    if(selected())
-        return this;
-    iterator it;
-    for(it = children_.begin(); it != children_.end(); ++it){
-        PropertyRow* result = (*it)->findSelected();
-        if(result)
-            return result;
-    }
-    return 0;
-}
-
-PropertyRow* PropertyRow::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated) const
+PropertyRow* PropertyRowStruct::findFromIndex(int* outIndex, const char* name, const char* typeName, int startIndex, bool checkUpdated) const
 {
 	int numChildren = count();
 	int iterations = 1;
@@ -1129,10 +1083,10 @@ void PropertyRow::intersect(const PropertyRow* row)
 
 	int indexSource = 0;
 	int num = count();
-	for(int i = 0; i < count(); ++i)
+	for(int i = 0; i < num; ++i)
 	{
 		PropertyRow* testRow = childByIndex(i);
-		PropertyRow* matchingRow = row->findFromIndex(&indexSource, testRow->name_, testRow->typeName_, indexSource);
+		PropertyRow* matchingRow = row->asStruct() ? row->asStruct()->findFromIndex(&indexSource, testRow->name_, testRow->typeName_, indexSource, false) : 0;
 		++indexSource;
 		if (matchingRow == 0) {
 			asStruct()->erase(testRow);
@@ -1269,8 +1223,6 @@ PropertyRowStruct* PropertyRow::asStruct() {
 const PropertyRowStruct* PropertyRow::asStruct() const {
 	return const_cast<PropertyRow*>(this)->asStruct();
 }
-
-YASLI_CLASS_NAME(PropertyRow, PropertyRow, "PropertyRow", "Structure");
 
 YASLI_API PropertyRowFactory& globalPropertyRowFactory() {
 	return PropertyRowFactory::the();

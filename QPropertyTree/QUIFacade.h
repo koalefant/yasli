@@ -76,8 +76,7 @@ public:
 		return action;
 	}
 	
-	void exec(const Point& point) override{
-		Point widgetPoint = tree_->_toWidget(point);
+	void exec(const Point& widgetPoint) override{
 		menu_->exec(tree_->mapToGlobal(QPoint(widgetPoint.x(), widgetPoint.y())));
 	}
 	const string& text() const{ return text_; }

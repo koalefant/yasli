@@ -294,7 +294,7 @@ protected:
 	virtual bool updateScrollBar() = 0;
 	virtual void interruptDrag() = 0;
 	virtual void _arrangeChildren() = 0;
-	virtual int filterAreaHeight() const { return 0; }
+	virtual int filterAreaHeight() const = 0;
 	virtual void startFilter(const char* text) = 0;
 	virtual void resetFilter() = 0;
 
@@ -385,5 +385,5 @@ protected:
 	friend struct ContainerMenuHandler;
 	friend class PropertyTreeModel;
 	friend class PropertyRow;
-	friend class RowWidthCache;
+	friend struct RowWidthCache;
 };

@@ -36,7 +36,6 @@ protected:
 	void drawRow(HDC dc);
 	void updateLayeredWindow();
 
-	bool useLayeredWindows_;
 	PropertyRow* row_;
 	Rect rect_;
 	TreeImpl* treeImpl_;
@@ -92,8 +91,6 @@ public:
 	PropertyTree* tree() { return tree_; };
 	PropertyTreeModel* model() { return tree_->model(); }
 
-	void redraw(HDC dc);
-
 	Vect2 pointToRootSpace(Vect2 pointInWindowSpace) const;
 	PropertyRow* rowByPoint(Vect2 pointInWindowSpace);
 
@@ -106,28 +103,28 @@ public:
     void updateArea();
 	void updateScrollBar();
 
-	int onMessageGetDlgCode(int keyCode, MSG* msg);
-	int onMessageChar(UINT code, USHORT count, USHORT flags);
-	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags);
+	int onMessageGetDlgCode(int keyCode, MSG* msg) override;
+	int onMessageChar(UINT code, USHORT count, USHORT flags) override;
+	int onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags) override;
 
-	void onMessageMouseWheel(SHORT delta);
-	void onMessageMouseMove(UINT button, int x, int y);
+	void onMessageMouseWheel(SHORT delta) override;
+	void onMessageMouseMove(UINT button, int x, int y) override;
 
-	void onMessageLButtonDblClk(int x, int y);
-	void onMessageLButtonDown(UINT button, int x, int y);
-	void onMessageLButtonUp(UINT button, int x, int y);
-	void onMessageMButtonDown(UINT button, int x, int y);
-	void onMessageRButtonDown(UINT button, int x, int y);
+	void onMessageLButtonDblClk(int x, int y) override;
+	void onMessageLButtonDown(UINT button, int x, int y) override;
+	void onMessageLButtonUp(UINT button, int x, int y) override;
+	void onMessageMButtonDown(UINT button, int x, int y) override;
+	void onMessageRButtonDown(UINT button, int x, int y) override;
 
-	BOOL onMessageEraseBkgnd(HDC dc);
-	void onMessageScroll(UINT message, WORD type);
-	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam);
-	BOOL onMessageSize(UINT type, USHORT width, USHORT height);
+	BOOL onMessageEraseBkgnd(HDC dc) override;
+	void onMessageScroll(UINT message, WORD type) override;
+	LRESULT onMessage(UINT message, WPARAM wparam, LPARAM lparam) override;
+	BOOL onMessageSize(UINT type, USHORT width, USHORT height) override;
 
-	int onMessageKillFocus(HWND newFocusedWindow);
-	int onMessageSetFocus(HWND lastFocusedWindow);
+	int onMessageKillFocus(HWND newFocusedWindow) override;
+	int onMessageSetFocus(HWND lastFocusedWindow) override;
 
-	void onMessagePaint();
+	void onMessagePaint() override;
 
 protected:
 	Vect2 size_;

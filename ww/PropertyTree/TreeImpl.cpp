@@ -37,25 +37,6 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
-struct DebugTimer
-{
-	const char* name;
-	unsigned int startTime;
-	DebugTimer(const char* name)
-	: name(name)
-	{
-		startTime = timeGetTime();
-	}
-
-	~DebugTimer()
-	{
-		unsigned int endTime = timeGetTime();
-		char buf[128] = "";
-		sprintf_s(buf, "timer %s: %i\n", name, endTime-startTime);
-		// OutputDebugStringA(buf);
-	}
-};
-
 using namespace Gdiplus;
 
 namespace ww{
@@ -111,45 +92,26 @@ void DragWindow::hide()
 	setWindowPos(false);
 }
 
-struct DrawRowVisitor
-{
-	DrawRowVisitor(Gdiplus::Graphics* graphics) : graphics(graphics) {}
-
-	ScanResult operator()(PropertyRow* row, ::PropertyTree* tree, int index)
-	{
-		wwDrawContext context((PropertyTree*)tree, graphics);
-		if (row->inlined() || (row->parent() && row->parent()->inlined())) {
-			row->drawRow(context, tree, index, true);
-			row->drawRow(context, tree, index, false);
-		}
-
-		return SCAN_CHILDREN_SIBLINGS;
-	}
-
-protected:
-	Gdiplus::Graphics* graphics;
-};
-
 void DragWindow::drawRow(HDC dc)
 {
-	Rect entireRowRect(0, 0, rect_.width(), rect_.height());
+	Rect entireRowRect(0, 0, rect_.width() + 4, rect_.height() + 4);
 
 	HGDIOBJ oldBrush = ::SelectObject(dc, GetSysColorBrush(COLOR_BTNFACE));
-	HGDIOBJ oldPen = ::SelectObject(dc, GetStockObject(WHITE_PEN));
+	HGDIOBJ oldPen = ::SelectObject(dc, GetStockObject(BLACK_PEN));
 	Rectangle(dc, entireRowRect.left(), entireRowRect.top(), entireRowRect.right(), entireRowRect.bottom());
 	::SelectObject(dc, oldBrush);
 	::SelectObject(dc, oldPen);
 
-	Vect2 leftTop(row_->rect().left(), row_->rect().top());
+	Vect2 leftTop(row_->rect(treeImpl_->tree()).left(),
+				  row_->rect(treeImpl_->tree()).top());
+
+	PropertyTree* tree = treeImpl_->tree();
+	int offsetX = -leftTop.x - tree->config().tabSize + 5;
+	int offsetY = -leftTop.y;
 	Gdiplus::Graphics graphics(dc);
-	SetViewportOrgEx(dc, (leftTop.x + treeImpl_->tree()->tabSize()), leftTop.y, 0);
-	int index = 0;
-	if (row_->parent())
-		index = row_->parent()->childIndex(row_);
-	wwDrawContext context(treeImpl_->tree(), &graphics);
-	row_->drawRow(context, treeImpl_->tree(), index, true);
-	row_->drawRow(context, treeImpl_->tree(), index, false);
-	row_->scanChildren(DrawRowVisitor(&graphics), treeImpl_->tree());
+	SetViewportOrgEx(dc, -offsetX, -offsetY, 0);
+	wwDrawContext context(tree, &graphics);
+	tree->drawRowLayout(context, row_);
 	SetViewportOrgEx(dc, 0, 0, 0);
 }
 
@@ -176,13 +138,9 @@ void DragWindow::updateLayeredWindow()
 		SIZE size = { rect_.width(), rect_.height() };
 		POINT point = { 0, 0 };
 		UpdateLayeredWindow(handle(), realDC, &leftTop, &size, dc, &point, 0, &blendFunction, ULW_ALPHA);
-		SetLayeredWindowAttributes(handle(), 0, 192, ULW_ALPHA);
+		SetLayeredWindowAttributes(handle(), 0, 200, ULW_ALPHA);
 	}
 	EndPaint(handle(), &ps);
-}
-
-void DragWindow::onMessagePaint()
-{
 }
 
 // ---------------------------------------------------------------------------
@@ -219,12 +177,15 @@ bool DragController::dragOn(POINT screenPoint)
 	if(!dragging_ && (Vect2(startPoint_.x, startPoint_.y) - Vect2(screenPoint.x, screenPoint.y)).length2() >= 25)
 		if(row_->canBeDragged()){
 			needCapture = true;
-			property_tree::Rect area = treeImpl_->tree()->area();
-			property_tree::Point offset = treeImpl_->tree()->offset();
-			property_tree::Rect rect = row_->rect();
+			PropertyTree* tree = treeImpl_->tree();
+			property_tree::Rect area = tree->area();
+			property_tree::Point offset = tree->offset();
+			property_tree::Rect rect = row_->rect(tree);
 			rect.y += area.top();
-			rect = property_tree::Rect(rect.left() - offset.x() + treeImpl_->tree()->tabSize(),
-				rect.top() - offset.y(), rect.width() - +treeImpl_->tree()->tabSize(), rect.height() + 1);
+			rect = property_tree::Rect(rect.left() - offset.x() + tree->tabSize(),
+									   rect.top() - offset.y(),
+									   rect.width() - +treeImpl_->tree()->tabSize(),
+									   rect.height() + 1);
             
 			window_.set(treeImpl_, row_, ww::Rect(rect.left(), rect.top(), rect.right(), rect.bottom()));
 			window_.move(screenPoint.x - startPoint_.x, screenPoint.y - startPoint_.y);
@@ -255,16 +216,16 @@ void DragController::trackRow(POINT pt)
 	destinationRow_ = 0;
 
     property_tree::Point point(pt.x, pt.y);
-	PropertyRow* row = treeImpl_->tree()->rowByPoint(point);
+	PropertyTree* tree = treeImpl_->tree();
+	PropertyRow* row = tree->rowByPoint(point);
 	if(!row || !row_)
 		return;
 
-	row = row->nonPulledParent();
+	row = row->findNonInlinedParent();
 	if(!row->parent() || row->isChildOf(row_) || row == row_)
 		return;
 
-	PropertyTree* tree = treeImpl_->tree();
-	float pos = (point.y() - row->rect().top() - treeImpl_->tree()->area().top()) / float(row->rect().height());
+	float pos = (point.y() - row->rect(tree).top() - tree->area().top()) / float(row->rect(tree).height());
 	if(row_->canBeDroppedOn(row->parent(), row, tree)){
 		if(pos < 0.25f){
 			destinationRow_ = row->parent();
@@ -286,7 +247,7 @@ void DragController::trackRow(POINT pt)
 void DragController::drawUnder(HDC dc)
 {
 	if(dragging_ && destinationRow_ == hoveredRow_ && hoveredRow_){
-		property_tree::Rect rowRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize(), 0, 0, 0);
+		property_tree::Rect rowRect = hoveredRow_->rect(treeImpl_->tree()).adjusted(treeImpl_->tree()->tabSize(), 0, 0, 0);
 		RECT rt = { rowRect.left(), rowRect.top(), rowRect.right(), rowRect.bottom() };
 		FillRect(dc, &rt, GetSysColorBrush(COLOR_HIGHLIGHT));
 	}
@@ -297,7 +258,8 @@ void DragController::drawOver(HDC dc)
 	if(!dragging_)
 		return;
 	
-	property_tree::Rect rr = row_->rect();
+	PropertyTree* tree = treeImpl_->tree();
+	property_tree::Rect rr = row_->rect(tree);
 	Rect rowRect(rr.left(), rr.top(), rr.right(), rr.bottom());
 
 	if(destinationRow_ != hoveredRow_ && hoveredRow_){
@@ -305,7 +267,7 @@ void DragController::drawOver(HDC dc)
 		property_tree::Point offset = treeImpl_->tree()->pointToRootSpace(property_tree::Point(0, 0));
 		int ox = offset.x();
 		int oy = offset.y();
-		property_tree::Rect hoveredRect = hoveredRow_->rect().adjusted(treeImpl_->tree()->tabSize() - ox, -oy, -ox, -oy);
+		property_tree::Rect hoveredRect = hoveredRow_->rect(tree).adjusted(tree->tabSize() - ox, -oy, -ox, -oy);
 
 		if(!before_){ // previous
 			RECT rect = { hoveredRect.left() - 1 , hoveredRect.bottom() - 1, hoveredRect.right() + 1, hoveredRect.bottom() + 1 };
@@ -332,7 +294,8 @@ void DragController::drop(POINT screenPoint)
 	if(row_ && hoveredRow_){
 		YASLI_ASSERT(destinationRow_);
 		clickedRow_->setSelected(false);
-		row_->dropInto(destinationRow_, destinationRow_ == hoveredRow_ ? 0 : hoveredRow_, treeImpl_->tree(), before_);
+		if (destinationRow_->isStruct())
+			row_->dropInto(destinationRow_->asStruct(), destinationRow_ == hoveredRow_ ? 0 : hoveredRow_, treeImpl_->tree(), before_);
 	}
 
 	captured_ = false;
@@ -476,7 +439,7 @@ void TreeImpl::onMessageScroll(UINT message, WORD type)
 BOOL TreeImpl::onMessageSize(UINT type, USHORT width, USHORT height)
 {
 	if(!creating()){
-        tree()->updateHeights(false);
+        tree()->updateHeights();
 	}
 	return TRUE;
 }
@@ -556,7 +519,8 @@ int TreeImpl::onMessageKeyDown(UINT keyCode, USHORT count, USHORT flags)
         }
     }
 
-	PropertyRow* row = tree_->model()->focusedRow();
+	// FIXME
+	PropertyRow* row = nullptr; // tree_->model()->focusedRow();
 
 	property_tree::KeyEvent keyEvent = translateKeyEvent(keyCode, flags);
 	bool result = tree_->onRowKeyDown(row, &keyEvent);

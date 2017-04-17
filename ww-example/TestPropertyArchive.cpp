@@ -1,5 +1,5 @@
 #include "UnitTest++.h"
-#include "../yasli/ComplexClass.h"
+#include "../yasli-test/ComplexClass.h"
 
 #include "ww/PropertyTreeModel.h"
 #include "ww/PropertyOArchive.h"

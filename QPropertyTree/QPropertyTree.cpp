@@ -608,8 +608,6 @@ void QPropertyTree::updateHeights()
 		int scrollBarW = style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 		area_ = fromQRect(widgetRect.adjusted(2, 2, -2 - scrollBarW, -2));
 
-		int filterAreaHeight = this->filterAreaHeight();
-
 		updateScrollBar();
 
 		model()->root()->updateLabel(this, 0, false);

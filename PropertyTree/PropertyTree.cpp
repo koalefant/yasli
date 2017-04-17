@@ -35,6 +35,7 @@
 #include "PropertyRowObject.h"
 #ifdef __linux__
 #include <time.h>
+#include <wctype.h> // towlower
 #endif
 
 // #define PROFILE
@@ -47,7 +48,7 @@ using namespace property_tree;
 
 static int timerLevel;
 DebugTimer::DebugTimer(const char* label, int threshold) : label(label), threshold(threshold) {
-#if 0
+#ifdef PROFILE
 	timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 	startTime = t.tv_sec * 1000 + t.tv_nsec / 1000000;
@@ -56,7 +57,7 @@ DebugTimer::DebugTimer(const char* label, int threshold) : label(label), thresho
 }
 
 DebugTimer::~DebugTimer() {
-#if 0
+#if PROFILE
 	--timerLevel;
 	timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
@@ -113,7 +114,7 @@ static int findNextChildLayoutElement(const Layout& layout, int startElement)
 {
 	int element = startElement;
 	do {
-		if (element > 0 && element < layout.elements.size() && layout.elements[element].childrenList >= 0)
+		if (element > 0 && element < int(layout.elements.size()) && layout.elements[element].childrenList >= 0)
 			return layout.childrenLists[layout.elements[element].childrenList].children.front();
 		size_t num = layout.elements.size();
 		for (size_t i = 0; i < num; ++i)
@@ -216,7 +217,7 @@ static int findNextLayoutElementInDirection(Point* newCursor, const Layout& layo
 	// 'newCursor' position is always clipped to a focused rectangle
 	if (bestElement > 0) {
 		if (layout.elements[bestElement].focusFlags == FORWARDS_FOCUS) { 
-			for (int i = bestElement; i < layout.elements.size(); ++i) {
+			for (int i = bestElement; i < int(layout.elements.size()); ++i) {
 				if (layout.elements[i].focusFlags == FOCUSABLE) {
 					bestElement = i;
 					break;
@@ -275,11 +276,11 @@ static int findLastLayoutElementInDirection(Point* newCursor, const Layout& layo
 
 static int heightByWidth(void * argument, int element, int subindex, int width) {
 	property_tree::Layout * l = (property_tree::Layout*)argument;
-	if ( element < 0 || element >= l->rows.size() ) {
+	if ( element < 0 || element >= int(l->rows.size()) ) {
 		return 0;
 	}
 	PropertyTree* tree = l->tree;
-	const int padding = tree->_defaultRowHeight() * 0.1f;
+	const int padding = int(tree->_defaultRowHeight() * 0.1f);
 
 	PropertyRow * row = l->rows[ element ];
 	int validatorIndex = row->validatorIndex();
@@ -302,9 +303,7 @@ static int heightByWidth(void * argument, int element, int subindex, int width) 
 
 TreeConfig::TreeConfig()
 : immediateUpdate(true)
-, compact(false)
 , hideUntranslated(true)
-, fullRowMode(false)
 , valueColumnWidth(.63f)
 , filter(YASLI_DEFAULT_FILTER)
 , fullRowContainers(true)
@@ -510,7 +509,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			else {
 				// can't move further to the left, collapse row
 				PropertyRow* nonInlinedParent = 0;
-				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
+				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < int(layout_->rows.size())) 
 					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
 				if(nonInlinedParent && nonInlinedParent->canBeToggled(this) && nonInlinedParent->expanded())
 					expandRow(nonInlinedParent, false);
@@ -532,7 +531,7 @@ bool PropertyTree::onRowKeyDown(PropertyRow* row, const KeyEvent* ev)
 			else {
 				// can't move further, expand row
 				PropertyRow* nonInlinedParent = 0;
-				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < layout_->rows.size()) 
+				if (focusedLayoutElement_ > 0 && focusedLayoutElement_ < int(layout_->rows.size())) 
 					nonInlinedParent = layout_->rows[focusedLayoutElement_]->findNonInlinedParent();
 				if (nonInlinedParent && nonInlinedParent->canBeToggled(this) && !nonInlinedParent->expanded())
 					expandRow(nonInlinedParent, true);
@@ -1010,7 +1009,7 @@ static int findRowElement(const Layout& l, const PropertyRow* row, int part, int
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
 		return 0;
-	for (; index < l.elements.size(); ++index) {
+	for (; index < int(l.elements.size()); ++index) {
 		const LayoutElement& element = l.elements[index];
 		if (element.rowPart == part && element.rowPartSubindex == subindex && l.rows[index] == row)
 			return index;
@@ -1023,7 +1022,7 @@ static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
 		return 0;
-	for (; index < l.elements.size(); ++index) {
+	for (; index < int(l.elements.size()); ++index) {
 		const LayoutElement& element = l.elements[index];
 		if (l.rows[index] == row && element.focusFlags == FOCUSABLE)
 			return index;
@@ -1763,7 +1762,13 @@ void toLowerUtf8(char* str)
 		*str = tolower(*str);
 #else
 	std::wstring ws = toWideChar(str);
-	_wcslwr_s((wchar_t*)ws.c_str(), ws.size() + 1);
+#ifdef _WIN32
+	_wcslwr_s((wchar_t*)ws.data(), ws.size() + 1);
+#else
+	for (int i = 0; i < ws.size(); ++i) {
+		ws[i] = towlower(ws[i]);
+	}
+#endif
 	std::string sl = fromWideChar(ws.c_str());
 	strcpy(str, sl.c_str());
 #endif
@@ -2100,7 +2105,7 @@ void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
 	DebugTimer t("PropertyTree::drawLayout", 20);
 	int lastElement = 0;
 	int numElements = layout_->rectangles.size();
-	for (size_t i = 0; i < numElements; ++i) {
+	for (int i = 0; i < numElements; ++i) {
 		if (findInSortedVector(hiddenLayoutElements_, (int)i))
 			continue;
 		const Rect& rect = layout_->rectangles[i];
@@ -2116,7 +2121,7 @@ void PropertyTree::drawLayout(property_tree::IDrawContext& context, int h)
 			continue;
 		row->drawElement(context, (property_tree::RowPart)e.rowPart, rect, e.rowPartSubindex);
 	}
-	for (size_t i = 0; i < numElements; ++i) {
+	for (int i = 0; i < numElements; ++i) {
 		if (findInSortedVector(hiddenLayoutElements_, (int)i))
 			continue;
 		const Rect& rect = layout_->rectangles[i];

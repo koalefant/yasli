@@ -29,8 +29,7 @@ public:
 	void hide();
 	void move(int deltaX, int deltaY);
 
-	void onMessagePaint();
-	BOOL onMessageEraseBkgnd(HDC dc);
+	BOOL onMessageEraseBkgnd(HDC dc) override;
 protected:
 	void setWindowPos(bool visible);
 	void drawRow(HDC dc);

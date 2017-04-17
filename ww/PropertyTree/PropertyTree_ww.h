@@ -100,9 +100,10 @@ protected:
 	void onScroll(int y);
 
 	void repaint() override { update(); }
-	void updateHeights(bool recalcTextSize) override;
+	void updateHeights() override;
 	bool updateScrollBar();
 	void defocusInplaceEditor() override;
+	int filterAreaHeight() const override;
 
 	void onFilterChanged();
 

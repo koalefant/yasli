@@ -4,6 +4,10 @@
 #include <vector>
 #include "PropertyTreeOperator.h"
 
+#ifdef MAX_PRIORITY
+#undef MAX_PRIORITY
+#endif
+
 class PropertyRow;
 
 namespace property_tree
@@ -157,7 +161,7 @@ struct Layout
 		LayoutElement& e = elements[parent];
 		if (e.childrenList == -1) {
 			e.childrenList = nextChildrenList;
-			if (nextChildrenList >= childrenLists.size())
+			if (nextChildrenList >= int(childrenLists.size()))
 				childrenLists.push_back(ChildrenList());
 			++nextChildrenList;
 		}

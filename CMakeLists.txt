@@ -30,23 +30,23 @@ set(PROJECT_SOURCE_ROOT ${PROJECT_SOURCE_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_ROOT})
 
-#add_subdirectory(UnitTest++)
-#include_directories(UnitTest++/src)
+add_subdirectory(UnitTest++)
+include_directories(UnitTest++/src)
 
 include_directories(.)
 add_subdirectory(yasli)
-#add_subdirectory(yasli-example)
+add_subdirectory(yasli-example)
 #add_subdirectory(yasli-test)
 
 add_subdirectory(XMath)
 
-#add_subdirectory(QPropertyTree)
-#add_subdirectory(QPropertyTree-example)
+add_subdirectory(QPropertyTree)
+add_subdirectory(QPropertyTree-example)
 
-# if (MSVC)
-#   add_subdirectory(ww)
-#   add_subdirectory(ww-example)
-# endif (MSVC)
+if (MSVC)
+   add_subdirectory(ww)
+   add_subdirectory(ww-example)
+endif (MSVC)
 
 if(UNIX)
 message("make: Entering Directory '${CMAKE_BINARY_DIR}'")

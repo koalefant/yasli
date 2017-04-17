@@ -11,7 +11,7 @@ class InplaceWidgetString : public property_tree::InplaceWidget, public sigslot:
 public:
 	InplaceWidgetString(PropertyRowString* row, ww::PropertyTree* tree)
 	: InplaceWidget(tree)
-	, initialValue_(row->value())
+	, initialValue_(toWideChar(row->value().c_str()))
 	, entry_(new ww::Entry(row->value().c_str()))
 	, tree_(tree)
 	, row_(row)
