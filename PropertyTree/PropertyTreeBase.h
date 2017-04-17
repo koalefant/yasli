@@ -313,7 +313,7 @@ protected:
 
 	void setWidget(property_tree::InplaceWidget* widget, PropertyRow* widgetRow);
 
-	void updateAttachedPropertyTreeBase(bool revert);
+	void updateAttachedPropertyTree(bool revert);
 
 	void onModelUpdated(const PropertyRows& rows, bool needApply);
 	void onModelPushUndo(PropertyTreeOperator* op, bool* handled);

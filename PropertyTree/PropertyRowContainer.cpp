@@ -284,13 +284,13 @@ void ContainerMenuHandler::onMenuChildRemove()
 	container->erase(element);
 	container->setMultiValue(false);
 	tree->model()->deselectAll();
-	tree->updateAttachedPropertyTreeBase(false);
+	tree->updateAttachedPropertyTree(false);
 	tree->model()->rowChanged(container);
 	PropertyRow* newSelectedRow = container->childByIndex(index);
 	if (newSelectedRow == 0)
 		newSelectedRow = container;
 	tree->model()->selectRow(newSelectedRow, true, true);
-	tree->updateAttachedPropertyTreeBase(false);
+	tree->updateAttachedPropertyTree(false);
 }
 
 

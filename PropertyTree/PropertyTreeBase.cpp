@@ -998,7 +998,7 @@ void PropertyTreeBase::YASLI_SERIALIZE_METHOD(Archive& ar)
 	model()->YASLI_SERIALIZE_METHOD(ar, this);
 
 	if(ar.isInput()){
-		updateAttachedPropertyTreeBase(false);
+		updateAttachedPropertyTree(false);
 		updateHeights();
 		onSelected();
 	}
@@ -1119,7 +1119,7 @@ void PropertyTreeBase::onRowSelected(const std::vector<PropertyRow*>& rows, bool
 	if (!rows.empty()) {
 		ensureVisible(rows.back(), true, false);
 	}
-	updateAttachedPropertyTreeBase(false);
+	updateAttachedPropertyTree(false);
 	onSelected();
 }
 
@@ -1270,7 +1270,7 @@ void PropertyTreeBase::revert()
 
 	restorePersistentFocusElement();
 	repaint();
-	updateAttachedPropertyTreeBase(true);
+	updateAttachedPropertyTree(true);
 
 	onReverted();
 }
@@ -1515,7 +1515,7 @@ void PropertyTreeBase::onModelUpdated(const PropertyRows& rows, bool needApply)
 			revert();
 		else {
 			updateHeights();
-			updateAttachedPropertyTreeBase(true);
+			updateAttachedPropertyTree(true);
 		}
 	}
 	else {
@@ -1607,7 +1607,7 @@ bool PropertyTreeBase::setSelectedRow(PropertyRow* row)
 		model()->setSelection(sel);
 		if (row)
 			ensureVisible(row);
-		updateAttachedPropertyTreeBase(false);
+		updateAttachedPropertyTree(false);
 		repaint();
 		return true;
 	}
@@ -1702,7 +1702,7 @@ void PropertyTreeBase::attachPropertyTree(PropertyTreeBase* propertyTree)
 	attachedPropertyTree_ = propertyTree; 
 	//if (attachedPropertyTree_)
 	//	connect(attachedPropertyTree_, SIGNAL(signalChanged()), this, SLOT(onAttachedTreeChanged()));
-	updateAttachedPropertyTreeBase(true); 
+	updateAttachedPropertyTree(true); 
 }
 
 void PropertyTreeBase::detachPropertyTree()
@@ -1745,7 +1745,7 @@ void PropertyTreeBase::getSelectionSerializers(yasli::Serializers* serializers)
 	}
 }
 
-void PropertyTreeBase::updateAttachedPropertyTreeBase(bool revert)
+void PropertyTreeBase::updateAttachedPropertyTree(bool revert)
 {
 	if(attachedPropertyTree_) {
  		Serializers serializers;
