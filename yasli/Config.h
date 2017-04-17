@@ -64,7 +64,9 @@
 #define YASLI_BIN_ARCHIVE_CHECK_EMPTY_NAME_MIX
 #endif
 
-#define YASLI_BIN_ARCHIVE_LEGACY_HASH 1
+#ifndef YASLI_BIN_ARCHIVE_LEGACY_HASH
+#define YASLI_BIN_ARCHIVE_LEGACY_HASH 0
+#endif
 
 // This allows to change the name of global serialization function and
 // serialization method to match the coding conventions of the codebase.
