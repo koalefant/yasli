@@ -605,7 +605,7 @@ void calculateRectangles_r(Layout* l, ElementType pass, int element, int length,
 	}
 }
 
-static int findRowElement(const Layout& l, const PropertyRow* row, int part, int subindex)
+int findRowElement(const Layout& l, const PropertyRow* row, int part, int subindex)
 {
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())
@@ -618,7 +618,7 @@ static int findRowElement(const Layout& l, const PropertyRow* row, int part, int
 	return 0;
 }
 
-static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
+int findFocusableRowElement(const Layout& l, const PropertyRow* row)
 {
 	int index = row->layoutElement();
 	if (size_t(index) >= l.elements.size())

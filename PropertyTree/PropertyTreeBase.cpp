@@ -1004,32 +1004,6 @@ void PropertyTreeBase::YASLI_SERIALIZE_METHOD(Archive& ar)
 	}
 }
 
-static int findRowElement(const Layout& l, const PropertyRow* row, int part, int subindex)
-{
-	int index = row->layoutElement();
-	if (size_t(index) >= l.elements.size())
-		return 0;
-	for (; index < int(l.elements.size()); ++index) {
-		const LayoutElement& element = l.elements[index];
-		if (element.rowPart == part && element.rowPartSubindex == subindex && l.rows[index] == row)
-			return index;
-	}
-	return 0;
-}
-
-static int findFocusableRowElement(const Layout& l, const PropertyRow* row)
-{
-	int index = row->layoutElement();
-	if (size_t(index) >= l.elements.size())
-		return 0;
-	for (; index < int(l.elements.size()); ++index) {
-		const LayoutElement& element = l.elements[index];
-		if (l.rows[index] == row && element.focusFlags == FOCUSABLE)
-			return index;
-	}
-	return 0;
-}
-
 Rect PropertyTreeBase::findRowRect(const PropertyRow* row, int part, int subindex) const
 {
 	int element = findRowElement(*layout_, row, part, subindex);

@@ -220,5 +220,7 @@ void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l
 void calculateRectangles_r(Layout* l, ElementType pass, int element, int length, int offset);
 void addValidatorsToLayout_r(PropertyTreeBase* tree, Layout* l, int parentElement, PropertyRow* row);
 void populateChildrenArea_r(Layout* l, int parentElement, PropertyRow* parentRow, PropertyTreeBase* tree, int indentationLevel);
+int findFocusableRowElement(const Layout& l, const PropertyRow* row);
+int findRowElement(const Layout& l, const PropertyRow* row, int part, int subindex);
 
 };

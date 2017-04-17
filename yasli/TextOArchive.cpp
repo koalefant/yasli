@@ -614,7 +614,7 @@ bool TextOArchive::operator()(ContainerInterface& ser, const char* name, const c
     placeName(name);
     std::size_t position = buffer_->position();
     openContainerBracket();
-    stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
+    stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * json_local::TAB_WIDTH + 2)));
 
     std::size_t size = ser.size();
     if(size > 0){

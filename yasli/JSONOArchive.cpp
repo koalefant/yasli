@@ -25,6 +25,8 @@ static unsigned long g_nan[2] = {0xffffffff, 0x7fffffff};
 
 namespace yasli{
 
+namespace json_local {
+
 // Some of non-latin1 characters here are not escaped to
 // keep compatibility with 8-bit local encoding (e.g. windows-1251)
 static const char* escapeTable[256] = {
@@ -319,15 +321,19 @@ static const char* escapeTable[256] = {
 static void escapeString(MemoryWriter& dest, const char* begin, const char* end)
 {
     while(begin != end){
-        const char* str = escapeTable[(unsigned char)(*begin)];
+        const char* str = json_local::escapeTable[(unsigned char)(*begin)];
         dest.write(str);
         ++begin;
     }
 }
 
+}
+
 // ---------------------------------------------------------------------------
 
+namespace json_local {
 static const int TAB_WIDTH = 2;
+}
 
 JSONOArchive::JSONOArchive(int textWidth, const char* header)
 : Archive(OUTPUT | TEXT)
@@ -464,11 +470,12 @@ bool JSONOArchive::operator()(StringInterface& value, const char* name, const ch
     placeName(name);
     (*buffer_) << "\""; 
     const char* str = value.get();
-    escapeString(*buffer_, str, str + strlen(value.get()));
+	json_local::escapeString(*buffer_, str, str + strlen(value.get()));
     (*buffer_) << "\"";
     return true;
 }
 
+namespace json_local {
 inline char* writeUtf16ToUtf8(char* s, unsigned int ch)
 {
   const unsigned char byteMark = 0x80;
@@ -507,6 +514,7 @@ inline char* writeUtf16ToUtf8(char* s, unsigned int ch)
 
   return s + len;
 }
+}
 
 bool JSONOArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
@@ -518,7 +526,7 @@ bool JSONOArchive::operator()(WStringInterface& value, const char* name, const c
   for(; *in; ++in)
   {
     char buf[6];
-		escapeString(*buffer_, buf, writeUtf16ToUtf8(buf, *in));
+	json_local::escapeString(*buffer_, buf, json_local::writeUtf16ToUtf8(buf, *in));
   }
 
 	(*buffer_) << "\"";
@@ -633,7 +641,7 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
     placeName(name);
     std::size_t position = buffer_->position();
     openBracket();
-    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * TAB_WIDTH + 2)));
+    stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + (stack_.size() - 1) * json_local::TAB_WIDTH + 2)));
 
     YASLI_ASSERT(ser);
     ser(*this);
@@ -695,7 +703,7 @@ bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const c
 	placeName(name);
 	std::size_t position = buffer_->position();
 	openContainerBracket();
-	stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * TAB_WIDTH + 2)));
+	stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * json_local::TAB_WIDTH + 2)));
 
 	std::size_t size = ser.size();
 	if(size > 0){
@@ -721,6 +729,8 @@ bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const c
 	return true;
 }
 
+namespace json_local {
+
 static char* joinLines(char* start, char* end)
 {
     YASLI_ASSERT(start <= end);
@@ -738,6 +748,8 @@ static char* joinLines(char* start, char* end)
     return start;
 }
 
+}
+
 bool JSONOArchive::joinLinesIfPossible()
 {
     YASLI_ASSERT(!stack_.empty());
@@ -749,7 +761,7 @@ bool JSONOArchive::joinLinesIfPossible()
         char* buffer = buffer_->buffer();
         char* start = buffer + startPosition;
         char* end = buffer + buffer_->position();
-        end = joinLines(start, end);
+        end = json_local::joinLines(start, end);
         std::size_t newPosition = end - buffer;
         YASLI_ASSERT(newPosition <= buffer_->position());
         buffer_->setPosition(newPosition);

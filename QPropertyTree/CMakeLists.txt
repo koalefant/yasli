@@ -1,4 +1,5 @@
 project(QPropertyTree)
+include(../yasli/UnityBuild.cmake)
 set(CMAKE_AUTOMOC TRUE)
 
 if (UNIX)
@@ -82,6 +83,9 @@ set(SOURCES
 	QUIFacade.h
 	)
 include_directories(..)
+if (NOT YASLI_NO_UNITY_BUILD)
+	enable_unity_build(qpropertytree SOURCES)
+endif()
 add_library(qpropertytree ${SOURCES})
 source_group("" FILES ${SOURCES})
 target_link_libraries(qpropertytree yasli ${Qt5Widgets_LIBRARIES})

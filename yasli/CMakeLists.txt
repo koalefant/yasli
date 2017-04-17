@@ -8,6 +8,7 @@
 #
 
 project("yasli")
+include(UnityBuild.cmake)
 
 if (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -48,6 +49,9 @@ set(DECORATORS
 	decorators/BitFlags.h
 	decorators/BitFlags.cpp
 	)
+if (NOT YASLI_NO_UNITY_BUILD)
+	enable_unity_build(yasli SOURCES)
+endif()
 
 source_group("" FILES ${SOURCES})
 source_group("decorators" FILES ${DECORATORS})

@@ -62,6 +62,7 @@ double parseFloat(const char* s)
 	return res*sign;
 }
 
+namespace json_local {
 
 static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -84,6 +85,8 @@ static char hexValueTable[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
+}
 
 static void unescapeString(std::vector<char>& buf, string& out, const char* begin, const char* end)
 {
@@ -114,7 +117,7 @@ static void unescapeString(std::vector<char>& buf, string& out, const char* begi
 			case '\'': *ptr = '\''; ++ptr; break;
 			case 'x':
 								 if(begin + 2 < end){
-									 *ptr = (hexValueTable[int(begin[1])] << 4) + hexValueTable[int(begin[2])];
+									 *ptr = (json_local::hexValueTable[int(begin[1])] << 4) + json_local::hexValueTable[int(begin[2])];
 									 ++ptr;
 									 begin += 2;
 									 break;
@@ -211,7 +214,7 @@ inline bool JSONTokenizer::isQuote(char c)
 	return c == '\"';
 }
 
-static const char charTypes[256] = {
+static const char jsonCharTypes[256] = {
 	0 /* 0x00: */,
 	0 /* 0x01: */,
 	0 /* 0x02: */,
@@ -502,7 +505,7 @@ static const char charTypes[256] = {
 
 inline bool JSONTokenizer::isWordPart(unsigned char c)
 {
-		return charTypes[c] != 0;
+		return jsonCharTypes[c] != 0;
 }
 
 Token JSONTokenizer::operator()(const char* ptr) const
@@ -1296,6 +1299,8 @@ bool JSONIArchive::operator()(StringInterface& value, const char* name, const ch
 }
 
 
+namespace json_local {
+
 inline size_t utf8InUtf16Len(const char* p)
 {
   size_t result = 0;
@@ -1378,6 +1383,7 @@ inline void utf8ToUtf16(wstring* out, const char* in)
   }
 }
 
+}
 
 bool JSONIArchive::operator()(WStringInterface& value, const char* name, const char* label)
 {
@@ -1387,7 +1393,7 @@ bool JSONIArchive::operator()(WStringInterface& value, const char* name, const c
 			string buf;
 			unescapeString(unescapeBuffer_, buf, token_.start + 1, token_.end - 1);
 			wstring wbuf;
-			utf8ToUtf16(&wbuf, buf.c_str());
+			json_local::utf8ToUtf16(&wbuf, buf.c_str());
 			value.set(wbuf.c_str());
 		}
 		else
