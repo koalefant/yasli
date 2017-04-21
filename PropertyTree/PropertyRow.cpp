@@ -661,8 +661,8 @@ void PropertyRow::parseControlCodes(const PropertyTreeBase* tree, const char* pt
 						child->controlCharacterCount_ = strlen(child->label_);
 					}
 				}
-				inlined_ = true;
-				container->setInlined(true);
+				hasInlinedChildren_ = true;
+				container->setInlinedContainer(true);
 			}
 		}
 	}
@@ -924,7 +924,7 @@ bool PropertyRow::inlinedSelected() const
 
 Font PropertyRow::rowFont(const PropertyTreeBase* tree) const
 {
-	return (hasVisibleChildren(tree) || (isContainer() && !static_cast<const PropertyRowContainer*>(this)->isInlined())) ? property_tree::FONT_BOLD : property_tree::FONT_NORMAL;
+	return (hasVisibleChildren(tree) || (isContainer() && !static_cast<const PropertyRowContainer*>(this)->isInlinedContainer())) ? property_tree::FONT_BOLD : property_tree::FONT_NORMAL;
 }
 
 void PropertyRow::drawElement(IDrawContext& context, property_tree::RowPart part, const property_tree::Rect& rect, int partSubindex)

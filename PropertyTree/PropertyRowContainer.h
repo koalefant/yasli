@@ -45,8 +45,8 @@ public:
 	bool isStatic() const override{ return false; }
 	bool isSelectable() const override{ return userWidgetSize() == 0 ? false : true; }
 	PropertyRow* addElement(PropertyTreeBase* tree, bool append);
-	void setInlined(bool inlined) { inlined_ = inlined; }
-	bool isInlined() const{ return inlined_; }
+	void setInlinedContainer(bool inlinedContainer) { inlinedContainer_ = inlinedContainer; }
+	bool isInlinedContainer() const{ return inlinedContainer_; }
 
 	PropertyRow* defaultRow(PropertyTreeModel* model);
 	const PropertyRow* defaultRow(const PropertyTreeModel* model) const;
@@ -63,7 +63,7 @@ public:
 	yasli::string valueAsString() const override;
 	// C-array is an example of fixed size container
 	bool isFixedSize() const{ return fixedSize_; }
-	WidgetPlacement widgetPlacement() const override{ return inlined_ ? WIDGET_NONE : WIDGET_AFTER_NAME; }
+	WidgetPlacement widgetPlacement() const override{ return inlinedContainer_ ? WIDGET_NONE : WIDGET_AFTER_NAME; }
 	int widgetSizeMin(const PropertyTreeBase*) const override;
 
 protected:
@@ -72,6 +72,6 @@ protected:
 	const char* elementTypeName_;
 	char buttonLabel_[8];
 	bool fixedSize_;
-	bool inlined_;
+	bool inlinedContainer_;
 	mutable RowWidthCache widthCache_;
 };

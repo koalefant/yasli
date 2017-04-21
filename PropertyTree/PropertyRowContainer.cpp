@@ -38,7 +38,7 @@ PropertyRowContainer::PropertyRowContainer()
 : PropertyRowStruct(/*isContainer=*/true)
 , fixedSize_(false)
 , elementTypeName_("")
-, inlined_(false)
+, inlinedContainer_(false)
 {
 	buttonLabel_[0] = '\0';
 
@@ -68,7 +68,7 @@ protected:
 void PropertyRowContainer::redraw(IDrawContext& context)
 {
 	Rect widgetRect = context.widgetRect;
-	if (widgetRect.width() == 0 || inlined_)
+	if (widgetRect.width() == 0 || inlinedContainer_)
 		return;
 	Rect rt = widgetRect.adjusted(0, 1, -1, -1);
 
@@ -86,7 +86,7 @@ bool PropertyRowContainer::onActivate(const PropertyActivationEvent& e)
 		return false;
 	if(userReadOnly())
 		return false;
-	if (inlined_)
+	if (inlinedContainer_)
 		return false;
 	std::unique_ptr<property_tree::IMenu> menu(e.tree->ui()->createMenu());
 	generateMenu(*menu, e.tree, true);
@@ -104,7 +104,7 @@ void PropertyRowContainer::generateMenu(property_tree::IMenu& menu, PropertyTree
 	tree->addMenuHandler(handler);
 
 	if (fixedSize_) {
-		if (!inlined_)
+		if (!inlinedContainer_)
 			menu.addAction("[ Fixed Size Container ]", MENU_DISABLED);
 	}
 	else if(userReadOnly()) {
@@ -338,7 +338,7 @@ bool PropertyRowContainer::onKeyDown(PropertyTreeBase* tree, const KeyEvent* ev)
 
 int PropertyRowContainer::widgetSizeMin(const PropertyTreeBase* tree) const
 {
-	if (inlined_)
+	if (inlinedContainer_)
 		return 0;
 	if (userWidgetSize() >= 0) {
 		return userWidgetSize();
