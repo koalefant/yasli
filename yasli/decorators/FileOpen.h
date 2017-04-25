@@ -9,7 +9,6 @@ class Archive;
 struct FileOpen
 {
 	string* pathPointer;
-	string path;
 	string filter;
 	string relativeToFolder;
 	int flags;
@@ -26,29 +25,16 @@ struct FileOpen
 	, relativeToFolder(relativeToFolder)
 	, flags(flags)
 	{
-		this->path = path;
 	}
 
-    FileOpen() : pathPointer(0), flags(0) { }
+    FileOpen() : pathPointer(nullptr), flags(0) { }
 
-	FileOpen& operator=(const FileOpen& rhs)
-	{
-		path = rhs.path;
-        flags = rhs.flags;
-		if (rhs.pathPointer) {
-			filter = rhs.filter;
-			relativeToFolder = rhs.relativeToFolder;
-		}
-		return *this;
-	}
 
 	~FileOpen()
 	{
-		if (pathPointer)
-			*pathPointer = path;
 	}
 
-	void YASLI_SERIALIZE_METHOD(Archive& ar);
+	FileOpen& operator=(const FileOpen&) = delete;
 };
 
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, FileOpen& value, const char* name, const char* label);

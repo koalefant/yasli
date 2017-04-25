@@ -80,6 +80,7 @@ public:
 		relativeToFolder_ = value->relativeToFolder;
 		flags_ = value->flags;
 		searchHandle_ = value->pathPointer;
+		value_ = value->pathPointer ? *value->pathPointer : "";
 	}
 
 	bool onActivate(const PropertyActivationEvent& e) override
