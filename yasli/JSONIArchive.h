@@ -27,6 +27,8 @@ public:
 	bool open(const char* buffer, size_t length, bool free = false);
 	// filename that will be include with errors produced with error() calls
 	void setDebugFilename(const char* filename);
+	// allows to disable warnings (enabled by default)
+	void setDisableWarnings(bool disableWarnings) { disableWarnings_ = disableWarnings; }
 	// enabled by default, can be disabled for performance reasons
 	void setWarnAboutUnusedFields(bool warn) { warnAboutUnusedFields_ = warn; }
 	int unusedFieldCount() const { return unusedFieldCount_; }
@@ -77,9 +79,10 @@ private:
 	struct Level{
 		const char* start;
 		const char* firstToken;
+		int fieldIndex;
 		bool isContainer;
 		bool isKeyValue;
-		int fieldIndex;
+		bool isDictionary;
 		bool parsedBlock;
 		std::vector<Token> names;
 		Level() : isContainer(false), isKeyValue(false), fieldIndex(0), parsedBlock(false) {}
@@ -91,6 +94,7 @@ private:
 	Token token_;
 	std::vector<char> unescapeBuffer_;
 	string filename_;
+	bool disableWarnings_;
 	bool warnAboutUnusedFields_;
 	int unusedFieldCount_;
 	void* buffer_;

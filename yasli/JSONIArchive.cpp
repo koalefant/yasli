@@ -582,6 +582,7 @@ JSONIArchive::JSONIArchive()
 , buffer_(0)
 , warnAboutUnusedFields_(true)
 , unusedFieldCount_(0)
+, disableWarnings_(false)
 {
 }
 
@@ -731,7 +732,6 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 	if(*blockBegin == '\0')
 		return false;
 
-
 	if(stack_.size() == 1 || level.isContainer || outName != 0){
 		// root or container or next value in a key-pair
 		readToken();
@@ -748,6 +748,15 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 			DEBUG_TRACE("Got unnamed value: '%s'", token_.str().c_str());
 			putToken();
 			return true;
+		}
+	}
+
+	if (!untilEndOfBlockOnly && stack_.size() > 1) {
+		if (name[0] == '\0' && !level.isContainer && !level.isKeyValue) {
+			error(0, TypeID(), "Deserializing nameless field in dictionary block");
+		}
+		if (name[0] != '\0' && level.isContainer) {
+			error(0, TypeID(), "Deserializing named field \"%s\" in array block", name);
 		}
 	}
 
@@ -987,7 +996,7 @@ bool JSONIArchive::operator()(const BlackBox& box, const char* name, const char*
 bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
 {
 	Token nextName;
-	if(!stack_.empty() && stack_.back().isContainer) {
+	if(!stack_.empty() && stack_.back().isDictionary) {
 		readToken();
 		if(isName(token_) && checkStringValueToken()) {
 			string key;
@@ -996,9 +1005,11 @@ bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, con
 			readToken();
 			if(!expect(':'))
 				return false;
-			if(!keyValue.serializeValue(*this, "", 0))
-				return false;
-			return true;
+			bool wasKeyValue = stack_.back().isKeyValue;
+			stack_.back().isKeyValue = true;
+			bool result = keyValue.serializeValue(*this, "", 0);
+			stack_.back().isKeyValue = wasKeyValue;
+			return result;
 		}
 		else {
 			putToken();
@@ -1062,15 +1073,18 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
     if(findName(name)){
+		Token bracketToken = token_;
 		bool containerBracket = openContainerBracket();
 		bool dictionaryBracket = false;
 		if (!containerBracket)
 			dictionaryBracket = openBracket();
 		if(containerBracket || dictionaryBracket){
-			if (dictionaryBracket)
-				warning(nullptr, TypeID(), "Container opens with a figure bracket instead of expected square bracket");
 			stack_.push_back(Level());
-			stack_.back().isContainer = true;
+			if (containerBracket) {
+				stack_.back().isContainer = true;
+			} else if (dictionaryBracket) {
+				stack_.back().isDictionary = true;
+			}
 			stack_.back().start = token_.end;
 
 			std::size_t size = ser.size();
@@ -1080,10 +1094,18 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 				readToken();
 				if (token_ == ',')
 					readToken();
-				if(token_ == '}')
+				if (token_ == '}') {
+					if (!dictionaryBracket) {
+						error(nullptr, TypeID(), "Unexpected bracket");
+					}
 					break;
-				if(token_ == ']')
+				}
+				if(token_ == ']') {
+					if (!containerBracket) {
+						error(nullptr, TypeID(), "Unexpected brace");
+					}
 					break;
+				}
 				else if(!token_)
 				{
 					error(nullptr, TypeID(), "Reached end of file while reading container");
@@ -1459,6 +1481,8 @@ void JSONIArchive::setDebugFilename(const char* filename) {
 }
 
 void JSONIArchive::validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) {
+	if (disableWarnings_)
+		return;
 	if (token_.start) {
 		int column_no = 0;
 		int line_no = line(&column_no, token_.start);

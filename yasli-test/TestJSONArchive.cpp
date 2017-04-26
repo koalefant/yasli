@@ -88,6 +88,7 @@ SUITE(JSONArchive)
 
 		JSONIArchive ia;
 		ia.setDebugFilename(m_details.testName);
+		ia.setDisableWarnings(true);
 		ia.open(content, strlen(content));
 
 		Root obj;
