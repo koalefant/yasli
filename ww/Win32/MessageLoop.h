@@ -12,12 +12,11 @@
 #include <vector>
 
 #include "ww/API.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "ww/Win32/Types.h"
 #include "yasli/Pointers.h"
 
 namespace Win32{
-using sigslot::signal0;
 
 class MessageFilter : public yasli::RefCounter
 {
@@ -26,7 +25,7 @@ public:
     virtual bool filter(MSG* msg) = 0;
 };
 
-class MessageLoop : public sigslot::has_slots
+class MessageLoop : public SignalScope
 {
 public:
 	MessageLoop();
@@ -38,8 +37,8 @@ public:
 	void interruptDialogLoop();
 	int runDialogLoop(HWND dialog);
 
-	signal0& signalIdle() { return signalIdle_; }
-	signal0& signalQuit() { return signalQuit_; }
+	Signal<>& signalIdle() { return signalIdle_; }
+	Signal<>& signalQuit() { return signalQuit_; }
 
 	void quit();
 	void quit(int code);
@@ -50,8 +49,8 @@ public:
 
 	static MessageLoop& instance();
 protected:
-	static signal0 signalIdle_;
-	signal0 signalQuit_;
+	static Signal<> signalIdle_;
+	Signal<> signalQuit_;
 
 	HWND dialog_;
 	bool dialogLoopInterrupted_;

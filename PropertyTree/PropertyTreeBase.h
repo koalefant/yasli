@@ -6,7 +6,7 @@
 #include <yasli/Archive.h>
 #include <yasli/Pointers.h>
 #include "Rect.h"
-#include "sigslot.h"
+#include "Signal.h"
 
 struct DebugTimer
 {

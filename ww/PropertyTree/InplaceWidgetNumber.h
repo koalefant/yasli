@@ -2,12 +2,12 @@
 
 #include "PropertyTree/IUIFacade.h"
 #include "PropertyTree/PropertyRowNumberField.h"
-#include "PropertyTree/sigslot.h"
+#include "PropertyTree/Signal.h"
 #include "ww/Entry.h"
 #include "ww/PropertyTree.h"
 #include "yasli/Pointers.h"
 
-class InplaceWidgetNumber : public property_tree::InplaceWidget, public sigslot::has_slots{
+class InplaceWidgetNumber : public property_tree::InplaceWidget, public SignalScope{
 public:
 	InplaceWidgetNumber(PropertyRowNumberField* row, ww::PropertyTree* tree)
 	: InplaceWidget(tree)

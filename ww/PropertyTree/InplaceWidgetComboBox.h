@@ -1,6 +1,6 @@
 #pragma once
 #include "PropertyTree/PropertyRow.h"
-#include "PropertyTree/sigslot.h"
+#include "PropertyTree/Signal.h"
 #include "yasli/StringList.h"
 #include "ww/ComboBox.h"
 
@@ -13,7 +13,7 @@ public:
 	}
 };
 
-class InplaceWidgetComboBox : public property_tree::InplaceWidget, public sigslot::has_slots{
+class InplaceWidgetComboBox : public property_tree::InplaceWidget, public SignalScope{
 public:
 	InplaceWidgetComboBox(ComboBoxClientRow* client, ww::PropertyTree* tree)
 	: InplaceWidget(tree)

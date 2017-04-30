@@ -31,9 +31,9 @@ public:
 	void setShowAlpha(bool showAlpha);
 	bool showAlpha()const{ return showAlpha_; }
 
-	signal0& signalChanged() { return signalChanged_; }
+	Signal<>& signalChanged() { return signalChanged_; }
 protected:
-	signal0 signalChanged_;
+	Signal<> signalChanged_;
 	void relayout();
 	void onRampChanged();
 	void onSliderChanged();

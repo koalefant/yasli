@@ -71,14 +71,14 @@ public:
 	Gdiplus::Graphics* _graphics() const { return graphics_; }
 	TreeImpl* impl() const;
 
-	signal0& signalChanged(){ return signalChanged_; }
-	typedef signal1<const yasli::Object&> SignalObjectChanged;
+	Signal<>& signalChanged(){ return signalChanged_; }
+	typedef Signal<const yasli::Object&> SignalObjectChanged;
 	SignalObjectChanged& signalObjectChanged(){ return signalObjectChanged_; }
-	typedef signal1<yasli::Archive&> SignalSerialized;
+	typedef Signal<yasli::Archive&> SignalSerialized;
 	SignalSerialized& signalSerialized(){ return signalSerialized_; }
-	signal0& signalSelected(){ return signalSelected_; }
-	signal0& signalReverted(){ return signalReverted_; }
-	signal0& signalPushUndo(){ return signalPushUndo_; }
+	Signal<>& signalSelected(){ return signalSelected_; }
+	Signal<>& signalReverted(){ return signalReverted_; }
+	Signal<>& signalPushUndo(){ return signalPushUndo_; }
 
 protected:
 	void onChanged() override { signalChanged_.emit(); }
@@ -125,13 +125,13 @@ protected:
 	void drawFilteredString(Gdiplus::Graphics* gr, const char* text, RowFilter::Type type, Gdiplus::Font* font, const Rect& rect, const Color& color, bool pathEllipsis, bool center) const;
 	void interruptDrag();
 
-	signal0 signalChanged_;
-	signal0 signalContinuousChange_;
+	Signal<> signalChanged_;
+	Signal<> signalContinuousChange_;
 	SignalObjectChanged signalObjectChanged_;
-	signal0 signalReverted_;
-	signal0 signalSelected_;
-    signal0 signalPushUndo_;
-	signal1<yasli::Archive&> signalAboutToSerialize_;
+	Signal<> signalReverted_;
+	Signal<> signalSelected_;
+    Signal<> signalPushUndo_;
+	Signal<yasli::Archive&> signalAboutToSerialize_;
 	SignalSerialized signalSerialized_;
 
 	Vect2 pressPoint_;

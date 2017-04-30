@@ -149,6 +149,7 @@ TwoTreesWidget::TwoTreesWidget()
 void TwoTreesWidget::onGenerate()
 {
 	twoTreesData.generate();
+	outlineTree->revert();
 }
 
 QWidget* createExampleTwoTrees()

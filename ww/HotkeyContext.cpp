@@ -10,7 +10,7 @@
 #include "StdAfx.h"
 #include "HotkeyContext.h"
 #include "Serialization.h"
-#include "sigslot.h"
+#include "Signal.h"
 #include "Win32/MessageLoop.h"
 #include "KeyPress.h"
 #include "Application.h"

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ww/Container.h"
+#include <list>
 
 namespace Win32{
     class Window;

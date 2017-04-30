@@ -13,7 +13,7 @@
 
 #include "ww/API.h"
 #include "ww/MouseButton.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "ww/Vect2.h"
 #include "ww/Rect.h"
 
@@ -46,7 +46,7 @@ struct WidgetVisitor{
 // When you override one of these methods in custom widget, please keep them
 // protected or private.
 	
-class Widget : public PolyRefCounter, public yasli::WeakObject, public has_slots{
+class Widget : public PolyRefCounter, public yasli::WeakObject, public SignalScope{
 public:
 	Widget();
 	virtual ~Widget();
@@ -78,7 +78,7 @@ public:
 	/// parent container
 	Container* parent() const{ return parent_; }
 
-	signal0& signalDelete() { return signalDelete_; };
+	Signal<>& signalDelete() { return signalDelete_; };
 
 	virtual void serialize(Archive& ar);
 
@@ -118,7 +118,7 @@ public:
 	virtual HotkeyContext* _hotkeyContext();
 protected:
 	/// called from destructor
-	signal0 signalDelete_;
+	Signal<> signalDelete_;
 
 	/// location in parent container (in pixels), don't confuse with coordinates in parent windows
 	Rect position_;

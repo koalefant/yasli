@@ -30,10 +30,10 @@ public:
 	void onPressed(){
 		signalPressed_.emit(response_);
 	}
-	signal1<int>& signalPressed() { return signalPressed_; }
+	Signal<int>& signalPressed() { return signalPressed_; }
 
 protected:
-	signal1<int> signalPressed_;
+	Signal<int> signalPressed_;
 	int response_;
 
 };

@@ -51,7 +51,7 @@ public:
 
 	void commit() override{}
 	void* actualWidget() override{ return comboBox_; }
-public slots:
+public Q_SLOTS:
 	void onChange(int)
 	{
 		if (!client_->onComboBoxSelected(comboBox_->currentText().toUtf8().data(), tree_))

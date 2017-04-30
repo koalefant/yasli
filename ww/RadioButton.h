@@ -27,7 +27,7 @@ public:
 	bool status() const { return status_; }
 
 	virtual void onChanged();
-	signal0& signalChanged() { return signalChanged_; }
+	Signal<>& signalChanged() { return signalChanged_; }
 
 	void serialize(Archive& ar);
 	RadioButtonGroup* group() const;
@@ -36,7 +36,7 @@ protected:
 	friend class RadioButtonImpl;
 	RadioButtonImpl* window() const;
 	// внутренние функции
-	signal0 signalChanged_;
+	Signal<> signalChanged_;
 	string text_;
 	bool status_;
 };

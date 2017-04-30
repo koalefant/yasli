@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/API.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "yasli/Pointers.h"
 
 namespace Win32{
@@ -19,7 +19,7 @@ namespace Win32{
 
 namespace ww{
 
-class Application : public has_slots
+class Application : public SignalScope
 {
 public:
     Application(void* hInstance = 0);
@@ -31,8 +31,8 @@ public:
     void quit();
     void quit(int returnCode);
 
-    signal0& signalIdle() { return signalIdle_; }
-    signal0& signalQuit() { return signalQuit_; }
+    Signal<>& signalIdle() { return signalIdle_; }
+    Signal<>& signalQuit() { return signalQuit_; }
 
 	void processPendingMessages();
     Win32::MessageLoop* _messageLoop(){ return messageLoop_.get(); }
@@ -40,8 +40,8 @@ private:
     void onLoopIdle();
     void onLoopQuit();
 
-    signal0 signalIdle_;
-    signal0 signalQuit_;
+    Signal<> signalIdle_;
+    Signal<> signalQuit_;
 
     AutoPtr<Win32::MessageLoop> messageLoop_;
 

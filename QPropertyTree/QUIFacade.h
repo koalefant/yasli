@@ -26,8 +26,8 @@ public:
 	{
 		connect(action, SIGNAL(triggered()), this, SLOT(onTriggered()));
 	}
-public slots:
-	void onTriggered() { signalTriggered.emit(); }
+public Q_SLOTS:
+	void onTriggered() { signalTriggered(); }
 private:
 	QAction* action_;
 };

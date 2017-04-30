@@ -28,14 +28,14 @@ public:
 	bool status() const { return status_; }
 
 	virtual void onChanged();
-	signal0& signalChanged() { return signalChanged_; }
+	Signal<>& signalChanged() { return signalChanged_; }
 
 	void serialize(Archive& ar);
 protected:
 	// внутренние функции
 	CheckBoxImpl* window() const{ return reinterpret_cast<CheckBoxImpl*>(_window()); }
 
-	signal0 signalChanged_;
+	Signal<> signalChanged_;
 	string text_;
 	bool status_;
 	bool buttonLike_;

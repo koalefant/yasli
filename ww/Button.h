@@ -22,7 +22,7 @@ public:
 	void setText(const char* text);
 
 	virtual void onPressed();
-	signal0& signalPressed() { return signalPressed_; }
+	Signal<>& signalPressed() { return signalPressed_; }
 
 	void serialize(Archive& ar);
 	
@@ -32,7 +32,7 @@ protected:
 	// внутренние функции
 	ButtonImpl* window() const{ return reinterpret_cast<ButtonImpl*>(_window()); }
 
-	signal0 signalPressed_;
+	Signal<> signalPressed_;
 	string text_;
 	bool defaultBtn_;
 };

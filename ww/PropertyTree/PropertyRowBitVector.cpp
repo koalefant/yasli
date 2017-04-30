@@ -29,7 +29,7 @@ public:
 	}
 };
 
-class InplaceWidgetBitVector : public property_tree::InplaceWidget, public has_slots{
+class InplaceWidgetBitVector : public property_tree::InplaceWidget, public SignalScope{
 public:
 	InplaceWidgetBitVector(PropertyRowBitVector* row, PropertyTreeBase* tree)
 	: InplaceWidget(tree)

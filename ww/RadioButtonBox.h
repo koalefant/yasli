@@ -33,12 +33,12 @@ public:
 	int selectedIndex() const;
 
 	virtual void onChangedSelection();
-	signal0& signalChangedSelection() { return signalChangedSelection_; }
+	Signal<>& signalChangedSelection() { return signalChangedSelection_; }
 
 	void serialize(Archive& ar);
 	
 protected:
-	signal0 signalChangedSelection_;
+	Signal<> signalChangedSelection_;
 
 	vector<RadioButton*> radioButtons_;
 	VBox* box_;

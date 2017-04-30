@@ -135,7 +135,7 @@ bool serialize(Archive& ar, SharedPtr<ObjectNode>& node, const char* name, const
 struct ObjectsData
 {
 	SharedPtr<ObjectNode> root_;
-	ww::signal0 signalChanged_;
+	Signal<> signalChanged_;
 
 	void serialize(Archive& ar)
 	{

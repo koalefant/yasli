@@ -97,7 +97,7 @@ protected:
     Rect rect_;
 };
 
-class MenuBarImpl : public _WidgetWindow, public has_slots
+class MenuBarImpl : public _WidgetWindow, public SignalScope
 {
 public:
     MenuBarImpl(ww::MenuBar* owner);

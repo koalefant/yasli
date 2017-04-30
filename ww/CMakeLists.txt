@@ -166,7 +166,7 @@ set(SOURCES
 	SafeCast.h
 	ScrolledWindow.h
 	Serialization.h
-	sigslot.h
+	Signal.h
 	Slider.h
 	SliderDecorator.h
 	Splitter.h

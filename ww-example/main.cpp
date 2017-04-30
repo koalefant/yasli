@@ -114,11 +114,11 @@ MainWindow::MainWindow(ww::Application& app)
 	ww::PopupMenuItem& file = menu->root().add("&File");
 	file.add("Test");
 	file.addSeparator();
-	file.add("E&xit").connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);
+	file.add("E&xit").connect(&app, [=]{ app_->quit(); });
 
 	setMenu(menu);
 
-	signalClose().connect((Win32::MessageLoop*)&app, &Win32::MessageLoop::quit);
+	signalClose().connect(&app, [=]{ app_->quit(); });
 
     proxy_ = 0;
 

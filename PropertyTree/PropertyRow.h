@@ -27,7 +27,7 @@
 #include "IUIFacade.h"
 #include "Rect.h"
 #include "Layout.h"
-#include "sigslot.h"
+#include "Signal.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4264) // no override available for virtual member function from base 'PropertyRow'; function is hidden
@@ -53,7 +53,7 @@ enum ScanResult {
 	SCAN_CHILDREN_SIBLINGS,
 };
 
-struct PropertyRowMenuHandler : sigslot::has_slots
+struct PropertyRowMenuHandler : SignalScope
 {
 	virtual ~PropertyRowMenuHandler() {}
 };

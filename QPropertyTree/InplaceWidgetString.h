@@ -39,7 +39,7 @@ public:
 	}
 	void* actualWidget() { return entry_.data(); }
 
-	public slots:
+	public Q_SLOTS:
 	void onEditingFinished(){
 		if(initialValue_ != entry_->text() || row_->multiValue()){
 			tree()->model()->rowAboutToBeChanged(row_);

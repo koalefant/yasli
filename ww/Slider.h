@@ -20,10 +20,10 @@ public:
 
 	void setValue(float value);
 	float value() const{ return value_; }
-	signal0& signalChanged(){ return signalChanged_; }
+	Signal<>& signalChanged(){ return signalChanged_; }
 	void setStepsCount(int stepsCount);
 protected:
-	signal0 signalChanged_;
+	Signal<> signalChanged_;
 	float value_;
 	int stepsCount_;
 

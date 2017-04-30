@@ -31,10 +31,10 @@ public:
 	int selectedTab();
 	void setSelectedTab(int index, const TabChanger* changer = 0);
 
-	typedef signal1<const TabChanger*> SignalChanged;
+	typedef Signal<const TabChanger*> SignalChanged;
 	SignalChanged& signalChanged(){ return signalChanged_; }
 	
-	typedef signal2<MouseButton, int> SignalMouseButtonDown;
+	typedef Signal<MouseButton, int> SignalMouseButtonDown;
 	SignalMouseButtonDown& signalMouseButtonDown(){ return signalMouseButtonDown_; }
 
 	void serialize(yasli::Archive& ar);
@@ -61,7 +61,7 @@ public:
 
 	void serialize(yasli::Archive& ar);
 
-	typedef signal1<const TabChanger*> SignalChanged;
+	typedef Signal<const TabChanger*> SignalChanged;
     SignalChanged &signalChanged(){ return tabs_->signalChanged(); }
 protected:
 	void onTabChange(const TabChanger* changer);

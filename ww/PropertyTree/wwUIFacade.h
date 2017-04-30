@@ -8,7 +8,7 @@
 
 namespace property_tree {
 
-class wwMenuAction : public IMenuAction, public sigslot::has_slots
+class wwMenuAction : public IMenuAction, public SignalScope
 {
 public:
 	wwMenuAction(ww::PopupMenuItem0* item) : item_(item) {

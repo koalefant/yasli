@@ -24,8 +24,8 @@ public:
 	void visitChildren(WidgetVisitor& visitor) const;
 	void serialize(yasli::Archive& ar);
 
-	signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
-	signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
+	Signal<>& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
+	Signal<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
 	HWND hwnd();
 protected:

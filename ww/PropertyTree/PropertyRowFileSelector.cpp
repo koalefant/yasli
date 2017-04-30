@@ -27,7 +27,7 @@
 
 namespace ww{
 
-class PropertyRowFileSelector : public PropertyRowImpl<FileSelector>, public has_slots{
+class PropertyRowFileSelector : public PropertyRowImpl<FileSelector>, public SignalScope{
 	bool locked_;
 public:
 	PropertyRowFileSelector() : locked_(false) {}

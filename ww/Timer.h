@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ww/API.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "yasli/Pointers.h"
 
 namespace ww{
@@ -21,10 +21,10 @@ class Timer : public RefCounter{
 public:
 	Timer(Widget* owner, int intervalMs);
 	virtual ~Timer();
-	signal0& signalTimer(){ return signalTimer_; }
+	Signal<>& signalTimer(){ return signalTimer_; }
 protected:
 	
-	signal0 signalTimer_;
+	Signal<> signalTimer_;
 	SharedPtr<TimerImpl> impl_;
     Widget* owner_;
 

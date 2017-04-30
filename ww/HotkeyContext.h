@@ -11,7 +11,7 @@
 
 #include <map>
 #include "ww/API.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "KeyPress.h"
 #include "yasli/Pointers.h"
 
@@ -26,16 +26,16 @@ public:
 
 	bool injectPress(KeyPress key);
 
-	signal0& signalPressed(KeyPress key) { return signalsPressed_[key]; }
-	signal2<KeyPress, bool&>& signalPressedAny(){ return signalPressedAny_; }
+	Signal<>& signalPressed(KeyPress key) { return signalsPressed_[key]; }
+	Signal<KeyPress, bool&>& signalPressedAny(){ return signalPressedAny_; }
 
     void installFilter(Application* app);
     void uninstallFilter(Application* app);
 protected:
-	typedef std::map<KeyPress, signal0> HotkeySignals;
+	typedef std::map<KeyPress, Signal<>> HotkeySignals;
 	HotkeySignals signalsPressed_;
 
-	signal2<KeyPress, bool&> signalPressedAny_;
+	Signal<KeyPress, bool&> signalPressedAny_;
 	yasli::SharedPtr<HotkeyFilter> filter_;
 };
 

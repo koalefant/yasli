@@ -23,7 +23,7 @@ public:
 
 	void commit();
 	void* actualWidget() { return entry_; }
-public slots:
+public Q_SLOTS:
 	void onEditingFinished();
 protected:
 	QLineEdit* entry_;

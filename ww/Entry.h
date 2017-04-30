@@ -68,22 +68,22 @@ public:
 	void serialize(Archive& ar);
 
 	virtual void onChanged() { signalChanged_.emit(); }
-	signal0& signalChanged() { return signalChanged_; }
+	Signal<>& signalChanged() { return signalChanged_; }
 
 	void commit(); // calls onEdited, if changed
 	virtual void onEdited() { signalEdited_.emit(); }
-	signal0& signalEdited() { return signalEdited_; }
+	Signal<>& signalEdited() { return signalEdited_; }
 
 	virtual void onSelectionChanged() { signalSelectionChanged_.emit(); }
-	sigslot::signal0& signalSelectionChanged() { return signalSelectionChanged_; }
+	Signal<>& signalSelectionChanged() { return signalSelectionChanged_; }
 protected:
     virtual bool onKeyPress(const KeyPress& key);
 
 	EntryImpl* impl() const;
 private:
-	signal0 signalEdited_;
-	signal0 signalChanged_;
-	signal0 signalSelectionChanged_;
+	Signal<> signalEdited_;
+	Signal<> signalChanged_;
+	Signal<> signalSelectionChanged_;
 
 	string text_;
 	wstring textW_;

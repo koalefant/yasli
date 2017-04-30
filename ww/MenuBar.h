@@ -10,7 +10,7 @@
 #pragma once
 #include "ww/_WidgetWithWindow.h"
 #include "ww/KeyPress.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 
 namespace ww{
 
@@ -18,7 +18,7 @@ class HotkeyContext;
 class MenuBarImpl;
 class Window;
 
-class MenuItem : public RefCounter, public has_slots
+class MenuItem : public RefCounter, public SignalScope
 {
 public:
     MenuItem(const char* text)
@@ -38,9 +38,9 @@ public:
 	void enable(bool enabled) { enabled_ = enabled; }
 	bool isEnabled() const{ return enabled_; }
 
-    typedef signal0 SignalActivate;
+    typedef Signal<> SignalActivate;
     SignalActivate& signalActivate(){ return signalActivate_; }
-    typedef signal1<MenuItem*> SignalUpdate;
+    typedef Signal<MenuItem*> SignalUpdate;
     SignalUpdate& signalUpdate(){ return signalUpdate_; }
     void activate(){
         signalActivate_.emit();

@@ -98,10 +98,10 @@ public:
 	void serialize(Archive& ar);
 	
 	// signals
-	signal0& signalClose(){ return signalClose_; }
-	signal0& signalActivate(){ return signalActivate_; }
-	sigslot::signal0& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
-	sigslot::signal2<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
+	Signal<>& signalClose(){ return signalClose_; }
+	Signal<>& signalActivate(){ return signalActivate_; }
+	Signal<>& signalPressed(KeyPress key) { return hotkeyContext_->signalPressed(key); }
+	Signal<KeyPress, bool&>& signalPressedAny(){ return hotkeyContext_->signalPressedAny(); }
 
 	// internal methods:
 	void setDefaultWidget(Widget* widget);
@@ -122,8 +122,8 @@ protected:
 	unsigned int calculateStyle();
 	void reposition();
 
-	sigslot::signal0 signalClose_;
-	sigslot::signal0 signalActivate_;
+	Signal<> signalClose_;
+	Signal<> signalActivate_;
 
 	bool resizeable_;
 	bool minimizeable_;

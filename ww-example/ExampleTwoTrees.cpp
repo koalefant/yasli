@@ -76,7 +76,7 @@ struct Node
 struct TwoTreesData
 {
 	Node root_;
-	ww::signal0 signalChanged_;
+	Signal<> signalChanged_;
 
 	void serialize(Archive& ar)
 	{
@@ -137,11 +137,11 @@ public:
 			outlineTree->setCompact(true);
 			outlineTree->setUndoEnabled(true, false);
 			outlineTree->setExpandLevels(2);
-			twoTreesData.signalChanged_.connect(this, &TwoTreesWidget::onDataChanged);
+			twoTreesData.signalChanged_.connect(this, [=]{ onDataChanged(); });
 			vbox->add(outlineTree, PACK_FILL);
 
 			ww::Button* button = new ww::Button("Generate New Tree", 2);
-			button->signalPressed().connect(this, &TwoTreesWidget::onGenerate);
+			button->signalPressed().connect(this, [=]{ onGenerate(); });
 			vbox->add(button, PACK_COMPACT);
 		}
 		add(vbox, 0.3f);

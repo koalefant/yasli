@@ -19,13 +19,13 @@ class ColorRamp : public _WidgetWithWindow{
 public:
 	ColorRamp(int border = 0);
 
-	signal0& signalChanged(){ return signalChanged_; }
+	Signal<>& signalChanged(){ return signalChanged_; }
 
 	void set(const Color& color);
 	const Color& get() const{ return color_; }
 protected:
 	ColorRampImpl& impl();
-	signal0 signalChanged_;
+	Signal<> signalChanged_;
 
 	Color color_;
 	friend class ColorRampImpl;

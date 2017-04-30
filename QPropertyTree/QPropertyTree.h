@@ -80,7 +80,7 @@ public:
 	void apply(bool continuous) override;
 	void revert() override;
 
-public slots:
+public Q_SLOTS:
 	void onAttachedTreeChanged();
 public:
 	// internal methods:
@@ -113,9 +113,9 @@ signals:
 	// Called when visual size of the tree changes, i.e. when things are deserialized and
 	// and when rows are expanded/collapsed.
 	void signalSizeChanged();
-public slots:
+public Q_SLOTS:
     void onFilterChanged(const QString& str);
-protected slots:
+protected Q_SLOTS:
 	void onScroll(int pos);
 	void onMouseStillTimer();
 

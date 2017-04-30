@@ -55,10 +55,10 @@ public:
 	void insert(iterator before, const char* text);
 
 	virtual void onEdited();
-	signal0& signalEdited() { return signalEdited_; }
+	Signal<>& signalEdited() { return signalEdited_; }
 	
 	virtual void onSelectionChanged(){ signalSelectionChanged_.emit(); }
-	signal0& signalSelectionChanged() { return signalSelectionChanged_; }
+	Signal<>& signalSelectionChanged() { return signalSelectionChanged_; }
 
 	void setFocus();
 
@@ -71,8 +71,8 @@ protected:
 
 	void updateMinimalSize();
 
-	signal0 signalSelectionChanged_;
-	signal0 signalEdited_;
+	Signal<> signalSelectionChanged_;
+	Signal<> signalEdited_;
 
 	bool expandByContent_;
 	StringList items_;

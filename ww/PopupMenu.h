@@ -12,7 +12,7 @@
 #include "ww/Strings.h"
 #include <vector>
 #include "ww/API.h"
-#include "ww/sigslot.h"
+#include "ww/Signal.h"
 #include "ww/Vect2.h"
 #include "ww/Unicode.h"
 #include "yasli/Pointers.h"
@@ -120,7 +120,7 @@ private:
 	KeyPress hotkey_;
 };
 
-class PopupMenuItem0 : public PopupMenuItem, public signal0{
+class PopupMenuItem0 : public PopupMenuItem, public Signal<>{
 public:
     PopupMenuItem0(const wchar_t* text = L"")
     : PopupMenuItem(text)
@@ -129,7 +129,7 @@ public:
     void _call(){ emit(); }
 	template<class desttype>
 	PopupMenuItem0& connect(desttype* pclass, void (desttype::*pmemfun)()){
-		signal0::connect(pclass, pmemfun);
+		Signal<>::connect(pclass, pmemfun);
 		return *this;
 	}
 protected:
@@ -137,7 +137,7 @@ protected:
 
 
 template<class Arg1>
-class PopupMenuItem1 : public PopupMenuItem, public signal1<Arg1>{
+class PopupMenuItem1 : public PopupMenuItem, public Signal<Arg1>{
 public:
     PopupMenuItem1(const wchar_t* text, Arg1 arg1)
     : PopupMenuItem(text)
@@ -148,7 +148,7 @@ public:
 
 	template<class desttype>
 	PopupMenuItem1& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1)){
-		signal1<Arg1>::connect(pclass, pmemfun);
+		Signal<Arg1>::connect(pclass, pmemfun);
 		return *this;
 	}
 protected:
@@ -156,7 +156,7 @@ protected:
 };
 
 template<class Arg1, class Arg2>
-class PopupMenuItem2 : public PopupMenuItem, public signal2<Arg1, Arg2>{
+class PopupMenuItem2 : public PopupMenuItem, public Signal<Arg1, Arg2>{
 public:
     PopupMenuItem2(const wchar_t* text, Arg1 arg1, Arg2 arg2)
     : PopupMenuItem(text)
@@ -168,7 +168,7 @@ public:
 
 	template<class desttype>
 	PopupMenuItem2& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1, Arg2)){
-		signal2<Arg1, Arg2>::connect(pclass, pmemfun);
+		Signal<Arg1, Arg2>::connect(pclass, pmemfun);
 		return *this;
 	}
 protected:
@@ -177,7 +177,7 @@ protected:
 };
 
 template<class Arg1, class Arg2, class Arg3>
-class PopupMenuItem3 : public PopupMenuItem, public signal3<Arg1, Arg2, Arg3>{
+class PopupMenuItem3 : public PopupMenuItem, public Signal<Arg1, Arg2, Arg3>{
 public:
     PopupMenuItem3(const wchar_t* text, Arg1 arg1, Arg2 arg2, Arg3 arg3)
     : PopupMenuItem(text)
@@ -190,7 +190,7 @@ public:
 
 	template<class desttype>
 	PopupMenuItem3& connect(desttype* pclass, void (desttype::*pmemfun)(Arg1, Arg2, Arg3)){
-		signal3<Arg1, Arg2, Arg3>::connect(pclass, pmemfun);
+		Signal<Arg1, Arg2, Arg3>::connect(pclass, pmemfun);
 		return *this;
 	}
 protected:

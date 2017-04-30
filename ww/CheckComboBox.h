@@ -50,10 +50,10 @@ public:
 	void insert(iterator before, const char* text);
 
 	virtual void onEdited() { signalEdited_.emit(); }
-	signal0& signalEdited() { return signalEdited_; }
+	Signal<>& signalEdited() { return signalEdited_; }
 	
 	virtual void onSelectionChanged(){ signalSelectionChanged_.emit(); }
-	signal0& signalSelectionChanged() { return signalSelectionChanged_; }
+	Signal<>& signalSelectionChanged() { return signalSelectionChanged_; }
 
 protected:
 	CheckComboBoxImpl* window() const{ return reinterpret_cast<CheckComboBoxImpl*>(_window()); }
@@ -63,8 +63,8 @@ protected:
 
 	void updateMinimalSize();
 
-	signal0 signalSelectionChanged_;
-	signal0 signalEdited_;
+	Signal<> signalSelectionChanged_;
+	Signal<> signalEdited_;
 
 	bool expandByContent_;
 	Items items_;

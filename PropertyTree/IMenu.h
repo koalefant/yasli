@@ -1,5 +1,5 @@
 #pragma once
-#include "sigslot.h"
+#include "Signal.h"
 #include "Rect.h"
 #include "IUIFacade.h"
 #include "IDrawContext.h"
@@ -16,7 +16,7 @@ enum
 class IMenuAction
 {
 public:
-	sigslot::signal0 signalTriggered;
+	Signal<> signalTriggered;
 };
 
 class IMenu

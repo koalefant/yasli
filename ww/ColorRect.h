@@ -23,10 +23,10 @@ public:
 	void set(const Color& color);
 	const Color& get() const{ return color_; }
 
-	signal0& signalActivate(){ return signalActivate_; }
+	Signal<>& signalActivate(){ return signalActivate_; }
 protected:
 	ColorRectImpl& impl();
-	signal0 signalActivate_;
+	Signal<> signalActivate_;
 	Color color_;
 	friend class ColorRectImpl;
 };
