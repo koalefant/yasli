@@ -80,27 +80,39 @@ private:
 	void skipBlock();
 
 	struct Level{
+		Level*& stackPointer;
+		Level* parent;
+
 		const char* start;
 		const char* firstToken;
-		int fieldIndex;
-		bool isContainer;
-		bool isKeyValue;
-		bool isDictionary;
-		bool parsedBlock;
+		int fieldIndex{ 0 };
+		bool isContainer{ false };
+		bool isKeyValue{ false };
+		bool isDictionary{ false };
+		bool parsedBlock{ false };
 		std::vector<Token> names;
-		Level() : isContainer(false), isKeyValue(false), fieldIndex(0), parsedBlock(false) {}
+
+		Level(Level*& stackPointer)
+		: stackPointer(stackPointer) {
+			parent = stackPointer;
+			stackPointer = this;
+		}
+		~Level() {
+			stackPointer = parent;
+		}
 	};
-	typedef std::vector<Level> Stack;
-	Stack stack_;
+	Level* stack_{ nullptr };
+	Level stackBottom_{ stack_ };
 
 	std::unique_ptr<MemoryReader> reader_;
 	Token token_;
 	std::vector<char> unescapeBuffer_;
 	string filename_;
-	bool disableWarnings_;
-	bool warnAboutUnusedFields_;
-	int unusedFieldCount_;
-	void* buffer_;
+
+	bool disableWarnings_{ false };
+	bool warnAboutUnusedFields_{ true };
+	int unusedFieldCount_{ 0 };
+	void* buffer_{ nullptr };
 };
 
 double parseFloat(const char* s);

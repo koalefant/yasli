@@ -579,10 +579,6 @@ Token JSONTokenizer::operator()(const char* ptr) const
 
 JSONIArchive::JSONIArchive()
 : Archive(INPUT | TEXT | VALIDATION)
-, buffer_(0)
-, warnAboutUnusedFields_(true)
-, unusedFieldCount_(0)
-, disableWarnings_(false)
 {
 }
 
@@ -592,7 +588,6 @@ JSONIArchive::~JSONIArchive()
 		free(buffer_);
 		buffer_ = 0;
 	}
-	stack_.clear();
 	reader_.reset();
 }
 
@@ -606,12 +601,11 @@ bool JSONIArchive::open(const char* buffer, size_t length, bool free)
 	buffer_ = 0;
 
 	token_ = Token(reader_->begin(), reader_->begin());
-	stack_.clear();
 
-	stack_.push_back(Level());
+	stack_ = &stackBottom_;
 	readToken();
 	putToken();
-	stack_.back().start = token_.end;
+	stack_->start = token_.end;
 	unusedFieldCount_ = 0;
 	return true;
 }
@@ -721,18 +715,18 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 {
 	DEBUG_TRACE(" * finding name '%s'", name);
 	DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
-	if(stack_.empty()) {
+	if(stack_ == nullptr) {
 		// TODO: diagnose
 		return false;
 	}
-	Level& level = stack_.back();
+	Level& level = *stack_;
 	if (level.isKeyValue)
 		return true;
 	const char* blockBegin = level.start;
 	if(*blockBegin == '\0')
 		return false;
 
-	if(stack_.size() == 1 || level.isContainer || outName != 0){
+	if(stack_ == &stackBottom_ || level.isContainer || outName != 0){
 		// root or container or next value in a key-pair
 		readToken();
 		if (token_ == ',')
@@ -751,7 +745,7 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 		}
 	}
 
-	if (!untilEndOfBlockOnly && stack_.size() > 1) {
+	if (!untilEndOfBlockOnly && stack_ != &stackBottom_) {
 		if (name[0] == '\0' && !level.isContainer) {
 			readToken();
 			error(0, TypeID(), "Deserializing nameless field in dictionary block");
@@ -879,8 +873,7 @@ bool JSONIArchive::closeBracket()
 		if (token_ == ',')
 			readToken();
         if(!token_){
-            YASLI_ASSERT(!stack_.empty());
-            const char* start = stack_.back().start;
+            const char* start = stack_->start;
 			int column = 0;
 			error(nullptr, TypeID(), "No closing bracket found for line %d\n", line(nullptr, start));
 			return false;
@@ -924,14 +917,13 @@ bool JSONIArchive::closeContainerBracket()
 bool JSONIArchive::operator()(const Serializer& ser, const char* name, const char* label)
 {
     if(findName(name)){
+		Level level(stack_);
         if(openBracket()){
-            stack_.push_back(Level());
-            stack_.back().start = token_.end;
+            level.start = token_.end;
 		}
 		else if (openContainerBracket()) {
-            stack_.push_back(Level());
-            stack_.back().start = token_.end;
-            stack_.back().isContainer = true;
+            level.start = token_.end;
+            level.isContainer = true;
 		}
 		else 
 			return false;
@@ -940,7 +932,7 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
             ser(*this);
 
 		if (warnAboutUnusedFields_) {
-			Level& level = stack_.back();
+			Level& level = *stack_;
 
 			// read remaining names
 			if (!level.parsedBlock) {
@@ -960,9 +952,6 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 				}
 			}
 		}
-
-        YASLI_ASSERT(!stack_.empty());
-        stack_.pop_back();
         closeBracket();
         return true;
     }
@@ -1001,9 +990,9 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 {
 	if (findName(name)) {
 		if(openBracket()){
-			stack_.push_back(Level());
-			stack_.back().start = token_.end;
-			stack_.back().isKeyValue = true;
+			Level level(stack_);
+			level.start = token_.end;
+			level.isKeyValue = true;
 
 			readToken();
 			if (isName(token_)) {
@@ -1024,7 +1013,6 @@ bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const cha
 				ser.create("");				
 			}
 			closeBracket();
-			stack_.pop_back();
 			return true;
 		}
 	}
@@ -1041,13 +1029,13 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 		if (!containerBracket)
 			dictionaryBracket = openBracket();
 		if(containerBracket || dictionaryBracket){
-			stack_.push_back(Level());
+			Level level(stack_);
 			if (containerBracket) {
-				stack_.back().isContainer = true;
+				level.isContainer = true;
 			} else if (dictionaryBracket) {
-				stack_.back().isDictionary = true;
+				level.isDictionary = true;
 			}
-			stack_.back().start = token_.end;
+			level.start = token_.end;
 
 			std::size_t size = ser.size();
 			std::size_t index = 0;
@@ -1093,9 +1081,6 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 			}
 			if(size > index)
 				ser.resize(index);
-
-			YASLI_ASSERT(!stack_.empty());
-			stack_.pop_back();
 			return true;
 		} else {
 			warning(nullptr, TypeID(), "Non-container value where container is expected");
@@ -1116,9 +1101,9 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 				return false;
 			}
 
-			stack_.push_back(Level());
-			stack_.back().isKeyValue = true;
-			stack_.back().start = token_.end;
+			Level level(stack_);
+			level.isKeyValue = true;
+			level.start = token_.end;
 
 			bool missingComma = false;
 			bool first = true;
@@ -1142,20 +1127,19 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 				first = false;
 			}
 
-			stack_.pop_back();
 		} else {
 			// expect [ { "key": KEY, "value": VALUE }, ... ]
 			if (!openContainerBracket()) {
 				warning(nullptr, TypeID(), "Expecting an opening square bracket");
 			}
-			stack_.push_back(Level());
-			stack_.back().isContainer = true;
-			stack_.back().start = token_.end;
+			Level outer_level(stack_);
+			outer_level.isContainer = true;
+			outer_level.start = token_.end;
 
-			stack_.push_back(Level());
-			stack_.back().isContainer = false;
-			stack_.back().isKeyValue = true;
-			stack_.back().start = token_.end;
+			Level level(stack_);
+			level.isContainer = false;
+			level.isKeyValue = true;
+			level.start = token_.end;
 
 			bool first = true;
 			bool missingComma = false;
@@ -1198,11 +1182,6 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 				}
 				first = false;
 			}
-
-			YASLI_ASSERT(!stack_.empty());
-			stack_.pop_back();
-			YASLI_ASSERT(!stack_.empty());
-			stack_.pop_back();
 			return true;
 		}
 	}
@@ -1212,7 +1191,6 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 void JSONIArchive::checkValueToken()
 {
     if(!token_){
-        YASLI_ASSERT(!stack_.empty());
 		error(nullptr, TypeID(), "End of while while expecting value token");
     }
 }
@@ -1220,7 +1198,6 @@ void JSONIArchive::checkValueToken()
 void JSONIArchive::checkIntegerToken()
 {
     if(!token_){
-        YASLI_ASSERT(!stack_.empty());
 		error(nullptr, TypeID(), "Reached end of file while expecting a value token");
     } else {
 		const char* p = token_.start;
