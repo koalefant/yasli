@@ -110,7 +110,7 @@ private:
 	string filename_;
 
 	bool disableWarnings_{ false };
-	bool warnAboutUnusedFields_{ true };
+	bool warnAboutUnusedFields_{ false };
 	int unusedFieldCount_{ 0 };
 	void* buffer_{ nullptr };
 };
