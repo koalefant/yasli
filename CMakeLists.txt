@@ -12,8 +12,8 @@ else()
 endif()
 
 if (CMAKE_CXX_COMPILER MATCHES "clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-unused-value -fsanitize=address")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-unused-value")
+	#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
 endif()
 
 if (UNIX)
@@ -37,6 +37,7 @@ include_directories(.)
 add_subdirectory(yasli)
 add_subdirectory(yasli-example)
 add_subdirectory(yasli-test)
+add_subdirectory(yasli-benchmark)
 
 add_subdirectory(XMath)
 

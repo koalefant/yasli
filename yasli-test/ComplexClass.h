@@ -12,6 +12,9 @@
 
 using namespace yasli;
 
+#ifndef CHECK
+#define CHECK
+#endif
 #define YCHECK(x) YASLI_ASSERT(x); CHECK(x)
 
 #ifdef _MSC_VER
