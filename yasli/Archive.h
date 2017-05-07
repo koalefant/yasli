@@ -330,6 +330,8 @@ inline bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, wchar_t& v, const char* name, 
 template<class T>
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T& object, const char* name, const char* label)
 {
+	static_assert( !std::is_pointer< T >::value, "No default serialization for raw pointers." );
+
 	using namespace Helpers;
 
 	return
