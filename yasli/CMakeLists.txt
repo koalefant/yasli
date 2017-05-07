@@ -25,7 +25,6 @@ set(SOURCES
 	Helpers.h
 	JSONIArchive.cpp JSONIArchive.h
 	JSONOArchive.cpp JSONOArchive.h
-	KeyValue.h
 	MemoryReader.cpp MemoryReader.h
 	MemoryWriter.cpp MemoryWriter.h
 	Object.h

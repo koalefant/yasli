@@ -13,7 +13,6 @@
 #include <list>
 #include "yasli/Archive.h"
 #include "yasli/Serializer.h"
-#include "yasli/KeyValue.h"
 #include "ClassFactory.h"
 
 #ifdef _MSC_VER

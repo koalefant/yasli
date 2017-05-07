@@ -10,7 +10,6 @@
 #include "StdAfx.h"
 #include "JSONOArchive.h"
 #include "MemoryWriter.h"
-#include "yasli/KeyValue.h"
 #include "yasli/ClassFactory.h"
 #include <math.h>
 #include <float.h>
@@ -662,18 +661,6 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
 		closeContainerBracket();
 	else
 		closeBracket();
-    return true;
-}
-
-bool JSONOArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
-{
-    placeIndent();
-    placeName(keyValue.get());
-	stack_.back().isKeyValue = true;
-	keyValue.serializeValue(*this, "", 0);
-	stack_.back().isKeyValue = false;
-	if (stack_.back().isContainer)
-		stack_.back().isDictionary = true;
     return true;
 }
 
