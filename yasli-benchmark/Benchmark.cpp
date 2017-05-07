@@ -59,7 +59,7 @@ void testText()
 }
 
 struct DataSetMixed {
-	std::vector<ComplexClass> arr{ 1000 };
+	std::vector<ComplexClass> arr{ 10000 };
 
 	void serialize(Archive& ar) {
 		ar(arr, "arr");
@@ -67,7 +67,7 @@ struct DataSetMixed {
 };
 
 void print_result(const char* name, std::size_t size, AutoTimer& timer) {
-	int duration = timer.result();
+	int duration = std::max(1, timer.result());
 	printf("%s:\t%g MByte/s\t[%d ms,\t%g MBytes]\n", name, size / 1024.0 / 1024.0 / duration * 1000.0, duration, size / 1024.0 / 1024.0);
 }
 
@@ -78,6 +78,15 @@ void benchmark_mixed_json_write() {
 	oa(object, "");
 
 	print_result(__FUNCTION__, oa.length(), timer);
+}
+
+void benchmark_mixed_copy() {
+	DataSetMixed temp;
+
+	AutoTimer timer;
+
+	DataSetMixed copy = temp;
+	print_result(__FUNCTION__, sizeof(copy), timer);
 }
 
 void benchmark_mixed_json_read() {
@@ -151,6 +160,8 @@ void benchmark_mixed_bin_read() {
 
 int main(int argc, char** argv)
 {
+	benchmark_mixed_copy();
+
 	benchmark_mixed_json_write();
 	benchmark_mixed_json_read();
 
