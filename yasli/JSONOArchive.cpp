@@ -339,6 +339,7 @@ JSONOArchive::JSONOArchive(int textWidth, const char* header)
 , header_(header)
 , textWidth_(textWidth)
 , compactOffset_(0)
+, compact_(false)
 {
     buffer_.reset(new MemoryWriter(1024, true));
     if(header_)
@@ -350,6 +351,15 @@ JSONOArchive::JSONOArchive(int textWidth, const char* header)
 
 JSONOArchive::~JSONOArchive()
 {
+}
+
+void JSONOArchive::clear() {
+	stack_.clear();
+	stack_.push_back(Level(false, 0, 0));
+	buffer_->clear();
+    if(header_)
+        (*buffer_) << header_;
+	fileName_.clear();
 }
 
 bool JSONOArchive::save(const char* fileName)
@@ -406,12 +416,15 @@ void JSONOArchive::placeName(const char* name)
 {
 	if (stack_.back().isKeyValue)
 		return;
-	if ((name[0] != '\0' || !stack_.back().isContainer) && stack_.size() > 1)
-	{
-        *buffer_ << "\"";
-        *buffer_ << name;
-		*buffer_ << "\": ";
-		stack_.back().nameIndex += 1;
+	if ((name[0] != '\0' || !stack_.back().isContainer) && stack_.size() > 1) {
+		if ((name[0] != '\0' || !stack_.back().isContainer)) {
+			*buffer_ << "\"";
+			*buffer_ << name;
+			*buffer_ << (compact_?"\":":"\": ");
+			stack_.back().nameIndex += 1;
+		} else {
+			stack_.back().emptyNameCount += 1;
+		}
     }
 }
 
@@ -426,8 +439,10 @@ void JSONOArchive::placeIndent(bool putComma)
 	int count = int(stack_.size() - 1);
 	stack_.back().indentCount += count;
 	stack_.back().elementIndex += 1;
-	for(int i = 0; i < count; ++i)
-		*buffer_ << "\t";
+	if (!compact_) {
+		for(int i = 0; i < count; ++i)
+			*buffer_ << "\t";
+	}
 	compactOffset_ = 0;
 }
 
@@ -438,7 +453,8 @@ void JSONOArchive::placeIndentCompact(bool putComma)
 	if (putComma && stack_.back().elementIndex > 0)
 		*buffer_ << ",";	
 	if ((compactOffset_ % 32) != 0 && stack_.back().isContainer){
-		*buffer_ << " ";
+		if (!compact_)
+			*buffer_ << " ";
 		compactOffset_ += 1;
 		stack_.back().elementIndex += 1;
 	}
@@ -448,8 +464,10 @@ void JSONOArchive::placeIndentCompact(bool putComma)
 		int count = int(stack_.size() - 1);
 		stack_.back().indentCount += count/* * TAB_WIDTH*/;
 		stack_.back().elementIndex += 1;
-		for(int i = 0; i < count; ++i)
-			*buffer_ << "\t";
+		if (!compact_){
+			for(int i = 0; i < count; ++i)
+				*buffer_ << "\t";
+		}
 		compactOffset_ = 1;
 	}
 }
@@ -646,7 +664,7 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
     ser(*this);
 
     bool joined = joinLinesIfPossible();
-	bool noNames = stack_.back().nameIndex == 0;
+	bool noNames = stack_.back().nameIndex == 0 && stack_.back().emptyNameCount > 0;
 	if (noNames) {
 		if (stack_.size() != 2) {
 			buffer_->buffer()[stack_.back().startPosition] = '[';
@@ -655,8 +673,10 @@ bool JSONOArchive::operator()(const Serializer& ser, const char* name, const cha
     stack_.pop_back();
     if(!joined)
         placeIndent(false);
-    else
-        *buffer_ << " ";
+    else {
+		if (!compact_)
+			*buffer_ << " ";
+	}
 	if (noNames)
 		closeContainerBracket();
 	else
@@ -703,8 +723,10 @@ bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const c
 	stack_.pop_back();
 	if(!joined)
 		placeIndent(false);
-	else
-		*buffer_ << " ";
+	else {
+		if (!compact_)
+			*buffer_ << " ";
+	}
 
 	closeContainerBracket();
 	return true;
@@ -787,7 +809,7 @@ bool JSONOArchive::operator()(MapInterface& ser, const char* name, const char* l
 
 namespace json_local {
 
-static char* joinLines(char* start, char* end)
+static char* joinLines(char* start, char* end, bool compact)
 {
     YASLI_ASSERT(start <= end);
     char* next = start;
@@ -795,8 +817,13 @@ static char* joinLines(char* start, char* end)
         if(*next != '\t' && *next != '\r'){
             if(*next != '\n')
                 *start = *next;
-            else
-                *start = ' ';
+            else {
+				if (!compact)
+					*start = ' ';
+				else {
+					--start;
+				}
+			}
             ++start;
         }
         ++next;
@@ -817,13 +844,18 @@ bool JSONOArchive::joinLinesIfPossible()
         char* buffer = buffer_->buffer();
         char* start = buffer + startPosition;
         char* end = buffer + buffer_->position();
-        end = json_local::joinLines(start, end);
+        end = json_local::joinLines(start, end, compact_);
         std::size_t newPosition = end - buffer;
         YASLI_ASSERT(newPosition <= buffer_->position());
         buffer_->setPosition(newPosition);
         return true;
     }
     return false;
+}
+
+void JSONOArchive::setCompact(bool compact)
+{
+	compact_ = compact;
 }
 
 }

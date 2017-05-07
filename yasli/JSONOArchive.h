@@ -23,6 +23,8 @@ public:
 	JSONOArchive(int textWidth = 80, const char* header = 0);
 	~JSONOArchive();
 
+	void setCompact(bool compact);
+	void clear();
 	bool save(const char* fileName);
 
 	const char* c_str() const;
@@ -70,6 +72,7 @@ private:
 		, nameIndex(0)
 		, elementIndex(0)
 		, indentCount(-column)
+		, emptyNameCount(0)
 		{}
 		bool isKeyValue;
 		bool isContainer;
@@ -78,6 +81,7 @@ private:
 		int nameIndex;
 		int elementIndex;
 		int indentCount;
+		int emptyNameCount;
 	};
 
 	typedef std::vector<Level> Stack;
@@ -88,6 +92,7 @@ private:
 	string fileName_;
 	int compactOffset_;
 	bool isKeyValue_;
+	bool compact_;
 };
 
 }
