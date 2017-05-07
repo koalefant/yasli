@@ -57,7 +57,7 @@ struct Context {
 	Context* previousContext;
 	Archive* archive;
 
-	Context() : archive(0), object(0), previousContext(0) {}
+	Context();
 	template<class T>
 	void set(T* object);
 	template<class T>
@@ -85,13 +85,8 @@ public:
 		CUSTOM3 = 1 << 11
 	};
 
-	Archive(int caps)
-	: lastContext_(0)
-	, caps_(caps)
-	, filter_(YASLI_DEFAULT_FILTER)
-	{
-	}
-	virtual ~Archive() {}
+	Archive(int caps);
+	virtual ~Archive();
 
 	bool isInput() const{ return caps_ & INPUT ? true : false; }
 	bool isOutput() const{ return caps_ & OUTPUT ? true : false; }
@@ -102,44 +97,38 @@ public:
 		return (caps_ & EDIT)  != 0;
 #endif
 	}
-	bool isInPlace() const { return (caps_ & INPLACE) != 0; }
-	bool caps(int caps) const { return (caps_ & caps) == caps; }
+	bool isInPlace() const;
+	bool caps(int caps) const;
 
-	void setFilter(int filter){
-		filter_ = filter;
-	}
-	int getFilter() const{ return filter_; }
-	bool filter(int flags) const{
-		YASLI_ASSERT(flags != 0 && "flags is supposed to be a bit mask");
-		YASLI_ASSERT(filter_ && "Filter is not set!");
-		return (filter_ & flags) != 0;
-	}
+	void setFilter(int filter);
+	int getFilter() const;
+	bool filter(int flags) const;
 
-	virtual bool operator()(bool& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(char& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(u8& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(i8& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(i16& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(u16& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(i32& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(u32& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(i64& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(u64& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(float& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(double& value, const char* name = "", const char* label = 0) { notImplemented(); return false; }
+	virtual bool operator()(bool& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(char& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(u8& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(i8& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(i16& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(u16& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(i32& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(u32& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(i64& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(u64& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(float& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(double& value, const char* name = "", const char* label = 0);
 
-	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
-	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0)    { notImplemented(); return false; }
-	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
-	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
+	virtual bool operator()(StringInterface& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(WStringInterface& value, const char* name = "", const char* label = 0);
+	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0);
+	virtual bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0);
+	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(MapInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
-	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
-	virtual bool operator()(CallbackInterface& callback, const char* name = "", const char* label = 0) { return false; }
+	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0);
+	virtual bool operator()(CallbackInterface& callback, const char* name = "", const char* label = 0);
 
 	// No point in supporting long double since it is represented as double on MSVC
-	bool operator()(long double& value, const char* name = "", const char* label = 0)         { notImplemented(); return false; }
+	bool operator()(long double& value, const char* name = "", const char* label = 0);
 
 	template<class T>
 	bool operator()(const T& value, const char* name = "", const char* label = 0);
@@ -157,32 +146,22 @@ public:
 	void doc(const char* docString);
 
 	// block call are osbolete, please do not use
-	virtual bool openBlock(const char* name, const char* label) { return true; }
-	virtual void closeBlock() {}
+	virtual bool openBlock(const char* name, const char* label);
+	virtual void closeBlock();
 
 	template<class T>
 	T* context() const {
 		return (T*)contextByType(TypeID::get<T>());
 	}
 
-	void* contextByType(const TypeID& type) const {
-		for (Context* current = lastContext_; current != 0; current = current->previousContext)
-			if (current->type == type)
-				return current->object;
-		return 0;
-	}
-
-	Context* setLastContext(Context* context) {
-		Context* previousContext = lastContext_;
-		lastContext_ = context;
-		return previousContext;
-	}
-	Context* lastContext() const{ return lastContext_; }
+	void* contextByType(const TypeID& type) const;
+	Context* setLastContext(Context* context);
+	Context* lastContext() const;
 protected:
-	virtual void validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) {}
-	virtual void documentLastField(const char* text) {}
+	virtual void validatorMessage(bool error, const void* handle, const TypeID& type, const char* message);
+	virtual void documentLastField(const char* text);
 
-	void notImplemented() { YASLI_ASSERT(0 && "Not implemented!"); }
+	void notImplemented();
 
 	int caps_;
 	int filter_;
@@ -245,19 +224,6 @@ void Context::set(T* object) {
 	type = TypeID::get<T>();
 }
 
-inline Context::~Context() {
-	if (archive)
-		archive->setLastContext(previousContext);
-}
-
-inline void Archive::doc(const char* docString)
-{
-#if !YASLI_NO_EDITING
-	if (caps_ & DOCUMENTATION)
-		documentLastField(docString); 
-#endif
-}
-
 template<class T>
 void Archive::error(T& value, const char* format, ...)
 {
@@ -270,20 +236,6 @@ void Archive::error(T& value, const char* format, ...)
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 	validatorMessage(true, &value, TypeID::get<T>(), buf);
-#endif
-}
-
-inline void Archive::error(const void* handle, const yasli::TypeID& type, const char* format, ...)
-{
-#if !YASLI_NO_EDITING
-	if ((caps_ & VALIDATION) == 0)
-		return;
-	va_list args;
-	va_start(args, format);
-	char buf[1024];
-	vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-	validatorMessage(true, handle, type, buf);
 #endif
 }
 
@@ -307,25 +259,6 @@ bool Archive::operator()(const T& value, const char* name, const char* label){
     return YASLI_SERIALIZE_OVERRIDE(*this, const_cast<T&>(value), name, label);
 }
 
-inline void Archive::warning(const void* handle, const yasli::TypeID& type, const char* format, ...)
-{
-#if !YASLI_NO_EDITING
-	if ((caps_ & VALIDATION) == 0)
-		return;
-	va_list args;
-	va_start(args, format);
-	char buf[1024];
-	vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-	validatorMessage(false, handle, type, buf);
-#endif
-}
-
-inline bool Archive::operator()(PointerInterface& ptr, const char* name, const char* label)
-{
-	Serializer ser(ptr);
-	return operator()(ser, name, label);
-}
 
 template<class T, int Size>
 bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T object[Size], const char* name, const char* label)
@@ -413,4 +346,6 @@ bool YASLI_SERIALIZE_OVERRIDE(Archive& ar, T& object, const char* name, const ch
 
 #include "yasli/SerializerImpl.h"
 
-// vim: ts=4 sw=4:
+#if YASLI_INLINE_IMPLEMENTATION
+#include "Archive.cpp"
+#endif

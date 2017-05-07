@@ -36,7 +36,7 @@ set(SOURCES
 	TextIArchive.cpp TextIArchive.h
 	TextOArchive.cpp TextOArchive.h
 	Token.h
-	TypeID.h
+	TypeID.h TypeID.cpp
 	)
 
 set(DECORATORS
