@@ -305,10 +305,12 @@ public:
 		ar(vectorOfStrings_, "vectorOfStrings");
 		ar(intToString_, "intToString");
 		ar(stringToInt_, "stringToInt");
+		ar(stringToStructMap_, "stringToStructMap");
 	}
 
 	void checkEquality(const ComplexClass& copy) const
 	{
+		YCHECK(this != &copy);
 		YCHECK(name_ == copy.name_);
 		YCHECK(wname_ == copy.wname_);
 		YCHECK(index_ == copy.index_);
@@ -353,6 +355,17 @@ public:
 		for (size_t i = 0; i < stringToInt_.size(); ++i)
 		{
 			YCHECK(stringToInt_[i] == copy.stringToInt_[i]);
+		}
+
+		{
+			YCHECK(stringToStructMap_.size() == copy.stringToStructMap_.size());
+			auto it = stringToStructMap_.begin();
+			auto jt = copy.stringToStructMap_.begin();
+			for ( ; it != stringToStructMap_.end() && jt != copy.stringToStructMap_.end(); ++it, ++jt)
+			{
+				YCHECK(it->first == jt->first);
+				it->second.checkEquality(jt->second);
+			}
 		}
 	}
 protected:

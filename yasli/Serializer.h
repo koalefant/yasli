@@ -124,7 +124,6 @@ typedef std::vector<Serializer> Serializers;
 // ---------------------------------------------------------------------------
 
 // This type is used to generalize access to specific container types.
-// It is used by concrete Archive implementations.
 class ContainerInterface{
 public:
 	virtual ~ContainerInterface() {}
@@ -143,6 +142,28 @@ public:
 	virtual bool operator()(Archive& ar, const char* name, const char* label) = 0;
 	virtual operator bool() const = 0;
 	virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
+};
+
+struct MapInterface {
+public:
+	virtual ~MapInterface() {}
+	virtual void* pointer() const = 0;
+	virtual TypeID keyType() const = 0;
+	virtual TypeID valueType() const = 0;
+	virtual TypeID containerType() const = 0;
+	// needed only for conversion to array
+	virtual size_t size() const = 0;
+
+	// deserialization interface
+	virtual bool deserializeNewKey(Archive& ar, const char* name, const char* label) = 0;
+	virtual bool deserializeNewValue(Archive& ar, const char* name, const char* label) = 0;
+	// serialization interface
+	virtual bool isEmpty() const = 0;
+	virtual bool next() = 0;
+	virtual void serializeKey(Archive& ar, const char* name, const char* label) = 0;
+	virtual void serializeValue(Archive& ar, const char* name, const char* label) = 0;
+	virtual void serializeDefaultKey(Archive& ar, const char* name, const char* label) = 0;
+	virtual void serializeDefaultValue(Archive& ar, const char* name, const char* label) = 0;
 };
 
 template<class T, size_t Size>

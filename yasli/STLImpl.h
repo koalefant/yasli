@@ -158,18 +158,79 @@ inline bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, yasli::string& value, c
 YASLI_STRING_NAMESPACE_END
 
 // ---------------------------------------------------------------------------
+
+namespace yasli {
+
+template<class K, class V, class C, class Alloc>
+struct STLMap : MapInterface {
+	STLMap(std::map<K, V, C, Alloc>& container)
+	: container(container)
+	, it(container.begin())
+	, newIt(container.end())
+	{}
+	std::map<K, V, C, Alloc>& container;
+	typename std::map<K, V, C, Alloc>::iterator newIt;
+	typename std::map<K, V, C, Alloc>::iterator it;
+
+	void* pointer() const override{ return &container; }
+	TypeID keyType() const override{ return TypeID::get<K>(); }
+	TypeID valueType() const override{ return TypeID::get<V>(); }
+	TypeID containerType() const override{ return TypeID::get<std::map<K, V, C, Alloc>>(); }
+	size_t size() const override{ return container.size(); }
+
+	bool deserializeNewKey(Archive& ar, const char* name, const char* label) override {
+		K newKey;
+		if (!ar(newKey, name, label))
+			return false;
+		newIt = container.emplace(std::make_pair(std::move(newKey), V())).first;
+		return true;
+	}
+
+	bool deserializeNewValue(Archive& ar, const char* name, const char* label) override {
+		if (newIt == container.end())
+			return false;
+		if (!ar(newIt->second, name, label))
+			return false;
+		newIt = container.end();
+		return true;
+	}
+
+	bool isEmpty() const override{ return container.empty(); }
+	bool next() override{
+		++it;
+		return it != container.end();
+	}
+	void serializeKey(Archive& ar, const char* name, const char* label) override {
+		YASLI_ASSERT(it != container.end());
+		ar(it->first, name, label);
+	}
+	void serializeValue(Archive& ar, const char* name, const char* label) override {
+		YASLI_ASSERT(it != container.end());
+		ar(it->second, name, label);
+	}
+	void serializeDefaultKey(Archive& ar, const char* name, const char* label) override {
+		K key;
+		ar(key, name, label);
+	}
+	void serializeDefaultValue(Archive& ar, const char* name, const char* label) override {
+		V value;
+		ar(value, name, label);
+	}
+
+};
+
+}
+
 namespace std {
 
 template<class K, class V, class C, class Alloc>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label)
 {
-	std::vector<std::pair<K, V> > temp(container.begin(), container.end());
-	if (!ar(temp, name, label))
-		return false;
-	
-	container.clear();
-	container.insert(temp.begin(), temp.end());
-	return true;
+	if (ar.isInput()) {
+		container.clear();
+	}
+	yasli::STLMap<K, V, C, Alloc> serializer(container);
+	return ar(static_cast<yasli::MapInterface&>(serializer), name, label);
 }
 
 }

@@ -11,8 +11,8 @@
 #include "yasli/Archive.h"
 #include "yasli/ClassFactory.h"
 
-#include "yasli/TextOArchive.h"
-#include "yasli/TextIArchive.h"
+#include "yasli/JSONOArchive.h"
+#include "yasli/JSONIArchive.h"
 #include "yasli/Enum.h"
 
 using namespace yasli;
@@ -114,6 +114,10 @@ public:
 			floatValues_[i] = rand() * 1000.0f / RAND_MAX;
 		polyVector_.push_back( new PolyBase() );
 
+		intByString_["a"] = 1;
+		intByString_["b"] = 2;
+		intByString_["c"] = 3;
+
 		strcpy(endBuf_, "END");
 	}
 	void serialize(Archive& ar){
@@ -133,6 +137,7 @@ public:
 		index_ = value.index();
 		if(index_ == -1)
 			index_ = 0;
+		ar(intByString_, "intByString");
 	}
 protected:
 	std::wstring name_;
@@ -142,6 +147,7 @@ protected:
 	StringListStatic stringList_;
 	std::vector< SharedPtr<PolyBase> > polyVector_;
 	std::vector< float > floatValues_;
+	std::map<string, int> intByString_;
 	SharedPtr<PolyBase> polyPtr_;
 	char endBuf_[4];
 };
@@ -202,19 +208,22 @@ int getFileSize(const char* filename)
 
 void testText()
 {
-		MyDataClass obj;
-		TextIArchive ia;
-		if(ia.load("test.ta"))
-			ia(obj, "obj");
-
-		TextOArchive oa;
-		oa(obj, "obj");
-		oa.save("test.ta");
 }
 
 int main(int argc, char** argv)
 {
-	testText();
+	MyDataClass obj;
+	JSONIArchive inputArchive;
+	// load text into buffer
+	if (inputArchive.load("example.json")) {
+		// deserialize object
+		inputArchive(obj);
+	}
 
+	JSONOArchive outputArchive;
+	// serialize object into memory
+	outputArchive(obj);
+	// save text to disk
+	outputArchive.save("example.json");
 	return 0;
 }

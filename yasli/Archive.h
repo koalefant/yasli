@@ -135,6 +135,7 @@ public:
 	virtual bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0) { notImplemented(); return false; }
 	virtual bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) { return false; }
+	virtual bool operator()(MapInterface& ser, const char* name = "", const char* label = 0);
 	virtual bool operator()(PointerInterface& ptr, const char* name = "", const char* label = 0);
 	virtual bool operator()(Object& obj, const char* name = "", const char* label = 0) { return false; }
 	virtual bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) { return operator()(Serializer(keyValue), name, label); }
