@@ -70,9 +70,6 @@ private:
 	bool checkStringValueToken();
 	void readToken();
 	void putToken();
-	bool expectToken(const char* token, int len);
-	template<int size>
-	bool expectToken(const char (&token)[size]) { return expectToken(token, size-1); }
 	int line(int * column_no, const char* position) const; 
 	bool isName(Token token) const;
 

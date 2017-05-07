@@ -686,15 +686,16 @@ bool JSONIArchive::isName(Token token) const
 
 bool JSONIArchive::expect(char token)
 {
-	if(token_ != token){
-		const char* lineEnd = token_.start;
-		while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
-			++lineEnd;
-		error(0, TypeID(), "Error parsing file, expected ':' at line %d, got '%s'\n",
-			  line(nullptr, token_.start), string(token_.start, lineEnd).c_str());
-		return false;
+	if (token_ == token){
+		return true;
 	}
-	return true;
+
+	const char* lineEnd = token_.start;
+	while (lineEnd && *lineEnd != '\0' && *lineEnd != '\r' && *lineEnd != '\n')
+		++lineEnd;
+	error(0, TypeID(), "Error parsing file, expected ':' at line %d, got '%s'\n",
+		  line(nullptr, token_.start), string(token_.start, lineEnd).c_str());
+	return false;
 }
 
 void JSONIArchive::skipBlock()
@@ -726,7 +727,8 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 	if(*blockBegin == '\0')
 		return false;
 
-	if(stack_ == &stackBottom_ || level.isContainer || outName != 0){
+	bool bottomOfStack = stack_ == &stackBottom_;
+	if(bottomOfStack || level.isContainer || outName != 0){
 		// root or container or next value in a key-pair
 		readToken();
 		if (token_ == ',')
@@ -745,7 +747,7 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 		}
 	}
 
-	if (!untilEndOfBlockOnly && stack_ != &stackBottom_) {
+	if (!untilEndOfBlockOnly && !bottomOfStack) {
 		if (name[0] == '\0' && !level.isContainer) {
 			readToken();
 			error(0, TypeID(), "Deserializing nameless field in dictionary block");
@@ -918,15 +920,14 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 {
     if(findName(name)){
 		Level level(stack_);
-        if(openBracket()){
-            level.start = token_.end;
-		}
-		else if (openContainerBracket()) {
-            level.start = token_.end;
-            level.isContainer = true;
-		}
-		else 
+		readToken();
+		bool isContainer = token_ == '[';
+		if (!isContainer && token_ != '{') {
+			putToken();
 			return false;
+		}
+		level.start = token_.end;
+		level.isContainer = isContainer;
 
         if (ser)
             ser(*this);
@@ -1120,7 +1121,8 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 					break;
 				putToken();
 				ser.deserializeNewKey(*this, "", "");
-				if (!expectToken(":"))
+				readToken();
+				if (!expect(':'))
 					break;
 				ser.deserializeNewValue(*this, "", "");
 				ser.next();
@@ -1170,7 +1172,8 @@ bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* l
 						break;
 					}
 					ser.next();
-					if (!expectToken("}"))
+					readToken();
+					if (!expect('}'))
 						break;
 				} else if (token_ == ']') {
 					break;
@@ -1535,15 +1538,6 @@ void JSONIArchive::validatorMessage(bool error, const void* handle, const TypeID
 	} else {
 		fprintf(stderr, "%s: %s: %s\n", filename_.c_str(), error?"error":"warning", message);
 	}
-}
-
-bool JSONIArchive::expectToken(const char* token, int len) {
-	readToken();
-	if (token_ == Token(token, len)) {
-		return true;
-	}
-	error(nullptr, TypeID(), "Expecting token \"%s\" instead of \"%s\"", string(token, token+len).c_str(), token_.str().c_str());
-	return false;
 }
 
 }
