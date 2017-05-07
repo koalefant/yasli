@@ -32,6 +32,9 @@ namespace std{ // not nice, but needed for argument-dependent lookup to work
 template<class T>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::unique_ptr<T>& ptr, const char* name, const char* label);
 
+template<class T, class D>
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::unique_ptr<T, D>& ptr, const char* name, const char* label);
+
 template<class T, class Alloc>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::vector<T, Alloc>& container, const char* name, const char* label);
 

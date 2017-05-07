@@ -324,6 +324,34 @@ protected:
 	std::unique_ptr<T>& ptr_;
 };
 
+template<class T, class D>
+class StdUniquePtrDeleter : public PointerInterface {
+public:
+	StdUniquePtrDeleter(std::unique_ptr<T, D>& ptr)
+	: ptr_(ptr)
+	{}
+	const char* registeredTypeName() const override{
+		if(ptr_)
+			return ClassFactory<T>::the().getRegisteredTypeName(ptr_.get());
+		else
+			return "";
+	}
+	TypeID pointerType() const override{ return TypeID::get<std::unique_ptr<T, D> >(); }
+	void create(const char* typeName) const override{
+		if(typeName && typeName[0] != '\0')
+			ptr_.reset(factory()->create(typeName));
+		else
+			ptr_.reset((T*)0);
+	}
+	TypeID baseType() const override{ return TypeID::get<T>(); }
+	Serializer serializer() const override{ return Serializer(*ptr_); }
+	void* get() const override{ return reinterpret_cast<void*>(ptr_.get()); }
+	ClassFactory<T>* factory() const override{ return &ClassFactory<T>::the(); }
+	const void* handle() const override{ return &ptr_; }
+protected:
+	std::unique_ptr<T, D>& ptr_;
+};
+
 }
 
 namespace std {
@@ -332,6 +360,13 @@ template<class T>
 bool serialize(yasli::Archive& ar, unique_ptr<T>& ptr, const char* name, const char* label)
 {
   yasli::StdUniquePtr<T> serializer(ptr);
+  return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
+}
+
+template<class T, class D>
+bool serialize(yasli::Archive& ar, unique_ptr<T, D>& ptr, const char* name, const char* label)
+{
+  yasli::StdUniquePtrDeleter<T, D> serializer(ptr);
   return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
 }
 
