@@ -713,19 +713,88 @@ bool JSONOArchive::operator()(ContainerInterface& ser, const char* name, const c
 	}
 
 	bool joined = joinLinesIfPossible();
-	bool isDictionary = stack_.back().isDictionary;
-	if (isDictionary)
-		buffer_->buffer()[stack_.back().startPosition] = '{';
 	stack_.pop_back();
 	if(!joined)
 		placeIndent(false);
 	else
 		*buffer_ << " ";
 
-	if (isDictionary)
+	closeContainerBracket();
+	return true;
+}
+
+bool JSONOArchive::operator()(MapInterface& ser, const char* name, const char* label)
+{
+	placeIndent();
+	placeName(name);
+	std::size_t position = buffer_->position();
+
+	if (ser.keySerializesToString()) {
+		openBracket();
+		stack_.push_back(Level(false, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * json_local::TAB_WIDTH + 2)));
+		stack_.back().isDictionary = true;
+		if (!ser.isEmpty()) {
+			while (true) {
+				placeIndent(false);
+				stack_.back().isKeyValue = true;
+				ser.serializeKey(*this, "", "");
+				*buffer_ << ": ";
+				ser.serializeValue(*this, "", "");
+				if (!ser.next()) {
+					break;
+				}
+				stack_.back().isKeyValue = false;
+				*buffer_ << ",";
+			}
+		}
+
+		bool joined = joinLinesIfPossible();
+		stack_.pop_back();
+		if(!joined)
+			placeIndent(false);
+		else
+			*buffer_ << " ";
+
 		closeBracket();
-	else
+	} else {
+		openContainerBracket();
+		stack_.push_back(Level(true, position, int(strlen(name) + 2 * (name[0] & 1) + stack_.size() - 1 * json_local::TAB_WIDTH + 2)));
+
+		if (!ser.isEmpty()) {
+			while (true) {
+				*buffer_ << "{";
+				placeIndent(false);
+
+				stack_.push_back(Level(false, position, int(strlen(name) + stack_.size() - 1 * json_local::TAB_WIDTH + 2)));
+				stack_.back().isKeyValue = true;
+
+				ser.serializeKey(*this, "key", "");
+				*buffer_ << ",";
+				ser.serializeValue(*this, "value", "");
+				*buffer_ << "\n";
+
+				stack_.pop_back();
+
+				placeIndent();
+				*buffer_ << "}";
+				if (!ser.next()) {
+					*buffer_ << "\n";
+					break;
+				}
+				*buffer_ << ",\n";
+			}
+		}
+
+		bool joined = joinLinesIfPossible();
+		stack_.pop_back();
+		stack_.pop_back();
+		if(!joined)
+			placeIndent(false);
+		else
+			*buffer_ << " ";
+
 		closeContainerBracket();
+	}
 	return true;
 }
 

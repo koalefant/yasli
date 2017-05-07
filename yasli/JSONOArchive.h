@@ -46,6 +46,7 @@ public:
 	bool operator()(WStringInterface& value, const char* name = "", const char* label = 0) override;
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) override;
+	bool operator()(MapInterface& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(KeyValueInterface& keyValue, const char* name = "", const char* label = 0) override;
 	bool operator()(PointerInterface& ser, const char* name = "", const char* label = 0) override;
 

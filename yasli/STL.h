@@ -21,6 +21,13 @@
 
 namespace yasli{ class Archive; }
 
+namespace yasli {
+template<>
+struct Traits<string> {
+	enum { serializes_to_string = true };
+};
+}
+
 namespace std{ // not nice, but needed for argument-dependent lookup to work
 
 template<class T>
@@ -32,13 +39,9 @@ bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::vector<T, Alloc>& contain
 template<class T, class Alloc>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::list<T, Alloc>& container, const char* name, const char* label);
 
+
 template<class K, class V, class C, class Alloc>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::map<K, V, C, Alloc>& container, const char* name, const char* label);
-
-#if !YASLI_NO_MAP_AS_DICTIONARY
-template<class V>
-bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<yasli::string, V>& pair, const char* name, const char* label);
-#endif
 
 template<class K, class V>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label);

@@ -51,7 +51,7 @@ public:
 	bool operator()(const Serializer& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(const BlackBox& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(ContainerInterface& ser, const char* name = "", const char* label = 0) override;
-	bool operator()(KeyValueInterface& ser, const char* name = "", const char* label = 0) override;
+	bool operator()(MapInterface& ser, const char* name = "", const char* label = 0) override;
 	bool operator()(PointerInterface& ser, const char* name = "", const char* label = 0) override;
 
 	void validatorMessage(bool error, const void* handle, const TypeID& type, const char* message) override;
@@ -70,6 +70,9 @@ private:
 	bool checkStringValueToken();
 	void readToken();
 	void putToken();
+	bool expectToken(const char* token, int len);
+	template<int size>
+	bool expectToken(const char (&token)[size]) { return expectToken(token, size-1); }
 	int line(int * column_no, const char* position) const; 
 	bool isName(Token token) const;
 

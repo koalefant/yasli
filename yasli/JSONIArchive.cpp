@@ -752,11 +752,15 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 	}
 
 	if (!untilEndOfBlockOnly && stack_.size() > 1) {
-		if (name[0] == '\0' && !level.isContainer && !level.isKeyValue) {
+		if (name[0] == '\0' && !level.isContainer) {
+			readToken();
 			error(0, TypeID(), "Deserializing nameless field in dictionary block");
+			putToken();
 		}
 		if (name[0] != '\0' && level.isContainer) {
+			readToken();
 			error(0, TypeID(), "Deserializing named field \"%s\" in array block", name);
+			putToken();
 		}
 	}
 
@@ -993,48 +997,6 @@ bool JSONIArchive::operator()(const BlackBox& box, const char* name, const char*
     return false;
 }
 
-bool JSONIArchive::operator()(KeyValueInterface& keyValue, const char* name, const char* label)
-{
-	Token nextName;
-	if(!stack_.empty() && stack_.back().isDictionary) {
-		readToken();
-		if(isName(token_) && checkStringValueToken()) {
-			string key;
-			unescapeString(unescapeBuffer_, key, token_.start + 1, token_.end - 1);
-			keyValue.set(key.c_str());
-			readToken();
-			if(!expect(':'))
-				return false;
-			bool wasKeyValue = stack_.back().isKeyValue;
-			stack_.back().isKeyValue = true;
-			bool result = keyValue.serializeValue(*this, "", 0);
-			stack_.back().isKeyValue = wasKeyValue;
-			return result;
-		}
-		else {
-			putToken();
-			return false;
-		}
-	}
-	else if(findName("", &nextName)) {
-		string key;
-		unescapeString(unescapeBuffer_, key, nextName.start + 1, nextName.end - 1);
-		keyValue.set(key.c_str());
-		stack_.push_back(Level());
-		stack_.back().isKeyValue = true;
-
-		bool result = keyValue.serializeValue(*this, "", 0);
-		if(stack_.empty()) {
-			// TODO: diagnose
-			return false;
-		}
-		stack_.pop_back();
-		return result;
-	}
-	return false;
-}
-
-
 bool JSONIArchive::operator()(PointerInterface& ser, const char* name, const char* label)
 {
 	if (findName(name)) {
@@ -1139,6 +1101,111 @@ bool JSONIArchive::operator()(ContainerInterface& ser, const char* name, const c
 			warning(nullptr, TypeID(), "Non-container value where container is expected");
 		}
     }
+    return false;
+}
+
+bool JSONIArchive::operator()(MapInterface& ser, const char* name, const char* label)
+{
+    if (findName(name)) {
+		Token bracketToken = token_;
+
+		if (ser.keySerializesToString()) {
+			// expect { KEY: VALUE, ... }
+			if (!openBracket()) {
+				error(nullptr, TypeID(), "Expecting opening brace '{'");
+				return false;
+			}
+
+			stack_.push_back(Level());
+			stack_.back().isKeyValue = true;
+			stack_.back().start = token_.end;
+
+			bool missingComma = false;
+			bool first = true;
+			while(true){
+				readToken();
+				if (!first) {
+					if (token_ == ',') {
+						readToken();
+					} else {
+						missingComma = true;
+					}
+				}
+				if (token_ == '}')
+					break;
+				putToken();
+				ser.deserializeNewKey(*this, "", "");
+				if (!expectToken(":"))
+					break;
+				ser.deserializeNewValue(*this, "", "");
+				ser.next();
+				first = false;
+			}
+
+			stack_.pop_back();
+		} else {
+			// expect [ { "key": KEY, "value": VALUE }, ... ]
+			if (!openContainerBracket()) {
+				warning(nullptr, TypeID(), "Expecting an opening square bracket");
+			}
+			stack_.push_back(Level());
+			stack_.back().isContainer = true;
+			stack_.back().start = token_.end;
+
+			stack_.push_back(Level());
+			stack_.back().isContainer = false;
+			stack_.back().isKeyValue = true;
+			stack_.back().start = token_.end;
+
+			bool first = true;
+			bool missingComma = false;
+			while(true){
+				readToken();
+				if (!first) {
+					if (token_ == ',') {
+						readToken();
+					} else {
+						missingComma = true;
+					}
+				}
+				if (token_ == '{') {
+					if (missingComma) {
+						error(nullptr, TypeID(), "Missing comma before block");
+					}
+					if (!ser.deserializeNewKey(*this, "key", "")) {
+						error(nullptr, TypeID(), "Missing expected key");
+						break;
+					}
+					readToken();
+					if (token_ != ',') {
+						error(nullptr, TypeID(), "Expected comma");
+						putToken();
+					}
+					if (!ser.deserializeNewValue(*this, "value", "") ){
+						error(nullptr, TypeID(), "Missing expected value");
+						break;
+					}
+					ser.next();
+					if (!expectToken("}"))
+						break;
+				} else if (token_ == ']') {
+					break;
+				} else if(!token_) {
+					error(nullptr, TypeID(), "Reached end of file while reading container");
+					return false;
+				} else {
+					error(nullptr, TypeID(), "Unexpected token, expecting '{'");
+				}
+				first = false;
+			}
+
+			YASLI_ASSERT(!stack_.empty());
+			stack_.pop_back();
+			YASLI_ASSERT(!stack_.empty());
+			stack_.pop_back();
+			return true;
+		}
+	}
     return false;
 }
 
@@ -1491,6 +1558,15 @@ void JSONIArchive::validatorMessage(bool error, const void* handle, const TypeID
 	} else {
 		fprintf(stderr, "%s: %s: %s\n", filename_.c_str(), error?"error":"warning", message);
 	}
+}
+
+bool JSONIArchive::expectToken(const char* token, int len) {
+	readToken();
+	if (token_ == Token(token, len)) {
+		return true;
+	}
+	error(nullptr, TypeID(), "Expecting token \"%s\" instead of \"%s\"", string(token, token+len).c_str(), token_.str().c_str());
+	return false;
 }
 
 }

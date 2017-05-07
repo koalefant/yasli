@@ -144,11 +144,17 @@ public:
 	virtual void serializeNewElement(Archive& ar, const char* name = "", const char* label = 0) const = 0;
 };
 
+template<class T>
+struct Traits {
+	enum { serializes_to_string = std::is_enum<T>::value };
+};
+
 struct MapInterface {
 public:
 	virtual ~MapInterface() {}
 	virtual void* pointer() const = 0;
 	virtual TypeID keyType() const = 0;
+	virtual bool keySerializesToString() const = 0;
 	virtual TypeID valueType() const = 0;
 	virtual TypeID containerType() const = 0;
 	// needed only for conversion to array

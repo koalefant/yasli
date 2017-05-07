@@ -177,6 +177,7 @@ struct STLMap : MapInterface {
 	TypeID valueType() const override{ return TypeID::get<V>(); }
 	TypeID containerType() const override{ return TypeID::get<std::map<K, V, C, Alloc>>(); }
 	size_t size() const override{ return container.size(); }
+	bool keySerializesToString() const override{ return Traits<K>::serializes_to_string; }
 
 	bool deserializeNewKey(Archive& ar, const char* name, const char* label) override {
 		K newKey;
@@ -267,27 +268,6 @@ YASLI_STRING_NAMESPACE_END
 
 namespace yasli {
 
-template<class V>
-struct StdStringPair final : yasli::KeyValueInterface
-{
-	const char* get() const { return pair_.first.c_str(); }
-	void set(const char* key) { pair_.first.assign(key); }
-	const void* handle() const { return &pair_; }
-	yasli::TypeID type() const { return yasli::TypeID::get<string>(); }
-	bool serializeValue(yasli::Archive& ar, const char* name, const char* label) 
-	{
-		return ar(pair_.second, name, label);
-	}
-
-	StdStringPair(std::pair<yasli::string, V>& pair)
-	: pair_(pair)
-	{
-	}
-
-
-	std::pair<yasli::string, V>& pair_;
-};
-
 template<class K, class V>
 struct StdPair final : std::pair<K, V>
 {
@@ -297,8 +277,8 @@ struct StdPair final : std::pair<K, V>
 		ar(this->first, "first", "^");
 		ar(this->second, "second", "^");
 #else
-		ar(this->first, "key");
-		ar(this->second, "value");
+		ar(this->first, "key", "^");
+		ar(this->second, "value", "^");
 #endif
 	}
 };
@@ -306,15 +286,6 @@ struct StdPair final : std::pair<K, V>
 }
 
 namespace std{
-
-#if !YASLI_NO_MAP_AS_DICTIONARY
-template<class V>
-bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<yasli::string, V>& pair, const char* name, const char* label)
-{
-	yasli::StdStringPair<V> keyValue(pair);
-	return ar(static_cast<yasli::KeyValueInterface&>(keyValue), name, label);
-}
-#endif
 
 template<class K, class V>
 bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::pair<K, V>& pair, const char* name, const char* label)
