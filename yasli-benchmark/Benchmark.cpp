@@ -59,8 +59,10 @@ void testText()
 }
 
 struct DataSetMixed {
-	std::vector<ComplexClass> arr{ 10000 };
+	std::vector<ComplexClass> arr;
 
+	DataSetMixed() : arr(10000) {}
+	
 	void serialize(Archive& ar) {
 		ar(arr, "arr");
 	}
