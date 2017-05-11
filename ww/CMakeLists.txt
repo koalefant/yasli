@@ -59,6 +59,8 @@ set(SOURCES
 	../PropertyTree/Layout.cpp
 	../PropertyTree/Layout.h
 	../PropertyTree/Serialization.h
+	../PropertyTree/Signal.cpp
+	../PropertyTree/Signal.h
 	../PropertyTree/Unicode.cpp
 	../PropertyTree/Unicode.h
 	

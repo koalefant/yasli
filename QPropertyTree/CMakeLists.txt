@@ -65,6 +65,8 @@ set(SOURCES
 	../PropertyTree/PropertyTreeOperator.cpp
 	../PropertyTree/PropertyTreeOperator.h
 	../PropertyTree/Serialization.h
+	../PropertyTree/Signal.cpp
+	../PropertyTree/Signal.h
 	../PropertyTree/Unicode.cpp
 	../PropertyTree/Unicode.h
 	IconXPMCache.cpp

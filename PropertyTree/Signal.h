@@ -11,18 +11,17 @@
 #include <vector>
 #include <memory> // std::unique_ptr
 #include <utility> // std::forward
-#include <algorithm> // std::remove
 
 struct SignalScope;
 
 namespace signal_details {
 
 struct ConnectionBase {
-	virtual ~ConnectionBase() {}
+	virtual ~ConnectionBase();
 	SignalScope* scope { nullptr };
 
 	ConnectionBase() = default;
-	ConnectionBase(SignalScope* scope) : scope(scope) {}
+	ConnectionBase(SignalScope* scope);
 };
 
 template<class ...Args>
@@ -80,6 +79,9 @@ struct SignalScope {
 	void disconnect_all();
 
 	std::vector<signal_details::SignalBase*> connected_signals;
+private:
+	void disconnect_self(signal_details::SignalBase* signal_base);
+	friend struct signal_details::SignalBase;
 };
 
 template<class ...Args>
@@ -127,41 +129,3 @@ struct Signal : signal_details::SignalBase {
 		scope->connected_signals.push_back(this);
 	}
 };
-
-// ---------------------------------------------------------------------------
-// implementation
-// ---------------------------------------------------------------------------
-
-inline void SignalScope::disconnect_all() {
-	int num_signals = connected_signals.size();
-	for (int i = 0; i < num_signals; ++i) {
-		connected_signals[i]->disconnect(this);
-	}
-}
-
-// ---------------------------------------------------------------------------
-
-inline void signal_details::SignalBase::disconnect(SignalScope* scope) {
-	int num_connections = connections.size();
-	for (int i = 0; i < num_connections; ++i) {
-		if (connections[i]->scope == scope) {
-			connections[i]->scope = nullptr;
-			connections[i].reset();
-		}	
-	}
-	connections.erase(std::remove(connections.begin(),
-								  connections.end(), std::unique_ptr<ConnectionBase>()),
-					  connections.end());
-} 
-
-inline void signal_details::SignalBase::disconnect_all() {
-	int num_connections = connections.size();
-	for (int i = 0; i < num_connections; ++i) {
-		if (connections[i]->scope == nullptr)
-			continue;
-		auto& s = connections[i]->scope->connected_signals;
-		s.erase(std::remove(s.begin(), s.end(), this), s.end());
-		connections[i].reset();
-	}
-	connections.clear();
-} 
