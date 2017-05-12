@@ -197,6 +197,7 @@ struct STLMap : MapInterface {
 
 	bool isEmpty() const override{ return container.empty(); }
 	bool next() override{
+		YASLI_ASSERT(it != container.end());
 		++it;
 		return it != container.end();
 	}
