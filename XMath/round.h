@@ -38,9 +38,9 @@ inline int xround(float x)
 	return _mm_cvtss_si32(_mm_load_ss(&x));//assume that current rounding mode is always correct (i.e. round to nearest)
 }
 
-#if _MSC_VER <= 1600
-#define round xround
-#endif
+//#if _MSC_VER <= 1600
+//#define round xround
+//#endif
 
 #else // _WIN32
 
