@@ -139,11 +139,14 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 	int point = 0;
 	int sign = 0;
 
+  const int CVTBUFSIZE = 400;
+  char buf[CVTBUFSIZE];
 #ifdef _MSC_VER
-	char buf[_CVTBUFSIZE];
 	_fcvt_s(buf, value, digits_, &point, &sign);
+#elif (defined _WIN32) // mingw
+  _fcvt_s(buf, CVTBUFSIZE, value, digits_, &point, &sign);
 #else
-    const char* buf = fcvt(value, digits_, &point, &sign);
+  fcvt_r(value, digits_, &point, &sign, buf, CVTBUFSIZE);
 #endif
 
     if(sign != 0)
@@ -156,7 +159,7 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 				write("0");
 				++point;
 			}
-			write(buf);
+			write((const char*)buf);
 		}
 		else
 			write(allowTrailingPoint ? "0" : "0.0");
