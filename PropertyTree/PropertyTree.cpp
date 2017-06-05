@@ -314,12 +314,13 @@ void PropertyTree::onMouseStill()
 	}
 }
 
-void PropertyTree::onRowLMBUp(PropertyRow* row, const Rect& rowRect, Point point)
+void PropertyTree::onRowLMBUp(PropertyRow* _row, const Rect& rowRect, Point point)
 {
 	onMouseStill();
+  SharedPtr<PropertyRow> row(_row);
 	row->onMouseUp(this, point);
 
-	if ((pressPoint_ - point).manhattanLength() < 2 && row->widgetRect(this).contains(point)) {
+	if (row->refCount() > 1 && (pressPoint_ - point).manhattanLength() < 2 && row->widgetRect(this).contains(point)) {
 		row->onActivateRelease(this);
 	}
 }
