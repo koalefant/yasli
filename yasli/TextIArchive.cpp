@@ -696,10 +696,14 @@ bool TextIArchive::findName(const char* name)
         }
     }
 
-	for(int itt = 0; itt < 10000; ++itt){
+  bool restarted = false;
+	while(true){
 		readToken();
 		if(!token_){
+      if (restarted)
+        return false;
 			token_.set(blockBegin, blockBegin);
+      restarted = true;
 			continue;
 		}
 		//return false; // Reached end of file while searching for name
@@ -713,8 +717,11 @@ bool TextIArchive::findName(const char* name)
 		}
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
+      if (restarted)
+        return false;
 			DEBUG_TRACE("Going to begin of block, from %i", token_.start - reader_->begin());
 			token_ = Token(blockBegin, blockBegin);
+      restarted = true;
 			DEBUG_TRACE(" to %i", token_.start - reader_->begin());
 			continue; // Reached '}' or ']' while searching for name, continue from begin of block
 		}
