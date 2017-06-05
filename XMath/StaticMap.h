@@ -330,6 +330,8 @@ public:
 	template<class K1, class T1, class Cmp1, class A1> 
 	friend bool serialize(yasli::Archive& ar, StaticMap<K1, T1, Cmp1, A1>& map, const char* name, const char* nameAlt);
 
+  Vec& vector() { return MapVector; }
+
 	struct Lock {
 		StaticMap& map;
 		Lock(StaticMap& map) : map(map) { ++map.lock_; }
