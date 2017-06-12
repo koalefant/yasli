@@ -460,7 +460,7 @@ void calculateMinimalSizes_r(int* outMinSize, ElementType orientation, Layout* l
 				int numColumns = 1;
 				int maxColumnLength = 0;
 				const Rect& rect = l->rectangles[element];
-				calculateColumns(*&columns, &numColumns, &maxColumnLength, &*l, element, rect.w);
+				calculateColumns(columns, &numColumns, &maxColumnLength, &*l, element, rect.w);
 				// repeat horizontal layout pass knowing that elements
 				// are split in the columns now
 				for (int i = 0; i < count; ++i) {
