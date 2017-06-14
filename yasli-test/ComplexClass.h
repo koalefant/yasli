@@ -52,11 +52,20 @@ struct Member
 		ar(wname, "wname");
 		ar(weight, "weight");
 	}
+
+	template<class Visitor>
+	void visit(Visitor& v) {
+		v(name);
+		v(wname);
+		v(weight);
+	}
 };
 
 class PolyBase : public RefCounter
 {
 public:
+	unsigned char typeIndex{ 0 };
+
 	PolyBase()
 	{
 		baseMember_ = "Regular base member";
@@ -76,6 +85,11 @@ public:
 	{
 		YCHECK(baseMember_ == copy->baseMember_);
 	}
+
+	template<class Visitor>
+	void visit(Visitor& v) {
+		v(baseMember_);
+	}
 protected:
 	std::string baseMember_;
 };
@@ -83,6 +97,9 @@ protected:
 class PolyDerivedA : public PolyBase
 {
 public:
+	PolyDerivedA() {
+		typeIndex = 1;
+	}
 	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{		
 		PolyBase::YASLI_SERIALIZE_METHOD(ar);
@@ -107,6 +124,7 @@ public:
 	PolyDerivedB()
 	: derivedMember_("B Derived")
 	{
+		typeIndex = 2;
 	}
 
 	void YASLI_SERIALIZE_METHOD(Archive& ar)
@@ -178,6 +196,22 @@ struct NumericTypes
     ar(uLongLong_, "unsigned_long_long");
     ar(float_, "float");
     ar(double_, "double");
+  }
+
+  template<class Visitor>
+  void visit(Visitor& v) {
+    v(bool_);
+    v(char_);
+    v(sChar_);
+    v(uChar_);
+    v(int_);
+    v(uInt_);
+    v(long_);
+    v(uLong_);
+    v(longLong_);
+    v(uLongLong_);
+    v(float_);
+    v(double_);
   }
 
   void checkEquality(const NumericTypes& rhs) const
@@ -311,6 +345,28 @@ public:
 		ar(stringToStructMap_, "stringToStructMap");
 	}
 
+	template<class Visitor>
+	void visit(Visitor& v) {
+		v(name_);
+		v(wname_);
+		v(polyPtr_);
+		v(polyVector_);
+		v(members_);
+
+		StringListValue value(stringList_, stringList_[index_]);
+		v(value);
+		index_ = value.index();
+		if(index_ == -1)
+			index_ = 0;
+
+		v(array_);
+		v(numericTypes_);
+		v(vectorOfStrings_);
+		v(intToString_);
+		v(stringToInt_);
+		v(stringToStructMap_);
+	}
+
 	void checkEquality(const ComplexClass& copy) const
 	{
 		YCHECK(this != &copy);
@@ -380,7 +436,7 @@ protected:
 	std::vector<std::pair<string, int> > stringToInt_;
 	Members members_;
 	int index_;
-  NumericTypes numericTypes_;
+	NumericTypes numericTypes_;
 
 	StringListStatic stringList_;
 	std::vector< SharedPtr<PolyBase> > polyVector_;
