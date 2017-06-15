@@ -317,6 +317,19 @@ void benchmark_mixed_copy() {
 	print_result(__FUNCTION__, sizeof(copy), timer);
 }
 
+void benchmark_mixed_memcpy() {
+	DataSetMixed object;
+	LeafWriter<BinaryWriter> oa;
+	oa.func.buffer.reserve(1024);
+	oa(object);
+
+	std::vector<char> buffer2;
+	buffer2.resize(oa.func.buffer.size());
+	AutoTimer timer;
+	memcpy(buffer2.data(), oa.func.buffer.data(), oa.func.buffer.size());
+	print_result(__FUNCTION__, oa.func.buffer.size(), timer);
+}
+
 void benchmark_mixed_json_read() {
 	DataSetMixed temp;
 	JSONOArchive oa;
@@ -439,6 +452,7 @@ void benchmark_mixed_bin_read() {
 int main(int argc, char** argv)
 {
 	benchmark_mixed_copy();
+	benchmark_mixed_memcpy();
 
 	benchmark_mixed_json_write();
 	benchmark_mixed_json_read();
@@ -452,6 +466,5 @@ int main(int argc, char** argv)
 	benchmark_mixed_bin_naive_write();
 	benchmark_mixed_bin_two_pass_write();
 	benchmark_mixed_bin_naive_read();
-
 	return 0;
 }
