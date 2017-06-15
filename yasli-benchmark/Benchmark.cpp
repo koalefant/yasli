@@ -94,7 +94,8 @@ struct LeafWriter {
 			break;
 			}
 		} else {
-			operator()(0xff);
+			unsigned char type = 0xff;
+			operator()(type);
 		}
 	}
 	template<class T, int num>
