@@ -674,7 +674,7 @@ int JSONIArchive::line(int* column_no, const char* position) const
 		}
 	}
 	if (column_no) {
-		*column_no = position - last_line;
+		*column_no = int(position - last_line);
 	}
 	return line_no;
 }

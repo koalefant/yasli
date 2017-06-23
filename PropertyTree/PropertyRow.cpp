@@ -668,7 +668,7 @@ void PropertyRow::parseControlCodes(const PropertyTreeBase* tree, const char* pt
 	}
 
 	if (changeLabel)
-		controlCharacterCount_ = min(255, ptr - startPtr);
+		controlCharacterCount_ = min(255, int(ptr - startPtr));
 
 	labelChanged();
 }
