@@ -853,8 +853,10 @@ void PropertyTreeBase::onMouseStill()
 void PropertyTreeBase::onRowLMBUp(const HitResult& hit)
 {
 	onMouseStill();
-	if (capturedRow_)
-		capturedRow_->onMouseUp(this, hit.point);
+  if (capturedRow_) {
+    SharedPtr<PropertyRow> capturedRow(capturedRow_);
+    capturedRow_->onMouseUp(this, hit.point);
+  }
 
 	if ((!capturedRow_ || capturedRow_ == hit.row) &&
 		(pressPoint_ - hit.point).manhattanLength() < 1 &&

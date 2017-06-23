@@ -25,7 +25,7 @@ public:
 protected:
 	
 	Signal<> signalTimer_;
-	SharedPtr<TimerImpl> impl_;
+	TimerImpl* impl_;
     Widget* owner_;
 
 private:
