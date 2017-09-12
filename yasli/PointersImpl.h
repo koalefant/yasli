@@ -14,6 +14,7 @@
 #include "ClassFactoryBase.h"
 #include "ClassFactory.h"
 #include "Object.h"
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -21,6 +22,39 @@
 #endif
 
 namespace yasli{
+
+template<class T>
+class StdSharedPtrSerializer : public PointerInterface
+{
+public:
+	StdSharedPtrSerializer(std::shared_ptr<T>& ptr)
+	: ptr_(ptr)
+	{}
+
+	TypeID type() const{
+		if(ptr_)
+			return ClassFactory<T>::the().getTypeID(ptr_.get());
+		else
+			return TypeID();
+	}
+	void create(TypeID type) const{
+		YASLI_ASSERT(!ptr_ || ptr_.use_count() == 1);
+		if(type)
+			ptr_.reset(ClassFactory<T>::the().create(type));
+		else
+			ptr_.reset();
+	}
+	TypeID baseType() const{ return TypeID::get<T>(); }
+	virtual Serializer serializer() const{
+		return Serializer(*ptr_);
+	}
+	void* get() const{
+		return reinterpret_cast<void*>(ptr_.get());
+	}
+	ClassFactoryBase* factory() const{ return &ClassFactory<T>::the(); }
+protected:
+	std::shared_ptr<T>& ptr_;
+};
 
 template<class T>
 class SharedPtrSerializer : public PointerInterface
@@ -108,6 +142,13 @@ int releaseByVoidPtr(void* ptr) {
 	if (result == 0)
 		delete obj;
 	return result;
+}
+
+template<class T>
+bool YASLI_SERIALIZE_OVERRIDE(yasli::Archive& ar, std::shared_ptr<T>& ptr, const char* name, const char* label)
+{
+	yasli::StdSharedPtrSerializer<T> serializer(ptr);
+	return ar(static_cast<yasli::PointerInterface&>(serializer), name, label);
 }
 
 template<class T>
