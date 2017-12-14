@@ -453,6 +453,7 @@ Token Tokenizer::operator()(const char* ptr) const
 								++cur.end;
 						}
 					}
+          continue;
 				}
 				if(isQuote(*cur.end)){
 					++cur.end;
