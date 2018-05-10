@@ -24,7 +24,7 @@ public:
 	~JSONIArchive();
 
 	bool load(const char* filename);
-	bool open(const char* buffer, size_t length, bool free = false);
+	bool open(const char* buffer, size_t length);
 	// filename that will be include with errors produced with error() calls
 	void setDebugFilename(const char* filename);
 	// allows to disable warnings (enabled by default)
@@ -109,7 +109,9 @@ private:
 	bool disableWarnings_{ false };
 	bool warnAboutUnusedFields_{ false };
 	int unusedFieldCount_{ 0 };
-	void* buffer_{ nullptr };
+	const char* buffer_{ nullptr };
+	const char* bufferEnd_{ nullptr };
+	bool free_{ false };
 };
 
 double parseFloat(const char* s);

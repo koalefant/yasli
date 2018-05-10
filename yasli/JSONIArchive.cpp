@@ -18,7 +18,6 @@
 #include "yasli/BlackBox.h"
 #include "yasli/Config.h"
 #include "JSONIArchive.h"
-#include "MemoryReader.h"
 
 #ifdef _MSC_VER
 #ifndef NAN
@@ -36,31 +35,6 @@
 #endif
 
 namespace yasli{
-
-inline bool isDigit(int ch) 
-{
-	return unsigned(ch - '0') <= 9;
-}
-
-double parseFloat(const char* s)
-{
-	double res = 0, f = 1, sign = 1;
-	while(*s && (*s == ' ' || *s == '\t')) 
-		s++;
-
-	if(*s == '-') 
-		sign=-1, s++; 
-	else if (*s == '+') 
-		s++;
-
-	for(; isDigit(*s); s++)
-		res = res * 10 + (*s - '0');
-
-	if(*s == '.')
-		for (s++; isDigit(*s); s++)
-			res += (f *= 0.1)*(*s - '0');
-	return res*sign;
-}
 
 namespace json_local {
 
@@ -181,35 +155,17 @@ static void print_line_with_underlined_token(const char* buffer, int line_no, co
 
 // ---------------------------------------------------------------------------
 
-class JSONTokenizer{
-public:
-    JSONTokenizer();
-
-    Token operator()(const char* text) const;
-private:
-    inline static bool isSpace(char c);
-    inline static bool isWordPart(unsigned char c);
-    inline static bool isComment(char c);
-    inline static bool isQuoteOpen(int& quoteIndex, char c);
-    inline static bool isQuoteClose(int quoteIndex, char c);
-    inline static bool isQuote(char c);
-};
-
-JSONTokenizer::JSONTokenizer()
-{
-}
-
-inline bool JSONTokenizer::isSpace(char c)
+static bool isSpace(char c)
 {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-inline bool JSONTokenizer::isComment(char c)
+static bool isComment(char c)
 {
 	return c == '#';
 }
 
-inline bool JSONTokenizer::isQuote(char c)
+static bool isQuote(char c)
 {
 	return c == '\"';
 }
@@ -503,12 +459,12 @@ static const char jsonCharTypes[256] = {
 	0 /* 0xFF: я */
 };
 
-inline bool JSONTokenizer::isWordPart(unsigned char c)
+static bool isWordPart(unsigned char c)
 {
 		return jsonCharTypes[c] != 0;
 }
 
-Token JSONTokenizer::operator()(const char* ptr) const
+Token tokenizeJSON(const char* ptr)
 {
 	while(isSpace(*ptr))
 		++ptr;
@@ -584,23 +540,17 @@ JSONIArchive::JSONIArchive()
 
 JSONIArchive::~JSONIArchive()
 {
-	if (buffer_) {
-		free(buffer_);
-		buffer_ = 0;
-	}
-	reader_.reset();
 }
 
-bool JSONIArchive::open(const char* buffer, size_t length, bool free)
+bool JSONIArchive::open(const char* buffer, size_t length)
 {
 	if(!length)
 		return false;
 
-	if(buffer)
-		reader_.reset(new MemoryReader(buffer, length, free));
-	buffer_ = 0;
+	buffer_ = buffer;
+	bufferEnd_ = buffer + length;
 
-	token_ = Token(reader_->begin(), reader_->begin());
+	token_ = Token(buffer_, buffer_);
 
 	stack_ = &stackBottom_;
 	readToken();
@@ -619,13 +569,13 @@ bool JSONIArchive::load(const char* filename)
 		long fileSize = ftell(file);
 		fseek(file, 0, SEEK_SET);
 
-		void* buffer = 0;
+		char* buffer = 0;
 		if(fileSize > 0){
-			buffer = malloc(fileSize + 1);
+			buffer = (char*)malloc(fileSize + 1);
 			YASLI_ASSERT(buffer != 0);
 			memset(buffer, 0, fileSize + 1);
 			size_t elementsRead = fread(buffer, fileSize, 1, file);
-			YASLI_ASSERT(((char*)(buffer))[fileSize] == '\0');
+			YASLI_ASSERT(buffer[fileSize] == '\0');
 			if(elementsRead != 1){
 				free(buffer);
 				fclose(file);
@@ -634,10 +584,15 @@ bool JSONIArchive::load(const char* filename)
 		}
 		fclose(file);
 
+		if (buffer_ != nullptr && free_) {
+			free((void*)buffer_);
+		}
 		filename_ = filename;
 		buffer_ = buffer;
-		if (fileSize > 0)
-			return open((char*)buffer, fileSize, true);
+		free_ = true;
+		if (fileSize > 0) {
+			return open((char*)buffer, fileSize);
+		}
 		else
 			return false; 
 	}
@@ -648,8 +603,7 @@ bool JSONIArchive::load(const char* filename)
 
 void JSONIArchive::readToken()
 {
-	JSONTokenizer tokenizer;
-	token_ = tokenizer(token_.end);
+	token_ = tokenizeJSON(token_.end);
 }
 
 void JSONIArchive::putToken()
@@ -661,7 +615,7 @@ int JSONIArchive::line(int* column_no, const char* position) const
 {
 	int line_no = 1;
 	const char* last_line = position;
-	for (const char* p = reader_->begin(); p != position; ++p) {
+	for (const char* p = buffer_; p != position; ++p) {
 		if (*p == '\n') {
 			++line_no;
 			last_line = p;
@@ -700,7 +654,7 @@ bool JSONIArchive::expect(char token)
 
 void JSONIArchive::skipBlock()
 {
-	DEBUG_TRACE("Skipping block from %i ...", int(token_.end - reader_->begin()));
+	DEBUG_TRACE("Skipping block from %i ...", int(token_.end - buffer_));
     if(openBracket() || openContainerBracket())
         closeBracket(); // Skipping entire block
     else
@@ -708,14 +662,14 @@ void JSONIArchive::skipBlock()
 	readToken();
 	if (token_ != ',')
 		putToken();
-	DEBUG_TRACE(" ...till %i", int(token_.end - reader_->begin()));
+	DEBUG_TRACE(" ...till %i", int(token_.end - buffer_));
 	DEBUG_TRACE("Skipped");
 }
 
 bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlockOnly)
 {
 	DEBUG_TRACE(" * finding name '%s'", name);
-	DEBUG_TRACE("   started at byte %i", int(token_.start - reader_->begin()));
+	DEBUG_TRACE("   started at byte %i", int(token_.start - buffer_));
 	if(stack_ == nullptr) {
 		// TODO: diagnose
 		return false;
@@ -771,7 +725,7 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 			return false;
 		}
 		DEBUG_TRACE("token '%s'", token_.str().c_str());
-		DEBUG_TRACE("Checking for loop: %d and %d, start %s", int(token_.start - reader_->begin()), int(start.start - reader_->begin()), start.str().c_str());
+		DEBUG_TRACE("Checking for loop: %d and %d, start %s", int(token_.start - buffer_), int(start.start - buffer_), start.str().c_str());
 
 		if(token_ == start){
 			// we have seen this token before, it is a full circle and we haven't found the name we
@@ -788,12 +742,12 @@ bool JSONIArchive::findName(const char* name, Token* outName, bool untilEndOfBlo
 		}
 
 		if(token_ == '}' || token_ == ']'){ // CONVERSION
-			DEBUG_TRACE("Going to begin of block, from %d", int(token_.start - reader_->begin()));
+			DEBUG_TRACE("Going to begin of block, from %d", int(token_.start - buffer_));
 			YASLI_ASSERT(start != Token());
 			token_ = Token(blockBegin, blockBegin);
 			level.fieldIndex = 0;
 			level.parsedBlock = true;
-			DEBUG_TRACE(" to %i", int(token_.start - reader_->begin()));
+			DEBUG_TRACE(" to %i", int(token_.start - buffer_));
 			if (untilEndOfBlockOnly) {
 				return false;
 			}
@@ -948,7 +902,7 @@ bool JSONIArchive::operator()(const Serializer& ser, const char* name, const cha
 					int line_no = line(&column_no, token.start);
 					fprintf(stderr, "%s:%d:%d: error: unused field %s while deserializing type %s\n",
 							filename_.c_str(), line_no, column_no, token.str().c_str(), ser.type().name());
-					print_line_with_underlined_token(reader_->buffer(), line_no, token);
+					print_line_with_underlined_token(buffer_, line_no, token);
 					++unusedFieldCount_;
 				}
 			}
@@ -1534,7 +1488,7 @@ void JSONIArchive::validatorMessage(bool error, const void* handle, const TypeID
 		int column_no = 0;
 		int line_no = line(&column_no, token_.start);
 		fprintf(stderr, "%s:%d:%d: %s: %s\n", filename_.c_str(), line_no, column_no, error?"error":"warning", message);
-		print_line_with_underlined_token(reader_->buffer(), line_no, token_);
+		print_line_with_underlined_token(buffer_, line_no, token_);
 	} else {
 		fprintf(stderr, "%s: %s: %s\n", filename_.c_str(), error?"error":"warning", message);
 	}

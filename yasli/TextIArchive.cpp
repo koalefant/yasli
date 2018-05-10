@@ -25,6 +25,31 @@
 
 namespace yasli{
 
+inline bool isDigit(int ch) 
+{
+	return unsigned(ch - '0') <= 9;
+}
+
+double parseFloat(const char* s)
+{
+	double res = 0, f = 1, sign = 1;
+	while(*s && (*s == ' ' || *s == '\t')) 
+		s++;
+
+	if(*s == '-') 
+		sign=-1, s++; 
+	else if (*s == '+') 
+		s++;
+
+	for(; isDigit(*s); s++)
+		res = res * 10 + (*s - '0');
+
+	if(*s == '.')
+		for (s++; isDigit(*s); s++)
+			res += (f *= 0.1)*(*s - '0');
+	return res*sign;
+}
+
 using std::string;
 using std::wstring;
 
