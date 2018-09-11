@@ -327,8 +327,8 @@ public:
 	{
 		ar(name_, "name");
 		ar(wname_, "wname");
-		ar(polyPtr_, "polyPtr");
-		ar(polyVector_, "polyVector");
+		//ar(polyPtr_, "polyPtr");
+		//ar(polyVector_, "polyVector");
 		ar(members_, "members");
 
 		StringListValue value(stringList_, stringList_[index_]);
@@ -341,16 +341,16 @@ public:
 		ar(numericTypes_, "numericTypes");
 		ar(vectorOfStrings_, "vectorOfStrings");
 		ar(intToString_, "intToString");
-		ar(stringToInt_, "stringToInt");
-		ar(stringToStructMap_, "stringToStructMap");
+		//ar(stringToInt_, "stringToInt");
+		//ar(stringToStructMap_, "stringToStructMap");
 	}
 
 	template<class Visitor>
 	void visit(Visitor& v) {
 		v(name_);
 		v(wname_);
-		v(polyPtr_);
-		v(polyVector_);
+		//v(polyPtr_);
+		//v(polyVector_);
 		v(members_);
 
 		StringListValue value(stringList_, stringList_[index_]);
@@ -364,7 +364,7 @@ public:
 		v(vectorOfStrings_);
 		v(intToString_);
 		v(stringToInt_);
-		v(stringToStructMap_);
+		//v(stringToStructMap_);
 	}
 
 	void checkEquality(const ComplexClass& copy) const
@@ -374,9 +374,9 @@ public:
 		YCHECK(wname_ == copy.wname_);
 		YCHECK(index_ == copy.index_);
 
-		YCHECK(polyPtr_ != 0);
-		YCHECK(copy.polyPtr_ != 0);
-		polyPtr_->checkEquality(copy.polyPtr_);
+		//YCHECK(polyPtr_ != 0);
+		//YCHECK(copy.polyPtr_ != 0);
+		//polyPtr_->checkEquality(copy.polyPtr_);
 
 		YCHECK(members_.size() == copy.members_.size());
 		for (size_t i = 0; i < members_.size(); ++i)
@@ -384,17 +384,17 @@ public:
 			members_[i].checkEquality(copy.members_[i]);
 		}
 
-		YCHECK(polyVector_.size() == copy.polyVector_.size());
-		for (size_t i = 0; i < polyVector_.size(); ++i)
-		{
-			if(polyVector_[i] == 0)
-			{
-				YCHECK(copy.polyVector_[i] == 0);
-				continue;
-			}
-			YCHECK(copy.polyVector_[i] != 0);
-			polyVector_[i]->checkEquality(copy.polyVector_[i]);
-		}
+		//YCHECK(polyVector_.size() == copy.polyVector_.size());
+		//for (size_t i = 0; i < polyVector_.size(); ++i)
+		//{
+		//	if(polyVector_[i] == 0)
+		//	{
+		//		YCHECK(copy.polyVector_[i] == 0);
+		//		continue;
+		//	}
+		//	YCHECK(copy.polyVector_[i] != 0);
+		//	polyVector_[i]->checkEquality(copy.polyVector_[i]);
+		//}
 
 		const size_t arrayLen = sizeof(array_) / sizeof(array_[0]);
 		for (size_t i = 0; i < arrayLen; ++i)
@@ -410,6 +410,7 @@ public:
 			YCHECK(intToString_[i] == copy.intToString_[i]);
 		}
 
+		/*
 		YCHECK(stringToInt_.size() == copy.stringToInt_.size());
 		for (size_t i = 0; i < stringToInt_.size(); ++i)
 		{
@@ -426,6 +427,7 @@ public:
 				it->second.checkEquality(jt->second);
 			}
 		}
+		*/
 	}
 protected:
 	std::string name_;

@@ -23,6 +23,8 @@ set(SOURCES
 	Config.h ConfigLocal.h
 	Enum.cpp Enum.h
 	Helpers.h
+	gason.cpp gason.h
+	GasonIArchive.cpp GasonIArchive.h
 	JSONIArchive.cpp JSONIArchive.h
 	JSONOArchive.cpp JSONOArchive.h
 	MemoryReader.cpp MemoryReader.h

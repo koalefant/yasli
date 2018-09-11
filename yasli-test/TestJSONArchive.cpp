@@ -4,6 +4,7 @@
 
 #include "ComplexClass.h"
 #include "yasli/JSONIArchive.h"
+#include "yasli/GasonIArchive.h"
 #include "yasli/JSONOArchive.h"
 
 #include <limits>
@@ -28,35 +29,37 @@ SUITE(JSONArchive)
 {
 	TEST(ComplexSaveAndLoad)
 	{
-		string bufChanged;
+		vector<char> bufChanged;
 		ComplexClass objChanged;
 		objChanged.change();
 		{
 			JSONOArchive oa;
-			CHECK(oa(objChanged, "obj"));
+			CHECK(oa(objChanged, ""));
 
-			bufChanged = oa.c_str();
+			bufChanged.assign(oa.c_str(), oa.c_str()+oa.length());
 			CHECK(!bufChanged.empty());
 		}
 
-		string bufResaved;
+		vector<char> bufResaved;
 		{
 			ComplexClass obj;
 
-			JSONIArchive ia;
+			GasonIArchive ia;
 			ia.setDebugFilename(m_details.testName);
-			CHECK(ia.open(bufChanged.c_str(), bufChanged.size()));
-			CHECK(ia(obj, "obj"));
+			printf("bufChanged: %s\n", string(bufChanged.begin(), bufChanged.end()).c_str());
+			CHECK(ia.openDestructive(bufChanged.data(), bufChanged.size()));
+			CHECK(ia(obj, ""));
 
 			JSONOArchive oa;
-			CHECK(oa(obj, "obj"));
+			CHECK(oa(obj, ""));
 
 			obj.checkEquality(objChanged);
 
-			bufResaved = oa.c_str();
+			bufResaved.assign(oa.c_str(), oa.c_str() + oa.length());
 			CHECK(!bufChanged.empty());
 		}
-		CHECK_EQUAL(bufChanged, bufResaved);
+		CHECK_EQUAL(string(bufChanged.begin(), bufChanged.end()),
+					string(bufResaved.begin(), bufResaved.end()));
 	}
 
     struct Element
