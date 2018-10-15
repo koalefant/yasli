@@ -13,6 +13,7 @@
 
 #include "yasli/JSONOArchive.h"
 #include "yasli/JSONIArchive.h"
+#include "yasli/GasonIArchive.h"
 #include "yasli/TextIArchive.h"
 #include "yasli/TextOArchive.h"
 #include "yasli/BinArchive.h"
@@ -348,6 +349,24 @@ void benchmark_mixed_json_read() {
 	print_result(__FUNCTION__, oa.length(), timer);
 }
 
+void benchmark_mixed_gason_read() {
+	DataSetMixed temp;
+	JSONOArchive oa;
+	oa(temp, "");
+
+	DataSetMixed object;
+
+	AutoTimer timer;
+
+	GasonIArchive ia;
+	ia.setDisableWarnings(true);
+	ia.setWarnAboutUnusedFields(false);
+	ia.openDestructive((char*)oa.buffer(), oa.length());
+	ia(object, "");
+	
+	print_result(__FUNCTION__, oa.length(), timer);
+}
+
 void benchmark_mixed_text_write() {
 	DataSetMixed object;
 	AutoTimer timer;
@@ -456,6 +475,8 @@ int main(int argc, char** argv)
 
 	benchmark_mixed_json_write();
 	benchmark_mixed_json_read();
+
+	benchmark_mixed_gason_read();
 
 	benchmark_mixed_text_write();
 	benchmark_mixed_text_read();

@@ -33,7 +33,7 @@ struct Member
 	void checkEquality(const Member& copy) const
 	{
 		YCHECK(name == copy.name);
-		YCHECK(wname == copy.wname);
+		//YCHECK(wname == copy.wname);
 		YCHECK(weight == copy.weight);
 	}
 
@@ -49,14 +49,14 @@ struct Member
 	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{
 		ar(name, "name");
-		ar(wname, "wname");
+		//ar(wname, "wname");
 		ar(weight, "weight");
 	}
 
 	template<class Visitor>
 	void visit(Visitor& v) {
 		v(name);
-		v(wname);
+		//v(wname);
 		v(weight);
 	}
 };
@@ -190,10 +190,10 @@ struct NumericTypes
     ar(uChar_, "unsigned_char");
     ar(int_, "int");
     ar(uInt_, "unsigned_int");
-    ar(long_, "long");
-    ar(uLong_, "unsigned_long");
-    ar(longLong_, "long_long");
-    ar(uLongLong_, "unsigned_long_long");
+    //ar(long_, "long");
+    //ar(uLong_, "unsigned_long");
+    //ar(longLong_, "long_long");
+    //ar(uLongLong_, "unsigned_long_long");
     ar(float_, "float");
     ar(double_, "double");
   }
@@ -206,10 +206,10 @@ struct NumericTypes
     v(uChar_);
     v(int_);
     v(uInt_);
-    v(long_);
-    v(uLong_);
-    v(longLong_);
-    v(uLongLong_);
+    //v(long_);
+    //v(uLong_);
+    //v(longLong_);
+    //v(uLongLong_);
     v(float_);
     v(double_);
   }
@@ -222,10 +222,10 @@ struct NumericTypes
     YCHECK(uChar_ == rhs.uChar_);
     YCHECK(int_ == rhs.int_);
     YCHECK(uInt_ == rhs.uInt_);
-    YCHECK(long_ == rhs.long_);
-    YCHECK(uLong_ == rhs.uLong_);
-    YCHECK(longLong_ == rhs.longLong_);
-    YCHECK(uLongLong_ == rhs.uLongLong_);
+    //YCHECK(long_ == rhs.long_);
+    //YCHECK(uLong_ == rhs.uLong_);
+    //YCHECK(longLong_ == rhs.longLong_);
+    //YCHECK(uLongLong_ == rhs.uLongLong_);
     YCHECK(float_ == rhs.float_);
     YCHECK(double_ == rhs.double_);
   }
@@ -326,7 +326,7 @@ public:
 	void YASLI_SERIALIZE_METHOD(Archive& ar)
 	{
 		ar(name_, "name");
-		ar(wname_, "wname");
+		//ar(wname_, "wname");
 		//ar(polyPtr_, "polyPtr");
 		//ar(polyVector_, "polyVector");
 		ar(members_, "members");
@@ -348,7 +348,7 @@ public:
 	template<class Visitor>
 	void visit(Visitor& v) {
 		v(name_);
-		v(wname_);
+		//v(wname_);
 		//v(polyPtr_);
 		//v(polyVector_);
 		v(members_);
@@ -371,7 +371,7 @@ public:
 	{
 		YCHECK(this != &copy);
 		YCHECK(name_ == copy.name_);
-		YCHECK(wname_ == copy.wname_);
+		//YCHECK(wname_ == copy.wname_);
 		YCHECK(index_ == copy.index_);
 
 		//YCHECK(polyPtr_ != 0);

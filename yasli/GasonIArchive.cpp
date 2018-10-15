@@ -22,6 +22,16 @@
 
 namespace yasli{
 
+const char* tagNames[] = {
+	"JSON_NUMBER",
+	"JSON_STRING",
+	"JSON_ARRAY",
+	"JSON_OBJECT",
+	"JSON_TRUE",
+	"JSON_FALSE",
+	"JSON_NULL",
+};
+
 // ---------------------------------------------------------------------------
 
 GasonIArchive::GasonIArchive()
@@ -57,50 +67,63 @@ bool GasonIArchive::findValue(JsonValue& v, const char* name)
 	if(stack_ == nullptr) {
 		v = stackBottom_.value;
 		stack_ = &stackBottom_;
-		printf("findValue %s->root\n", name);
+		//printf("findValue %s->root\n", name);
 		return true;
 	}
 	Level& level = *stack_;
 	if (level.isKeyValue) {
-		printf("findValue %s->isKeyValue\n", name);
+		//printf("findValue %s->isKeyValue\n", name);
 		return true;
 	}
 	JsonIterator it = level.iterator;
 	JsonIterator beginIterator = it;
 	JsonIterator e = end(level.value);
 	if (!(it != e)) {
-		printf("findValue %s->EMPTY\n", name);
+		//printf("findValue %s->EMPTY\n", name);
 		return false;
 	}
-	if (name[0] != '\0') {
-		if (it != e) {
-			do {
-				bool match = strcmp(it->key, name) == 0;
-				printf(" tried %s\n", it->key);
-				++it;
-				if (!(it != e))
-					it = begin(level.value);
-				if (match) {
-					level.iterator = it;
-					v = it->value;
-					printf("findValue %s->found\n", name);
-					return true;
-				}
-			} while(it != beginIterator);
-		}
-		printf("findValue %s->NOT found\n", name);
-		return false;
-	} else {
-		if (level.iterator != end(level.value)) {
-			v = level.iterator->value;
-			++level.iterator;
-			printf("findValue ->found\n");
-			return true;
+	if (level.value.getTag() == JSON_OBJECT) {
+		if (name[0] != '\0') {
+			if (it != e) {
+				do {
+					bool match = strcmp(it->key, name) == 0;
+					//printf(" tried %s\n", it->key);
+					JsonIterator current = it;
+					++it;
+					if (!(it != e))
+						it = begin(level.value);
+					if (match) {
+						level.iterator = it;
+						v = current->value;
+						//printf("findValue %s->found %s\n", name, tagNames[v.getTag()]);
+						return true;
+					}
+				} while(it != beginIterator);
+			}
+			//printf("findValue %s->NOT found\n", name);
+			return false;
 		} else {
-			printf("findValue ->NOT found\n");
+			if (level.iterator != end(level.value)) {
+				v = level.iterator->value;
+				++level.iterator;
+				//printf("findValue ->found %s\n", tagNames[v.getTag()]);
+				return true;
+			} else {
+				//printf("findValue ->NOT found\n");
+				return false;
+			}
+		}
+	}
+	if (level.value.getTag() == JSON_ARRAY) {
+		if (!(it != e)) {
 			return false;
 		}
+		v = it->value;
+		++it;
+		level.iterator = it;
+		return true;
 	}
+	return false;
 }
 
 bool GasonIArchive::operator()(const Serializer& ser, const char* name, const char* label)
@@ -117,7 +140,13 @@ bool GasonIArchive::operator()(const Serializer& ser, const char* name, const ch
             ser(*this);
 
         return true;
-    }
+    } else {
+		if (v.getTag() >= 0 && v.getTag() <= JSON_NULL ) {
+			printf("Expecting JSON_OBJECT %s, got %s", name, tagNames[v.getTag()]);
+		} else {
+			printf("Expecting JSON_OBJECT %s, got %d", name, v.getTag());
+		}
+	}
     return false;
 }
 
@@ -165,7 +194,7 @@ bool GasonIArchive::operator()(PointerInterface& ser, const char* name, const ch
 bool GasonIArchive::operator()(ContainerInterface& ser, const char* name, const char* label)
 {
 	JsonValue v;
-	if (findValue(v, name) && (v.getTag() == JSON_ARRAY)){
+	if (findValue(v, name) && (v.getTag() == JSON_ARRAY || v.getTag() == JSON_OBJECT)){
 		Level level(stack_);
 		level.isContainer = v.getTag() == JSON_ARRAY;
 		level.isDictionary = v.getTag() == JSON_OBJECT;
@@ -179,13 +208,17 @@ bool GasonIArchive::operator()(ContainerInterface& ser, const char* name, const 
 			++jsonLength;
 		}
 		ser.resize(jsonLength);
+		//printf("array length: %d\n", int(jsonLength));
 
 		for (; index < jsonLength; ++index) {
-			printf(" element %d\n", int(index));
+			//printf(" element %d\n", int(index));
 			if (!ser(*this, "", "")) {
+				//printf(" element %d FAILED\n", int(index));
 				break;
 			}
-			ser.next();
+			if (index != jsonLength - 1) {
+				ser.next();
+			}
 		}
 		if(size > index)
 			ser.resize(index);
