@@ -1173,8 +1173,10 @@ QuatD Slerp(const QuatD& A,const QuatD& B,double t)
 //////////////////////////////////////////
 void Vect2f::serialize(yasli::Archive& ar) 
 {
-    ar(x, "x", "^x");
-    ar(y, "y", "^y");
+  if(!ar(x, "x", "^x"))
+    ar(x, "", "^x");
+  if(!ar(y, "y", "^y"))
+    ar(y, "", "^y");
 }
 
 void Vect2i::serialize(yasli::Archive& ar) 
