@@ -140,12 +140,16 @@ void MemoryWriter::appendAsString(double value)
 	int sign = 0;
 
   const int CVTBUFSIZE = 400;
-  char buf[CVTBUFSIZE];
 #ifdef _MSC_VER
-	_fcvt_s(buf, value, digits_, &point, &sign);
+  char buf[CVTBUFSIZE];
+  _fcvt_s(buf, value, digits_, &point, &sign);
 #elif (defined _WIN32) // mingw
+  char buf[CVTBUFSIZE];
   _fcvt_s(buf, CVTBUFSIZE, value, digits_, &point, &sign);
+#elif (defined EMSCRIPTEN) // not thread-safe!!!
+  const char* buf = fcvt(value, digits_, &point, &sign);
 #else
+  char buf[CVTBUFSIZE];
   fcvt_r(value, digits_, &point, &sign, buf, CVTBUFSIZE);
 #endif
 
