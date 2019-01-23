@@ -39,8 +39,7 @@ MemoryDC::MemoryDC(HDC dc)
 
 MemoryDC::~MemoryDC()
 {
-	WW_VERIFY(::BitBlt(destinationDC_, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-			 dc_, 0, 0, SRCCOPY));
+	::BitBlt(destinationDC_, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),dc_, 0, 0, SRCCOPY);
 	::SelectObject(dc_, (HGDIOBJ)oldBitmap_);
 	::DeleteDC(dc_);
 	::DeleteObject(bitmap_);

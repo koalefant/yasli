@@ -26,7 +26,7 @@ bool Icon::getImage(RGBAImage* image) const
 	int hotSpotX = -1;
 	int hotSpotY = -1;
 
-	int scanResult = sscanf_s(source_[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, hotSpotX, hotSpotY);
+	int scanResult = sscanf_s(source_[0], "%d %d %d %d %d %d", &width, &height, &colorCount, &charsPerPixel, &hotSpotX, &hotSpotY);
 	if (scanResult != 4 && scanResult != 6)
 		return false;
 

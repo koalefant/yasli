@@ -95,7 +95,8 @@ bool assertionDialog(const char* function, const char* fileName, int line, const
 			exit(-1);
     }
 #else
-	fprintf(stderr, "%s", text.c_str()); 
+	if(!logHandler)
+		fprintf(stderr, "%s", text.c_str());
 #endif
 	return false; 
 }

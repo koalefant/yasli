@@ -86,7 +86,7 @@ public:
 		return runtimeID_ < rhs.runtimeID_;
 #else
 		if(typeInfo_ && rhs.typeInfo_)
-			return typeInfo_->before(*rhs.typeInfo_) > 0;
+			return typeInfo_->before(*rhs.typeInfo_);
 		else if(!typeInfo_)
 			return rhs.typeInfo_!= 0;
 		else if(!rhs.typeInfo_)

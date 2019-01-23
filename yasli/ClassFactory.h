@@ -293,8 +293,7 @@ protected:
 
 #define YASLI_CLASS(BaseType, Type, label) \
 	static const yasli::TypeDescription Type##BaseType##_DerivedDescription(yasli::TypeID::get<Type>(), #Type, label, sizeof(Type)); \
-	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(&Type##BaseType##_DerivedDescription); \
-	int dummyForType_##Type##BaseType;
+	static yasli::ClassFactory<BaseType>::Creator<Type> Type##BaseType##_Creator(&Type##BaseType##_DerivedDescription); 
 
 #define YASLI_CLASS_NAME_HELPER(Counter, BaseType, Type, name, label) \
 	static yasli::TypeDescription YASLI_JOIN(globalDerivedDescription,__LINE__,_,Counter)(yasli::TypeID::get<Type>(), name, label, sizeof(Type)); \

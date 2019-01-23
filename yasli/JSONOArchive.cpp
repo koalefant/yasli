@@ -536,7 +536,7 @@ bool JSONOArchive::operator()(float& value, const char* name, const char* label)
 	else if (value == -std::numeric_limits<float>::infinity())
 		(*buffer_) << "\"-Infinity\"";
 	else
-		buffer_->appendAsString(value, false);
+		buffer_->appendAsString(value);
     return true;
 }
 
@@ -551,7 +551,7 @@ bool JSONOArchive::operator()(double& value, const char* name, const char* label
 	else if (value == -std::numeric_limits<double>::infinity())
 		(*buffer_) << "\"-Infinity\"";
 	else
-		buffer_->appendAsString(value, false);
+		buffer_->appendAsString(value);
     return true;
 }
 

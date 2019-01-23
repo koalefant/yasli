@@ -122,11 +122,11 @@ inline void cutRightZeros(const char* str)
 
 MemoryWriter& MemoryWriter::operator<<(double value)
 {
-	appendAsString(value, true);
+	appendAsString(value);
 	return *this;
 }
 
-void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
+void MemoryWriter::appendAsString(double value)
 {
 #ifdef ANDROID_NDK
 	char buf[64] = { 0 };
@@ -149,9 +149,9 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
   fcvt_r(value, digits_, &point, &sign, buf, CVTBUFSIZE);
 #endif
 
-    if(sign != 0)
-        write("-");
-    if(point <= 0){
+  if(sign != 0)
+      write("-");
+  if(point <= 0){
 		cutRightZeros(buf);
 		if (strlen(buf)){
 			write("0.");
@@ -162,18 +162,16 @@ void MemoryWriter::appendAsString(double value, bool allowTrailingPoint)
 			write((const char*)buf);
 		}
 		else
-			write(allowTrailingPoint ? "0" : "0.0");
-		*position_ = '\0';
-    }
-    else{
-        write(buf, point);
-        write(".");
-		if (allowTrailingPoint)
-			cutRightZeros(buf + point);
-		else if (buf[point] != '\0')
-			cutRightZeros(buf + point + 1);
-		operator<<(buf + point);
-    }
+			write("0.0");
+  }
+  else{
+    write(buf, point);
+    write(".");
+    const char* fraction = buf + point;
+  	cutRightZeros(fraction);
+		write(strlen(fraction) ? fraction : "0");
+  }
+  *position_ = '\0';
 #endif
 }
 
