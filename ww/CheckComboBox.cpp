@@ -86,8 +86,7 @@ CheckComboListBoxImpl::CheckComboListBoxImpl(HWND handle, CheckComboBoxImpl* own
 	controlWindowProc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtr(handle, GWLP_WNDPROC));
 	::SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Win32::universalWindowProcedure));
 	LONG_PTR userData = ::GetWindowLongPtr(handle, GWLP_USERDATA);
-	::SetWindowLong(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
+	::SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
 LRESULT CheckComboListBoxImpl::onMessage(UINT message, WPARAM wparam, LPARAM lparam)
@@ -150,7 +149,7 @@ void CheckComboListBoxImpl::onMessageLButtonDown(UINT button, int x, int y)
 		INT nIndex = nItemHeight == 0 ? -1 : nTopIndex + pt.y / nItemHeight;
 
 		RECT rcItem;
-		SendMessageW(handle_, LB_GETITEMRECT, nIndex, (LONG)(VOID *)&rcItem);
+		SendMessageW(handle_, LB_GETITEMRECT, nIndex, reinterpret_cast<LONG_PTR>(&rcItem));
 
 		if(PtInRect(&rcItem, pt)) {
 			owner_->setCheck(nIndex, !owner_->getCheck(nIndex));
@@ -167,7 +166,7 @@ int CheckComboListBoxImpl::onMessageChar(UINT code, USHORT count, USHORT flags)
 	if(code == VK_SPACE){
 		int index = ::CallWindowProcW(controlWindowProc_, handle_, LB_GETCURSEL, WPARAM(code), MAKELPARAM(count, flags));
 		RECT itemRect;
-		SendMessageW(handle_, LB_GETITEMRECT, index, (LONG)(VOID*)&itemRect);
+		SendMessageW(handle_, LB_GETITEMRECT, index, reinterpret_cast<LONG_PTR>(&itemRect));
 		InvalidateRect(handle_, &itemRect, FALSE);
 
 		owner_->setCheck(index, !owner_->getCheck(index));
