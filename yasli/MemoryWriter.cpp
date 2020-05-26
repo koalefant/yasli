@@ -128,7 +128,7 @@ MemoryWriter& MemoryWriter::operator<<(double value)
 
 void MemoryWriter::appendAsString(double value)
 {
-#ifdef ANDROID_NDK
+#if defined(__ANDROID__) || defined(__APPLE__)
 	char buf[64] = { 0 };
 	sprintf(buf, "%f", value);
 	cutRightZeros(buf);

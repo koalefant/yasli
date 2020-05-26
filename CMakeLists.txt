@@ -3,7 +3,8 @@ project("yasli")
 
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-else()
+elseif(ANDROID)
+	add_definitions(-DANDROID_NDK)
 endif()
 
 if (CMAKE_CXX_COMPILER MATCHES "clang")
