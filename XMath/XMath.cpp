@@ -1175,14 +1175,14 @@ void Vect2f::serialize(yasli::Archive& ar)
 
 void Vect2i::serialize(yasli::Archive& ar) 
 {
-    ar(x, "", "^x");
-    ar(y, "", "^y");
+    ar(x, "x", "^x");
+    ar(y, "y", "^y");
 }
 
 void Vect2s::serialize(yasli::Archive& ar) 
 {
-	ar(x, "", "^x");
-	ar(y, "", "^y");
+	ar(x, "x", "^x");
+	ar(y, "y", "^y");
 }
 
 void Vect3f::serialize(yasli::Archive& ar) 
