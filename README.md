@@ -6,53 +6,55 @@ Highlights:
 	* JSON
 	* QPropertyTree - powerful UI generator
 - Works with complex types and STL containers
-- Support polymorphic types and enum-annotations
+- Supports polymorphic types and enums through custom annotations
 - Non-intrusive when needed
 - Extendable in user code
-- Crossplatform
+- Portable
 
 Quick example:
 
-    :::cpp
-    enum Position
-    {
-       ENGINEER,
-       MANAGER,
-    };
-    
-    struct Entry
-    {
-        std::string name = "Foo Bar";
-        int age = 25;
-        Position position = ENGINEER;
-    
-        void serialize(yasli::Archive& ar)
-        {
-            ar(name, "name");
-            ar(age, "age");
-            ar(position, "position");
-        }
-    };
-    
-    struct Document
-    {
-        std::vector<Entry> entries = { Entry() };
-    
-        void serialize(yasli::Archive& ar)
-        {
-            ar(entries, "entries");
-        }
-    };
-    
-    YASLI_ENUM_BEGIN(Position, "Position")
-    YASLI_ENUM(ENGINEER, "engineer", "Engineer")
-    YASLI_ENUM(MANAGER, "manager", "Manager")
-    YASLI_ENUM_END()
+```cpp
+enum Position
+{
+   ENGINEER,
+   MANAGER,
+};
+
+struct Entry
+{
+	std::string name = "Foo Bar";
+	int age = 25;
+	Position position = ENGINEER;
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(name, "name");
+		ar(age, "age");
+		ar(position, "position");
+	}
+};
+
+struct Document
+{
+	std::vector<Entry> entries = { Entry() };
+
+	void serialize(yasli::Archive& ar)
+	{
+		ar(entries, "entries");
+	}
+};
+
+YASLI_ENUM_BEGIN(Position, "Position")
+YASLI_ENUM(ENGINEER, "engineer", "Engineer")
+YASLI_ENUM(MANAGER, "manager", "Manager")
+YASLI_ENUM_END()
+```
 
 Document instance, serialized through JSON-archive will look like this:
 
-	:::json
+```json
 	{ "entries": [ { "name": "Foo Bar", "age": 25, "position": "engineer" } ] }
+```
 
 See [Documentation](http://yasli.bitbucket.org/) for further details.
 
